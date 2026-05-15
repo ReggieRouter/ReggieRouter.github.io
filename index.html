@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LendPaper | Professional Funding Toolkit</title>
+    <style>
+        /* 5. Color System & 6. Typography */
+        :root {
+            --cloud-white: #FFFFFF;
+            --soft-white: #FAFAFA;
+            --deep-slate: #111827;
+            --muted-gray: #6B7280;
+            --mint-green: #10B981;
+            --deep-mint: #059669;
+            --whisper-gray: #E5E7EB;
+            --warning-orange: #F59E0B;
+            --system-fonts: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--system-fonts);
+            background-color: var(--cloud-white);
+            color: var(--deep-slate);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 4b. CSS Wordmark */
+        .logo-lendpaper {
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            user-select: none;
+            text-decoration: none;
+        }
+        .logo-lend { font-weight: 800; color: var(--deep-slate); }
+        .logo-paper { font-weight: 300; color: var(--muted-gray); }
+        .logo-dot { color: var(--mint-green); font-weight: 800; margin-left: 2px; }
+
+        header {
+            border-bottom: 1px solid var(--whisper-gray);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--cloud-white);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero & Search (7e) */
+        .hero { margin-bottom: 3rem; }
+        h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+        .subtitle { color: var(--muted-gray); font-size: 1rem; margin-bottom: 2rem; }
+
+        .search-container {
+            position: relative;
+            max-width: 600px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 1px solid var(--whisper-gray);
+            border-radius: 6px;
+            transition: all 150ms ease;
+            background: var(--soft-white);
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--mint-green);
+            background: var(--cloud-white);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        /* 9. Component Patterns: Cards */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background: var(--cloud-white);
+            border: 1px solid var(--whisper-gray);
+            border-radius: 8px;
+            padding: 24px;
+            transition: transform 150ms ease, box-shadow 150ms ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-decoration: none;
+            color: inherit;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-color: var(--mint-green);
+        }
+
+        .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .card-desc { font-size: 0.9375rem; color: var(--muted-gray); margin-bottom: 1.5rem; }
+
+        /* 9. Buttons */
+        .btn-primary {
+            display: inline-block;
+            background: var(--mint-green);
+            color: #FFF;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: background 150ms ease;
+        }
+        .btn-primary:hover { background: var(--deep-mint); }
+
+        .tag {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted-gray);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* 8c. Watermark */
+        footer {
+            margin-top: 5rem;
+            padding: 2rem;
+            border-top: 1px solid var(--whisper-gray);
+            color: var(--muted-gray);
+            font-size: 0.75rem;
+            text-align: center;
+        }
+        .footer-links a { color: var(--muted-gray); text-decoration: none; margin: 0 10px; }
+        .footer-links a:hover { color: var(--deep-slate); }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="#" class="logo-lendpaper">
+        <!-- 4a. Micro-Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter" style="margin-right: 8px;">
+            <path d="M4 4v16h11l5-5V4H4z" />
+            <path d="M15 20v-5h5" />
+            <path d="M9 9v6" />
+            <path d="M9 15h4" />
+        </svg>
+        <span class="logo-lend">lend</span><span class="logo-paper">paper</span><span class="logo-dot">.</span>
+    </a>
+    <nav class="footer-links" style="font-size: 0.9rem; font-weight: 500;">
+        <a href="mailto:info@lendpaper.com">Support</a>
+    </nav>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <h1>Professional Funding Toolkit</h1>
+        <p class="subtitle">Fast, accurate tools for MCA brokers and ISOs. No fluff.</p>
+        
+        <div class="search-container">
+            <input type="text" id="toolSearch" class="search-input" placeholder="Search calculators, tools, or glossary terms...">
+        </div>
+    </section>
+
+    <div class="tool-grid" id="toolGrid">
+        <!-- Calculator 1 -->
+        <a href="mca-payback.html" class="card tool-item">
+            <div>
+                <span class="tag">Calculator</span>
+                <div class="card-title">MCA Payback Builder</div>
+                <p class="card-desc">Calculate daily/weekly payments, cents-on-dollar, and total payback from factor rates.</p>
+            </div>
+            <span class="btn-primary">Open Tool</span>
+        </a>
+
+        <!-- Calculator 2 -->
+        <a href="factor-builder.html" class="card tool-item">
+            <div>
+                <span class="tag">Calculator</span>
+                <div class="card-title">Factor Rate Builder</div>
+                <p class="card-desc">Reverse engineer factor rates based on desired commission and net funding goals.</p>
+            </div>
+            <span class="btn-primary">Open Tool</span>
+        </a>
+
+        <!-- RegistryRoute Integration (10) -->
+        <a href="https://registryroute.com" target="_blank" class="card tool-item">
+            <div>
+                <span class="tag">External</span>
+                <div class="card-title">RegistryRoute ↗</div>
+                <p class="card-desc">Direct access to Secretary of State business search portals for all 50 states.</p>
+            </div>
+            <span class="btn-primary">Visit Site</span>
+        </a>
+
+        <!-- Future Feature (11) -->
+        <div class="card tool-item" style="opacity: 0.7; cursor: not-allowed;">
+            <div>
+                <span class="tag">Coming Soon</span>
+                <div class="card-title">UCC Lead Sales</div>
+                <p class="card-desc">Clean, filterable UCC filing data for targeted outreach. Currently in development.</p>
+            </div>
+            <span class="btn-primary" style="background: var(--muted-gray);">Locked</span>
+        </div>
+    </div>
+
+    <!-- Glossary Placeholder (7f) -->
+    <section id="glossarySection" class="hidden" style="margin-top: 4rem;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Glossary</h2>
+        <div id="glossaryResults" style="background: var(--soft-white); padding: 20px; border-radius: 8px;">
+            <!-- Results injected here -->
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>Powered by LendPaper. | info@lendpaper.com | lendpaper.com</p>
+    <p style="margin-top: 8px;">Custom branding available — contact info@lendpaper.com</p>
+</footer>
+
+<script>
+    // 7e. Search Implementation
+    const searchInput = document.getElementById('toolSearch');
+    const toolItems = document.querySelectorAll('.tool-item');
+    const glossarySection = document.getElementById('glossarySection');
+    const glossaryResults = document.getElementById('glossaryResults');
+
+    // Simple glossary data
+    const glossary = [
+        { term: "Factor Rate", def: "The multiplier used to determine the total payback amount. Common range: 1.10 - 1.50." },
+        { term: "Position", def: "The priority of a lender's lien. 1st position is primary; stacking creates 2nd or 3rd positions." },
+        { term: "MCA", def: "Merchant Cash Advance. A purchase of future sales at a discount." },
+        { term: "ISO", def: "Independent Sales Organization. The brokers moving the paper." }
+    ];
+
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        
+        // Filter Tools
+        toolItems.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.classList.toggle('hidden', !text.includes(query));
+        });
+
+        // Search Glossary
+        if (query.length > 2) {
+            const matches = glossary.filter(g => g.term.toLowerCase().includes(query) || g.def.toLowerCase().includes(query));
+            if (matches.length > 0) {
+                glossarySection.classList.remove('hidden');
+                glossaryResults.innerHTML = matches.map(m => `
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: var(--mint-green);">${m.term}:</strong> ${m.def}
+                    </div>
+                `).join('');
+            } else {
+                glossarySection.classList.add('hidden');
+            }
+        } else {
+            glossarySection.classList.add('hidden');
+        }
+    });
+</script>
+
+</body>
+</html>
