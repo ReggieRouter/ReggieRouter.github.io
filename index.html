@@ -1,283 +1,769 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LendPaper | Professional Funding Toolkit</title>
-    <style>
-        /* 5. Color System & 6. Typography */
-        :root {
-            --cloud-white: #FFFFFF;
-            --soft-white: #FAFAFA;
-            --deep-slate: #111827;
-            --muted-gray: #6B7280;
-            --mint-green: #10B981;
-            --deep-mint: #059669;
-            --whisper-gray: #E5E7EB;
-            --warning-orange: #F59E0B;
-            --system-fonts: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LendPaper — Calculators &amp; Tools for SMB Funders, Brokers &amp; ISOs</title>
+<meta name="description" content="Fast, free calculators and tools for MCA, LOC, SBA, and alternative financing professionals. Built for funding desks that don't have time to waste.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'%3E%3Cpath d='M4 4v16h11l5-5V4H4z'/%3E%3Cpath d='M15 20v-5h5'/%3E%3Cpath d='M9 9v6'/%3E%3Cpath d='M9 15h4'/%3E%3C/svg%3E">
+<style>
+/*
+ * LendPaper Homepage — Dashboard Layout
+ * lendpaper.com | info@lendpaper.com
+ * v2.0
+ */
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FFFFFF;
+  --bg-alt: #FAFAFA;
+  --bg-page: #F3F4F6;
+  --text: #111827;
+  --text-muted: #6B7280;
+  --text-faint: #9CA3AF;
+  --accent: #10B981;
+  --accent-hover: #059669;
+  --accent-soft: rgba(16, 185, 129, 0.08);
+  --border: #E5E7EB;
+  --border-hover: #D1D5DB;
+  --warning: #F59E0B;
+  --warning-soft: rgba(245, 158, 11, 0.10);
+  --info: #3B82F6;
+  --info-soft: rgba(59, 130, 246, 0.10);
+  --danger: #EF4444;
+  --radius: 8px;
+  --radius-sm: 6px;
+  --transition: 150ms ease;
+  --sidebar-w: 220px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
 
-        body {
-            font-family: var(--system-fonts);
-            background-color: var(--cloud-white);
-            color: var(--deep-slate);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* 4b. CSS Wordmark */
-        .logo-lendpaper {
-            font-size: 1.5rem;
-            letter-spacing: -0.02em;
-            display: flex;
-            align-items: center;
-            user-select: none;
-            text-decoration: none;
-        }
-        .logo-lend { font-weight: 800; color: var(--deep-slate); }
-        .logo-paper { font-weight: 300; color: var(--muted-gray); }
-        .logo-dot { color: var(--mint-green); font-weight: 800; margin-left: 2px; }
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg-page);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  height: 100vh;
+}
 
-        header {
-            border-bottom: 1px solid var(--whisper-gray);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--cloud-white);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+a { color: inherit; text-decoration: none; }
+input { font-family: inherit; }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
+/* ==================== Shell ==================== */
 
-        /* Hero & Search (7e) */
-        .hero { margin-bottom: 3rem; }
-        h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
-        .subtitle { color: var(--muted-gray); font-size: 1rem; margin-bottom: 2rem; }
+.shell { display: flex; height: 100vh; }
 
-        .search-container {
-            position: relative;
-            max-width: 600px;
-        }
-        .search-input {
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 1rem;
-            border: 1px solid var(--whisper-gray);
-            border-radius: 6px;
-            transition: all 150ms ease;
-            background: var(--soft-white);
-        }
-        .search-input:focus {
-            outline: none;
-            border-color: var(--mint-green);
-            background: var(--cloud-white);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
-        }
+/* ==================== Sidebar ==================== */
 
-        /* 9. Component Patterns: Cards */
-        .tool-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  z-index: 20;
+}
 
-        .card {
-            background: var(--cloud-white);
-            border: 1px solid var(--whisper-gray);
-            border-radius: 8px;
-            padding: 24px;
-            transition: transform 150ms ease, box-shadow 150ms ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            text-decoration: none;
-            color: inherit;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border-color: var(--mint-green);
-        }
+.sidebar-logo {
+  padding: 20px 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  user-select: none;
+}
+.sidebar-logo svg { color: var(--text); flex-shrink: 0; }
+.logo-lend  { font-size: 1.125rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+.logo-paper { font-size: 1.125rem; font-weight: 300; color: var(--text-muted); letter-spacing: -0.02em; }
+.logo-dot   { font-size: 1.125rem; font-weight: 800; color: var(--accent); margin-left: 1px; }
 
-        .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .card-desc { font-size: 0.9375rem; color: var(--muted-gray); margin-bottom: 1.5rem; }
+.nav-section { padding: 0 12px; margin-bottom: 8px; }
+.nav-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
 
-        /* 9. Buttons */
-        .btn-primary {
-            display: inline-block;
-            background: var(--mint-green);
-            color: #FFF;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 600;
-            text-decoration: none;
-            text-align: center;
-            transition: background 150ms ease;
-        }
-        .btn-primary:hover { background: var(--deep-mint); }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: background var(--transition), color var(--transition);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+.nav-item:hover { background: var(--bg-alt); color: var(--text); }
+.nav-item.active { background: var(--accent-soft); color: var(--accent-hover); }
+.nav-item svg { flex-shrink: 0; }
 
-        .tag {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted-gray);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
+.nav-divider { height: 1px; background: var(--border); margin: 10px 20px; }
 
-        /* 8c. Watermark */
-        footer {
-            margin-top: 5rem;
-            padding: 2rem;
-            border-top: 1px solid var(--whisper-gray);
-            color: var(--muted-gray);
-            font-size: 0.75rem;
-            text-align: center;
-        }
-        .footer-links a { color: var(--muted-gray); text-decoration: none; margin: 0 10px; }
-        .footer-links a:hover { color: var(--deep-slate); }
+.nav-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+  background: var(--bg-alt);
+  border-radius: 99px;
+  padding: 1px 7px;
+  min-width: 22px;
+  text-align: center;
+}
+.nav-item.active .nav-count { background: rgba(16, 185, 129, 0.15); color: var(--accent-hover); }
 
-        .hidden { display: none; }
-    </style>
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+.sidebar-footer p { font-size: 11px; color: var(--text-faint); line-height: 1.45; }
+.sidebar-footer a { color: var(--accent); font-weight: 600; }
+.sidebar-footer a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+/* ==================== Main ==================== */
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 60px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 16px;
+}
+.topbar-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.search-wrap { position: relative; max-width: 380px; flex: 1; }
+.search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-faint); pointer-events: none; display: flex;
+}
+.search-input {
+  width: 100%; height: 36px; padding: 0 36px 0 38px;
+  font-size: 13px; color: var(--text); background: var(--bg-alt);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  outline: none; transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+.search-input::placeholder { color: var(--text-faint); }
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+  background: var(--bg);
+}
+.search-kbd {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 10px; color: var(--text-faint);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 6px; pointer-events: none; transition: opacity var(--transition);
+}
+.search-input:focus ~ .search-kbd { opacity: 0; }
+.search-clear {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  color: var(--text-faint); padding: 4px; border-radius: 4px;
+  display: none; align-items: center; justify-content: center;
+}
+.search-clear:hover { color: var(--text); background: var(--bg-alt); }
+.search-clear.visible { display: flex; }
+.search-clear.visible ~ .search-kbd { display: none; }
+
+.mobile-toggle { display: none; padding: 6px; border-radius: var(--radius-sm); color: var(--text-muted); }
+
+.content { flex: 1; overflow-y: auto; padding: 28px 32px 48px; }
+
+/* ==================== Views ==================== */
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* ==================== Category labels ==================== */
+
+.cat-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-faint);
+  margin-bottom: 12px; padding-left: 2px;
+}
+.cat-label:not(:first-child) { margin-top: 28px; }
+
+/* ==================== Tool cards ==================== */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  transition: border-color var(--transition), transform var(--transition);
+  cursor: pointer; text-decoration: none; color: inherit;
+}
+.card:hover:not(.is-disabled) { border-color: var(--accent); transform: translateY(-1px); }
+.card.is-disabled { cursor: default; opacity: 0.85; }
+
+.card-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.card-icon svg { width: 18px; height: 18px; }
+.card-icon.green  { background: var(--accent-soft); color: var(--accent-hover); }
+.card-icon.amber  { background: var(--warning-soft); color: #B45309; }
+.card-icon.blue   { background: var(--info-soft); color: #1D4ED8; }
+.card-icon.slate  { background: var(--bg-alt); color: var(--text-muted); }
+
+.card-body { flex: 1; min-width: 0; }
+.card-name { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; color: var(--text); }
+.card-desc {
+  font-size: 11.5px; color: var(--text-muted); line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.card-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.pill {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.03em;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 99px; white-space: nowrap;
+}
+.pill-live { background: var(--accent-soft); color: var(--accent-hover); }
+.pill-soon { background: var(--bg-alt); color: var(--text-faint); border: 1px solid var(--border); }
+.pill-new  { background: var(--warning-soft); color: #92400E; }
+
+.card-arrow {
+  color: var(--text-faint); flex-shrink: 0;
+  transition: color var(--transition), transform var(--transition);
+}
+.card:hover:not(.is-disabled) .card-arrow { color: var(--accent); transform: translateX(2px); }
+
+/* ==================== Glossary ==================== */
+
+.glossary-controls { display: flex; align-items: center; gap: 4px; margin-bottom: 16px; flex-wrap: wrap; }
+.letter-btn {
+  width: 28px; height: 28px; border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition), color var(--transition);
+}
+.letter-btn:hover:not(:disabled) { background: var(--bg-alt); color: var(--text); }
+.letter-btn.active { background: var(--accent-soft); color: var(--accent-hover); }
+.letter-btn:disabled { color: var(--border); cursor: default; }
+
+.glossary-grid {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; background: var(--bg);
+}
+
+.g-item {
+  display: grid; grid-template-columns: 160px 1fr;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.g-item:last-child { border-bottom: none; }
+.g-item:hover { background: var(--bg-alt); }
+
+.g-term { padding: 12px 16px; border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; }
+.g-term-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.g-term-abbrev { font-size: 11px; color: var(--text-faint); font-family: var(--mono); }
+
+.g-def { padding: 12px 16px; font-size: 12.5px; color: var(--text-muted); line-height: 1.5; display: flex; align-items: center; }
+
+/* ==================== Empty state ==================== */
+
+.empty {
+  display: none; text-align: center; padding: 48px 24px;
+  background: var(--bg); border: 1px dashed var(--border); border-radius: var(--radius);
+}
+.empty.visible { display: block; }
+.empty-icon { color: var(--text-faint); margin-bottom: 12px; }
+.empty h3 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.empty p { font-size: 12.5px; color: var(--text-muted); }
+.empty a { color: var(--accent); font-weight: 600; }
+
+/* ==================== Search meta ==================== */
+
+.search-meta { font-size: 12px; color: var(--text-faint); margin-bottom: 20px; display: none; }
+.search-meta.visible { display: block; }
+.search-meta strong { color: var(--text-muted); font-weight: 600; }
+
+/* ==================== Banner ==================== */
+
+.banner {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 20px; display: flex; align-items: center; gap: 14px; margin-bottom: 28px;
+}
+.banner-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  background: var(--accent-soft); color: var(--accent-hover);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.banner-icon svg { width: 18px; height: 18px; }
+.banner-text { flex: 1; }
+.banner-title { font-size: 13px; font-weight: 700; margin-bottom: 1px; }
+.banner-sub { font-size: 12px; color: var(--text-muted); }
+.banner-sub a { color: var(--accent); font-weight: 600; }
+.banner-sub a:hover { text-decoration: underline; }
+
+/* ==================== Contact ==================== */
+
+.contact-card {
+  max-width: 480px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px 28px 24px;
+}
+.contact-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.contact-card > p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+.contact-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px 0;
+  border-top: 1px solid var(--border); font-size: 13px;
+}
+.contact-row svg { color: var(--text-faint); flex-shrink: 0; }
+.contact-row a { color: var(--accent); font-weight: 600; }
+.contact-row a:hover { text-decoration: underline; }
+.contact-label { color: var(--text-muted); min-width: 80px; }
+
+/* ==================== Mobile overlay ==================== */
+
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 15; }
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    transform: translateX(-100%); transition: transform 250ms ease;
+    z-index: 20; box-shadow: 4px 0 24px rgba(0,0,0,0.08);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .mobile-toggle { display: flex; }
+  .content { padding: 20px 16px 48px; }
+  .topbar { padding: 0 16px; }
+  .cards { grid-template-columns: 1fr; }
+  .g-item { grid-template-columns: 1fr; }
+  .g-term { border-right: none; border-bottom: 1px solid var(--border); padding: 10px 16px 4px; }
+  .g-def { padding: 4px 16px 12px; }
+  .glossary-controls { gap: 2px; }
+  .letter-btn { width: 24px; height: 28px; font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card, .g-item, .banner { animation: fadeUp 250ms ease both; }
+</style>
 </head>
 <body>
+<div class="shell">
 
-<header>
-    <a href="#" class="logo-lendpaper">
-        <!-- 4a. Micro-Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter" style="margin-right: 8px;">
-            <path d="M4 4v16h11l5-5V4H4z" />
-            <path d="M15 20v-5h5" />
-            <path d="M9 9v6" />
-            <path d="M9 15h4" />
-        </svg>
-        <span class="logo-lend">lend</span><span class="logo-paper">paper</span><span class="logo-dot">.</span>
-    </a>
-    <nav class="footer-links" style="font-size: 0.9rem; font-weight: 500;">
-        <a href="mailto:info@lendpaper.com">Support</a>
-    </nav>
-</header>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-<main class="container">
-    <section class="hero">
-        <h1>Professional Funding Toolkit</h1>
-        <p class="subtitle">Fast, accurate tools for MCA brokers and ISOs. No fluff.</p>
-        
-        <div class="search-container">
-            <input type="text" id="toolSearch" class="search-input" placeholder="Search calculators, tools, or glossary terms...">
-        </div>
-    </section>
-
-    <div class="tool-grid" id="toolGrid">
-        <!-- Calculator 1 -->
-        <a href="mca-payback.html" class="card tool-item">
-            <div>
-                <span class="tag">Calculator</span>
-                <div class="card-title">MCA Payback Builder</div>
-                <p class="card-desc">Calculate daily/weekly payments, cents-on-dollar, and total payback from factor rates.</p>
-            </div>
-            <span class="btn-primary">Open Tool</span>
-        </a>
-
-        <!-- Calculator 2 -->
-        <a href="factor-builder.html" class="card tool-item">
-            <div>
-                <span class="tag">Calculator</span>
-                <div class="card-title">Factor Rate Builder</div>
-                <p class="card-desc">Reverse engineer factor rates based on desired commission and net funding goals.</p>
-            </div>
-            <span class="btn-primary">Open Tool</span>
-        </a>
-
-        <!-- RegistryRoute Integration (10) -->
-        <a href="https://registryroute.com" target="_blank" class="card tool-item">
-            <div>
-                <span class="tag">External</span>
-                <div class="card-title">RegistryRoute ↗</div>
-                <p class="card-desc">Direct access to Secretary of State business search portals for all 50 states.</p>
-            </div>
-            <span class="btn-primary">Visit Site</span>
-        </a>
-
-        <!-- Future Feature (11) -->
-        <div class="card tool-item" style="opacity: 0.7; cursor: not-allowed;">
-            <div>
-                <span class="tag">Coming Soon</span>
-                <div class="card-title">UCC Lead Sales</div>
-                <p class="card-desc">Clean, filterable UCC filing data for targeted outreach. Currently in development.</p>
-            </div>
-            <span class="btn-primary" style="background: var(--muted-gray);">Locked</span>
-        </div>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"
+           fill="none" stroke="currentColor" stroke-width="2.5"
+           stroke-linecap="square" stroke-linejoin="miter">
+        <path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/><path d="M9 9v6"/><path d="M9 15h4"/>
+      </svg>
+      <div><span class="logo-lend">lend</span><span class="logo-paper">paper</span><span class="logo-dot">.</span></div>
     </div>
 
-    <!-- Glossary Placeholder (7f) -->
-    <section id="glossarySection" class="hidden" style="margin-top: 4rem;">
-        <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Glossary</h2>
-        <div id="glossaryResults" style="background: var(--soft-white); padding: 20px; border-radius: 8px;">
-            <!-- Results injected here -->
-        </div>
-    </section>
-</main>
+    <nav>
+      <div class="nav-section">
+        <button class="nav-item active" data-view="home" onclick="switchView('home')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+          Home
+        </button>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <div class="nav-label">Tools</div>
+        <button class="nav-item" data-view="deal-math" onclick="switchView('deal-math')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="16" y1="14" x2="16" y2="14.01"/></svg>
+          Deal math<span class="nav-count" id="count-deal">4</span>
+        </button>
+        <button class="nav-item" data-view="risk" onclick="switchView('risk')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Risk &amp; UW<span class="nav-count" id="count-risk">3</span>
+        </button>
+        <button class="nav-item" data-view="data" onclick="switchView('data')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          Data &amp; leads<span class="nav-count" id="count-data">2</span>
+        </button>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <div class="nav-label">Reference</div>
+        <button class="nav-item" data-view="glossary" onclick="switchView('glossary')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+          Glossary<span class="nav-count" id="count-glossary">20</span>
+        </button>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">
+        <button class="nav-item" data-view="contact" onclick="switchView('contact')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Contact
+        </button>
+      </div>
+    </nav>
 
-<footer>
-    <p>Powered by LendPaper. | info@lendpaper.com | lendpaper.com</p>
-    <p style="margin-top: 8px;">Custom branding available — contact info@lendpaper.com</p>
-</footer>
+    <div class="sidebar-footer">
+      <p>Custom branding &amp; white-label available.<br><a href="mailto:info@lendpaper.com">info@lendpaper.com</a></p>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-title" id="topbarTitle">Home</div>
+      <div class="search-wrap">
+        <span class="search-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input id="searchInput" class="search-input" type="search" placeholder="Search tools, terms…" autocomplete="off" spellcheck="false" aria-label="Search everything">
+        <button id="searchClear" class="search-clear" aria-label="Clear search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <span class="search-kbd">/</span>
+      </div>
+    </header>
+
+    <div class="content" id="content">
+
+      <!-- Home -->
+      <div class="view active" id="view-home">
+        <div class="banner">
+          <div class="banner-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="banner-text">
+            <div class="banner-title">Tools are rolling out — you're early.</div>
+            <div class="banner-sub">Need something we haven't built yet? <a href="mailto:info@lendpaper.com">Tell us</a> and we'll bump it up.</div>
+          </div>
+        </div>
+        <div id="homeTools"></div>
+        <div class="empty" id="homeEmpty">
+          <div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <h3>No matches.</h3><p>Try a shorter search or <a href="mailto:info@lendpaper.com">request a tool</a>.</p>
+        </div>
+      </div>
+
+      <!-- Category views -->
+      <div class="view" id="view-deal-math"><div id="dealMathCards"></div><div class="empty" id="dealEmpty"><h3>No matching deal tools.</h3><p>Try a different search term.</p></div></div>
+      <div class="view" id="view-risk"><div id="riskCards"></div><div class="empty" id="riskEmpty"><h3>No matching risk tools.</h3><p>Try a different search term.</p></div></div>
+      <div class="view" id="view-data"><div id="dataCards"></div><div class="empty" id="dataEmpty"><h3>No matching data tools.</h3><p>Try a different search term.</p></div></div>
+
+      <!-- Glossary -->
+      <div class="view" id="view-glossary">
+        <div class="glossary-controls" id="letterBar"></div>
+        <div class="glossary-grid" id="glossaryGrid"></div>
+        <div class="empty" id="glossaryEmpty"><h3>No matching terms.</h3><p>Try a shorter search or <a href="mailto:info@lendpaper.com">suggest a term</a>.</p></div>
+      </div>
+
+      <!-- Contact -->
+      <div class="view" id="view-contact">
+        <div class="contact-card">
+          <h3>Get in touch</h3>
+          <p>Need a custom calculator, white-label branding, or something we haven't built yet? We're all ears.</p>
+          <div class="contact-row">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <span class="contact-label">Email</span>
+            <a href="mailto:info@lendpaper.com">info@lendpaper.com</a>
+          </div>
+          <div class="contact-row">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+            <span class="contact-label">GitHub</span>
+            <a href="https://github.com/lendpaper" target="_blank" rel="noopener">github.com/lendpaper</a>
+          </div>
+          <div class="contact-row" style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 4px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+            <span class="contact-label">Services</span>
+            <span style="color: var(--text-muted)">Custom calculators, white-label, API integrations</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search results -->
+      <div class="view" id="view-search">
+        <div class="search-meta visible" id="searchMeta"></div>
+        <div id="searchToolResults"></div>
+        <div style="margin-top:24px" id="searchGlossaryResults"></div>
+        <div class="empty" id="searchEmpty">
+          <div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <h3>Nothing matched.</h3><p>Try different keywords or <a href="mailto:info@lendpaper.com">request a tool</a>.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <script>
-    // 7e. Search Implementation
-    const searchInput = document.getElementById('toolSearch');
-    const toolItems = document.querySelectorAll('.tool-item');
-    const glossarySection = document.getElementById('glossarySection');
-    const glossaryResults = document.getElementById('glossaryResults');
+/* ============================================================
+   LendPaper Homepage — JS
+   To add a tool: push into TOOLS array.
+   To add a glossary term: push into GLOSSARY array.
+   ============================================================ */
 
-    // Simple glossary data
-    const glossary = [
-        { term: "Factor Rate", def: "The multiplier used to determine the total payback amount. Common range: 1.10 - 1.50." },
-        { term: "Position", def: "The priority of a lender's lien. 1st position is primary; stacking creates 2nd or 3rd positions." },
-        { term: "MCA", def: "Merchant Cash Advance. A purchase of future sales at a discount." },
-        { term: "ISO", def: "Independent Sales Organization. The brokers moving the paper." }
-    ];
+var ICO = {
+  percent:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>',
+  calc:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="16" y1="14" x2="16" y2="14.01"/></svg>',
+  cash:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+  exchange: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>',
+  stack:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1"/><rect x="4" y="14" width="16" height="6" rx="1"/></svg>',
+  chart:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  refresh:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
+  db:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>',
+  search:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  arrow:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+};
 
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        
-        // Filter Tools
-        toolItems.forEach(item => {
-            const text = item.innerText.toLowerCase();
-            item.classList.toggle('hidden', !text.includes(query));
-        });
+/* ---- DATA ---- */
 
-        // Search Glossary
-        if (query.length > 2) {
-            const matches = glossary.filter(g => g.term.toLowerCase().includes(query) || g.def.toLowerCase().includes(query));
-            if (matches.length > 0) {
-                glossarySection.classList.remove('hidden');
-                glossaryResults.innerHTML = matches.map(m => `
-                    <div style="margin-bottom: 1rem;">
-                        <strong style="color: var(--mint-green);">${m.term}:</strong> ${m.def}
-                    </div>
-                `).join('');
-            } else {
-                glossarySection.classList.add('hidden');
-            }
-        } else {
-            glossarySection.classList.add('hidden');
-        }
-    });
+var TOOLS = [
+  { name:"Factor Rate Builder",   desc:"Factor-to-APR and APR-to-factor. Compare offers side by side.",          href:"#", status:"soon", cat:"deal-math", icon:"percent", color:"green",  kw:"factor rate apr interest convert comparison mca" },
+  { name:"MCA Payback Calculator", desc:"Daily, weekly, bi-weekly payment schedules with running balance.",      href:"#", status:"soon", cat:"deal-math", icon:"calc",    color:"green",  kw:"mca merchant cash advance payback payment schedule daily weekly" },
+  { name:"Net Funding Estimator",  desc:"Net wire after origination, PSF, and commission deductions.",           href:"#", status:"soon", cat:"deal-math", icon:"cash",    color:"green",  kw:"net funding wire origination psf commission fees estimate" },
+  { name:"Buy / Sell Rate Spread", desc:"ISO commission from buy rate, sell rate, and funding amount.",           href:"#", status:"soon", cat:"deal-math", icon:"exchange",color:"green",  kw:"buy sell rate spread commission iso broker" },
+  { name:"Position Stacker",       desc:"Model a deal against existing positions. Flags stacking risk.",         href:"#", status:"soon", cat:"risk",      icon:"stack",   color:"amber",  kw:"position stack stacking 1st 2nd 3rd risk mca" },
+  { name:"Coverage Ratio Check",   desc:"Quick DSCR and payment-to-revenue against bank statement averages.",   href:"#", status:"soon", cat:"risk",      icon:"chart",   color:"blue",   kw:"coverage dscr ratio revenue bank statement underwriting" },
+  { name:"Reverse Consolidation",  desc:"Refinance multiple MCAs into one advance. Project savings.",            href:"#", status:"soon", cat:"risk",      icon:"refresh", color:"amber",  kw:"reverse consolidation refinance mca restructure" },
+  { name:"RegistryRote",           desc:"Public registry research and UCC lookups.",                             href:"#", status:"soon", cat:"data",      icon:"search",  color:"slate",  kw:"registry rote ucc lookup search public records" },
+  { name:"UCC Leads Database",     desc:"Searchable UCC filings by state, date, and secured party.",             href:"#", status:"soon", cat:"data",      icon:"db",      color:"slate",  kw:"ucc leads filings database lookup secured prospecting" }
+];
+
+var GLOSSARY = [
+  { term:"ACH",               abbrev:"Automated Clearing House",   def:"The electronic banking network used for daily or weekly debits that repay most MCAs and many term loans." },
+  { term:"Buy Rate",          def:"The factor rate offered by the funder to the ISO. The spread between buy and sell rate is broker commission." },
+  { term:"COJ",               abbrev:"Confession of Judgment",     def:"A legal document where the merchant pre-agrees to judgment in the event of default. Banned in NY for out-of-state merchants since 2019." },
+  { term:"DSCR",              abbrev:"Debt Service Coverage Ratio",def:"Net operating income divided by total debt service. Most lenders want at least 1.20\u20131.25." },
+  { term:"Factor Rate",       def:"A multiplier (typically 1.10\u20131.49) applied to the funded amount to determine total payback. Not the same as APR." },
+  { term:"Funding Amount",    def:"The cash advanced to the merchant before any fees are deducted." },
+  { term:"Holdback",          def:"A fixed percentage of daily credit card sales withheld to repay an MCA. Only applies to true split-processing MCAs, not fixed-ACH advances." },
+  { term:"ISO",               abbrev:"Independent Sales Org",      def:"A broker or shop that originates MCA and financing deals on commission, typically without funding them directly." },
+  { term:"LOC",               abbrev:"Line of Credit",             def:"A revolving credit facility that lets a business draw, repay, and re-draw up to a set limit." },
+  { term:"MCA",               abbrev:"Merchant Cash Advance",      def:"A purchase of future business receivables in exchange for an upfront lump sum. Legally distinct from a loan." },
+  { term:"Origination Fee",   def:"An upfront fee deducted from the funded amount at closing. Common in both MCA and SBA deals." },
+  { term:"Position",          def:"The order of MCAs on a merchant\u2019s books. 1st position is repaid first; higher positions carry more risk and cost more." },
+  { term:"PSF",               abbrev:"Program Service Fee",        def:"An administrative or program fee charged by the funder, often deducted from the net wire to the merchant." },
+  { term:"Reverse Consol",    def:"A new advance that covers existing MCA payments weekly, effectively refinancing multiple positions into one." },
+  { term:"SBA Loan",          abbrev:"Small Business Admin",       def:"Government-backed small business loans. Most common: 7(a) and 504. Longer terms and lower rates than alternative financing." },
+  { term:"Sell Rate",         def:"The factor rate quoted to the merchant. Always equal to or higher than the buy rate." },
+  { term:"Stacking",          def:"Taking on additional MCAs while existing ones are still active. Usually prohibited and a major underwriting flag." },
+  { term:"Term",              def:"The expected repayment period of a financing product, measured in days for MCAs, months for loans." },
+  { term:"UCC Filing",        abbrev:"Uniform Commercial Code",    def:"A public filing that establishes a creditor\u2019s security interest in a business\u2019s assets. Used to spot existing financing." },
+  { term:"Working Capital",   def:"Current assets minus current liabilities. The cash a business has on hand to operate day-to-day." }
+].sort(function(a,b){ return a.term.localeCompare(b.term); });
+
+/* ---- Render ---- */
+
+function cardHTML(t, i) {
+  var dis = t.status === 'soon';
+  var tag = dis ? 'div' : 'a';
+  var href = dis ? '' : ' href="'+t.href+'"';
+  var cls = 'card' + (dis ? ' is-disabled' : '');
+  var pillCls = t.status==='live' ? 'pill-live' : t.status==='new' ? 'pill-new' : 'pill-soon';
+  var pillTxt = t.status==='live' ? 'Live' : t.status==='new' ? 'New' : 'Soon';
+  return '<'+tag+href+' class="'+cls+'" data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
+    +'<div class="card-icon '+t.color+'">'+ICO[t.icon]+'</div>'
+    +'<div class="card-body"><div class="card-name">'+t.name+'</div><div class="card-desc">'+t.desc+'</div></div>'
+    +'<div class="card-meta"><span class="pill '+pillCls+'">'+pillTxt+'</span>'
+    +(dis?'':'<span class="card-arrow">'+ICO.arrow+'</span>')
+    +'</div></'+tag+'>';
+}
+
+function gItemHTML(g) {
+  return '<div class="g-item" data-kw="'+g.term.toLowerCase()+' '+(g.abbrev||'').toLowerCase()+' '+g.def.toLowerCase()+'" data-letter="'+g.term[0].toUpperCase()+'">'
+    +'<div class="g-term"><span class="g-term-name">'+g.term+'</span>'
+    +(g.abbrev?'<span class="g-term-abbrev">'+g.abbrev+'</span>':'')
+    +'</div><div class="g-def">'+g.def+'</div></div>';
+}
+
+function renderHome() {
+  var cats = [
+    { key:'deal-math', label:'Deal math' },
+    { key:'risk',      label:'Risk & underwriting' },
+    { key:'data',      label:'Data & leads' }
+  ];
+  var html='', idx=0;
+  cats.forEach(function(c){
+    var items = TOOLS.filter(function(t){return t.cat===c.key;});
+    html += '<div class="cat-label">'+c.label+'</div><div class="cards">';
+    items.forEach(function(t){ html += cardHTML(t, idx++); });
+    html += '</div>';
+  });
+  document.getElementById('homeTools').innerHTML = html;
+}
+
+function renderCat(cat, id) {
+  var items = TOOLS.filter(function(t){ return t.cat===cat; });
+  var html = '<div class="cards">';
+  items.forEach(function(t,i){ html += cardHTML(t, i); });
+  document.getElementById(id).innerHTML = html + '</div>';
+}
+
+function renderGlossary() {
+  document.getElementById('glossaryGrid').innerHTML = GLOSSARY.map(gItemHTML).join('');
+  var letters = {};
+  GLOSSARY.forEach(function(g){ letters[g.term[0].toUpperCase()] = true; });
+  var bar = '';
+  for (var i=65; i<=90; i++) {
+    var ch = String.fromCharCode(i);
+    bar += '<button class="letter-btn'+(letters[ch]?'':'" disabled')+'" data-letter="'+ch+'">'+ch+'</button>';
+  }
+  document.getElementById('letterBar').innerHTML = bar;
+  document.getElementById('letterBar').onclick = function(e) {
+    var btn = e.target.closest('.letter-btn');
+    if (!btn || btn.disabled) return;
+    var active = btn.classList.contains('active');
+    document.querySelectorAll('.letter-btn').forEach(function(b){ b.classList.remove('active'); });
+    filterGlossary(active ? null : btn.dataset.letter);
+    if (!active) btn.classList.add('active');
+  };
+}
+
+function filterGlossary(letter) {
+  var n=0;
+  document.querySelectorAll('#glossaryGrid .g-item').forEach(function(el){
+    var show = !letter || el.dataset.letter===letter;
+    el.style.display = show ? '' : 'none';
+    if (show) n++;
+  });
+  document.getElementById('glossaryEmpty').classList.toggle('visible', n===0);
+  document.getElementById('glossaryGrid').style.display = n ? '' : 'none';
+}
+
+function updateCounts() {
+  document.getElementById('count-deal').textContent = TOOLS.filter(function(t){return t.cat==='deal-math';}).length;
+  document.getElementById('count-risk').textContent = TOOLS.filter(function(t){return t.cat==='risk';}).length;
+  document.getElementById('count-data').textContent = TOOLS.filter(function(t){return t.cat==='data';}).length;
+  document.getElementById('count-glossary').textContent = GLOSSARY.length;
+}
+
+/* ---- View switching ---- */
+
+var currentView='home', prevView='home';
+var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Contact','search':'Search results'};
+
+function switchView(v) {
+  if (v !== 'search') prevView = v;
+  currentView = v;
+  document.querySelectorAll('.view').forEach(function(el){ el.classList.remove('active'); });
+  var t = document.getElementById('view-'+v);
+  if (t) t.classList.add('active');
+  document.getElementById('topbarTitle').textContent = titles[v] || 'LendPaper';
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  var nb = document.querySelector('.nav-item[data-view="'+v+'"]');
+  if (nb) nb.classList.add('active');
+  document.getElementById('content').scrollTop = 0;
+  closeMobile();
+}
+
+/* ---- Search ---- */
+
+var searchInput = document.getElementById('searchInput');
+var searchClear = document.getElementById('searchClear');
+
+function applySearch(q) {
+  q = q.trim().toLowerCase();
+  if (!q) { switchView(prevView); searchClear.classList.remove('visible'); return; }
+  searchClear.classList.add('visible');
+  switchView('search');
+
+  var mt = TOOLS.filter(function(t){ return (t.kw+' '+t.name.toLowerCase()).indexOf(q) !== -1; });
+  var th = '';
+  if (mt.length) {
+    th = '<div class="cat-label">Tools</div><div class="cards">';
+    mt.forEach(function(t,i){ th += cardHTML(t, i); });
+    th += '</div>';
+  }
+  document.getElementById('searchToolResults').innerHTML = th;
+
+  var mg = GLOSSARY.filter(function(g){
+    return g.term.toLowerCase().indexOf(q)!==-1 || (g.abbrev&&g.abbrev.toLowerCase().indexOf(q)!==-1) || g.def.toLowerCase().indexOf(q)!==-1;
+  });
+  var gh = '';
+  if (mg.length) {
+    gh = '<div class="cat-label">Glossary</div><div class="glossary-grid">';
+    mg.forEach(function(g){ gh += gItemHTML(g); });
+    gh += '</div>';
+  }
+  document.getElementById('searchGlossaryResults').innerHTML = gh;
+
+  var total = mt.length + mg.length;
+  document.getElementById('searchEmpty').classList.toggle('visible', total===0);
+
+  var parts = [];
+  if (mt.length) parts.push(mt.length+' tool'+(mt.length===1?'':'s'));
+  if (mg.length) parts.push(mg.length+' term'+(mg.length===1?'':'s'));
+  document.getElementById('searchMeta').innerHTML = total
+    ? parts.join(' and ')+' matching "<strong>'+esc(q)+'</strong>"'
+    : 'No results for "<strong>'+esc(q)+'</strong>"';
+}
+
+function esc(s) { var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+searchInput.addEventListener('input', function(e){ applySearch(e.target.value); });
+searchClear.addEventListener('click', function(){ searchInput.value=''; searchClear.classList.remove('visible'); switchView(prevView); searchInput.focus(); });
+
+/* ---- Keyboard ---- */
+document.addEventListener('keydown', function(e){
+  if (e.key==='/' && document.activeElement!==searchInput && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) { e.preventDefault(); searchInput.focus(); searchInput.select(); }
+  if (e.key==='Escape' && document.activeElement===searchInput) { searchInput.value=''; searchClear.classList.remove('visible'); switchView(prevView); searchInput.blur(); }
+});
+
+/* ---- Mobile ---- */
+var sidebar=document.getElementById('sidebar'), overlay=document.getElementById('sidebarOverlay');
+document.getElementById('mobileToggle').addEventListener('click', function(){ sidebar.classList.add('open'); overlay.classList.add('open'); });
+function closeMobile(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+overlay.addEventListener('click', closeMobile);
+
+/* ---- Init ---- */
+renderHome();
+renderCat('deal-math','dealMathCards');
+renderCat('risk','riskCards');
+renderCat('data','dataCards');
+renderGlossary();
+updateCounts();
 </script>
-
 </body>
 </html>
