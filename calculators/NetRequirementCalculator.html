@@ -377,29 +377,24 @@
             </div>
 
             <div class="lp-group" style="margin-bottom: 0;">
-                <label for="net_pct">Target net %</label>
+                <label for="net_pct">Net Requirement <span class="tooltip-icon" data-tip="Percentage of the new funding amount that must go directly to the borrower.">i</span></label>
                 <div class="input-wrap">
-                    <input type="number" id="net_pct" class="input-field" value="85" oninput="runNetCalc()">
-                    <div class="input-suffix">%</div>
+                    <div class="input-prefix">%</div>
+                    <input type="number" id="net_pct" class="input-field" value="50" oninput="runNetCalc()">
                 </div>
             </div>
         </div>
 
         <!-- Results -->
         <div class="lp-results">
-            <div class="hero-output">
-                <div class="hero-label">Min. to borrower</div>
-                <div id="hero_val" class="hero-value">$42,500.00</div>
-            </div>
-
-            <div class="result-grid">
-                <div class="result-item">
-                    <span class="result-label">Net % goal <span class="tooltip-icon" data-tip="Percentage of the new funding amount that must go directly to the borrower.">i</span></span>
-                    <span id="res_pct" class="result-val">85%</span>
+            <div class="hero-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px;">
+                <div class="hero-output">
+                    <div class="hero-label">Min. to borrower</div>
+                    <div id="hero_val" class="hero-value" style="font-size: 24px;">$25,000.00</div>
                 </div>
-                <div class="result-item">
-                    <span class="result-label">Max payoff allowed <span class="tooltip-icon" data-tip="Total amount available to pay off existing debt or liens.">i</span></span>
-                    <span id="res_payoff" class="result-val">$7,500</span>
+                <div class="hero-output">
+                    <div class="hero-label">Max payoff <span class="tooltip-icon" data-tip="Total amount available to pay off existing debt or liens.">i</span></div>
+                    <div id="res_payoff" class="hero-value" style="font-size: 24px;">$25,000.00</div>
                 </div>
             </div>
 
@@ -485,12 +480,10 @@
         const netPct = cleanNumericInput(document.getElementById('net_pct').value);
         
         const heroVal = document.getElementById('hero_val');
-        const resPct = document.getElementById('res_pct');
         const resPayoff = document.getElementById('res_payoff');
         
         if (loanAmt === null || loanAmt <= 0 || netPct === null) {
             heroVal.textContent = '$0.00';
-            resPct.textContent = '—%';
             resPayoff.textContent = '$0';
             return;
         }
@@ -498,9 +491,9 @@
         const minToBorrower = loanAmt * (netPct / 100);
         const maxPayoff = loanAmt - minToBorrower;
 
-        heroVal.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(minToBorrower);
-        resPct.textContent = netPct + '%';
-        resPayoff.textContent = formatCurrency(maxPayoff);
+        const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        heroVal.textContent = formatter.format(minToBorrower);
+        resPayoff.textContent = formatter.format(maxPayoff);
     }
 
     function copyResults() {
@@ -510,9 +503,9 @@
 
         const dataPairs = {
             "New funding amount": formatCurrency(loanAmt),
-            "Target net %": netPct + "%",
+            "Net Requirement": netPct + "%",
             "Min. to borrower": document.getElementById('hero_val').innerText,
-            "Max payoff allowed": document.getElementById('res_payoff').innerText
+            "Max payoff": document.getElementById('res_payoff').innerText
         };
 
         const borderLine = "─────────────────────────────";
