@@ -684,6 +684,29 @@ function cardHTML(t, i) {
     +'</div></'+tag+'>';
 }
 
+function renderHome() {
+  var cats = [
+    { key:'deal-math', label:'Deal math' },
+    { key:'risk',      label:'Risk & underwriting' },
+    { key:'data',      label:'Data & leads' }
+  ];
+  var html='', idx=0;
+  cats.forEach(function(c){
+    var items = TOOLS.filter(function(t){return t.cat===c.key;});
+    html += '<div class="cat-label">'+c.label+'</div><div class="cards">';
+    items.forEach(function(t){ html += cardHTML(t, idx++); });
+    html += '</div>';
+  });
+  document.getElementById('homeTools').innerHTML = html;
+}
+
+function renderCat(cat, id) {
+  var items = TOOLS.filter(function(t){ return t.cat===cat; });
+  var html = '<div class="cards">';
+  items.forEach(function(t,i){ html += cardHTML(t, i); });
+  document.getElementById(id).innerHTML = html + '</div>';
+}
+
 function gItemHTML(g) {
   let defHtml = g.def;
   // Handle specific sub-column replacement for technical relationships
