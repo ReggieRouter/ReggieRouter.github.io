@@ -1,7 +1,7 @@
 {
   "name": "LendPaper",
   "short_name": "LendPaper",
-  "description": "Loan documents, done right.",
+  "description": "Built for ISOs. Trusted by lenders.",
   "icons": [
     { "src": "apple-touch-icon-180x180.png", "sizes": "180x180", "type": "image/png" },
     { "src": "apple-touch-icon-192x192.png", "sizes": "192x192", "type": "image/png" },

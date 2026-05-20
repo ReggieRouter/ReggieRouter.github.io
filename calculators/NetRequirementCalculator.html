@@ -365,11 +365,11 @@
         <!-- Inputs -->
         <div class="lp-inputs">
             <div class="lp-definition">
-                Find out how much you can pay off. The <strong>Net Requirement</strong> is the minimum percentage of the new loan amount that must go directly to the borrower after all existing liens and debt payoffs are settled.
+                Find out how much you can pay off. The <strong>Net Requirement</strong> is the minimum percentage of the new funding amount that must go directly to the borrower after all existing liens and debt payoffs are settled.
             </div>
 
             <div class="lp-group">
-                <label for="loan_amt">New loan amount</label>
+                <label for="loan_amt">New funding amount</label>
                 <div class="input-wrap">
                     <div class="input-prefix">$</div>
                     <input type="number" id="loan_amt" class="input-field" value="50000" oninput="runNetCalc()">
@@ -394,7 +394,7 @@
 
             <div class="result-grid">
                 <div class="result-item">
-                    <span class="result-label">Net % goal <span class="tooltip-icon" data-tip="Percentage of the new loan amount that must go directly to the borrower.">i</span></span>
+                    <span class="result-label">Net % goal <span class="tooltip-icon" data-tip="Percentage of the new funding amount that must go directly to the borrower.">i</span></span>
                     <span id="res_pct" class="result-val">85%</span>
                 </div>
                 <div class="result-item">
@@ -509,7 +509,7 @@
         if (loanAmt === null) return;
 
         const dataPairs = {
-            "New loan amount": formatCurrency(loanAmt),
+            "New funding amount": formatCurrency(loanAmt),
             "Target net %": netPct + "%",
             "Min. to borrower": document.getElementById('hero_val').innerText,
             "Max payoff allowed": document.getElementById('res_payoff').innerText

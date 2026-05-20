@@ -436,7 +436,7 @@ body {
                 </div>
                 <div class="sc-body">
                     <div class="lp-definition">
-                        The <strong>Debt Service Coverage Ratio (DSCR)</strong> measures a business's ability to cover its debt obligations with its available cash flow, providing a critical indicator of loan serviceability.
+                        The <strong>Debt Service Coverage Ratio (DSCR)</strong> measures a business's ability to cover its debt obligations with its available cash flow, providing a critical indicator of funding serviceability.
                     </div>
                     
                     <div class="ent-toggle-bar">
@@ -509,7 +509,7 @@ body {
                             <div class="addbacks-content" id="addbacksContent">
                                 <strong>Add-backs</strong> are non-cash or discretionary expenses added back to net income to reflect true cash flow. Standard SBA add-backs:
                                 <ul style="margin: 8px 0 0 16px;">
-                                    <li>Interest - replaced by new loan</li>
+                                    <li>Interest - replaced by new funding</li>
                                     <li>Depreciation & Amortization - non-cash</li>
                                     <li>Owner(s)' Comp - discretionary</li>
                                 </ul>
@@ -543,7 +543,7 @@ body {
             <div class="sc" data-sc-collapsible data-pdf-sec="numbers">
                 <div class="sc-hd">
                     <span class="sc-num">3</span>
-                    <span class="sc-title">Run your numbers<span class="sc-sub">Add loan scenarios to see results</span></span>
+                    <span class="sc-title">Run your numbers<span class="sc-sub">Add deal scenarios to see results</span></span>
                     <button class="add-btn" id="addScenBtn" onclick="addScenario()">+ Add scenario</button>
                     <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
                 </div>
@@ -726,7 +726,7 @@ function renderMode() {
   });
   document.getElementById('modeBar').innerHTML = h;
 
-  var def = S.mode === 'bdscr' ? '<strong>Business DSCR</strong> measures whether operating income alone can cover new loan payments.' : (S.mode === 'gdscr' ? '<strong>Global DSCR</strong> combines business income with the owner\'s personal financials.' : 'Runs <strong>BDSCR</strong> and <strong>GDSCR</strong> side-by-side.');
+  var def = S.mode === 'bdscr' ? '<strong>Business DSCR</strong> measures whether operating income alone can cover new funding payments.' : (S.mode === 'gdscr' ? '<strong>Global DSCR</strong> combines business income with the owner\'s personal financials.' : 'Runs <strong>BDSCR</strong> and <strong>GDSCR</strong> side-by-side.');
   document.getElementById('modeInfo').innerHTML = '<div class="mode-info">'+def+'</div>';
 
   var showPers = S.mode !== 'bdscr';

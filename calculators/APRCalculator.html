@@ -439,7 +439,7 @@
             </div>
 
             <div class="lp-group">
-                <label>Loan amount</label>
+                <label>Funding amount</label>
                 <div class="input-wrap">
                     <div class="input-prefix">$</div>
                     <input type="number" id="loanAmount" class="input-field" value="80000" oninput="updateFromLoan(); calculate()">
@@ -455,7 +455,7 @@
             </div>
 
             <div class="lp-group">
-                <label>Loan term</label>
+                <label>Funding term</label>
                 <div class="input-wrap">
                     <input type="number" id="termMonths" class="input-field" value="12" oninput="calculate()">
                     <div class="input-suffix">Months</div>
@@ -502,7 +502,7 @@
                     <div id="res-avg-monthly" class="lp-res-val">$0</div>
                 </div>
                 <div class="lp-res-item">
-                    <div class="lp-res-label">Cost of loan</div>
+                    <div class="lp-res-label">Cost of capital</div>
                     <div id="res-cost" class="lp-res-val highlight">$0</div>
                 </div>
             </div>
@@ -673,7 +673,7 @@
         const payout = document.getElementById('res-disbursement').innerText;
 
         const dataPairs = {
-            "Loan amount": formatCurrency(cleanNumericInput(loan)),
+            "Funding amount": formatCurrency(cleanNumericInput(loan)),
             "Estimated APR": apr,
             "Total cost": cost,
             "Net disbursement": payout,
