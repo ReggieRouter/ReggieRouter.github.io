@@ -5,7 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LendPaper — Calculators &amp; Tools for SMB Funders, Brokers &amp; ISOs</title>
 <meta name="description" content="Fast, free calculators and tools for MCA, LOC, SBA, and alternative financing professionals. Built for funding desks that don't have time to waste.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111827' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'%3E%3Cpath d='M4 4v16h11l5-5V4H4z'/%3E%3Cpath d='M15 20v-5h5'/%3E%3Cpath d='M9 9v6'/%3E%3Cpath d='M9 15h4'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="public/assets/brand/favicon.svg">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lendpaper.com/">
+<meta property="og:title" content="LendPaper | Loan documents, done right.">
+<meta property="og:description" content="LendPaper simplifies loan documentation for everyone. Secure, fast, and professional.">
+<meta property="og:image" content="public/assets/brand/og-image.png">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://lendpaper.com/">
+<meta property="twitter:title" content="LendPaper | Loan documents, done right.">
+<meta property="twitter:description" content="LendPaper simplifies loan documentation for everyone. Secure, fast, and professional.">
+<meta property="twitter:image" content="public/assets/brand/og-image.png">
 <style>
 /*
  * LendPaper Homepage — Dashboard Layout
@@ -385,6 +399,26 @@ input { font-family: inherit; }
   to   { opacity: 1; transform: translateY(0); }
 }
 .card, .g-item, .banner { animation: fadeUp 250ms ease both; }
+
+/* ==================== Modal System ==================== */
+#lp-modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); z-index: 1000;
+    justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+}
+#lp-modal-container {
+    background: white; width: 100%; max-width: 1000px; height: 90vh;
+    border-radius: 16px; position: relative; overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+#lp-modal-close {
+    position: absolute; top: 20px; right: 20px; width: 40px; height: 40px;
+    background: white; border: 1px solid var(--border); border-radius: 50%;
+    display: flex; justify-content: center; align-items: center; cursor: pointer;
+    z-index: 1001; font-size: 20px; font-weight: bold; color: var(--text);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+#lp-modal-iframe { width: 100%; height: 100%; border: none; }
 </style>
 </head>
 <body>
@@ -395,11 +429,7 @@ input { font-family: inherit; }
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20"
-           fill="none" stroke="currentColor" stroke-width="2.5"
-           stroke-linecap="square" stroke-linejoin="miter">
-        <path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/><path d="M9 9v6"/><path d="M9 15h4"/>
-      </svg>
+      <img src="public/assets/brand/favicon.svg" alt="LendPaper Logo" width="20" height="20">
       <div><span class="logo-lend">lend</span><span class="logo-paper">paper</span><span class="logo-dot">.</span></div>
     </div>
 
@@ -537,11 +567,20 @@ input { font-family: inherit; }
   </div>
 </div>
 
+<!-- Modal Structure -->
+<div id="lp-modal-overlay" onclick="closeModal()">
+    <div id="lp-modal-container" onclick="event.stopPropagation()">
+        <div id="lp-modal-close" onclick="closeModal()">&times;</div>
+        <iframe id="lp-modal-iframe" src=""></iframe>
+    </div>
+</div>
+
+<!-- External Data -->
+<script src="public/assets/js/glossary.js"></script>
+
 <script>
 /* ============================================================
    LendPaper Homepage — JS
-   To add a tool: push into TOOLS array.
-   To add a glossary term: push into GLOSSARY array.
    ============================================================ */
 
 var ICO = {
@@ -558,44 +597,20 @@ var ICO = {
 };
 
 /* ---- DATA ---- */
-
 var TOOLS = [
-  { name:"Factor Rate Builder",   desc:"Factor-to-APR and APR-to-factor. Compare offers side by side.",          href:"#", status:"soon", cat:"deal-math", icon:"percent", color:"green",  kw:"factor rate apr interest convert comparison mca" },
+  { name:"APR Calculator",   desc:"Factor-to-APR and APR-to-factor. Compare offers side by side.",          href:"javascript:openModal('calculators/APRCalculator.html')", status:"live", cat:"deal-math", icon:"percent", color:"green",  kw:"factor rate apr interest convert comparison mca" },
   { name:"MCA Payback Calculator", desc:"Daily, weekly, bi-weekly payment schedules with running balance.",      href:"#", status:"soon", cat:"deal-math", icon:"calc",    color:"green",  kw:"mca merchant cash advance payback payment schedule daily weekly" },
-  { name:"Net Funding Estimator",  desc:"Net wire after origination, PSF, and commission deductions.",           href:"#", status:"soon", cat:"deal-math", icon:"cash",    color:"green",  kw:"net funding wire origination psf commission fees estimate" },
+  { name:"Net Funding Estimator",  desc:"Net wire after origination, PSF, and commission deductions.",           href:"javascript:openModal('calculators/NetRequirementCalculator.html')", status:"live", cat:"deal-math", icon:"cash",    color:"green",  kw:"net funding wire origination psf commission fees estimate" },
+  { name:"SBA Rates & Fees",      desc:"Dynamic SBA 7(a) scenario builder with guarantee fee logic.",           href:"javascript:openModal('calculators/SBAFeesCalculator.html')", status:"live", cat:"deal-math", icon:"refresh", color:"green",  kw:"sba fees rates scenario builder 7a guarantee packaging search closing" },
   { name:"Buy / Sell Rate Spread", desc:"ISO commission from buy rate, sell rate, and funding amount.",           href:"#", status:"soon", cat:"deal-math", icon:"exchange",color:"green",  kw:"buy sell rate spread commission iso broker" },
   { name:"Position Stacker",       desc:"Model a deal against existing positions. Flags stacking risk.",         href:"#", status:"soon", cat:"risk",      icon:"stack",   color:"amber",  kw:"position stack stacking 1st 2nd 3rd risk mca" },
-  { name:"Coverage Ratio Check",   desc:"Quick DSCR and payment-to-revenue against bank statement averages.",   href:"#", status:"soon", cat:"risk",      icon:"chart",   color:"blue",   kw:"coverage dscr ratio revenue bank statement underwriting" },
+  { name:"DSCR Calculator",   desc:"Quick DSCR and payment-to-revenue against bank statement averages.",   href:"javascript:openModal('calculators/DSCRCalculator.html')", status:"live", cat:"risk",      icon:"chart",   color:"green",  kw:"coverage dscr ratio revenue bank statement underwriting" },
   { name:"Reverse Consolidation",  desc:"Refinance multiple MCAs into one advance. Project savings.",            href:"#", status:"soon", cat:"risk",      icon:"refresh", color:"amber",  kw:"reverse consolidation refinance mca restructure" },
-  { name:"RegistryRote",           desc:"Public registry research and UCC lookups.",                             href:"#", status:"soon", cat:"data",      icon:"search",  color:"slate",  kw:"registry rote ucc lookup search public records" },
+  { name:"Public Registry Search", desc:"Public registry research and UCC lookups.",                             href:"#", status:"soon", cat:"data",      icon:"search",  color:"slate",  kw:"ucc lookup search public records" },
   { name:"UCC Leads Database",     desc:"Searchable UCC filings by state, date, and secured party.",             href:"#", status:"soon", cat:"data",      icon:"db",      color:"slate",  kw:"ucc leads filings database lookup secured prospecting" }
 ];
 
-var GLOSSARY = [
-  { term:"ACH",               abbrev:"Automated Clearing House",   def:"The electronic banking network used for daily or weekly debits that repay most MCAs and many term loans." },
-  { term:"Buy Rate",          def:"The factor rate offered by the funder to the ISO. The spread between buy and sell rate is broker commission." },
-  { term:"COJ",               abbrev:"Confession of Judgment",     def:"A legal document where the merchant pre-agrees to judgment in the event of default. Banned in NY for out-of-state merchants since 2019." },
-  { term:"DSCR",              abbrev:"Debt Service Coverage Ratio",def:"Net operating income divided by total debt service. Most lenders want at least 1.20\u20131.25." },
-  { term:"Factor Rate",       def:"A multiplier (typically 1.10\u20131.49) applied to the funded amount to determine total payback. Not the same as APR." },
-  { term:"Funding Amount",    def:"The cash advanced to the merchant before any fees are deducted." },
-  { term:"Holdback",          def:"A fixed percentage of daily credit card sales withheld to repay an MCA. Only applies to true split-processing MCAs, not fixed-ACH advances." },
-  { term:"ISO",               abbrev:"Independent Sales Org",      def:"A broker or shop that originates MCA and financing deals on commission, typically without funding them directly." },
-  { term:"LOC",               abbrev:"Line of Credit",             def:"A revolving credit facility that lets a business draw, repay, and re-draw up to a set limit." },
-  { term:"MCA",               abbrev:"Merchant Cash Advance",      def:"A purchase of future business receivables in exchange for an upfront lump sum. Legally distinct from a loan." },
-  { term:"Origination Fee",   def:"An upfront fee deducted from the funded amount at closing. Common in both MCA and SBA deals." },
-  { term:"Position",          def:"The order of MCAs on a merchant\u2019s books. 1st position is repaid first; higher positions carry more risk and cost more." },
-  { term:"PSF",               abbrev:"Program Service Fee",        def:"An administrative or program fee charged by the funder, often deducted from the net wire to the merchant." },
-  { term:"Reverse Consol",    def:"A new advance that covers existing MCA payments weekly, effectively refinancing multiple positions into one." },
-  { term:"SBA Loan",          abbrev:"Small Business Admin",       def:"Government-backed small business loans. Most common: 7(a) and 504. Longer terms and lower rates than alternative financing." },
-  { term:"Sell Rate",         def:"The factor rate quoted to the merchant. Always equal to or higher than the buy rate." },
-  { term:"Stacking",          def:"Taking on additional MCAs while existing ones are still active. Usually prohibited and a major underwriting flag." },
-  { term:"Term",              def:"The expected repayment period of a financing product, measured in days for MCAs, months for loans." },
-  { term:"UCC Filing",        abbrev:"Uniform Commercial Code",    def:"A public filing that establishes a creditor\u2019s security interest in a business\u2019s assets. Used to spot existing financing." },
-  { term:"Working Capital",   def:"Current assets minus current liabilities. The cash a business has on hand to operate day-to-day." }
-].sort(function(a,b){ return a.term.localeCompare(b.term); });
-
 /* ---- Render ---- */
-
 function cardHTML(t, i) {
   var dis = t.status === 'soon';
   var tag = dis ? 'div' : 'a';
@@ -680,7 +695,6 @@ function updateCounts() {
 }
 
 /* ---- View switching ---- */
-
 var currentView='home', prevView='home';
 var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Contact','search':'Search results'};
 
@@ -699,7 +713,6 @@ function switchView(v) {
 }
 
 /* ---- Search ---- */
-
 var searchInput = document.getElementById('searchInput');
 var searchClear = document.getElementById('searchClear');
 
@@ -756,6 +769,25 @@ var sidebar=document.getElementById('sidebar'), overlay=document.getElementById(
 document.getElementById('mobileToggle').addEventListener('click', function(){ sidebar.classList.add('open'); overlay.classList.add('open'); });
 function closeMobile(){ sidebar.classList.remove('open'); overlay.classList.remove('open'); }
 overlay.addEventListener('click', closeMobile);
+
+/* ---- Modal System Functions ---- */
+function openModal(url) {
+    const overlay = document.getElementById('lp-modal-overlay');
+    const iframe = document.getElementById('lp-modal-iframe');
+    iframe.src = url;
+    overlay.style.display = 'flex';
+}
+
+function closeModal() {
+    const overlay = document.getElementById('lp-modal-overlay');
+    const iframe = document.getElementById('lp-modal-iframe');
+    overlay.style.display = 'none';
+    iframe.src = '';
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+});
 
 /* ---- Init ---- */
 renderHome();
