@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBA Scenario Builder | LendPaper</title>
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICA8cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHJ4PSI1IiBmaWxsPSIjMTBCODgxIi8+CiAgPHBhdGggZD0iTTQgNHYxNmgxMWw1LTVWNEg0eiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNMTUgMjB2LTVoNSIgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNOSA5djYiICAgICAgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNOSAxNWg0IiAgICAgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KPC9zdmc+">
+
+<!-- Apple Touch Icon -->
+<link rel="apple-touch-icon" href="../public/assets/brand/apple-touch-icon-180x180.png">
+
+<!-- Manifest -->
+<link rel="manifest" href="../public/assets/brand/site.webmanifest">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+--lp-green: #14532D;
+--lp-green-light: #f0fdf4;
+--lp-dark: #334243;
+--lp-light: #f9fafb;
+--lp-border: #e5e7eb;
+--lp-text-muted: #64748b;
+--gray-50: #f9fafb;
+--gray-100: #f3f4f6;
+--gray-200: #e5e7eb;
+--gray-500: #6b7280;
+--gray-900: #111827;
+--green-bg: #f0fdf4;
+--green-border: #bcf0da;
+--green-text: #14532D;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+background-color: #f1f5f9;
+color: var(--lp-dark);
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+}
+
+/* Standard Modal Header */
+.modal-header {
+height: 56px;
+background: #fff;
+border-bottom: 1px solid var(--lp-border);
+display: flex;
+align-items: center;
+padding: 0 24px;
+position: sticky;
+top: 0;
+z-index: 100;
+flex-shrink: 0;
+}
+.modal-logo { height: 22px; }
+.modal-title {
+position: absolute;
+left: 50%;
+transform: translateX(-50%);
+font-size: 13px;
+font-weight: 800;
+color: var(--lp-dark);
+text-transform: uppercase;
+letter-spacing: 0.05em;
+white-space: nowrap;
+}
+
+.lp-main {
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 24px;
+flex-grow: 1;
+}
+
+.lp-container {
+width: 100%;
+max-width: 900px;
+background: #ffffff;
+border: 1px solid var(--lp-border);
+border-radius: 16px;
+overflow: hidden;
+display: flex;
+flex-direction: column;
+box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.sec-pad { padding: 32px; }
+
+.lp-definition {
+    font-size: 11px;
+    color: #64748b;
+    border-left: 3px solid #14532D;
+    line-height: 1.6;
+    padding-left: 16px;
+    margin-bottom: 24px;
+}
+.lp-definition strong { color: var(--lp-dark); font-weight: 700; }
+
+/* Calculator Table UI */
+.calc-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.calc-title { font-size: 18px; font-weight: 800; color: var(--lp-dark); letter-spacing: -0.02em; }
+
+.lp-btn-group { display: flex; gap: 8px; }
+
+.add-btn { background: var(--lp-green); border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 700; color: white; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; font-family: inherit; }
+.add-btn:hover { background: #166534; transform: translateY(-1px); }
+
+.copy-all-btn { background: var(--lp-green); border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 700; color: white; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; font-family: inherit; }
+.copy-all-btn:hover { background: #166534; }
+
+.print-btn { background: transparent; border: 2px solid var(--lp-green); border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 700; color: var(--lp-green); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; font-family: inherit; }
+.print-btn:hover { background: rgba(20, 83, 45, 0.05); }
+
+.calc-wrap { border: 1px solid var(--lp-border); border-radius: 12px; overflow-x: auto; margin-bottom: 32px; }
+.compare-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 750px; table-layout: fixed; }
+
+/* HEADERS */
+.compare-table th { background: #fff; padding: 16px; text-align: left; border-bottom: 1px solid var(--lp-border); border-right: 1px solid var(--gray-100); }
+.compare-table th:first-child { width: 30%; border-right: 2px solid var(--lp-border); background: var(--gray-50); }
+.compare-table th:last-child { border-right: none; }
+
+.scenario-header-wrap { position: relative; padding-right: 24px; }
+.scenario-name-input { width: 100%; border: 1px solid transparent; background: transparent; font-size: 13px; font-weight: 800; color: var(--lp-green); text-transform: uppercase; letter-spacing: 0.05em; font-family: inherit; outline: none; border-radius: 4px; padding: 4px; transition: all 0.15s; }
+.scenario-name-input:hover { background: var(--lp-green-light); }
+.scenario-name-input:focus { background: #fff; border-color: var(--lp-green); }
+
+.delete-btn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 4px; border: none; background: transparent; color: var(--gray-500); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.15s; }
+.compare-table th:hover .delete-btn { opacity: 1; }
+.delete-btn:hover { background: #fee2e2; color: #dc2626; }
+
+/* ROWS & CELLS */
+.compare-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--gray-100); border-right: 1px solid var(--gray-100); vertical-align: middle; background: #fff; }
+.compare-table td:first-child { border-right: 2px solid var(--lp-border); background: var(--gray-50); }
+.compare-table td:last-child { border-right: none; }
+
+.row-title { font-size: 11px; font-weight: 700; color: var(--lp-dark); display: flex; align-items: center; gap: 4px; text-transform: uppercase; letter-spacing: 0.025em; }
+.row-sub { font-size: 10px; color: var(--lp-text-muted); font-weight: 400; display: block; margin-top: 2px; }
+
+/* Separated Prefix Pattern */
+.input-wrap { display: flex; align-items: stretch; border: 2px solid var(--lp-border); border-radius: 8px; overflow: hidden; transition: all 0.2s; }
+.input-wrap:focus-within { border-color: var(--lp-green); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--lp-green); }
+.input-prefix, .input-suffix { background: #f8fafc; border-right: 1px solid var(--lp-border); padding: 0 10px; display: flex; align-items: center; justify-content: center; color: var(--lp-text-muted); font-size: 13px; font-weight: 600; }
+.input-suffix { border-right: none; border-left: 1px solid var(--lp-border); }
+.input-field { border: none; padding: 8px; font-size: 14px; font-weight: 600; color: var(--lp-dark); width: 100%; outline: none; font-family: inherit; }
+
+/* READ-ONLY VALUES */
+.val-calc { font-size: 14px; font-weight: 700; color: var(--lp-dark); }
+
+/* SPECIAL ROWS */
+.compare-table .fee-total-row td { background: var(--lp-green-light); border-top: 2px solid var(--green-border); border-bottom: 2px solid var(--green-border); }
+.compare-table .fee-total-row .row-title { color: var(--lp-green); }
+
+/* Advanced Toggle */
+.adv-toggle-wrap { margin-bottom: 24px; display: flex; justify-content: center; }
+.adv-toggle-btn { background: transparent; border: 1px solid var(--lp-border); border-radius: 99px; padding: 6px 16px; font-size: 11px; font-weight: 700; color: var(--lp-text-muted); cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.05em; }
+.adv-toggle-btn:hover { border-color: var(--lp-green); color: var(--lp-green); }
+.adv-row { display: none; }
+.adv-row.show { display: table-row; }
+
+/* Tooltips */
+.tooltip-icon { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; background: var(--gray-200); color: var(--gray-500); font-size: 9px; font-weight: 800; cursor: help; margin-left: 4px; }
+.tooltip-icon:hover { background: var(--lp-green); color: white; }
+
+#tt { position: fixed; z-index: 9999; background: var(--gray-900); color: white; font-size: 12px; padding: 10px 14px; border-radius: 8px; max-width: 250px; pointer-events: none; opacity: 0; transition: opacity 0.15s; font-weight: 400; }
+#tt.show { opacity: 1; }
+
+.lp-disclaimer { font-size: 10px; font-weight: 600; text-align: center; padding: 24px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.print-header { display: none; }
+.print-disclaimer { display: none; }
+
+@media print {
+body { background: white !important; }
+.modal-header, .lp-btn-group, .adv-toggle-wrap, .sec-pad > div:not(.calc-wrap), .lp-disclaimer { display: none !important; }
+.lp-main { padding: 0 !important; display: block !important; }
+.lp-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; }
+.sec-pad { padding: 0 !important; }
+.calc-wrap { border: none !important; overflow: visible !important; }
+.compare-table { min-width: 100% !important; table-layout: auto !important; }
+.compare-table td, .compare-table th { font-size: 10px !important; padding: 8px !important; }
+
+.print-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    margin-bottom: 40px !important;
+    border-bottom: 2px solid var(--lp-green) !important;
+    padding-bottom: 20px !important;
+}
+.print-logo { height: 64px !important; margin-bottom: 12px !important; }
+.print-title { font-size: 18px !important; font-weight: 800 !important; text-transform: uppercase !important; color: var(--lp-dark) !important; }
+
+.print-disclaimer {
+    display: block !important;
+    margin-top: 60px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid var(--lp-border) !important;
+    font-size: 10px !important;
+    color: #94a3b8 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+    line-height: 1.5 !important;
+}
+}
+</style>
+</head>
+<body>
+
+<div id="tt"></div>
+
+<header class="modal-header">
+<svg class="modal-logo" width="124" height="22" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
+  <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M4 4v16h11l5-5V4H4z"/>
+    <path d="M15 20v-5h5"/>
+    <path d="M9 9v6"/>
+    <path d="M9 15h4"/>
+  </svg>
+  <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
+    <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#10B981">.</tspan>
+  </text>
+</svg>
+<div class="modal-title">SBA Scenario Builder</div>
+</header>
+
+<div class="lp-main">
+<div class="lp-container">
+<!-- Print Header -->
+<div class="print-header">
+    <svg class="print-logo" width="180" height="32" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
+      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+        <path d="M4 4v16h11l5-5V4H4z"/>
+        <path d="M15 20v-5h5"/>
+        <path d="M9 9v6"/>
+        <path d="M9 15h4"/>
+      </svg>
+      <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
+        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#10B981">.</tspan>
+      </text>
+    </svg>
+    <div class="print-title">SBA 7(a) Estimate</div>
+</div>
+<div class="sec-pad">
+
+  <div class="lp-definition">
+    Calculate statutory SBA 7(a) guarantee fees and estimated closing costs to provide a comprehensive view of the total upfront capital required for various loan sizes.
+  </div>
+
+  <div class="calc-header-flex">
+    <div class="calc-title">Loan Structure & Comparison</div>
+    <div class="lp-btn-group">
+        <button class="add-btn" onclick="addScenario()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add
+        </button>
+        <button class="copy-all-btn" onclick="copyAllScenarios()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+        </button>
+        <button class="print-btn" onclick="handleLendPaperPrint()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Save PDF
+        </button>
+    </div>
+  </div>
+
+  <div class="adv-toggle-wrap">
+      <button class="adv-toggle-btn" onclick="toggleAdvanced()">Show Advanced Inputs</button>
+  </div>
+
+  <div class="calc-wrap">
+    <table class="compare-table" id="calcTable">
+      <thead>
+        <tr id="row-headers">
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="row-loan">
+          <td><span class="row-title">Gross Loan Amount</span><span class="row-sub">Total request before fees</span></td>
+        </tr>
+        <tr id="row-pct" class="adv-row">
+          <td><span class="row-title">SBA Guarantee % <span class="tooltip-icon" data-tip="Portion backed by government. 85% for loans up to $150k, 75% for loans above.">i</span></span><span class="row-sub">Auto-determined by loan size</span></td>
+        </tr>
+        <tr id="row-sba">
+          <td><span class="row-title">SBA Guarantee Fee <span class="tooltip-icon" data-tip="Calculated via SOP tier formula on the guaranteed portion of the loan.">i</span></span><span class="row-sub">Calculated per SOP 50 10 8</span></td>
+        </tr>
+        <tr id="row-pkg">
+          <td><span class="row-title">Packaging Fee <span class="tooltip-icon" data-tip="Lender processing costs. Usually ranges from $500 to $3,000.">i</span></span><span class="row-sub">Lender processing costs</span></td>
+        </tr>
+        <tr id="row-close">
+          <td><span class="row-title">Search & Closing <span class="tooltip-icon" data-tip="Title, UCC, and legal counsel costs.">i</span></span><span class="row-sub">Third-party and legal costs</span></td>
+        </tr>
+        <tr class="fee-total-row" id="row-fee-total">
+          <td><span class="row-title">Total Upfront Fees</span><span class="row-sub">Estimated out-of-pocket costs</span></td>
+        </tr>
+        <tr id="row-pmt">
+          <td><span class="row-title">Est. Monthly Payment</span><span class="row-sub">Fully amortized Principal + Interest</span></td>
+        </tr>
+        <tr id="row-term" class="adv-row">
+          <td><span class="row-title">Loan Term <span class="tooltip-icon" data-tip="10 years standard. Up to 25 years allowed if commercial real estate is involved.">i</span></span><span class="row-sub">Duration of the loan in years</span></td>
+        </tr>
+        <tr id="row-spread" class="adv-row">
+          <td><span class="row-title">Rate Spread <span class="tooltip-icon" data-tip="Added to WSJ Prime (Assumed 6.75%).">i</span></span><span class="row-sub">Base WSJ Prime is 6.75%</span></td>
+        </tr>
+        <tr id="row-interest-cost">
+          <td><span class="row-title">Total Interest Cost</span><span class="row-sub">Cost of capital over the life</span></td>
+        </tr>
+        <tr id="row-lifetime-cost">
+          <td><span class="row-title">Total Payback</span><span class="row-sub">Principal + total interest</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="lp-definition">
+    <div style="font-size: 11px; font-weight: 800; color: var(--lp-dark); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Typical DSCR Baselines</div>
+    <div style="margin-bottom: 4px;"><strong>Business DSCR:</strong> Typically 1.15x. Measures operating cash flow vs debt.</div>
+    <div><strong>Global DSCR:</strong> Typically 1.00x - 1.15x. Includes personal income and debt.</div>
+  </div>
+
+  <div class="lp-disclaimer">
+    DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+  </div>
+
+  <!-- Print-only disclaimer -->
+  <div class="print-disclaimer">
+    DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+    <br><br>
+    Powered by LendPaper | lendpaper.com
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available";
+
+function cleanNumericInput(value) {
+if (value === null || value === undefined || value === '') return null;
+const parsed = parseFloat(value.toString().replace(/,/g, ''));
+return isNaN(parsed) || !isFinite(parsed) ? null : parsed;
+}
+
+function formatCurrency(num) {
+if (num === null || num === undefined) return '—';
+return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
+}
+
+function showLendPaperToast() {
+let toast = document.getElementById('lp-toast');
+if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'lp-toast';
+    toast.textContent = 'Copied!';
+    toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#14532D;color:#fff;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;opacity:0;transition:opacity 150ms;pointer-events:none;z-index:9999;';
+    document.body.appendChild(toast);
+}
+toast.style.opacity = '1';
+setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+}
+
+function handleLendPaperPrint() {
+window.print();
+}
+
+let colCounter = 0;
+const WSJ_PRIME = 6.75;
+let showAdv = false;
+
+// --- Tooltip Logic ---
+const tt = document.getElementById('tt');
+function bindTips() {
+document.querySelectorAll('.tooltip-icon').forEach(el => {
+el.addEventListener('mouseenter', e => { tt.textContent = e.target.dataset.tip; tt.classList.add('show'); });
+el.addEventListener('mousemove', e => {
+  const m = 12; let x = e.clientX + m, y = e.clientY + m;
+  if (x + tt.offsetWidth > window.innerWidth) x = e.clientX - tt.offsetWidth - m;
+  if (y + tt.offsetHeight > window.innerHeight) y = e.clientY - tt.offsetHeight - m;
+  tt.style.left = x + 'px'; tt.style.top = y + 'px';
+});
+el.addEventListener('mouseleave', () => tt.classList.remove('show'));
+});
+}
+
+function toggleAdvanced() {
+showAdv = !showAdv;
+document.querySelectorAll('.adv-row').forEach(row => row.classList.toggle('show', showAdv));
+document.querySelector('.adv-toggle-btn').textContent = showAdv ? "Hide Advanced Inputs" : "Show Advanced Inputs";
+}
+
+function runCalc(id) {
+const loanAmt = cleanNumericInput(document.querySelector(`.loan-input[data-col="${id}"]`).value);
+const pkgAmt = cleanNumericInput(document.querySelector(`.pkg-input[data-col="${id}"]`).value) || 0;
+const closeAmt = cleanNumericInput(document.querySelector(`.close-input[data-col="${id}"]`).value) || 0;
+const termYears = cleanNumericInput(document.querySelector(`.term-input[data-col="${id}"]`).value) || 10;
+const rateSpread = cleanNumericInput(document.querySelector(`.spread-input[data-col="${id}"]`).value) || 2.75;
+
+const pctCell = document.querySelector(`.pct-calc[data-col="${id}"]`);
+const sbaCell = document.querySelector(`.sba-calc[data-col="${id}"]`);
+const feeTotalCell = document.querySelector(`.fee-total-calc[data-col="${id}"]`);
+const interestCell = document.querySelector(`.interest-calc[data-col="${id}"]`);
+const lifeCostCell = document.querySelector(`.lifetime-calc[data-col="${id}"]`);
+const pmtCell = document.querySelector(`.hero-pmt[data-col="${id}"]`);
+
+if (loanAmt > 0) {
+  const guarPct = loanAmt <= 150000 ? 0.85 : 0.75;
+  pctCell.textContent = (guarPct * 100) + '%';
+  const guarAmt = loanAmt * guarPct;
+  let sbaFee = loanAmt <= 150000 ? guarAmt * 0.02 : loanAmt <= 700000 ? guarAmt * 0.03 : Math.min(guarAmt, 1000000) * 0.035 + Math.max(0, guarAmt - 1000000) * 0.0375;
+  sbaCell.textContent = formatCurrency(sbaFee);
+  const totalFees = sbaFee + pkgAmt + closeAmt;
+  feeTotalCell.textContent = formatCurrency(totalFees);
+
+  const monthlyRate = (WSJ_PRIME + rateSpread) / 100 / 12;
+  const totalMonths = termYears * 12;
+  const pmt = loanAmt * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1);
+  const totalPayback = pmt * totalMonths;
+
+  pmtCell.textContent = formatCurrency(pmt);
+  interestCell.textContent = formatCurrency(totalPayback - loanAmt);
+  lifeCostCell.textContent = formatCurrency(totalPayback);
+} else {
+  [pctCell, sbaCell, feeTotalCell, interestCell, lifeCostCell].forEach(c => c.textContent = '—');
+  pmtCell.textContent = '$0';
+}
+}
+
+function addScenario(vals = {}) {
+colCounter++; const id = 'c' + colCounter;
+const name = vals.name || `Scenario ${colCounter}`;
+
+// Header
+const th = document.createElement('th'); th.setAttribute('data-col', id);
+th.innerHTML = `<div class="scenario-header-wrap"><input type="text" class="scenario-name-input" value="${name}"><button class="delete-btn" onclick="deleteScenario('${id}')">×</button></div>`;
+document.getElementById('row-headers').appendChild(th);
+
+// Rows
+const createCell = (rowId, html) => {
+  const td = document.createElement('td'); td.setAttribute('data-col', id); td.innerHTML = html;
+  document.getElementById(rowId).appendChild(td);
+};
+
+createCell('row-loan', `<div class="input-wrap"><div class="input-prefix">$</div><input type="number" class="input-field loan-input" data-col="${id}" value="${vals.loan || ''}" oninput="runCalc('${id}')"></div>`);
+createCell('row-pct', `<span class="val-calc pct-calc" data-col="${id}">—</span>`);
+createCell('row-sba', `<span class="val-calc sba-calc" data-col="${id}">—</span>`);
+createCell('row-pkg', `<div class="input-wrap"><div class="input-prefix">$</div><input type="number" class="input-field pkg-input" data-col="${id}" value="${vals.pkg || ''}" oninput="runCalc('${id}')"></div>`);
+createCell('row-close', `<div class="input-wrap"><div class="input-prefix">$</div><input type="number" class="input-field close-input" data-col="${id}" value="${vals.close || ''}" oninput="runCalc('${id}')"></div>`);
+createCell('row-fee-total', `<span class="val-calc fee-total-calc" data-col="${id}">—</span>`);
+createCell('row-pmt', `<span class="val-calc hero-pmt" data-col="${id}">$0</span>`);
+createCell('row-term', `<div class="input-wrap"><input type="number" class="input-field term-input" data-col="${id}" value="${vals.term || '10'}"><div class="input-suffix">Yrs</div></div>`);
+createCell('row-spread', `<div class="input-wrap"><input type="number" class="input-field spread-input" data-col="${id}" value="${vals.spread || '2.75'}"><div class="input-suffix">%</div></div>`);
+createCell('row-interest-cost', `<span class="val-calc interest-calc" data-col="${id}">—</span>`);
+createCell('row-lifetime-cost', `<span class="val-calc lifetime-calc" data-col="${id}">—</span>`);
+
+if(vals.loan) runCalc(id);
+}
+
+function deleteScenario(id) { document.querySelectorAll(`[data-col="${id}"]`).forEach(el => el.remove()); }
+
+function copyAllScenarios() {
+let text = "LendPaper SBA 7(a) Estimates\n\n";
+document.querySelectorAll('.scenario-name-input').forEach(input => {
+  const id = input.closest('th').getAttribute('data-col');
+  const loan = document.querySelector(`.loan-input[data-col="${id}"]`).value;
+  if (!loan) return;
+  text += `SCENARIO: ${input.value}\nLoan: ${formatCurrency(cleanNumericInput(loan))}\nFees: ${document.querySelector(`.fee-total-calc[data-col="${id}"]`).innerText}\nMonthly: ${document.querySelector(`.hero-pmt[data-col="${id}"]`).innerText}\n----------------\n`;
+});
+text += `\n${WATERMARK_FOOTER}`;
+navigator.clipboard.writeText(text).then(showLendPaperToast);
+}
+
+window.onload = () => {
+addScenario({ name: 'Scenario A' });
+bindTips();
+};</script>
+
+</body>
+</html>

@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSCR Calculator | LendPaper</title>
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICA8cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHJ4PSI1IiBmaWxsPSIjMTBCODgxIi8+CiAgPHBhdGggZD0iTTQgNHYxNmgxMWw1LTVWNEg0eiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNMTUgMjB2LTVoNSIgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNOSA5djYiICAgICAgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNOSAxNWg0IiAgICAgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KPC9zdmc+">
+
+<!-- Apple Touch Icon -->
+<link rel="apple-touch-icon" href="../public/assets/brand/apple-touch-icon-180x180.png">
+
+<!-- Manifest -->
+<link rel="manifest" href="../public/assets/brand/site.webmanifest">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --lp-green: #14532D;
+  --lp-green-light: #f0fdf4;
+  --lp-dark: #334243;
+  --lp-light: #f9fafb;
+  --lp-border: #e5e7eb;
+  --lp-text-muted: #64748b;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-500: #6b7280;
+  --gray-900: #111827;
+  
+  /* DSCR specific colors */
+  --pass-bg: #d1fae5; --pass-tx: #065f46;
+  --fail-bg: #fee2e2; --fail-tx: #991b1b;
+  --tax-pass: #579985;
+  --tax-pass-bg: rgba(87, 153, 133, 0.12);
+  --tax-dbl: #9b85b9;
+  --tax-dbl-bg: rgba(155, 133, 185, 0.12);
+  
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f1f5f9;
+  color: var(--lp-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal Header */
+.modal-header {
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid var(--lp-border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+.modal-logo { height: 22px; }
+.modal-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--lp-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.lp-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  flex-grow: 1;
+}
+
+.lp-container {
+  width: 100%;
+  max-width: 820px;
+  background: #ffffff;
+  border: 1px solid var(--lp-border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.lp-body {
+    padding: 24px;
+}
+
+.lp-definition {
+  font-size: 11px;
+  color: #64748b;
+  border-left: 3px solid var(--lp-green);
+  line-height: 1.6;
+  padding-left: 16px;
+  margin-bottom: 24px;
+}
+.lp-definition strong { color: var(--lp-dark); font-weight: 700; }
+
+/* -- Section card -- */
+.sc { background: #fff; border: 1px solid var(--lp-border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+.sc-hd { padding: 14px 16px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sc-num { width: 22px; height: 22px; border-radius: 50%; background: var(--lp-green); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sc-title { font-size: 13px; font-weight: 700; color: var(--lp-dark); flex: 1; }
+.sc-sub { font-size: 11px; color: var(--lp-text-muted); margin-left: 8px; font-weight: 400; }
+.sc-body { padding: 16px; }
+
+/* -- Entity Grid & Pills -- */
+.ent-toggle-bar { display: flex; gap: 4px; background: var(--gray-100); border: 1px solid var(--lp-border); border-radius: 8px; padding: 3px; width: max-content; margin: 0 0 16px 0; }
+.ent-toggle-btn { padding: 8px 12px; border: none; border-radius: 6px; background: transparent; color: var(--lp-text-muted); font-size: 11px; font-weight: 600; cursor: pointer; transition: all .12s; font-family: inherit; }
+.ent-toggle-btn.active { background: #fff; color: var(--lp-dark); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+.ent-grid-2x2 { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.ent-grid-2x2 > .ent-card { width: calc(50% - 5px); }
+.ent-grid-4x1 { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.ent-grid-4x1 > .ent-card { width: calc(25% - 7.5px); }
+
+.ent-card { border: 1px solid var(--lp-border); border-radius: 8px; padding: 12px; background: #fff; cursor: pointer; transition: all .15s; position: relative; text-align: left; font-family: inherit; display: flex; flex-direction: column; height: 100%; }
+.ent-card:hover { border-color: var(--lp-green); background: var(--lp-green-light); }
+.ent-card.active { border-color: var(--lp-green); background: var(--lp-green-light); box-shadow: 0 0 0 1px var(--lp-green); }
+.ent-card-dot { position: absolute; top: 12px; right: 12px; width: 8px; height: 8px; border-radius: 50%; }
+.ent-card-dot.pass { background: var(--tax-pass); }
+.ent-card-dot.dbl { background: var(--tax-dbl); }
+
+.ent-card-title { font-size: 14px; font-weight: 700; color: var(--lp-dark); margin-bottom: 2px; }
+.ent-card-sub { font-size: 11px; font-weight: 600; color: var(--lp-text-muted); margin-bottom: 6px; }
+.ent-card-note { font-size: 11px; color: var(--lp-text-muted); font-style: italic; margin-top: auto; padding-top: 6px; line-height: 1.4; }
+.dotted-hover { border-bottom: 1px dashed var(--lp-text-muted); cursor: help; }
+
+/* -- Dynamic Tax Treatment Box -- */
+.tax-treatment-box { display: none; padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 12px; line-height: 1.5; border: 1px solid; }
+.tax-treatment-box.show { display: block; }
+.tax-treatment-box.pass { background: var(--tax-pass-bg); border-color: var(--tax-pass); color: var(--lp-dark); }
+.tax-treatment-box.dbl { background: var(--tax-dbl-bg); border-color: var(--tax-dbl); color: var(--lp-dark); }
+.tax-treatment-box strong { font-size: 13px; display: block; margin-bottom: 2px; }
+
+/* -- Tax Docs Panel -- */
+.tax-docs-panel { border-top: 1px solid var(--lp-border); background: var(--gray-50); padding: 16px; display: none; }
+.tax-docs-panel.show { display: block; }
+.td-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; flex-wrap: wrap; }
+.td-field { display: flex; flex-direction: column; gap: 6px; }
+.td-label { font-size: 11px; font-weight: 700; color: var(--lp-text-muted); text-transform: uppercase; letter-spacing: 0.025em; }
+.td-select { padding: 8px 12px; border: 1px solid var(--lp-border); border-radius: 8px; font-size: 12px; font-family: inherit; outline: none; background: #fff; }
+.td-output { background: #fff; border: 1px solid var(--lp-border); border-left: 3px solid var(--lp-green); border-radius: 8px; padding: 12px; font-size: 12px; line-height: 1.5; color: var(--lp-dark); }
+.td-deadline { font-size: 11px; color: var(--lp-text-muted); margin-top: 8px; font-style: italic; }
+
+/* -- Step 2 Gating -- */
+.gated-section { position: relative; }
+.gated-section.is-locked .sc-body { opacity: 0.35; pointer-events: none; user-select: none; filter: grayscale(1); }
+.gated-overlay { display: none; position: absolute; top: 50px; left: 0; right: 0; bottom: 0; z-index: 10; align-items: center; justify-content: center; }
+.gated-section.is-locked .gated-overlay { display: flex; }
+.gated-msg { background: var(--lp-dark); color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+
+/* -- Form Reference Badges -- */
+.form-ref-badge { display: inline-block; background: var(--lp-green-light); border: 1px solid var(--lp-border); color: var(--lp-green); font-family: monospace; font-size: 11px; padding: 2px 8px; border-radius: 99px; }
+.helper-text { font-size: 11px; color: var(--lp-text-muted); font-weight: 400; display: block; margin-top: 4px; line-height: 1.4; }
+.pers-ref { font-size: 10px; color: var(--lp-green); font-weight: 600; display: block; margin-top: 2px; }
+
+/* -- Mode toggle -- */
+.mode-bar { display: flex; gap: 4px; padding: 4px; background: var(--gray-100); border: 1px solid var(--lp-border); border-radius: 10px; margin-bottom: 12px; }
+.mode-btn { flex: 1; padding: 10px 8px; border: none; border-radius: 8px; background: transparent; color: var(--lp-text-muted); font-size: 12px; font-weight: 800; cursor: pointer; transition: all .12s; text-align: center; font-family: inherit; line-height: 1.3; text-transform: uppercase; }
+.mode-btn.active { background: var(--lp-green); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.1); }
+.mode-sub { font-size: 10px; font-weight: 400; display: block; margin-top: 2px; opacity: .8; text-transform: none; }
+.mode-info { margin-top: 12px; padding: 12px; background: var(--gray-50); border-radius: 10px; font-size: 12px; color: var(--lp-text-muted); line-height: 1.6; border: 1px solid var(--lp-border); }
+.mode-info strong { color: var(--lp-dark); }
+
+/* -- Lender chips -- */
+.lc { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin: 0 2px; vertical-align: middle; text-transform: uppercase; }
+.lc-Bank-A { background: var(--lp-green); color: #fff; }
+.lc-sb { background: var(--lp-dark); color: #dcfce7; }
+.lc-gh { background: #dcfce7; color: var(--lp-dark); }
+
+/* -- Inputs -- */
+.inp-group { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
+.inp-label { font-size: 11px; font-weight: 700; color: var(--lp-dark); flex: 0 0 220px; padding-top: 8px; text-transform: uppercase; letter-spacing: 0.025em; }
+.inp-wrap { flex: 1; position: relative; }
+.inp-wrap .dollar { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; font-weight: 600; color: var(--lp-text-muted); }
+.inp { width: 100%; padding: 12px 12px 12px 28px; border: 2px solid var(--lp-border); border-radius: 8px; font-size: 16px; font-weight: 600; color: var(--lp-dark); background: #fff; font-family: inherit; outline: none; transition: all .2s; }
+.inp:focus { border-color: var(--lp-green); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--lp-green); }
+.inp-plain { padding-left: 14px; }
+
+/* -- Total bar -- */
+.tot-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-radius: 10px; margin-top: 12px; }
+.tot-primary { background: var(--lp-green); color: #fff; }
+.tot-secondary { background: var(--gray-100); border: 1px solid var(--lp-border); }
+.tot-muted { background: var(--gray-50); border: 1px solid var(--lp-border); }
+.tot-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+.tot-val { font-size: 16px; font-weight: 800; }
+
+/* -- Debt card -- */
+.debt-card { padding: 16px; border: 1px solid var(--lp-border); border-radius: 12px; margin-bottom: 12px; background: #fff; position: relative; transition: all .15s; }
+.debt-card.refi { border-color: var(--lp-green); background: var(--lp-green-light); }
+.debt-rm { position: absolute; top: 10px; right: 12px; background: none; border: none; color: var(--lp-text-muted); font-size: 20px; cursor: pointer; line-height: 1; }
+.debt-row { display: flex; gap: 12px; margin-bottom: 10px; }
+.refi-btn { width: 100%; padding: 10px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; transition: all .15s; font-family: inherit; text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.refi-btn.off { background: #fff; border: 2px solid var(--lp-border); color: var(--lp-text-muted); }
+.refi-btn.on { background: var(--lp-green); border: 2px solid var(--lp-green); color: #fff; }
+.refi-note { font-size: 11px; color: var(--lp-green); font-weight: 700; margin-top: 8px; text-align: center; }
+.add-btn { background: none; border: none; color: var(--lp-green); font-size: 12px; font-weight: 800; cursor: pointer; padding: 6px 0; font-family: inherit; text-transform: uppercase; letter-spacing: 0.05em; }
+.add-btn:hover { text-decoration: underline; }
+
+/* -- Owner Cards -- */
+.owner-card { border: 1px solid var(--lp-border); border-radius: 12px; padding: 16px; margin-bottom: 16px; background: #fff; }
+.owner-hd { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-100); padding-bottom: 12px; margin-bottom: 16px; }
+.owner-name { font-size: 16px; font-weight: 800; color: var(--lp-dark); border: none; outline: none; border-bottom: 2px dashed var(--lp-border); font-family: inherit; width: 60%; padding-bottom: 4px; background: transparent; }
+.owner-name:focus { border-bottom-color: var(--lp-green); }
+.owner-rm { background: none; border: none; color: var(--fail-tx); font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+
+/* -- Scenario card -- */
+.scen-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.scen-card { width: calc(50% - 6px); border: 2px solid var(--lp-border); border-radius: 16px; overflow: hidden; transition: all .15s; }
+@media (max-width: 640px) { .scen-card { width: 100%; } }
+.scen-card.refi-active { border-color: var(--lp-green); }
+.scen-hd { background: var(--gray-50); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--lp-border); }
+.scen-name { background: transparent; border: none; border-bottom: 1px dashed var(--lp-border); font-size: 14px; font-weight: 800; color: var(--lp-dark); width: 60%; outline: none; font-family: inherit; }
+.scen-name:focus { border-bottom-color: var(--lp-green); }
+.scen-rm { background: none; border: none; color: var(--lp-text-muted); font-size: 11px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+.scen-body { padding: 16px; }
+.scen-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.scen-field { flex: 1; }
+.scen-field label { display: block; font-size: 10px; font-weight: 800; color: var(--lp-text-muted); text-transform: uppercase; margin-bottom: 4px; }
+.scen-field input { width: 100%; padding: 8px 10px; border: 2px solid var(--lp-border); border-radius: 8px; font-size: 14px; font-weight: 600; font-family: inherit; outline: none; }
+.scen-field input:focus { border-color: var(--lp-green); }
+.scen-foot { padding: 16px; border-top: 1px solid var(--gray-100); background: var(--gray-50); }
+.scen-mp { display: flex; justify-content: space-between; font-size: 13px; color: var(--lp-dark); margin-bottom: 8px; }
+.scen-mp span:last-child { font-weight: 800; }
+.dscr-result { text-align: center; padding: 12px; background: #fff; border: 1px solid var(--lp-border); border-radius: 12px; margin-top: 8px; }
+.dscr-label { font-size: 10px; font-weight: 800; color: var(--lp-text-muted); text-transform: uppercase; margin-bottom: 4px; }
+.dscr-val { font-size: 28px; font-weight: 900; line-height: 1; }
+.dscr-pass { color: var(--pass-tx); }
+.dscr-fail { color: var(--fail-tx); }
+.dscr-min { font-size: 10px; color: var(--lp-text-muted); margin-top: 4px; font-weight: 600; }
+
+/* -- Summary -- */
+.sum-card { padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; gap: 12px; align-items: flex-start; border: 1px solid transparent; }
+.sum-pass { background: var(--lp-green-light); border-color: var(--lp-green); }
+.sum-fail { background: var(--fail-bg); border-color: var(--fail-tx); }
+.sum-text { font-size: 13px; color: var(--lp-dark); line-height: 1.6; flex: 1; }
+.sum-text strong { font-weight: 800; }
+
+/* -- Tooltips (LendPaper Style) -- */
+.tooltip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--gray-200);
+    color: var(--gray-500);
+    font-size: 9px;
+    font-weight: 800;
+    cursor: help;
+    margin-left: 4px;
+    font-family: 'Inter', sans-serif;
+    font-style: normal;
+}
+.tooltip-icon:hover { background: var(--lp-green); color: white; }
+
+#tt {
+    position: fixed;
+    z-index: 9999;
+    background: var(--gray-900);
+    color: white;
+    font-size: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    max-width: 250px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    font-weight: 400;
+}
+#tt.show { opacity: 1; }
+
+/* -- Section toggle -- */
+.sc-collapse { background: transparent; border: none; cursor: pointer; color: var(--lp-text-muted); font-size: 12px; padding: 4px; }
+
+/* -- Tab bar -- */
+.tab-bar { display: flex; gap: 4px; padding: 4px; background: var(--gray-100); border: 1px solid var(--lp-border); border-radius: 10px; margin-bottom: 16px; }
+.tab-btn { position: relative; flex: 1; padding: 10px 8px; border: none; border-radius: 8px; background: transparent; color: var(--lp-text-muted); font-size: 12px; font-weight: 800; cursor: pointer; transition: all .12s; text-align: center; text-transform: uppercase; font-family: inherit; }
+.tab-btn.active { background: var(--lp-dark); color: #fff; }
+.tab-req-dot { position: absolute; top: 8px; right: 12px; width: 6px; height: 6px; background: #ef4444; border-radius: 50%; }
+
+/* -- Threshold reference -- */
+.thresh-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fff; border: 1px solid var(--lp-border); border-radius: 12px; margin-bottom: 12px; }
+.thresh-label { font-size: 12px; color: var(--lp-text-muted); font-weight: 600; }
+.lender-ctx-btn { background: none; border: none; color: var(--lp-green); font-size: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* -- Add-backs reference -- */
+.addbacks-wrap { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--lp-border); }
+.addbacks-btn { background: none; border: none; color: var(--lp-green); font-size: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 4px; }
+.addbacks-content { display: none; margin-top: 12px; padding: 16px; background: var(--gray-50); border: 1px solid var(--lp-border); border-radius: 12px; font-size: 12px; color: var(--lp-dark); line-height: 1.6; }
+.addbacks-content.show { display: block; }
+
+/* -- Save / PDF section -- */
+.save-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.save-field { flex: 1; min-width: 140px; }
+.save-field label { display: block; font-size: 11px; font-weight: 800; color: var(--lp-text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.save-field input { width: 100%; padding: 12px; border: 2px solid var(--lp-border); border-radius: 8px; font-size: 14px; font-weight: 600; font-family: inherit; outline: none; }
+.save-field input:focus { border-color: var(--lp-green); }
+.pdf-btn { width: 100%; padding: 16px; background: var(--lp-green); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: all .2s; }
+.pdf-btn:hover { background: #166534; }
+.pdf-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* -- Lender Context modal -- */
+.lc-modal { display: none; position: fixed; inset: 0; background: rgba(51,66,67,0.6); z-index: 9998; align-items: center; justify-content: center; padding: 24px; }
+.lc-modal.open { display: flex; }
+.lc-modal-inner { background: #fff; border-radius: 16px; max-width: 500px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.2); overflow: hidden; }
+.lc-modal-hd { padding: 20px 24px; border-bottom: 1px solid var(--lp-border); display: flex; justify-content: space-between; align-items: center; }
+.lc-modal-title { font-size: 16px; font-weight: 800; color: var(--lp-dark); text-transform: uppercase; letter-spacing: 0.05em; }
+.lc-modal-body { padding: 24px; }
+
+/* -- Print Styles -- */
+.print-header { display: none; }
+.print-disclaimer { display: none; }
+
+@media print {
+    body { background: white !important; }
+    .modal-header, .pdf-btn, .pdf-hint, .sc-collapse, .add-btn, .debt-rm, .owner-rm, .scen-rm, .refi-btn, .addbacks-btn, .lender-ctx-btn, .tab-bar, .ent-toggle-bar, .lc-modal, .pdf-picker, .lp-disclaimer { display: none !important; }
+    .lp-main { padding: 0 !important; display: block !important; }
+    .lp-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; }
+    .lp-body { padding: 0 !important; }
+    .sc { border: 1px solid #d1d5db !important; break-inside: avoid; margin-bottom: 24px !important; }
+    .sc-body { display: block !important; }
+    .sc.collapsed .sc-body { display: block !important; }
+    .sc.pdf-hide { display: none !important; }
+    
+    .print-header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        margin-bottom: 40px !important;
+        border-bottom: 2px solid var(--lp-green) !important;
+        padding-bottom: 24px !important;
+    }
+    .print-logo { height: 64px !important; margin-bottom: 12px !important; }
+    .print-title { font-size: 20px !important; font-weight: 800 !important; text-transform: uppercase !important; color: var(--lp-dark) !important; letter-spacing: 0.05em; }
+    
+    .print-disclaimer {
+        display: block !important;
+        margin-top: 60px !important;
+        padding-top: 24px !important;
+        border-top: 1px solid var(--lp-border) !important;
+        font-size: 10px !important;
+        color: var(--lp-text-muted) !important;
+        text-align: center !important;
+        text-transform: uppercase !important;
+        line-height: 1.6 !important;
+        letter-spacing: 0.05em;
+    }
+    
+    .inp { border: none !important; padding-left: 18px !important; font-weight: 700 !important; }
+    .save-field input { border: none !important; padding: 0 !important; font-weight: 800 !important; }
+    .owner-name { border: none !important; }
+    .scen-name { border: none !important; }
+    .mode-bar { background: transparent !important; border: none !important; padding: 0 !important; }
+    .mode-btn:not(.active) { display: none !important; }
+    .mode-btn.active { background: transparent !important; color: var(--lp-dark) !important; text-align: left !important; font-size: 14px !important; padding: 0 !important; }
+}
+
+.lp-disclaimer {
+    font-size: 10px;
+    font-weight: 600;
+    text-align: center;
+    padding: 12px 24px 24px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+</style>
+</head>
+<body>
+
+<div id="tt"></div>
+
+<header class="modal-header">
+    <svg class="modal-logo" width="124" height="22" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
+      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+        <path d="M4 4v16h11l5-5V4H4z"/>
+        <path d="M15 20v-5h5"/>
+        <path d="M9 9v6"/>
+        <path d="M9 15h4"/>
+      </svg>
+      <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
+        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#10B981">.</tspan>
+      </text>
+    </svg>
+    <div class="modal-title">DSCR Calculator</div>
+</header>
+
+<div class="lp-main">
+    <div class="lp-container">
+        <!-- Print Header -->
+        <div class="print-header">
+            <svg class="print-logo" width="180" height="32" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
+              <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M4 4v16h11l5-5V4H4z"/>
+                <path d="M15 20v-5h5"/>
+                <path d="M9 9v6"/>
+                <path d="M9 15h4"/>
+              </svg>
+              <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
+                <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#10B981">.</tspan>
+              </text>
+            </svg>
+            <div class="print-title">DSCR Analysis</div>
+            <div style="margin-top:12px; font-size:12px; font-weight:600; color:var(--lp-text-muted);">
+                Business: <span class="pdfPrintBizNameOut"></span>
+            </div>
+        </div>
+
+        <div class="lp-body">
+            <div class="sc" data-sc-collapsible data-pdf-sec="entity">
+                <div class="sc-hd">
+                    <span class="sc-num">1</span>
+                    <span class="sc-title">Entity type & tax form<span class="sc-sub">Select the borrower's entity type</span></span>
+                    <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
+                </div>
+                <div class="sc-body">
+                    <div class="lp-definition">
+                        The <strong>Debt Service Coverage Ratio (DSCR)</strong> measures a business's ability to cover its debt obligations with its available cash flow, providing a critical indicator of loan serviceability.
+                    </div>
+                    
+                    <div class="ent-toggle-bar">
+                        <button class="ent-toggle-btn active" id="btnEntMode" onclick="setEntMode('entity')">By entity</button>
+                        <button class="ent-toggle-btn" id="btnFormMode" onclick="setEntMode('form')">By tax form</button>
+                    </div>
+                    <div id="entGrid" class="ent-grid-2x2"></div>
+                    <div id="taxTreatmentBox" class="tax-treatment-box"></div>
+                </div>
+
+                <div class="tax-docs-panel" id="taxDocsPanel">
+                    <div style="font-size:13px; font-weight:800; color:var(--lp-dark); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.05em;">Required Tax Docs</div>
+                    <div class="td-row">
+                        <div class="td-field">
+                            <label class="td-label">
+                                Expected SBA Submission
+                                <span class="tooltip-icon" data-tip="The date the Bank Partner submits the file to the SBA, not your internal submission date.">i</span>
+                            </label>
+                            <select class="td-select" id="tdScenario" onchange="updateTaxDocs()">
+                                <option value="today">Today</option>
+                                <option value="q1">Q1 (Jan - Mar)</option>
+                                <option value="q2pre">Q2 (Pre-May 1)</option>
+                                <option value="q2post">Q2 (Post-May 1)</option>
+                            </select>
+                        </div>
+                        <div class="td-field">
+                            <label class="td-label">Return Status</label>
+                            <select class="td-select" id="tdStatus" onchange="updateTaxDocs()">
+                                <option value="filed">Tax Return Filed</option>
+                                <option value="ext">Extension + Company-Prepared</option>
+                                <option value="prep">Company-Prepared Only</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="td-output" id="tdOutput">
+                        <strong>You'll need:</strong> <span id="tdDocsList">Select options above.</span>
+                        <div class="td-deadline" id="tdDeadline"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sc gated-section is-locked" id="step2Container" data-sc-collapsible data-pdf-sec="ebida">
+                <div class="gated-overlay">
+                    <div class="gated-msg">Select an entity type above to load form references</div>
+                </div>
+                <div class="sc-hd">
+                    <span class="sc-num">2</span>
+                    <span class="sc-title">EBIDA & financials
+                        <span class="tooltip-icon" data-tip="EBIDA = Earnings Before Interest, Depreciation & Amortization. Calculated as: Net Income + Interest + Depreciation + Amortization + Owner(s)' Comp.">i</span>
+                        <span class="sc-sub" id="ebidaFormHint"></span>
+                    </span>
+                    <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
+                </div>
+                <div class="sc-body">
+                    <div class="mode-bar" id="modeBar"></div>
+                    <div id="modeInfo"></div>
+
+                    <div class="tab-bar" id="finTabBar" style="display:none">
+                        <button class="tab-btn active" onclick="setFinTab('business')">Business</button>
+                        <button class="tab-btn" onclick="setFinTab('personal')" id="tabBtnPersonal">Personal</button>
+                        <button class="tab-btn" style="opacity:0.6; cursor:not-allowed;">Affiliate (Soon)</button>
+                    </div>
+
+                    <div id="bizSection" class="biz-section">
+                        <div id="ebidaInputs"></div>
+                        <div id="ebidaTotal"></div>
+
+                        <div class="addbacks-wrap">
+                            <button class="addbacks-btn" id="addbacksBtn" onclick="toggleAddbacks()">What are add-backs? <span style="font-size:10px; margin-left:4px;">▼</span></button>
+                            <div class="addbacks-content" id="addbacksContent">
+                                <strong>Add-backs</strong> are non-cash or discretionary expenses added back to net income to reflect true cash flow. Standard SBA add-backs:
+                                <ul style="margin: 8px 0 0 16px;">
+                                    <li>Interest - replaced by new loan</li>
+                                    <li>Depreciation & Amortization - non-cash</li>
+                                    <li>Owner(s)' Comp - discretionary</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--lp-border)">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
+                                <span style="font-size:13px; font-weight:800; color:var(--lp-dark); text-transform:uppercase; letter-spacing:0.05em;">Existing business debt</span>
+                                <button class="add-btn" onclick="addDebt()">+ Add debt</button>
+                            </div>
+                            <div id="debtList"></div>
+                            <div id="debtTotals"></div>
+                        </div>
+                    </div>
+
+                    <div class="personal-section" id="persSection" style="display:none">
+                        <div style="background:var(--lp-green-light); border-left:4px solid var(--lp-green); padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:12px;">
+                            <strong>SBA 20% Rule:</strong> Include combined income and obligations for every individual owning 20% or more.
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
+                            <span style="font-size:13px; font-weight:800; color:var(--lp-dark); text-transform:uppercase; letter-spacing:0.05em;">Guarantors</span>
+                            <button class="add-btn" onclick="addOwner()">+ Add owner</button>
+                        </div>
+                        <div id="ownersList"></div>
+                        <div id="persTotals"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sc" data-sc-collapsible data-pdf-sec="numbers">
+                <div class="sc-hd">
+                    <span class="sc-num">3</span>
+                    <span class="sc-title">Run your numbers<span class="sc-sub">Add loan scenarios to see results</span></span>
+                    <button class="add-btn" id="addScenBtn" onclick="addScenario()">+ Add scenario</button>
+                    <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
+                </div>
+                <div class="sc-body">
+                    <div id="refiNotice" style="display:none; margin-bottom:12px; padding:12px; background:var(--lp-green-light); border:1px solid var(--lp-green); border-radius:8px; font-size:12px; font-weight:600;"></div>
+                    <div class="scen-grid" id="scenGrid"></div>
+                    <div id="noScenMsg" style="font-size:13px; color:var(--lp-text-muted); font-style:italic; padding:16px 0; text-align:center;">Add a scenario above to see results.</div>
+                    <div id="sopBaseline" style="margin-top:20px;"></div>
+                    <div id="threshRef"></div>
+                    <div id="summaries" style="margin-top:16px"></div>
+                </div>
+            </div>
+
+            <div class="sc" data-sc-collapsible data-pdf-sec="save">
+                <div class="sc-hd">
+                    <span class="sc-num">4</span>
+                    <span class="sc-title">Save this analysis<span class="sc-sub">Download PDF for your records</span></span>
+                    <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
+                </div>
+                <div class="sc-body">
+                    <div class="save-row">
+                        <div class="save-field"><label>Business name</label><input type="text" id="pdfBizName" placeholder="e.g. Acme Plumbing" oninput="updPdfBtnState()"></div>
+                    </div>
+                    <button class="pdf-btn" id="pdfBtn" onclick="runPDF()" disabled>Save as PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print-only disclaimer -->
+        <div class="print-disclaimer">
+            DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+            <br><br>
+            Powered by LendPaper | lendpaper.com
+        </div>
+    </div>
+</div>
+
+<div class="lp-disclaimer">
+    DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+</div>
+
+<div class="lc-modal" id="lenderCtxModal" onclick="if(event.target===this)closeLenderCtx()">
+    <div class="lc-modal-inner">
+        <div class="lc-modal-hd">
+            <div class="lc-modal-title">Lender thresholds</div>
+            <button class="sc-collapse" onclick="closeLenderCtx()" style="font-size:24px;">&times;</button>
+        </div>
+        <div class="lc-modal-body">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div style="padding:12px; border:1px solid var(--lp-border); border-radius:12px;">
+                    <div class="lc lc-sb">Bank B</div>
+                    <div style="font-size:13px; margin-top:8px;">BDSCR <strong>&ge; 1.10x</strong></div>
+                </div>
+                <div style="padding:12px; border:1px solid var(--lp-border); border-radius:12px;">
+                    <div class="lc lc-gh">Category A</div>
+                    <div style="font-size:13px; margin-top:8px;">BDSCR <strong>&ge; 1.15x</strong></div>
+                </div>
+                <div style="padding:12px; border:1px solid var(--lp-border); border-radius:12px;">
+                    <div class="lc lc-Bank-A">Bank A</div>
+                    <div style="font-size:13px; margin-top:8px;">GDSCR <strong>&ge; 1.00x</strong> + BDSCR <strong>&ge; 1.10x</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var ENTITIES = [
+  {id:'sole', name:'Sole Prop', taxation:'pass', form:'1040 Schedule C', dot:'pass', llcText:'Includes Single-Member LLC (default)'},
+  {id:'partnership', name:'Partnership', taxation:'pass', form:'Form 1065', dot:'pass', llcText:'Includes Multi-Member LLC (default)'},
+  {id:'scorp', name:'S-Corp', taxation:'pass', form:'Form 1120-S', dot:'pass', llcText:'Includes LLC taxed as S-Corp'},
+  {id:'ccorp', name:'C-Corp', taxation:'double', form:'Form 1120', dot:'dbl', llcText:'Includes LLC taxed as C-Corp'}
+];
+var LINE_ITEMS = {
+  'Form 1120': {
+    netEarnings: { ref: '1120 · Line 30', helper: 'Taxable income before NOL / Special Deductions' },
+    interest: { ref: '1120 · Line 18', helper: '' },
+    depreciation: { ref: '1120 · Line 20', helper: '' },
+    amortization: { ref: '1120 · Stmt', helper: 'Back of return, under "Other Deductions"' },
+    ownersComp: { ref: '1120 · Line 12', helper: 'Combine all 20%+ owners (Comp. of officers)' }
+  },
+  'Form 1120-S': {
+    netEarnings: { ref: '1120-S · Line 21', helper: 'Ordinary business income (loss)' },
+    interest: { ref: '1120-S · Line 13', helper: '' },
+    depreciation: { ref: '1120-S · Line 14', helper: '' },
+    amortization: { ref: '1120-S · Stmt', helper: 'Back of return, under "Other Deductions"' },
+    ownersComp: { ref: '1120-S · Line 7', helper: 'Combine all 20%+ owners (Comp. of officers)' }
+  },
+  'Form 1065': {
+    netEarnings: { ref: '1065 · Line 22', helper: 'Ordinary business income (loss)' },
+    interest: { ref: '1065 · Line 15', helper: '' },
+    depreciation: { ref: '1065 · Line 16c', helper: '' },
+    amortization: { ref: '1065 · Stmt', helper: 'Back of return, under "Other Deductions"' },
+    ownersComp: { ref: '1065 · Line 10', helper: 'Combine all 20%+ owners (Guaranteed payments)' }
+  },
+  '1040 Schedule C': {
+    netEarnings: { ref: '1040 Sch C · Line 31', helper: 'Net profit or (loss)' },
+    interest: { ref: '1040 Sch C · Line 16', helper: 'Interest (mortgage + other)' },
+    depreciation: { ref: '1040 Sch C · Line 13', helper: '' },
+    amortization: { ref: '1040 Sch C · Stmt', helper: 'Back of return, under "Other Expenses"' },
+    ownersComp: { ref: 'N/A', helper: 'Not applicable for Sole Props' }
+  }
+};
+var PERS_LINE_ITEMS = {
+  w2: { ref: '1040 · Line 1z', helper: 'Total W-2 wages, salaries, tips' },
+  rental: { ref: '1040 Sch E · Line 26', helper: 'Total rental real estate/royalty income' },
+  other: { ref: '1040 Sch 1', helper: 'Additional income (K-1s, dividends, etc.)' }
+};
+var S = {
+  entity: null, mode: 'bdscr', finTab: 'business', guidanceOpen: false,
+  ebida: {netEarnings:0,interest:0,depreciation:0,amortization:0,ownersComp:0},
+  debts: [],
+  owners: [{id:101, name:'Owner 1', w2:0, rental:0, other:0, debts:[]}],
+  scenarios: [{id:1, name:'Requested', amount:0, term:10, rate:10}],
+  nextId: 200
+};
+function nid(){return ++S.nextId;}
+var fmt = function(v){return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0}).format(v);};
+function calcPmt(amt,rate,yrs){if(!amt||!yrs)return 0;if(!rate)return amt/(yrs*12);var r=rate/100/12,n=yrs*12;return(amt*r)/(1-Math.pow(1+r,-n));}
+
+function setEntMode(mode) {
+  document.getElementById('btnEntMode').className = 'ent-toggle-btn' + (mode === 'entity' ? ' active' : '');
+  document.getElementById('btnFormMode').className = 'ent-toggle-btn' + (mode === 'form' ? ' active' : '');
+  renderEntities(mode);
+}
+
+function renderEntities(mode = 'entity') {
+  var grid = document.getElementById('entGrid');
+  grid.className = mode === 'entity' ? 'ent-grid-2x2' : 'ent-grid-4x1';
+  var h = '';
+  ENTITIES.forEach(function(e) {
+    var isAct = S.entity === e.id ? ' active' : '';
+    h += '<button class="ent-card' + isAct + '" onclick="pickEntity(\'' + e.id + '\')">';
+    h += '<div class="ent-card-dot ' + e.dot + '"></div>';
+    h += '<div class="ent-card-title">' + (mode === 'entity' ? e.name : e.form) + '</div>';
+    h += '<div class="ent-card-sub">' + (mode === 'entity' ? e.form : e.name) + '</div>';
+    h += '<div class="ent-card-note">' + e.llcText + '</div>';
+    h += '</button>';
+  });
+  grid.innerHTML = h;
+  
+  var taxBox = document.getElementById('taxTreatmentBox');
+  if (S.entity) {
+    document.getElementById('step2Container').classList.remove('is-locked');
+    document.getElementById('taxDocsPanel').classList.add('show');
+    var ent = ENTITIES.find(x => x.id === S.entity);
+    taxBox.className = 'tax-treatment-box ' + (ent.taxation==='pass'?'pass':'dbl') + ' show';
+    taxBox.innerHTML = '<strong>' + (ent.taxation==='pass'?'Pass-through Taxation':'Double Taxation') + '</strong>' + (ent.taxation==='pass'?'Owner pays tax on their personal return.':'Corporation pays tax, then owner pays again on dividends.');
+    updateTaxDocs();
+  } else {
+    document.getElementById('step2Container').classList.add('is-locked');
+    document.getElementById('taxDocsPanel').classList.remove('show');
+    taxBox.className = 'tax-treatment-box';
+  }
+}
+
+function pickEntity(id) {
+  S.entity = (S.entity === id ? null : id);
+  renderEntities(document.getElementById('btnEntMode').classList.contains('active') ? 'entity' : 'form');
+  renderEbida();
+}
+
+function updateTaxDocs() {
+  if (!S.entity) return;
+  var scen = document.getElementById('tdScenario').value;
+  var stat = document.getElementById('tdStatus').value;
+  var e = ENTITIES.find(x => x.id === S.entity);
+  var out = "2 years most recent business tax returns (" + e.form + ")";
+  if (scen === 'q1') out += " + YTD P&L and Balance Sheet.";
+  if (scen.includes('q2')) out += " + YTD P&L, Balance Sheet, and previous year-end statements if unfiled.";
+  if (stat === 'ext') out += " Include Extension Form 7004 and company-prepared year-end statements.";
+  document.getElementById('tdDocsList').innerHTML = out;
+}
+
+function renderMode() {
+  var modes = [{key:'bdscr', label:'BDSCR', sub:'Business only'}, {key:'gdscr', label:'GDSCR', sub:'Global'}, {key:'both', label:'Both', sub:'Side by side'}];
+  var h = '';
+  modes.forEach(function(m) {
+    h += '<button class="mode-btn'+(S.mode === m.key ? ' active' : '')+'" onclick="setMode(\''+m.key+'\')">'+m.label+'<span class="mode-sub">'+m.sub+'</span></button>';
+  });
+  document.getElementById('modeBar').innerHTML = h;
+
+  var def = S.mode === 'bdscr' ? '<strong>Business DSCR</strong> measures whether operating income alone can cover new loan payments.' : (S.mode === 'gdscr' ? '<strong>Global DSCR</strong> combines business income with the owner\'s personal financials.' : 'Runs <strong>BDSCR</strong> and <strong>GDSCR</strong> side-by-side.');
+  document.getElementById('modeInfo').innerHTML = '<div class="mode-info">'+def+'</div>';
+
+  var showPers = S.mode !== 'bdscr';
+  document.getElementById('finTabBar').style.display = showPers ? 'flex' : 'none';
+  document.getElementById('persSection').style.display = (showPers && S.finTab === 'personal') ? 'block' : 'none';
+  document.getElementById('bizSection').style.display = (S.finTab === 'business' || !showPers) ? 'block' : 'none';
+  
+  if(!showPers && S.finTab !== 'business') S.finTab = 'business';
+  renderFinTabs();
+  renderEbida(); 
+}
+
+function setMode(m){ S.mode = m; renderMode(); renderScenarios(); renderSummaries(); }
+function setFinTab(t){ S.finTab = t; renderMode(); }
+function renderFinTabs(){
+  var btns = document.getElementById('finTabBar').querySelectorAll('.tab-btn');
+  if(btns.length >= 2){
+    btns[0].className = 'tab-btn' + (S.finTab === 'business' ? ' active' : '');
+    btns[1].className = 'tab-btn' + (S.finTab === 'personal' ? ' active' : '');
+    var showReq = (S.mode !== 'bdscr') && S.finTab !== 'personal';
+    btns[1].innerHTML = 'Personal' + (showReq ? '<span class="tab-req-dot"></span>' : '');
+  }
+}
+
+function renderEbida() {
+  var labels = {netEarnings:'Net Earnings', interest:'Interest', depreciation:'Depreciation', amortization:'Amortization', ownersComp:"Owner(s)' Comp"};
+  var keys = ['netEarnings','interest','depreciation','amortization','ownersComp'];
+  var e = S.entity ? ENTITIES.find(x => x.id === S.entity) : null;
+  var items = e ? LINE_ITEMS[e.form] : null;
+
+  var h = '';
+  keys.forEach(function(k) {
+    var ref = (items && items[k]) ? items[k].ref : 'N/A';
+    var helper = (items && items[k]) ? items[k].helper : '';
+    h += '<div class="inp-group"><div class="inp-label">' + labels[k] + '<div style="margin-top:4px"><span class="form-ref-badge">[' + ref + ']</span></div><span class="helper-text">' + helper + '</span></div>';
+    h += '<div class="inp-wrap"><span class="dollar">$</span><input class="inp" type="number" value="' + S.ebida[k] + '" oninput="updEbida(\''+k+'\',this.value)" '+(ref==='N/A'?'disabled style="background:#f3f4f6"':'')+'></div></div>';
+  });
+  document.getElementById('ebidaInputs').innerHTML = h;
+  updEbidaTotal();
+}
+
+function updEbida(k,v){ S.ebida[k] = parseFloat(v)||0; updEbidaTotal(); updScenarioDisplays(); renderSummaries(); }
+function updEbidaTotal(){
+  var total = Object.values(S.ebida).reduce((s,v)=>s+v,0);
+  document.getElementById('ebidaTotal').innerHTML = '<div class="tot-bar tot-primary"><span class="tot-label">Total EBIDA</span><span class="tot-val">'+fmt(total)+'</span></div>';
+}
+
+function renderDebts(){
+  var h = '';
+  S.debts.forEach(function(d){
+    h += '<div class="debt-card' + (d.refi?' refi':'') + '"><button class="debt-rm" onclick="rmDebt('+d.id+')">&times;</button>';
+    h += '<div class="debt-row"><div class="inp-wrap"><input class="inp inp-plain" type="text" placeholder="Creditor" value="'+(d.creditor||'')+'" oninput="updDebt('+d.id+',\'creditor\',this.value)"></div></div>';
+    h += '<div class="debt-row"><div class="inp-wrap"><span class="dollar">$</span><input class="inp" type="number" placeholder="Balance" value="'+d.balance+'" oninput="updDebt('+d.id+',\'balance\',this.value)"></div>';
+    h += '<div class="inp-wrap"><span class="dollar">$</span><input class="inp" type="number" placeholder="Mo. payment" value="'+d.mp+'" oninput="updDebt('+d.id+',\'mp\',this.value)"></div></div>';
+    h += '<button class="refi-btn '+(d.refi?'on':'off')+'" onclick="togRefi('+d.id+')">'+(d.refi?'Refinancing this debt':'Refinancing this debt?')+'</button></div>';
+  });
+  document.getElementById('debtList').innerHTML = h;
+  updDebtTotals();
+}
+
+function addDebt(){ S.debts.push({id:nid(), creditor:'', balance:0, mp:0, refi:false}); renderDebts(); renderScenarios(); }
+function rmDebt(id){ S.debts = S.debts.filter(d => d.id !== id); renderDebts(); renderScenarios(); }
+function updDebt(id,f,v){ S.debts.forEach(d => { if(d.id===id) d[f] = (f==='creditor'?v:parseFloat(v)||0); }); updDebtTotals(); updScenarioDisplays(); renderSummaries(); }
+function togRefi(id){ S.debts.forEach(d => { if(d.id===id) d.refi = !d.refi; }); renderDebts(); updScenarioDisplays(); renderSummaries(); }
+function updDebtTotals(){
+  var nonRefi = S.debts.filter(d => !d.refi).reduce((s,d)=>s+d.mp, 0) * 12;
+  document.getElementById('debtTotals').innerHTML = '<div class="tot-bar tot-muted"><span class="tot-label">Existing Annual Debt</span><span class="tot-val">'+fmt(nonRefi)+'</span></div>';
+}
+
+function renderOwners() {
+  var h = '';
+  S.owners.forEach(function(o) {
+    h += '<div class="owner-card"><div class="owner-hd"><input class="owner-name" value="'+o.name+'" oninput="updOwner('+o.id+',\'name\',this.value)">';
+    if(S.owners.length>1) h += '<button class="owner-rm" onclick="rmOwner('+o.id+')">Remove</button>';
+    h += '</div>';
+    ['w2','rental','other'].forEach(k => {
+      var it = PERS_LINE_ITEMS[k];
+      h += '<div class="inp-group"><div class="inp-label" style="flex:0 0 160px;">'+k.toUpperCase()+'<div style="margin-top:4px"><span class="form-ref-badge">['+it.ref+']</span></div></div>';
+      h += '<div class="inp-wrap"><span class="dollar">$</span><input class="inp" type="number" value="'+o[k]+'" oninput="updOwner('+o.id+',\''+k+'\',this.value)"></div></div>';
+    });
+    h += '<div style="display:flex; justify-content:space-between; margin-top:12px;"><span style="font-size:11px; font-weight:800; text-transform:uppercase;">Personal Debt</span><button class="add-btn" onclick="addOwnerDebt('+o.id+')">+ Add debt</button></div>';
+    o.debts.forEach(d => {
+        h += '<div class="debt-row" style="margin-top:8px;"><div class="inp-wrap"><input class="inp inp-plain" placeholder="Mortgage" value="'+(d.creditor||'')+'" oninput="updOwnerDebt('+o.id+','+d.id+',\'creditor\',this.value)"></div><div class="inp-wrap"><span class="dollar">$</span><input class="inp" type="number" value="'+d.mp+'" oninput="updOwnerDebt('+o.id+','+d.id+',\'mp\',this.value)"></div></div>';
+    });
+    h += '</div>';
+  });
+  document.getElementById('ownersList').innerHTML = h;
+  updPersTotals();
+}
+
+function addOwner(){ S.owners.push({id:nid(), name:'Owner '+ (S.owners.length+1), w2:0, rental:0, other:0, debts:[]}); renderOwners(); }
+function rmOwner(id){ S.owners = S.owners.filter(o => o.id !== id); renderOwners(); }
+function updOwner(id,f,v){ S.owners.forEach(o => { if(o.id===id) o[f] = (f==='name'?v:parseFloat(v)||0); }); updPersTotals(); updScenarioDisplays(); renderSummaries(); }
+function addOwnerDebt(oid){ S.owners.find(o => o.id===oid).debts.push({id:nid(), mp:0}); renderOwners(); }
+function updOwnerDebt(oid, did, f, v){ var d = S.owners.find(o => o.id===oid).debts.find(x => x.id===did); d[f] = (f==='creditor'?v:parseFloat(v)||0); updPersTotals(); updScenarioDisplays(); renderSummaries(); }
+
+function updPersTotals(){
+  var inc = S.owners.reduce((s,o)=>s+o.w2+o.rental+o.other, 0);
+  var debt = S.owners.reduce((s,o)=>s+o.debts.reduce((sd,d)=>sd+d.mp,0), 0) * 12;
+  document.getElementById('persTotals').innerHTML = '<div class="tot-bar tot-muted"><span class="tot-label">Combined Pers. Income</span><span class="tot-val">'+fmt(inc)+'</span></div>';
+}
+
+function getCalcData(){
+  var ebida = Object.values(S.ebida).reduce((s,v)=>s+v,0);
+  var pInc = S.owners.reduce((s,o)=>s+o.w2+o.rental+o.other, 0);
+  var pDebt = S.owners.reduce((s,o)=>s+o.debts.reduce((sd,d)=>sd+d.mp,0), 0) * 12;
+  var bDebt = S.debts.filter(d => !d.refi).reduce((s,d)=>s+d.mp,0) * 12;
+  return {ebida:ebida, global:ebida+pInc, bObl:bDebt, gObl:bDebt+pDebt, refi: S.debts.filter(d => d.refi).reduce((s,d)=>s+d.mp,0)*12};
+}
+
+function renderScenarios(){
+  var cd = getCalcData();
+  var rn = document.getElementById('refiNotice');
+  rn.style.display = cd.refi > 0 ? 'block' : 'none';
+  rn.innerHTML = 'Refinancing active: ' + fmt(cd.refi) + '/yr excluded from calculation.';
+  
+  var h = '';
+  S.scenarios.forEach(function(sc){
+    var mp = calcPmt(sc.amount, sc.rate, sc.term);
+    var db = (mp*12+cd.bObl)>0 ? cd.ebida/(mp*12+cd.bObl) : 0;
+    var dg = (mp*12+cd.gObl)>0 ? cd.global/(mp*12+cd.gObl) : 0;
+    
+    h += '<div class="scen-card" data-scen-id="'+sc.id+'"><div class="scen-hd"><input class="scen-name" value="'+sc.name+'" oninput="updScen('+sc.id+',\'name\',this.value)"><button class="scen-rm" onclick="rmScen('+sc.id+')">&times;</button></div>';
+    h += '<div class="scen-body"><div class="scen-row"><div class="scen-field"><label>Amount ($)</label><input type="number" value="'+sc.amount+'" oninput="updScen('+sc.id+',\'amount\',this.value)"></div></div>';
+    h += '<div class="scen-row"><div class="scen-field"><label>Term (yrs)</label><input type="number" value="'+sc.term+'" oninput="updScen('+sc.id+',\'term\',this.value)"></div><div class="scen-field"><label>Rate (%)</label><input type="number" step="0.1" value="'+sc.rate+'" oninput="updScen('+sc.id+',\'rate\',this.value)"></div></div></div>';
+    h += '<div class="scen-foot"><div class="scen-mp"><span>Payment:</span><span>'+fmt(mp)+'/mo</span></div>';
+    if(S.mode==='both' || S.mode==='bdscr') h += '<div class="dscr-result"><div class="dscr-label">BDSCR</div><div class="dscr-val '+(db>=1.15?'dscr-pass':'dscr-fail')+'">'+db.toFixed(2)+'</div><div class="dscr-min">min 1.15x</div></div>';
+    if(S.mode==='both' || S.mode==='gdscr') h += '<div class="dscr-result"><div class="dscr-label">GDSCR</div><div class="dscr-val '+(dg>=1.0?'dscr-pass':'dscr-fail')+'">'+dg.toFixed(2)+'</div><div class="dscr-min">min 1.00x</div></div>';
+    h += '</div></div>';
+  });
+  document.getElementById('scenGrid').innerHTML = h;
+  document.getElementById('noScenMsg').style.display = S.scenarios.length ? 'none' : 'block';
+}
+
+function addScenario(){ S.scenarios.push({id:nid(), name:'Scenario '+(S.scenarios.length+1), amount:0, term:10, rate:10}); renderScenarios(); }
+function rmScen(id){ S.scenarios = S.scenarios.filter(s => s.id !== id); renderScenarios(); }
+function updScen(id,f,v){ S.scenarios.forEach(s => { if(s.id===id) s[f] = (f==='name'?v:parseFloat(v)||0); }); updScenarioDisplays(); renderSummaries(); }
+
+function updScenarioDisplays(){ renderScenarios(); }
+
+function renderSummaries(){
+  var cd = getCalcData();
+  var h = '';
+  S.scenarios.forEach(function(sc){
+    var mp = calcPmt(sc.amount, sc.rate, sc.term);
+    var db = (mp*12+cd.bObl)>0 ? cd.ebida/(mp*12+cd.bObl) : 0;
+    var dg = (mp*12+cd.gObl)>0 ? cd.global/(mp*12+cd.gObl) : 0;
+    var pass = (S.mode==='bdscr'?db>=1.15:(S.mode==='gdscr'?dg>=1.0:(db>=1.15&&dg>=1.0)));
+    h += '<div class="sum-card '+(pass?'sum-pass':'sum-fail')+'"><div class="sum-text"><strong>'+sc.name+':</strong> '+ (S.mode==='both'?'BDSCR '+db.toFixed(2)+' & GDSCR '+dg.toFixed(2) : (S.mode==='gdscr'?'GDSCR '+dg.toFixed(2):'BDSCR '+db.toFixed(2))) + (pass?' - Likely to approve.':' - Below thresholds.') + '</div></div>';
+  });
+  document.getElementById('summaries').innerHTML = h;
+  document.getElementById('sopBaseline').innerHTML = '<div style="font-size:11px; color:var(--lp-text-muted); background:var(--gray-50); padding:12px; border-radius:10px; border:1px solid var(--lp-border);"><strong>SBA SOP Baseline:</strong> BDSCR min 1.15x for loans > $350k. GDSCR min 1.00x.</div>';
+}
+
+function toggleSc(btn){ var sc=btn.closest('.sc'); sc.classList.toggle('collapsed'); btn.innerHTML=sc.classList.contains('collapsed')?'&#9660;':'&#9650;'; }
+function toggleAddbacks(){ document.getElementById('addbacksContent').classList.toggle('show'); }
+function openLenderCtx(){ document.getElementById('lenderCtxModal').classList.add('open'); }
+function closeLenderCtx(){ document.getElementById('lenderCtxModal').classList.remove('open'); }
+
+function updPdfBtnState(){
+  var bn = document.getElementById('pdfBizName').value.trim();
+  document.getElementById('pdfBtn').disabled = !bn;
+}
+
+function runPDF(){
+  var biz = document.getElementById('pdfBizName').value.trim();
+  document.querySelectorAll('.pdfPrintBizNameOut').forEach(el => el.textContent = biz);
+  window.print();
+}
+
+// Tooltips
+const tt = document.getElementById('tt');
+document.querySelectorAll('.tooltip-icon').forEach(el => {
+    el.addEventListener('mouseenter', e => { tt.textContent = e.target.dataset.tip; tt.classList.add('show'); });
+    el.addEventListener('mousemove', e => { tt.style.left = (e.clientX + 12) + 'px'; tt.style.top = (e.clientY + 12) + 'px'; });
+    el.addEventListener('mouseleave', () => tt.classList.remove('show'));
+});
+
+// Init
+renderEntities(); renderMode(); renderEbida(); renderDebts(); renderOwners(); renderScenarios(); renderSummaries();
+</script>
+</body>
+</html>

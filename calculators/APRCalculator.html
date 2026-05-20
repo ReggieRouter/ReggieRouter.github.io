@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APR Calculator | LendPaper</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICA8cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHJ4PSI1IiBmaWxsPSIjMTBCODgxIi8+CiAgPHBhdGggZD0iTTQgNHYxNmgxMWw1LTVWNEg0eiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNMTUgMjB2LTVoNSIgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNOSA5djYiICAgICAgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNOSAxNWg0IiAgICAgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KPC9zdmc+">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="../public/assets/brand/apple-touch-icon-180x180.png">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="../public/assets/brand/site.webmanifest">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --lp-green: #14532D;
+            --lp-green-light: #f0fdf4;
+            --lp-dark: #334243;
+            --lp-light: #f9fafb;
+            --lp-border: #e5e7eb;
+            --lp-text-muted: #64748b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-500: #6b7280;
+            --gray-900: #111827;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f1f5f9;
+            color: var(--lp-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Standard Modal Header */
+        .modal-header {
+            height: 56px;
+            background: #fff;
+            border-bottom: 1px solid var(--lp-border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+        .modal-logo { height: 22px; }
+        .modal-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--lp-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .lp-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            flex-grow: 1;
+        }
+
+        .lp-container {
+            width: 100%;
+            max-width: 760px;
+            background: #ffffff;
+            border: 1px solid var(--lp-border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        @media (min-width: 768px) {
+            .lp-container {
+                flex-direction: row;
+            }
+        }
+
+        /* Left Panel: Inputs */
+        .lp-inputs {
+            flex: 1;
+            padding: 32px;
+            border-bottom: 1px solid var(--lp-border);
+            background: #fff;
+        }
+
+        .lp-definition {
+            font-size: 11px;
+            color: #64748b;
+            border-left: 3px solid #14532D;
+            line-height: 1.6;
+            padding-left: 16px;
+            margin-bottom: 24px;
+        }
+        .lp-definition strong { color: var(--lp-dark); font-weight: 700; }
+
+        @media (min-width: 768px) {
+            .lp-inputs {
+                border-bottom: none;
+                border-right: 1px solid var(--lp-border);
+            }
+        }
+
+        /* Mode Switcher */
+        .lp-switcher {
+            display: flex;
+            gap: 4px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+        }
+
+        .lp-switcher button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 800;
+            background: transparent;
+            color: var(--lp-text-muted);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-family: inherit;
+        }
+
+        .lp-switcher button.active {
+            background: var(--lp-green);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Form Groups */
+        .lp-group { margin-bottom: 24px; }
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--lp-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            margin-bottom: 8px;
+        }
+
+        /* Separated Prefix Pattern */
+        .input-wrap {
+            display: flex;
+            align-items: stretch;
+            border: 2px solid var(--lp-border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .input-wrap:focus-within {
+            border-color: var(--lp-green);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--lp-green);
+        }
+        .input-prefix, .input-suffix {
+            background: #f8fafc;
+            border-right: 1px solid var(--lp-border);
+            padding: 0 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--lp-text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .input-suffix { border-right: none; border-left: 1px solid var(--lp-border); }
+        .input-field {
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--lp-dark);
+            width: 100%;
+            outline: none;
+            font-family: inherit;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* OR Section */
+        .lp-or-section {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid var(--lp-border);
+            position: relative;
+        }
+        .lp-or-badge {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translate(-50%, -50%);
+            background: #ffffff;
+            border: 1px solid var(--lp-border);
+            padding: 4px 10px;
+            font-size: 10px;
+            font-weight: 900;
+            color: #94a3b8;
+            border-radius: 99px;
+            text-transform: uppercase;
+        }
+
+        /* Right Panel: Results */
+        .lp-results {
+            flex: 1.1;
+            padding: 32px;
+            background-color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-output { margin-bottom: 32px; }
+        .hero-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--lp-green);
+            text-transform: none;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .hero-value {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--lp-dark);
+            letter-spacing: -0.03em;
+        }
+
+        .lp-result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .lp-res-item { display: flex; flex-direction: column; gap: 4px; }
+        .lp-res-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--lp-text-muted);
+            text-transform: none;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+        }
+        .lp-res-val { font-size: 18px; font-weight: 700; color: var(--lp-dark); }
+        .lp-res-val.highlight { color: var(--lp-green); }
+
+        .lp-actions { display: flex; flex-direction: column; gap: 12px; }
+
+        .lp-copy-btn {
+            background-color: var(--lp-green);
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .lp-copy-btn:hover { background-color: #166534; }
+
+        .lp-print-btn {
+            background-color: transparent;
+            color: var(--lp-green);
+            padding: 14px;
+            border: 2px solid var(--lp-green);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .lp-print-btn:hover { background-color: rgba(20, 83, 45, 0.05); }
+
+        /* Tooltips */
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--gray-200);
+            color: var(--gray-500);
+            font-size: 9px;
+            font-weight: 800;
+            cursor: help;
+            margin-left: 4px;
+        }
+        .tooltip-icon:hover { background: var(--lp-green); color: white; }
+
+        #tt {
+            position: fixed;
+            z-index: 9999;
+            background: var(--gray-900);
+            color: white;
+            font-size: 12px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            max-width: 250px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            font-weight: 400;
+        }
+        #tt.show { opacity: 1; }
+
+        .lp-disclaimer {
+            font-size: 10px;
+            font-weight: 600;
+            text-align: center;
+            padding: 12px 24px 24px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .print-header { display: none; }
+        .print-disclaimer { display: none; }
+
+        @media print {
+            body { background: white !important; }
+            .modal-header, .lp-actions, .lp-inputs, .lp-disclaimer { display: none !important; }
+            .lp-main { padding: 0 !important; display: block !important; }
+            .lp-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; }
+            .lp-results { background: white !important; padding: 0 !important; }
+            
+            .print-header {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                margin-bottom: 40px !important;
+                border-bottom: 2px solid var(--lp-green) !important;
+                padding-bottom: 20px !important;
+            }
+            .print-logo { height: 64px !important; margin-bottom: 12px !important; }
+            .print-title { font-size: 18px !important; font-weight: 800 !important; text-transform: uppercase !important; color: var(--lp-dark) !important; }
+            
+            .print-disclaimer {
+                display: block !important;
+                margin-top: 60px !important;
+                padding-top: 20px !important;
+                border-top: 1px solid var(--lp-border) !important;
+                font-size: 10px !important;
+                color: #94a3b8 !important;
+                text-align: center !important;
+                text-transform: uppercase !important;
+                line-height: 1.5 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="tt"></div>
+
+<header class="modal-header">
+    <svg class="modal-logo" width="124" height="22" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
+      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+        <path d="M4 4v16h11l5-5V4H4z"/>
+        <path d="M15 20v-5h5"/>
+        <path d="M9 9v6"/>
+        <path d="M9 15h4"/>
+      </svg>
+      <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
+        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#10B981">.</tspan>
+      </text>
+    </svg>
+    <div class="modal-title">APR Calculator</div>
+</header>
+
+<div class="lp-main">
+    <div class="lp-container">
+        <!-- Print Header -->
+        <div class="print-header">
+            <svg class="print-logo" width="180" height="32" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
+              <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M4 4v16h11l5-5V4H4z"/>
+                <path d="M15 20v-5h5"/>
+                <path d="M9 9v6"/>
+                <path d="M9 15h4"/>
+              </svg>
+              <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
+                <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#10B981">.</tspan>
+              </text>
+            </svg>
+            <div class="print-title">APR Estimate</div>
+        </div>
+
+        <!-- Left Panel: Inputs -->
+        <div class="lp-inputs">
+            <div class="lp-definition">
+                See how much you are actually paying. The <strong>Annual Percentage Rate (APR)</strong> represents the total annualized cost of borrowing funds, expressed as a percentage, accounting for both interest and upfront fees.
+            </div>
+
+            <div class="lp-switcher">
+                <button onclick="setMode('daily')" id="btn-daily" class="active">Daily</button>
+                <button onclick="setMode('weekly')" id="btn-weekly">Weekly</button>
+                <button onclick="setMode('monthly')" id="btn-monthly">Monthly</button>
+            </div>
+
+            <div class="lp-group">
+                <label>Loan amount</label>
+                <div class="input-wrap">
+                    <div class="input-prefix">$</div>
+                    <input type="number" id="loanAmount" class="input-field" value="80000" oninput="updateFromLoan(); calculate()">
+                </div>
+            </div>
+
+            <div class="lp-group">
+                <label>Origination fee</label>
+                <div class="input-wrap">
+                    <input type="number" id="origFee" class="input-field" value="2.5" oninput="calculate()">
+                    <div class="input-suffix">%</div>
+                </div>
+            </div>
+
+            <div class="lp-group">
+                <label>Loan term</label>
+                <div class="input-wrap">
+                    <input type="number" id="termMonths" class="input-field" value="12" oninput="calculate()">
+                    <div class="input-suffix">Months</div>
+                </div>
+            </div>
+
+            <div class="lp-or-section">
+                <div class="lp-or-badge">OR</div>
+                <div class="lp-group">
+                    <label>Factor rate</label>
+                    <div class="input-wrap">
+                        <div class="input-prefix">$</div>
+                        <input type="number" id="factor" class="input-field" value="0.16" step="0.01" oninput="updateFromFactor(); calculate()">
+                    </div>
+                </div>
+                <div class="lp-group" style="margin-bottom: 0;">
+                    <label>Total repayment amount</label>
+                    <div class="input-wrap">
+                        <div class="input-prefix">$</div>
+                        <input type="number" id="totalRepayInput" class="input-field" value="92800" oninput="updateFromTotal(); calculate()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Results -->
+        <div class="lp-results">
+            <div class="hero-output">
+                <div class="hero-label">Estimated APR</div>
+                <div id="res-apr" class="hero-value">0.00%</div>
+            </div>
+
+            <div class="lp-result-grid">
+                <div class="lp-res-item">
+                    <div class="lp-res-label">Net disbursement <span class="tooltip-icon" data-tip="Total cash received after the origination fee is deducted.">i</span></div>
+                    <div id="res-disbursement" class="lp-res-val">$0</div>
+                </div>
+                <div class="lp-res-item">
+                    <div class="lp-res-label" id="label-period-payment">Daily payment</div>
+                    <div id="res-payment" class="lp-res-val">$0</div>
+                </div>
+                <div class="lp-res-item">
+                    <div class="lp-res-label">Average monthly</div>
+                    <div id="res-avg-monthly" class="lp-res-val">$0</div>
+                </div>
+                <div class="lp-res-item">
+                    <div class="lp-res-label">Cost of loan</div>
+                    <div id="res-cost" class="lp-res-val highlight">$0</div>
+                </div>
+            </div>
+
+            <div class="lp-actions">
+                <button class="lp-copy-btn" onclick="copyResults()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy
+                </button>
+                <button class="lp-print-btn" onclick="handleLendPaperPrint()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    Save PDF
+                </button>
+            </div>
+
+            <!-- Print-only disclaimer -->
+            <div class="print-disclaimer">
+                DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+                <br><br>
+                Powered by LendPaper | lendpaper.com
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="lp-disclaimer">
+    DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+</div>
+
+<script>
+    const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available";
+
+    function cleanNumericInput(value) {
+        if (value === null || value === undefined || value === '') return null;
+        const parsed = parseFloat(value.toString().replace(/,/g, ''));
+        return isNaN(parsed) || !isFinite(parsed) ? null : parsed;
+    }
+
+    function formatCurrency(num) {
+        if (num === null || num === undefined) return '—';
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
+    }
+
+    function formatPercent(num, decimals = 2) {
+        if (num === null || num === undefined || isNaN(num)) return '—%';
+        return num.toFixed(decimals) + '%';
+    }
+
+    function showLendPaperToast() {
+        let toast = document.getElementById('lp-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'lp-toast';
+            toast.textContent = 'Copied!';
+            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#14532D;color:#fff;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;opacity:0;transition:opacity 150ms;pointer-events:none;z-index:9999;';
+            document.body.appendChild(toast);
+        }
+        toast.style.opacity = '1';
+        setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+    }
+
+    function handleLendPaperPrint() {
+        window.print();
+    }
+
+    let currentMode = 'daily';
+
+    // --- Tooltip Logic ---
+    const tt = document.getElementById('tt');
+    document.querySelectorAll('.tooltip-icon').forEach(el => {
+        el.addEventListener('mouseenter', e => {
+            tt.textContent = e.target.dataset.tip;
+            tt.classList.add('show');
+        });
+        el.addEventListener('mousemove', e => {
+            const m = 12;
+            let x = e.clientX + m;
+            let y = e.clientY + m;
+            if (x + tt.offsetWidth > window.innerWidth) x = e.clientX - tt.offsetWidth - m;
+            if (y + tt.offsetHeight > window.innerHeight) y = e.clientY - tt.offsetHeight - m;
+            tt.style.left = x + 'px';
+            tt.style.top = y + 'px';
+        });
+        el.addEventListener('mouseleave', () => tt.classList.remove('show'));
+    });
+
+    function updateFromLoan() {
+        const loan = cleanNumericInput(document.getElementById('loanAmount').value);
+        const factor = cleanNumericInput(document.getElementById('factor').value);
+        if (loan !== null && factor !== null) {
+            document.getElementById('totalRepayInput').value = Math.round(loan + (loan * factor));
+        }
+    }
+
+    function updateFromFactor() {
+        const loan = cleanNumericInput(document.getElementById('loanAmount').value);
+        const factor = cleanNumericInput(document.getElementById('factor').value);
+        if (loan !== null && factor !== null) {
+            document.getElementById('totalRepayInput').value = Math.round(loan + (loan * factor));
+        }
+    }
+
+    function updateFromTotal() {
+        const loan = cleanNumericInput(document.getElementById('loanAmount').value);
+        const total = cleanNumericInput(document.getElementById('totalRepayInput').value);
+        if (loan !== null && total !== null && loan > 0) {
+            document.getElementById('factor').value = ((total - loan) / loan).toFixed(2);
+        }
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        ['daily', 'weekly', 'monthly'].forEach(m => {
+            const btn = document.getElementById('btn-' + m);
+            if (m === mode) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        document.getElementById('label-period-payment').textContent = mode.charAt(0).toUpperCase() + mode.slice(1) + " payment";
+        calculate();
+    }
+
+    function deriveRate(nper, pmt, pv) {
+        if (pmt <= 0 || pv <= 0 || nper <= 0) return 0;
+        let r = 0.1 / (currentMode === 'daily' ? 252 : currentMode === 'weekly' ? 52 : 12);
+        for (let i = 0; i < 100; i++) {
+            let x = Math.pow(1 + r, nper);
+            let f = (pmt * (1 - 1/x) / r) - pv;
+            let df = pmt * ( (1/x * (nper*r/(1+r) + (1 - 1/x))) / (r*r) );
+            if (Math.abs(f) < 1e-8) break;
+            r = r + f/df;
+        }
+        return r;
+    }
+
+    function calculate() {
+        const loan = cleanNumericInput(document.getElementById('loanAmount').value);
+        const feePercent = cleanNumericInput(document.getElementById('origFee').value);
+        const months = cleanNumericInput(document.getElementById('termMonths').value);
+        const totalRepayment = cleanNumericInput(document.getElementById('totalRepayInput').value);
+        
+        if (loan === null || months === null || totalRepayment === null || loan <= 0 || months <= 0) {
+            ['res-disbursement', 'res-payment', 'res-avg-monthly', 'res-cost', 'res-apr'].forEach(id => {
+                document.getElementById(id).innerText = "—";
+            });
+            return;
+        }
+
+        const disbursement = loan - (loan * ((feePercent || 0) / 100));
+        const costOfLoan = totalRepayment - disbursement;
+        let pYear = (currentMode === 'daily' ? 252 : currentMode === 'weekly' ? 52 : 12);
+        const totalPeriods = (months / 12) * pYear;
+        const periodPayment = totalRepayment / totalPeriods;
+        const avgMonthly = totalRepayment / months;
+        const ratePerPeriod = deriveRate(totalPeriods, periodPayment, disbursement);
+        const apr = ratePerPeriod * pYear * 100;
+
+        document.getElementById('res-disbursement').innerText = formatCurrency(disbursement);
+        document.getElementById('res-payment').innerText = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(periodPayment);
+        document.getElementById('res-avg-monthly').innerText = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(avgMonthly);
+        document.getElementById('res-cost').innerText = formatCurrency(costOfLoan);
+        document.getElementById('res-apr').innerText = formatPercent(apr);
+    }
+
+    function copyResults() {
+        const loan = document.getElementById('loanAmount').value;
+        const apr = document.getElementById('res-apr').innerText;
+        const cost = document.getElementById('res-cost').innerText;
+        const payout = document.getElementById('res-disbursement').innerText;
+
+        const dataPairs = {
+            "Loan amount": formatCurrency(cleanNumericInput(loan)),
+            "Estimated APR": apr,
+            "Total cost": cost,
+            "Net disbursement": payout,
+            "Term": document.getElementById('termMonths').value + " Months"
+        };
+
+        const borderLine = "─────────────────────────────";
+        let payload = `[APR Calculator] — LendPaper\n${borderLine}\n`;
+        Object.entries(dataPairs).forEach(([label, value]) => {
+            payload += `${label.padEnd(20)}: ${value}\n`;
+        });
+        payload += `${borderLine}\n${WATERMARK_FOOTER}`;
+
+        navigator.clipboard.writeText(payload).then(showLendPaperToast);
+    }
+
+    setMode('daily');
+</script>
+
+</body>
+</html>
