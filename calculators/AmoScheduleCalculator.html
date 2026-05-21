@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" href="../public/assets/brand/apple-touch-icon-180x180.png">
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
     <script src="../public/assets/js/calculator-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Typography & Core Variables */
         :root {
@@ -114,6 +115,10 @@
             align-items: center;
             flex-grow: 1;
             padding: 40px 24px;
+        }
+        @media (max-width: 640px) {
+            main { padding: 16px 12px; }
+            .lp-howto { padding: 16px; margin-bottom: 24px; }
         }
         .cards-container {
             display: flex;
@@ -240,7 +245,8 @@
 
         /* Embedded state adjustments */
         body.is-embedded { background-color: transparent; }
-        body.is-embedded main { padding: 0; }
+        body.is-embedded main { padding: 0; align-items: center; justify-content: center; }
+        body.is-embedded header, body.is-embedded .modal-header { display: none !important; }
         body.is-embedded .modal-shell { box-shadow: none; border: none; border-radius: 0; }
         body.is-embedded .remove-card-btn { display: none !important; }
 
@@ -250,8 +256,8 @@
 
         /* Print Export Standards */
         .print-header-content { display: none; }
-        .print-footer-legal { display: none; }
-        .print-watermark { display: none; }
+        .print-footer-legal, .print-watermark { display: none; }
+
         @media print {
             body { background: white !important; }
             .no-print, header, .action-buttons, .tooltiptext, .lp-howto, .remove-card-btn { display: none !important; }
@@ -262,6 +268,23 @@
             .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
             .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
         }
+
+        /* Direct PDF Export Styles */
+        body.pdf-export-mode { background: white !important; }
+        body.pdf-export-mode .no-print, 
+        body.pdf-export-mode header, 
+        body.pdf-export-mode .action-buttons, 
+        body.pdf-export-mode .tooltiptext, 
+        body.pdf-export-mode .lp-howto, 
+        body.pdf-export-mode .remove-card-btn { display: none !important; }
+        body.pdf-export-mode .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
+        body.pdf-export-mode .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
+        body.pdf-export-mode .print-header-content h1 { display: none !important; }
+
+        body.pdf-export-mode main { padding: 0 !important; display: block !important; max-width: 1000px !important; margin: 0 auto !important; }
+        body.pdf-export-mode .modal-shell { box-shadow: none !important; border: none !important; max-width: 100% !important; margin: 0 auto !important; break-inside: avoid; }
+        body.pdf-export-mode .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
+        body.pdf-export-mode .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
     </style>
 </head>
 <body>
@@ -271,6 +294,10 @@
         <div class="print-header-content">
             <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
             <h1>Payment Breakdown Report</h1>
+        </div>
+
+        <div class="flex justify-center mb-8 no-print">
+            <button onclick="addCard()" class="lp-pill-btn h-[40px] px-6">+ Compare Scenarios</button>
         </div>
         
         <div id="cardsContainer" class="cards-container">
@@ -288,11 +315,37 @@
         THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
     </div>
     <div class="print-watermark">
-        Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available
+        Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom brand | bespoke tooling available
     </div>
 
     <script>
-        const fmtUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom brand | bespoke tooling available";
+        
+        async function handleLendPaperSavePDF() {
+            const btn = event.currentTarget;
+            const origText = btn.innerHTML;
+            btn.innerHTML = "Generating...";
+            btn.disabled = true;
+
+            document.body.classList.add('pdf-export-mode');
+            
+            const element = document.querySelector('main');
+            const opt = {
+                margin: [10, 10],
+                filename: 'LendPaper-Payment-Breakdown.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, logging: false, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+            };
+
+            try {
+                await html2pdf().set(opt).from(element).save();
+            } finally {
+                document.body.classList.remove('pdf-export-mode');
+                btn.innerHTML = origText;
+                btn.disabled = false;
+            }
+        }
         
         const holidays = [
             "2024-01-01", "2024-01-15", "2024-02-19", "2024-05-27", "2024-06-19", "2024-07-04", "2024-09-02", "2024-10-14", "2024-11-11", "2024-11-28", "2024-12-25",
@@ -396,19 +449,16 @@
             const cardHTML = `
             <div class="modal-shell w-full max-w-[1000px] bg-white rounded-[20px] shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col relative no-break-inside" id="cardContainer-${id}">
                 
-                <div class="h-[70px] px-[24px] flex items-center justify-between border-b border-[#E5E7EB] bg-white shrink-0">
-                    <div class="text-[20px] leading-none tracking-tight">
-                        <span class="font-[800] text-[#111827]">lend</span><span class="font-[300] text-[#6B7280]">paper</span><span class="text-[#14532D]">.</span>
-                    </div>
-                    <div class="flex flex-col items-center text-center" id="header-center-${id}"></div>
-                    <div class="flex items-center gap-3">
-                        <button onclick="addCard()" class="lp-pill-btn h-[32px] no-print">+ Compare Scenarios</button>
+                <div class="h-[64px] px-[24px] flex items-center justify-between border-b border-[#E5E7EB] bg-white shrink-0 relative">
+                    <div id="badge-container-${id}" class="z-10"></div>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none" id="header-center-${id}"></div>
+                    <div class="flex items-center z-10">
                         <button onclick="removeCard(${id})" class="remove-card-btn w-[32px] h-[32px] rounded-full hover:bg-slate-50 flex items-center justify-center text-[#6B7280] text-[20px] leading-none no-print transition-colors hover:text-[#EF4444]">&times;</button>
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row">
-                    <div class="w-full md:w-[50%] p-[32px] flex flex-col relative">
+                    <div class="w-full md:w-[50%] p-[20px] sm:p-[32px] flex flex-col relative">
                         <div class="lp-howto">
                             Enter the loan amount, rate, and term. You'll see the exact <strong>payment schedule</strong> — and what to tell your borrower about total cost and prepayment savings.
                         </div>
@@ -499,7 +549,7 @@
                         </div>
                     </div>
 
-                    <div class="w-full md:w-[50%] p-[32px] flex flex-col results-col">
+                    <div class="w-full md:w-[50%] p-[20px] sm:p-[32px] flex flex-col results-col">
                         <div>
                             <div class="mb-6 pb-6 border-b border-[#E5E7EB]">
                                 <div class="text-[11px] text-[#64748B] font-bold uppercase tracking-wider mb-2" id="lblPmt-${id}">Est. payment</div>
@@ -572,7 +622,7 @@
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                 Copy Results
                             </button>
-                            <button onclick="window.print()" class="lp-print-btn no-print">
+                            <button onclick="handleLendPaperSavePDF()" class="lp-print-btn no-print">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                                 Save as PDF
                             </button>
@@ -702,9 +752,9 @@
             document.getElementById(`outBuyout-${id}`).innerText = fmtUsd.format(savedBuyout);
 
             // Talking point
-            let takeaway = `Your borrower pays <strong>${fmtUsd.format(pmt)} per ${freqName}</strong> over ${term} months, repaying <strong>${fmtUsd.format(payback)} total</strong>.`;
+            let takeaway = `You pay <strong>${fmtUsd.format(pmt)} per ${freqName}</strong> over ${term} months, repaying <strong>${fmtUsd.format(payback)} total</strong>.`;
             if (isPrepayEnabled && savedSavings > 0) {
-                takeaway += ` Paying off early could save up to <strong>${fmtUsd.format(savedSavings)}</strong> in interest.`;
+                takeaway += ` Paying off early could save you up to <strong>${fmtUsd.format(savedSavings)}</strong> in interest.`;
             }
             document.getElementById(`takeaway-content-${id}`).innerHTML = takeaway;
             

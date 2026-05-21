@@ -19,6 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
 <script src="../public/assets/js/calculator-app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 :root {
@@ -111,6 +112,14 @@
 /* -- Inputs -- */
 .inp-group { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
 .inp-label { font-size: 11px; font-weight: 700; color: var(--lp-dark); flex: 0 0 220px; padding-top: 8px; text-transform: uppercase; letter-spacing: 0.025em; }
+@media (max-width: 640px) {
+    .inp-group { flex-direction: column; gap: 4px; }
+    .inp-label { flex: 0 0 auto; padding-top: 0; margin-bottom: 4px; }
+    .lp-main { padding: 16px 12px; }
+    .sc-body { padding: 16px; }
+    .sc-hd { padding: 12px 16px; height: auto; min-height: 60px; flex-wrap: wrap; gap: 8px; }
+    .sc-title { font-size: 14px; }
+}
 .inp-wrap { flex: 1; position: relative; }
 .inp-wrap .dollar { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; font-weight: 600; color: var(--lp-text-muted); }
 .inp { width: 100%; padding: 12px 12px 12px 28px; border: 2px solid var(--lp-border); border-radius: 8px; font-size: 16px; font-weight: 600; color: var(--lp-dark); background: #fff; font-family: inherit; outline: none; transition: all .2s; }
@@ -276,6 +285,56 @@
     .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
     .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
 }
+
+/* Print-only elements hidden by default on screen */
+.print-header-content, .print-footer-legal, .print-watermark { display: none; }
+
+/* Direct PDF Export Styles - Rigorous Hiding */
+body.pdf-export-mode { background: white !important; }
+body.pdf-export-mode .no-print, 
+body.pdf-export-mode header, 
+body.pdf-export-mode .modal-header, 
+body.pdf-export-mode .pdf-btn, 
+body.pdf-export-mode .pdf-hint, 
+body.pdf-export-mode .sc-collapse, 
+body.pdf-export-mode .add-btn, 
+body.pdf-export-mode .debt-rm, 
+body.pdf-export-mode .owner-rm, 
+body.pdf-export-mode .scen-rm, 
+body.pdf-export-mode .refi-btn, 
+body.pdf-export-mode .addbacks-btn, 
+body.pdf-export-mode .lender-ctx-btn, 
+body.pdf-export-mode .tab-bar, 
+body.pdf-export-mode .ent-toggle-bar, 
+body.pdf-export-mode .lc-modal, 
+body.pdf-export-mode .pdf-picker, 
+body.pdf-export-mode .lp-disclaimer, 
+body.pdf-export-mode .tooltip-icon, 
+body.pdf-export-mode .lp-howto, 
+body.pdf-export-mode .gated-overlay { display: none !important; }
+
+body.pdf-export-mode .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
+body.pdf-export-mode .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
+body.pdf-export-mode .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
+
+body.pdf-export-mode .lp-main { padding: 0 !important; display: block !important; max-width: 800px !important; margin: 0 auto !important; }
+body.pdf-export-mode .lp-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; }
+body.pdf-export-mode .lp-body { padding: 0 !important; }
+body.pdf-export-mode .sc { border: none !important; border-bottom: 1px solid #e5e7eb !important; border-radius: 0 !important; margin-bottom: 24px !important; break-inside: avoid; }
+body.pdf-export-mode .sc-body { display: block !important; }
+body.pdf-export-mode .sc.collapsed .sc-body { display: block !important; }
+body.pdf-export-mode .sc.pdf-hide { display: none !important; }
+body.pdf-export-mode .gated-section.is-locked .sc-body { opacity: 1 !important; filter: none !important; }
+body.pdf-export-mode .inp { border: none !important; padding-left: 18px !important; font-weight: 700 !important; }
+body.pdf-export-mode .save-field input { border: none !important; padding: 0 !important; font-weight: 800 !important; }
+body.pdf-export-mode .owner-name { border: none !important; }
+body.pdf-export-mode .scen-name { border: none !important; }
+body.pdf-export-mode .mode-bar { background: transparent !important; border: none !important; padding: 0 !important; }
+body.pdf-export-mode .mode-btn:not(.active) { display: none !important; }
+body.pdf-export-mode .mode-btn.active { background: transparent !important; color: var(--lp-dark) !important; text-align: left !important; font-size: 14px !important; padding: 0 !important; }
+
+body.pdf-export-mode .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
+body.pdf-export-mode .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
 
 .lp-disclaimer {
     font-size: 10px;
@@ -463,7 +522,7 @@
             THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
         </div>
         <div class="print-watermark">
-            Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available
+            Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom brand | bespoke tooling available
         </div>
     </div>
 </div>
@@ -498,6 +557,7 @@
 </div>
 
 <script>
+const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom brand | bespoke tooling available";
 var ENTITIES = [
   {id:'sole', name:'Sole Prop', taxation:'pass', form:'1040 Schedule C', dot:'pass', llcText:'Includes Single-Member LLC (default)'},
   {id:'partnership', name:'Partnership', taxation:'pass', form:'Form 1065', dot:'pass', llcText:'Includes Multi-Member LLC (default)'},
@@ -778,10 +838,31 @@ function updPdfBtnState(){
   document.getElementById('pdfBtn').disabled = !bn;
 }
 
-function runPDF(){
-  var biz = document.getElementById('pdfBizName').value.trim();
-  document.querySelectorAll('.pdfPrintBizNameOut').forEach(el => el.textContent = biz);
-  window.print();
+async function runPDF() {
+    const biz = document.getElementById('pdfBizName').value.trim();
+    const btn = document.getElementById('pdfBtn');
+    const origText = btn.innerHTML;
+    btn.innerHTML = "Generating...";
+    btn.disabled = true;
+
+    document.body.classList.add('pdf-export-mode');
+    
+    const element = document.querySelector('.lp-main');
+    const opt = {
+        margin: [10, 10],
+        filename: `${biz || 'LendPaper'}-DSCR-Analysis.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, logging: false, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+    };
+
+    try {
+        await html2pdf().set(opt).from(element).save();
+    } finally {
+        document.body.classList.remove('pdf-export-mode');
+        btn.innerHTML = origText;
+        btn.disabled = false;
+    }
 }
 
 // Tooltips
@@ -799,5 +880,10 @@ if (window.self !== window.top) {
     document.body.classList.add('is-embedded');
 }
 </script>
+<style>
+    body.is-embedded { background: transparent; }
+    body.is-embedded .modal-header { display: none !important; }
+    body.is-embedded .lp-main { padding: 0; align-items: center; }
+</style>
 </body>
 </html>

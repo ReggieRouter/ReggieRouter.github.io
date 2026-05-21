@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
     <script src="../public/assets/js/calculator-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
@@ -40,6 +41,15 @@
             justify-content: center;
             padding: 40px 24px;
             flex-grow: 1;
+        }
+        @media (max-width: 640px) {
+            .lp-main { padding: 16px 12px; }
+            .lp-tab { padding: 16px 8px; font-size: 11px; }
+            .lp-tab-sub { font-size: 8px; }
+            .lp-inputs, .shared-strip, .lp-results { padding: 20px; }
+            .lp-howto { padding: 16px; margin-bottom: 24px; }
+            .hero-grid { gap: 16px; }
+            .hero-value { font-size: 24px; }
         }
 
         .lp-container {
@@ -305,7 +315,8 @@
 
         /* Embedded overrides */
         body.is-embedded { background: transparent; }
-        body.is-embedded .lp-main { padding: 0; }
+        body.is-embedded .modal-header { display: none !important; }
+        body.is-embedded .lp-main { padding: 0; align-items: center; }
         body.is-embedded .lp-container { border: none; box-shadow: none; border-radius: 0; max-width: 100%; }
 
         .panel { display: none; }
@@ -332,6 +343,33 @@
             .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
             .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
         }
+
+        /* Direct PDF Export Styles - Rigorous Hiding */
+        body.pdf-export-mode { background: white !important; }
+        body.pdf-export-mode .no-print, 
+        body.pdf-export-mode header, 
+        body.pdf-export-mode .modal-header, 
+        body.pdf-export-mode .lp-actions, 
+        body.pdf-export-mode .lp-pill-btn, 
+        body.pdf-export-mode .remove-card-btn, 
+        body.pdf-export-mode .lp-disclaimer, 
+        body.pdf-export-mode .tooltip-icon, 
+        body.pdf-export-mode .lp-howto, 
+        body.pdf-export-mode .lp-tab-sub, 
+        body.pdf-export-mode .shared-strip { display: none !important; }
+        
+        body.pdf-export-mode .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
+        body.pdf-export-mode .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
+        body.pdf-export-mode .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
+
+        body.pdf-export-mode .lp-main { display: block !important; max-width: 800px !important; margin: 0 auto !important; padding: 0 !important; width: 800px !important; }
+        body.pdf-export-mode .lp-container { width: 100% !important; max-width: 100% !important; border: none !important; box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; display: block !important; }
+        body.pdf-export-mode .lp-results { background: white !important; padding: 0 !important; display: block !important; width: 100% !important; }
+        body.pdf-export-mode .lp-inputs { display: none !important; }
+        body.pdf-export-mode .panel { display: block !important; width: 100% !important; }
+        
+        body.pdf-export-mode .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
+        body.pdf-export-mode .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
     </style>
 </head>
 <body>
@@ -412,7 +450,7 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                         Copy
                     </button>
-                    <button class="lp-print-btn" onclick="handlePrint('Net Requirement Estimate')">
+                    <button class="lp-print-btn" onclick="handleLendPaperSavePDF()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                         Save PDF
                     </button>
@@ -538,7 +576,7 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                         Copy
                     </button>
-                    <button class="lp-print-btn" onclick="handlePrint('Position / Stacking Risk Estimate')">
+                    <button class="lp-print-btn" onclick="handleLendPaperSavePDF()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                         Save PDF
                     </button>
@@ -549,7 +587,7 @@
 </div>
 
 <script>
-    const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available";
+    const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom brand | bespoke tooling available";
 
     const BUSINESS_DAYS_PER_MONTH = 21.67;
     const WEEKS_PER_MONTH = 4.33;
@@ -580,8 +618,30 @@
         toast.style.opacity = '1';
         setTimeout(() => { toast.style.opacity = '0'; }, 2000);
     }
-    function handlePrint(title) {
-        window.print();
+    async function handleLendPaperSavePDF() {
+        const btn = event.currentTarget;
+        const origText = btn.innerHTML;
+        btn.innerHTML = "Generating...";
+        btn.disabled = true;
+
+        document.body.classList.add('pdf-export-mode');
+        
+        const element = document.querySelector('.lp-container');
+        const opt = {
+            margin: [10, 10],
+            filename: 'LendPaper-Fundability-Estimate.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, logging: false, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+        };
+
+        try {
+            await html2pdf().set(opt).from(element).save();
+        } finally {
+            document.body.classList.remove('pdf-export-mode');
+            btn.innerHTML = origText;
+            btn.disabled = false;
+        }
     }
 
     // Tabs
@@ -618,7 +678,7 @@
         const netTakeaway = document.getElementById('net_takeaway');
         if (loanAmt === null || loanAmt <= 0 || netPct === null) {
             heroVal.textContent = '$0'; resPayoff.textContent = '$0';
-            netTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>Enter a funding amount to see what your borrower nets.';
+            netTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>Enter a funding amount to see what you walk away with.';
             return;
         }
         const minToBorrower = loanAmt * (netPct / 100);
@@ -732,11 +792,11 @@
 
         const riskTakeaway = document.getElementById('risk_takeaway');
         if (dsr === null) {
-            riskTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>Enter monthly revenue to see how this funding lands.';
+            riskTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>Enter monthly revenue to see how this funding lands for you.';
         } else if (newPeriodic > 0) {
             riskTakeaway.innerHTML = `<span class="tk-eyebrow">What you tell the borrower</span>"This would be your <strong>${ordinal(newPositionNum)} position</strong>, with about <strong>${formatCurrency(newPeriodic)} ${periodLabel.replace('/ ', 'per ')}</strong> in new payments — taking total payments to <strong>${dsr.toFixed(1)}%</strong> of your revenue."`;
         } else {
-            riskTakeaway.innerHTML = `<span class="tk-eyebrow">What you tell the borrower</span>Existing payments already take <strong>${dsr.toFixed(1)}%</strong> of revenue. Add the new funding terms to model the next position.`;
+            riskTakeaway.innerHTML = `<span class="tk-eyebrow">What you tell the borrower</span>"Your existing payments already take <strong>${dsr.toFixed(1)}%</strong> of your revenue. Add the new funding terms to model your next position."`;
         }
 
         // optional exposure
@@ -855,7 +915,7 @@
         THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
     </div>
     <div class="print-watermark">
-        Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available
+        Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom brand | bespoke tooling available
     </div>
 </body>
 </html>
