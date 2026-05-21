@@ -318,10 +318,6 @@
             <h1>Payment Breakdown Report</h1>
         </div>
 
-        <div class="flex justify-center mb-8 no-print">
-            <button onclick="addCard()" class="lp-pill-btn h-[40px] px-6">+ Compare Scenarios</button>
-        </div>
-        
         <div id="cardsContainer" class="cards-container">
             <!-- Cards injected here via JS -->
         </div>
@@ -490,7 +486,8 @@
                 <div class="h-[64px] px-[24px] flex items-center justify-between border-b border-[#E5E7EB] bg-white shrink-0 relative">
                     <div id="badge-container-${id}" class="z-10"></div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none" id="header-center-${id}"></div>
-                    <div class="flex items-center z-10">
+                    <div class="flex items-center gap-2 z-10">
+                        <button onclick="addCard()" class="no-print h-[30px] px-[10px] rounded-full border border-dashed border-[#D1D5DB] text-[10px] font-bold uppercase tracking-wider text-[#9CA3AF] hover:border-[#14532D] hover:text-[#14532D] transition-colors whitespace-nowrap">+ Compare</button>
                         <button onclick="removeCard(${id})" class="remove-card-btn w-[32px] h-[32px] rounded-full hover:bg-slate-50 flex items-center justify-center text-[#6B7280] text-[20px] leading-none no-print transition-colors hover:text-[#EF4444]">&times;</button>
                     </div>
                 </div>
