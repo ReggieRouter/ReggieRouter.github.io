@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundability | LendPaper</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICA8cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHJ4PSI1IiBmaWxsPSIjMTBCODgxIi8+CiAgPHBhdGggZD0iTTQgNHYxNmgxMWw1LTVWNEg0eiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNMTUgMjB2LTVoNSIgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNOSA5djYiICAgICAgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNOSAxNWg0IiAgICAgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KPC9zdmc+">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
+
+    <style>
+        :root {
+            --risk-low-bg: #f0fdf4;    --risk-low-bd: #16a34a;  --risk-low-tx: #14532D;
+            --risk-mod-bg: #fffbeb;    --risk-mod-bd: #f59e0b;  --risk-mod-tx: #92400e;
+            --risk-high-bg: #fff7ed;   --risk-high-bd: #ea580c; --risk-high-tx: #9a3412;
+            --risk-sev-bg: #fef2f2;    --risk-sev-bd: #dc2626;  --risk-sev-tx: #991b1b;
+        }
+
+        .lp-main {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 24px;
+            flex-grow: 1;
+        }
+
+        .lp-container {
+            max-width: 500px;
+        }
+
+        /* Tabs */
+        .lp-tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 1px solid var(--lp-border);
+            padding: 0 16px;
+            gap: 4px;
+        }
+        .lp-tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 16px 8px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--lp-text-muted);
+            cursor: pointer;
+            transition: all 0.18s;
+            margin-bottom: -1px;
+        }
+        .lp-tab:hover { color: var(--lp-dark); }
+        .lp-tab.active { color: var(--lp-green); border-bottom-color: var(--lp-green); }
+
+        /* Shared funding amount strip */
+        .shared-strip {
+            padding: 24px 32px;
+            background: var(--lp-green-light);
+            border-bottom: 1px solid var(--lp-border);
+        }
+        .shared-strip label { color: var(--lp-green); }
+
+        .lp-inputs {
+            padding: 32px;
+            background: #fff;
+            border-bottom: 1px solid var(--lp-border);
+        }
+
+        /* Two-line tab subtitle */
+        .lp-tab-sub {
+            display: block;
+            font-size: 9.5px;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: 0;
+            opacity: 0.65;
+            margin-top: 4px;
+        }
+
+        /* Compact "how to use" callout */
+        .lp-howto {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--lp-dark);
+            background: var(--lp-green-light);
+            border-radius: 10px;
+            padding: 13px 15px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .lp-howto strong { color: var(--lp-green); font-weight: 800; }
+
+        /* Borrower talking-point takeaway */
+        .takeaway {
+            background: #fff;
+            border: 1px solid var(--lp-border);
+            border-left: 3px solid var(--lp-green);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--lp-dark);
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+        .takeaway strong { color: var(--lp-green); font-weight: 800; }
+        .takeaway .tk-eyebrow {
+            display: block;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--lp-text-muted);
+            margin-bottom: 5px;
+        }
+
+        .lp-section-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--lp-green);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .lp-section-label::after { content: ""; flex: 1; height: 1px; background: var(--lp-border); }
+        .lp-divider { height: 1px; background: var(--lp-border); margin: 22px 0; }
+
+        /* Collapsible optional section toggle */
+        .lp-toggle {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 2px 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--lp-green);
+        }
+        .lp-toggle:hover { color: #166534; }
+        .lp-toggle .optional-tag { margin-left: auto; }
+        .lp-collapse[hidden] { display: none; }
+
+        .lp-group { margin-bottom: 24px; }
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--lp-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            margin-bottom: 8px;
+        }
+
+        .input-wrap {
+            display: flex;
+            align-items: stretch;
+            border: 2px solid var(--lp-border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.2s;
+            background: #fff;
+        }
+        .input-wrap:focus-within {
+            border-color: var(--lp-green);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--lp-green);
+        }
+        .input-prefix, .input-suffix {
+            background: #f8fafc;
+            border-right: 1px solid var(--lp-border);
+            padding: 0 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--lp-text-muted);
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .input-suffix { border-right: none; border-left: 1px solid var(--lp-border); }
+        .input-field {
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--lp-dark);
+            width: 100%;
+            outline: none;
+            font-family: inherit;
+            background: transparent;
+            min-width: 0;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .unit-select {
+            border: none;
+            background: #f8fafc;
+            border-left: 1px solid var(--lp-border);
+            padding: 0 10px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--lp-dark);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .pos-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .pos-tag {
+            flex-shrink: 0; width: 30px; height: 30px; border-radius: 7px;
+            background: var(--lp-green-light); color: var(--lp-green);
+            font-size: 12px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .pos-row .input-wrap { flex: 1; }
+        .pos-remove {
+            flex-shrink: 0; width: 30px; height: 30px; border: none; background: transparent;
+            color: #cbd5e1; cursor: pointer; border-radius: 7px;
+            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+        }
+        .pos-remove:hover { background: #fef2f2; color: var(--lp-red); }
+
+        .add-pos-btn {
+            margin-top: 6px; background: transparent; border: 2px dashed var(--lp-border);
+            color: var(--lp-text-muted); padding: 10px; border-radius: 8px;
+            font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+            cursor: pointer; width: 100%; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit;
+        }
+        .add-pos-btn:hover { border-color: var(--lp-green); color: var(--lp-green); }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        .computed-note { font-size: 11px; color: var(--lp-text-muted); margin-top: 8px; font-weight: 600; }
+        .computed-note strong { color: var(--lp-green); font-weight: 800; }
+
+        .optional-tag {
+            font-size: 9px; font-weight: 700; color: #94a3b8; background: var(--gray-100);
+            padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; margin-left: 6px;
+        }
+
+        .lp-results { padding: 32px; background-color: var(--lp-light); display: flex; flex-direction: column; }
+
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .hero-output { text-align: center; }
+        .hero-label { font-size: 11px; font-weight: 700; color: var(--lp-green); letter-spacing: 0.05em; margin-bottom: 4px; }
+        .hero-value { font-size: 24px; font-weight: 800; color: var(--lp-dark); letter-spacing: -0.02em; }
+
+        .verdict {
+            border: 2px solid var(--risk-low-bd); background: var(--risk-low-bg);
+            border-radius: 14px; padding: 20px; margin-bottom: 24px; text-align: center;
+        }
+        .verdict-eyebrow { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; margin-bottom: 4px; }
+        .verdict-headline { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.15; }
+        .verdict-sub { font-size: 12px; font-weight: 600; margin-top: 8px; line-height: 1.45; }
+
+        .result-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 24px; }
+        .result-item {
+            background: #fff; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--lp-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .result-label { font-size: 12px; font-weight: 700; color: var(--lp-text-muted); display: flex; align-items: center; }
+        .result-val { font-size: 15px; font-weight: 800; color: var(--lp-dark); }
+        .result-item.hidden { display: none; }
+
+        .legend { background: #fff; border: 1px solid var(--lp-border); border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; }
+        .legend-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--lp-text-muted); margin-bottom: 10px; }
+        .legend-row { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; color: var(--lp-dark); margin-bottom: 6px; }
+        .legend-row:last-child { margin-bottom: 0; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+        .legend-range { color: var(--lp-text-muted); font-weight: 700; margin-left: auto; }
+
+        .lp-actions { display: flex; flex-direction: column; gap: 12px; }
+        .lp-copy-btn {
+            background-color: var(--lp-green); color: white; padding: 14px; border: none; border-radius: 8px;
+            font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; font-family: inherit;
+        }
+        .lp-copy-btn:hover { background-color: #166534; }
+        .lp-print-btn {
+            background-color: transparent; color: var(--lp-green); padding: 14px; border: 2px solid var(--lp-green); border-radius: 8px;
+            font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; font-family: inherit;
+        }
+        .lp-print-btn:hover { background-color: rgba(20, 83, 45, 0.05); }
+
+        .tooltip-icon {
+            display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px;
+            border-radius: 50%; background: var(--gray-200); color: var(--gray-500); font-size: 9px; font-weight: 800;
+            cursor: help; margin-left: 4px; flex-shrink: 0;
+        }
+        .tooltip-icon:hover { background: var(--lp-green); color: white; }
+        #tt {
+            position: fixed; z-index: 9999; background: var(--gray-900); color: white; font-size: 12px;
+            padding: 10px 14px; border-radius: 8px; max-width: 250px; pointer-events: none; opacity: 0;
+            transition: opacity 0.15s; font-weight: 400; line-height: 1.4;
+        }
+        #tt.show { opacity: 1; }
+
+        .lp-disclaimer {
+            font-size: 10px; font-weight: 600; text-align: center; padding: 24px; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.5;
+        }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .print-header { display: none; }
+        .print-disclaimer { display: none; }
+
+        @media print {
+            body { background: white !important; }
+            .modal-header, .lp-tabs, .lp-actions, .lp-inputs, .shared-strip, .lp-disclaimer, .add-pos-btn, .pos-remove { display: none !important; }
+            .lp-main { padding: 0 !important; display: block !important; align-items: stretch !important; }
+            .lp-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; }
+            .lp-results { background: white !important; padding: 0 !important; }
+            .panel:not(.active) { display: none !important; }
+            .panel.active .lp-inputs { display: none !important; }
+
+            .print-header {
+                display: flex !important; flex-direction: column !important; align-items: center !important;
+                margin-bottom: 40px !important; border-bottom: 2px solid var(--lp-green) !important; padding-bottom: 20px !important;
+            }
+            .print-logo { height: 64px !important; margin-bottom: 12px !important; }
+            .print-title { font-size: 18px !important; font-weight: 800 !important; text-transform: uppercase !important; color: var(--lp-dark) !important; }
+
+            .print-disclaimer {
+                display: block !important; margin-top: 60px !important; padding-top: 20px !important;
+                border-top: 1px solid var(--lp-border) !important; font-size: 10px !important; color: #94a3b8 !important;
+                text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important;
+            }
+        }
+
+        @media (max-width: 420px) { .grid-2 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div id="tt"></div>
+
+<header class="modal-header">
+    <svg class="modal-logo" width="124" height="22" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
+      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+        <path d="M4 4v16h11l5-5V4H4z"/>
+        <path d="M15 20v-5h5"/>
+        <path d="M9 9v6"/>
+        <path d="M9 15h4"/>
+      </svg>
+      <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
+        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#10B981">.</tspan>
+      </text>
+    </svg>
+    <div class="modal-title">Fundability</div>
+</header>
+
+<div class="lp-main">
+    <div class="lp-container">
+        <!-- Print Header -->
+        <div class="print-header">
+            <svg class="print-logo" width="180" height="32" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
+              <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M4 4v16h11l5-5V4H4z"/>
+                <path d="M15 20v-5h5"/>
+                <path d="M9 9v6"/>
+                <path d="M9 15h4"/>
+              </svg>
+              <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
+                <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#10B981">.</tspan>
+              </text>
+            </svg>
+            <div class="print-title" id="print_title">Deal Estimate</div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="lp-tabs">
+            <button class="lp-tab active" id="tab_net" onclick="switchTab('net')">Net Requirement<span class="lp-tab-sub">Cash to the borrower</span></button>
+            <button class="lp-tab" id="tab_risk" onclick="switchTab('risk')">Position Risk<span class="lp-tab-sub">Can they carry it?</span></button>
+        </div>
+
+        <!-- Shared funding amount -->
+        <div class="shared-strip">
+            <div class="lp-group" style="margin-bottom: 0;">
+                <label for="funding_amt">New funding under review</label>
+                <div class="input-wrap">
+                    <div class="input-prefix">$</div>
+                    <input type="number" id="funding_amt" class="input-field" value="50000" oninput="runAll()">
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ PANEL: NET REQUIREMENT ============ -->
+        <div class="panel active" id="panel_net">
+            <div class="lp-inputs">
+                <div class="lp-howto">
+                    Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
+                </div>
+                <div class="lp-group" style="margin-bottom: 0;">
+                    <label for="net_pct">Net Requirement <span class="tooltip-icon" data-tip="Percentage of the new funding that must go directly to the borrower.">i</span></label>
+                    <div class="input-wrap">
+                        <div class="input-prefix">%</div>
+                        <input type="number" id="net_pct" class="input-field" value="50" oninput="runNetCalc()">
+                    </div>
+                </div>
+            </div>
+            <div class="lp-results">
+                <div class="hero-grid">
+                    <div class="hero-output">
+                        <div class="hero-label">Min. to borrower</div>
+                        <div id="hero_val" class="hero-value">$25,000</div>
+                    </div>
+                    <div class="hero-output">
+                        <div class="hero-label">Max payoff <span class="tooltip-icon" data-tip="Total amount available to pay off existing debt or liens.">i</span></div>
+                        <div id="res_payoff" class="hero-value">$25,000</div>
+                    </div>
+                </div>
+                <div class="takeaway" id="net_takeaway">
+                    <span class="tk-eyebrow">What you tell the borrower</span>
+                </div>
+                <div class="lp-actions">
+                    <button class="lp-copy-btn" onclick="copyNet()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy
+                    </button>
+                    <button class="lp-print-btn" onclick="handlePrint('Net Requirement Estimate')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        Save PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ PANEL: POSITION RISK ============ -->
+        <div class="panel" id="panel_risk">
+            <div class="lp-inputs">
+                <div class="lp-howto">
+                    Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
+                </div>
+
+                <div class="lp-section-label">Revenue</div>
+                <div class="lp-group" style="margin-bottom: 0;">
+                    <label for="monthly_rev">Average monthly revenue <span class="tooltip-icon" data-tip="Gross monthly deposits / sales. Use a true monthly average from bank statements.">i</span></label>
+                    <div class="input-wrap">
+                        <div class="input-prefix">$</div>
+                        <input type="number" id="monthly_rev" class="input-field" value="120000" oninput="runRiskCalc()">
+                    </div>
+                </div>
+
+                <div class="lp-divider"></div>
+
+                <div class="lp-section-label">Existing positions</div>
+                <div id="positions_wrap"></div>
+                <button class="add-pos-btn" onclick="addPosition()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add position
+                </button>
+
+                <div class="lp-divider"></div>
+
+                <div class="lp-section-label">New funding terms</div>
+                <div class="lp-group">
+                    <label for="factor">Factor rate / total payback multiple <span class="tooltip-icon" data-tip="Total payback multiple. e.g. 1.40 means $50,000 funded is repaid as $70,000. For an interest loan, enter total payback ÷ principal.">i</span></label>
+                    <div class="input-wrap">
+                        <input type="number" step="0.01" id="factor" class="input-field" value="1.40" oninput="runRiskCalc()">
+                    </div>
+                </div>
+                <div class="lp-group" style="margin-bottom: 0;">
+                    <label for="term_val">Term <span class="tooltip-icon" data-tip="Repayment length. Choose the unit that matches the product: business days for daily-ACH advances, weeks for weekly remits, or months for a term loan.">i</span></label>
+                    <div class="input-wrap">
+                        <input type="number" id="term_val" class="input-field" value="120" oninput="runRiskCalc()">
+                        <select class="unit-select" id="term_unit" onchange="runRiskCalc()">
+                            <option value="bizdays">business days</option>
+                            <option value="weeks">weeks</option>
+                            <option value="months">months</option>
+                        </select>
+                    </div>
+                    <div class="computed-note">New payment: <strong id="new_pay_note">—</strong></div>
+                </div>
+
+                <div class="lp-divider"></div>
+
+                <button type="button" class="lp-toggle" id="exp_toggle" onclick="toggleExposure()">
+                    <span class="exp-label">+ Add exposure check</span>
+                    <span class="optional-tag">Optional</span>
+                </button>
+                <div class="lp-collapse" id="exp_collapse" hidden>
+                    <div class="lp-group" style="margin: 14px 0 0;">
+                        <label for="open_bal">Total outstanding balance on existing positions <span class="tooltip-icon" data-tip="Combined remaining payback across all current obligations. Powers the total-exposure ratio (typically capped near 1.0x–1.5x of monthly revenue).">i</span></label>
+                        <div class="input-wrap">
+                            <div class="input-prefix">$</div>
+                            <input type="number" id="open_bal" class="input-field" placeholder="0" oninput="runRiskCalc()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lp-results">
+                <div id="verdict" class="verdict">
+                    <div class="verdict-eyebrow" id="verdict_eyebrow">Stacking verdict</div>
+                    <div class="verdict-headline" id="verdict_headline">—</div>
+                    <div class="verdict-sub" id="verdict_sub"></div>
+                </div>
+
+                <div class="hero-grid">
+                    <div class="hero-output">
+                        <div class="hero-label">Debt-service ratio <span class="tooltip-icon" data-tip="Total monthly debt service (all positions + new) divided by monthly revenue. The primary stacking risk signal.">i</span></div>
+                        <div id="hero_dsr" class="hero-value">—</div>
+                    </div>
+                    <div class="hero-output">
+                        <div class="hero-label">New position</div>
+                        <div id="hero_pos" class="hero-value">—</div>
+                    </div>
+                </div>
+
+                <div class="takeaway" id="risk_takeaway">
+                    <span class="tk-eyebrow">What you tell the borrower</span>
+                </div>
+
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="result-label">Combined daily debt service <span class="tooltip-icon" data-tip="All positions plus the new funding, normalized to a daily-equivalent across ~21.7 business days/month.">i</span></div>
+                        <div id="res_daily" class="result-val">—</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Combined monthly debt service</div>
+                        <div id="res_monthly" class="result-val">—</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Revenue left after debt service</div>
+                        <div id="res_remaining" class="result-val">—</div>
+                    </div>
+                    <div class="result-item hidden" id="row_exposure">
+                        <div class="result-label">Total exposure vs revenue <span class="tooltip-icon" data-tip="Total outstanding + new payback, as a multiple of monthly revenue. Responsible funders typically cap this near 1.0x–1.5x.">i</span></div>
+                        <div id="res_exposure" class="result-val">—</div>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-title">Debt-service ratio bands</div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--risk-low-bd);"></span> Low — room to fund <span class="legend-range">&lt; 10%</span></div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--risk-mod-bd);"></span> Moderate — tighten terms <span class="legend-range">10–20%</span></div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--risk-high-bd);"></span> High — likely overextended <span class="legend-range">20–30%</span></div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--risk-sev-bd);"></span> Severe — decline / restructure <span class="legend-range">&gt; 30%</span></div>
+                </div>
+
+                <div class="lp-actions">
+                    <button class="lp-copy-btn" onclick="copyRisk()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy
+                    </button>
+                    <button class="lp-print-btn" onclick="handlePrint('Position / Stacking Risk Estimate')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        Save PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print-only disclaimer (shared) -->
+        <div class="print-disclaimer">
+            DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. NOT A FUNDING DECISION OR FINANCIAL ADVICE. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+            <br><br>
+            Powered by LendPaper | lendpaper.com
+        </div>
+    </div>
+</div>
+
+<div class="lp-disclaimer">
+    DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. NOT A FUNDING DECISION OR FINANCIAL ADVICE. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+</div>
+
+<script>
+    const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available";
+
+    const BUSINESS_DAYS_PER_MONTH = 21.67;  // ~260 business days / 12
+    const WEEKS_PER_MONTH = 4.33;           // 52 / 12
+    const BUSINESS_DAYS_PER_WEEK = 5;
+
+    function cleanNumericInput(value) {
+        if (value === null || value === undefined || value === '') return null;
+        const parsed = parseFloat(value.toString().replace(/,/g, ''));
+        return isNaN(parsed) || !isFinite(parsed) ? null : parsed;
+    }
+    function formatCurrency(num) {
+        if (num === null || num === undefined) return '—';
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
+    }
+    function ordinal(n) {
+        const s = ["th", "st", "nd", "rd"], v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+    function showToast() {
+        let toast = document.getElementById('lp-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'lp-toast';
+            toast.textContent = 'Copied!';
+            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#14532D;color:#fff;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;opacity:0;transition:opacity 150ms;pointer-events:none;z-index:9999;';
+            document.body.appendChild(toast);
+        }
+        toast.style.opacity = '1';
+        setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+    }
+    function handlePrint(title) {
+        document.getElementById('print_title').textContent = title;
+        window.print();
+    }
+
+    // Tabs
+    function switchTab(which) {
+        document.getElementById('tab_net').classList.toggle('active', which === 'net');
+        document.getElementById('tab_risk').classList.toggle('active', which === 'risk');
+        document.getElementById('panel_net').classList.toggle('active', which === 'net');
+        document.getElementById('panel_risk').classList.toggle('active', which === 'risk');
+    }
+
+    // Tooltips
+    const tt = document.getElementById('tt');
+    function bindTips() {
+        document.querySelectorAll('.tooltip-icon').forEach(el => {
+            if (el.dataset.bound) return;
+            el.dataset.bound = '1';
+            el.addEventListener('mouseenter', e => { tt.textContent = e.target.dataset.tip; tt.classList.add('show'); });
+            el.addEventListener('mousemove', e => {
+                const m = 12; let x = e.clientX + m; let y = e.clientY + m;
+                if (x + tt.offsetWidth > window.innerWidth) x = e.clientX - tt.offsetWidth - m;
+                if (y + tt.offsetHeight > window.innerHeight) y = e.clientY - tt.offsetHeight - m;
+                tt.style.left = x + 'px'; tt.style.top = y + 'px';
+            });
+            el.addEventListener('mouseleave', () => tt.classList.remove('show'));
+        });
+    }
+
+    // ---------- NET REQUIREMENT ----------
+    function runNetCalc() {
+        const loanAmt = cleanNumericInput(document.getElementById('funding_amt').value);
+        const netPct = cleanNumericInput(document.getElementById('net_pct').value);
+        const heroVal = document.getElementById('hero_val');
+        const resPayoff = document.getElementById('res_payoff');
+        const netTakeaway = document.getElementById('net_takeaway');
+        if (loanAmt === null || loanAmt <= 0 || netPct === null) {
+            heroVal.textContent = '$0'; resPayoff.textContent = '$0';
+            netTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>Enter a funding amount to see what your borrower nets.';
+            return;
+        }
+        const minToBorrower = loanAmt * (netPct / 100);
+        const maxPayoff = loanAmt - minToBorrower;
+        heroVal.textContent = formatCurrency(minToBorrower);
+        resPayoff.textContent = formatCurrency(maxPayoff);
+        netTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>"You walk away with <strong>' + formatCurrency(minToBorrower) + '</strong> in hand, and we can put up to <strong>' + formatCurrency(maxPayoff) + '</strong> toward clearing your existing debt."';
+    }
+
+    function copyNet() {
+        const loanAmt = cleanNumericInput(document.getElementById('funding_amt').value);
+        const netPct = cleanNumericInput(document.getElementById('net_pct').value);
+        if (loanAmt === null) return;
+        const dataPairs = {
+            "New funding": formatCurrency(loanAmt),
+            "Net Requirement": netPct + "%",
+            "Min. to borrower": document.getElementById('hero_val').innerText,
+            "Max payoff": document.getElementById('res_payoff').innerText
+        };
+        const borderLine = "─────────────────────────────";
+        let payload = `[Net Requirement] — LendPaper\n${borderLine}\n`;
+        Object.entries(dataPairs).forEach(([l, v]) => { payload += `${l.padEnd(20)}: ${v}\n`; });
+        payload += `${borderLine}\n${WATERMARK_FOOTER}`;
+        navigator.clipboard.writeText(payload).then(showToast);
+    }
+
+    // ---------- POSITION RISK ----------
+    function addPosition(value, freq) {
+        const wrap = document.getElementById('positions_wrap');
+        const row = document.createElement('div');
+        row.className = 'pos-row';
+        row.innerHTML = `
+            <div class="pos-tag"></div>
+            <div class="input-wrap">
+                <div class="input-prefix">$</div>
+                <input type="number" class="input-field pos-amt" value="${value !== undefined ? value : ''}" placeholder="Payment" oninput="runRiskCalc()">
+                <select class="unit-select pos-freq" onchange="runRiskCalc()">
+                    <option value="daily">/ day</option>
+                    <option value="weekly">/ week</option>
+                    <option value="monthly">/ month</option>
+                </select>
+            </div>
+            <button class="pos-remove" title="Remove" onclick="removePosition(this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>`;
+        wrap.appendChild(row);
+        if (freq) row.querySelector('.pos-freq').value = freq;
+        renumberPositions();
+        bindTips();
+        runRiskCalc();
+    }
+    function removePosition(btn) { btn.closest('.pos-row').remove(); renumberPositions(); runRiskCalc(); }
+    function renumberPositions() {
+        document.querySelectorAll('#positions_wrap .pos-tag').forEach((tag, i) => { tag.textContent = (i + 1); });
+    }
+
+    function runRiskCalc() {
+        const monthlyRev = cleanNumericInput(document.getElementById('monthly_rev').value);
+
+        // existing positions -> monthly + daily-equivalent
+        let existingDailyEquiv = 0, existingMonthly = 0, posCount = 0;
+        document.querySelectorAll('#positions_wrap .pos-row').forEach(row => {
+            const amt = cleanNumericInput(row.querySelector('.pos-amt').value);
+            const freq = row.querySelector('.pos-freq').value;
+            if (amt !== null && amt > 0) {
+                posCount++;
+                if (freq === 'weekly') { existingMonthly += amt * WEEKS_PER_MONTH; existingDailyEquiv += amt / BUSINESS_DAYS_PER_WEEK; }
+                else if (freq === 'monthly') { existingMonthly += amt; existingDailyEquiv += amt / BUSINESS_DAYS_PER_MONTH; }
+                else { existingMonthly += amt * BUSINESS_DAYS_PER_MONTH; existingDailyEquiv += amt; }
+            }
+        });
+
+        // new funding -> derive periodic payment from amount * factor / term
+        const fundAmt = cleanNumericInput(document.getElementById('funding_amt').value);
+        const factor = cleanNumericInput(document.getElementById('factor').value);
+        const termVal = cleanNumericInput(document.getElementById('term_val').value);
+        const termUnit = document.getElementById('term_unit').value;
+
+        let newDailyEquiv = 0, newMonthly = 0, newPayback = 0, newPeriodic = 0, periodLabel = '';
+        if (fundAmt > 0 && factor > 0 && termVal > 0) {
+            newPayback = fundAmt * factor;
+            newPeriodic = newPayback / termVal;
+            if (termUnit === 'weeks') {
+                newMonthly = newPeriodic * WEEKS_PER_MONTH; // newPeriodic is per week
+                newDailyEquiv = newPeriodic / BUSINESS_DAYS_PER_WEEK;
+                periodLabel = '/ week';
+            } else if (termUnit === 'months') {
+                newMonthly = newPeriodic; // periodic is per month
+                newDailyEquiv = newPeriodic / BUSINESS_DAYS_PER_MONTH;
+                periodLabel = '/ month';
+            } else { // business days
+                newMonthly = newPeriodic * BUSINESS_DAYS_PER_MONTH;
+                newDailyEquiv = newPeriodic;
+                periodLabel = '/ day';
+            }
+        }
+        document.getElementById('new_pay_note').textContent = newPeriodic > 0 ? (formatCurrency(newPeriodic) + ' ' + periodLabel) : '—';
+
+        const newPositionNum = posCount + 1;
+        const totalDaily = existingDailyEquiv + newDailyEquiv;
+        const totalMonthly = existingMonthly + newMonthly;
+        const dsr = (monthlyRev !== null && monthlyRev > 0) ? (totalMonthly / monthlyRev) * 100 : null;
+        const remaining = (monthlyRev !== null) ? monthlyRev - totalMonthly : null;
+
+        document.getElementById('hero_pos').textContent = ordinal(newPositionNum);
+        document.getElementById('res_daily').textContent = totalDaily > 0 ? formatCurrency(totalDaily) : '—';
+        document.getElementById('res_monthly').textContent = totalMonthly > 0 ? formatCurrency(totalMonthly) : '—';
+        document.getElementById('hero_dsr').textContent = (dsr !== null) ? dsr.toFixed(1) + '%' : '—';
+        document.getElementById('res_remaining').textContent = (remaining !== null) ? formatCurrency(remaining) : '—';
+
+        const riskTakeaway = document.getElementById('risk_takeaway');
+        if (dsr === null) {
+            riskTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>Enter monthly revenue to see how this funding lands.';
+        } else if (newPeriodic > 0) {
+            riskTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>"This would be your <strong>' + ordinal(newPositionNum) + ' position</strong>, with about <strong>' + formatCurrency(newPeriodic) + ' ' + periodLabel.replace('/ ', 'per ') + '</strong> in new payments — taking total payments to <strong>' + dsr.toFixed(1) + '%</strong> of your revenue."';
+        } else {
+            riskTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>Existing payments already take <strong>' + dsr.toFixed(1) + '%</strong> of revenue. Add the new funding terms to model the next position.';
+        }
+
+        // optional exposure
+        const openBal = cleanNumericInput(document.getElementById('open_bal').value);
+        const expRow = document.getElementById('row_exposure');
+        if (openBal !== null && openBal >= 0 && monthlyRev !== null && monthlyRev > 0 && (newPayback > 0 || openBal > 0)) {
+            const exposure = (openBal + newPayback) / monthlyRev;
+            document.getElementById('res_exposure').textContent = exposure.toFixed(2) + 'x revenue';
+            expRow.classList.remove('hidden');
+        } else {
+            expRow.classList.add('hidden');
+        }
+
+        updateVerdict(dsr, newPositionNum, remaining);
+    }
+
+    function updateVerdict(dsr, posNum, remaining) {
+        const box = document.getElementById('verdict');
+        const head = document.getElementById('verdict_headline');
+        const sub = document.getElementById('verdict_sub');
+        const eyebrow = document.getElementById('verdict_eyebrow');
+        eyebrow.textContent = 'Stacking verdict — ' + ordinal(posNum) + ' position';
+
+        if (dsr === null) {
+            setVerdictColor(box, head, sub, eyebrow, 'low');
+            head.textContent = 'Enter revenue to assess';
+            sub.textContent = '';
+            return;
+        }
+
+        let band, headline, note;
+        if (dsr < 10) { band = 'low'; headline = 'Low risk'; note = 'Debt service leaves comfortable operating headroom.'; }
+        else if (dsr < 20) { band = 'mod'; headline = 'Moderate risk'; note = 'Workable but tight. Consider a smaller amount or longer term.'; }
+        else if (dsr < 30) { band = 'high'; headline = 'High risk'; note = 'The merchant is likely overextended. Funding adds real default risk.'; }
+        else { band = 'sev'; headline = 'Severe risk'; note = 'Debt service is unsustainable at this revenue. Decline or restructure.'; }
+
+        if (posNum >= 4 && band === 'low') { band = 'high'; headline = 'High risk'; note = 'Ratio looks fine, but a 4th+ position is inherently fragile — any revenue dip breaks it.'; }
+        else if (posNum >= 4) { note += ' This is a ' + ordinal(posNum) + ' position — exceptional caution warranted.'; }
+        else if (posNum === 3 && band === 'low') { band = 'mod'; headline = 'Moderate risk'; note = 'Ratio is healthy, but a 3rd position still elevates risk. Verify revenue stability.'; }
+        else if (posNum === 3) { note += ' Note: this is a 3rd position.'; }
+
+        if (remaining !== null && remaining < 0) {
+            band = 'sev'; headline = 'Severe risk';
+            note = 'Combined debt service exceeds total revenue — mathematically unpayable.';
+        }
+
+        setVerdictColor(box, head, sub, eyebrow, band);
+        head.textContent = headline;
+        sub.textContent = note;
+    }
+
+    function setVerdictColor(box, head, sub, eyebrow, band) {
+        const map = {
+            low:  ['--risk-low-bg',  '--risk-low-bd',  '--risk-low-tx'],
+            mod:  ['--risk-mod-bg',  '--risk-mod-bd',  '--risk-mod-tx'],
+            high: ['--risk-high-bg', '--risk-high-bd', '--risk-high-tx'],
+            sev:  ['--risk-sev-bg',  '--risk-sev-bd',  '--risk-sev-tx'],
+        };
+        const [bg, bd, tx] = map[band];
+        const css = getComputedStyle(document.documentElement);
+        box.style.background = css.getPropertyValue(bg);
+        box.style.borderColor = css.getPropertyValue(bd);
+        const txc = css.getPropertyValue(tx);
+        head.style.color = txc; sub.style.color = txc; eyebrow.style.color = txc;
+    }
+
+    function copyRisk() {
+        const monthlyRev = cleanNumericInput(document.getElementById('monthly_rev').value);
+        if (monthlyRev === null) return;
+        const dataPairs = {
+            "New funding": formatCurrency(cleanNumericInput(document.getElementById('funding_amt').value)),
+            "Monthly revenue": formatCurrency(monthlyRev),
+            "New position": document.getElementById('hero_pos').innerText,
+            "Combined daily debt svc": document.getElementById('res_daily').innerText,
+            "Combined monthly debt svc": document.getElementById('res_monthly').innerText,
+            "Debt-service ratio": document.getElementById('hero_dsr').innerText,
+            "Revenue left after debt": document.getElementById('res_remaining').innerText,
+            "Verdict": document.getElementById('verdict_headline').innerText
+        };
+        if (!document.getElementById('row_exposure').classList.contains('hidden')) {
+            dataPairs["Total exposure"] = document.getElementById('res_exposure').innerText;
+        }
+        const borderLine = "─────────────────────────────";
+        let payload = `[Position / Stacking Risk] — LendPaper\n${borderLine}\n`;
+        Object.entries(dataPairs).forEach(([l, v]) => { payload += `${l.padEnd(26)}: ${v}\n`; });
+        payload += `${borderLine}\n${WATERMARK_FOOTER}`;
+        navigator.clipboard.writeText(payload).then(showToast);
+    }
+
+    function toggleExposure() {
+        const c = document.getElementById('exp_collapse');
+        const label = document.querySelector('#exp_toggle .exp-label');
+        if (c.hasAttribute('hidden')) {
+            c.removeAttribute('hidden');
+            label.textContent = '– Hide exposure check';
+            bindTips();
+        } else {
+            c.setAttribute('hidden', '');
+            label.textContent = '+ Add exposure check';
+        }
+    }
+
+    function runAll() { runNetCalc(); runRiskCalc(); }
+
+    window.onload = () => {
+        addPosition(450, 'daily');  // seed one example existing position
+        bindTips();
+        runAll();
+        if (window.self !== window.top) {
+            document.body.classList.add('is-embedded');
+        }
+    };
+</script>
+
+</body>
+</html>

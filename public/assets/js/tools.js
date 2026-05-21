@@ -58,17 +58,17 @@ const TOOLS = [
     kw: "factor rate apr interest convert comparison mca"
   },
   { 
-    id: "net-funding", 
-    name: "Net requirement", 
-    desc: "Net wire after origination, PSF, and commission deductions.",
+    id: "fundability", 
+    name: "Fundability", 
+    desc: "Combined net requirement and stacking risk assessment.",
     status: "live", 
     group: "deal-math", 
     icon: "stack", 
     color: "green",
-    slug: "/tools/net-requirement",
+    slug: "/tools/fundability",
     presentation: "modal",
-    path: "./calculators/NetRequirementCalculator.html",
-    kw: "net funding wire origination psf commission fees estimate"
+    path: "./calculators/FundabilityCalculator.html",
+    kw: "net funding wire origination fundability stacking risk positions"
   },
   { 
     id: "sba-rates", 
