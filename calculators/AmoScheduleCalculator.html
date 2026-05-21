@@ -156,12 +156,14 @@
             border: 1px solid #e5e7eb;
             border-left: 4px solid #14532D;
             border-radius: 12px;
-            padding: 16px 18px;
             font-size: 14px;
             font-weight: 600;
             color: #1e293b;
             line-height: 1.6;
             margin-top: 24px;
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
         }
         .takeaway-eyebrow {
             display: block;
@@ -315,6 +317,16 @@
         .track-btn.active { background: #F0FDF4; border-color: #14532D; color: #14532D; }
         .amo-row { cursor: pointer; transition: background 0.1s; }
         .amo-row:hover { background: #F9FAFB; }
+        .takeaway-body { flex: 1; padding: 16px 18px; min-width: 0; }
+        .takeaway-nav { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-left: 0.5px solid #e5e7eb; padding: 8px 10px; min-width: 36px; }
+        .takeaway-nav-btn { background: transparent; border: none; cursor: pointer; color: #94a3b8; padding: 4px; transition: color 0.15s; display: flex; align-items: center; justify-content: center; }
+        .takeaway-nav-btn:hover { color: #14532D; }
+        .takeaway-counter { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; margin-top: 6px; white-space: nowrap; }
+        .fee-seg-wrap { display: flex; align-self: stretch; border-right: 1px solid #E5E7EB; }
+        .fee-seg-btn { padding: 0 9px; font-size: 11px; font-weight: 700; color: #94A3B8; background: transparent; border: none; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+        .fee-seg-btn:first-child { border-right: 1px solid #E5E7EB; }
+        .fee-seg-btn.active { color: #14532D; background: #F0FDF4; }
+        .amo-detail-cell { background: #e8f5ec; box-shadow: inset 2px 0 0 #0a4d2c; font-style: italic; font-size: 12px; color: #14532D; padding: 5px 12px 5px 16px; }
     </style>
 </head>
 <body>
@@ -443,29 +455,33 @@
             const isChecked = document.getElementById(`enablePrepay-${id}`).checked;
             const section = document.getElementById(`prepaySection-${id}`);
             isChecked ? section.classList.remove('hidden') : section.classList.add('hidden');
+            if (!isChecked) {
+                const tracks = getTracks(id);
+                if ((cardTracks[id] ?? 0) >= tracks.length) cardTracks[id] = 0;
+                renderDetailRow(id);
+            }
         }
 
-        function toggleFeeMode(id) {
+        function setFeeMode(id, newMode) {
             const wrap = document.getElementById(`feeWrap-${id}`);
-            const pfx = document.getElementById(`feePfx-${id}`);
             const unit = document.getElementById(`feeUnit-${id}`);
             const input = document.getElementById(`fee-${id}`);
             const amt = cleanNumericInput(document.getElementById(`amt-${id}`).value) || 0;
             const val = cleanNumericInput(input.value) || 0;
+            if (wrap.dataset.feeMode === newMode) return;
 
-            if (wrap.dataset.feeMode === 'pct') {
-                wrap.dataset.feeMode = 'dollar';
-                pfx.classList.remove('hidden');
-                unit.classList.add('hidden');
+            if (newMode === 'dollar') {
                 input.step = '100';
                 input.value = amt > 0 ? Math.round(amt * val / 100) : val;
+                unit.textContent = '$';
             } else {
-                wrap.dataset.feeMode = 'pct';
-                pfx.classList.add('hidden');
-                unit.classList.remove('hidden');
                 input.step = '0.1';
                 input.value = amt > 0 ? parseFloat((val / amt * 100).toFixed(2)) : 0;
+                unit.textContent = '%';
             }
+            wrap.dataset.feeMode = newMode;
+            document.getElementById(`feeBtnPct-${id}`).classList.toggle('active', newMode === 'pct');
+            document.getElementById(`feeBtnDollar-${id}`).classList.toggle('active', newMode === 'dollar');
             calcCard(id);
         }
 
@@ -521,7 +537,7 @@
 
                         <div class="grid grid-cols-2 gap-x-4 gap-y-5">
                             <div class="col-span-2">
-                                <label>Loan Amount</label>
+                                <label>Financing Amount</label>
                                 <div class="lp-input-group">
                                     <span class="pl-3 pr-2 text-[#94A3B8] font-bold border-r border-[#E5E7EB]">$</span>
                                     <input type="number" id="amt-${id}" value="100000" min="0" class="lp-input" oninput="calcCard(${id})">
@@ -552,9 +568,12 @@
                             <div class="col-span-2">
                                 <label>Origination Fee</label>
                                 <div class="lp-input-group" id="feeWrap-${id}" data-fee-mode="pct">
-                                    <span id="feePfx-${id}" class="hidden pl-3 pr-2 text-[#14532D] font-bold border-r border-[#E5E7EB] fee-unit" onclick="toggleFeeMode(${id})" title="Switch to %">$</span>
+                                    <div class="fee-seg-wrap">
+                                        <button id="feeBtnPct-${id}" onclick="setFeeMode(${id}, 'pct')" class="fee-seg-btn active" type="button">%</button>
+                                        <button id="feeBtnDollar-${id}" onclick="setFeeMode(${id}, 'dollar')" class="fee-seg-btn" type="button">$</button>
+                                    </div>
                                     <input type="number" step="0.1" id="fee-${id}" value="3.0" min="0" class="lp-input" oninput="calcCard(${id})">
-                                    <span id="feeUnit-${id}" class="pr-3 pl-2 text-[#94A3B8] font-bold border-l border-[#E5E7EB] fee-unit" onclick="toggleFeeMode(${id})" title="Switch to $">%</span>
+                                    <span id="feeUnit-${id}" class="pr-3 pl-2 text-[#94A3B8] font-bold border-l border-[#E5E7EB]">%</span>
                                 </div>
                             </div>
 
@@ -581,14 +600,14 @@
 
                             <label class="flex items-center cursor-pointer group mb-1 w-max select-none">
                                 <input type="checkbox" id="enablePrepay-${id}" class="rounded border-[#E5E7EB] focus:ring-[#14532D]" onchange="togglePrepay(${id}); calcCard(${id})">
-                                <span class="ml-2 text-[12px] uppercase tracking-[0.05em] text-[#14532D] font-extrabold">Model Prepay Savings</span>
+                                <span class="ml-2 text-[12px] uppercase tracking-[0.05em] text-[#14532D] font-extrabold">Model pre-pay discount</span>
                             </label>
                             <div class="text-[11px] text-[#6B7280] mb-4">Model early payoff savings and reduced interest cost.</div>
                             
                             <div id="prepaySection-${id}" class="hidden bg-[#F8FAFC] p-4 rounded-xl border border-[#E2E8F0]">
                                 <label class="!text-[#6B7280]">Pre-Pay Discount</label>
                                 <div class="lp-input-group">
-                                    <input type="number" id="discPct-${id}" value="25" min="0" class="lp-input text-right" oninput="calcCard(${id})">
+                                    <input type="number" id="discPct-${id}" value="25" min="0" class="lp-input" oninput="calcCard(${id})">
                                     <span class="pr-3 pl-2 text-[#94A3B8] font-bold">%</span>
                                 </div>
                             </div>
@@ -616,7 +635,7 @@
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outCents-${id}">0¢</div>
                                 </div>
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">APR</div>
+                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">APR<sup title="Required disclosure in CA and NY" class="cursor-help" style="font-size:8px;font-weight:700;vertical-align:super">*</sup></div>
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outApr-${id}">0%</div>
                                 </div>
                             </div>
@@ -636,13 +655,20 @@
                                 </div>
                             </div>
 
-                            <div class="flex gap-1.5 mb-2 no-print" id="trackToggle-${id}">
-                                <button id="trackA-${id}" onclick="setTrack(${id}, 'summary')" class="track-btn active">Payment Summary</button>
-                                <button id="trackB-${id}" onclick="setTrack(${id}, 'apr')" class="track-btn">APR Cost</button>
-                            </div>
-                            <div class="takeaway">
-                                <span class="takeaway-eyebrow">What you tell the borrower</span>
-                                <span id="takeaway-content-${id}"></span>
+                            <div class="takeaway" id="takeaway-box-${id}" tabindex="0" onkeydown="handleTakeawayKey(event, ${id})" onmouseenter="showCounter(${id})" onmouseleave="hideCounter(${id})">
+                                <div class="takeaway-body">
+                                    <span class="takeaway-eyebrow">What you tell the borrower</span>
+                                    <span id="takeaway-content-${id}"></span>
+                                    <div id="track-counter-${id}" class="takeaway-counter" style="display:none"></div>
+                                </div>
+                                <div class="takeaway-nav no-print">
+                                    <button onclick="prevTrack(${id})" class="takeaway-nav-btn" type="button" aria-label="Previous track">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                                    </button>
+                                    <button onclick="nextTrack(${id})" class="takeaway-nav-btn" type="button" aria-label="Next track">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="action-buttons flex flex-col gap-3 mt-5 no-print">
@@ -654,6 +680,7 @@
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                                     Save as PDF
                                 </button>
+                                <p class="text-[10px] text-[#94A3B8] italic mt-1">* APR disclosure required in CA and NY</p>
                             </div>
 
                         </div>
@@ -662,8 +689,9 @@
                 </div>
 
                 <div class="border-t border-[#E5E7EB]">
-                    <div class="px-[24px] pt-5 pb-3 flex items-center">
+                    <div class="px-[24px] pt-5 pb-3 flex items-center justify-between">
                         <span class="text-[11px] font-extrabold text-[#6B7280] uppercase tracking-widest">Amortization Schedule</span>
+                        <span class="text-[11px] text-[#94A3B8] italic no-print">Click any row to quantify the pre-pay discount</span>
                     </div>
                     <div id="detailsWrap-${id}" class="px-[24px] pb-[28px]">
                         <div class="table-scroll-container">
@@ -710,34 +738,82 @@
             updateHeaders();
         }
 
-        function setTrack(id, type) {
-            cardTracks[id] = type;
-            document.getElementById(`trackA-${id}`).classList.toggle('active', type === 'summary');
-            document.getElementById(`trackB-${id}`).classList.toggle('active', type === 'apr');
+        function getTracks(id) {
+            const isPrepay = document.getElementById(`enablePrepay-${id}`)?.checked;
+            const tracks = [
+                { key: 'summary', name: 'Payment summary' },
+                { key: 'apr', name: 'APR cost' },
+                { key: 'perdollar', name: 'Per-dollar pitch' }
+            ];
+            if (isPrepay) tracks.push({ key: 'prepay', name: 'Pre-pay discount' });
+            return tracks;
+        }
+
+        function prevTrack(id) {
+            const tracks = getTracks(id);
+            const cur = cardTracks[id] ?? 0;
+            cardTracks[id] = (cur - 1 + tracks.length) % tracks.length;
             renderTakeaway(id);
+        }
+
+        function nextTrack(id) {
+            const tracks = getTracks(id);
+            const cur = cardTracks[id] ?? 0;
+            cardTracks[id] = (cur + 1) % tracks.length;
+            renderTakeaway(id);
+        }
+
+        function handleTakeawayKey(e, id) {
+            if (e.key === 'ArrowUp') { e.preventDefault(); prevTrack(id); }
+            if (e.key === 'ArrowDown') { e.preventDefault(); nextTrack(id); }
+        }
+
+        function showCounter(id) {
+            const el = document.getElementById(`track-counter-${id}`);
+            if (el) el.style.display = '';
+        }
+
+        function hideCounter(id) {
+            const el = document.getElementById(`track-counter-${id}`);
+            if (el) el.style.display = 'none';
         }
 
         function renderTakeaway(id) {
             const c = lastCalc[id];
             if (!c) return;
-            const track = cardTracks[id] || 'summary';
+            const tracks = getTracks(id);
+            const curIdx = Math.min(cardTracks[id] ?? 0, tracks.length - 1);
+            cardTracks[id] = curIdx;
+            const track = tracks[curIdx];
             const sel = rowSelection[id];
 
             let html;
-            if (track === 'summary') {
+            if (track.key === 'summary') {
                 if (sel) {
                     html = `"You're looking at <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong>. Pay off at payment #${sel.period} on ${sel.date}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}."`;
                 } else {
                     html = `"You're looking at <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong> over ${c.term} months — repaying <strong>${fmtUsd.format(c.payback)} total</strong>."`;
                 }
-            } else {
+            } else if (track.key === 'apr') {
                 if (sel) {
                     html = `"You're looking at <strong>${c.apr.toFixed(1)}% APR</strong> on net funded. Pay off at payment #${sel.period} on ${sel.date}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>."`;
                 } else {
                     html = `"You're looking at <strong>${fmtUsd.format(c.totalCost)}</strong> in total funding costs — a <strong>${c.apr.toFixed(1)}% APR</strong>, or <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong>."`;
                 }
+            } else if (track.key === 'perdollar') {
+                html = `"For every dollar you receive, you're paying back <strong>${c.factor.toFixed(2)}</strong> — that's <strong>${c.centsDisplay}¢ on the dollar</strong>. On <strong>${fmtUsd.format(c.amt)}</strong> funded, you repay <strong>${fmtUsd.format(c.payback)}</strong> total."`;
+            } else if (track.key === 'prepay') {
+                if (sel && sel.savings > 0) {
+                    html = `"Pay off at payment #${sel.period} on ${sel.date} — your buyout drops to <strong>${fmtUsd.format(sel.buyout)}</strong>, saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest."`;
+                } else {
+                    html = `"This deal has a <strong>${c.discPct}%</strong> pre-pay discount — pay off early and keep the unearned interest savings. Click any row below to model the exact buyout."`;
+                }
             }
+
             document.getElementById(`takeaway-content-${id}`).innerHTML = html;
+
+            const counter = document.getElementById(`track-counter-${id}`);
+            if (counter) counter.textContent = `${track.name} · ${curIdx + 1} / ${tracks.length}`;
 
             const summary = document.getElementById(`prepaySummary-${id}`);
             if (sel) {
@@ -769,7 +845,21 @@
                 };
                 rowEl.classList.add('prepay-target-row');
             }
+            renderDetailRow(id);
             renderTakeaway(id);
+        }
+
+        function renderDetailRow(id) {
+            document.querySelectorAll(`.amo-detail-for-${id}`).forEach(r => r.remove());
+            const sel = rowSelection[id];
+            const isPrepay = document.getElementById(`enablePrepay-${id}`)?.checked;
+            if (!sel || !isPrepay || sel.savings <= 0) return;
+            const rowEl = document.getElementById(`arow-${id}-${sel.period}`);
+            if (!rowEl) return;
+            const tr = document.createElement('tr');
+            tr.className = `amo-detail-for-${id}`;
+            tr.innerHTML = `<td colspan="6" class="amo-detail-cell">↳ Borrower saves ${fmtUsd.format(sel.savings)} in interest by paying off here · buyout ${fmtUsd.format(sel.buyout)}</td>`;
+            rowEl.after(tr);
         }
 
         function removeCard(id) {
@@ -814,7 +904,9 @@
             document.getElementById(`valPmt-${id}`).innerText = fmtUsd.format(pmt);
             document.getElementById(`outPayback-${id}`).innerText = fmtUsd.format(payback);
             document.getElementById(`outInterest-${id}`).innerText = fmtUsd.format(totalCost);
-            document.getElementById(`outCents-${id}`).innerText = ((totalCost / amt) * 100).toFixed(1) + '¢';
+            const rawCents = (totalCost / amt) * 100;
+            const centsDisplay = rawCents % 1 === 0 ? rawCents.toFixed(0) : parseFloat(rawCents.toFixed(2)).toString();
+            document.getElementById(`outCents-${id}`).innerText = centsDisplay + '¢';
             document.getElementById(`outApr-${id}`).innerText = apr.toFixed(1) + '%';
             
             let balance = amt, unearnedInterest = totalCost, currentDate = new Date(startDate);
@@ -861,8 +953,9 @@
 
             document.getElementById(`tableBody-${id}`).innerHTML = tbodyHTML;
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
+            renderDetailRow(id);
 
-            lastCalc[id] = { pmt, freqName, term, payback, apr, totalCost };
+            lastCalc[id] = { pmt, freqName, term, payback, apr, totalCost, factor, amt, centsDisplay, discPct };
             renderTakeaway(id);
         }
 
