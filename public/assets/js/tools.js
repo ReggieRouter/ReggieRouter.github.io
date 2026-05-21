@@ -6,13 +6,13 @@
 const TOOLS = [
   { 
     id: "amo", 
-    name: "Amo schedule", 
+    name: "Payment Breakdown", 
     desc: "Full payment breakdown by period with multi-scenario prepay logic.",
     status: "live", 
     group: "deal-math", 
     icon: "chart", 
     color: "green",
-    slug: "/tools/amo",
+    slug: "/tools/payment-breakdown",
     presentation: "page",
     path: "./calculators/AmoScheduleCalculator.html",
     kw: "amortization schedule prepay payoff buyout mca payment deal desk"
