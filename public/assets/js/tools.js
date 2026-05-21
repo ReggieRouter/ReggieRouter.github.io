@@ -40,7 +40,7 @@ const TOOLS = [
     icon: "refresh", 
     color: "green",
     slug: "/tools/dscr",
-    presentation: "modal",
+    presentation: "page",
     path: "./calculators/DSCRCalculator.html",
     kw: "coverage dscr ratio revenue bank statement underwriting"
   },
@@ -79,7 +79,7 @@ const TOOLS = [
     icon: "refresh", 
     color: "green",
     slug: "/tools/sba-fees",
-    presentation: "modal",
+    presentation: "page",
     path: "./calculators/SBAFeesCalculator.html",
     kw: "sba fees rates scenario builder 7a guarantee packaging search closing"
   },
