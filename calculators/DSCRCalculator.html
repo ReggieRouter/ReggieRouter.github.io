@@ -850,7 +850,7 @@ async function runPDF() {
     const element = document.querySelector('.lp-main');
     const opt = {
         margin: [10, 10],
-        filename: `${biz || 'LendPaper'}-DSCR-Analysis.pdf`,
+        filename: `LendPaper_DSCR_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, logging: false, useCORS: true },
         jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
