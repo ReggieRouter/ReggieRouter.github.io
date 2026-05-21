@@ -435,11 +435,43 @@
 </div>
 
 <script>
-    const WATERMARK_FOOTER = "Powered by LendPaper | lendpaper.com";
+    const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available";
 
-    function cleanNumericInput(v) { return parseFloat(v.toString().replace(/,/g, '')) || 0; }
-    function formatCurrency(n) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n); }
+    const BUSINESS_DAYS_PER_MONTH = 21.67;
+    const WEEKS_PER_MONTH = 4.33;
+    const BUSINESS_DAYS_PER_WEEK = 5;
 
+    function cleanNumericInput(value) {
+        if (value === null || value === undefined || value === '') return null;
+        const parsed = parseFloat(value.toString().replace(/,/g, ''));
+        return isNaN(parsed) || !isFinite(parsed) ? null : parsed;
+    }
+    function formatCurrency(num) {
+        if (num === null || num === undefined) return '—';
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
+    }
+    function ordinal(n) {
+        const s = ["th", "st", "nd", "rd"], v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+    function showToast() {
+        let toast = document.getElementById('lp-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'lp-toast';
+            toast.textContent = 'Copied!';
+            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#14532D;color:#fff;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;opacity:0;transition:opacity 150ms;pointer-events:none;z-index:9999;';
+            document.body.appendChild(toast);
+        }
+        toast.style.opacity = '1';
+        setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+    }
+    function handlePrint(title) {
+        document.getElementById('print_title').textContent = title;
+        window.print();
+    }
+
+    // Tabs
     function switchTab(which) {
         document.getElementById('tab_net').classList.toggle('active', which === 'net');
         document.getElementById('tab_risk').classList.toggle('active', which === 'risk');
@@ -447,25 +479,257 @@
         document.getElementById('panel_risk').classList.toggle('active', which === 'risk');
     }
 
+    // Tooltips
+    const tt = document.getElementById('tt');
+    function bindTips() {
+        document.querySelectorAll('.tooltip-icon').forEach(el => {
+            if (el.dataset.bound) return;
+            el.dataset.bound = '1';
+            el.addEventListener('mouseenter', e => { tt.textContent = e.target.dataset.tip; tt.classList.add('show'); });
+            el.addEventListener('mousemove', e => {
+                const m = 12; let x = e.clientX + m; let y = e.clientY + m;
+                if (x + tt.offsetWidth > window.innerWidth) x = e.clientX - tt.offsetWidth - m;
+                if (y + tt.offsetHeight > window.innerHeight) y = e.clientY - tt.offsetHeight - m;
+                tt.style.left = x + 'px'; tt.style.top = y + 'px';
+            });
+            el.addEventListener('mouseleave', () => tt.classList.remove('show'));
+        });
+    }
+
+    // ---------- NET REQUIREMENT ----------
     function runNetCalc() {
         const loanAmt = cleanNumericInput(document.getElementById('funding_amt').value);
         const netPct = cleanNumericInput(document.getElementById('net_pct').value);
+        const heroVal = document.getElementById('hero_val');
+        const resPayoff = document.getElementById('res_payoff');
+        const netTakeaway = document.getElementById('net_takeaway');
+        if (loanAmt === null || loanAmt <= 0 || netPct === null) {
+            heroVal.textContent = '$0'; resPayoff.textContent = '$0';
+            netTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>Enter a funding amount to see what your borrower nets.';
+            return;
+        }
         const minToBorrower = loanAmt * (netPct / 100);
         const maxPayoff = loanAmt - minToBorrower;
-        document.getElementById('hero_val').textContent = formatCurrency(minToBorrower);
-        document.getElementById('res_payoff').textContent = formatCurrency(maxPayoff);
-        document.getElementById('net_takeaway').innerHTML = `<span class="tk-eyebrow">What you tell the borrower</span>"You walk away with <strong>${formatCurrency(minToBorrower)}</strong> in hand, and we can put up to <strong>${formatCurrency(maxPayoff)}</strong> toward clearing your existing debt."`;
+        heroVal.textContent = formatCurrency(minToBorrower);
+        resPayoff.textContent = formatCurrency(maxPayoff);
+        netTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>"You walk away with <strong>' + formatCurrency(minToBorrower) + '</strong> in hand, and we can put up to <strong>' + formatCurrency(maxPayoff) + '</strong> toward clearing your existing debt."';
     }
 
     function copyNet() {
-        const payload = `[Net Requirement] — LendPaper\nMin. to borrower: ${document.getElementById('hero_val').innerText}\nMax payoff: ${document.getElementById('res_payoff').innerText}\n${WATERMARK_FOOTER}`;
-        navigator.clipboard.writeText(payload);
+        const loanAmt = cleanNumericInput(document.getElementById('funding_amt').value);
+        const netPct = cleanNumericInput(document.getElementById('net_pct').value);
+        if (loanAmt === null) return;
+        const dataPairs = {
+            "New funding": formatCurrency(loanAmt),
+            "Net Requirement": netPct + "%",
+            "Min. to borrower": document.getElementById('hero_val').innerText,
+            "Max payoff": document.getElementById('res_payoff').innerText
+        };
+        const borderLine = "─────────────────────────────";
+        let payload = `[Net Requirement] — LendPaper\n${borderLine}\n`;
+        Object.entries(dataPairs).forEach(([l, v]) => { payload += `${l.padEnd(20)}: ${v}\n`; });
+        payload += `${borderLine}\n${WATERMARK_FOOTER}`;
+        navigator.clipboard.writeText(payload).then(showToast);
     }
 
-    function handlePrint(t) { window.print(); }
-    function runAll() { runNetCalc(); }
+    // ---------- POSITION RISK ----------
+    function addPosition(value, freq) {
+        const wrap = document.getElementById('positions_wrap');
+        const row = document.createElement('div');
+        row.className = 'pos-row';
+        row.innerHTML = `
+            <div class="pos-tag"></div>
+            <div class="input-wrap">
+                <div class="input-prefix">$</div>
+                <input type="number" class="input-field pos-amt" value="${value !== undefined ? value : ''}" placeholder="Payment" oninput="runRiskCalc()">
+                <select class="unit-select pos-freq" onchange="runRiskCalc()">
+                    <option value="daily">/ day</option>
+                    <option value="weekly">/ week</option>
+                    <option value="monthly">/ month</option>
+                </select>
+            </div>
+            <button class="pos-remove" title="Remove" onclick="removePosition(this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>`;
+        wrap.appendChild(row);
+        if (freq) row.querySelector('.pos-freq').value = freq;
+        renumberPositions();
+        bindTips();
+        runRiskCalc();
+    }
+    function removePosition(btn) { btn.closest('.pos-row').remove(); renumberPositions(); runRiskCalc(); }
+    function renumberPositions() {
+        document.querySelectorAll('#positions_wrap .pos-tag').forEach((tag, i) => { tag.textContent = (i + 1); });
+    }
+
+    function runRiskCalc() {
+        const monthlyRev = cleanNumericInput(document.getElementById('monthly_rev').value);
+
+        // existing positions -> monthly + daily-equivalent
+        let existingDailyEquiv = 0, existingMonthly = 0, posCount = 0;
+        document.querySelectorAll('#positions_wrap .pos-row').forEach(row => {
+            const amt = cleanNumericInput(row.querySelector('.pos-amt').value);
+            const freq = row.querySelector('.pos-freq').value;
+            if (amt !== null && amt > 0) {
+                posCount++;
+                if (freq === 'weekly') { existingMonthly += amt * WEEKS_PER_MONTH; existingDailyEquiv += amt / BUSINESS_DAYS_PER_WEEK; }
+                else if (freq === 'monthly') { existingMonthly += amt; existingDailyEquiv += amt / BUSINESS_DAYS_PER_MONTH; }
+                else { existingMonthly += amt * BUSINESS_DAYS_PER_MONTH; existingDailyEquiv += amt; }
+            }
+        });
+
+        // new funding -> derive periodic payment from amount * factor / term
+        const fundAmt = cleanNumericInput(document.getElementById('funding_amt').value);
+        const factor = cleanNumericInput(document.getElementById('factor').value);
+        const termVal = cleanNumericInput(document.getElementById('term_val').value);
+        const termUnit = document.getElementById('term_unit').value;
+
+        let newDailyEquiv = 0, newMonthly = 0, newPayback = 0, newPeriodic = 0, periodLabel = '';
+        if (fundAmt > 0 && factor > 0 && termVal > 0) {
+            newPayback = fundAmt * factor;
+            newPeriodic = newPayback / termVal;
+            if (termUnit === 'weeks') {
+                newMonthly = newPeriodic * WEEKS_PER_MONTH;
+                newDailyEquiv = newPeriodic / BUSINESS_DAYS_PER_WEEK;
+                periodLabel = '/ week';
+            } else if (termUnit === 'months') {
+                newMonthly = newPeriodic;
+                newDailyEquiv = newPeriodic / BUSINESS_DAYS_PER_MONTH;
+                periodLabel = '/ month';
+            } else { // business days
+                newMonthly = newPeriodic * BUSINESS_DAYS_PER_MONTH;
+                newDailyEquiv = newPeriodic;
+                periodLabel = '/ day';
+            }
+        }
+        document.getElementById('new_pay_note').textContent = newPeriodic > 0 ? (formatCurrency(newPeriodic) + ' ' + periodLabel) : '—';
+
+        const newPositionNum = posCount + 1;
+        const totalDaily = existingDailyEquiv + newDailyEquiv;
+        const totalMonthly = existingMonthly + newMonthly;
+        const dsr = (monthlyRev !== null && monthlyRev > 0) ? (totalMonthly / monthlyRev) * 100 : null;
+        const remaining = (monthlyRev !== null) ? monthlyRev - totalMonthly : null;
+
+        document.getElementById('hero_pos').textContent = ordinal(newPositionNum);
+        document.getElementById('res_daily').textContent = totalDaily > 0 ? formatCurrency(totalDaily) : '—';
+        document.getElementById('res_monthly').textContent = totalMonthly > 0 ? formatCurrency(totalMonthly) : '—';
+        document.getElementById('hero_dsr').textContent = (dsr !== null) ? dsr.toFixed(1) + '%' : '—';
+        document.getElementById('res_remaining').textContent = (remaining !== null) ? formatCurrency(remaining) : '—';
+
+        const riskTakeaway = document.getElementById('risk_takeaway');
+        if (dsr === null) {
+            riskTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>Enter monthly revenue to see how this funding lands.';
+        } else if (newPeriodic > 0) {
+            riskTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>"This would be your <strong>' + ordinal(newPositionNum) + ' position</strong>, with about <strong>' + formatCurrency(newPeriodic) + ' ' + periodLabel.replace('/ ', 'per ') + '</strong> in new payments — taking total payments to <strong>' + dsr.toFixed(1) + '%</strong> of your revenue."';
+        } else {
+            riskTakeaway.innerHTML = '<span class="tk-eyebrow">What you tell the borrower</span>Existing payments already take <strong>' + dsr.toFixed(1) + '%</strong> of revenue. Add the new funding terms to model the next position.';
+        }
+
+        // optional exposure
+        const openBal = cleanNumericInput(document.getElementById('open_bal').value);
+        const expRow = document.getElementById('row_exposure');
+        if (openBal !== null && openBal >= 0 && monthlyRev !== null && monthlyRev > 0 && (newPayback > 0 || openBal > 0)) {
+            const exposure = (openBal + newPayback) / monthlyRev;
+            document.getElementById('res_exposure').textContent = exposure.toFixed(2) + 'x revenue';
+            expRow.classList.remove('hidden');
+        } else {
+            expRow.classList.add('hidden');
+        }
+
+        updateVerdict(dsr, newPositionNum, remaining);
+    }
+
+    function updateVerdict(dsr, posNum, remaining) {
+        const box = document.getElementById('verdict');
+        const head = document.getElementById('verdict_headline');
+        const sub = document.getElementById('verdict_sub');
+        const eyebrow = document.getElementById('verdict_eyebrow');
+        eyebrow.textContent = 'Stacking verdict — ' + ordinal(posNum) + ' position';
+
+        if (dsr === null) {
+            setVerdictColor(box, head, sub, eyebrow, 'low');
+            head.textContent = 'Enter revenue to assess';
+            sub.textContent = '';
+            return;
+        }
+
+        let band, headline, note;
+        if (dsr < 10) { band = 'low'; headline = 'Low risk'; note = 'Debt service leaves comfortable operating headroom.'; }
+        else if (dsr < 20) { band = 'mod'; headline = 'Moderate risk'; note = 'Workable but tight. Consider a smaller amount or longer term.'; }
+        else if (dsr < 30) { band = 'high'; headline = 'High risk'; note = 'The merchant is likely overextended. Funding adds real default risk.'; }
+        else { band = 'sev'; headline = 'Severe risk'; note = 'Debt service is unsustainable at this revenue. Decline or restructure.'; }
+
+        if (posNum >= 4 && band === 'low') { band = 'high'; headline = 'High risk'; note = 'Ratio looks fine, but a 4th+ position is inherently fragile — any revenue dip breaks it.'; }
+        else if (posNum >= 4) { note += ' This is a ' + ordinal(posNum) + ' position — exceptional caution warranted.'; }
+        else if (posNum === 3 && band === 'low') { band = 'mod'; headline = 'Moderate risk'; note = 'Ratio is healthy, but a 3rd position still elevates risk. Verify revenue stability.'; }
+        else if (posNum === 3) { note += ' Note: this is a 3rd position.'; }
+
+        if (remaining !== null && remaining < 0) {
+            band = 'sev'; headline = 'Severe risk';
+            note = 'Combined debt service exceeds total revenue — mathematically unpayable.';
+        }
+
+        setVerdictColor(box, head, sub, eyebrow, band);
+        head.textContent = headline;
+        sub.textContent = note;
+    }
+
+    function setVerdictColor(box, head, sub, eyebrow, band) {
+        const map = {
+            low:  ['--risk-low-bg',  '--risk-low-bd',  '--risk-low-tx'],
+            mod:  ['--risk-mod-bg',  '--risk-mod-bd',  '--risk-mod-tx'],
+            high: ['--risk-high-bg', '--risk-high-bd', '--risk-high-tx'],
+            sev:  ['--risk-sev-bg',  '--risk-sev-bd',  '--risk-sev-tx'],
+        };
+        const [bg, bd, tx] = map[band];
+        const css = getComputedStyle(document.documentElement);
+        box.style.background = css.getPropertyValue(bg);
+        box.style.borderColor = css.getPropertyValue(bd);
+        const txc = css.getPropertyValue(tx);
+        head.style.color = txc; sub.style.color = txc; eyebrow.style.color = txc;
+    }
+
+    function copyRisk() {
+        const monthlyRev = cleanNumericInput(document.getElementById('monthly_rev').value);
+        if (monthlyRev === null) return;
+        const dataPairs = {
+            "New funding": formatCurrency(cleanNumericInput(document.getElementById('funding_amt').value)),
+            "Monthly revenue": formatCurrency(monthlyRev),
+            "New position": document.getElementById('hero_pos').innerText,
+            "Combined daily debt svc": document.getElementById('res_daily').innerText,
+            "Combined monthly debt svc": document.getElementById('res_monthly').innerText,
+            "Debt-service ratio": document.getElementById('hero_dsr').innerText,
+            "Revenue left after debt": document.getElementById('res_remaining').innerText,
+            "Verdict": document.getElementById('verdict_headline').innerText
+        };
+        if (!document.getElementById('row_exposure').classList.contains('hidden')) {
+            dataPairs["Total exposure"] = document.getElementById('res_exposure').innerText;
+        }
+        const borderLine = "─────────────────────────────";
+        let payload = `[Position / Stacking Risk] — LendPaper\n${borderLine}\n`;
+        Object.entries(dataPairs).forEach(([l, v]) => { payload += `${l.padEnd(26)}: ${v}\n`; });
+        payload += `${borderLine}\n${WATERMARK_FOOTER}`;
+        navigator.clipboard.writeText(payload).then(showToast);
+    }
+
+    function toggleExposure() {
+        const c = document.getElementById('exp_collapse');
+        const label = document.querySelector('#exp_toggle .exp-label');
+        if (c.hasAttribute('hidden')) {
+            c.removeAttribute('hidden');
+            label.textContent = '– Hide exposure check';
+            bindTips();
+        } else {
+            c.setAttribute('hidden', '');
+            label.textContent = '+ Add exposure check';
+        }
+    }
+
+    function runAll() { runNetCalc(); runRiskCalc(); }
 
     window.onload = () => {
+        addPosition(450, 'daily');
+        bindTips();
         runAll();
         if (window.self !== window.top) {
             document.body.classList.add('is-embedded');

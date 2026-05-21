@@ -76,7 +76,7 @@ const TOOLS = [
     desc: "Dynamic SBA 7(a) scenario builder with guarantee fee logic.",
     status: "live", 
     group: "deal-math", 
-    icon: "refresh", 
+    icon: "flag", 
     color: "green",
     slug: "/tools/sba-fees",
     presentation: "page",
@@ -89,7 +89,7 @@ const TOOLS = [
     desc: "Identify the break even point.",
     status: "soon", 
     group: "deal-math", 
-    icon: "chart", 
+    icon: "trendUp", 
     color: "green",
     href: "#",
     kw: "roi break even profit investment"
