@@ -214,7 +214,7 @@
 
         /* Amortization Table Scroll with Fade */
         .table-scroll-container {
-            max-height: 280px;
+            max-height: 480px;
             overflow-y: auto;
             position: relative;
             border: 1px solid var(--brand-border);
@@ -307,6 +307,10 @@
         body.pdf-export-mode .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
         body.pdf-export-mode .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
         body.pdf-export-mode .takeaway-eyebrow { display: none !important; }
+        body.pdf-export-mode .table-scroll-container { max-height: none !important; overflow: visible !important; }
+        body.pdf-export-mode .no-print { display: none !important; }
+        .fee-unit { cursor: pointer; user-select: none; transition: color 0.15s; }
+        .fee-unit:hover { color: #14532D !important; }
     </style>
 </head>
 <body>
@@ -436,18 +440,35 @@
             isChecked ? summary.classList.remove('hidden') : summary.classList.add('hidden');
 
             if (isChecked) {
-                const wrap = document.getElementById(`detailsWrap-${id}`);
-                const btn = document.getElementById(`toggleDetailsBtn-${id}`);
-                if (wrap.classList.contains('hidden')) {
-                    wrap.classList.remove('hidden');
-                    btn.textContent = 'Hide Amortization Schedule ↑';
-                }
-                // calcCard runs synchronously after this — scroll once DOM is updated
                 setTimeout(() => {
                     const targetRow = document.getElementById(`prepay-target-${id}`);
                     if (targetRow) targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 50);
             }
+        }
+
+        function toggleFeeMode(id) {
+            const wrap = document.getElementById(`feeWrap-${id}`);
+            const pfx = document.getElementById(`feePfx-${id}`);
+            const unit = document.getElementById(`feeUnit-${id}`);
+            const input = document.getElementById(`fee-${id}`);
+            const amt = cleanNumericInput(document.getElementById(`amt-${id}`).value) || 0;
+            const val = cleanNumericInput(input.value) || 0;
+
+            if (wrap.dataset.feeMode === 'pct') {
+                wrap.dataset.feeMode = 'dollar';
+                pfx.classList.remove('hidden');
+                unit.classList.add('hidden');
+                input.step = '100';
+                input.value = amt > 0 ? Math.round(amt * val / 100) : val;
+            } else {
+                wrap.dataset.feeMode = 'pct';
+                pfx.classList.add('hidden');
+                unit.classList.remove('hidden');
+                input.step = '0.1';
+                input.value = amt > 0 ? parseFloat((val / amt * 100).toFixed(2)) : 0;
+            }
+            calcCard(id);
         }
 
         function updateHeaders() {
@@ -532,9 +553,10 @@
 
                             <div class="col-span-2">
                                 <label>Origination Fee</label>
-                                <div class="lp-input-group">
+                                <div class="lp-input-group" id="feeWrap-${id}" data-fee-mode="pct">
+                                    <span id="feePfx-${id}" class="hidden pl-3 pr-2 text-[#14532D] font-bold border-r border-[#E5E7EB] fee-unit" onclick="toggleFeeMode(${id})" title="Switch to %">$</span>
                                     <input type="number" step="0.1" id="fee-${id}" value="3.0" min="0" class="lp-input" oninput="calcCard(${id})">
-                                    <span class="pr-3 pl-2 text-[#94A3B8] font-bold border-l border-[#E5E7EB]">%</span>
+                                    <span id="feeUnit-${id}" class="pr-3 pl-2 text-[#94A3B8] font-bold border-l border-[#E5E7EB] fee-unit" onclick="toggleFeeMode(${id})" title="Switch to $">%</span>
                                 </div>
                             </div>
 
@@ -565,20 +587,11 @@
                             </label>
                             <div class="text-[11px] text-[#6B7280] mb-4">Model early payoff savings and reduced interest cost.</div>
                             
-                            <div id="prepaySection-${id}" class="hidden grid grid-cols-2 gap-4 bg-[#F8FAFC] p-4 rounded-xl border border-[#E2E8F0]">
-                                <div>
-                                    <label class="!text-[#6B7280]">Target Paid Down</label>
-                                    <div class="lp-input-group">
-                                        <input type="number" id="renPct-${id}" value="50" min="0" class="lp-input text-right" oninput="calcCard(${id})">
-                                        <span class="pr-3 pl-2 text-[#94A3B8] font-bold">%</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="!text-[#6B7280]">Pre-Pay Discount</label>
-                                    <div class="lp-input-group">
-                                        <input type="number" id="discPct-${id}" value="25" min="0" class="lp-input text-right" oninput="calcCard(${id})">
-                                        <span class="pr-3 pl-2 text-[#94A3B8] font-bold">%</span>
-                                    </div>
+                            <div id="prepaySection-${id}" class="hidden bg-[#F8FAFC] p-4 rounded-xl border border-[#E2E8F0]">
+                                <label class="!text-[#6B7280]">Pre-Pay Discount</label>
+                                <div class="lp-input-group">
+                                    <input type="number" id="discPct-${id}" value="25" min="0" class="lp-input text-right" oninput="calcCard(${id})">
+                                    <span class="pr-3 pl-2 text-[#94A3B8] font-bold">%</span>
                                 </div>
                             </div>
                         </div>
@@ -641,28 +654,30 @@
                                 </button>
                             </div>
 
-                            <div class="mt-6 mb-4 flex justify-center">
-                                <button onclick="toggleDetails(${id})" id="toggleDetailsBtn-${id}" class="lp-pill-btn">View Amortization Schedule ↓</button>
-                            </div>
-
-                            <div id="detailsWrap-${id}" class="hidden mb-8">
-                                <div class="table-scroll-container">
-                                    <table class="min-w-full text-left bg-white text-[12px]">
-                                        <thead class="bg-[#F9FAFB] sticky top-0 border-b border-[#E5E7EB]">
-                                            <tr>
-                                                <th class="p-3 font-bold text-[#111827]">Date</th>
-                                                <th class="p-3 font-bold text-[#111827]">Payment</th>
-                                                <th class="p-3 font-bold text-[#111827]">Principal</th>
-                                                <th class="p-3 font-bold text-[#111827]">Interest</th>
-                                                <th class="p-3 font-bold text-[#111827]">Balance</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tableBody-${id}" class="divide-y divide-[#F3F4F6]"></tbody>
-                                    </table>
-                                </div>
-                            </div>
                         </div>
 
+                    </div>
+                </div>
+
+                <div class="border-t border-[#E5E7EB]">
+                    <div class="px-[24px] pt-5 pb-3 flex items-center">
+                        <span class="text-[11px] font-extrabold text-[#6B7280] uppercase tracking-widest">Amortization Schedule</span>
+                    </div>
+                    <div id="detailsWrap-${id}" class="px-[24px] pb-[28px]">
+                        <div class="table-scroll-container">
+                            <table class="min-w-full text-left bg-white text-[12px]">
+                                <thead class="bg-[#F9FAFB] sticky top-0 border-b border-[#E5E7EB]">
+                                    <tr>
+                                        <th class="p-3 font-bold text-[#111827]">Date</th>
+                                        <th class="p-3 font-bold text-[#111827]">Payment</th>
+                                        <th class="p-3 font-bold text-[#111827]">Principal</th>
+                                        <th class="p-3 font-bold text-[#111827]">Interest</th>
+                                        <th class="p-3 font-bold text-[#111827]">Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody-${id}" class="divide-y divide-[#F3F4F6]"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -691,13 +706,6 @@
             updateHeaders();
         }
 
-        function toggleDetails(id) {
-            const wrap = document.getElementById(`detailsWrap-${id}`);
-            const btn = document.getElementById(`toggleDetailsBtn-${id}`);
-            const isHidden = wrap.classList.toggle('hidden');
-            btn.textContent = isHidden ? "View Amortization Schedule ↓" : "Hide Amortization Schedule ↑";
-        }
-
         function removeCard(id) {
             const el = document.getElementById(`cardContainer-${id}`);
             if(el) { el.remove(); updateHeaders(); }
@@ -710,17 +718,18 @@
             const amt = cleanNumericInput(document.getElementById(`amt-${id}`).value);
             const factor = cleanNumericInput(document.getElementById(`factor-${id}`).value);
             const term = cleanNumericInput(document.getElementById(`term-${id}`).value);
-            const feePct = cleanNumericInput(document.getElementById(`fee-${id}`).value) || 0;
+            const feeInput = cleanNumericInput(document.getElementById(`fee-${id}`).value) || 0;
+            const feeIsDollar = document.getElementById(`feeWrap-${id}`)?.dataset.feeMode === 'dollar';
             const freq = document.getElementById(`freq-${id}`).value;
             const startDateStr = document.getElementById(`start-${id}`).value;
             const isPrepayEnabled = document.getElementById(`enablePrepay-${id}`).checked;
-            const renPct = cleanNumericInput(document.getElementById(`renPct-${id}`).value) || 0;
+            const renPct = 50;
             const discPct = cleanNumericInput(document.getElementById(`discPct-${id}`).value) || 0;
 
             if(!amt || !factor || !term) return;
 
             const payback = amt * factor;
-            const feeAmt = amt * (feePct / 100);
+            const feeAmt = feeIsDollar ? feeInput : amt * (feeInput / 100);
             const netFunded = amt - feeAmt;
             const totalCost = payback - amt;
             let startDate = parseLocalDate(startDateStr);
