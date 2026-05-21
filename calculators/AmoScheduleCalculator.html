@@ -109,12 +109,23 @@
         }
 
         /* Layout specific */
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--brand-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            margin-bottom: 8px;
+        }
+        label.flex { display: flex; }
+
         main {
             display: flex;
             flex-direction: column;
             align-items: center;
             flex-grow: 1;
-            padding: 40px 24px;
+            padding: 24px;
         }
         @media (max-width: 640px) {
             main { padding: 16px 12px; }
@@ -403,6 +414,8 @@
             return (low + high) / 2;
         }
 
+        const fmtUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
         function cleanNumericInput(val) {
             const num = parseFloat(val);
             return isNaN(num) ? null : num;
@@ -595,7 +608,18 @@
                                 <span id="takeaway-content-${id}"></span>
                             </div>
 
-                            <div class="mt-8 mb-4 flex justify-center">
+                            <div class="action-buttons flex flex-col gap-3 mt-5 no-print">
+                                <button onclick="copyResults(${id})" class="lp-copy-btn">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    Copy Results
+                                </button>
+                                <button onclick="handleLendPaperSavePDF()" class="lp-print-btn">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                                    Save as PDF
+                                </button>
+                            </div>
+
+                            <div class="mt-6 mb-4 flex justify-center">
                                 <button onclick="toggleDetails(${id})" id="toggleDetailsBtn-${id}" class="lp-pill-btn">View Amortization Schedule ↓</button>
                             </div>
 
@@ -617,16 +641,6 @@
                             </div>
                         </div>
 
-                        <div class="action-buttons flex flex-col gap-4 mt-auto">
-                            <button onclick="copyResults(${id})" class="lp-copy-btn no-print">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                Copy Results
-                            </button>
-                            <button onclick="handleLendPaperSavePDF()" class="lp-print-btn no-print">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                                Save as PDF
-                            </button>
-                        </div>
                     </div>
                 </div>
 
