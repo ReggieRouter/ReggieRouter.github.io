@@ -66,7 +66,7 @@ const TOOLS = [
     icon: "stack", 
     color: "green",
     slug: "/tools/fundability",
-    presentation: "modal",
+    presentation: "page",
     path: "./calculators/FundabilityCalculator.html",
     kw: "net funding wire origination fundability stacking risk positions"
   },
