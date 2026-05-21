@@ -43,6 +43,7 @@
             border: 1px solid var(--lp-border);
             border-radius: 20px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden; /* Fixes corner bleeding */
         }
 
         /* Tabs */
@@ -71,12 +72,11 @@
             align-items: center;
             line-height: 1.2;
         }
-        .lp-tab:first-child { border-top-left-radius: 20px; border-right: 1px solid var(--lp-border); }
-        .lp-tab:last-child { border-top-right-radius: 20px; }
+        .lp-tab:first-child { border-right: 1px solid var(--lp-border); }
         
         .lp-tab.active { 
             color: var(--lp-green); 
-            border-top-color: #D97706; /* Golden orange accent */
+            border-top-color: var(--lp-green); /* Changed from golden-orange to brand green */
             background: #fff;
         }
         .lp-tab-sub {
