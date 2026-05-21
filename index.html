@@ -544,6 +544,64 @@ input { font-family: inherit; }
     border-right: 1px solid var(--border);
 }
 #lp-tool-iframe { width: 100%; height: 100%; border: none; }
+
+/* ==================== Home — Greeting ==================== */
+.home-greeting { margin-bottom: 28px; }
+.greeting-text {
+  font-size: 38px; font-weight: 800; letter-spacing: -0.025em;
+  color: var(--text); line-height: 1.1; margin-bottom: 8px;
+}
+.greeting-sub { font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+
+/* ==================== Featured tool cards ==================== */
+.featured-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-bottom: 28px;
+}
+.featured-card {
+  background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 20px; cursor: pointer; text-decoration: none; color: inherit;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: border-color var(--transition), transform var(--transition);
+  animation: fadeUp 250ms ease both;
+}
+.featured-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.featured-card.is-featured-primary { border-color: var(--accent); }
+.featured-card-icon {
+  width: 48px; height: 48px; border-radius: 10px;
+  background: var(--bg-alt); color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.featured-card-icon.green { background: var(--accent-soft); color: var(--accent-hover); }
+.featured-card-icon svg { width: 22px; height: 22px; }
+.featured-card-name { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); line-height: 1.2; }
+.featured-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; flex: 1; }
+.featured-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.featured-card-label { font-size: 12px; font-weight: 700; color: var(--accent); }
+.featured-card-arrow { color: var(--text-faint); transition: color var(--transition), transform var(--transition); }
+.featured-card:hover .featured-card-arrow { color: var(--accent); transform: translateX(2px); }
+
+/* ==================== Home section labels ==================== */
+.home-section-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-faint);
+  margin-bottom: 10px; padding-left: 2px;
+}
+
+/* ==================== Live tools grid (2-col) ==================== */
+.live-tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 28px; }
+
+/* ==================== Coming soon grid (3-col) ==================== */
+.soon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+@media (max-width: 900px) {
+  .featured-grid { grid-template-columns: repeat(2, 1fr); }
+  .soon-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .featured-grid, .live-tools-grid, .soon-grid { grid-template-columns: 1fr; }
+  .greeting-text { font-size: 28px; }
+}
 </style>
 </head>
 <body>
@@ -631,20 +689,11 @@ input { font-family: inherit; }
 
       <!-- Home -->
       <div class="view active" id="view-home">
-        <div class="banner">
-          <div class="banner-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          </div>
-          <div class="banner-text">
-            <div class="banner-title">Precision tools for modern funding desks.</div>
-            <div class="banner-sub">Built for ISOs. Trusted by lenders. <a href="mailto:info@lendpaper.com">Request a custom tool</a>.</div>
-          </div>
+        <div class="home-greeting">
+          <div class="greeting-text" id="greetingText"></div>
+          <div class="greeting-sub" id="greetingSubtitle"></div>
         </div>
         <div id="homeTools"></div>
-        <div class="empty" id="homeEmpty">
-          <div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-          <h3>No matches.</h3><p>Try a shorter search or <a href="mailto:info@lendpaper.com">request a tool</a>.</p>
-        </div>
       </div>
 
       <!-- Category views -->
@@ -823,20 +872,97 @@ function handleRouting() {
   }
 }
 
+/* ---- Greeting + phrase bank ---- */
+var phraseBank = [
+  "Close faster. Underwrite smarter.",
+  "The deal you need is one conversation away.",
+  "Every rep who hit quota started somewhere in their pipeline.",
+  "Be the person who follows up.",
+  "Clarity closes. Know your numbers.",
+  "Busy day or slow day — work it the same way.",
+  "The best deals take patience.",
+  "Show up prepared. The rest follows.",
+  "What's the next move on your biggest deal?"
+];
+var lastPhraseIdx = -1;
+
+function getGreeting() {
+  var now = new Date();
+  var h = now.getHours(), d = now.getDay(), date = now.getDate();
+  var lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  if (date > lastDay - 5) return "Last push of the month.";
+  if (date <= 3) return "Fresh start.";
+  if (d === 1) return "New week.";
+  if (d === 5) return "End of week.";
+  if (h >= 5 && h < 12) return "Good morning.";
+  if (h >= 12 && h < 17) return "Good afternoon.";
+  if (h >= 17 && h < 21) return "Good evening.";
+  return "Working late.";
+}
+
+function getSubtitle() {
+  var idx;
+  do { idx = Math.floor(Math.random() * phraseBank.length); } while (idx === lastPhraseIdx && phraseBank.length > 1);
+  lastPhraseIdx = idx;
+  return phraseBank[idx];
+}
+
+function updateGreeting() {
+  var gt = document.getElementById('greetingText');
+  var gs = document.getElementById('greetingSubtitle');
+  if (gt) gt.textContent = getGreeting();
+  if (gs) gs.textContent = getSubtitle();
+}
+
+/* ---- Featured card renderer ---- */
+var featuredIds = ['amo', 'registry', 'sba-rates'];
+var featuredLabels = {
+  'amo': 'Most used', 'registry': 'Due diligence',
+  'sba-rates': 'SBA 7(a)', 'dscr': 'Risk & coverage', 'fundability': 'Deal math'
+};
+
+function featuredCardHTML(t, i, isPrimary) {
+  var href = ' href="'+t.slug+'"';
+  var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
+  var cls = 'featured-card' + (isPrimary ? ' is-featured-primary' : '');
+  var onclick = ' onclick="handleToolClick(event, \''+t.id+'\')"';
+  var label = featuredLabels[t.id] || '';
+  var iconCls = t.color === 'green' ? 'green' : '';
+  return '<a'+href+target+' class="'+cls+'"'+onclick+' style="animation-delay:'+(i*80)+'ms">'
+    +'<div class="featured-card-icon '+iconCls+'">'+ICO[t.icon]+'</div>'
+    +'<div class="featured-card-name">'+t.name+'</div>'
+    +'<div class="featured-card-desc">'+t.desc+'</div>'
+    +'<div class="featured-card-foot">'
+    +(label ? '<span class="featured-card-label">'+label+' →</span>' : '<span></span>')
+    +'<span class="featured-card-arrow">'+ICO.arrow+'</span>'
+    +'</div>'
+    +'</a>';
+}
+
 function renderHome() {
-  var cats = [
-    { key:'deal-math', label:'Deal math' },
-    { key:'risk',      label:'Risk & underwriting' },
-    { key:'data',      label:'Data & leads' }
-  ];
-  var html='', idx=0;
-  cats.forEach(function(c){
-    var items = TOOLS.filter(function(t){return t.group===c.key;});
-    html += '<div class="cat-label">'+c.label+'</div><div class="cards">';
-    items.forEach(function(t){ html += cardHTML(t, idx++); });
+  var featured = featuredIds.map(function(id){ return TOOLS.find(function(x){ return x.id === id; }); }).filter(Boolean);
+  var liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1; });
+  var soon = TOOLS.filter(function(t){ return t.status === 'soon'; });
+
+  var html = '<div class="featured-grid">';
+  featured.forEach(function(t, i){ html += featuredCardHTML(t, i, i === 0); });
+  html += '</div>';
+
+  if (liveRest.length) {
+    html += '<div class="home-section-label">Live Tools</div><div class="live-tools-grid">';
+    liveRest.forEach(function(t, i){ html += cardHTML(t, i); });
     html += '</div>';
-  });
+  }
+
+  if (soon.length) {
+    html += '<div class="home-section-label">Coming Soon</div><div class="soon-grid">';
+    soon.forEach(function(t, i){ html += cardHTML(t, i); });
+    html += '</div>';
+  }
+
   document.getElementById('homeTools').innerHTML = html;
+  updateGreeting();
+  setInterval(updateGreeting, 3.5 * 60 * 60 * 1000);
 }
 
 function renderCat(cat, id) {
