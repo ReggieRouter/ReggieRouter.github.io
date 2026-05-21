@@ -354,9 +354,10 @@
         body.pdf-export-mode .remove-card-btn, 
         body.pdf-export-mode .lp-disclaimer, 
         body.pdf-export-mode .tooltip-icon, 
-        body.pdf-export-mode .lp-howto, 
-        body.pdf-export-mode .lp-tab-sub, 
-        body.pdf-export-mode .shared-strip { display: none !important; }
+        body.pdf-export-mode .lp-howto,
+        body.pdf-export-mode .lp-tab-sub,
+        body.pdf-export-mode .shared-strip,
+        body.pdf-export-mode .calc-card-header { display: none !important; }
         
         body.pdf-export-mode .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
         body.pdf-export-mode .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
@@ -401,6 +402,10 @@
         <h1>Fundability Assessment</h1>
     </div>
     <div class="lp-container">
+        <div class="calc-card-header">
+            <div class="calc-card-header-title">Fundability</div>
+            <div class="calc-card-header-sub">Borrower Readiness Report</div>
+        </div>
         <!-- Tabs -->
         <div class="lp-tabs">
             <button class="lp-tab active" id="tab_net" onclick="switchTab('net')">
