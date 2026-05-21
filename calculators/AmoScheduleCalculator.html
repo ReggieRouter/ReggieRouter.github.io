@@ -578,19 +578,16 @@
         function togglePrepay(id) {
             const isChecked = document.getElementById(`enablePrepay-${id}`).checked;
             const hint = document.getElementById(`prepayAmoHint-${id}`);
-            const targetRow = document.getElementById(`prepayTargetRow-${id}`);
             if (!isChecked) {
                 const tracks = getTracks(id);
                 if ((cardTracks[id] ?? 0) >= tracks.length) cardTracks[id] = 0;
                 renderDetailRow(id);
-                document.getElementById(`prepaySummary-${id}`)?.classList.add('hidden');
                 if (hint) hint.classList.remove('visible');
-                if (targetRow) targetRow.style.display = 'none';
             } else {
-                document.getElementById(`prepaySummary-${id}`)?.classList.remove('hidden');
                 if (hint) hint.classList.add('visible');
-                if (targetRow) targetRow.style.display = 'flex';
             }
+            // Let renderTakeaway own all summary box state
+            renderTakeaway(id);
         }
 
         const feeToggleTimes = {};
@@ -799,22 +796,22 @@
                                 </div>
                             </div>
 
-                            <div id="prepaySummary-${id}" class="hidden bg-[#F9FAFB] rounded-xl p-5 border border-[#E5E7EB] mb-6">
+                            <div id="prepaySummary-${id}" class="hidden bg-[#F0FDF4] rounded-xl p-5 border border-[#BBF7D0] mb-6">
                                 <div class="flex justify-between mb-2">
-                                    <span class="text-[#374151] font-semibold text-[13px]">Payoff date</span>
-                                    <span class="font-extrabold text-[#111827]" id="outRenDate-${id}">—</span>
+                                    <span class="text-[#14532D] font-semibold text-[13px]">Payoff date</span>
+                                    <span class="font-extrabold text-[#14532D]" id="outRenDate-${id}">—</span>
                                 </div>
                                 <div id="prepayTargetRow-${id}" class="flex justify-between mb-2" style="display:none">
-                                    <span class="text-[#374151] font-semibold text-[13px] flex items-center gap-1">Pre-pay target payoff date <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+                                    <span class="text-[#14532D] font-semibold text-[13px] flex items-center gap-1">Pre-pay target payoff date <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
                                     <span class="font-extrabold text-[#14532D]" id="outPrepayDate-${id}">—</span>
                                 </div>
                                 <div class="flex justify-between mb-2">
-                                    <span class="text-[#374151] font-semibold text-[13px]">Pre-pay savings</span>
-                                    <span class="font-extrabold text-[#111827]" id="outSavings-${id}">$0.00</span>
+                                    <span class="text-[#14532D] font-semibold text-[13px]">Pre-pay savings</span>
+                                    <span class="font-extrabold text-[#14532D]" id="outSavings-${id}">$0.00</span>
                                 </div>
-                                <div class="flex justify-between border-t border-[#E5E7EB] pt-2 mt-2">
-                                    <span class="text-[#111827] font-extrabold text-[13px] flex items-center">Est. payoff balance<i class="lp-info-btn" title="The amount the borrower needs to pay today to fully retire the loan at this date, after applying the pre-pay discount on unearned interest.">i</i></span>
-                                    <span class="font-extrabold text-[#111827]" id="outBuyout-${id}">$0.00</span>
+                                <div id="estPayoffRow-${id}" class="flex justify-between border-t border-[#BBF7D0] pt-2 mt-2" style="display:none">
+                                    <span class="text-[#14532D] font-extrabold text-[13px] flex items-center">Est. payoff balance<i class="lp-info-btn" title="The amount the borrower needs to pay today to fully retire the loan at this date, after applying the pre-pay discount on unearned interest.">i</i></span>
+                                    <span class="font-extrabold text-[#14532D]" id="outBuyout-${id}">$0.00</span>
                                 </div>
                             </div>
 
@@ -1012,22 +1009,33 @@
             const summary = document.getElementById(`prepaySummary-${id}`);
             const isPrepayOn = document.getElementById(`enablePrepay-${id}`)?.checked;
             const targetRow = document.getElementById(`prepayTargetRow-${id}`);
-            if (sel) {
-                document.getElementById(`outRenDate-${id}`).innerText = sel.date;
-                document.getElementById(`outSavings-${id}`).innerText = fmtUsd.format(sel.savings);
-                document.getElementById(`outBuyout-${id}`).innerText = fmtUsd.format(sel.buyout);
-                const prepayDateEl = document.getElementById(`outPrepayDate-${id}`);
-                if (prepayDateEl) prepayDateEl.innerText = sel.date;
-                if (isPrepayOn) {
-                    summary.classList.remove('hidden');
-                    if (targetRow) targetRow.style.display = 'flex';
-                }
-            } else if (isPrepayOn) {
+            const estPayoffRow = document.getElementById(`estPayoffRow-${id}`);
+            const rowSelected = !!(sel);
+
+            // "Payoff date" always shows the loan maturity date (last payment)
+            const maturityEl = document.getElementById(`outRenDate-${id}`);
+            if (maturityEl && c.maturityDate) maturityEl.innerText = c.maturityDate;
+
+            if (isPrepayOn) {
                 summary.classList.remove('hidden');
-                if (targetRow) targetRow.style.display = 'flex';
+                if (rowSelected) {
+                    // Pre-pay target date = the row the rep clicked (early payoff target)
+                    const prepayDateEl = document.getElementById(`outPrepayDate-${id}`);
+                    if (prepayDateEl) prepayDateEl.innerText = sel.date;
+                    document.getElementById(`outSavings-${id}`).innerText = fmtUsd.format(sel.savings);
+                    document.getElementById(`outBuyout-${id}`).innerText = fmtUsd.format(sel.buyout);
+                    if (targetRow) targetRow.style.display = 'flex';
+                    if (estPayoffRow) estPayoffRow.style.display = 'flex';
+                } else {
+                    // Pre-pay on but no row clicked yet — hide row-specific fields
+                    document.getElementById(`outSavings-${id}`).innerText = '$0.00';
+                    if (targetRow) targetRow.style.display = 'none';
+                    if (estPayoffRow) estPayoffRow.style.display = 'none';
+                }
             } else {
                 summary.classList.add('hidden');
                 if (targetRow) targetRow.style.display = 'none';
+                if (estPayoffRow) estPayoffRow.style.display = 'none';
             }
         }
 
@@ -1132,7 +1140,7 @@
             document.getElementById(`outApr-${id}`).innerText = apr.toFixed(1) + '%';
             
             let balance = amt, unearnedInterest = totalCost, currentDate = new Date(startDate);
-            let tbodyHTML = '', printTbodyHTML = '';
+            let tbodyHTML = '', printTbodyHTML = '', maturityDate = '';
 
             const periodRate = getPeriodRate(amt, pmt, periods);
 
@@ -1156,6 +1164,7 @@
                 const dateStr = currentDate.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
                 const dateDay = currentDate.getDate();
                 const dateMonth = currentDate.toLocaleString('default', {month: 'long'});
+                maturityDate = dateStr;
                 const isSelected = rowSelection[id] && rowSelection[id].period === i;
 
                 if (isSelected) {
@@ -1179,7 +1188,7 @@
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
             renderDetailRow(id);
 
-            lastCalc[id] = { pmt, freqName, term, payback, apr, totalCost, factor, amt, centsDisplay, discPct };
+            lastCalc[id] = { pmt, freqName, term, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate };
             renderTakeaway(id);
         }
 
