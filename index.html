@@ -699,8 +699,8 @@ input { font-family: inherit; }
 </div>
 
 <!-- External Data -->
-<script src="public/assets/js/tools.js"></script>
-<script src="public/assets/js/glossary.js"></script>
+<script src="public/assets/js/tools.js?v=2.2"></script>
+<script src="public/assets/js/glossary.js?v=2.2"></script>
 
 <script>
 /* ============================================================
@@ -751,6 +751,7 @@ function handleToolClick(e, id) {
 }
 
 function openTool(t, push, urlOverride) {
+  if (!t) return;
   var path = urlOverride || (t.path + window.location.search);
   
   if (t.presentation === 'modal') {
@@ -759,13 +760,15 @@ function openTool(t, push, urlOverride) {
     switchView('tool');
     document.getElementById('topbarTitle').textContent = t.name;
     const iframe = document.getElementById('lp-tool-iframe');
-    // Always update iframe src if it's different to ensure query params are passed
-    if (iframe.src !== window.location.origin + path.replace('./', '/')) {
-        iframe.src = path;
+    if (iframe && path) {
+        // Always update iframe src if it's different to ensure query params are passed
+        if (iframe.src !== window.location.origin + path.replace('./', '/')) {
+            iframe.src = path;
+        }
     }
   }
   
-  if (push) {
+  if (push && t.slug) {
     history.pushState({ toolId: t.id }, '', t.slug + window.location.search);
   }
 }
@@ -777,18 +780,23 @@ window.onpopstate = function(event) {
 
 function handleRouting() {
   var path = window.location.pathname;
-  if (path === '/' || path === '/index.html') {
+  var cleanPath = path.replace(/\/$/, "").replace(".html", "") || "/";
+  
+  if (cleanPath === "/" || cleanPath === "/index") {
     closeModal(false);
     switchView(prevView || 'home');
     return;
   }
 
-  var t = TOOLS.find(function(x){ return x.slug === path; });
+  // Look for tool by slug
+  var t = TOOLS.find(function(x){ 
+    return x.slug && (x.slug === cleanPath || x.slug === path); 
+  });
+
   if (t) {
     openTool(t, false);
   } else {
-    // If not a tool, maybe it's a view? (Simpler routing for now)
-    var view = path.replace('/', '');
+    var view = cleanPath.replace("/", "");
     if (titles[view]) switchView(view);
     else switchView('home');
   }
