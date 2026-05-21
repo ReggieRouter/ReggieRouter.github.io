@@ -45,19 +45,6 @@ const TOOLS = [
     kw: "coverage dscr ratio revenue bank statement underwriting"
   },
   { 
-    id: "apr", 
-    name: "APR calculator", 
-    desc: "Factor-to-APR and APR-to-factor. Compare offers side by side.",
-    status: "live", 
-    group: "deal-math", 
-    icon: "percent", 
-    color: "green",
-    slug: "/tools/apr",
-    presentation: "modal",
-    path: "/calculators/APRCalculator.html",
-    kw: "factor rate apr interest convert comparison mca"
-  },
-  { 
     id: "fundability", 
     name: "Fundability", 
     desc: "Combined net requirement and stacking risk assessment.",

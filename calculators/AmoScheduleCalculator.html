@@ -311,6 +311,10 @@
         body.pdf-export-mode .no-print { display: none !important; }
         .fee-unit { cursor: pointer; user-select: none; transition: color 0.15s; }
         .fee-unit:hover { color: #14532D !important; }
+        .track-btn { padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border: 1.5px solid #E5E7EB; color: #94A3B8; cursor: pointer; transition: all 0.15s; background: transparent; font-family: inherit; }
+        .track-btn.active { background: #F0FDF4; border-color: #14532D; color: #14532D; }
+        .amo-row { cursor: pointer; transition: background 0.1s; }
+        .amo-row:hover { background: #F9FAFB; }
     </style>
 </head>
 <body>
@@ -426,6 +430,9 @@
         }
 
         const fmtUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        const rowSelection = {};
+        const cardTracks = {};
+        const lastCalc = {};
 
         function cleanNumericInput(val) {
             const num = parseFloat(val);
@@ -435,16 +442,7 @@
         function togglePrepay(id) {
             const isChecked = document.getElementById(`enablePrepay-${id}`).checked;
             const section = document.getElementById(`prepaySection-${id}`);
-            const summary = document.getElementById(`prepaySummary-${id}`);
             isChecked ? section.classList.remove('hidden') : section.classList.add('hidden');
-            isChecked ? summary.classList.remove('hidden') : summary.classList.add('hidden');
-
-            if (isChecked) {
-                setTimeout(() => {
-                    const targetRow = document.getElementById(`prepay-target-${id}`);
-                    if (targetRow) targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 50);
-            }
         }
 
         function toggleFeeMode(id) {
@@ -625,8 +623,8 @@
 
                             <div id="prepaySummary-${id}" class="hidden bg-[#F0FDF4] rounded-xl p-5 border border-[#BBF7D0] mb-6">
                                 <div class="flex justify-between mb-2">
-                                    <span class="text-[#14532D] font-semibold text-[13px]">Target prepay date</span>
-                                    <span class="font-extrabold text-[#14532D]" id="outRenDate-${id}">-</span>
+                                    <span class="text-[#14532D] font-semibold text-[13px]">Payoff target</span>
+                                    <span class="font-extrabold text-[#14532D]" id="outRenDate-${id}">—</span>
                                 </div>
                                 <div class="flex justify-between mb-2">
                                     <span class="text-[#14532D] font-semibold text-[13px]">Pre-pay savings</span>
@@ -638,6 +636,10 @@
                                 </div>
                             </div>
 
+                            <div class="flex gap-1.5 mb-2 no-print" id="trackToggle-${id}">
+                                <button id="trackA-${id}" onclick="setTrack(${id}, 'summary')" class="track-btn active">Payment Summary</button>
+                                <button id="trackB-${id}" onclick="setTrack(${id}, 'apr')" class="track-btn">APR Cost</button>
+                            </div>
                             <div class="takeaway">
                                 <span class="takeaway-eyebrow">What you tell the borrower</span>
                                 <span id="takeaway-content-${id}"></span>
@@ -668,6 +670,7 @@
                             <table class="min-w-full text-left bg-white text-[12px]">
                                 <thead class="bg-[#F9FAFB] sticky top-0 border-b border-[#E5E7EB]">
                                     <tr>
+                                        <th class="p-3 font-bold text-[#6B7280] w-[40px] text-center">#</th>
                                         <th class="p-3 font-bold text-[#111827]">Date</th>
                                         <th class="p-3 font-bold text-[#111827]">Payment</th>
                                         <th class="p-3 font-bold text-[#111827]">Principal</th>
@@ -686,6 +689,7 @@
                     <table class="min-w-full text-left text-[11px]">
                         <thead>
                             <tr class="border-b-2 border-[#111827]">
+                                <th class="py-3 font-black text-[#111827] uppercase w-[32px]">#</th>
                                 <th class="py-3 font-black text-[#111827] uppercase">Date</th>
                                 <th class="py-3 font-black text-[#111827] uppercase">Payment</th>
                                 <th class="py-3 font-black text-[#111827] uppercase">Principal</th>
@@ -704,6 +708,68 @@
             `;
             document.getElementById('cardsContainer').insertAdjacentHTML('beforeend', cardHTML);
             updateHeaders();
+        }
+
+        function setTrack(id, type) {
+            cardTracks[id] = type;
+            document.getElementById(`trackA-${id}`).classList.toggle('active', type === 'summary');
+            document.getElementById(`trackB-${id}`).classList.toggle('active', type === 'apr');
+            renderTakeaway(id);
+        }
+
+        function renderTakeaway(id) {
+            const c = lastCalc[id];
+            if (!c) return;
+            const track = cardTracks[id] || 'summary';
+            const sel = rowSelection[id];
+
+            let html;
+            if (track === 'summary') {
+                if (sel) {
+                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong>. Pay off at payment #${sel.period} on ${sel.date}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}."`;
+                } else {
+                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong> over ${c.term} months — repaying <strong>${fmtUsd.format(c.payback)} total</strong>."`;
+                }
+            } else {
+                if (sel) {
+                    html = `"You're looking at <strong>${c.apr.toFixed(1)}% APR</strong> on net funded. Pay off at payment #${sel.period} on ${sel.date}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>."`;
+                } else {
+                    html = `"You're looking at <strong>${fmtUsd.format(c.totalCost)}</strong> in total funding costs — a <strong>${c.apr.toFixed(1)}% APR</strong>, or <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong>."`;
+                }
+            }
+            document.getElementById(`takeaway-content-${id}`).innerHTML = html;
+
+            const summary = document.getElementById(`prepaySummary-${id}`);
+            if (sel) {
+                document.getElementById(`outRenDate-${id}`).innerText = `#${sel.period} · ${sel.date}`;
+                document.getElementById(`outSavings-${id}`).innerText = fmtUsd.format(sel.savings);
+                document.getElementById(`outBuyout-${id}`).innerText = fmtUsd.format(sel.buyout);
+                summary.classList.remove('hidden');
+            } else {
+                summary.classList.add('hidden');
+            }
+        }
+
+        function selectAmoRow(id, period) {
+            const rowEl = document.getElementById(`arow-${id}-${period}`);
+            if (!rowEl) return;
+            const tbody = document.getElementById(`tableBody-${id}`);
+            tbody.querySelectorAll('tr').forEach(r => r.classList.remove('prepay-target-row'));
+
+            if (rowSelection[id] && rowSelection[id].period === period) {
+                delete rowSelection[id];
+            } else {
+                rowSelection[id] = {
+                    period,
+                    balance: parseFloat(rowEl.dataset.bal),
+                    unearned: parseFloat(rowEl.dataset.unearned),
+                    savings: parseFloat(rowEl.dataset.savings),
+                    buyout: parseFloat(rowEl.dataset.buyout),
+                    date: rowEl.dataset.date
+                };
+                rowEl.classList.add('prepay-target-row');
+            }
+            renderTakeaway(id);
         }
 
         function removeCard(id) {
@@ -751,8 +817,8 @@
             document.getElementById(`outCents-${id}`).innerText = ((totalCost / amt) * 100).toFixed(1) + '¢';
             document.getElementById(`outApr-${id}`).innerText = apr.toFixed(1) + '%';
             
-            let balance = amt, unearnedInterest = totalCost, cumulativePrincipal = 0, currentDate = new Date(startDate);
-            let tbodyHTML = '', printTbodyHTML = '', targetHit = false, savedRenDate = '-', savedSavings = 0, savedBuyout = 0;
+            let balance = amt, unearnedInterest = totalCost, currentDate = new Date(startDate);
+            let tbodyHTML = '', printTbodyHTML = '';
 
             const periodRate = getPeriodRate(amt, pmt, periods);
 
@@ -767,50 +833,42 @@
                 if(i === periods || balance - principal < 0.01) { principal = balance; interest = Math.max(0, pmt - principal); }
 
                 balance -= principal;
-                cumulativePrincipal += principal;
                 unearnedInterest -= interest;
                 if(unearnedInterest < 0) unearnedInterest = 0;
                 if(balance < 0) balance = 0;
 
-                let isTargetRow = false;
-                if(isPrepayEnabled && (cumulativePrincipal / amt * 100) >= renPct && !targetHit) {
-                    targetHit = true;
-                    isTargetRow = true;
-                    savedRenDate = currentDate.toLocaleDateString();
-                    savedSavings = unearnedInterest * (discPct / 100);
-                    savedBuyout = balance + unearnedInterest - savedSavings;
+                const rowSavings = unearnedInterest * (discPct / 100);
+                const rowBuyout = balance + unearnedInterest - rowSavings;
+                const dateStr = currentDate.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+                const isSelected = rowSelection[id] && rowSelection[id].period === i;
+
+                if (isSelected) {
+                    rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, date: dateStr };
                 }
 
                 const row = `
-                    <td class="p-3 font-medium text-[#64748B]">${currentDate.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'2-digit'})}</td>
+                    <td class="p-3 font-medium text-[#94A3B8] text-center text-[11px]">${i}</td>
+                    <td class="p-3 font-medium text-[#64748B]">${dateStr}</td>
                     <td class="p-3 font-bold">${fmtUsd.format(pmt)}</td>
                     <td class="p-3">${fmtUsd.format(principal)}</td>
                     <td class="p-3">${fmtUsd.format(interest)}</td>
                     <td class="p-3 font-extrabold text-[#14532D]">${fmtUsd.format(balance)}</td>`;
-                tbodyHTML += `<tr ${isTargetRow ? `id="prepay-target-${id}" class="prepay-target-row"` : ''}>${row}</tr>`;
-                printTbodyHTML += `<tr>${row.replace('text-right', '')}</tr>`;
+                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? ' prepay-target-row' : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-date="${dateStr}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
+                const printRow = `<td>${i}</td><td>${dateStr}</td><td>${fmtUsd.format(pmt)}</td><td>${fmtUsd.format(principal)}</td><td>${fmtUsd.format(interest)}</td><td>${fmtUsd.format(balance)}</td>`;
+                printTbodyHTML += `<tr>${printRow}</tr>`;
                 if(balance <= 0) break;
             }
 
             document.getElementById(`tableBody-${id}`).innerHTML = tbodyHTML;
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
-            document.getElementById(`outRenDate-${id}`).innerText = savedRenDate;
-            document.getElementById(`outSavings-${id}`).innerText = fmtUsd.format(savedSavings);
-            document.getElementById(`outBuyout-${id}`).innerText = fmtUsd.format(savedBuyout);
 
-            // Talking point
-            let takeaway = `"You're looking at <strong>${fmtUsd.format(pmt)} per ${freqName}</strong> over ${term} months — repaying <strong>${fmtUsd.format(payback)} total</strong>`;
-            if (isPrepayEnabled && savedSavings > 0) {
-                takeaway += `. Paying off early could save you <strong>${fmtUsd.format(savedSavings)}</strong> in interest`;
-            }
-            takeaway += `."`;
-            document.getElementById(`takeaway-content-${id}`).innerHTML = takeaway;
-            
-            el.dataset.payload = `Breakdown | Amt: ${fmtUsd.format(amt)} | Term: ${term} mos | Pmt: ${fmtUsd.format(pmt)} | Payback: ${fmtUsd.format(payback)}`;
+            lastCalc[id] = { pmt, freqName, term, payback, apr, totalCost };
+            renderTakeaway(id);
         }
 
         function copyResults(id) {
-            navigator.clipboard.writeText(document.getElementById(`cardContainer-${id}`).dataset.payload);
+            const el = document.getElementById(`takeaway-content-${id}`);
+            navigator.clipboard.writeText(el ? el.innerText : '');
             const t = document.getElementById('toast'); t.style.opacity = '1';
             setTimeout(() => t.style.opacity = '0', 2000);
         }
