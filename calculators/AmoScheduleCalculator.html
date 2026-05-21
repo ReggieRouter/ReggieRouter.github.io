@@ -464,7 +464,7 @@
 
         function setFeeMode(id, newMode) {
             const wrap = document.getElementById(`feeWrap-${id}`);
-            const unit = document.getElementById(`feeUnit-${id}`);
+            const prefix = document.getElementById(`feePrefix-${id}`);
             const input = document.getElementById(`fee-${id}`);
             const amt = cleanNumericInput(document.getElementById(`amt-${id}`).value) || 0;
             const val = cleanNumericInput(input.value) || 0;
@@ -473,11 +473,11 @@
             if (newMode === 'dollar') {
                 input.step = '100';
                 input.value = amt > 0 ? Math.round(amt * val / 100) : val;
-                unit.textContent = '$';
+                prefix.classList.remove('hidden');
             } else {
                 input.step = '0.1';
                 input.value = amt > 0 ? parseFloat((val / amt * 100).toFixed(2)) : 0;
-                unit.textContent = '%';
+                prefix.classList.add('hidden');
             }
             wrap.dataset.feeMode = newMode;
             document.getElementById(`feeBtnPct-${id}`).classList.toggle('active', newMode === 'pct');
@@ -572,8 +572,8 @@
                                         <button id="feeBtnPct-${id}" onclick="setFeeMode(${id}, 'pct')" class="fee-seg-btn active" type="button">%</button>
                                         <button id="feeBtnDollar-${id}" onclick="setFeeMode(${id}, 'dollar')" class="fee-seg-btn" type="button">$</button>
                                     </div>
+                                    <span id="feePrefix-${id}" class="hidden pl-3 pr-1 text-[#94A3B8] font-bold text-[14px]">$</span>
                                     <input type="number" step="0.1" id="fee-${id}" value="3.0" min="0" class="lp-input" oninput="calcCard(${id})">
-                                    <span id="feeUnit-${id}" class="pr-3 pl-2 text-[#94A3B8] font-bold border-l border-[#E5E7EB]">%</span>
                                 </div>
                             </div>
 
@@ -619,6 +619,7 @@
                             <div class="mb-6 pb-6 border-b border-[#E5E7EB]">
                                 <div class="text-[11px] text-[#64748B] font-bold uppercase tracking-wider mb-2" id="lblPmt-${id}">Est. payment</div>
                                 <div class="text-[42px] font-black text-[#14532D] leading-none tracking-tight" id="valPmt-${id}">$0.00</div>
+                                <div id="moEquiv-${id}" class="text-[13px] text-[#9CA3AF]" style="display:none;margin-top:6px"></div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-y-6 gap-x-8 text-[13px] mb-8">
@@ -902,6 +903,17 @@
 
             document.getElementById(`lblPmt-${id}`).innerText = pmtLabel;
             document.getElementById(`valPmt-${id}`).innerText = fmtUsd.format(pmt);
+
+            const moEquivEl = document.getElementById(`moEquiv-${id}`);
+            if (moEquivEl) {
+                if (freq === 'daily' || freq === 'weekly') {
+                    moEquivEl.textContent = '≈ $' + Math.round(payback / term).toLocaleString('en-US') + '/mo';
+                    moEquivEl.style.display = '';
+                } else {
+                    moEquivEl.style.display = 'none';
+                }
+            }
+
             document.getElementById(`outPayback-${id}`).innerText = fmtUsd.format(payback);
             document.getElementById(`outInterest-${id}`).innerText = fmtUsd.format(totalCost);
             const rawCents = (totalCost / amt) * 100;
