@@ -463,6 +463,36 @@ input { font-family: inherit; }
 }
 .card, .g-item, .banner { animation: fadeUp 250ms ease both; }
 
+@keyframes glisten {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(16, 185, 129, 0); }
+  50% { transform: scale(1.02); box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes sweep {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.card-amo-glisten {
+  position: relative;
+  overflow: hidden;
+  animation: fadeUp 250ms ease both, glisten 1.5s ease-out 0.5s 1;
+}
+
+.card-amo-glisten::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: skewX(-25deg);
+  left: -100%;
+  animation: sweep 1s ease-in-out 0.8s 1;
+  pointer-events: none;
+}
+
 /* ==================== Modal System ==================== */
 #lp-modal-overlay {
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -482,6 +512,18 @@ input { font-family: inherit; }
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
 }
 #lp-modal-iframe { width: 100%; height: 100%; border: none; }
+
+#toolPageContainer {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    height: calc(100vh - 60px);
+    background: white;
+    box-shadow: 0 0 50px rgba(0,0,0,0.05);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+}
+#lp-tool-iframe { width: 100%; height: 100%; border: none; }
 </style>
 </head>
 <body>
@@ -503,7 +545,7 @@ input { font-family: inherit; }
 
     <nav>
       <div class="nav-section">
-        <button class="nav-item active" data-view="home" onclick="switchView('home')">
+        <button class="nav-item active" data-view="home" onclick="navigateToView('home')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
           Home
         </button>
@@ -511,15 +553,15 @@ input { font-family: inherit; }
       <div class="nav-divider"></div>
       <div class="nav-section">
         <div class="nav-label">Tools</div>
-        <button class="nav-item" data-view="deal-math" onclick="switchView('deal-math')">
+        <button class="nav-item" data-view="deal-math" onclick="navigateToView('deal-math')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14.01"/><line x1="12" y1="14" x2="12" y2="14.01"/><line x1="16" y1="14" x2="16" y2="14.01"/></svg>
           Deal math<span class="nav-count" id="count-deal">0</span>
         </button>
-        <button class="nav-item" data-view="risk" onclick="switchView('risk')">
+        <button class="nav-item" data-view="risk" onclick="navigateToView('risk')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           Risk &amp; UW<span class="nav-count" id="count-risk">0</span>
         </button>
-        <button class="nav-item" data-view="data" onclick="switchView('data')">
+        <button class="nav-item" data-view="data" onclick="navigateToView('data')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
           Data &amp; leads<span class="nav-count" id="count-data">0</span>
         </button>
@@ -527,14 +569,14 @@ input { font-family: inherit; }
       <div class="nav-divider"></div>
       <div class="nav-section">
         <div class="nav-label">Reference</div>
-        <button class="nav-item" data-view="glossary" onclick="switchView('glossary')">
+        <button class="nav-item" data-view="glossary" onclick="navigateToView('glossary')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
           Glossary
         </button>
       </div>
       <div class="nav-divider"></div>
       <div class="nav-section">
-        <button class="nav-item" data-view="contact" onclick="switchView('contact')">
+        <button class="nav-item" data-view="contact" onclick="navigateToView('contact')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           Contact
         </button>
@@ -637,6 +679,13 @@ input { font-family: inherit; }
         </div>
       </div>
 
+      <!-- Full-page Tool View -->
+      <div class="view" id="view-tool" style="padding: 0; height: 100%;">
+        <div id="toolPageContainer">
+          <iframe id="lp-tool-iframe" src=""></iframe>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -676,18 +725,73 @@ var ICO = {
 function cardHTML(t, i) {
   var dis = t.status === 'soon';
   var tag = dis ? 'div' : 'a';
-  var href = dis ? '' : ' href="'+t.href+'"';
+  var href = dis ? '' : ' href="'+t.slug+'"';
   var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
-  var cls = 'card' + (dis ? ' is-disabled' : '');
+  var cls = 'card' + (dis ? ' is-disabled' : '') + (t.id === 'amo' ? ' card-amo-glisten' : '');
   var pillCls = t.status==='live' ? 'pill-live' : t.status==='new' ? 'pill-new' : t.status==='soon' ? 'pill-soon' : '';
   var pillTxt = t.status==='live' ? 'Live' : t.status==='new' ? 'New' : t.status==='soon' ? 'Soon' : '';
   
-  return '<'+tag+href+target+' class="'+cls+'" data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
+  var onclick = dis ? '' : ' onclick="handleToolClick(event, \''+t.id+'\')"';
+
+  return '<'+tag+href+target+' class="'+cls+'" '+onclick+' data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
     +'<div class="card-icon '+t.color+'">'+ICO[t.icon]+'</div>'
     +'<div class="card-body"><div class="card-name">'+t.name+'</div><div class="card-desc">'+t.desc+'</div></div>'
     +'<div class="card-meta"><span class="pill '+pillCls+'">'+pillTxt+'</span>'
     +(dis?'':'<span class="card-arrow">'+ICO.arrow+'</span>')
     +'</div></'+tag+'>';
+}
+
+function handleToolClick(e, id) {
+  var t = TOOLS.find(function(x){ return x.id === id; });
+  if (!t || t.status === 'soon') return;
+  if (t.presentation === 'external') return; // Let default link behavior happen
+
+  e.preventDefault();
+  openTool(t, true);
+}
+
+function openTool(t, push, urlOverride) {
+  var path = urlOverride || (t.path + window.location.search);
+  
+  if (t.presentation === 'modal') {
+    openModal(path);
+  } else {
+    switchView('tool');
+    document.getElementById('topbarTitle').textContent = t.name;
+    const iframe = document.getElementById('lp-tool-iframe');
+    // Always update iframe src if it's different to ensure query params are passed
+    if (iframe.src !== window.location.origin + path.replace('./', '/')) {
+        iframe.src = path;
+    }
+  }
+  
+  if (push) {
+    history.pushState({ toolId: t.id }, '', t.slug + window.location.search);
+  }
+}
+
+/* ---- Router ---- */
+window.onpopstate = function(event) {
+  handleRouting();
+};
+
+function handleRouting() {
+  var path = window.location.pathname;
+  if (path === '/' || path === '/index.html') {
+    closeModal(false);
+    switchView(prevView || 'home');
+    return;
+  }
+
+  var t = TOOLS.find(function(x){ return x.slug === path; });
+  if (t) {
+    openTool(t, false);
+  } else {
+    // If not a tool, maybe it's a view? (Simpler routing for now)
+    var view = path.replace('/', '');
+    if (titles[view]) switchView(view);
+    else switchView('home');
+  }
 }
 
 function renderHome() {
@@ -848,16 +952,28 @@ function updateCounts() {
 }
 
 /* ---- View switching ---- */
+function navigateToView(v) {
+  if (v === currentView && window.location.pathname === '/' + (v === 'home' ? '' : v)) return;
+  
+  // If we are moving away from a tool or modal, ensure they are closed
+  if (currentView === 'tool' || document.getElementById('lp-modal-overlay').style.display === 'flex') {
+    closeModal(false);
+  }
+
+  history.pushState({ view: v }, '', '/' + (v === 'home' ? '' : v));
+  switchView(v);
+}
+
 var currentView='home', prevView='home';
-var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Contact','search':'Search results'};
+var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Contact','search':'Search results', 'tool': 'Tool'};
 
 function switchView(v) {
-  if (v !== 'search') prevView = v;
+  if (v !== 'search' && v !== 'tool') prevView = v;
   currentView = v;
   document.querySelectorAll('.view').forEach(function(el){ el.classList.remove('active'); });
   var t = document.getElementById('view-'+v);
   if (t) t.classList.add('active');
-  document.getElementById('topbarTitle').textContent = titles[v] || 'LendPaper';
+  document.getElementById('topbarTitle').textContent = (v === 'tool') ? 'Tool' : (titles[v] || 'LendPaper');
   document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
   var nb = document.querySelector('.nav-item[data-view="'+v+'"]');
   if (nb) nb.classList.add('active');
@@ -931,11 +1047,15 @@ function openModal(url) {
     overlay.style.display = 'flex';
 }
 
-function closeModal() {
+function closeModal(push) {
     const overlay = document.getElementById('lp-modal-overlay');
     const iframe = document.getElementById('lp-modal-iframe');
     overlay.style.display = 'none';
     iframe.src = '';
+    
+    if (push !== false) {
+        history.pushState(null, '', '/');
+    }
 }
 
 document.addEventListener('keydown', (e) => {
@@ -949,6 +1069,7 @@ renderCat('risk','riskCards');
 renderCat('data','dataCards');
 renderGlossary();
 updateCounts();
+handleRouting();
 </script>
 </body>
 </html>

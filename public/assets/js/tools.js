@@ -6,13 +6,15 @@
 const TOOLS = [
   { 
     id: "amo", 
-    name: "Amo calculator", 
+    name: "Amo schedule", 
     desc: "Full payment breakdown by period with multi-scenario prepay logic.",
     status: "live", 
     group: "deal-math", 
     icon: "chart", 
     color: "green",
-    href: "javascript:openModal('./calculators/AmoScheduleCalculator.html')",
+    slug: "/tools/amo",
+    presentation: "page",
+    path: "./calculators/AmoScheduleCalculator.html",
     kw: "amortization schedule prepay payoff buyout mca payment deal desk"
   },
   { 
@@ -23,7 +25,9 @@ const TOOLS = [
     group: "data", 
     icon: "search", 
     color: "green",
-    href: "https://www.registryroute.com/",
+    slug: "https://www.registryroute.com/",
+    presentation: "external",
+    path: "https://www.registryroute.com/",
     target: "_blank",
     kw: "ucc lookup search public records registry route"
   },
@@ -35,7 +39,9 @@ const TOOLS = [
     group: "risk", 
     icon: "refresh", 
     color: "green",
-    href: "javascript:openModal('./calculators/DSCRCalculator.html')",
+    slug: "/tools/dscr",
+    presentation: "modal",
+    path: "./calculators/DSCRCalculator.html",
     kw: "coverage dscr ratio revenue bank statement underwriting"
   },
   { 
@@ -46,7 +52,9 @@ const TOOLS = [
     group: "deal-math", 
     icon: "percent", 
     color: "green",
-    href: "javascript:openModal('./calculators/APRCalculator.html')",
+    slug: "/tools/apr",
+    presentation: "modal",
+    path: "./calculators/APRCalculator.html",
     kw: "factor rate apr interest convert comparison mca"
   },
   { 
@@ -57,7 +65,9 @@ const TOOLS = [
     group: "deal-math", 
     icon: "stack", 
     color: "green",
-    href: "javascript:openModal('./calculators/NetRequirementCalculator.html')",
+    slug: "/tools/net-requirement",
+    presentation: "modal",
+    path: "./calculators/NetRequirementCalculator.html",
     kw: "net funding wire origination psf commission fees estimate"
   },
   { 
@@ -68,7 +78,9 @@ const TOOLS = [
     group: "deal-math", 
     icon: "refresh", 
     color: "green",
-    href: "javascript:openModal('./calculators/SBAFeesCalculator.html')",
+    slug: "/tools/sba-fees",
+    presentation: "modal",
+    path: "./calculators/SBAFeesCalculator.html",
     kw: "sba fees rates scenario builder 7a guarantee packaging search closing"
   },
   { 

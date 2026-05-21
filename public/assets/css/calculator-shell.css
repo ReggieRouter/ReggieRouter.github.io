@@ -1,0 +1,89 @@
+/**
+ * LendPaper Calculator Shared Shell
+ * Centralized styles for all tool containers and headers.
+ */
+
+:root {
+  --lp-green: #10B981;
+  --lp-green-dark: #059669;
+  --lp-green-soft: rgba(16, 185, 129, 0.08);
+  --lp-dark: #111827;
+  --lp-text-muted: #64748b;
+  --lp-border: #e5e7eb;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f1f5f9;
+  color: var(--lp-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Embedded state: hide header and adjust background */
+body.is-embedded { background-color: #fff; }
+body.is-embedded .modal-header { display: none; }
+body.is-embedded .lp-main { padding: 24px 0; }
+body.is-embedded .lp-container { border: none; box-shadow: none; border-radius: 0; max-width: 100%; }
+
+.modal-header {
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid var(--lp-border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+.modal-logo { height: 22px; }
+.modal-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--lp-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.lp-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  flex-grow: 1;
+}
+
+.lp-container {
+  width: 100%;
+  max-width: 820px;
+  background: #ffffff;
+  border: 1px solid var(--lp-border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.lp-definition {
+  font-size: 11px;
+  color: var(--lp-text-muted);
+  border-left: 3px solid var(--lp-green);
+  line-height: 1.6;
+  padding-left: 16px;
+  margin-bottom: 24px;
+}
+.lp-definition strong { color: var(--lp-dark); font-weight: 700; }
