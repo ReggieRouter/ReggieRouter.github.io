@@ -31,7 +31,8 @@ body {
 body.is-embedded { background-color: #fff; }
 body.is-embedded .modal-header { display: none; }
 body.is-embedded .lp-main { padding: 24px 0; }
-body.is-embedded .lp-container { border: none; box-shadow: none; border-radius: 0; max-width: 100%; }
+body.is-embedded .lp-container,
+body.is-embedded .modal-shell { border: none; box-shadow: none; border-radius: 0; max-width: 100%; }
 
 .modal-header {
   height: 56px;
