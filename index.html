@@ -236,7 +236,7 @@ input { font-family: inherit; }
 
 .mobile-toggle { display: none; padding: 6px; border-radius: var(--radius-sm); color: var(--text-muted); }
 
-.content { flex: 1; min-width: 0; overflow-y: auto; padding: 28px 32px 48px; }
+.content { flex: 1; min-width: 0; overflow-y: auto; overflow-x: hidden; padding: 28px 32px 48px; }
 
 /* ==================== Views ==================== */
 
@@ -264,10 +264,11 @@ input { font-family: inherit; }
   display: flex; align-items: center; gap: 14px;
   padding: 14px 16px; background: var(--bg);
   border: 1px solid var(--border); border-radius: var(--radius);
-  transition: border-color var(--transition), transform var(--transition);
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
   cursor: pointer; text-decoration: none; color: inherit;
+  min-width: 0;
 }
-.card:hover:not(.is-disabled) { border-color: var(--accent); transform: translateY(-1px); }
+.card:hover:not(.is-disabled) { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.07); }
 .card.is-disabled { cursor: default; opacity: 0.85; }
 
 .card-icon {
@@ -297,7 +298,7 @@ input { font-family: inherit; }
 .pill-new  { background: var(--warning-soft); color: #92400E; }
 
 .card-arrow {
-  color: var(--text-faint); flex-shrink: 0;
+  color: var(--text-muted); flex-shrink: 0;
   transition: color var(--transition), transform var(--transition);
 }
 .card:hover:not(.is-disabled) .card-arrow { color: var(--accent); transform: translateX(2px); }
@@ -562,12 +563,25 @@ input { font-family: inherit; }
   background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px;
   padding: 20px; cursor: pointer; text-decoration: none; color: inherit;
   display: flex; flex-direction: column; gap: 10px;
-  transition: border-color var(--transition), transform var(--transition);
+  position: relative; overflow: hidden; min-width: 0;
+  transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
   animation: fadeUp 250ms ease both;
 }
-.featured-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
-.featured-card.is-featured-primary { border-color: var(--accent); background: var(--accent-soft); }
-.featured-card.is-featured-primary:hover { border-color: var(--accent-hover); }
+.featured-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.09); }
+.featured-card.is-featured-primary {
+  border-color: var(--accent); background: var(--accent-soft);
+  animation: fadeUp 250ms ease both, glisten 2s ease-out 0.6s 1;
+}
+.featured-card.is-featured-primary::after {
+  content: "";
+  position: absolute; top: 0; height: 100%; width: 45%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.45), transparent);
+  transform: skewX(-20deg);
+  left: -100%;
+  animation: sweep 1.1s ease-in-out 0.9s 1;
+  pointer-events: none;
+}
+.featured-card.is-featured-primary:hover { border-color: var(--accent-hover); box-shadow: 0 6px 20px rgba(20,83,45,0.15); }
 .featured-card-icon {
   width: 48px; height: 48px; border-radius: 10px;
   background: var(--bg-alt); color: var(--text-muted);
@@ -579,8 +593,8 @@ input { font-family: inherit; }
 .featured-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; flex: 1; }
 .featured-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
 .featured-card-label { font-size: 12px; font-weight: 700; color: var(--accent); }
-.featured-card-arrow { color: var(--text-faint); transition: color var(--transition), transform var(--transition); }
-.featured-card:hover .featured-card-arrow { color: var(--accent); transform: translateX(2px); }
+.featured-card-arrow { color: var(--text-muted); transition: color var(--transition), transform var(--transition); }
+.featured-card:hover .featured-card-arrow { color: var(--accent); transform: translateX(3px); }
 
 /* ==================== Home section labels ==================== */
 .home-section-label {
@@ -930,7 +944,8 @@ function featuredCardHTML(t, i, isPrimary) {
   var onclick = ' onclick="handleToolClick(event, \''+t.id+'\')"';
   var label = featuredLabels[t.id] || '';
   var iconCls = t.color === 'green' ? 'green' : '';
-  return '<a'+href+target+' class="'+cls+'"'+onclick+' style="animation-delay:'+(i*80)+'ms">'
+  var delayStyle = isPrimary ? '' : ' style="animation-delay:'+(i*80)+'ms"';
+  return '<a'+href+target+' class="'+cls+'"'+onclick+delayStyle+'>'
     +'<div class="featured-card-icon '+iconCls+'">'+ICO[t.icon]+'</div>'
     +'<div class="featured-card-name">'+t.name+'</div>'
     +'<div class="featured-card-desc">'+t.desc+'</div>'

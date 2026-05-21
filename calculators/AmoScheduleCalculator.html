@@ -347,18 +347,22 @@
         }
 
         /* Pre-pay widget */
-        .prepay-widget { border: 1px solid #E5E7EB; border-radius: 12px; background: #FFFFFF; overflow: hidden; }
+        .prepay-widget { border: 1px solid #E5E7EB; border-radius: 12px; background: #F9FAFB; overflow: hidden; }
         .prepay-widget-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
-        .prepay-widget-icon { width: 34px; height: 34px; border-radius: 8px; background: #111827; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .prepay-widget-text { flex: 1; min-width: 0; }
         .prepay-widget-title { font-size: 13px; font-weight: 700; color: #111827; }
         .prepay-widget-sub { font-size: 11.5px; color: #6B7280; margin-top: 1px; }
         .prepay-widget-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-        .prepay-pct-box { display: flex; align-items: center; gap: 4px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 5px 10px; }
+        .prepay-pct-box { display: flex; align-items: center; gap: 4px; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 5px 10px; }
         .prepay-pct-input { width: 36px; border: none; background: transparent; font-size: 15px; font-weight: 700; color: #111827; outline: none; text-align: right; -moz-appearance: textfield; }
         .prepay-pct-input::-webkit-inner-spin-button, .prepay-pct-input::-webkit-outer-spin-button { -webkit-appearance: none; }
         .prepay-pct-sym { font-size: 13px; font-weight: 600; color: #6B7280; }
         .prepay-widget-hint { font-size: 11px; color: #9CA3AF; padding: 0 14px 10px; }
+        /* Info tooltip */
+        .lp-info-btn { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #9CA3AF; color: #9CA3AF; font-size: 9px; font-weight: 800; cursor: help; vertical-align: middle; margin-left: 5px; line-height: 1; flex-shrink: 0; font-style: normal; }
+        /* Amo click hint banner */
+        .prepay-amo-hint { display: none; margin: 0 24px 12px; padding: 8px 12px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; font-size: 11.5px; color: #14532D; font-weight: 600; align-items: center; gap: 6px; }
+        .prepay-amo-hint.visible { display: flex; }
 
         /* iOS-style toggle */
         .prepay-toggle { position: relative; display: inline-block; width: 44px; height: 26px; cursor: pointer; flex-shrink: 0; }
@@ -566,13 +570,19 @@
 
         function togglePrepay(id) {
             const isChecked = document.getElementById(`enablePrepay-${id}`).checked;
+            const hint = document.getElementById(`prepayAmoHint-${id}`);
+            const targetRow = document.getElementById(`prepayTargetRow-${id}`);
             if (!isChecked) {
                 const tracks = getTracks(id);
                 if ((cardTracks[id] ?? 0) >= tracks.length) cardTracks[id] = 0;
                 renderDetailRow(id);
                 document.getElementById(`prepaySummary-${id}`)?.classList.add('hidden');
+                if (hint) hint.classList.remove('visible');
+                if (targetRow) targetRow.style.display = 'none';
             } else {
                 document.getElementById(`prepaySummary-${id}`)?.classList.remove('hidden');
+                if (hint) hint.classList.add('visible');
+                if (targetRow) targetRow.style.display = 'flex';
             }
         }
 
@@ -735,9 +745,6 @@
 
                             <div id="prepaySection-${id}" class="prepay-widget">
                                 <div class="prepay-widget-row">
-                                    <div class="prepay-widget-icon">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                                    </div>
                                     <div class="prepay-widget-text">
                                         <div class="prepay-widget-title">Pre-pay discount</div>
                                         <div class="prepay-widget-sub">Save on early payoff — toggle to apply</div>
@@ -785,18 +792,22 @@
                                 </div>
                             </div>
 
-                            <div id="prepaySummary-${id}" class="hidden bg-[#F0FDF4] rounded-xl p-5 border border-[#BBF7D0] mb-6">
+                            <div id="prepaySummary-${id}" class="hidden bg-[#F9FAFB] rounded-xl p-5 border border-[#E5E7EB] mb-6">
                                 <div class="flex justify-between mb-2">
-                                    <span class="text-[#14532D] font-semibold text-[13px]">Payoff target</span>
-                                    <span class="font-extrabold text-[#14532D]" id="outRenDate-${id}">—</span>
+                                    <span class="text-[#374151] font-semibold text-[13px]">Payoff date</span>
+                                    <span class="font-extrabold text-[#111827]" id="outRenDate-${id}">—</span>
+                                </div>
+                                <div id="prepayTargetRow-${id}" class="flex justify-between mb-2" style="display:none">
+                                    <span class="text-[#374151] font-semibold text-[13px] flex items-center gap-1">Pre-pay target payoff date <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
+                                    <span class="font-extrabold text-[#14532D]" id="outPrepayDate-${id}">—</span>
                                 </div>
                                 <div class="flex justify-between mb-2">
-                                    <span class="text-[#14532D] font-semibold text-[13px]">Pre-pay savings</span>
-                                    <span class="font-extrabold text-[#14532D]" id="outSavings-${id}">$0.00</span>
+                                    <span class="text-[#374151] font-semibold text-[13px]">Pre-pay savings</span>
+                                    <span class="font-extrabold text-[#111827]" id="outSavings-${id}">$0.00</span>
                                 </div>
-                                <div class="flex justify-between border-t border-[#BBF7D0] pt-2 mt-2">
-                                    <span class="text-[#14532D] font-extrabold text-[13px]">Est. payoff balance</span>
-                                    <span class="font-extrabold text-[#14532D]" id="outBuyout-${id}">$0.00</span>
+                                <div class="flex justify-between border-t border-[#E5E7EB] pt-2 mt-2">
+                                    <span class="text-[#111827] font-extrabold text-[13px] flex items-center">Est. payoff balance<i class="lp-info-btn" title="The amount the borrower needs to pay today to fully retire the loan at this date, after applying the pre-pay discount on unearned interest.">i</i></span>
+                                    <span class="font-extrabold text-[#111827]" id="outBuyout-${id}">$0.00</span>
                                 </div>
                             </div>
 
@@ -840,7 +851,11 @@
                 <div class="border-t border-[#E5E7EB] amo-section">
                     <div class="px-[24px] pt-5 pb-3 flex items-center justify-between">
                         <span class="text-[11px] font-extrabold text-[#6B7280] uppercase tracking-widest">Amortization Schedule</span>
-                        <span class="text-[11px] text-[#94A3B8] italic no-print">Click any row to quantify the pre-pay discount</span>
+                        <span class="text-[11px] text-[#94A3B8] italic no-print">Click any row to see payoff details</span>
+                    </div>
+                    <div id="prepayAmoHint-${id}" class="prepay-amo-hint no-print">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                        Pre-pay discount active — click any row below to see the exact savings and payoff balance
                     </div>
                     <div id="detailsWrap-${id}" class="px-[24px] pb-[28px]">
                         <div class="table-scroll-container">
@@ -966,15 +981,23 @@
 
             const summary = document.getElementById(`prepaySummary-${id}`);
             const isPrepayOn = document.getElementById(`enablePrepay-${id}`)?.checked;
+            const targetRow = document.getElementById(`prepayTargetRow-${id}`);
             if (sel) {
                 document.getElementById(`outRenDate-${id}`).innerText = sel.date;
                 document.getElementById(`outSavings-${id}`).innerText = fmtUsd.format(sel.savings);
                 document.getElementById(`outBuyout-${id}`).innerText = fmtUsd.format(sel.buyout);
-                if (isPrepayOn) summary.classList.remove('hidden');
+                const prepayDateEl = document.getElementById(`outPrepayDate-${id}`);
+                if (prepayDateEl) prepayDateEl.innerText = sel.date;
+                if (isPrepayOn) {
+                    summary.classList.remove('hidden');
+                    if (targetRow) targetRow.style.display = 'flex';
+                }
             } else if (isPrepayOn) {
                 summary.classList.remove('hidden');
+                if (targetRow) targetRow.style.display = 'flex';
             } else {
                 summary.classList.add('hidden');
+                if (targetRow) targetRow.style.display = 'none';
             }
         }
 
