@@ -70,7 +70,7 @@
         }
 
         .lp-switcher button.active {
-            background: var(--lp-green);
+            background: #14532D;
             color: white;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -97,8 +97,8 @@
             transition: all 0.2s;
         }
         .input-wrap:focus-within {
-            border-color: var(--lp-green);
-            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--lp-green);
+            border-color: #14532D;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #14532D;
         }
         .input-prefix, .input-suffix {
             background: #f8fafc;
@@ -126,6 +126,41 @@
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
+        .lp-definition {
+            background: #f0fdf4;
+            border-radius: 10px;
+            padding: 13px 15px;
+            border: none;
+            font-size: 12.5px;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            color: #334155;
+        }
+
+        /* Takeaway style */
+        .takeaway {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-left: 3px solid #14532D;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--lp-dark);
+            line-height: 1.5;
+            margin-top: 20px;
+        }
+        .takeaway-eyebrow {
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #64748b;
+            display: block;
+            margin-bottom: 5px;
+        }
+
         /* OR Section */
         .lp-or-section {
             margin-top: 32px;
@@ -152,7 +187,7 @@
         .lp-results {
             flex: 1.1;
             padding: 32px;
-            background-color: #fff;
+            background-color: #f9fafb;
             display: flex;
             flex-direction: column;
         }
@@ -161,7 +196,7 @@
         .hero-label {
             font-size: 11px;
             font-weight: 700;
-            color: var(--lp-green);
+            color: #14532D;
             text-transform: none;
             letter-spacing: 0.05em;
             margin-bottom: 4px;
@@ -190,12 +225,12 @@
             align-items: center;
         }
         .lp-res-val { font-size: 18px; font-weight: 700; color: var(--lp-dark); }
-        .lp-res-val.highlight { color: var(--lp-green); }
+        .lp-res-val.highlight { color: #14532D; }
 
         .lp-actions { display: flex; flex-direction: column; gap: 12px; }
 
         .lp-copy-btn {
-            background-color: var(--lp-green);
+            background-color: #14532D;
             color: white;
             padding: 14px;
             border: none;
@@ -212,13 +247,13 @@
             gap: 8px;
             width: 100%;
         }
-        .lp-copy-btn:hover { background-color: #166534; }
+        .lp-copy-btn:hover { background-color: #0f4022; }
 
         .lp-print-btn {
             background-color: transparent;
-            color: var(--lp-green);
+            color: #14532D;
             padding: 14px;
-            border: 2px solid var(--lp-green);
+            border: 2px solid #14532D;
             border-radius: 8px;
             font-size: 12px;
             font-weight: 800;
@@ -249,7 +284,7 @@
             cursor: help;
             margin-left: 4px;
         }
-        .tooltip-icon:hover { background: var(--lp-green); color: white; }
+        .tooltip-icon:hover { background: #14532D; color: white; }
 
         #tt {
             position: fixed;
@@ -292,7 +327,7 @@
                 flex-direction: column !important;
                 align-items: center !important;
                 margin-bottom: 40px !important;
-                border-bottom: 2px solid var(--lp-green) !important;
+                border-bottom: 2px solid #14532D !important;
                 padding-bottom: 20px !important;
             }
             .print-logo { height: 64px !important; margin-bottom: 12px !important; }
@@ -352,7 +387,7 @@
         <!-- Left Panel: Inputs -->
         <div class="lp-inputs">
             <div class="lp-definition">
-                See how much you are actually paying. The <strong>Annual Percentage Rate (APR)</strong> represents the total annualized cost of borrowing funds, expressed as a percentage, accounting for both interest and upfront fees.
+                Enter the deal terms and choose a payment frequency. You'll see the true annualized cost — and exactly what to tell your borrower about what they're paying.
             </div>
 
             <div class="lp-switcher">
@@ -388,9 +423,8 @@
             <div class="lp-or-section">
                 <div class="lp-or-badge">OR</div>
                 <div class="lp-group">
-                    <label>Factor rate</label>
+                    <label>Factor rate &times; <span class="tooltip-icon" data-tip="Enter as a total payback multiple. e.g. 1.40 means $1.40 repaid per $1 funded.">i</span></label>
                     <div class="input-wrap">
-                        <div class="input-prefix">$</div>
                         <input type="number" id="factor" class="input-field" value="0.16" step="0.01" oninput="updateFromFactor(); calculate()">
                     </div>
                 </div>
@@ -407,7 +441,7 @@
         <!-- Right Panel: Results -->
         <div class="lp-results">
             <div class="hero-output">
-                <div class="hero-label">Estimated APR</div>
+                <div class="hero-label">Estimated APR <span class="tooltip-icon" data-tip="Annualized for comparison only. MCA agreements are not loans — APR is not a contractual term.">i</span></div>
                 <div id="res-apr" class="hero-value">0.00%</div>
             </div>
 
@@ -421,13 +455,18 @@
                     <div id="res-payment" class="lp-res-val">$0</div>
                 </div>
                 <div class="lp-res-item">
-                    <div class="lp-res-label">Average monthly</div>
+                    <div class="lp-res-label">Avg. monthly payment</div>
                     <div id="res-avg-monthly" class="lp-res-val">$0</div>
                 </div>
                 <div class="lp-res-item">
                     <div class="lp-res-label">Cost of capital</div>
                     <div id="res-cost" class="lp-res-val highlight">$0</div>
                 </div>
+            </div>
+
+            <div class="takeaway">
+                <span class="takeaway-eyebrow">WHAT YOU TELL THE BORROWER</span>
+                <span id="takeaway-content"></span>
             </div>
 
             <div class="lp-actions">
@@ -495,22 +534,26 @@
 
     // --- Tooltip Logic ---
     const tt = document.getElementById('tt');
-    document.querySelectorAll('.tooltip-icon').forEach(el => {
-        el.addEventListener('mouseenter', e => {
-            tt.textContent = e.target.dataset.tip;
-            tt.classList.add('show');
+    function bindTips() {
+        document.querySelectorAll('.tooltip-icon').forEach(el => {
+            if (el.dataset.bound) return;
+            el.dataset.bound = '1';
+            el.addEventListener('mouseenter', e => {
+                tt.textContent = e.target.dataset.tip;
+                tt.classList.add('show');
+            });
+            el.addEventListener('mousemove', e => {
+                const m = 12;
+                let x = e.clientX + m;
+                let y = e.clientY + m;
+                if (x + tt.offsetWidth > window.innerWidth) x = e.clientX - tt.offsetWidth - m;
+                if (y + tt.offsetHeight > window.innerHeight) y = e.clientY - tt.offsetHeight - m;
+                tt.style.left = x + 'px';
+                tt.style.top = y + 'px';
+            });
+            el.addEventListener('mouseleave', () => tt.classList.remove('show'));
         });
-        el.addEventListener('mousemove', e => {
-            const m = 12;
-            let x = e.clientX + m;
-            let y = e.clientY + m;
-            if (x + tt.offsetWidth > window.innerWidth) x = e.clientX - tt.offsetWidth - m;
-            if (y + tt.offsetHeight > window.innerHeight) y = e.clientY - tt.offsetHeight - m;
-            tt.style.left = x + 'px';
-            tt.style.top = y + 'px';
-        });
-        el.addEventListener('mouseleave', () => tt.classList.remove('show'));
-    });
+    }
 
     function updateFromLoan() {
         const loan = cleanNumericInput(document.getElementById('loanAmount').value);
@@ -570,6 +613,7 @@
             ['res-disbursement', 'res-payment', 'res-avg-monthly', 'res-cost', 'res-apr'].forEach(id => {
                 document.getElementById(id).innerText = "—";
             });
+            document.getElementById('takeaway-content').innerText = "";
             return;
         }
 
@@ -586,7 +630,13 @@
         document.getElementById('res-payment').innerText = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(periodPayment);
         document.getElementById('res-avg-monthly').innerText = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(avgMonthly);
         document.getElementById('res-cost').innerText = formatCurrency(costOfLoan);
-        document.getElementById('res-apr').innerText = formatPercent(apr);
+        const formattedApr = formatPercent(apr);
+        document.getElementById('res-apr').innerText = formattedApr;
+
+        // Takeaway text
+        const unit = currentMode === 'daily' ? 'day' : currentMode === 'weekly' ? 'week' : 'month';
+        const pmtStr = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(periodPayment);
+        document.getElementById('takeaway-content').innerText = `This funding costs ${formatCurrency(costOfLoan)} total — a ${formattedApr} APR, or ${pmtStr} per ${unit}.`;
     }
 
     function copyResults() {
@@ -613,6 +663,7 @@
         navigator.clipboard.writeText(payload).then(showLendPaperToast);
     }
 
+    bindTips();
     setMode('daily');
 
     if (window.self !== window.top) {
