@@ -346,6 +346,13 @@
             .amo-section { page-break-before: always; break-before: page; }
         }
 
+        /* Takeaway inline row link */
+        .amo-row-link { cursor: pointer; border-bottom: 1px dashed currentColor; padding-bottom: 1px; }
+        .amo-row-link:hover { opacity: 0.7; }
+        @keyframes amoFlash { 0%,100% { background: transparent; } 40% { background: rgba(20,83,45,0.12); } }
+        .amo-scroll-flash { animation: amoFlash 900ms ease; }
+        .amo-scroll-flash td { background: rgba(20,83,45,0.10) !important; }
+
         /* Pre-pay widget */
         .prepay-widget { border: 1px solid #E5E7EB; border-radius: 12px; background: #F9FAFB; overflow: hidden; }
         .prepay-widget-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
@@ -942,6 +949,29 @@
             if (el) el.style.display = 'none';
         }
 
+        function toOrdinal(n) {
+            var s = ['th','st','nd','rd'], v = n % 100;
+            return n + (s[(v-20)%10] || s[v] || s[0]);
+        }
+        function monthPhrase(day, month) {
+            if (day <= 10) return 'early ' + month;
+            if (day <= 20) return 'mid ' + month;
+            return 'late ' + month;
+        }
+        function payoffLink(id, sel) {
+            var phrase = toOrdinal(sel.period) + ' payment in ' + monthPhrase(sel.day, sel.month);
+            return '<span class="amo-row-link" onclick="scrollToAmoRow('+id+','+sel.period+')" role="button">'+phrase+'</span>';
+        }
+        function scrollToAmoRow(id, period) {
+            var rowEl = document.getElementById('arow-'+id+'-'+period);
+            if (!rowEl) return;
+            rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            rowEl.classList.remove('amo-scroll-flash');
+            void rowEl.offsetWidth;
+            rowEl.classList.add('amo-scroll-flash');
+            setTimeout(function(){ rowEl.classList.remove('amo-scroll-flash'); }, 950);
+        }
+
         function renderTakeaway(id) {
             const c = lastCalc[id];
             if (!c) return;
@@ -954,13 +984,13 @@
             let html;
             if (track.key === 'summary') {
                 if (sel) {
-                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong>. Pay off at payment #${sel.period} on ${sel.date}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}."`;
+                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong>. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}."`;
                 } else {
                     html = `"You're looking at <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong> over ${c.term} months — repaying <strong>${fmtUsd.format(c.payback)} total</strong>."`;
                 }
             } else if (track.key === 'apr') {
                 if (sel) {
-                    html = `"You're looking at <strong>${c.apr.toFixed(1)}% APR</strong> on net funded. Pay off at payment #${sel.period} on ${sel.date}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>."`;
+                    html = `"You're looking at <strong>${c.apr.toFixed(1)}% APR</strong> on net funded. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>."`;
                 } else {
                     html = `"You're looking at <strong>${fmtUsd.format(c.totalCost)}</strong> in total funding costs — a <strong>${c.apr.toFixed(1)}% APR</strong>, or <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong>."`;
                 }
@@ -968,7 +998,7 @@
                 html = `"For every dollar you receive, you're paying back <strong>${c.factor.toFixed(2)}</strong> — that's <strong>${c.centsDisplay}¢ on the dollar</strong>. On <strong>${fmtUsd.format(c.amt)}</strong> funded, you repay <strong>${fmtUsd.format(c.payback)}</strong> total."`;
             } else if (track.key === 'prepay') {
                 if (sel && sel.savings > 0) {
-                    html = `"Pay off at payment #${sel.period} on ${sel.date} — your buyout drops to <strong>${fmtUsd.format(sel.buyout)}</strong>, saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest."`;
+                    html = `"Pay off on your ${payoffLink(id, sel)} — your buyout drops to <strong>${fmtUsd.format(sel.buyout)}</strong>, saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest."`;
                 } else {
                     html = `"This deal has a <strong>${c.discPct}%</strong> pre-pay discount — pay off early and keep the unearned interest savings. Click any row below to model the exact buyout."`;
                 }
@@ -1016,7 +1046,9 @@
                     unearned: parseFloat(rowEl.dataset.unearned),
                     savings: parseFloat(rowEl.dataset.savings),
                     buyout: parseFloat(rowEl.dataset.buyout),
-                    date: rowEl.dataset.date
+                    date: rowEl.dataset.date,
+                    day: parseInt(rowEl.dataset.day, 10),
+                    month: rowEl.dataset.month
                 };
                 rowEl.classList.add('prepay-target-row');
             }
@@ -1122,10 +1154,12 @@
                 const rowSavings = unearnedInterest * (discPct / 100);
                 const rowBuyout = balance + unearnedInterest - rowSavings;
                 const dateStr = currentDate.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+                const dateDay = currentDate.getDate();
+                const dateMonth = currentDate.toLocaleString('default', {month: 'long'});
                 const isSelected = rowSelection[id] && rowSelection[id].period === i;
 
                 if (isSelected) {
-                    rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, date: dateStr };
+                    rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, date: dateStr, day: dateDay, month: dateMonth };
                 }
 
                 const row = `
@@ -1135,7 +1169,7 @@
                     <td class="p-3">${fmtUsd.format(principal)}</td>
                     <td class="p-3">${fmtUsd.format(interest)}</td>
                     <td class="p-3 font-extrabold text-[#14532D]">${fmtUsd.format(balance)}</td>`;
-                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? ' prepay-target-row' : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-date="${dateStr}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
+                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? ' prepay-target-row' : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
                 const printRow = `<td>${i}</td><td>${dateStr}</td><td>${fmtUsd.format(pmt)}</td><td>${fmtUsd.format(principal)}</td><td>${fmtUsd.format(interest)}</td><td>${fmtUsd.format(balance)}</td>`;
                 printTbodyHTML += `<tr>${printRow}</tr>`;
                 if(balance <= 0) break;
