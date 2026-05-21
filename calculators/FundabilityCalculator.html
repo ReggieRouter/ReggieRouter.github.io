@@ -308,18 +308,128 @@
 
         <!-- ============ PANEL: POSITION RISK ============ -->
         <div class="panel" id="panel_risk">
-            <!-- Simplified for brevity, logic remains same as provided -->
             <div class="lp-inputs">
                 <div class="lp-howto">
-                    Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong>.
+                    Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
                 </div>
-                <label for="monthly_rev">Average monthly revenue</label>
-                <div class="input-wrap">
-                    <div class="input-prefix">$</div>
-                    <input type="number" id="monthly_rev" class="input-field" value="120000" oninput="runRiskCalc()">
+
+                <div class="lp-section-label">Revenue</div>
+                <div class="lp-group" style="margin-bottom: 0;">
+                    <label for="monthly_rev">Average monthly revenue <span class="tooltip-icon" data-tip="Gross monthly deposits / sales. Use a true monthly average from bank statements.">i</span></label>
+                    <div class="input-wrap">
+                        <div class="input-prefix">$</div>
+                        <input type="number" id="monthly_rev" class="input-field" value="120000" oninput="runRiskCalc()">
+                    </div>
+                </div>
+
+                <div class="lp-divider"></div>
+
+                <div class="lp-section-label">Existing positions</div>
+                <div id="positions_wrap"></div>
+                <button class="add-pos-btn" onclick="addPosition()">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add position
+                </button>
+
+                <div class="lp-divider"></div>
+
+                <div class="lp-section-label">New funding terms</div>
+                <div class="lp-group">
+                    <label for="factor">Factor rate / total payback multiple <span class="tooltip-icon" data-tip="Total payback multiple. e.g. 1.40 means $50,000 funded is repaid as $70,000. For an interest loan, enter total payback ÷ principal.">i</span></label>
+                    <div class="input-wrap">
+                        <input type="number" step="0.01" id="factor" class="input-field" value="1.40" oninput="runRiskCalc()">
+                    </div>
+                </div>
+                <div class="lp-group" style="margin-bottom: 0;">
+                    <label for="term_val">Term <span class="tooltip-icon" data-tip="Repayment length. Choose the unit that matches the product: business days for daily-ACH advances, weeks for weekly remits, or months for a term loan.">i</span></label>
+                    <div class="input-wrap">
+                        <input type="number" id="term_val" class="input-field" value="120" oninput="runRiskCalc()">
+                        <select class="unit-select" id="term_unit" onchange="runRiskCalc()">
+                            <option value="bizdays">business days</option>
+                            <option value="weeks">weeks</option>
+                            <option value="months">months</option>
+                        </select>
+                    </div>
+                    <div class="computed-note">New payment: <strong id="new_pay_note">—</strong></div>
+                </div>
+
+                <div class="lp-divider"></div>
+
+                <button type="button" class="lp-toggle" id="exp_toggle" onclick="toggleExposure()">
+                    <span class="exp-label">+ Add exposure check</span>
+                    <span class="optional-tag">Optional</span>
+                </button>
+                <div class="lp-collapse" id="exp_collapse" hidden>
+                    <div class="lp-group" style="margin: 14px 0 0;">
+                        <label for="open_bal">Total outstanding balance on existing positions <span class="tooltip-icon" data-tip="Combined remaining payback across all current obligations. Powers the total-exposure ratio (typically capped near 1.0x–1.5x of monthly revenue).">i</span></label>
+                        <div class="input-wrap">
+                            <div class="input-prefix">$</div>
+                            <input type="number" id="open_bal" class="input-field" placeholder="0" oninput="runRiskCalc()">
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- ... rest of risk panel ... -->
+
+            <div class="lp-results">
+                <div id="verdict" class="verdict">
+                    <div class="verdict-eyebrow" id="verdict_eyebrow">Stacking verdict</div>
+                    <div class="verdict-headline" id="verdict_headline">—</div>
+                    <div class="verdict-sub" id="verdict_sub"></div>
+                </div>
+
+                <div class="hero-grid">
+                    <div class="hero-output">
+                        <div class="hero-label">Debt-service ratio <span class="tooltip-icon" data-tip="Total monthly debt service (all positions + new) divided by monthly revenue. The primary stacking risk signal.">i</span></div>
+                        <div id="hero_dsr" class="hero-value">—</div>
+                    </div>
+                    <div class="hero-output">
+                        <div class="hero-label">New position</div>
+                        <div id="hero_pos" class="hero-value">—</div>
+                    </div>
+                </div>
+
+                <div class="takeaway" id="risk_takeaway">
+                    <span class="tk-eyebrow">What you tell the borrower</span>
+                </div>
+
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="result-label">Combined daily debt service <span class="tooltip-icon" data-tip="All positions plus the new funding, normalized to a daily-equivalent across ~21.7 business days/month.">i</span></div>
+                        <div id="res_daily" class="result-val">—</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Combined monthly debt service</div>
+                        <div id="res_monthly" class="result-val">—</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Revenue left after debt service</div>
+                        <div id="res_remaining" class="result-val">—</div>
+                    </div>
+                    <div class="result-item hidden" id="row_exposure">
+                        <div class="result-label">Total exposure vs revenue <span class="tooltip-icon" data-tip="Total outstanding + new payback, as a multiple of monthly revenue. Responsible funders typically cap this near 1.0x–1.5x.">i</span></div>
+                        <div id="res_exposure" class="result-val">—</div>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-title">Debt-service ratio bands</div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--risk-low-bd);"></span> Low — room to fund <span class="legend-range">&lt; 10%</span></div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--risk-mod-bd);"></span> Moderate — tighten terms <span class="legend-range">10–20%</span></div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--risk-high-bd);"></span> High — likely overextended <span class="legend-range">20–30%</span></div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--risk-sev-bd);"></span> Severe — decline / restructure <span class="legend-range">&gt; 30%</span></div>
+                </div>
+
+                <div class="lp-actions">
+                    <button class="lp-copy-btn" onclick="copyRisk()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy
+                    </button>
+                    <button class="lp-print-btn" onclick="handlePrint('Position / Stacking Risk Estimate')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        Save PDF
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
