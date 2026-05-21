@@ -281,7 +281,10 @@
         .legend-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
         .legend-range { color: #94a3b8; font-weight: 700; margin-left: auto; }
 
-        .lp-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .lp-actions { display: flex; flex-direction: row; gap: 12px; margin-top: 20px; }
+        .lp-actions .lp-copy-btn,
+        .lp-actions .lp-print-btn { flex: 1; width: auto; }
+        .panel > .lp-howto { margin: 20px 24px 0; }
         .lp-copy-btn {
             background-color: var(--lp-green); color: white; padding: 18px; border: none; border-radius: 10px;
             font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;
@@ -429,10 +432,10 @@
 
         <!-- ============ PANEL: NET REQUIREMENT ============ -->
         <div class="panel active" id="panel_net">
+            <div class="lp-howto">
+                Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
+            </div>
             <div class="lp-inputs">
-                <div class="lp-howto">
-                    Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
-                </div>
                 <label for="net_pct">Net Requirement <span class="tooltip-icon" data-tip="Percentage of the new funding that must go directly to the borrower.">i</span></label>
                 <div class="input-wrap">
                     <div class="input-prefix">%</div>
@@ -469,11 +472,10 @@
 
         <!-- ============ PANEL: POSITION RISK ============ -->
         <div class="panel" id="panel_risk">
+            <div class="lp-howto">
+                Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
+            </div>
             <div class="lp-inputs">
-                <div class="lp-howto">
-                    Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
-                </div>
-
                 <div class="lp-section-label">Revenue</div>
                 <div class="lp-group" style="margin-bottom: 0;">
                     <label for="monthly_rev">Average monthly revenue <span class="tooltip-icon" data-tip="Gross monthly deposits / sales. Use a true monthly average from bank statements.">i</span></label>
