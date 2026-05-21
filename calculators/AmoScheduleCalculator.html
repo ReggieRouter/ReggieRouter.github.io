@@ -202,6 +202,16 @@
             color: var(--brand-accent);
         }
 
+        .prepay-target-row td {
+            background: #dcfce7 !important;
+            font-weight: 800 !important;
+            border-top: 2px solid #14532D !important;
+            border-bottom: 2px solid #14532D !important;
+        }
+        .prepay-target-row td:first-child {
+            border-left: 4px solid #14532D !important;
+        }
+
         /* Amortization Table Scroll with Fade */
         .table-scroll-container {
             max-height: 280px;
@@ -427,6 +437,20 @@
             const summary = document.getElementById(`prepaySummary-${id}`);
             isChecked ? section.classList.remove('hidden') : section.classList.add('hidden');
             isChecked ? summary.classList.remove('hidden') : summary.classList.add('hidden');
+
+            if (isChecked) {
+                const wrap = document.getElementById(`detailsWrap-${id}`);
+                const btn = document.getElementById(`toggleDetailsBtn-${id}`);
+                if (wrap.classList.contains('hidden')) {
+                    wrap.classList.remove('hidden');
+                    btn.textContent = 'Hide Amortization Schedule ↑';
+                }
+                // calcCard runs synchronously after this — scroll once DOM is updated
+                setTimeout(() => {
+                    const targetRow = document.getElementById(`prepay-target-${id}`);
+                    if (targetRow) targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 50);
+            }
         }
 
         function updateHeaders() {
@@ -741,8 +765,10 @@
                 if(unearnedInterest < 0) unearnedInterest = 0;
                 if(balance < 0) balance = 0;
 
+                let isTargetRow = false;
                 if(isPrepayEnabled && (cumulativePrincipal / amt * 100) >= renPct && !targetHit) {
                     targetHit = true;
+                    isTargetRow = true;
                     savedRenDate = currentDate.toLocaleDateString();
                     savedSavings = unearnedInterest * (discPct / 100);
                     savedBuyout = balance + unearnedInterest - savedSavings;
@@ -754,7 +780,7 @@
                     <td class="p-3">${fmtUsd.format(principal)}</td>
                     <td class="p-3">${fmtUsd.format(interest)}</td>
                     <td class="p-3 font-extrabold text-[#14532D]">${fmtUsd.format(balance)}</td>`;
-                tbodyHTML += `<tr class="${targetHit && i === periods ? 'bg-[#F0FDF4]' : ''}">${row}</tr>`;
+                tbodyHTML += `<tr ${isTargetRow ? `id="prepay-target-${id}" class="prepay-target-row"` : ''}>${row}</tr>`;
                 printTbodyHTML += `<tr>${row.replace('text-right', '')}</tr>`;
                 if(balance <= 0) break;
             }
