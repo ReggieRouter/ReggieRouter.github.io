@@ -162,7 +162,7 @@
             line-height: 1.6;
             margin-top: 24px;
             display: flex;
-            align-items: stretch;
+            flex-direction: column;
             overflow: hidden;
         }
         .takeaway-eyebrow {
@@ -327,6 +327,29 @@
         .fee-seg-btn:first-child { border-right: 1px solid #E5E7EB; }
         .fee-seg-btn.active { color: #14532D; background: #F0FDF4; }
         .amo-detail-cell { background: #e8f5ec; box-shadow: inset 2px 0 0 #0a4d2c; font-style: italic; font-size: 12px; color: #14532D; padding: 5px 12px 5px 16px; }
+
+        /* Talk track arrow shimmer */
+        @keyframes arrowShimmer {
+            0%, 100% { opacity: 0.35; transform: scale(1); }
+            50%       { opacity: 1;    transform: scale(1.18); }
+        }
+        .tt-arrow-up  { color: #14532D; animation: arrowShimmer 2.2s ease-in-out infinite; }
+        .tt-arrow-down { color: #14532D; animation: arrowShimmer 2.2s ease-in-out infinite; animation-delay: 1.1s; }
+        .tt-arrow-up:hover, .tt-arrow-down:hover { animation: none; }
+
+        /* Talk track row layout + footer */
+        .takeaway-main { display: flex; align-items: stretch; }
+        .takeaway-footer { border-top: 0.5px solid #BBF7D0; padding: 8px 18px; font-size: 11px; color: #94A3B8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .takeaway-apr-dot { color: #F59E0B; font-size: 10px; line-height: 1; }
+
+        /* PDF fixes */
+        body.pdf-export-mode { display: block !important; }
+        body.pdf-export-mode .cards-container { display: block !important; gap: 0 !important; }
+        body.pdf-export-mode .print-header-content { padding-top: 4px !important; margin-bottom: 16px !important; }
+        body.pdf-export-mode .amo-section { page-break-before: always !important; break-before: page !important; }
+        @media print {
+            .amo-section { page-break-before: always; break-before: page; }
+        }
     </style>
 </head>
 <body>
@@ -446,6 +469,75 @@
         const cardTracks = {};
         const lastCalc = {};
 
+        let compareCardId = null;
+        let compareHidden = false;
+        let compareSnapshot = null;
+
+        function cloneInputsToCompare(srcId, dstId) {
+            const fields = ['amt', 'factor', 'term', 'fee', 'start', 'discPct'];
+            const snap = {};
+            fields.forEach(f => {
+                const src = document.getElementById(`${f}-${srcId}`);
+                const dst = document.getElementById(`${f}-${dstId}`);
+                if (src && dst) { dst.value = src.value; snap[f] = src.value; }
+            });
+            const freqSrc = document.getElementById(`freq-${srcId}`);
+            const freqDst = document.getElementById(`freq-${dstId}`);
+            if (freqSrc && freqDst) { freqDst.value = freqSrc.value; snap['freq'] = freqSrc.value; }
+            const srcMode = document.getElementById(`feeWrap-${srcId}`)?.dataset.feeMode || 'pct';
+            if (srcMode === 'dollar') setFeeMode(dstId, 'dollar');
+            const srcPrepay = document.getElementById(`enablePrepay-${srcId}`);
+            const dstPrepay = document.getElementById(`enablePrepay-${dstId}`);
+            if (srcPrepay && dstPrepay) { dstPrepay.checked = srcPrepay.checked; snap['prepay'] = srcPrepay.checked; }
+            return snap;
+        }
+
+        function compareHasChanges() {
+            if (!compareCardId || !compareSnapshot) return false;
+            const fields = ['amt', 'factor', 'term', 'fee', 'start', 'discPct', 'freq'];
+            return fields.some(f => {
+                const el = document.getElementById(`${f}-${compareCardId}`);
+                return el && el.value !== compareSnapshot[f];
+            });
+        }
+
+        function updateCompareBtn(sourceId) {
+            const btn = document.getElementById(`compareBtn-${sourceId}`);
+            if (!btn) return;
+            if (!compareCardId || !document.getElementById(`cardContainer-${compareCardId}`)) {
+                btn.textContent = '+ Compare';
+            } else if (compareHidden) {
+                btn.textContent = '↩ Restore';
+            } else {
+                btn.textContent = 'Hide compare';
+            }
+        }
+
+        function compareCard(sourceId) {
+            if (compareCardId !== null && document.getElementById(`cardContainer-${compareCardId}`)) {
+                const el = document.getElementById(`cardContainer-${compareCardId}`);
+                if (!compareHidden) {
+                    if (compareHasChanges() && !confirm('Discard comparison?')) return;
+                    el.style.display = 'none';
+                    compareHidden = true;
+                } else {
+                    el.style.display = '';
+                    compareHidden = false;
+                }
+                updateCompareBtn(sourceId);
+                return;
+            }
+            compareCardId = null;
+            addCard();
+            compareCardId = maxId;
+            compareHidden = false;
+            compareSnapshot = cloneInputsToCompare(sourceId, compareCardId);
+            const compBtn = document.getElementById(`compareBtn-${compareCardId}`);
+            if (compBtn) compBtn.style.display = 'none';
+            calcCard(compareCardId);
+            updateCompareBtn(sourceId);
+        }
+
         function cleanNumericInput(val) {
             const num = parseFloat(val);
             return isNaN(num) ? null : num;
@@ -453,8 +545,6 @@
 
         function togglePrepay(id) {
             const isChecked = document.getElementById(`enablePrepay-${id}`).checked;
-            const section = document.getElementById(`prepaySection-${id}`);
-            isChecked ? section.classList.remove('hidden') : section.classList.add('hidden');
             if (!isChecked) {
                 const tracks = getTracks(id);
                 if ((cardTracks[id] ?? 0) >= tracks.length) cardTracks[id] = 0;
@@ -522,7 +612,7 @@
                     <div id="badge-container-${id}" class="z-10"></div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none" id="header-center-${id}"></div>
                     <div class="flex items-center gap-2 z-10">
-                        <button onclick="addCard()" class="no-print h-[30px] px-[10px] rounded-full border border-dashed border-[#D1D5DB] text-[10px] font-bold uppercase tracking-wider text-[#9CA3AF] hover:border-[#14532D] hover:text-[#14532D] transition-colors whitespace-nowrap">+ Compare</button>
+                        <button id="compareBtn-${id}" onclick="compareCard(${id})" class="no-print h-[30px] px-[10px] rounded-full border border-dashed border-[#D1D5DB] text-[10px] font-bold uppercase tracking-wider text-[#9CA3AF] hover:border-[#14532D] hover:text-[#14532D] transition-colors whitespace-nowrap">+ Compare</button>
                         <button onclick="removeCard(${id})" class="remove-card-btn w-[32px] h-[32px] rounded-full hover:bg-slate-50 flex items-center justify-center text-[#6B7280] text-[20px] leading-none no-print transition-colors hover:text-[#EF4444]">&times;</button>
                     </div>
                 </div>
@@ -604,12 +694,13 @@
                             </label>
                             <div class="text-[11px] text-[#6B7280] mb-4">Model early payoff savings and reduced interest cost.</div>
                             
-                            <div id="prepaySection-${id}" class="hidden bg-[#F8FAFC] p-4 rounded-xl border border-[#E2E8F0]">
+                            <div id="prepaySection-${id}" class="bg-[#F8FAFC] p-4 rounded-xl border border-[#E2E8F0]">
                                 <label class="!text-[#6B7280]">Pre-Pay Discount</label>
                                 <div class="lp-input-group">
                                     <input type="number" id="discPct-${id}" value="25" min="0" class="lp-input" oninput="calcCard(${id})">
                                     <span class="pr-3 pl-2 text-[#94A3B8] font-bold">%</span>
                                 </div>
+                                <div class="text-[11px] text-[#94A3B8] mt-2">Check the box above to include this in the payment calculation.</div>
                             </div>
                         </div>
                     </div>
@@ -657,18 +748,24 @@
                             </div>
 
                             <div class="takeaway" id="takeaway-box-${id}" tabindex="0" onkeydown="handleTakeawayKey(event, ${id})" onmouseenter="showCounter(${id})" onmouseleave="hideCounter(${id})">
-                                <div class="takeaway-body">
-                                    <span class="takeaway-eyebrow">What you tell the borrower</span>
-                                    <span id="takeaway-content-${id}"></span>
-                                    <div id="track-counter-${id}" class="takeaway-counter" style="display:none"></div>
+                                <div class="takeaway-main">
+                                    <div class="takeaway-body">
+                                        <span class="takeaway-eyebrow">What you tell the borrower</span>
+                                        <span id="takeaway-content-${id}"></span>
+                                        <div id="track-counter-${id}" class="takeaway-counter" style="display:none"></div>
+                                    </div>
+                                    <div class="takeaway-nav no-print">
+                                        <button onclick="prevTrack(${id})" class="takeaway-nav-btn tt-arrow-up" type="button" aria-label="Previous track">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                                        </button>
+                                        <button onclick="nextTrack(${id})" class="takeaway-nav-btn tt-arrow-down" type="button" aria-label="Next track">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="takeaway-nav no-print">
-                                    <button onclick="prevTrack(${id})" class="takeaway-nav-btn" type="button" aria-label="Previous track">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
-                                    </button>
-                                    <button onclick="nextTrack(${id})" class="takeaway-nav-btn" type="button" aria-label="Next track">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                    </button>
+                                <div class="takeaway-footer no-print">
+                                    <span class="takeaway-apr-dot">●</span>
+                                    APR disclosure required in CA and NY
                                 </div>
                             </div>
 
@@ -681,7 +778,6 @@
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                                     Save as PDF
                                 </button>
-                                <p class="text-[10px] text-[#94A3B8] italic mt-1">* APR disclosure required in CA and NY</p>
                             </div>
 
                         </div>
@@ -689,7 +785,7 @@
                     </div>
                 </div>
 
-                <div class="border-t border-[#E5E7EB]">
+                <div class="border-t border-[#E5E7EB] amo-section">
                     <div class="px-[24px] pt-5 pb-3 flex items-center justify-between">
                         <span class="text-[11px] font-extrabold text-[#6B7280] uppercase tracking-widest">Amortization Schedule</span>
                         <span class="text-[11px] text-[#94A3B8] italic no-print">Click any row to quantify the pre-pay discount</span>
@@ -704,7 +800,7 @@
                                         <th class="p-3 font-bold text-[#111827]">Payment</th>
                                         <th class="p-3 font-bold text-[#111827]">Principal</th>
                                         <th class="p-3 font-bold text-[#111827]">Interest</th>
-                                        <th class="p-3 font-bold text-[#111827]">Balance</th>
+                                        <th class="p-3 font-bold text-[#111827]">Remaining Balance</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tableBody-${id}" class="divide-y divide-[#F3F4F6]"></tbody>
@@ -723,7 +819,7 @@
                                 <th class="py-3 font-black text-[#111827] uppercase">Payment</th>
                                 <th class="py-3 font-black text-[#111827] uppercase">Principal</th>
                                 <th class="py-3 font-black text-[#111827] uppercase">Interest</th>
-                                <th class="py-3 font-black text-[#111827] uppercase text-right">Balance</th>
+                                <th class="py-3 font-black text-[#111827] uppercase text-right">Remaining Balance</th>
                             </tr>
                         </thead>
                         <tbody id="printTableBody-${id}" class="divide-y divide-[#E5E7EB]"></tbody>
@@ -865,7 +961,11 @@
 
         function removeCard(id) {
             const el = document.getElementById(`cardContainer-${id}`);
-            if(el) { el.remove(); updateHeaders(); }
+            if (el) {
+                if (compareCardId === id) { compareCardId = null; compareHidden = false; compareSnapshot = null; }
+                el.remove();
+                updateHeaders();
+            }
         }
 
         function calcCard(id) {
