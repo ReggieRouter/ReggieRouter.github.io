@@ -761,10 +761,8 @@ function openTool(t, push, urlOverride) {
     document.getElementById('topbarTitle').textContent = t.name;
     const iframe = document.getElementById('lp-tool-iframe');
     if (iframe && path) {
-        // Always update iframe src if it's different to ensure query params are passed
-        if (iframe.src !== window.location.origin + path.replace('./', '/')) {
-            iframe.src = path;
-        }
+        // Always force a reload of the iframe content to reset state
+        iframe.src = path;
     }
   }
   

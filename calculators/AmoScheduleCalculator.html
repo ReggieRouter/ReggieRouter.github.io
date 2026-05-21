@@ -167,6 +167,8 @@
         /* Embedded state adjustments */
         body.is-embedded { background-color: #fff; }
         body.is-embedded main { padding-top: 8px; }
+        body.is-embedded .modal-shell { box-shadow: none; border: none; }
+        body.is-embedded .remove-card-btn { display: none !important; }
 
         .lp-print-btn {
             background-color: transparent;
@@ -438,7 +440,7 @@
                     <div class="flex flex-col items-center text-center" id="header-center-${id}">
                         <!-- Injected via updateHeaders() -->
                     </div>
-                    <button onclick="removeCard(${id})" class="w-[32px] h-[32px] rounded-full hover:bg-slate-50 flex items-center justify-center text-[#6B7280] text-[20px] leading-none no-print transition-colors hover:text-[#EF4444]">&times;</button>
+                    <button onclick="removeCard(${id})" class="remove-card-btn w-[32px] h-[32px] rounded-full hover:bg-slate-50 flex items-center justify-center text-[#6B7280] text-[20px] leading-none no-print transition-colors hover:text-[#EF4444]">&times;</button>
                 </div>
 
                 <!-- Left/Right Panel Standard -->
