@@ -24,12 +24,14 @@
     max-width: 1000px;
     margin: 0 auto;
     padding: 40px 24px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 @media (max-width: 640px) {
     .lp-main { padding: 16px 12px; }
     .card-header { height: auto; padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
     .lp-inputs, .lp-results { padding: 20px; }
-    .lp-howto { padding: 12px; margin-bottom: 20px; }
 }
 
 .cards-container {
@@ -117,18 +119,6 @@
     background-color: #f9fafb;
     display: flex;
     flex-direction: column;
-}
-
-/* Definition Box */
-.lp-howto {
-    background: #f0fdf4;
-    border-radius: 10px;
-    padding: 13px 15px;
-    font-size: 12.5px;
-    font-weight: 600;
-    line-height: 1.6;
-    margin-bottom: 24px;
-    color: #334155;
 }
 
 /* Form Groups */
@@ -349,11 +339,11 @@ label {
 }
 
 /* Print-only elements hidden by default on screen */
-.print-header-content, .print-footer-legal, .print-watermark { display: none; }
+.print-header-content, .print-footer-legal, .print-watermark { display: none !important; }
 
 @media print {
     body { background: white !important; }
-    .no-print, header, .modal-header, .lp-actions, .lp-pill-btn, .remove-card-btn, .lp-disclaimer, .tooltip-icon, .lp-howto { display: none !important; }
+    .no-print, header, .modal-header, .lp-actions, .lp-pill-btn, .remove-card-btn, .lp-disclaimer, .tooltip-icon, .lp-definition { display: none !important; }
     .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
     .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
     .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
@@ -375,7 +365,7 @@ body.pdf-export-mode .lp-pill-btn,
 body.pdf-export-mode .remove-card-btn, 
 body.pdf-export-mode .lp-disclaimer, 
 body.pdf-export-mode .tooltip-icon, 
-body.pdf-export-mode .lp-howto,
+body.pdf-export-mode .lp-definition,
 body.pdf-export-mode .lp-inputs { display: none !important; }
 
 body.pdf-export-mode .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
@@ -556,7 +546,7 @@ function addCard() {
         </div>
         <div class="card-body-flex">
             <div class="lp-inputs">
-                <div class="lp-howto">
+                <div class="lp-definition">
                     Enter the loan amount and term. You'll see the full fee picture and monthly payment — and what to tell your borrower about total cost.
                 </div>
                 <div class="lp-group">
@@ -683,7 +673,7 @@ window.onload = () => {
 <style>
     body.is-embedded { background: transparent; }
     body.is-embedded .modal-header { display: none !important; }
-    body.is-embedded .lp-main { padding: 0; align-items: center; }
+    body.is-embedded .lp-main { padding: 0; display: flex; flex-direction: column; align-items: center; }
 </style>
 </body>
 </html>
