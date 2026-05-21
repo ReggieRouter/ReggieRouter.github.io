@@ -950,13 +950,13 @@
             var s = ['th','st','nd','rd'], v = n % 100;
             return n + (s[(v-20)%10] || s[v] || s[0]);
         }
-        function monthPhrase(day, month) {
-            if (day <= 10) return 'early ' + month;
-            if (day <= 20) return 'mid ' + month;
-            return 'late ' + month;
+        function monthPhrase(day, month, year) {
+            var part = day <= 10 ? 'early ' : day <= 20 ? 'mid ' : 'late ';
+            var base = part + month;
+            return (year && year !== new Date().getFullYear()) ? base + ' ' + year : base;
         }
         function payoffLink(id, sel) {
-            var phrase = toOrdinal(sel.period) + ' payment in ' + monthPhrase(sel.day, sel.month);
+            var phrase = toOrdinal(sel.period) + ' payment in ' + monthPhrase(sel.day, sel.month, sel.year);
             return '<span class="amo-row-link" onclick="scrollToAmoRow('+id+','+sel.period+')" role="button">'+phrase+'</span>';
         }
         function scrollToAmoRow(id, period) {
@@ -1056,7 +1056,8 @@
                     buyout: parseFloat(rowEl.dataset.buyout),
                     date: rowEl.dataset.date,
                     day: parseInt(rowEl.dataset.day, 10),
-                    month: rowEl.dataset.month
+                    month: rowEl.dataset.month,
+                    year: parseInt(rowEl.dataset.year, 10)
                 };
                 rowEl.classList.add('prepay-target-row');
             }
@@ -1164,11 +1165,12 @@
                 const dateStr = currentDate.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
                 const dateDay = currentDate.getDate();
                 const dateMonth = currentDate.toLocaleString('default', {month: 'long'});
+                const dateYear = currentDate.getFullYear();
                 maturityDate = dateStr;
                 const isSelected = rowSelection[id] && rowSelection[id].period === i;
 
                 if (isSelected) {
-                    rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, date: dateStr, day: dateDay, month: dateMonth };
+                    rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, date: dateStr, day: dateDay, month: dateMonth, year: dateYear };
                 }
 
                 const row = `
@@ -1178,7 +1180,7 @@
                     <td class="p-3">${fmtUsd.format(principal)}</td>
                     <td class="p-3">${fmtUsd.format(interest)}</td>
                     <td class="p-3 font-extrabold text-[#14532D]">${fmtUsd.format(balance)}</td>`;
-                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? ' prepay-target-row' : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
+                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? ' prepay-target-row' : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" data-year="${dateYear}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
                 const printRow = `<td>${i}</td><td>${dateStr}</td><td>${fmtUsd.format(pmt)}</td><td>${fmtUsd.format(principal)}</td><td>${fmtUsd.format(interest)}</td><td>${fmtUsd.format(balance)}</td>`;
                 printTbodyHTML += `<tr>${printRow}</tr>`;
                 if(balance <= 0) break;
