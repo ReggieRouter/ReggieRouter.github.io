@@ -18,14 +18,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
+<script src="../public/assets/js/calculator-app.js"></script>
 
 <style>
 :root {
   /* DSCR specific colors */
-  --pass-bg: #d1fae5; --pass-tx: #065f46;
+  --pass-bg: #f0fdf4; --pass-tx: #14532D;
   --fail-bg: #fee2e2; --fail-tx: #991b1b;
-  --tax-pass: #579985;
-  --tax-pass-bg: rgba(87, 153, 133, 0.12);
+  --tax-pass: #14532D;
+  --tax-pass-bg: rgba(20, 83, 45, 0.12);
   --tax-dbl: #9b85b9;
   --tax-dbl-bg: rgba(155, 133, 185, 0.12);
 }
@@ -248,44 +249,22 @@
 .lc-modal-title { font-size: 16px; font-weight: 800; color: var(--lp-dark); text-transform: uppercase; letter-spacing: 0.05em; }
 .lc-modal-body { padding: 24px; }
 
-/* -- Print Styles -- */
-.print-header { display: none; }
-.print-disclaimer { display: none; }
-
+/* Print Export Standards */
+.print-header-content { display: none; }
 @media print {
     body { background: white !important; }
-    .modal-header, .pdf-btn, .pdf-hint, .sc-collapse, .add-btn, .debt-rm, .owner-rm, .scen-rm, .refi-btn, .addbacks-btn, .lender-ctx-btn, .tab-bar, .ent-toggle-bar, .lc-modal, .pdf-picker, .lp-disclaimer { display: none !important; }
+    .no-print, header, .modal-header, .pdf-btn, .pdf-hint, .sc-collapse, .add-btn, .debt-rm, .owner-rm, .scen-rm, .refi-btn, .addbacks-btn, .lender-ctx-btn, .tab-bar, .ent-toggle-bar, .lc-modal, .pdf-picker, .lp-disclaimer, .tooltip-icon, .lp-howto, .gated-overlay { display: none !important; }
+    .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
+    .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
+    .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
     .lp-main { padding: 0 !important; display: block !important; }
     .lp-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; }
     .lp-body { padding: 0 !important; }
-    .sc { border: 1px solid #d1d5db !important; break-inside: avoid; margin-bottom: 24px !important; }
+    .sc { border: none !important; border-bottom: 1px solid #e5e7eb !important; border-radius: 0 !important; margin-bottom: 24px !important; break-inside: avoid; }
     .sc-body { display: block !important; }
     .sc.collapsed .sc-body { display: block !important; }
     .sc.pdf-hide { display: none !important; }
-    
-    .print-header {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        margin-bottom: 40px !important;
-        border-bottom: 2px solid var(--lp-green) !important;
-        padding-bottom: 24px !important;
-    }
-    .print-logo { height: 64px !important; margin-bottom: 12px !important; }
-    .print-title { font-size: 20px !important; font-weight: 800 !important; text-transform: uppercase !important; color: var(--lp-dark) !important; letter-spacing: 0.05em; }
-    
-    .print-disclaimer {
-        display: block !important;
-        margin-top: 60px !important;
-        padding-top: 24px !important;
-        border-top: 1px solid var(--lp-border) !important;
-        font-size: 10px !important;
-        color: var(--lp-text-muted) !important;
-        text-align: center !important;
-        text-transform: uppercase !important;
-        line-height: 1.6 !important;
-        letter-spacing: 0.05em;
-    }
+    .gated-section.is-locked .sc-body { opacity: 1 !important; filter: none !important; }
     
     .inp { border: none !important; padding-left: 18px !important; font-weight: 700 !important; }
     .save-field input { border: none !important; padding: 0 !important; font-weight: 800 !important; }
@@ -294,6 +273,8 @@
     .mode-bar { background: transparent !important; border: none !important; padding: 0 !important; }
     .mode-btn:not(.active) { display: none !important; }
     .mode-btn.active { background: transparent !important; color: var(--lp-dark) !important; text-align: left !important; font-size: 14px !important; padding: 0 !important; }
+    .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
+    .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
 }
 
 .lp-disclaimer {
@@ -313,39 +294,25 @@
 
 <header class="modal-header">
     <svg class="modal-logo" width="124" height="22" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
-      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
         <path d="M4 4v16h11l5-5V4H4z"/>
         <path d="M15 20v-5h5"/>
         <path d="M9 9v6"/>
         <path d="M9 15h4"/>
       </svg>
       <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
-        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#10B981">.</tspan>
+        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#14532D">.</tspan>
       </text>
     </svg>
     <div class="modal-title">DSCR Calculator</div>
 </header>
 
 <div class="lp-main">
+    <div class="print-header-content">
+        <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
+        <h1>DSCR Analysis</h1>
+    </div>
     <div class="lp-container">
-        <!-- Print Header -->
-        <div class="print-header">
-            <svg class="print-logo" width="180" height="32" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
-              <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
-                <path d="M4 4v16h11l5-5V4H4z"/>
-                <path d="M15 20v-5h5"/>
-                <path d="M9 9v6"/>
-                <path d="M9 15h4"/>
-              </svg>
-              <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
-                <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#10B981">.</tspan>
-              </text>
-            </svg>
-            <div class="print-title">DSCR Analysis</div>
-            <div style="margin-top:12px; font-size:12px; font-weight:600; color:var(--lp-text-muted);">
-                Business: <span class="pdfPrintBizNameOut"></span>
-            </div>
-        </div>
 
         <div class="lp-body">
             <div class="sc" data-sc-collapsible data-pdf-sec="entity">
@@ -492,11 +459,11 @@
             </div>
         </div>
 
-        <!-- Print-only disclaimer -->
-        <div class="print-disclaimer">
-            DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
-            <br><br>
-            Powered by LendPaper | lendpaper.com
+        <div class="print-footer-legal">
+            THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
+        </div>
+        <div class="print-watermark">
+            Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available
         </div>
     </div>
 </div>

@@ -11,6 +11,7 @@
     <link rel="icon" type="image/svg+xml" href="../public/assets/brand/favicon.svg">
     <link rel="apple-touch-icon" href="../public/assets/brand/apple-touch-icon-180x180.png">
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
+    <script src="../public/assets/js/calculator-app.js"></script>
     <style>
         /* Typography & Core Variables */
         :root {
@@ -249,13 +250,17 @@
 
         /* Print Export Standards */
         .print-header-content { display: none; }
+        .print-footer-legal { display: none; }
+        .print-watermark { display: none; }
         @media print {
             body { background: white !important; }
-            .no-print, header, .action-buttons, .tooltiptext { display: none !important; }
+            .no-print, header, .action-buttons, .tooltiptext, .lp-howto, .remove-card-btn { display: none !important; }
             .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
             .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
             .print-header-content h1 { font-size: 22px; font-weight: 800; color: var(--brand-primary); margin: 0; text-transform: uppercase; }
             .modal-shell { box-shadow: none !important; border: none !important; max-width: 100% !important; margin: 0 auto !important; }
+            .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
+            .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
         }
     </style>
 </head>
@@ -279,10 +284,10 @@
     </div>
 
     <!-- Print Baseline Constants -->
-    <div class="hidden print-footer-legal">
+    <div class="print-footer-legal">
         THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
     </div>
-    <div class="hidden print-watermark">
+    <div class="print-watermark">
         Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available
     </div>
 

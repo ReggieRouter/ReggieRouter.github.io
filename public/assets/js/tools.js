@@ -89,7 +89,7 @@ const TOOLS = [
     desc: "Identify the break even point.",
     status: "soon", 
     group: "deal-math", 
-    icon: "trendUp", 
+    icon: "lineChart", 
     color: "green",
     href: "#",
     kw: "roi break even profit investment"
