@@ -363,7 +363,10 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
         <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#14532D">.</tspan>
       </text>
     </svg>
-    <div class="modal-title">DSCR Calculator</div>
+    <div class="modal-title">
+        <span class="modal-title-main">DSCR Calculator</span>
+        <span class="modal-title-sub">Cash Flow Analysis Engine</span>
+    </div>
 </header>
 
 <div class="lp-main">
@@ -522,7 +525,7 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
             THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
         </div>
         <div class="print-watermark">
-            Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom brand | bespoke tooling available
+            Powered by LendPaper | info@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.
         </div>
     </div>
 </div>
@@ -557,7 +560,7 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
 </div>
 
 <script>
-const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom brand | bespoke tooling available";
+const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.";
 var ENTITIES = [
   {id:'sole', name:'Sole Prop', taxation:'pass', form:'1040 Schedule C', dot:'pass', llcText:'Includes Single-Member LLC (default)'},
   {id:'partnership', name:'Partnership', taxation:'pass', form:'Form 1065', dot:'pass', llcText:'Includes Multi-Member LLC (default)'},

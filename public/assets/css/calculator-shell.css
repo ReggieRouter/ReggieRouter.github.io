@@ -35,7 +35,7 @@ body.is-embedded .lp-container,
 body.is-embedded .modal-shell { border: none; box-shadow: none; border-radius: 0; max-width: 100%; }
 
 .modal-header {
-  height: 56px;
+  height: 64px;
   background: #fff;
   border-bottom: 1px solid var(--lp-border);
   display: flex;
@@ -52,11 +52,26 @@ body.is-embedded .modal-shell { border: none; box-shadow: none; border-radius: 0
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+  text-align: center;
+  line-height: 1;
+}
+.modal-title-main {
+  display: block;
   font-size: 13px;
   font-weight: 800;
   color: var(--lp-dark);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.modal-title-sub {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--lp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 3px;
   white-space: nowrap;
 }
 
