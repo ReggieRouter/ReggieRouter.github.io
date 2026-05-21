@@ -236,7 +236,7 @@ input { font-family: inherit; }
 
 .mobile-toggle { display: none; padding: 6px; border-radius: var(--radius-sm); color: var(--text-muted); }
 
-.content { flex: 1; overflow-y: auto; padding: 28px 32px 48px; }
+.content { flex: 1; min-width: 0; overflow-y: auto; padding: 28px 32px 48px; }
 
 /* ==================== Views ==================== */
 
@@ -551,7 +551,7 @@ input { font-family: inherit; }
   font-size: 38px; font-weight: 800; letter-spacing: -0.025em;
   color: var(--text); line-height: 1.1; margin-bottom: 8px;
 }
-.greeting-sub { font-size: 13px; color: var(--text-muted); font-family: var(--mono); }
+.greeting-sub { font-size: 13px; color: var(--text-muted); }
 
 /* ==================== Featured tool cards ==================== */
 .featured-grid {
@@ -565,8 +565,9 @@ input { font-family: inherit; }
   transition: border-color var(--transition), transform var(--transition);
   animation: fadeUp 250ms ease both;
 }
-.featured-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-.featured-card.is-featured-primary { border-color: var(--accent); }
+.featured-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+.featured-card.is-featured-primary { border-color: var(--accent); background: var(--accent-soft); }
+.featured-card.is-featured-primary:hover { border-color: var(--accent-hover); }
 .featured-card-icon {
   width: 48px; height: 48px; border-radius: 10px;
   background: var(--bg-alt); color: var(--text-muted);
@@ -894,7 +895,8 @@ function getGreeting() {
   if (date <= 3) return "Fresh start.";
   if (d === 1) return "New week.";
   if (d === 5) return "End of week.";
-  if (h >= 5 && h < 12) return "Good morning.";
+  if (h >= 5 && h < 8) return "Good (early) morning.";
+  if (h >= 8 && h < 12) return "Good morning.";
   if (h >= 12 && h < 17) return "Good afternoon.";
   if (h >= 17 && h < 21) return "Good evening.";
   return "Working late.";

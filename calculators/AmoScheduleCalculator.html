@@ -322,10 +322,6 @@
         .takeaway-nav-btn { background: transparent; border: none; cursor: pointer; color: #94a3b8; padding: 4px; transition: color 0.15s; display: flex; align-items: center; justify-content: center; }
         .takeaway-nav-btn:hover { color: #14532D; }
         .takeaway-counter { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; margin-top: 6px; white-space: nowrap; }
-        .fee-seg-wrap { display: flex; align-self: stretch; border-right: 1px solid #E5E7EB; }
-        .fee-seg-btn { padding: 0 9px; font-size: 11px; font-weight: 700; color: #94A3B8; background: transparent; border: none; cursor: pointer; transition: all 0.15s; font-family: inherit; }
-        .fee-seg-btn:first-child { border-right: 1px solid #E5E7EB; }
-        .fee-seg-btn.active { color: #14532D; background: #F0FDF4; }
         .amo-detail-cell { background: #e8f5ec; box-shadow: inset 2px 0 0 #0a4d2c; font-style: italic; font-size: 12px; color: #14532D; padding: 5px 12px 5px 16px; }
 
         /* Talk track arrow shimmer */
@@ -349,6 +345,32 @@
         @media print {
             .amo-section { page-break-before: always; break-before: page; }
         }
+
+        /* Pre-pay widget */
+        .prepay-widget { border: 1px solid #E5E7EB; border-radius: 12px; background: #FFFFFF; overflow: hidden; }
+        .prepay-widget-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+        .prepay-widget-icon { width: 34px; height: 34px; border-radius: 8px; background: #111827; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .prepay-widget-text { flex: 1; min-width: 0; }
+        .prepay-widget-title { font-size: 13px; font-weight: 700; color: #111827; }
+        .prepay-widget-sub { font-size: 11.5px; color: #6B7280; margin-top: 1px; }
+        .prepay-widget-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .prepay-pct-box { display: flex; align-items: center; gap: 4px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; padding: 5px 10px; }
+        .prepay-pct-input { width: 36px; border: none; background: transparent; font-size: 15px; font-weight: 700; color: #111827; outline: none; text-align: right; -moz-appearance: textfield; }
+        .prepay-pct-input::-webkit-inner-spin-button, .prepay-pct-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+        .prepay-pct-sym { font-size: 13px; font-weight: 600; color: #6B7280; }
+        .prepay-widget-hint { font-size: 11px; color: #9CA3AF; padding: 0 14px 10px; }
+
+        /* iOS-style toggle */
+        .prepay-toggle { position: relative; display: inline-block; width: 44px; height: 26px; cursor: pointer; flex-shrink: 0; }
+        .prepay-toggle-cb { opacity: 0; width: 0; height: 0; position: absolute; }
+        .prepay-toggle-track { position: absolute; inset: 0; border-radius: 99px; background: #D1D5DB; transition: background 0.2s; }
+        .prepay-toggle-track::after { content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%; background: white; top: 3px; left: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .prepay-toggle-cb:checked + .prepay-toggle-track { background: #14532D; }
+        .prepay-toggle-cb:checked + .prepay-toggle-track::after { transform: translateX(18px); }
+
+        /* Origination fee easter egg */
+        .fee-egg { font-size: 12px; color: #6B7280; font-style: italic; opacity: 0; max-height: 0; overflow: hidden; transition: opacity 0.4s, max-height 0.3s; margin-top: 0; }
+        .fee-egg.visible { opacity: 1; max-height: 24px; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -548,29 +570,51 @@
                 const tracks = getTracks(id);
                 if ((cardTracks[id] ?? 0) >= tracks.length) cardTracks[id] = 0;
                 renderDetailRow(id);
+                document.getElementById(`prepaySummary-${id}`)?.classList.add('hidden');
+            } else {
+                document.getElementById(`prepaySummary-${id}`)?.classList.remove('hidden');
+            }
+        }
+
+        const feeToggleTimes = {};
+        const feeEggCooldown = {};
+        function trackFeeToggle(id) {
+            const now = Date.now();
+            if (!feeToggleTimes[id]) feeToggleTimes[id] = [];
+            feeToggleTimes[id].push(now);
+            feeToggleTimes[id] = feeToggleTimes[id].filter(t => now - t < 3000);
+            if (feeToggleTimes[id].length >= 5 && !feeEggCooldown[id]) {
+                feeToggleTimes[id] = [];
+                feeEggCooldown[id] = true;
+                const egg = document.getElementById(`feeEgg-${id}`);
+                if (egg) {
+                    egg.textContent = 'hey. take a breath. the deal is still here.';
+                    egg.classList.add('visible');
+                    setTimeout(() => { egg.classList.remove('visible'); }, 4000);
+                    setTimeout(() => { feeEggCooldown[id] = false; }, 64000);
+                }
             }
         }
 
         function setFeeMode(id, newMode) {
             const wrap = document.getElementById(`feeWrap-${id}`);
             const prefix = document.getElementById(`feePrefix-${id}`);
+            const suffix = document.getElementById(`feeSuffix-${id}`);
             const input = document.getElementById(`fee-${id}`);
-            const amt = cleanNumericInput(document.getElementById(`amt-${id}`).value) || 0;
-            const val = cleanNumericInput(input.value) || 0;
             if (wrap.dataset.feeMode === newMode) return;
-
             if (newMode === 'dollar') {
                 input.step = '100';
-                input.value = amt > 0 ? Math.round(amt * val / 100) : val;
-                prefix.classList.remove('hidden');
+                input.value = 3000;
+                if (prefix) prefix.style.display = 'flex';
+                if (suffix) suffix.style.display = 'none';
             } else {
                 input.step = '0.1';
-                input.value = amt > 0 ? parseFloat((val / amt * 100).toFixed(2)) : 0;
-                prefix.classList.add('hidden');
+                input.value = 3.0;
+                if (prefix) prefix.style.display = 'none';
+                if (suffix) suffix.style.display = 'flex';
             }
             wrap.dataset.feeMode = newMode;
-            document.getElementById(`feeBtnPct-${id}`).classList.toggle('active', newMode === 'pct');
-            document.getElementById(`feeBtnDollar-${id}`).classList.toggle('active', newMode === 'dollar');
+            trackFeeToggle(id);
             calcCard(id);
         }
 
@@ -657,13 +701,15 @@
                             <div class="col-span-2">
                                 <label>Origination Fee</label>
                                 <div class="lp-input-group" id="feeWrap-${id}" data-fee-mode="pct">
-                                    <div class="fee-seg-wrap">
-                                        <button id="feeBtnPct-${id}" onclick="setFeeMode(${id}, 'pct')" class="fee-seg-btn active" type="button">%</button>
-                                        <button id="feeBtnDollar-${id}" onclick="setFeeMode(${id}, 'dollar')" class="fee-seg-btn" type="button">$</button>
-                                    </div>
-                                    <span id="feePrefix-${id}" class="hidden pl-3 pr-1 text-[#94A3B8] font-bold text-[14px]">$</span>
+                                    <button id="feePrefix-${id}" type="button" onclick="setFeeMode(${id}, 'pct')" style="display:none;align-items:center;gap:5px;padding:0 10px 0 12px;border-right:1px solid #E5E7EB;background:transparent;cursor:pointer;font-size:14px;font-weight:700;color:#111827;white-space:nowrap;font-family:inherit">
+                                        <span style="font-size:11px;color:#94A3B8">⇄</span> $
+                                    </button>
                                     <input type="number" step="0.1" id="fee-${id}" value="3.0" min="0" class="lp-input" oninput="calcCard(${id})">
+                                    <button id="feeSuffix-${id}" type="button" onclick="setFeeMode(${id}, 'dollar')" style="display:flex;align-items:center;gap:5px;padding:0 12px 0 10px;border-left:1px solid #E5E7EB;background:transparent;cursor:pointer;font-size:14px;font-weight:700;color:#111827;white-space:nowrap;font-family:inherit">
+                                        % <span style="font-size:11px;color:#94A3B8">⇄</span>
+                                    </button>
                                 </div>
+                                <div id="feeEgg-${id}" class="fee-egg"></div>
                             </div>
 
                             <div class="col-span-2">
@@ -687,19 +733,27 @@
                                 </div>
                             </div>
 
-                            <label class="flex items-center cursor-pointer group mb-1 w-max select-none">
-                                <input type="checkbox" id="enablePrepay-${id}" class="rounded border-[#E5E7EB] focus:ring-[#14532D]" onchange="togglePrepay(${id}); calcCard(${id})">
-                                <span class="ml-2 text-[12px] uppercase tracking-[0.05em] text-[#14532D] font-extrabold">Model pre-pay discount</span>
-                            </label>
-                            <div class="text-[11px] text-[#6B7280] mb-4">Model early payoff savings and reduced interest cost.</div>
-                            
-                            <div id="prepaySection-${id}" class="bg-white p-4 rounded-xl border border-[#E2E8F0]">
-                                <label class="!text-[#6B7280]">Pre-Pay Discount</label>
-                                <div class="lp-input-group">
-                                    <input type="number" id="discPct-${id}" value="25" min="0" class="lp-input" oninput="calcCard(${id})">
-                                    <span class="pr-3 pl-2 text-[#94A3B8] font-bold">%</span>
+                            <div id="prepaySection-${id}" class="prepay-widget">
+                                <div class="prepay-widget-row">
+                                    <div class="prepay-widget-icon">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                                    </div>
+                                    <div class="prepay-widget-text">
+                                        <div class="prepay-widget-title">Pre-pay discount</div>
+                                        <div class="prepay-widget-sub">Save on early payoff — toggle to apply</div>
+                                    </div>
+                                    <div class="prepay-widget-right">
+                                        <div class="prepay-pct-box">
+                                            <input type="number" id="discPct-${id}" value="25" min="0" max="100" class="prepay-pct-input" oninput="calcCard(${id})">
+                                            <span class="prepay-pct-sym">%</span>
+                                        </div>
+                                        <label class="prepay-toggle" for="enablePrepay-${id}">
+                                            <input type="checkbox" id="enablePrepay-${id}" class="prepay-toggle-cb" onchange="togglePrepay(${id}); calcCard(${id})">
+                                            <span class="prepay-toggle-track"></span>
+                                        </label>
+                                    </div>
                                 </div>
-                                <div class="text-[11px] text-[#94A3B8] mt-2">Check the box above to include this in the payment calculation.</div>
+                                <div class="prepay-widget-hint">Toggle to include in payment calculation</div>
                             </div>
                         </div>
                     </div>
@@ -911,10 +965,13 @@
             if (counter) counter.textContent = `${track.name} · ${curIdx + 1} / ${tracks.length}`;
 
             const summary = document.getElementById(`prepaySummary-${id}`);
+            const isPrepayOn = document.getElementById(`enablePrepay-${id}`)?.checked;
             if (sel) {
-                document.getElementById(`outRenDate-${id}`).innerText = `#${sel.period} · ${sel.date}`;
+                document.getElementById(`outRenDate-${id}`).innerText = sel.date;
                 document.getElementById(`outSavings-${id}`).innerText = fmtUsd.format(sel.savings);
                 document.getElementById(`outBuyout-${id}`).innerText = fmtUsd.format(sel.buyout);
+                if (isPrepayOn) summary.classList.remove('hidden');
+            } else if (isPrepayOn) {
                 summary.classList.remove('hidden');
             } else {
                 summary.classList.add('hidden');
@@ -1079,6 +1136,9 @@
         window.onload = () => {
             addCard();
             if (window.self !== window.top) document.body.classList.add('is-embedded');
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                console.log('%c origination fee field online. you\'re doing better than you think.', 'color:#1D9E75; font-style:italic;');
+            }
         };
     </script>
 </body>
