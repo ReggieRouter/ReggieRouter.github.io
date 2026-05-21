@@ -339,8 +339,7 @@
 
         /* Talk track row layout + footer */
         .takeaway-main { display: flex; align-items: stretch; }
-        .takeaway-footer { border-top: 0.5px solid #BBF7D0; padding: 8px 18px; font-size: 11px; color: #94A3B8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-        .takeaway-apr-dot { color: #F59E0B; font-size: 10px; line-height: 1; }
+        .takeaway-footer { padding: 2px 18px 8px; font-size: 11px; color: #94A3B8; font-weight: 500; display: flex; align-items: center; gap: 6px; }
 
         /* PDF fixes */
         body.pdf-export-mode { display: block !important; }
@@ -694,7 +693,7 @@
                             </label>
                             <div class="text-[11px] text-[#6B7280] mb-4">Model early payoff savings and reduced interest cost.</div>
                             
-                            <div id="prepaySection-${id}" class="bg-[#F8FAFC] p-4 rounded-xl border border-[#E2E8F0]">
+                            <div id="prepaySection-${id}" class="bg-white p-4 rounded-xl border border-[#E2E8F0]">
                                 <label class="!text-[#6B7280]">Pre-Pay Discount</label>
                                 <div class="lp-input-group">
                                     <input type="number" id="discPct-${id}" value="25" min="0" class="lp-input" oninput="calcCard(${id})">
@@ -764,7 +763,6 @@
                                     </div>
                                 </div>
                                 <div class="takeaway-footer no-print">
-                                    <span class="takeaway-apr-dot">●</span>
                                     APR disclosure required in CA and NY
                                 </div>
                             </div>
