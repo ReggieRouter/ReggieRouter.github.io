@@ -752,10 +752,11 @@
             document.getElementById(`outBuyout-${id}`).innerText = fmtUsd.format(savedBuyout);
 
             // Talking point
-            let takeaway = `You pay <strong>${fmtUsd.format(pmt)} per ${freqName}</strong> over ${term} months, repaying <strong>${fmtUsd.format(payback)} total</strong>.`;
+            let takeaway = `"You're looking at <strong>${fmtUsd.format(pmt)} per ${freqName}</strong> over ${term} months — repaying <strong>${fmtUsd.format(payback)} total</strong>`;
             if (isPrepayEnabled && savedSavings > 0) {
-                takeaway += ` Paying off early could save you up to <strong>${fmtUsd.format(savedSavings)}</strong> in interest.`;
+                takeaway += `. Paying off early could save you <strong>${fmtUsd.format(savedSavings)}</strong> in interest`;
             }
+            takeaway += `."`;
             document.getElementById(`takeaway-content-${id}`).innerHTML = takeaway;
             
             el.dataset.payload = `Breakdown | Amt: ${fmtUsd.format(amt)} | Term: ${term} mos | Pmt: ${fmtUsd.format(pmt)} | Payback: ${fmtUsd.format(payback)}`;
