@@ -981,7 +981,7 @@
                                 </div>
                                 <div class="flex flex-wrap gap-x-5 gap-y-1 px-4 pb-4" style="font-size:11.5px; color:#166534">
                                     <span>Est. payoff balance: <strong id="outBuyout-${id}">—</strong></span>
-                                    <span style="color:#9CA3AF; font-style:italic">Full maturity date: <span id="outMaturityDate-${id}">—</span></span>
+                                    <span style="color:#9CA3AF; font-style:italic"><span id="lblMaturityDate-${id}">Full maturity date</span>: <span id="outMaturityDate-${id}">—</span></span>
                                 </div>
                                 <span id="outSavings-${id}" style="display:none">$0.00</span>
                                 <span id="outRenDate-${id}" style="display:none">—</span>
@@ -1211,8 +1211,17 @@
                 document.getElementById(`outBuyout-${id}`).innerText = fmtUsd.format(sel.buyout);
                 const phraseEl = document.getElementById(`outSavingsPhrase-${id}`);
                 if (phraseEl) phraseEl.innerText = `Saves ${fmtUsd.format(sel.savings)} if paid off by ${sel.date}`;
+                
+                const lblEl = document.getElementById(`lblMaturityDate-${id}`);
+                const valEl = document.getElementById(`outMaturityDate-${id}`);
+                if (lblEl) lblEl.innerText = 'Pre-pay date';
+                if (valEl) valEl.innerText = sel.date;
             } else {
                 summary.classList.add('hidden');
+                const lblEl = document.getElementById(`lblMaturityDate-${id}`);
+                const valEl = document.getElementById(`outMaturityDate-${id}`);
+                if (lblEl) lblEl.innerText = 'Full maturity date';
+                if (valEl && lastCalc[id]) valEl.innerText = lastCalc[id].maturityDate || '—';
             }
         }
 
