@@ -382,9 +382,9 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
 }
 
 @keyframes badgePulse {
-  0% { background-color: #22C55E; color: white; transform: scale(1); }
-  50% { background-color: #14532D; color: white; transform: scale(1.15); }
-  100% { transform: scale(1); }
+  0% { background-color: #22C55E; color: white; transform: scale(1); box-shadow: 0 0 0 0px rgba(34, 197, 94, 0.5); }
+  50% { background-color: #15803d; color: white; transform: scale(1.12); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.2); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0px rgba(34, 197, 94, 0); }
 }
 .badge-flash {
   animation: badgePulse 0.8s ease-in-out 1;
@@ -411,6 +411,41 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
 }
 .flash-indicator {
   animation: indicatorPulse 2s infinite;
+}
+
+/* Card pulse when active */
+@keyframes cardPulse {
+  0% { transform: scale(1); border-color: #22C55E; box-shadow: 0 0 0 0px rgba(34, 197, 94, 0.4); }
+  50% { transform: scale(1.02); border-color: #16a34a; box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.2); }
+  100% { transform: scale(1); border-color: var(--lp-green); box-shadow: 0 0 0 0px rgba(34, 197, 94, 0); }
+}
+.ent-card.active {
+  animation: cardPulse 0.5s ease-out 1;
+}
+
+/* Beautiful auto-populated toast alert */
+.tax-notification {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid #22C55E;
+  color: #14532D;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 12px;
+  margin-bottom: 16px;
+  animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) 1;
+}
+.tax-notification.pulse-flash {
+  animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) 1, pulseHighlight 1s ease-out 1;
+}
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
 </head>
@@ -464,6 +499,7 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
                         <button class="ent-toggle-btn" id="btnFormMode" onclick="setEntMode('form')">By tax form</button>
                     </div>
                     <div id="entGrid" class="ent-grid-2x2"></div>
+                    <div id="taxNotification" class="tax-notification" style="display:none;"></div>
                     <div id="taxTreatmentBox" class="tax-treatment-box"></div>
                 </div>
 
@@ -710,6 +746,7 @@ function renderEntities(mode = 'entity') {
   grid.innerHTML = h;
   
   var taxBox = document.getElementById('taxTreatmentBox');
+  var notiBox = document.getElementById('taxNotification');
   if (S.entity) {
     document.getElementById('step2Container').classList.remove('is-locked');
     document.getElementById('taxDocsPanel').classList.add('show');
@@ -717,12 +754,35 @@ function renderEntities(mode = 'entity') {
     var ent = ENTITIES.find(x => x.id === S.entity);
     taxBox.className = 'tax-treatment-box ' + (ent.taxation==='pass'?'pass':'dbl') + ' show';
     taxBox.innerHTML = '<strong>' + (ent.taxation==='pass'?'Pass-through Taxation':'Double Taxation') + '</strong>' + (ent.taxation==='pass'?'Owner pays tax on their personal return.':'Corporation pays tax, then owner pays again on dividends.');
+    
+    // Dynamic notification toast
+    if (notiBox) {
+      notiBox.innerHTML = '<span style="font-size:16px; margin-right:4px;">✓</span> Tax reference lines auto-populated in <strong>Step 2 (EBIDA & Financials)</strong> below for <strong>' + ent.form + '</strong>!';
+      notiBox.style.display = 'flex';
+    }
+
+    // Dynamic EBIDA hint badge in Step 2 Title
+    const hintEl = document.getElementById('ebidaFormHint');
+    if (hintEl) {
+      hintEl.innerHTML = '<span class="live-indicator-pill flash-indicator badge-flash" style="background:#16a34a; margin-left:8px; animation: indicatorPulse 2s infinite, badgePulse 0.8s ease-in-out 1;">Auto-Populated [' + ent.form + ']</span>';
+      hintEl.style.display = 'inline-block';
+    }
+
     updateTaxDocs();
   } else {
     document.getElementById('step2Container').classList.add('is-locked');
     document.getElementById('taxDocsPanel').classList.remove('show');
     document.getElementById('taxActiveIndicator').style.display = 'none';
     taxBox.className = 'tax-treatment-box';
+    if (notiBox) {
+      notiBox.style.display = 'none';
+      notiBox.innerHTML = '';
+    }
+    const hintEl = document.getElementById('ebidaFormHint');
+    if (hintEl) {
+      hintEl.innerHTML = '';
+      hintEl.style.display = 'none';
+    }
   }
 }
 
@@ -980,6 +1040,7 @@ function cycleBusinessPlaceholder() {
 function triggerTaxFlash() {
   const treatmentBox = document.getElementById('taxTreatmentBox');
   const docsPanel = document.getElementById('taxDocsPanel');
+  const notification = document.getElementById('taxNotification');
   
   if (treatmentBox) {
     treatmentBox.classList.remove('pulse-flash');
@@ -991,6 +1052,12 @@ function triggerTaxFlash() {
     docsPanel.classList.remove('pulse-flash');
     void docsPanel.offsetWidth; // Trigger reflow to restart animation
     docsPanel.classList.add('pulse-flash');
+  }
+
+  if (notification) {
+    notification.classList.remove('pulse-flash');
+    void notification.offsetWidth; // Trigger reflow to restart animation
+    notification.classList.add('pulse-flash');
   }
 
   // Flash the badge icons
