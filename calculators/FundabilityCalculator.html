@@ -140,6 +140,7 @@
             display: block;
             font-size: 10px;
             font-weight: 800;
+            text-transform: uppercase;
             letter-spacing: 0.1em;
             color: #64748b;
             margin-bottom: 8px;
@@ -286,13 +287,13 @@
         .panel > .lp-howto { margin: 20px 24px 0; }
         .lp-copy-btn {
             background-color: var(--lp-green); color: white; padding: 18px; border: none; border-radius: 10px;
-            font-size: 14px; font-weight: 800; cursor: pointer;
+            font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; font-family: inherit;
         }
         .lp-copy-btn:hover { background-color: #0f4022; }
         .lp-print-btn {
             background-color: transparent; color: var(--lp-green); padding: 18px; border: 2px solid var(--lp-green); border-radius: 10px;
-            font-size: 14px; font-weight: 800; cursor: pointer;
+            font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;
             display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; font-family: inherit;
         }
 
@@ -332,36 +333,33 @@
         .print-watermark { display: none; }
         @media print {
             body { background: white !important; }
-            .no-print, header, .modal-header, .lp-actions, .lp-pill-btn, .remove-card-btn, .lp-disclaimer, .tooltip-icon, .lp-howto, .lp-tab-sub, .shared-strip, .lp-inputs, .lp-tabs { display: none !important; }
+            .no-print, header, .modal-header, .lp-actions, .lp-pill-btn, .remove-card-btn, .lp-disclaimer, .tooltip-icon, .lp-howto, .lp-tab-sub, .shared-strip { display: none !important; }
             .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
             .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
             .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
             .lp-main { padding: 0 !important; display: block !important; }
             .lp-container { width: 100% !important; max-width: 100% !important; border: none !important; box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; }
             .lp-results { background: white !important; padding: 0 !important; }
-            .verdict { break-inside: avoid; page-break-inside: avoid; }
-            .legend { break-inside: avoid; page-break-inside: avoid; }
-            .hero-grid { break-inside: avoid; page-break-inside: avoid; }
-            .takeaway { break-inside: avoid; page-break-inside: avoid; }
-            .result-grid { break-inside: avoid; page-break-inside: avoid; }
+            .lp-inputs { padding: 0 !important; }
+            .lp-tab { border: none !important; padding: 10px !important; color: #111827 !important; font-size: 16px !important; }
+            .lp-tabs { border-bottom: 2px solid #111827 !important; margin-bottom: 24px !important; }
             .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
             .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
         }
 
         /* Direct PDF Export Styles - Rigorous Hiding */
         body.pdf-export-mode { background: white !important; }
-        body.pdf-export-mode .no-print,
-        body.pdf-export-mode header,
-        body.pdf-export-mode .modal-header,
-        body.pdf-export-mode .lp-actions,
-        body.pdf-export-mode .lp-pill-btn,
-        body.pdf-export-mode .remove-card-btn,
-        body.pdf-export-mode .lp-disclaimer,
-        body.pdf-export-mode .tooltip-icon,
+        body.pdf-export-mode .no-print, 
+        body.pdf-export-mode header, 
+        body.pdf-export-mode .modal-header, 
+        body.pdf-export-mode .lp-actions, 
+        body.pdf-export-mode .lp-pill-btn, 
+        body.pdf-export-mode .remove-card-btn, 
+        body.pdf-export-mode .lp-disclaimer, 
+        body.pdf-export-mode .tooltip-icon, 
         body.pdf-export-mode .lp-howto,
         body.pdf-export-mode .lp-tab-sub,
         body.pdf-export-mode .shared-strip,
-        body.pdf-export-mode .lp-tabs,
         body.pdf-export-mode .calc-card-header { display: none !important; }
         
         body.pdf-export-mode .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
