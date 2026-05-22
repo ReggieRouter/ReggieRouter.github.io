@@ -268,20 +268,8 @@
     .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
     .lp-main { padding: 0 !important; display: block !important; }
     .lp-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; }
-    .lp-body { padding: 0 !important; }
-    .sc { border: none !important; border-bottom: 1px solid #e5e7eb !important; border-radius: 0 !important; margin-bottom: 24px !important; break-inside: avoid; }
-    .sc-body { display: block !important; }
-    .sc.collapsed .sc-body { display: block !important; }
-    .sc.pdf-hide { display: none !important; }
-    .gated-section.is-locked .sc-body { opacity: 1 !important; filter: none !important; }
-    
-    .inp { border: none !important; padding-left: 18px !important; font-weight: 700 !important; }
-    .save-field input { border: none !important; padding: 0 !important; font-weight: 800 !important; }
-    .owner-name { border: none !important; }
-    .scen-name { border: none !important; }
-    .mode-bar { background: transparent !important; border: none !important; padding: 0 !important; }
-    .mode-btn:not(.active) { display: none !important; }
-    .mode-btn.active { background: transparent !important; color: var(--lp-dark) !important; text-align: left !important; font-size: 14px !important; padding: 0 !important; }
+    .lp-body { display: none !important; }
+    .dscr-print-view { display: block !important; padding: 24px; }
     .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
     .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
 }
@@ -320,19 +308,8 @@ body.pdf-export-mode .print-header-content h1 { font-size: 22px; font-weight: 80
 
 body.pdf-export-mode .lp-main { padding: 0 !important; display: block !important; max-width: 800px !important; margin: 0 auto !important; }
 body.pdf-export-mode .lp-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; }
-body.pdf-export-mode .lp-body { padding: 0 !important; }
-body.pdf-export-mode .sc { border: none !important; border-bottom: 1px solid #e5e7eb !important; border-radius: 0 !important; margin-bottom: 24px !important; break-inside: avoid; }
-body.pdf-export-mode .sc-body { display: block !important; }
-body.pdf-export-mode .sc.collapsed .sc-body { display: block !important; }
-body.pdf-export-mode .sc.pdf-hide { display: none !important; }
-body.pdf-export-mode .gated-section.is-locked .sc-body { opacity: 1 !important; filter: none !important; }
-body.pdf-export-mode .inp { border: none !important; padding-left: 18px !important; font-weight: 700 !important; }
-body.pdf-export-mode .save-field input { border: none !important; padding: 0 !important; font-weight: 800 !important; }
-body.pdf-export-mode .owner-name { border: none !important; }
-body.pdf-export-mode .scen-name { border: none !important; }
-body.pdf-export-mode .mode-bar { background: transparent !important; border: none !important; padding: 0 !important; }
-body.pdf-export-mode .mode-btn:not(.active) { display: none !important; }
-body.pdf-export-mode .mode-btn.active { background: transparent !important; color: var(--lp-dark) !important; text-align: left !important; font-size: 14px !important; padding: 0 !important; }
+body.pdf-export-mode .lp-body { display: none !important; }
+body.pdf-export-mode .dscr-print-view { display: block !important; padding: 24px !important; }
 
 body.pdf-export-mode .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
 body.pdf-export-mode .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
@@ -346,6 +323,22 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
+
+/* DSCR Print View */
+.dscr-print-view { display: none; }
+.dpv-section { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb; break-inside: avoid; page-break-inside: avoid; }
+.dpv-section:last-child { border-bottom: none; }
+.dpv-heading { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--lp-green); margin-bottom: 10px; }
+.dpv-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+.dpv-row:last-child { border-bottom: none; }
+.dpv-label { color: #64748b; font-weight: 500; }
+.dpv-val { font-weight: 700; color: #1e293b; }
+.dpv-total .dpv-label { font-weight: 800; color: #1e293b; }
+.dpv-total .dpv-val { font-size: 15px; color: var(--lp-green); }
+.dpv-scenario { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; break-inside: avoid; page-break-inside: avoid; }
+.dpv-scen-name { font-size: 13px; font-weight: 800; color: #111827; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+.dpv-pass { color: #14532D; }
+.dpv-fail { color: #991b1b; }
 </style>
 </head>
 <body>
@@ -526,6 +519,7 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
             </div>
         </div>
 
+        <div class="dscr-print-view" id="dscrPrintView"></div>
         <div class="print-footer-legal">
             THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
         </div>
@@ -846,6 +840,90 @@ function updPdfBtnState(){
   document.getElementById('pdfBtn').disabled = !bn;
 }
 
+function buildDscrPrintView() {
+    const ent = S.entity ? ENTITIES.find(x => x.id === S.entity) : null;
+    const cd = getCalcData();
+    const ebidaLabels = {
+        netEarnings: 'Net Earnings',
+        interest: 'Interest',
+        depreciation: 'Depreciation',
+        amortization: 'Amortization',
+        ownersComp: "Owner(s)' Comp"
+    };
+
+    let html = '';
+
+    // Business name
+    const biz = document.getElementById('pdfBizName').value.trim();
+    if (biz) {
+        html += `<div class="dpv-section"><div class="dpv-heading">Business</div>
+            <div class="dpv-row"><span class="dpv-label">Business Name</span><span class="dpv-val">${biz}</span></div>
+        </div>`;
+    }
+
+    // Entity & tax form
+    if (ent) {
+        html += `<div class="dpv-section">
+            <div class="dpv-heading">Entity &amp; Tax Form</div>
+            <div class="dpv-row"><span class="dpv-label">Entity Type</span><span class="dpv-val">${ent.name}</span></div>
+            <div class="dpv-row"><span class="dpv-label">Tax Form</span><span class="dpv-val">${ent.form}</span></div>
+            <div class="dpv-row"><span class="dpv-label">Tax Treatment</span><span class="dpv-val">${ent.taxation === 'pass' ? 'Pass-through' : 'C-Corp (double taxation)'}</span></div>
+        </div>`;
+    }
+
+    // EBIDA breakdown
+    html += `<div class="dpv-section"><div class="dpv-heading">EBIDA Breakdown</div>`;
+    Object.entries(ebidaLabels).forEach(([k, label]) => {
+        html += `<div class="dpv-row"><span class="dpv-label">${label}</span><span class="dpv-val">${fmt(S.ebida[k])}</span></div>`;
+    });
+    html += `<div class="dpv-row dpv-total"><span class="dpv-label">Total EBIDA</span><span class="dpv-val">${fmt(cd.ebida)}</span></div>`;
+    html += `</div>`;
+
+    // Existing debt
+    if (S.debts.length > 0) {
+        const nonRefi = S.debts.filter(d => !d.refi).reduce((s, d) => s + d.mp, 0) * 12;
+        html += `<div class="dpv-section"><div class="dpv-heading">Existing Business Debt</div>`;
+        S.debts.forEach(d => {
+            html += `<div class="dpv-row"><span class="dpv-label">${d.creditor || 'Unnamed creditor'}${d.refi ? ' (refi)' : ''}</span><span class="dpv-val">${fmt(d.mp)}/mo</span></div>`;
+        });
+        html += `<div class="dpv-row dpv-total"><span class="dpv-label">Annual Debt Service${cd.refi > 0 ? ' (excl. refi)' : ''}</span><span class="dpv-val">${fmt(nonRefi)}/yr</span></div>`;
+        html += `</div>`;
+    }
+
+    // Analysis mode
+    const modeLabel = S.mode === 'bdscr' ? 'Business DSCR (BDSCR)' : S.mode === 'gdscr' ? 'Global DSCR (GDSCR)' : 'Both (BDSCR & GDSCR)';
+    html += `<div class="dpv-section"><div class="dpv-heading">Analysis Mode</div>
+        <div class="dpv-row"><span class="dpv-label">Mode</span><span class="dpv-val">${modeLabel}</span></div>
+    </div>`;
+
+    // Scenarios & results
+    if (S.scenarios.length > 0) {
+        html += `<div class="dpv-section"><div class="dpv-heading">Scenarios &amp; Results</div>`;
+        S.scenarios.forEach(sc => {
+            const mp = calcPmt(sc.amount, sc.rate, sc.term);
+            const db = (mp * 12 + cd.bObl) > 0 ? cd.ebida / (mp * 12 + cd.bObl) : 0;
+            const dg = (mp * 12 + cd.gObl) > 0 ? cd.global / (mp * 12 + cd.gObl) : 0;
+            const bPass = db >= 1.15;
+            const gPass = dg >= 1.0;
+            html += `<div class="dpv-scenario">
+                <div class="dpv-scen-name">${sc.name}</div>
+                <div class="dpv-row"><span class="dpv-label">Amount</span><span class="dpv-val">${fmt(sc.amount)}</span></div>
+                <div class="dpv-row"><span class="dpv-label">Term / Rate</span><span class="dpv-val">${sc.term} yrs @ ${sc.rate}%</span></div>
+                <div class="dpv-row"><span class="dpv-label">Monthly Payment</span><span class="dpv-val">${fmt(mp)}</span></div>`;
+            if (S.mode === 'bdscr' || S.mode === 'both') {
+                html += `<div class="dpv-row"><span class="dpv-label">BDSCR (min 1.15x)</span><span class="dpv-val ${bPass ? 'dpv-pass' : 'dpv-fail'}">${db.toFixed(2)}x — ${bPass ? 'PASS' : 'FAIL'}</span></div>`;
+            }
+            if (S.mode === 'gdscr' || S.mode === 'both') {
+                html += `<div class="dpv-row"><span class="dpv-label">GDSCR (min 1.00x)</span><span class="dpv-val ${gPass ? 'dpv-pass' : 'dpv-fail'}">${dg.toFixed(2)}x — ${gPass ? 'PASS' : 'FAIL'}</span></div>`;
+            }
+            html += `</div>`;
+        });
+        html += `</div>`;
+    }
+
+    document.getElementById('dscrPrintView').innerHTML = html;
+}
+
 async function runPDF() {
     const biz = document.getElementById('pdfBizName').value.trim();
     const btn = document.getElementById('pdfBtn');
@@ -853,12 +931,13 @@ async function runPDF() {
     btn.innerHTML = "Generating...";
     btn.disabled = true;
 
+    buildDscrPrintView();
     document.body.classList.add('pdf-export-mode');
-    
+
     const element = document.querySelector('.lp-main');
     const opt = {
         margin: [10, 10],
-        filename: `LendPaper_DSCR_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
+        filename: `LendPaper_DSCR_${biz.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, logging: false, useCORS: true },
         jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
@@ -868,6 +947,7 @@ async function runPDF() {
         await html2pdf().set(opt).from(element).save();
     } finally {
         document.body.classList.remove('pdf-export-mode');
+        document.getElementById('dscrPrintView').innerHTML = '';
         btn.innerHTML = origText;
         btn.disabled = false;
     }
