@@ -66,51 +66,32 @@
 .ent-card-note { font-size: 11px; color: var(--lp-text-muted); font-style: italic; margin-top: auto; padding-top: 6px; line-height: 1.4; }
 .dotted-hover { border-bottom: 1px dashed var(--lp-text-muted); cursor: help; }
 
-/* -- Dynamic Tax Treatment Box -- */
-.tax-treatment-box {
+/* -- Unified Elegant Tax Card -- */
+.unified-tax-card {
   display: none;
-  padding: 16px;
   border-radius: 12px;
-  margin-bottom: 16px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #334155;
+  padding: 20px;
+  margin-top: 16px;
+  transition: all 0.2s ease;
 }
-.tax-treatment-box.show {
+.unified-tax-card.show {
   display: block;
 }
-.tax-treatment-box.pass {
-  background-color: #F0FDF4; /* Soft green-tinted background, matches lp-howto exactly */
-}
-.tax-treatment-box.dbl {
-  background-color: #F5F3FF; /* Soft purple-tinted background */
-}
-.tax-treatment-box strong {
-  font-size: 14px;
-  color: var(--lp-dark);
-  font-weight: 800;
-  display: block;
-  margin-bottom: 2px;
-}
-
-/* -- Tax Docs Panel -- */
-.tax-docs-panel { border-top: 1px solid var(--lp-border); background: var(--gray-50); padding: 16px; display: none; }
-.tax-docs-panel.show { display: block; }
-.td-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; flex-wrap: wrap; }
-.td-field { display: flex; flex-direction: column; gap: 6px; }
-.td-label { font-size: 11px; font-weight: 700; color: var(--lp-text-muted); text-transform: uppercase; letter-spacing: 0.025em; }
-.td-select { padding: 8px 12px; border: 1px solid var(--lp-border); border-radius: 8px; font-size: 12px; font-family: inherit; outline: none; background: #fff; }
-.td-output {
-  background-color: #F0FDF4;
+.unified-tax-card.pass {
+  background-color: #F0FDF4; /* Soft green, matches lp-howto exactly */
   border: 1px solid #BBF7D0;
   border-left: 4px solid #14532D;
-  border-radius: 12px;
-  padding: 16px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #334155;
 }
-.td-deadline { font-size: 11px; color: #475569; margin-top: 8px; font-style: italic; }
+.unified-tax-card.dbl {
+  background-color: #F5F3FF; /* Soft purple */
+  border: 1px solid #DDD6FE;
+  border-left: 4px solid #6B21A8;
+}
+.td-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; flex-wrap: wrap; }
+.td-field { display: flex; flex-direction: column; gap: 6px; }
+.td-label { font-size: 11px; font-weight: 700; color: inherit; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.025em; }
+.td-select { padding: 8px 12px; border: 1px solid var(--lp-border); border-radius: 8px; font-size: 12px; font-family: inherit; outline: none; background: #fff; font-weight: 600; color: var(--lp-dark); }
+.td-deadline { font-size: 11px; margin-top: 8px; font-style: italic; }
 
 /* -- Step 2 Gating -- */
 .gated-section { position: relative; }
@@ -505,39 +486,47 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
                         <button class="ent-toggle-btn" id="btnFormMode" onclick="setEntMode('form')">By tax form</button>
                     </div>
                     <div id="entGrid" class="ent-grid-2x2"></div>
-                    <div id="taxTreatmentBox" class="tax-treatment-box"></div>
-                </div>
+                    <!-- Unified Elegant Tax Treatment & Required Docs Card -->
+                    <div class="unified-tax-card" id="taxDocsPanel">
+                        <!-- Top Row: Tax Treatment & Auto-Populate Badge (rendered dynamically in JS) -->
+                        <div id="taxTreatmentHeader"></div>
+                        
+                        <!-- Dashed Divider ( currentColor automatically inherits green/purple theme ) -->
+                        <div style="border-top: 1px dashed currentColor; opacity: 0.25; margin: 14px 0;"></div>
 
-                <div class="tax-docs-panel" id="taxDocsPanel">
-                    <div style="font-size:13px; font-weight:800; color:var(--lp-dark); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.05em; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                        <span>Required Tax Docs</span>
-                        <span class="live-indicator-pill flash-indicator" id="taxActiveIndicator" style="display:none;">Auto-Populated</span>
-                    </div>
-                    <div class="td-row">
-                        <div class="td-field">
-                            <label class="td-label">
-                                Expected SBA Submission
-                                <span class="tooltip-icon" data-tip="The date the Bank Partner submits the file to the SBA, not your internal submission date.">i</span>
-                            </label>
-                            <select class="td-select" id="tdScenario" onchange="updateTaxDocs()">
-                                <option value="today">Today</option>
-                                <option value="q1">Q1 (Jan - Mar)</option>
-                                <option value="q2pre">Q2 (Pre-May 1)</option>
-                                <option value="q2post">Q2 (Post-May 1)</option>
-                            </select>
+                        <!-- Dropdowns Row -->
+                        <div class="td-row">
+                            <div class="td-field">
+                                <label class="td-label">
+                                    Expected SBA Submission
+                                    <span class="tooltip-icon" data-tip="The date the Bank Partner submits the file to the SBA, not your internal submission date.">i</span>
+                                </label>
+                                <select class="td-select" id="tdScenario" onchange="updateTaxDocs()">
+                                    <option value="today">Today</option>
+                                    <option value="q1">Q1 (Jan - Mar)</option>
+                                    <option value="q2pre">Q2 (Pre-May 1)</option>
+                                    <option value="q2post">Q2 (Post-May 1)</option>
+                                </select>
+                            </div>
+                            <div class="td-field">
+                                <label class="td-label">Return Status</label>
+                                <select class="td-select" id="tdStatus" onchange="updateTaxDocs()">
+                                    <option value="filed">Tax Return Filed</option>
+                                    <option value="ext">Extension + Company-Prepared</option>
+                                    <option value="prep">Company-Prepared Only</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="td-field">
-                            <label class="td-label">Return Status</label>
-                            <select class="td-select" id="tdStatus" onchange="updateTaxDocs()">
-                                <option value="filed">Tax Return Filed</option>
-                                <option value="ext">Extension + Company-Prepared</option>
-                                <option value="prep">Company-Prepared Only</option>
-                            </select>
+
+                        <!-- Dashed Divider -->
+                        <div style="border-top: 1px dashed currentColor; opacity: 0.25; margin: 14px 0;"></div>
+
+                        <!-- Required Documents Output (Border-free, embedded beautifully) -->
+                        <div>
+                            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: inherit; opacity: 0.85; margin-bottom: 6px;">Required Tax Documents</div>
+                            <div id="tdDocsList" style="font-size: 13.5px; color: #1e293b; font-weight: 600; line-height: 1.5;">Select options above.</div>
+                            <div id="tdDeadline" style="font-size: 11px; color: #475569; margin-top: 6px; font-style: italic; font-weight: 500;"></div>
                         </div>
-                    </div>
-                    <div class="td-output" id="tdOutput">
-                        <strong>You'll need:</strong> <span id="tdDocsList">Select options above.</span>
-                        <div class="td-deadline" id="tdDeadline"></div>
                     </div>
                 </div>
             </div>
@@ -750,13 +739,11 @@ function renderEntities(mode = 'entity') {
   });
   grid.innerHTML = h;
   
-  var taxBox = document.getElementById('taxTreatmentBox');
+  var unifiedCard = document.getElementById('taxDocsPanel');
   if (S.entity) {
     document.getElementById('step2Container').classList.remove('is-locked');
-    document.getElementById('taxDocsPanel').classList.add('show');
-    document.getElementById('taxActiveIndicator').style.display = 'inline-block';
     var ent = ENTITIES.find(x => x.id === S.entity);
-    taxBox.className = 'tax-treatment-box ' + (ent.taxation==='pass'?'pass':'dbl') + ' show';
+    unifiedCard.className = 'unified-tax-card ' + (ent.taxation==='pass'?'pass':'dbl') + ' show';
     
     // Unified elegant text inside a single soft background card (Matches payment breakdown style)
     var taxationText = ent.taxation === 'pass' ? 'Pass-through Taxation' : 'Double Taxation';
@@ -764,10 +751,12 @@ function renderEntities(mode = 'entity') {
     var badgeBg = ent.taxation === 'pass' ? '#dcfce7' : '#f3e8ff';
     var badgeColor = ent.taxation === 'pass' ? '#15803d' : '#6b21a8';
     
-    taxBox.innerHTML = `
+    document.getElementById('taxTreatmentHeader').innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; width: 100%;">
         <div>
-          <strong>${taxationText}</strong>
+          <strong style="font-size: 14.5px; font-weight: 800; color: ${ent.taxation==='pass'?'#14532D':'#6b21a8'}; margin-bottom: 2px;">
+            ${taxationText} <span style="font-size: 11.5px; font-weight: 600; color: #64748b; margin-left: 2px;">(${ent.form})</span>
+          </strong>
           <span style="font-size: 12.5px; color: #475569; font-weight: 500;">${taxationDesc}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 5px; color: ${badgeColor}; background: ${badgeBg}; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 12px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
@@ -786,9 +775,7 @@ function renderEntities(mode = 'entity') {
     updateTaxDocs();
   } else {
     document.getElementById('step2Container').classList.add('is-locked');
-    document.getElementById('taxDocsPanel').classList.remove('show');
-    document.getElementById('taxActiveIndicator').style.display = 'none';
-    taxBox.className = 'tax-treatment-box';
+    unifiedCard.className = 'unified-tax-card';
     const hintEl = document.getElementById('ebidaFormHint');
     if (hintEl) {
       hintEl.innerHTML = '';
@@ -1027,36 +1014,37 @@ document.querySelectorAll('.tooltip-icon').forEach(el => {
 });
 
 const COMPANY_NAMES = [
-  "Keystone Electric",
-  "Apex Logistics",
-  "Horizon Ventures",
-  "Beacon Hill Bakery",
-  "Vanguard Roofing",
-  "Ironclad Security",
-  "Zenith Consulting",
-  "Summit Medical",
-  "Atlas Distribution",
-  "Synergy Creative Group",
-  "Skyline Auto Group",
-  "Pinnacle Manufacturing"
+  "Lawn & Order Landscaping",
+  "Bread Zeppelin Bakery",
+  "Ctrl-Alt-Delete IT Services",
+  "Surelock Homes Security",
+  "Spruce Springclean Car Wash",
+  "Deja Brew Cafe",
+  "Wok This Way Eatery",
+  "Pane in the Glass Glazing",
+  "The Codfather Seafood Market",
+  "Sole Mate Shoe Repair",
+  "Pita Pan Mediterranean Grill",
+  "Julius Scissor Hair Salon",
+  "Floral & Hardy Gardening",
+  "The Daily Grind Cafe",
+  "Sofa So Good Furniture",
+  "Wok & Roll Bistro",
+  "Curl Up & Dye Salon",
+  "Lord of the Rinses Laundromat",
+  "Batter Up Bakery",
+  "Grate Expectations Cheese"
 ];
-let currentNameIdx = Math.floor(Math.random() * COMPANY_NAMES.length);
-function cycleBusinessPlaceholder() {
+
+function setRandomBusinessPlaceholder() {
   const input = document.getElementById('pdfBizName');
   if (!input) return;
-  input.placeholder = "e.g. " + COMPANY_NAMES[currentNameIdx];
-  currentNameIdx = (currentNameIdx + 1) % COMPANY_NAMES.length;
+  const name = COMPANY_NAMES[Math.floor(Math.random() * COMPANY_NAMES.length)];
+  input.placeholder = "e.g. " + name;
 }
 
 function triggerTaxFlash() {
-  const treatmentBox = document.getElementById('taxTreatmentBox');
   const docsPanel = document.getElementById('taxDocsPanel');
-  
-  if (treatmentBox) {
-    treatmentBox.classList.remove('pulse-flash');
-    void treatmentBox.offsetWidth; // Trigger reflow to restart animation
-    treatmentBox.classList.add('pulse-flash');
-  }
   
   if (docsPanel) {
     docsPanel.classList.remove('pulse-flash');
@@ -1075,8 +1063,7 @@ function triggerTaxFlash() {
 
 // Init
 renderEntities(); renderMode(); renderEbida(); renderDebts(); renderOwners(); renderScenarios(); renderSummaries();
-cycleBusinessPlaceholder();
-setInterval(cycleBusinessPlaceholder, 3000);
+setRandomBusinessPlaceholder();
 
 if (window.self !== window.top) {
     document.body.classList.add('is-embedded');
