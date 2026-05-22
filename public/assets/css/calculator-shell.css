@@ -131,3 +131,28 @@ body.is-embedded .modal-shell { border: none; box-shadow: none; border-radius: 0
   letter-spacing: 0.1em;
   margin-top: 2px;
 }
+
+/* Responsive adjustments to prevent title and logo overlaps on small viewports */
+@media (max-width: 640px) {
+  .modal-logo text {
+    display: none !important;
+  }
+  .modal-logo {
+    width: 28px !important;
+  }
+  .modal-title {
+    max-width: calc(100% - 80px);
+  }
+  .modal-title-main {
+    font-size: 11px !important;
+    white-space: normal !important;
+    line-height: 1.2 !important;
+  }
+  .modal-title-sub {
+    font-size: 8px !important;
+    white-space: normal !important;
+    line-height: 1.2 !important;
+    margin-top: 1px !important;
+  }
+}
+

@@ -25,7 +25,7 @@
 </script>
 <title>LendPaper — Calculators &amp; Tools for SMB Funders, Brokers &amp; ISOs</title>
 <meta name="description" content="Fast, free calculators and tools for MCA, LOC, SBA, and alternative financing professionals. Built for funding desks that don't have time to waste.">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj4KICA8cmVjdCB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHJ4PSI1IiBmaWxsPSIjMTBCODgxIi8+CiAgPHBhdGggZD0iTTQgNHYxNmgxMWw1LTVWNEg0eiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNMTUgMjB2LTVoNSIgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNOSA5djYiICAgICAgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KICA8cGF0aCBkPSJNOSAxNWg0IiAgICAgICAgICAgICAgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz4KPC9zdmc+">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
@@ -990,6 +990,23 @@ function renderHome() {
   }
 
   document.getElementById('homeTools').innerHTML = html;
+
+  // Add hover effect listeners for featured grid cards
+  var grid = document.querySelector('.featured-grid');
+  if (grid) {
+    var cards = grid.querySelectorAll('.featured-card');
+    cards.forEach(function(card) {
+      card.addEventListener('mouseenter', function() {
+        cards.forEach(function(c) { c.classList.remove('is-featured-primary'); });
+        card.classList.add('is-featured-primary');
+      });
+    });
+    grid.addEventListener('mouseleave', function() {
+      cards.forEach(function(c) { c.classList.remove('is-featured-primary'); });
+      if (cards[0]) cards[0].classList.add('is-featured-primary');
+    });
+  }
+
   updateGreeting();
   setInterval(updateGreeting, 3.5 * 60 * 60 * 1000);
 }
