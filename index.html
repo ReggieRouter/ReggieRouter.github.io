@@ -1347,118 +1347,132 @@ document.addEventListener('keydown', (e) => {
   const ctx = canvas.getContext('2d');
   
   let link = document.querySelector("link[rel~='icon']");
-  if (!link) {
+  if (link) {
+    link.type = 'image/png';
+  } else {
     link = document.createElement('link');
     link.rel = 'icon';
+    link.type = 'image/png';
     document.getElementsByTagName('head')[0].appendChild(link);
   }
-  
   let frame = 0;
   function drawFavicon() {
     ctx.clearRect(0, 0, 32, 32);
     
-    // Smooth rounded paper-sheet background clip
+    // Create premium rounded square clipping path (Full 32x32 square with 10px corner radius for ultra-smooth corners)
     ctx.save();
     ctx.beginPath();
-    ctx.arc(16, 16, 15, 0, Math.PI * 2);
+    const r = 10;
+    ctx.moveTo(r, 0);
+    ctx.lineTo(32 - r, 0);
+    ctx.quadraticCurveTo(32, 0, 32, r);
+    ctx.lineTo(32, 32 - r);
+    ctx.quadraticCurveTo(32, 32, 32 - r, 32);
+    ctx.lineTo(r, 32);
+    ctx.quadraticCurveTo(0, 32, 0, 32 - r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath();
     ctx.clip();
     
-    // Deep emerald background
-    ctx.fillStyle = '#062010';
+    // Base gradient matching deep emerald/forest theme
+    const grad = ctx.createLinearGradient(0, 0, 0, 32);
+    grad.addColorStop(0, '#01170e');
+    grad.addColorStop(1, '#043220');
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 32, 32);
     
-    const time = frame * 0.05;
+    const time = frame * 0.025; // Soothing, slow wave speed matching premium motion
     
-    // Draw 3 overlaying waves of vibrant green, teal, and lime
-    // Wave 1 (Deep Emerald)
-    const g1 = (frame * 0.4 + 140) % 360;
-    ctx.fillStyle = `hsla(${g1}, 80%, 42%, 0.65)`;
+    // Wave 1: Flowing Deep Emerald (sloshy/prominent)
+    ctx.fillStyle = 'rgba(8, 48, 32, 0.95)';
     ctx.beginPath();
     ctx.moveTo(0, 32);
     for (let x = 0; x <= 32; x++) {
-      const y = 16 + Math.sin(x * 0.15 + time) * 6;
+      const y = 15.5 + Math.sin(x * 0.12 + time) * 4.8;
       ctx.lineTo(x, y);
     }
     ctx.lineTo(32, 32);
     ctx.fill();
     
-    // Wave 2 (Teal)
-    const g2 = (frame * 0.5 + 175) % 360;
-    ctx.fillStyle = `hsla(${g2}, 85%, 48%, 0.55)`;
+    // Wave 2: Flowing Medium Teal-Green
+    ctx.fillStyle = 'rgba(16, 80, 56, 0.85)';
     ctx.beginPath();
     ctx.moveTo(0, 32);
     for (let x = 0; x <= 32; x++) {
-      const y = 18 + Math.cos(x * 0.12 - time * 0.9) * 5;
+      const y = 17.5 + Math.cos(x * 0.15 - time * 0.85) * 4.4;
       ctx.lineTo(x, y);
     }
     ctx.lineTo(32, 32);
     ctx.fill();
 
-    // Wave 3 (Vibrant Lime/Mint)
-    const g3 = (frame * 0.3 + 95) % 360;
-    ctx.fillStyle = `hsla(${g3}, 90%, 55%, 0.4)`;
+    // Wave 3: Flowing Vibrant Mint/Neon Emerald Foam Accent
+    ctx.fillStyle = 'rgba(52, 168, 120, 0.7)';
     ctx.beginPath();
     ctx.moveTo(0, 32);
     for (let x = 0; x <= 32; x++) {
-      const y = 14 + Math.sin(x * 0.2 + time * 1.4) * 4;
+      const y = 13.5 + Math.sin(x * 0.18 + time * 1.35) * 3.4;
       ctx.lineTo(x, y);
     }
     ctx.lineTo(32, 32);
     ctx.fill();
     
-    ctx.restore();
+    ctx.restore(); // End rounded square clipping
     
-    // Glowing border ring
-    const borderHue = (frame * 0.4 + 140) % 360;
-    ctx.strokeStyle = `hsla(${borderHue}, 85%, 65%, 0.8)`;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(16, 16, 14.25, 0, Math.PI * 2);
-    ctx.stroke();
+    // Draw Crisp White Geometric Logo (paper sheet outline + L monogram) floating on top of the waves
+    ctx.save();
     
-    // Render the LendPaper logo outline on top: a folded document
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.75;
+    // Smooth, soothing bobbing/floating micro-animation
+    const bob = Math.sin(frame * 0.08) * 0.8;
+    ctx.translate(0, bob);
+    
+    // Scale 24x24 coordinates to 32x32 canvas beautifully
+    ctx.scale(32 / 24, 32 / 24);
+    
+    // Drop shadow for optimal readability on top of active waves
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 0.4;
+    ctx.shadowOffsetY = 0.8;
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.52)'; // Premium transparent white outline logo
+    ctx.lineWidth = 1.8; // Scales up to ~2.4px at 32x32 for high tab visibility
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     
-    // Main page outline (with folded corner at top-right)
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    ctx.shadowBlur = 3;
-    ctx.shadowOffsetX = 0.5;
-    ctx.shadowOffsetY = 1;
-    
+    // 1. Draw Paper Outline
     ctx.beginPath();
-    ctx.moveTo(9, 8);
-    ctx.lineTo(18, 8);
-    ctx.lineTo(23, 13);
-    ctx.lineTo(23, 24);
-    ctx.lineTo(9, 24);
+    ctx.moveTo(4, 4);
+    ctx.lineTo(4, 20);
+    ctx.lineTo(15, 20);
+    ctx.lineTo(20, 15);
+    ctx.lineTo(20, 4);
     ctx.closePath();
     ctx.stroke();
     
-    // Folded flap line
+    // 2. Draw Folded Corner Flap
     ctx.beginPath();
-    ctx.moveTo(18, 8);
-    ctx.lineTo(18, 13);
-    ctx.lineTo(23, 13);
+    ctx.moveTo(15, 20);
+    ctx.lineTo(15, 15);
+    ctx.lineTo(20, 15);
     ctx.stroke();
     
-    // Small decorative line in the document representing text
+    // 3. Draw Geometric 'L' Monogram
     ctx.beginPath();
-    ctx.moveTo(13, 18);
-    ctx.lineTo(19, 18);
+    // Vertical stem of L
+    ctx.moveTo(9, 9);
+    ctx.lineTo(9, 15);
+    // Horizontal foot of L
+    ctx.lineTo(14, 15);
     ctx.stroke();
     
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
+    ctx.restore();
     
     link.href = canvas.toDataURL('image/png');
     frame++;
   }
   
-  setInterval(drawFavicon, 66);
+  setInterval(drawFavicon, 50); // ~20 FPS for perfect lightweight motion
 })();
 
 /* ---- Init ---- */
