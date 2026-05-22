@@ -373,7 +373,14 @@
         .prepay-widget-hint { font-size: 11px; color: #9CA3AF; padding: 0 14px 10px; }
         /* Info tooltip */
         .lp-info-btn { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #9CA3AF; color: #9CA3AF; font-size: 9px; font-weight: 800; cursor: help; vertical-align: middle; margin-left: 5px; line-height: 1; flex-shrink: 0; font-style: normal; }
+        /* Amo toggle bar (mockup lp-toggle style) */
+        .lp-amo-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 24px; border-bottom: 0.5px solid #E5E7EB; }
+        .lp-amo-tt { font-weight: 600; font-size: 14px; color: #111827; }
+        .lp-amo-ts { font-size: 12px; color: #6B7280; margin-top: 2px; }
+        .lp-amo-pct { font-size: 13px; padding: 4px 10px; background: #F3F4F6; border-radius: 8px; font-weight: 600; color: #111827; }
         /* Amo click hint banner */
+        .lp-amo-hint { display: none; padding: 10px 24px; font-size: 12px; color: #6B7280; background: #F9FAFB; border-bottom: 0.5px solid #E5E7EB; align-items: center; gap: 8px; }
+        .lp-amo-hint.visible { display: flex; }
         .prepay-amo-hint { display: none; margin: 0 24px 12px; padding: 8px 12px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; font-size: 11.5px; color: #14532D; font-weight: 600; align-items: center; gap: 6px; }
         .prepay-amo-hint.visible { display: flex; }
 
@@ -753,7 +760,6 @@
                                 </div>
                             </div>
 
-                            <input type="checkbox" id="enablePrepay-${id}" class="prepay-toggle-cb" checked style="display:none">
                             <input type="number" id="discPct-${id}" value="25" min="0" max="100" style="display:none">
                         </div>
                     </div>
@@ -836,13 +842,25 @@
                 </div>
 
                 <div class="border-t border-[#E5E7EB] amo-section">
-                    <div class="px-[24px] pt-5 pb-3 flex items-center justify-between">
+                    <div class="px-[24px] pt-5 pb-2">
                         <span class="text-[11px] font-extrabold text-[#6B7280] uppercase tracking-widest">Amortization Schedule</span>
-                        <span class="text-[11px] text-[#94A3B8] italic no-print">Click any row to see payoff details</span>
                     </div>
-                    <div id="prepayAmoHint-${id}" class="prepay-amo-hint visible no-print">
+                    <div class="lp-amo-toggle no-print">
+                        <div>
+                            <div class="lp-amo-tt">Pre-pay discount</div>
+                            <div class="lp-amo-ts">Save on early payoff — pick a row below to see exact savings.</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span class="lp-amo-pct">25%</span>
+                            <label class="prepay-toggle" for="enablePrepay-${id}">
+                                <input type="checkbox" id="enablePrepay-${id}" class="prepay-toggle-cb" checked onchange="togglePrepay(${id}); calcCard(${id})">
+                                <span class="prepay-toggle-track"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="prepayAmoHint-${id}" class="lp-amo-hint visible no-print">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                        Click any row below to see exact savings and payoff balance
+                        Click any payment row to see payoff details right there — no scrolling around.
                     </div>
                     <div id="detailsWrap-${id}" class="px-[24px] pb-[28px]">
                         <div class="table-scroll-container">
@@ -990,8 +1008,9 @@
             if (counter) counter.textContent = `${track.name} · ${curIdx + 1} / ${tracks.length}`;
 
             const summary = document.getElementById(`prepaySummary-${id}`);
+            const isPrepayOn = document.getElementById(`enablePrepay-${id}`)?.checked;
 
-            if (sel && sel.savings > 0) {
+            if (isPrepayOn && sel && sel.savings > 0) {
                 summary.classList.remove('hidden');
                 const prepayDateEl = document.getElementById(`outPrepayDate-${id}`);
                 if (prepayDateEl) prepayDateEl.innerText = sel.date;
@@ -1032,7 +1051,8 @@
         function renderDetailRow(id) {
             document.querySelectorAll(`.amo-detail-for-${id}`).forEach(r => r.remove());
             const sel = rowSelection[id];
-            if (!sel || sel.savings <= 0) return;
+            const isPrepay = document.getElementById(`enablePrepay-${id}`)?.checked;
+            if (!sel || !isPrepay || sel.savings <= 0) return;
             const rowEl = document.getElementById(`arow-${id}-${sel.period}`);
             if (!rowEl) return;
             const tr = document.createElement('tr');
