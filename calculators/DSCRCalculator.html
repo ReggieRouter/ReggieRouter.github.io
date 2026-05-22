@@ -30,6 +30,7 @@
   --tax-pass-bg: rgba(20, 83, 45, 0.12);
   --tax-dbl: #9b85b9;
   --tax-dbl-bg: rgba(155, 133, 185, 0.12);
+  --lp-green-light: #f0fdf4;
 }
 
 .lp-body {
@@ -217,7 +218,7 @@
 #tt {
     position: fixed;
     z-index: 9999;
-    background: var(--gray-900);
+    background: #1e293b;
     color: white;
     font-size: 12px;
     padding: 10px 14px;
@@ -226,7 +227,8 @@
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.15s;
-    font-weight: 400;
+    font-weight: 500;
+    line-height: 1.5;
 }
 #tt.show { opacity: 1; }
 
@@ -948,12 +950,29 @@ async function runPDF() {
     }
 }
 
-// Tooltips
+// Tooltips (Event Delegation)
 const tt = document.getElementById('tt');
-document.querySelectorAll('.tooltip-icon').forEach(el => {
-    el.addEventListener('mouseenter', e => { tt.textContent = e.target.dataset.tip; tt.classList.add('show'); });
-    el.addEventListener('mousemove', e => { tt.style.left = (e.clientX + 12) + 'px'; tt.style.top = (e.clientY + 12) + 'px'; });
-    el.addEventListener('mouseleave', () => tt.classList.remove('show'));
+document.addEventListener('mouseover', e => {
+    const icon = e.target.closest('.tooltip-icon');
+    if (!icon) return;
+    tt.textContent = icon.dataset.tip || '';
+    tt.classList.add('show');
+});
+document.addEventListener('mousemove', e => {
+    const icon = e.target.closest('.tooltip-icon');
+    if (!icon) return;
+    const m = 12;
+    let x = e.clientX + m;
+    let y = e.clientY + m;
+    if (x + tt.offsetWidth > window.innerWidth) x = e.clientX - tt.offsetWidth - m;
+    if (y + tt.offsetHeight > window.innerHeight) y = e.clientY - tt.offsetHeight - m;
+    tt.style.left = x + 'px';
+    tt.style.top = y + 'px';
+});
+document.addEventListener('mouseout', e => {
+    const icon = e.target.closest('.tooltip-icon');
+    if (!icon) return;
+    tt.classList.remove('show');
 });
 
 const COMPANY_NAMES = [
