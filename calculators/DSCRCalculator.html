@@ -67,11 +67,31 @@
 .dotted-hover { border-bottom: 1px dashed var(--lp-text-muted); cursor: help; }
 
 /* -- Dynamic Tax Treatment Box -- */
-.tax-treatment-box { display: none; padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 12px; line-height: 1.5; border: 1px solid; }
-.tax-treatment-box.show { display: block; }
-.tax-treatment-box.pass { background: var(--tax-pass-bg); border-color: var(--tax-pass); color: var(--lp-dark); }
-.tax-treatment-box.dbl { background: var(--tax-dbl-bg); border-color: var(--tax-dbl); color: var(--lp-dark); }
-.tax-treatment-box strong { font-size: 13px; display: block; margin-bottom: 2px; }
+.tax-treatment-box {
+  display: none;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #334155;
+}
+.tax-treatment-box.show {
+  display: block;
+}
+.tax-treatment-box.pass {
+  background-color: #F0FDF4; /* Soft green-tinted background, matches lp-howto exactly */
+}
+.tax-treatment-box.dbl {
+  background-color: #F5F3FF; /* Soft purple-tinted background */
+}
+.tax-treatment-box strong {
+  font-size: 14px;
+  color: var(--lp-dark);
+  font-weight: 800;
+  display: block;
+  margin-bottom: 2px;
+}
 
 /* -- Tax Docs Panel -- */
 .tax-docs-panel { border-top: 1px solid var(--lp-border); background: var(--gray-50); padding: 16px; display: none; }
@@ -80,8 +100,17 @@
 .td-field { display: flex; flex-direction: column; gap: 6px; }
 .td-label { font-size: 11px; font-weight: 700; color: var(--lp-text-muted); text-transform: uppercase; letter-spacing: 0.025em; }
 .td-select { padding: 8px 12px; border: 1px solid var(--lp-border); border-radius: 8px; font-size: 12px; font-family: inherit; outline: none; background: #fff; }
-.td-output { background: #fff; border: 1px solid var(--lp-border); border-left: 3px solid var(--lp-green); border-radius: 8px; padding: 12px; font-size: 12px; line-height: 1.5; color: var(--lp-dark); }
-.td-deadline { font-size: 11px; color: var(--lp-text-muted); margin-top: 8px; font-style: italic; }
+.td-output {
+  background-color: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-left: 4px solid #14532D;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #334155;
+}
+.td-deadline { font-size: 11px; color: #475569; margin-top: 8px; font-style: italic; }
 
 /* -- Step 2 Gating -- */
 .gated-section { position: relative; }
@@ -423,30 +452,7 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
   animation: cardPulse 0.5s ease-out 1;
 }
 
-/* Beautiful auto-populated toast alert */
-.tax-notification {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-left: 4px solid #22C55E;
-  color: #14532D;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  margin-top: 12px;
-  margin-bottom: 16px;
-  animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) 1;
-}
-.tax-notification.pulse-flash {
-  animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) 1, pulseHighlight 1s ease-out 1;
-}
-@keyframes slideInDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+
 </style>
 </head>
 <body>
@@ -499,7 +505,6 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
                         <button class="ent-toggle-btn" id="btnFormMode" onclick="setEntMode('form')">By tax form</button>
                     </div>
                     <div id="entGrid" class="ent-grid-2x2"></div>
-                    <div id="taxNotification" class="tax-notification" style="display:none;"></div>
                     <div id="taxTreatmentBox" class="tax-treatment-box"></div>
                 </div>
 
@@ -746,20 +751,30 @@ function renderEntities(mode = 'entity') {
   grid.innerHTML = h;
   
   var taxBox = document.getElementById('taxTreatmentBox');
-  var notiBox = document.getElementById('taxNotification');
   if (S.entity) {
     document.getElementById('step2Container').classList.remove('is-locked');
     document.getElementById('taxDocsPanel').classList.add('show');
     document.getElementById('taxActiveIndicator').style.display = 'inline-block';
     var ent = ENTITIES.find(x => x.id === S.entity);
     taxBox.className = 'tax-treatment-box ' + (ent.taxation==='pass'?'pass':'dbl') + ' show';
-    taxBox.innerHTML = '<strong>' + (ent.taxation==='pass'?'Pass-through Taxation':'Double Taxation') + '</strong>' + (ent.taxation==='pass'?'Owner pays tax on their personal return.':'Corporation pays tax, then owner pays again on dividends.');
     
-    // Dynamic notification toast
-    if (notiBox) {
-      notiBox.innerHTML = '<span style="font-size:16px; margin-right:4px;">✓</span> Tax reference lines auto-populated in <strong>Step 2 (EBIDA & Financials)</strong> below for <strong>' + ent.form + '</strong>!';
-      notiBox.style.display = 'flex';
-    }
+    // Unified elegant text inside a single soft background card (Matches payment breakdown style)
+    var taxationText = ent.taxation === 'pass' ? 'Pass-through Taxation' : 'Double Taxation';
+    var taxationDesc = ent.taxation === 'pass' ? 'Owner pays tax on their personal return.' : 'Corporation pays tax, then owner pays again on dividends.';
+    var badgeBg = ent.taxation === 'pass' ? '#dcfce7' : '#f3e8ff';
+    var badgeColor = ent.taxation === 'pass' ? '#15803d' : '#6b21a8';
+    
+    taxBox.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; width: 100%;">
+        <div>
+          <strong>${taxationText}</strong>
+          <span style="font-size: 12.5px; color: #475569; font-weight: 500;">${taxationDesc}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px; color: ${badgeColor}; background: ${badgeBg}; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 12px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+          <span style="font-size: 13px;">✓</span> Auto-Populated Step 2
+        </div>
+      </div>
+    `;
 
     // Dynamic EBIDA hint badge in Step 2 Title
     const hintEl = document.getElementById('ebidaFormHint');
@@ -774,10 +789,6 @@ function renderEntities(mode = 'entity') {
     document.getElementById('taxDocsPanel').classList.remove('show');
     document.getElementById('taxActiveIndicator').style.display = 'none';
     taxBox.className = 'tax-treatment-box';
-    if (notiBox) {
-      notiBox.style.display = 'none';
-      notiBox.innerHTML = '';
-    }
     const hintEl = document.getElementById('ebidaFormHint');
     if (hintEl) {
       hintEl.innerHTML = '';
@@ -1040,7 +1051,6 @@ function cycleBusinessPlaceholder() {
 function triggerTaxFlash() {
   const treatmentBox = document.getElementById('taxTreatmentBox');
   const docsPanel = document.getElementById('taxDocsPanel');
-  const notification = document.getElementById('taxNotification');
   
   if (treatmentBox) {
     treatmentBox.classList.remove('pulse-flash');
@@ -1052,12 +1062,6 @@ function triggerTaxFlash() {
     docsPanel.classList.remove('pulse-flash');
     void docsPanel.offsetWidth; // Trigger reflow to restart animation
     docsPanel.classList.add('pulse-flash');
-  }
-
-  if (notification) {
-    notification.classList.remove('pulse-flash');
-    void notification.offsetWidth; // Trigger reflow to restart animation
-    notification.classList.add('pulse-flash');
   }
 
   // Flash the badge icons
