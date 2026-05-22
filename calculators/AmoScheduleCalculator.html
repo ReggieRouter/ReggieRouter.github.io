@@ -226,8 +226,8 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            background-color: #F9FAFB !important;
-            border-bottom: 1px solid #E5E7EB !important;
+            background-color: #F9FAFB;
+            box-shadow: 0 1px 0 0 #E5E7EB;
         }
         .table-scroll-container::-webkit-scrollbar { width: 6px; }
         .table-scroll-container::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
@@ -527,6 +527,17 @@
         /* Origination fee easter egg */
         .fee-egg { font-size: 12px; color: #6B7280; font-style: italic; opacity: 0; max-height: 0; overflow: hidden; transition: opacity 0.4s, max-height 0.3s; margin-top: 0; }
         .fee-egg.visible { opacity: 1; max-height: 24px; margin-top: 5px; }
+
+        /* Two-zone talk track layout */
+        .tt-data-block { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+        .tt-data-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; line-height: 1.5; font-weight: 400; }
+        .tt-data-label { color: #64748B; font-weight: 500; }
+        .tt-data-value { font-weight: 600; color: #111827; }
+        .tt-data-value.tt-savings { color: #14532D; }
+        .tt-divider { height: 1px; background: #E5E7EB; margin: 10px 0 8px; }
+        .tt-script-eyebrow { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #64748B; margin-bottom: 5px; }
+        .tt-script { font-style: italic; font-size: 13px; color: #1e293b; line-height: 1.55; margin: 0; }
+        .tt-apr-footnote { font-size: 11px; color: #94A3B8; font-weight: 500; margin: 6px 0 0; padding: 0 2px; }
     </style>
 </head>
 <body>
@@ -978,10 +989,8 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="takeaway-footer no-print">
-                                    APR disclosure required in CA and NY
-                                </div>
                             </div>
+                            <p class="tt-apr-footnote no-print">* APR disclosure required in CA and NY</p>
 
                             <div class="action-buttons flex flex-col gap-3 mt-5 no-print">
                                 <button onclick="copyResults(${id})" class="lp-copy-btn">
@@ -1023,7 +1032,7 @@
                     <div id="detailsWrap-${id}" class="px-[24px] pb-[28px]">
                         <div class="table-scroll-container">
                             <table class="min-w-full text-left bg-white text-[12px]">
-                                <thead class="bg-[#F9FAFB] sticky top-0 border-b border-[#E5E7EB]">
+                                <thead class="bg-[#F9FAFB]">
                                     <tr>
                                         <th class="p-3 font-bold text-[#6B7280] w-[40px] text-center">#</th>
                                         <th class="p-3 font-bold text-[#111827]">Date</th>
@@ -1139,8 +1148,23 @@
 
             let html;
             if (track.key === 'summary') {
-                if (sel) {
-                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}."`;
+                if (sel && sel.savings > 0) {
+                    const monthBucketRaw = monthPhrase(sel.day, sel.month, sel.year);
+                    const monthBucketCap = monthBucketRaw.charAt(0).toUpperCase() + monthBucketRaw.slice(1);
+                    const fmtWhole = n => '$' + Math.round(n).toLocaleString('en-US');
+                    const pmtLabelMap = { week: 'Weekly payment', day: 'Daily payment', 'semi-month': 'Semi-mo payment', month: 'Monthly payment' };
+                    const pmtLabel = pmtLabelMap[c.freqName] || 'Payment';
+                    const pmtFreqMap = { week: 'weekly', day: 'daily', 'semi-month': 'semi-monthly', month: 'monthly' };
+                    const pmtFreqAdj = pmtFreqMap[c.freqName] || c.freqName;
+                    html = `<div class="tt-data-block">
+                        <div class="tt-data-row"><span class="tt-data-label">${pmtLabel}</span><span class="tt-data-value">${fmtUsd.format(c.pmt)}</span></div>
+                        <div class="tt-data-row"><span class="tt-data-label">Pay off by</span><span class="tt-data-value">${monthBucketCap}</span></div>
+                        <div class="tt-data-row"><span class="tt-data-label">Payoff balance</span><span class="tt-data-value">${fmtWhole(sel.buyout)}</span></div>
+                        <div class="tt-data-row"><span class="tt-data-label">You save</span><span class="tt-data-value tt-savings">${fmtWhole(sel.savings)} in interest</span></div>
+                    </div>
+                    <div class="tt-divider"></div>
+                    <span class="tt-script-eyebrow">Sample Script</span>
+                    <p class="tt-script">“Your ${pmtFreqAdj} is ${fmtUsd.format(c.pmt)}. If you pay it off by ${monthBucketRaw} by taking advantage of pre-payment incentives, you keep ${fmtWhole(sel.savings)} that would’ve gone to interest.”</p>`;
                 } else {
                     html = `"You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span> over ${c.term} months — repaying <strong>${fmtUsd.format(c.payback)}</strong> total."`;
                 }
