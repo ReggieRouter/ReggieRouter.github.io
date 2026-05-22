@@ -3,6 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="version" content="2026.05.22.0830">
+<script type="text/javascript">
+  window.CURRENT_VERSION = "2026.05.22.0830";
+
+  // Force active cleanup of legacy service workers
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (var i = 0; i < registrations.length; i++) {
+        registrations[i].unregister().then(function(success) {
+          if (success) console.log('Stale service worker removed.');
+        });
+      }
+    });
+  }
+
+  // Check for updates on server
+  function checkForUpdates() {
+    // Prevent reload loop
+    var lastAttempt = sessionStorage.getItem('lp_update_attempt');
+    var nowTime = Date.now();
+    if (lastAttempt && (nowTime - parseInt(lastAttempt, 10) < 15000)) {
+      return;
+    }
+
+    fetch('/?_cb=' + nowTime, {
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+      cache: 'no-store'
+    })
+    .then(function(res) {
+      if (!res.ok) return;
+      return res.text();
+    })
+    .then(function(htmlText) {
+      if (!htmlText) return;
+      var match = htmlText.match(/<meta\s+name=["']version["']\s+content=["'](.*?)["']/i);
+      if (match && match[1] && match[1] !== window.CURRENT_VERSION) {
+        console.warn('New LendPaper update detected: ' + match[1] + '. Refreshing page...');
+        sessionStorage.setItem('lp_update_attempt', Date.now());
+        
+        // Clear browser cache via cache storage if available
+        if ('caches' in window) {
+          caches.keys().then(function(keys) {
+            keys.forEach(function(key) { caches.delete(key); });
+          });
+        }
+        
+        window.location.reload(true);
+      }
+    })
+    .catch(function(err) {
+      console.warn('Update check failed:', err);
+    });
+  }
+
+  // Check immediately, on page focus/tab switch, and every 5 minutes
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkForUpdates);
+  } else {
+    checkForUpdates();
+  }
+
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      checkForUpdates();
+    }
+  });
+
+  setInterval(checkForUpdates, 5 * 60 * 1000);
+</script>
 <script type="text/javascript">
   // Single Page Apps for GitHub Pages
   // MIT License
@@ -795,8 +864,8 @@ input { font-family: inherit; }
 </div>
 
 <!-- External Data -->
-<script src="/public/assets/js/tools.js?v=2.4"></script>
-<script src="/public/assets/js/glossary.js?v=2.3"></script>
+<script src="/public/assets/js/tools.js?v=2026.05.22.0830"></script>
+<script src="/public/assets/js/glossary.js?v=2026.05.22.0830"></script>
 
 <script>
 /* ============================================================
@@ -853,15 +922,22 @@ function openTool(t, push, urlOverride) {
   if (!t) return;
   var path = urlOverride || (t.path + window.location.search);
   
+  // Append current version to path to prevent iframe / modal caching
+  var versionedPath = path;
+  if (window.CURRENT_VERSION) {
+    var sep = versionedPath.indexOf('?') !== -1 ? '&' : '?';
+    versionedPath += sep + 'v=' + window.CURRENT_VERSION;
+  }
+
   if (t.presentation === 'modal') {
-    openModal(path);
+    openModal(versionedPath);
   } else {
     switchView('tool');
     document.getElementById('topbarTitle').textContent = t.name;
     const iframe = document.getElementById('lp-tool-iframe');
-    if (iframe && path) {
+    if (iframe && versionedPath) {
         // Always force a reload of the iframe content to reset state
-        iframe.src = path;
+        iframe.src = versionedPath;
     }
   }
   
