@@ -352,9 +352,64 @@
             .amo-section { page-break-before: always; break-before: page; }
         }
 
-        /* Takeaway inline row link */
-        .amo-row-link { cursor: pointer; border-bottom: 1px dashed rgba(0,0,0,0.25); padding-bottom: 1px; }
-        .amo-row-link:hover { opacity: 0.7; }
+        /* Form Section Grouping Labels */
+        .lp-section-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--brand-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
+        }
+
+        /* Outlined Secondary Button for Compare Scenario */
+        .lp-btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 38px;
+            padding: 0 16px;
+            border: 2px solid var(--brand-accent);
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--brand-accent);
+            background-color: transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .lp-btn-secondary:hover {
+            background-color: var(--brand-tint);
+            color: var(--brand-accent-hover);
+            border-color: var(--brand-accent-hover);
+        }
+
+        /* Quote Block Styling & Dynamic Fields */
+        .takeaway-body {
+            font-style: normal !important;
+        }
+        .amo-row-link {
+            cursor: pointer;
+            border-bottom: none;
+            padding-bottom: 0;
+            color: #2E7D52;
+            font-weight: 500;
+            font-style: normal;
+        }
+        .amo-row-link:hover {
+            color: var(--brand-accent-hover);
+            text-decoration: underline;
+            opacity: 1;
+        }
+        .lp-dynamic-text {
+            color: #2E7D52;
+            font-weight: 500;
+            font-style: normal;
+        }
+
         @keyframes amoFlash { 0%,100% { background: transparent; } 40% { background: rgba(20,83,45,0.12); } }
         .amo-scroll-flash { animation: amoFlash 900ms ease; }
         .amo-scroll-flash td { background: rgba(20,83,45,0.10) !important; }
@@ -392,6 +447,76 @@
         .prepay-toggle-cb:checked + .prepay-toggle-track { background: #14532D; }
         .prepay-toggle-cb:checked + .prepay-toggle-track::after { transform: translateX(18px); }
 
+        /* Compact Stepper Pill */
+        .lp-stepper-pill {
+            display: inline-flex;
+            align-items: center;
+            height: 26px;
+            background: #F3F4F6;
+            border-radius: 13px;
+            padding: 0 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #111827;
+            border: 1px solid #E5E7EB;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+        .lp-stepper-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #4B5563;
+            transition: all 0.1s ease;
+        }
+        .lp-stepper-btn:hover {
+            background: #E5E7EB;
+            color: #111827;
+        }
+        .lp-stepper-btn:active {
+            background: #D1D5DB;
+        }
+        .lp-stepper-val {
+            min-width: 32px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            padding: 0 4px;
+        }
+
+        /* Clickable Rows & Chevron Hover Affordances */
+        .prepay-enabled .amo-row {
+            cursor: pointer;
+        }
+        .prepay-enabled .amo-row:hover td {
+            background-color: var(--brand-tint) !important;
+        }
+        .amo-row td {
+            position: relative;
+        }
+        .prepay-enabled .amo-row .amo-row-chevron {
+            opacity: 0;
+            transition: opacity 0.15s ease-in-out;
+        }
+        .prepay-enabled .amo-row:hover .amo-row-chevron {
+            opacity: 1;
+        }
+
+        /* Mobile pay-off detail stacking */
+        @media (max-width: 640px) {
+            .lp-inline-stats {
+                grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+        }
+
         /* Origination fee easter egg */
         .fee-egg { font-size: 12px; color: #6B7280; font-style: italic; opacity: 0; max-height: 0; overflow: hidden; transition: opacity 0.4s, max-height 0.3s; margin-top: 0; }
         .fee-egg.visible { opacity: 1; max-height: 24px; margin-top: 5px; }
@@ -412,7 +537,7 @@
 
         <!-- Footer inside main so html2pdf capture includes it -->
         <div class="print-footer-legal">
-            THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
+            THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL FINANCING TERMS, RATES, AND FEES WILL BE DETERMINED BY THE FUNDING PROVIDER UPON FINAL REVIEW.
         </div>
         <div class="print-watermark">
             Powered by LendPaper | info@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.
@@ -590,17 +715,29 @@
 
         function togglePrepay(id) {
             const isChecked = document.getElementById(`enablePrepay-${id}`).checked;
-            const hint = document.getElementById(`prepayAmoHint-${id}`);
+            const stepperPill = document.getElementById(`stepper-pill-${id}`);
             if (!isChecked) {
-                const tracks = getTracks(id);
-                if ((cardTracks[id] ?? 0) >= tracks.length) cardTracks[id] = 0;
+                delete rowSelection[id];
                 renderDetailRow(id);
-                if (hint) hint.classList.remove('visible');
+                if (stepperPill) stepperPill.style.display = 'none';
             } else {
-                if (hint) hint.classList.add('visible');
+                if (stepperPill) stepperPill.style.display = 'inline-flex';
             }
             // Let renderTakeaway own all summary box state
             renderTakeaway(id);
+        }
+
+        function adjustDiscount(id, delta) {
+            const input = document.getElementById(`discPct-${id}`);
+            if (!input) return;
+            let val = parseInt(input.value, 10);
+            if (isNaN(val)) val = 25;
+            val += delta;
+            val = Math.max(0, Math.min(50, val)); // Clamp strictly between 0% and 50%
+            input.value = val;
+            const display = document.getElementById(`stepper-val-${id}`);
+            if (display) display.textContent = val + '%';
+            calcCard(id);
         }
 
         const feeToggleTimes = {};
@@ -648,6 +785,7 @@
         function updateHeaders() {
             const cards = document.querySelectorAll('.modal-shell');
             const totalCount = cards.length;
+            const isDismissed = localStorage.getItem('lendpaper_intro_dismissed') === 'true';
 
             cards.forEach((card, index) => {
                 const id = card.id.split('-')[1];
@@ -655,7 +793,10 @@
                 const scenarioLetter = String.fromCharCode(64 + (index + 1));
 
                 headerCenter.innerHTML = `
-                    <h1 class="text-[15px] font-extrabold text-[#111827] uppercase tracking-wider">Payment Breakdown</h1>
+                    <h1 class="text-[15px] font-extrabold text-[#111827] uppercase tracking-wider flex items-center gap-1.5 justify-center">
+                        Payment Breakdown
+                        <button onclick="showIntro()" class="lp-intro-toggle-btn no-print w-[16px] h-[16px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9.5px] font-bold transition-colors bg-white hover:border-[#14532D] hover:text-[#14532D] cursor-pointer" style="display: ${isDismissed ? 'inline-flex' : 'none'}; pointer-events: auto;" title="Restore introduction">i</button>
+                    </h1>
                     <div class="text-[10px] uppercase tracking-[0.1em] text-[#6B7280] font-bold mt-0.5">Scenario Modeling Engine</div>
                 `;
                 
@@ -674,6 +815,7 @@
             maxId++;
             const id = maxId;
             const today = new Date().toISOString().split('T')[0];
+            const isDismissed = localStorage.getItem('lendpaper_intro_dismissed') === 'true';
 
             const cardHTML = `
             <div class="modal-shell w-full max-w-[1000px] bg-white rounded-[20px] shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col relative no-break-inside" id="cardContainer-${id}">
@@ -682,86 +824,95 @@
                     <div id="badge-container-${id}" class="z-10"></div>
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none" id="header-center-${id}"></div>
                     <div class="flex items-center gap-2 z-10">
-                        <button id="compareBtn-${id}" onclick="compareCard(${id})" class="no-print h-[30px] px-[10px] rounded-full border border-dashed border-[#D1D5DB] text-[10px] font-bold uppercase tracking-wider text-[#9CA3AF] hover:border-[#14532D] hover:text-[#14532D] transition-colors whitespace-nowrap">+ Compare</button>
+                        <button id="compareBtn-${id}" onclick="compareCard(${id})" class="no-print lp-btn-secondary">+ Compare</button>
                         <button onclick="removeCard(${id})" class="remove-card-btn w-[32px] h-[32px] rounded-full hover:bg-slate-50 flex items-center justify-center text-[#6B7280] text-[20px] leading-none no-print transition-colors hover:text-[#EF4444]">&times;</button>
                     </div>
                 </div>
 
                 <div class="flex flex-col md:flex-row">
                     <div class="w-full md:w-[50%] p-[20px] sm:p-[32px] flex flex-col relative">
-                        <div class="lp-howto">
-                            Enter the loan amount, rate, and term. You'll see the exact <strong>payment schedule</strong> — and what to tell your borrower about total cost and prepayment savings.
+                        <div class="lp-howto relative pr-8" id="intro-box-${id}" style="display: ${isDismissed ? 'none' : 'block'};">
+                            <button onclick="dismissIntro()" class="absolute top-2.5 right-3 text-[#6B7280] hover:text-[#14532D] transition-colors font-bold text-base leading-none no-print" style="background: transparent; border: none; cursor: pointer;" aria-label="Dismiss">&times;</button>
+                            Enter the financing amount, rate, and term. You'll see the exact <strong>payment schedule</strong> — and what to tell your borrower about total cost and prepayment savings.
                         </div>
 
                         <div id="badge-container-${id}" class="hidden mb-4"></div>
 
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-5">
-                            <div class="col-span-2">
-                                <label>Financing Amount</label>
-                                <div class="lp-input-group">
-                                    <span class="pl-3 pr-2 text-[#94A3B8] font-bold border-r border-[#E5E7EB]">$</span>
-                                    <input type="number" id="amt-${id}" value="100000" min="0" class="lp-input" oninput="calcCard(${id})">
+                        <!-- Section: Financing Terms -->
+                        <div class="mb-6">
+                            <div class="lp-section-label">Financing Terms</div>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-5">
+                                <div class="col-span-2">
+                                    <label>Financing Amount</label>
+                                    <div class="lp-input-group">
+                                        <span class="pl-3 pr-2 text-[#94A3B8] font-bold border-r border-[#E5E7EB]">$</span>
+                                        <input type="number" id="amt-${id}" value="100000" min="0" class="lp-input" oninput="calcCard(${id})">
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div>
-                                <label class="flex items-center">
-                                    Cost per Dollar Borrowed
-                                    <span class="tooltip ml-1 no-print">
-                                        <span class="w-[14px] h-[14px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9px] font-bold italic transition-colors bg-white">i</span>
-                                        <span class="tooltiptext">How many cents you pay per dollar funded. e.g. 25¢ means $1.25 repaid per $1 borrowed.</span>
-                                    </span>
-                                </label>
-                                <div class="lp-input-group">
-                                    <input type="number" step="0.01" id="factor-${id}" value="${id===1 ? 1.25 : 1.30}" min="0" class="lp-input" oninput="calcCard(${id})">
+                                <div>
+                                    <label class="flex items-center">
+                                        Cost per Dollar Borrowed
+                                        <span class="tooltip ml-1 no-print">
+                                            <span class="w-[14px] h-[14px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9px] font-bold italic transition-colors bg-white">i</span>
+                                            <span class="tooltiptext">How many cents you pay per dollar funded. e.g. 25¢ means $1.25 repaid per $1 borrowed.</span>
+                                        </span>
+                                    </label>
+                                    <div class="lp-input-group">
+                                        <input type="number" step="0.01" id="factor-${id}" value="${id===1 ? 1.25 : 1.30}" min="0" class="lp-input" oninput="calcCard(${id})">
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div>
-                                <label>Term</label>
-                                <div class="lp-input-group">
-                                    <input type="number" id="term-${id}" value="${id===1 ? 12 : 18}" min="0" class="lp-input text-right" oninput="calcCard(${id})">
-                                    <span class="pr-3 pl-2 text-[#94A3B8] font-bold border-l border-[#E5E7EB]">mos</span>
+                                <div>
+                                    <label>Term</label>
+                                    <div class="lp-input-group">
+                                        <input type="number" id="term-${id}" value="${id===1 ? 12 : 18}" min="0" class="lp-input text-right" oninput="calcCard(${id})">
+                                        <span class="pr-3 pl-2 text-[#94A3B8] font-bold border-l border-[#E5E7EB]">mos</span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div class="col-span-2">
-                                <label>Origination Fee</label>
-                                <div class="lp-input-group" id="feeWrap-${id}" data-fee-mode="pct">
-                                    <button id="feePrefix-${id}" type="button" onclick="setFeeMode(${id}, 'pct')" style="display:none;align-items:center;gap:5px;padding:0 10px 0 12px;border-right:1px solid #E5E7EB;background:transparent;cursor:pointer;font-size:14px;font-weight:700;color:#111827;white-space:nowrap;font-family:inherit">
-                                        <span style="font-size:11px;color:#94A3B8">⇄</span> $
-                                    </button>
-                                    <input type="number" step="0.1" id="fee-${id}" value="3.0" min="0" class="lp-input" oninput="calcCard(${id})">
-                                    <button id="feeSuffix-${id}" type="button" onclick="setFeeMode(${id}, 'dollar')" style="display:flex;align-items:center;gap:5px;padding:0 12px 0 10px;border-left:1px solid #E5E7EB;background:transparent;cursor:pointer;font-size:14px;font-weight:700;color:#111827;white-space:nowrap;font-family:inherit">
-                                        % <span style="font-size:11px;color:#94A3B8">⇄</span>
-                                    </button>
-                                </div>
-                                <div id="feeEgg-${id}" class="fee-egg"></div>
-                            </div>
-
-                            <div class="col-span-2">
-                                <label>Payment Frequency</label>
-                                <div class="lp-input-group pr-2">
-                                    <select id="freq-${id}" class="w-full py-2.5 px-3 outline-none text-[#111827] text-[14px] font-semibold bg-transparent appearance-none cursor-pointer" onchange="calcCard(${id})">
-                                        <option value="daily">Daily</option>
-                                        <option value="weekly" selected>Weekly</option>
-                                        <option value="semimonthly">Semi-Mo</option>
-                                        <option value="monthly">Monthly</option>
-                                    </select>
+                                <div class="col-span-2">
+                                    <label>Origination Fee</label>
+                                    <div class="lp-input-group" id="feeWrap-${id}" data-fee-mode="pct">
+                                        <button id="feePrefix-${id}" type="button" onclick="setFeeMode(${id}, 'pct')" style="display:none;align-items:center;gap:5px;padding:0 10px 0 12px;border-right:1px solid #E5E7EB;background:transparent;cursor:pointer;font-size:14px;font-weight:700;color:#111827;white-space:nowrap;font-family:inherit">
+                                            <span style="font-size:11px;color:#94A3B8">⇄</span> $
+                                        </button>
+                                        <input type="number" step="0.1" id="fee-${id}" value="3.0" min="0" class="lp-input" oninput="calcCard(${id})">
+                                        <button id="feeSuffix-${id}" type="button" onclick="setFeeMode(${id}, 'dollar')" style="display:flex;align-items:center;gap:5px;padding:0 12px 0 10px;border-left:1px solid #E5E7EB;background:transparent;cursor:pointer;font-size:14px;font-weight:700;color:#111827;white-space:nowrap;font-family:inherit">
+                                            % <span style="font-size:11px;color:#94A3B8">⇄</span>
+                                        </button>
+                                    </div>
+                                    <div id="feeEgg-${id}" class="fee-egg"></div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mt-8 pt-6 border-t border-[#E5E7EB]">
-                            <div class="mb-4">
-                                <label>Start Date</label>
-                                <div class="lp-input-group">
-                                    <input type="date" id="start-${id}" value="${today}" class="lp-input font-bold" onchange="calcCard(${id})">
+                        <!-- Section: Schedule -->
+                        <div>
+                            <div class="lp-section-label">Schedule</div>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-5">
+                                <div class="col-span-2">
+                                    <label>Payment Frequency</label>
+                                    <div class="lp-input-group pr-2">
+                                        <select id="freq-${id}" class="w-full py-2.5 px-3 outline-none text-[#111827] text-[14px] font-semibold bg-transparent appearance-none cursor-pointer" onchange="calcCard(${id})">
+                                            <option value="daily">Daily</option>
+                                            <option value="weekly" selected>Weekly</option>
+                                            <option value="semimonthly">Semi-Mo</option>
+                                            <option value="monthly">Monthly</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-span-2">
+                                    <label>Start Date</label>
+                                    <div class="lp-input-group">
+                                        <input type="date" id="start-${id}" value="${today}" class="lp-input font-bold" onchange="calcCard(${id})">
+                                    </div>
                                 </div>
                             </div>
-
-                            <input type="number" id="discPct-${id}" value="25" min="0" max="100" style="display:none">
                         </div>
+
+                        <input type="number" id="discPct-${id}" value="25" min="0" max="100" style="display:none">
                     </div>
 
                     <div class="w-full md:w-[50%] p-[20px] sm:p-[32px] flex flex-col results-col">
@@ -791,7 +942,7 @@
                                 </div>
                             </div>
 
-                            <div id="prepaySummary-${id}" class="hidden rounded-xl border mb-6" style="background:#F0FDF4; border-color:#BBF7D0; overflow:hidden">
+                            <div id="prepaySummary-${id}" class="hidden rounded-xl border mb-6" style="background:#F0FDF4; border-color:#BBF7D0; border-left: 4px solid #14532D; overflow:hidden">
                                 <div class="flex items-center gap-2 px-4 pt-4 pb-2">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                                     <span id="outSavingsPhrase-${id}" style="font-size:15px; font-weight:700; color:#14532D; line-height:1.3">—</span>
@@ -851,16 +1002,16 @@
                             <div class="lp-amo-ts">Save on early payoff — pick a row below to see exact savings.</div>
                         </div>
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <span class="lp-amo-pct">25%</span>
+                            <div class="lp-stepper-pill" id="stepper-pill-${id}">
+                                <button type="button" onclick="adjustDiscount(${id}, -1)" class="lp-stepper-btn" aria-label="Decrease discount">&minus;</button>
+                                <span class="lp-stepper-val" id="stepper-val-${id}">25%</span>
+                                <button type="button" onclick="adjustDiscount(${id}, 1)" class="lp-stepper-btn" aria-label="Increase discount">&plus;</button>
+                            </div>
                             <label class="prepay-toggle" for="enablePrepay-${id}">
                                 <input type="checkbox" id="enablePrepay-${id}" class="prepay-toggle-cb" checked onchange="togglePrepay(${id}); calcCard(${id})">
                                 <span class="prepay-toggle-track"></span>
                             </label>
                         </div>
-                    </div>
-                    <div id="prepayAmoHint-${id}" class="lp-amo-hint visible no-print">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                        Click any payment row to see payoff details right there — no scrolling around.
                     </div>
                     <div id="detailsWrap-${id}" class="px-[24px] pb-[28px]">
                         <div class="table-scroll-container">
@@ -982,15 +1133,15 @@
             let html;
             if (track.key === 'summary') {
                 if (sel) {
-                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong>. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}."`;
+                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}."`;
                 } else {
-                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong> over ${c.term} months — repaying <strong>${fmtUsd.format(c.payback)} total</strong>."`;
+                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span> over ${c.term} months — repaying <strong>${fmtUsd.format(c.payback)}</strong> total."`;
                 }
             } else if (track.key === 'apr') {
                 if (sel) {
                     html = `"You're looking at <strong>${c.apr.toFixed(1)}% APR</strong> on net funded. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>."`;
                 } else {
-                    html = `"You're looking at <strong>${fmtUsd.format(c.totalCost)}</strong> in total funding costs — a <strong>${c.apr.toFixed(1)}% APR</strong>, or <strong>${fmtUsd.format(c.pmt)} per ${c.freqName}</strong>."`;
+                    html = `"You're looking at <strong>${fmtUsd.format(c.totalCost)}</strong> in total funding costs — a <strong>${c.apr.toFixed(1)}% APR</strong>, or <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>."`;
                 }
             } else if (track.key === 'perdollar') {
                 html = `"For every dollar you receive, you're paying back <strong>${c.factor.toFixed(2)}</strong> — that's <strong>${c.centsDisplay}¢ on the dollar</strong>. On <strong>${fmtUsd.format(c.amt)}</strong> funded, you repay <strong>${fmtUsd.format(c.payback)}</strong> total."`;
@@ -1023,6 +1174,8 @@
         }
 
         function selectAmoRow(id, period) {
+            const isPrepay = document.getElementById(`enablePrepay-${id}`)?.checked;
+            if (!isPrepay) return;
             const rowEl = document.getElementById(`arow-${id}-${period}`);
             if (!rowEl) return;
             const tbody = document.getElementById(`tableBody-${id}`);
@@ -1096,6 +1249,16 @@
 
             if(!amt || !factor || !term) return;
 
+            // Synchronize Stepper Pill
+            const stepperPill = document.getElementById(`stepper-pill-${id}`);
+            if (stepperPill) {
+                stepperPill.style.display = isPrepayEnabled ? 'inline-flex' : 'none';
+            }
+            const stepperValEl = document.getElementById(`stepper-val-${id}`);
+            if (stepperValEl) {
+                stepperValEl.textContent = discPct + '%';
+            }
+
             const payback = amt * factor;
             const feeAmt = feeIsDollar ? feeInput : amt * (feeInput / 100);
             const netFunded = amt - feeAmt;
@@ -1107,6 +1270,11 @@
             else if (freq === 'weekly') { periods = Math.round(term * 4.333); pmtLabel = 'Weekly payment'; pYear = 52; freqName = 'week'; }
             else if (freq === 'semimonthly') { periods = term * 2; pmtLabel = 'Semi-mo payment'; pYear = 24; freqName = 'semi-month'; }
             else { periods = term; pmtLabel = 'Monthly payment'; pYear = 12; freqName = 'month'; }
+
+            // Clear active selection if the term has shrunk below the selected period
+            if (rowSelection[id] && rowSelection[id].period > periods) {
+                delete rowSelection[id];
+            }
 
             const pmt = payback / periods;
             const truePeriodRate = getPeriodRate(netFunded, pmt, periods);
@@ -1136,6 +1304,7 @@
             let tbodyHTML = '', printTbodyHTML = '', maturityDate = '';
 
             const periodRate = getPeriodRate(amt, pmt, periods);
+            const defaultPeriod = Math.max(1, Math.round(periods * 0.25) - 1);
 
             for(let i = 1; i <= periods; i++) {
                 if(freq === 'daily') currentDate = getNextBusinessDay(currentDate, false);
@@ -1159,7 +1328,15 @@
                 const dateMonth = currentDate.toLocaleString('default', {month: 'long'});
                 const dateYear = currentDate.getFullYear();
                 maturityDate = dateStr;
-                const isSelected = rowSelection[id] && rowSelection[id].period === i;
+
+                let isSelected = false;
+                if (isPrepayEnabled) {
+                    if (rowSelection[id]) {
+                        isSelected = rowSelection[id].period === i;
+                    } else {
+                        isSelected = defaultPeriod === i;
+                    }
+                }
 
                 if (isSelected) {
                     rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, date: dateStr, day: dateDay, month: dateMonth, year: dateYear };
@@ -1171,14 +1348,22 @@
                     <td class="p-3 font-bold">${fmtUsd.format(pmt)}</td>
                     <td class="p-3">${fmtUsd.format(principal)}</td>
                     <td class="p-3">${fmtUsd.format(interest)}</td>
-                    <td class="p-3 font-extrabold text-[#14532D]">${fmtUsd.format(balance)}</td>`;
+                    <td class="p-3 font-extrabold text-[#14532D] relative">${fmtUsd.format(balance)}<span class="amo-row-chevron no-print absolute right-3 top-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-150 text-[#14532D] font-bold text-[14px]">→</span></td>`;
                 tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? ' prepay-target-row' : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" data-year="${dateYear}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
                 const printRow = `<td>${i}</td><td>${dateStr}</td><td>${fmtUsd.format(pmt)}</td><td>${fmtUsd.format(principal)}</td><td>${fmtUsd.format(interest)}</td><td>${fmtUsd.format(balance)}</td>`;
                 printTbodyHTML += `<tr>${printRow}</tr>`;
                 if(balance <= 0) break;
             }
 
-            document.getElementById(`tableBody-${id}`).innerHTML = tbodyHTML;
+            const tbody = document.getElementById(`tableBody-${id}`);
+            if (tbody) {
+                tbody.innerHTML = tbodyHTML;
+                if (isPrepayEnabled) {
+                    tbody.classList.add('prepay-enabled');
+                } else {
+                    tbody.classList.remove('prepay-enabled');
+                }
+            }
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
             renderDetailRow(id);
 
@@ -1191,6 +1376,18 @@
             navigator.clipboard.writeText(el ? el.innerText : '');
             const t = document.getElementById('toast'); t.style.opacity = '1';
             setTimeout(() => t.style.opacity = '0', 2000);
+        }
+
+        function dismissIntro() {
+            localStorage.setItem('lendpaper_intro_dismissed', 'true');
+            document.querySelectorAll('.lp-howto').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.lp-intro-toggle-btn').forEach(el => el.style.display = 'inline-flex');
+        }
+
+        function showIntro() {
+            localStorage.removeItem('lendpaper_intro_dismissed');
+            document.querySelectorAll('.lp-howto').forEach(el => el.style.display = 'block');
+            document.querySelectorAll('.lp-intro-toggle-btn').forEach(el => el.style.display = 'none');
         }
 
         window.onload = () => {
