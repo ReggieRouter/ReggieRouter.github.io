@@ -234,11 +234,13 @@
 
 /* -- Section toggle -- */
 .sc-collapse { background: transparent; border: none; cursor: pointer; color: var(--lp-text-muted); font-size: 12px; padding: 4px; }
+.sc.collapsed .sc-body { display: none; }
 
 /* -- Tab bar -- */
 .tab-bar { display: flex; gap: 4px; padding: 4px; background: var(--gray-100); border: 1px solid var(--lp-border); border-radius: 10px; margin-bottom: 16px; }
 .tab-btn { position: relative; flex: 1; padding: 10px 8px; border: none; border-radius: 8px; background: transparent; color: var(--lp-text-muted); font-size: 12px; font-weight: 800; cursor: pointer; transition: all .12s; text-align: center; text-transform: uppercase; font-family: inherit; }
 .tab-btn.active { background: var(--lp-dark); color: #fff; }
+.tab-btn:not(.active):hover { color: var(--lp-dark); background: rgba(0, 0, 0, 0.04); }
 .tab-req-dot { position: absolute; top: 8px; right: 12px; width: 6px; height: 6px; background: #ef4444; border-radius: 50%; }
 
 /* -- Threshold reference -- */
@@ -504,7 +506,6 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
                     <div class="tab-bar" id="finTabBar" style="display:none">
                         <button class="tab-btn active" onclick="setFinTab('business')">Business</button>
                         <button class="tab-btn" onclick="setFinTab('personal')" id="tabBtnPersonal">Personal</button>
-                        <button class="tab-btn" style="opacity:0.6; cursor:not-allowed;">Affiliate (Soon)</button>
                     </div>
 
                     <div id="bizSection" class="biz-section">
