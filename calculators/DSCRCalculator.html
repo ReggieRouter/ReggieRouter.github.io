@@ -246,7 +246,7 @@
 .save-field label { display: block; font-size: 11px; font-weight: 800; color: var(--lp-text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
 .save-field input { width: 100%; padding: 12px; border: 2px solid var(--lp-border); border-radius: 8px; font-size: 14px; font-weight: 600; font-family: inherit; outline: none; }
 .save-field input:focus { border-color: var(--lp-green); }
-.pdf-btn { width: 100%; padding: 16px; background: var(--lp-green); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: all .2s; }
+.pdf-btn { width: 100%; padding: 16px; background: var(--lp-green); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; transition: all .2s; }
 .pdf-btn:hover { background: #166534; }
 .pdf-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -255,7 +255,7 @@
 .lc-modal.open { display: flex; }
 .lc-modal-inner { background: #fff; border-radius: 16px; max-width: 500px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.2); overflow: hidden; }
 .lc-modal-hd { padding: 20px 24px; border-bottom: 1px solid var(--lp-border); display: flex; justify-content: space-between; align-items: center; }
-.lc-modal-title { font-size: 16px; font-weight: 800; color: var(--lp-dark); text-transform: uppercase; letter-spacing: 0.05em; }
+.lc-modal-title { font-size: 16px; font-weight: 800; color: var(--lp-dark); }
 .lc-modal-body { padding: 24px; }
 
 /* Print Export Standards */
@@ -514,7 +514,7 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
                     <div class="save-row">
                         <div class="save-field"><label>Business name</label><input type="text" id="pdfBizName" placeholder="e.g. Acme Plumbing" oninput="updPdfBtnState()"></div>
                     </div>
-                    <button class="pdf-btn" id="pdfBtn" onclick="runPDF()" disabled>Save as PDF</button>
+                    <button class="pdf-btn" id="pdfBtn" onclick="runPDF()" disabled>Save PDF</button>
                 </div>
             </div>
         </div>

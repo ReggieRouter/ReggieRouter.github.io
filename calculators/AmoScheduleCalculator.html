@@ -169,7 +169,6 @@
             display: block;
             font-size: 10px;
             font-weight: 800;
-            text-transform: uppercase;
             letter-spacing: 0.1em;
             color: #64748b;
             margin-bottom: 6px;
@@ -241,8 +240,6 @@
             border-radius: 10px;
             font-size: 13px;
             font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
             cursor: pointer;
             transition: background 0.2s;
             display: flex;
@@ -261,8 +258,6 @@
             border-radius: 10px;
             font-size: 13px;
             font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
             cursor: pointer;
             transition: background 0.2s;
             display: flex;
@@ -553,7 +548,7 @@
         .tt-data-value { font-weight: 600; color: #111827; }
         .tt-data-value.tt-savings { color: #14532D; }
         .tt-divider { height: 1px; background: #E5E7EB; margin: 10px 0 8px; }
-        .tt-script-eyebrow { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #64748B; margin-bottom: 5px; }
+        .tt-script-eyebrow { display: block; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; color: #64748B; margin-bottom: 5px; }
         .tt-script { font-style: normal; font-size: 13px; color: #1e293b; line-height: 1.55; margin: 0; }
         .tt-apr-footnote { font-size: 11px; color: #94A3B8; font-weight: 500; margin: 6px 0 0; padding: 0 2px; }
     </style>
@@ -955,26 +950,26 @@
                         <div class="lp-loan-summary" id="loanSummary-${id}"></div>
                         <div>
                             <div class="mb-6 pb-6 border-b border-[#E5E7EB]">
-                                <div class="text-[11px] text-[#64748B] font-bold uppercase tracking-wider mb-2" id="lblPmt-${id}">Est. payment</div>
+                                <div class="text-[11px] text-[#64748B] font-bold tracking-wider mb-2" id="lblPmt-${id}">Est. payment</div>
                                 <div class="text-[42px] font-black text-[#14532D] leading-none tracking-tight" id="valPmt-${id}">$0.00</div>
                                 <div id="moEquiv-${id}" class="text-[13px] text-[#9CA3AF]" style="display:none;margin-top:6px"></div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-y-6 gap-x-8 text-[13px] mb-8">
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">Total payback</div>
+                                    <div class="text-[#64748B] font-bold text-[10px] tracking-wider mb-1">Total payback</div>
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outPayback-${id}">$0.00</div>
                                 </div>
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">Total interest</div>
+                                    <div class="text-[#64748B] font-bold text-[10px] tracking-wider mb-1">Total interest</div>
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outInterest-${id}">$0.00</div>
                                 </div>
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">Cost per Dollar</div>
+                                    <div class="text-[#64748B] font-bold text-[10px] tracking-wider mb-1">Cost per Dollar</div>
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outCents-${id}">0¢</div>
                                 </div>
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">APR<sup title="Required disclosure in CA and NY" class="cursor-help" style="font-size:8px;font-weight:700;vertical-align:super">*</sup></div>
+                                    <div class="text-[#64748B] font-bold text-[10px] tracking-wider mb-1">APR<sup title="Required disclosure in CA and NY" class="cursor-help" style="font-size:8px;font-weight:700;vertical-align:super">*</sup></div>
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outApr-${id}">0%</div>
                                 </div>
                             </div>
@@ -1014,11 +1009,11 @@
                             <div class="action-buttons flex flex-col gap-3 mt-5 no-print">
                                 <button onclick="copyResults(${id})" class="lp-copy-btn">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                    Copy Results
+                                    Copy
                                 </button>
                                 <button onclick="handleLendPaperSavePDF()" class="lp-print-btn">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                                    Save as PDF
+                                    Save PDF
                                 </button>
                             </div>
 
