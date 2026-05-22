@@ -19,7 +19,7 @@ const TOOLS = [
   },
   { 
     id: "registry", 
-    name: "Public registry search", 
+    name: "Secretary of State Search", 
     desc: "Search public business records and UCC filings.",
     status: "live", 
     group: "data", 
@@ -107,11 +107,14 @@ const TOOLS = [
     id: "ucc-leads", 
     name: "UCC leads database", 
     desc: "Searchable UCC filings by state, date, and secured party.",
-    status: "soon", 
+    status: "live", 
     group: "data", 
     icon: "db", 
-    color: "slate",
-    href: "#",
+    color: "green",
+    slug: "https://www.registryroute.com/",
+    presentation: "external",
+    path: "https://www.registryroute.com/",
+    target: "_blank",
     kw: "ucc leads filings database lookup secured prospecting"
   },
   { 
