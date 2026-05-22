@@ -1215,6 +1215,33 @@
             if (!sel || !isPrepay || sel.savings <= 0) return;
             const rowEl = document.getElementById(`arow-${id}-${sel.period}`);
             if (!rowEl) return;
+            const c = lastCalc[id];
+            if (!c) return;
+
+            const renPeriod = Math.ceil(c.periods * 0.5);
+            const isEligible = sel.period >= renPeriod;
+            
+            let renDate = '';
+            let renSavings = 0;
+            const targetRowEl = document.getElementById(`arow-${id}-${renPeriod}`);
+            if (targetRowEl) {
+                renDate = targetRowEl.dataset.date;
+                renSavings = parseFloat(targetRowEl.dataset.savings);
+            }
+
+            let renewalHtml = '';
+            if (isEligible) {
+                renewalHtml = `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(20, 83, 45, 0.2); font-size: 12.5px; color: #166534; line-height: 1.45;">
+                    <strong>Early renewal explanation:</strong> 
+                    "You're eligible for early renewal since you've paid off at least 50% of the loan. Renewing today waives your remaining interest, saving you <strong>${fmtUsd.format(sel.savings)}</strong> in unearned costs."
+                </div>`;
+            } else {
+                renewalHtml = `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(20, 83, 45, 0.2); font-size: 12.5px; color: #166534; line-height: 1.45; opacity: 0.85;">
+                    <strong>Early renewal explanation:</strong> 
+                    "You qualify for early renewal at payment #${renPeriod}${renDate ? ` on ${renDate}` : ''}. Renewing at that milestone will waive <strong>${fmtUsd.format(renSavings)}</strong> in remaining interest costs."
+                </div>`;
+            }
+
             const tr = document.createElement('tr');
             tr.className = `amo-detail-for-${id}`;
             tr.innerHTML = `<td colspan="6" style="padding:0">
@@ -1225,6 +1252,7 @@
                         <div><div class="lp-inline-stat-label">Payoff balance</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.buyout)}</div></div>
                         <div><div class="lp-inline-stat-label">Borrower saves</div><div class="lp-inline-stat-value savings">${fmtUsd.format(sel.savings)}</div></div>
                     </div>
+                    ${renewalHtml}
                 </div>
             </td>`;
             rowEl.after(tr);
@@ -1372,9 +1400,8 @@
                 }
             }
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
+            lastCalc[id] = { pmt, freqName, term, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate, periods };
             renderDetailRow(id);
-
-            lastCalc[id] = { pmt, freqName, term, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate };
             renderTakeaway(id);
         }
 
