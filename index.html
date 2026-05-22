@@ -615,6 +615,15 @@ input { font-family: inherit; }
 }
 #lp-tool-iframe { width: 100%; height: 100%; border: none; }
 
+#whyPageContainer {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    height: calc(100vh - 60px);
+    background: #f8fafc;
+}
+#lp-why-iframe { width: 100%; height: 100%; border: none; }
+
 /* ==================== Home — Greeting ==================== */
 .home-greeting { margin-bottom: 28px; }
 .greeting-text {
@@ -754,6 +763,10 @@ input { font-family: inherit; }
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           Services
         </button>
+        <button class="nav-item" data-view="why" onclick="navigateToView('why')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Why LendPaper
+        </button>
       </div>
     </nav>
 
@@ -830,6 +843,13 @@ input { font-family: inherit; }
             <span class="contact-label">Services</span>
             <span style="color: var(--text-muted)">Custom calculators, white-label, API integrations</span>
           </div>
+        </div>
+      </div>
+
+      <!-- Why LendPaper View -->
+      <div class="view" id="view-why" style="padding: 0; height: 100%;">
+        <div id="whyPageContainer">
+          <iframe id="lp-why-iframe" src="lendpaper-why.html" style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
       </div>
 
@@ -1242,7 +1262,7 @@ function navigateToView(v) {
 }
 
 var currentView='home', prevView='home';
-var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Services','search':'Search results', 'tool': 'Tool'};
+var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Services','search':'Search results', 'tool': 'Tool', 'why': 'Why LendPaper'};
 
 function switchView(v) {
   if (v !== 'search' && v !== 'tool') prevView = v;
