@@ -516,10 +516,10 @@
       function drawFavicon() {
         ctx.clearRect(0, 0, 32, 32);
         
-        // Create premium rounded square clipping path (Full 32x32 square with 6px corner radius)
+        // Create premium rounded square clipping path (Full 32x32 square with 10px corner radius for ultra-smooth corners)
         ctx.save();
         ctx.beginPath();
-        const r = 6;
+        const r = 10;
         ctx.moveTo(r, 0);
         ctx.lineTo(32 - r, 0);
         ctx.quadraticCurveTo(32, 0, 32, r);
@@ -594,8 +594,8 @@
         
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.52)'; // Premium transparent white outline logo
         ctx.lineWidth = 1.8; // Scales up to ~2.4px at 32x32 for high tab visibility
-        ctx.lineCap = 'square';
-        ctx.lineJoin = 'miter';
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         
         // 1. Draw Paper Outline
         ctx.beginPath();
