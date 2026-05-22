@@ -683,13 +683,13 @@ input { font-family: inherit; }
       <div class="nav-section">
         <button class="nav-item" data-view="contact" onclick="navigateToView('contact')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          Contact
+          Services
         </button>
       </div>
     </nav>
 
     <div class="sidebar-footer">
-      <p>Custom tooling &amp; white-labeling available.<br><a href="mailto:info@lendpaper.com">info@lendpaper.com</a></p>
+      <p>Custom tooling &amp; white-labeling available.<br><a href="mailto:info@lendpaper.com?subject=Interested%20in%20LendPaper%20Services&amp;body=Hi%20LendPaper%2C%20I'm%20interested%20in%20your%20services.%20Reply%20and%20let's%20set%20a%20time.">info@lendpaper.com</a></p>
     </div>
   </aside>
 
@@ -749,12 +749,12 @@ input { font-family: inherit; }
       <!-- Contact -->
       <div class="view" id="view-contact">
         <div class="contact-card">
-          <h3>Get in touch</h3>
-          <p>Need a custom calculator, white-label branding, or something we haven't built yet? We're all ears.</p>
+          <h3>LendPaper Services</h3>
+          <p>Want custom tools, white-label branding, M.Ed Enablement from former NerdWallet and Lendio at a reasonable rate? Talk to us.</p>
           <div class="contact-row">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <span class="contact-label">Email</span>
-            <a href="mailto:info@lendpaper.com">info@lendpaper.com</a>
+            <a href="mailto:info@lendpaper.com?subject=Interested%20in%20LendPaper%20Services&amp;body=Hi%20LendPaper%2C%20I'm%20interested%20in%20your%20services.%20Reply%20and%20let's%20set%20a%20time.">info@lendpaper.com</a>
           </div>
           <div class="contact-row" style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 4px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
@@ -1149,7 +1149,7 @@ function navigateToView(v) {
 }
 
 var currentView='home', prevView='home';
-var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Contact','search':'Search results', 'tool': 'Tool'};
+var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Services','search':'Search results', 'tool': 'Tool'};
 
 function switchView(v) {
   if (v !== 'search' && v !== 'tool') prevView = v;
