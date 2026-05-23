@@ -348,7 +348,7 @@
         }
 
         /* Direct PDF Export Styles - Rigorous Hiding */
-        body.pdf-export-mode { background: white !important; }
+        body.pdf-export-mode { background: white !important; display: block !important; min-height: 0 !important; height: auto !important; }
         body.pdf-export-mode .no-print, 
         body.pdf-export-mode header, 
         body.pdf-export-mode .modal-header, 
@@ -367,8 +367,8 @@
         body.pdf-export-mode .print-header-content img { display: none !important; }
         body.pdf-export-mode .print-header-content h1 { display: none !important; }
 
-        body.pdf-export-mode .lp-main { display: block !important; max-width: 800px !important; margin: 0 auto !important; padding: 0 !important; width: 800px !important; }
-        body.pdf-export-mode .lp-container { width: 100% !important; max-width: 100% !important; border: none !important; box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; display: block !important; }
+        body.pdf-export-mode .lp-main { display: block !important; max-width: 100% !important; margin: 0 auto !important; padding: 0 !important; width: 100% !important; min-height: 0 !important; height: auto !important; flex-grow: 0 !important; }
+        body.pdf-export-mode .lp-container { width: 100% !important; max-width: 100% !important; border: none !important; box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; display: block !important; overflow: visible !important; }
         body.pdf-export-mode .lp-results { background: white !important; padding: 0 !important; display: block !important; width: 100% !important; }
         body.pdf-export-mode .lp-inputs { display: none !important; }
         body.pdf-export-mode .panel { display: block !important; width: 100% !important; }
@@ -681,7 +681,7 @@
             margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
             filename: `LendPaper_Fundability_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, logging: false, useCORS: true },
+            html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 740 },
             jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
         };
 

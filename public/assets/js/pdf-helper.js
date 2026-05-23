@@ -53,7 +53,7 @@ window.PDF_HELPER = {
         
         if (tier === 'free') {
             headerHTML = `
-                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding-bottom: 12px !important; margin-bottom: 16px !important;">
+                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 12px 12px 12px !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
                     <div class="print-header-left"></div>
                     <div class="print-header-right" style="text-align: right !important; display: flex !important; flex-direction: column !important; align-items: flex-end !important;">
                         <div style="display: flex !important; align-items: center !important; gap: 6px !important;">
@@ -71,7 +71,7 @@ window.PDF_HELPER = {
             `;
         } else if (tier === 'pro' || tier === 'branded') {
             headerHTML = `
-                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding-bottom: 12px !important; margin-bottom: 16px !important;">
+                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 12px 12px 12px !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
                     <div class="print-header-left" style="display: flex !important; align-items: center !important; gap: 8px !important;">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #14532D !important;">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"/>
@@ -93,7 +93,7 @@ window.PDF_HELPER = {
             `;
         } else if (tier === 'whitelabel' || tier === 'enterprise') {
             headerHTML = `
-                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding-bottom: 12px !important; margin-bottom: 16px !important;">
+                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 12px 12px 12px !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
                     <div class="print-header-left" style="display: flex !important; align-items: center !important; gap: 8px !important;">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #111827 !important;">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"/>
@@ -119,86 +119,324 @@ window.PDF_HELPER = {
     },
     
     addPdfFooters: function(pdf) {
+        if (pdf.footersAdded) return;
+        pdf.footersAdded = true;
+
         const tier = this.getTier();
-        const totalPages = pdf.internal.getNumberOfPages();
+        const totalPages = pdf.getNumberOfPages();
         const pageHeight = pdf.internal.pageSize.getHeight();
         const pageWidth = pdf.internal.pageSize.getWidth();
         
         for (let i = 1; i <= totalPages; i++) {
             pdf.setPage(i);
             
+            // Explicitly reset font to normal Helvetica before drawing anything in footer
+            pdf.setFont("helvetica", "normal");
+            
             // Draw a subtle line separator at bottom
             pdf.setDrawColor(229, 231, 235); // #E5E7EB
             pdf.setLineWidth(0.2);
-            pdf.line(10, pageHeight - 21, pageWidth - 10, pageHeight - 21);
+            pdf.line(10, pageHeight - 24, pageWidth - 10, pageHeight - 24);
             
             // 1. Draw Tier-Specific Footer
             pdf.setFontSize(7.5);
             pdf.setTextColor(107, 114, 128); // #6B7280
-            pdf.setFont("helvetica", "normal");
-            
-            let tierText = "";
-            let tierSubText = "";
             
             if (tier === 'free') {
-                tierText = "Built with LendPaper Free  ·  lendpaper.com";
-                tierSubText = "Brokers: Remove branding, add your logo, and unlock custom calculators → lendpaper.com/upgrade";
-                
-                pdf.text("⚙ " + tierText, 10, pageHeight - 16);
-                
+                let startX = 10;
+                let y1 = pageHeight - 19;
+
+                let seg1 = "Generated via LendPaper  |  ";
+                pdf.text(seg1, startX, y1);
+
+                let seg1Width = pdf.getTextWidth(seg1);
+                startX += seg1Width;
+
+                pdf.setTextColor(20, 83, 45); // Green for the link
+                pdf.setFont("helvetica", "bold");
                 try {
-                    // Place live links
-                    pdf.textWithLink("lendpaper.com", 38, pageHeight - 16, { url: "https://lendpaper.com" });
-                    
-                    pdf.text("Brokers: Remove branding, add your logo, and unlock custom calculators → ", 10, pageHeight - 12);
-                    pdf.setTextColor(20, 83, 45); // Green for the link
-                    pdf.textWithLink("lendpaper.com/upgrade", 112, pageHeight - 12, { url: "https://lendpaper.com/upgrade" });
+                    pdf.textWithLink("lendpaper.com", startX, y1, { url: "https://lendpaper.com" });
                 } catch(e) {
-                    pdf.text(tierSubText, 10, pageHeight - 12);
+                    pdf.text("lendpaper.com", startX, y1);
+                }
+
+                // Row 2:
+                pdf.setFont("helvetica", "normal");
+                pdf.setTextColor(107, 114, 128); // #6B7280
+
+                let y2 = pageHeight - 15;
+                startX = 10;
+
+                let subSeg1 = "White-label and custom branding available  -  ";
+                pdf.text(subSeg1, startX, y2);
+
+                let subSeg1Width = pdf.getTextWidth(subSeg1);
+                startX += subSeg1Width;
+
+                pdf.setTextColor(20, 83, 45); // Green for the link
+                pdf.setFont("helvetica", "bold");
+                try {
+                    pdf.textWithLink("info@lendpaper.com", startX, y2, { url: "mailto:info@lendpaper.com" });
+                } catch(e) {
+                    pdf.text("info@lendpaper.com", startX, y2);
                 }
             } else if (tier === 'pro' || tier === 'branded') {
-                tierText = "Generated via LendPaper  ·  lendpaper.com";
-                tierSubText = "Remove this footer and add your logo — ask about white-label plans.";
+                let startX = 10;
+                let y1 = pageHeight - 19;
                 
-                pdf.text(tierText, 10, pageHeight - 16);
+                let seg1 = "Generated via LendPaper  ·  ";
+                pdf.text(seg1, startX, y1);
                 
+                let seg1Width = pdf.getTextWidth(seg1);
+                startX += seg1Width;
+                
+                pdf.setTextColor(20, 83, 45); // #14532D
+                pdf.setFont("helvetica", "bold");
                 try {
-                    pdf.textWithLink("lendpaper.com", 42, pageHeight - 16, { url: "https://lendpaper.com" });
-                    
-                    pdf.text("Remove this footer and add your logo — ask about ", 10, pageHeight - 12);
-                    pdf.setTextColor(20, 83, 45);
-                    pdf.textWithLink("white-label plans", 76, pageHeight - 12, { url: "mailto:info@lendpaper.com?subject=Interested%20in%20White-Label%20Plans" });
+                    pdf.textWithLink("lendpaper.com", startX, y1, { url: "https://lendpaper.com" });
                 } catch(e) {
-                    pdf.text(tierSubText, 10, pageHeight - 12);
+                    pdf.text("lendpaper.com", startX, y1);
+                }
+                
+                // Row 2
+                pdf.setFont("helvetica", "normal");
+                pdf.setTextColor(107, 114, 128); // #6B7280
+                
+                let y2 = pageHeight - 15;
+                startX = 10;
+                
+                let subSeg1 = "Remove this footer and add your logo - ask about ";
+                pdf.text(subSeg1, startX, y2);
+                
+                let subSeg1Width = pdf.getTextWidth(subSeg1);
+                startX += subSeg1Width;
+                
+                pdf.setTextColor(20, 83, 45);
+                pdf.setFont("helvetica", "bold");
+                try {
+                    pdf.textWithLink("white-label plans", startX, y2, { url: "mailto:info@lendpaper.com?subject=Interested%20in%20White-Label%20Plans" });
+                } catch(e) {
+                    pdf.text("white-label plans", startX, y2);
                 }
             } else if (tier === 'whitelabel' || tier === 'enterprise') {
-                tierText = "Powered by LendPaper  |  info@lendpaper.com  |  lendpaper.com";
-                pdf.text(tierText, 10, pageHeight - 14);
+                let startX = 10;
+                let y1 = pageHeight - 17;
                 
+                let seg1 = "Powered by LendPaper  |  ";
+                pdf.text(seg1, startX, y1);
+                
+                let seg1Width = pdf.getTextWidth(seg1);
+                startX += seg1Width;
+                
+                pdf.setFont("helvetica", "bold");
                 try {
-                    pdf.textWithLink("info@lendpaper.com", 37, pageHeight - 14, { url: "mailto:info@lendpaper.com" });
-                    pdf.textWithLink("lendpaper.com", 67, pageHeight - 14, { url: "https://lendpaper.com" });
-                } catch(e) {}
+                    pdf.textWithLink("info@lendpaper.com", startX, y1, { url: "mailto:info@lendpaper.com" });
+                } catch(e) {
+                    pdf.text("info@lendpaper.com", startX, y1);
+                }
+                
+                let seg2Width = pdf.getTextWidth("info@lendpaper.com");
+                startX += seg2Width;
+                
+                pdf.setFont("helvetica", "normal");
+                let seg3 = "  |  ";
+                pdf.text(seg3, startX, y1);
+                
+                let seg3Width = pdf.getTextWidth(seg3);
+                startX += seg3Width;
+                
+                pdf.setFont("helvetica", "bold");
+                try {
+                    pdf.textWithLink("lendpaper.com", startX, y1, { url: "https://lendpaper.com" });
+                } catch(e) {
+                    pdf.text("lendpaper.com", startX, y1);
+                }
             }
             
+            // Page Number in bottom right corner (aligned with tierText row)
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(7.5);
+            pdf.setTextColor(156, 163, 175);
+            pdf.text(`Page ${i} of ${totalPages}`, pageWidth - 26, pageHeight - 17);
+            
             // 2. Draw Legal Micro-Copy (Always Present, Lower Left)
-            pdf.setFontSize(6);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(5.5);
             pdf.setTextColor(156, 163, 175); // #9CA3AF
             
-            const disclaimer = "ESTIMATES ONLY — NOT FINANCIAL ADVICE. These figures are preliminary estimates generated by the user (lender, broker, or ISO) using LendPaper software. LendPaper is a software provider only — not a lender, broker, financial advisor, or institution. LendPaper does not verify inputs, guarantee calculations, or determine final loan terms. Actual terms are subject to lender underwriting and final approval. Full terms: lendpaper.com/legal/estimates";
-            const splitDisclaimer = pdf.splitTextToSize(disclaimer, pageWidth - 32); // margin left 10, right 22
+            const disclaimerText = "ESTIMATES ONLY — NOT FINANCIAL ADVICE. These figures are preliminary estimates generated by the user (lender, broker, or ISO) using LendPaper software. LendPaper is a software provider only — not a lender, broker, financial advisor, or institution. LendPaper does not verify inputs, guarantee calculations, or determine final loan terms. Actual terms are subject to lender underwriting and final approval.";
+            const splitDisclaimer = pdf.splitTextToSize(disclaimerText, pageWidth - 20); // Margins: left 10, right 10
             
-            pdf.text(splitDisclaimer, 10, pageHeight - 8);
+            let currentY = pageHeight - 10.5;
+            splitDisclaimer.forEach((line) => {
+                pdf.text(line, 10, currentY);
+                currentY += 2.4; // Clean, elegant vertical spacing for 5.5pt font
+            });
             
+            // Print the terms link row separately, perfectly aligned and colored!
+            let startX = 10;
+            pdf.text("Full terms: ", startX, currentY);
+            
+            let ftWidth = pdf.getTextWidth("Full terms: ");
+            startX += ftWidth;
+            
+            pdf.setTextColor(20, 83, 45); // Signature primary brand green
+            pdf.setFont("helvetica", "bold");
             try {
-                // Add live link overlay for disclaimer terms
-                pdf.textWithLink("lendpaper.com/legal/estimates", pageWidth - 42, pageHeight - 8, { url: "https://lendpaper.com/legal/estimates" });
-            } catch(e) {}
-            
-            // Page Number in bottom right corner
-            pdf.setFontSize(7);
-            pdf.setTextColor(156, 163, 175);
-            pdf.text(`Page ${i} of ${totalPages}`, pageWidth - 20, pageHeight - 14);
+                pdf.textWithLink("lendpaper.com/legal/estimates", startX, currentY, { url: "https://lendpaper.com/legal/estimates" });
+            } catch(e) {
+                pdf.text("lendpaper.com/legal/estimates", startX, currentY);
+            }
         }
     }
 };
+
+// Start the dynamic flowy printer favicon loop for all calculator pages
+(function() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 32;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d');
+  
+  let link = document.querySelector("link[rel~='icon']");
+  if (link) {
+    link.type = 'image/png';
+  } else {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/png';
+    document.getElementsByTagName('head')[0].appendChild(link);
+  }
+  
+  let frame = 0;
+  function drawFavicon() {
+    ctx.clearRect(0, 0, 32, 32);
+    
+    // Create rounded square clipping path
+    ctx.save();
+    ctx.beginPath();
+    const r = 10;
+    ctx.moveTo(r, 0);
+    ctx.lineTo(32 - r, 0);
+    ctx.quadraticCurveTo(32, 0, 32, r);
+    ctx.lineTo(32, 32 - r);
+    ctx.quadraticCurveTo(32, 32, 32 - r, 32);
+    ctx.lineTo(r, 32);
+    ctx.quadraticCurveTo(0, 32, 0, 32 - r);
+    ctx.lineTo(0, r);
+    ctx.quadraticCurveTo(0, 0, r, 0);
+    ctx.closePath();
+    ctx.clip();
+    
+    // Base gradient matching deep emerald/forest theme
+    const grad = ctx.createLinearGradient(0, 0, 0, 32);
+    grad.addColorStop(0, '#01170e');
+    grad.addColorStop(1, '#043220');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 32, 32);
+    
+    const time = frame * 0.025; // Soothing, slow wave speed
+    
+    // Wave 1: Flowing Deep Emerald
+    ctx.fillStyle = 'rgba(8, 48, 32, 0.95)';
+    ctx.beginPath();
+    ctx.moveTo(0, 32);
+    for (let x = 0; x <= 32; x++) {
+      const y = 15.5 + Math.sin(x * 0.12 + time) * 4.8;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(32, 32);
+    ctx.fill();
+    
+    // Wave 2: Flowing Medium Teal-Green
+    ctx.fillStyle = 'rgba(16, 80, 56, 0.85)';
+    ctx.beginPath();
+    ctx.moveTo(0, 32);
+    for (let x = 0; x <= 32; x++) {
+      const y = 17.5 + Math.cos(x * 0.15 - time * 0.85) * 4.4;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(32, 32);
+    ctx.fill();
+    
+    // Wave 3: Flowing Vibrant Mint/Neon Emerald Foam Accent
+    ctx.fillStyle = 'rgba(52, 168, 120, 0.7)';
+    ctx.beginPath();
+    ctx.moveTo(0, 32);
+    for (let x = 0; x <= 32; x++) {
+      const y = 13.5 + Math.sin(x * 0.18 + time * 1.35) * 3.4;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(32, 32);
+    ctx.fill();
+    
+    ctx.restore(); // End rounded square clipping
+    
+    // Draw Crisp White Geometric Logo (Printer Icon) floating on top of waves
+    ctx.save();
+    
+    // Floating micro-animation
+    const bob = Math.sin(frame * 0.08) * 0.8;
+    ctx.translate(0, bob);
+    
+    // Scale 24x24 coordinates to 32x32 canvas beautifully
+    ctx.scale(32 / 24, 32 / 24);
+    
+    // Drop shadow for optimal readability
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 0.4;
+    ctx.shadowOffsetY = 0.8;
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.88)'; // Monoline white
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    
+    // 1. Printer Main Body
+    ctx.beginPath();
+    ctx.moveTo(4, 11);
+    ctx.lineTo(20, 11);
+    ctx.lineTo(20, 17);
+    ctx.lineTo(4, 17);
+    ctx.closePath();
+    ctx.stroke();
+    
+    // 2. Printer Top Paper/Tray
+    ctx.beginPath();
+    ctx.moveTo(7, 11);
+    ctx.lineTo(7, 5);
+    ctx.lineTo(17, 5);
+    ctx.lineTo(17, 11);
+    ctx.stroke();
+    
+    // 3. Printer Bottom Paper/Tray (Output Paper)
+    ctx.beginPath();
+    ctx.moveTo(6, 17);
+    ctx.lineTo(6, 20);
+    ctx.lineTo(18, 20);
+    ctx.lineTo(18, 17);
+    ctx.stroke();
+    
+    // 4. Feed slot / detail lines
+    ctx.beginPath();
+    ctx.moveTo(9, 14);
+    ctx.lineTo(12, 14);
+    ctx.stroke();
+    
+    ctx.restore();
+    
+    link.href = canvas.toDataURL('image/png');
+    frame++;
+  }
+  
+  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setInterval(drawFavicon, 50);
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        setInterval(drawFavicon, 50);
+      });
+    }
+  }
+})();

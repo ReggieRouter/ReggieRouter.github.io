@@ -303,6 +303,9 @@
 
         /* Direct PDF Export Styles */
         body.pdf-export-mode { background: white !important; min-height: 0 !important; height: auto !important; }
+        body.pdf-export-mode .card-header-band { display: none !important; }
+        body.pdf-export-mode [id^="header-center-"] { display: none !important; }
+        body.pdf-export-mode.multi-scenario .card-header-band { display: flex !important; height: 36px !important; border-bottom: none !important; padding-top: 8px !important; padding-bottom: 0 !important; }
         body.pdf-export-mode .no-print, 
         body.pdf-export-mode header, 
         body.pdf-export-mode .action-buttons, 
@@ -618,6 +621,9 @@
             // Setup custom print header band dynamically per plan tier
             window.PDF_HELPER.initPrintLayout("PAYMENT BREAKDOWN");
 
+            if (cards.length > 1) {
+                document.body.classList.add('multi-scenario');
+            }
             document.body.classList.add('pdf-export-mode');
             
             const element = document.querySelector('main');
@@ -625,7 +631,7 @@
                 margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
                 filename: `LendPaper_Amortization_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, logging: false, useCORS: true },
+                html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 740 },
                 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
 
@@ -636,6 +642,7 @@
                 }).save();
             } finally {
                 document.body.classList.remove('pdf-export-mode');
+                document.body.classList.remove('multi-scenario');
                 btn.innerHTML = origText;
                 btn.disabled = false;
             }
@@ -883,7 +890,7 @@
             const cardHTML = `
             <div class="modal-shell w-full max-w-[1000px] bg-white rounded-[20px] shadow-sm border border-[#E5E7EB] overflow-hidden flex flex-col relative no-break-inside" id="cardContainer-${id}">
                 
-                <div class="h-[64px] px-[16px] sm:px-[24px] flex items-center justify-between border-b border-[#E5E7EB] bg-white shrink-0 gap-2 relative">
+                <div class="card-header-band h-[64px] px-[16px] sm:px-[24px] flex items-center justify-between border-b border-[#E5E7EB] bg-white shrink-0 gap-2 relative">
                     <div id="badge-container-${id}" class="z-10 flex-1 flex justify-start min-w-[80px] sm:min-w-[120px]"></div>
                     <div class="flex flex-col items-center justify-center text-center z-10 mx-auto" id="header-center-${id}"></div>
                     <div class="flex items-center gap-2 z-10 flex-1 justify-end min-w-[80px] sm:min-w-[120px]">
