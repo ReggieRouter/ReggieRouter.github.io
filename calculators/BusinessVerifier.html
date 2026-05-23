@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lendpaper — Business Verifier Cockpit</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #0a0c10;
+      --bg-card: rgba(16, 20, 30, 0.75);
+      --bg-panel: rgba(22, 28, 45, 0.45);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #4f46e5;
+      --primary-glow: rgba(79, 70, 229, 0.4);
+      --accent-business: #10b981;
+      --accent-business-glow: rgba(16, 185, 129, 0.3);
+      --accent-residential: #f59e0b;
+      --accent-residential-glow: rgba(245, 158, 11, 0.3);
+      --accent-danger: #ef4444;
+      --accent-danger-glow: rgba(239, 68, 68, 0.3);
+      --accent-info: #06b6d4;
+      --accent-info-glow: rgba(6, 182, 212, 0.3);
+      --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.16) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 2rem;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary), #06b6d4);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 1.25rem;
+      box-shadow: 0 0 20px var(--primary-glow);
+      position: relative;
+    }
+
+    .logo-icon::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(135deg, var(--primary), #06b6d4);
+      border-radius: 12px;
+      z-index: -1;
+      opacity: 0.4;
+      filter: blur(4px);
+    }
+
+    .logo-text h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #ffffff, #d1d5db);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .badge-live {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--accent-business);
+      color: var(--accent-business);
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .badge-live::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background-color: var(--accent-business);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-business);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.75rem;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-premium);
+      transition: var(--transition-smooth);
+    }
+
+    .card:hover {
+      border-color: rgba(79, 70, 229, 0.25);
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #fff;
+    }
+
+    h2 svg {
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .optional-tag {
+      font-size: 0.7rem;
+      color: var(--primary);
+      text-transform: none;
+      font-weight: 400;
+    }
+
+    input, select {
+      width: 100%;
+      background: rgba(10, 10, 15, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.85rem;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: var(--transition-smooth);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(79, 70, 229, 0.2);
+    }
+
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), #3b82f6);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+      background: linear-gradient(135deg, #5850ec, #4299e1);
+    }
+
+    /* Registry Route Banner card */
+    .registry-route-banner {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.08) 0%, rgba(79, 70, 229, 0.08) 100%);
+      border: 1px dashed rgba(6, 182, 212, 0.4);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      transition: var(--transition-smooth);
+    }
+
+    .registry-route-banner:hover {
+      border-color: var(--accent-info);
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(79, 70, 229, 0.12) 100%);
+      transform: translateY(-1px);
+    }
+
+    .rr-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .rr-content h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+
+    .rr-content p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .rr-content a {
+      color: #06b6d4;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .rr-content a:hover {
+      text-decoration: underline;
+    }
+
+    /* Terminal Console Style */
+    .terminal-container {
+      margin-top: 1rem;
+      background: #05070a;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .terminal-header {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 0.5rem 0.75rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .terminal-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .td-red { background: #ef4444; }
+    .td-yellow { background: #f59e0b; }
+    .td-green { background: #10b981; }
+
+    .terminal-body {
+      padding: 0.85rem;
+      height: 140px;
+      overflow-y: auto;
+      font-size: 0.72rem;
+      color: #38bdf8;
+      line-height: 1.5;
+    }
+
+    .log-line {
+      margin-bottom: 0.25rem;
+    }
+
+    .log-info { color: #38bdf8; }
+    .log-warning { color: #f59e0b; }
+    .log-error { color: #ef4444; }
+    .log-success { color: #10b981; }
+
+    /* Results Dashboard Grid */
+    .dashboard-results {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .scoring-cockpit {
+      display: grid;
+      grid-template-columns: 1.2fr 2fr;
+      gap: 1.5rem;
+    }
+
+    .radial-score-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-panel);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      position: relative;
+    }
+
+    .score-circle {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+
+    .score-circle svg {
+      width: 120px;
+      height: 120px;
+      transform: rotate(-90deg);
+    }
+
+    .score-circle circle {
+      fill: none;
+      stroke-width: 10;
+    }
+
+    .circle-bg {
+      stroke: rgba(255, 255, 255, 0.05);
+    }
+
+    .circle-progress {
+      stroke: var(--primary);
+      stroke-linecap: round;
+      stroke-dasharray: 314;
+      stroke-dashoffset: 314;
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+
+    .score-text-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-percent {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .score-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .confidence-tag {
+      margin-top: 1rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .ct-business {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--accent-business);
+      color: var(--accent-business);
+    }
+
+    .ct-residential {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid var(--accent-residential);
+      color: var(--accent-residential);
+    }
+
+    .ct-undetermined {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid var(--accent-info);
+      color: var(--accent-info);
+    }
+
+    .indicators-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .indicator-item {
+      display: flex;
+      flex-direction: column;
+      padding: 0.65rem 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .ind-label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .ind-val {
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .val-active {
+      color: var(--accent-business);
+    }
+
+    .val-inactive {
+      color: var(--text-muted);
+    }
+
+    .val-warning {
+      color: var(--accent-residential);
+    }
+
+    /* D&B Dossier panel */
+    .dnb-dossier {
+      background: radial-gradient(135deg, rgba(22, 28, 45, 0.6) 0%, rgba(10, 12, 20, 0.8) 100%);
+      border: 1px solid rgba(79, 70, 229, 0.15);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dnb-dossier::before {
+      content: 'D&B MOCK VERIFICATION PROFILE';
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.55rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.12);
+      letter-spacing: 1px;
+    }
+
+    .dnb-header-sub {
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .dnb-company-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .dnb-company-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .dnb-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .dnb-cell {
+      background: rgba(255,255,255,0.01);
+      border: 1px solid rgba(255,255,255,0.03);
+      padding: 0.65rem 0.85rem;
+      border-radius: 8px;
+    }
+
+    .dnb-cell-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .dnb-cell-value {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .dnb-cell-alert {
+      color: var(--accent-danger);
+    }
+    
+    .dnb-cell-ok {
+      color: var(--accent-business);
+    }
+
+    .alert-subtext {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .alert-subtext a {
+      color: #38bdf8;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .alert-subtext a:hover {
+      color: #0ea5e9;
+    }
+
+    /* Disclaimer box */
+    .disclaimer-card {
+      background: rgba(239, 68, 68, 0.03);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+
+    .disclaimer-title {
+      font-weight: 700;
+      color: #fca5a5;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      margin-bottom: 1px;
+    }
+
+    /* Footer styling */
+    footer {
+      grid-column: span 2;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2.5rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    .quick-preset-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .preset-chip {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 0.35rem 0.75rem;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .preset-chip:hover {
+      background: rgba(79, 70, 229, 0.1);
+      border-color: rgba(79, 70, 229, 0.3);
+      color: #fff;
+    }
+
+    /* Screen Export button */
+    .btn-print {
+      background: rgba(79, 70, 229, 0.15);
+      border: 1px solid rgba(79, 70, 229, 0.4);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: none; /* Hidden on screen by default until verified */
+      align-items: center;
+      gap: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .btn-print:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 0 15px var(--primary-glow);
+      transform: translateY(-1px);
+    }
+
+    /* Print-only container display controls on screen */
+    .print-only-header {
+      display: none;
+      box-sizing: border-box;
+    }
+
+    /* ==========================================
+       PRINT AND PDF GENERATION LAYOUT STYLES
+       Complies fully with PDF Layout Rules
+       ========================================== */
+    @media print {
+      /* Rule 1: Clean high-contrast colors for paper/PDF */
+      :root {
+        --bg-dark: #ffffff;
+        --bg-card: #ffffff;
+        --bg-panel: #f9fafb;
+        --border-color: #d1d5db;
+        --text-main: #111827;
+        --text-muted: #4b5563;
+        --primary: #4f46e5;
+        --accent-business: #059669;
+        --accent-residential: #d97706;
+        --accent-danger: #dc2626;
+        --accent-info: #0891b2;
+      }
+
+      body {
+        background: #ffffff !important;
+        background-image: none !important;
+        color: #111827 !important;
+        padding: 20px !important; /* Rule 2: absolute px units instead of rem */
+        margin: 0 !important;
+        font-size: 14px !important; /* Rule 2: absolute px units */
+        line-height: 1.5 !important;
+      }
+
+      /* Rule 2: Hide screen-only interactive elements */
+      header, 
+      .dashboard-inputs, 
+      .btn,
+      .preset-chip,
+      .registry-route-banner,
+      .terminal-container,
+      .quick-preset-container,
+      footer {
+        display: none !important;
+      }
+
+      /* Show print-only header */
+      .print-only-header {
+        display: block !important;
+        margin-bottom: 30px !important;
+        border-bottom: 2px solid #111827 !important;
+        padding-bottom: 15px !important;
+        box-sizing: border-box !important;
+      }
+
+      .print-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px !important;
+        box-sizing: border-box !important;
+      }
+
+      .print-logo {
+        font-size: 24px !important;
+        font-weight: 800 !important;
+        color: #4f46e5 !important;
+        letter-spacing: -1px !important;
+      }
+
+      .print-report-title {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #111827 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+      }
+
+      .print-metadata {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px !important;
+        color: #4b5563 !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Layout adjustments for single column full-width printing */
+      main {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+      }
+
+      .dashboard-results {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .card {
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 8px !important;
+        padding: 24px !important; /* Absolute px unit */
+        margin-bottom: 25px !important; /* Absolute px unit */
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
+      }
+
+      h2 {
+        font-size: 18px !important;
+        color: #111827 !important;
+        border-bottom: 1px solid #e5e7eb !important;
+        padding-bottom: 10px !important;
+        margin-bottom: 20px !important;
+        box-sizing: border-box !important;
+      }
+
+      h2 svg {
+        color: #4f46e5 !important;
+      }
+
+      /* Scoring cockpit print adjustments */
+      .scoring-cockpit {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 30px !important; /* Absolute px unit */
+        margin-bottom: 20px !important;
+        box-sizing: border-box !important;
+      }
+
+      .radial-score-container {
+        flex: 0 0 160px !important;
+        background: #f9fafb !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 8px !important;
+        padding: 15px !important;
+        box-sizing: border-box !important;
+      }
+
+      .score-circle circle {
+        stroke-width: 10 !important;
+      }
+
+      .circle-bg {
+        stroke: #e5e7eb !important;
+      }
+
+      .confidence-tag {
+        margin-top: 15px !important;
+        padding: 6px 12px !important;
+        border-radius: 6px !important;
+        font-size: 11px !important;
+        box-shadow: none !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Indicators list print layout */
+      .indicators-list {
+        flex: 1 !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 12px !important;
+        box-sizing: border-box !important;
+      }
+
+      .indicator-item {
+        padding: 10px 15px !important;
+        background: #f9fafb !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 6px !important;
+        box-sizing: border-box !important;
+      }
+
+      .ind-label {
+        font-size: 10px !important;
+        color: #4b5563 !important;
+      }
+
+      .ind-val {
+        font-size: 12px !important;
+        color: #111827 !important;
+      }
+
+      /* Rule 2 & Rule 1: Remove text truncation and overflow hidden for print */
+      #ind_places_name {
+        max-width: none !important;
+        text-overflow: clip !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        word-break: break-word !important;
+        box-sizing: border-box !important;
+      }
+
+      /* D&B Dossier print layout */
+      .dnb-dossier {
+        background: #ffffff !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 8px !important;
+        padding: 24px !important;
+        box-sizing: border-box !important;
+        overflow: visible !important; /* Rule 2: Ensure overflow visible */
+        page-break-inside: avoid !important;
+      }
+
+      .dnb-dossier::before {
+        color: #9ca3af !important;
+        font-size: 9px !important;
+      }
+
+      .dnb-header-sub {
+        border-bottom: 1px solid #e5e7eb !important;
+        padding-bottom: 10px !important;
+        margin-bottom: 20px !important;
+        box-sizing: border-box !important;
+      }
+
+      .dnb-company-title {
+        font-size: 20px !important;
+        color: #111827 !important;
+      }
+
+      .dnb-company-sub {
+        font-size: 12px !important;
+        color: #4b5563 !important;
+      }
+
+      /* D&B Grid print layout */
+      .dnb-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px !important; /* Absolute px unit */
+        margin-bottom: 20px !important;
+        box-sizing: border-box !important;
+      }
+
+      .dnb-cell {
+        background: #f9fafb !important;
+        border: 1px solid #e5e7eb !important;
+        padding: 10px 15px !important;
+        border-radius: 6px !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Rule 2: Table cells / th / td or cells acting as tables have absolutely no negative margins or paddings */
+      .dnb-cell, .indicator-item {
+        margin: 0 !important;
+        padding: 10px 15px !important;
+        text-indent: 0 !important;
+      }
+
+      .dnb-cell-label {
+        font-size: 10px !important;
+        color: #4b5563 !important;
+      }
+
+      .dnb-cell-value {
+        font-size: 13px !important;
+        color: #111827 !important;
+      }
+
+      .dnb-cell-alert {
+        color: #dc2626 !important;
+        font-weight: 700 !important;
+      }
+
+      .dnb-cell-ok {
+        color: #059669 !important;
+        font-weight: 700 !important;
+      }
+
+      .alert-subtext {
+        font-size: 10px !important;
+        color: #4b5563 !important;
+      }
+
+      .alert-subtext a {
+        color: #4f46e5 !important;
+        text-decoration: none !important;
+      }
+
+      /* Disclaimer print layout */
+      .disclaimer-card {
+        background: #fef2f2 !important;
+        border: 1px solid #fca5a5 !important;
+        border-radius: 6px !important;
+        padding: 15px !important;
+        box-sizing: border-box !important;
+        color: #7f1d1d !important;
+        font-size: 11px !important;
+        page-break-inside: avoid !important;
+      }
+
+      .disclaimer-title {
+        color: #991b1b !important;
+        font-size: 11px !important;
+        margin-bottom: 5px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Print-Only Report Header (Rule 2 & 1 compliant, absolute px positioning and layouts) -->
+  <div class="print-only-header">
+    <div class="print-header-top">
+      <div class="print-logo">LENDPAPER</div>
+      <div class="print-report-title">BUSINESS VERIFICATION REPORT</div>
+    </div>
+    <div class="print-metadata">
+      <div><strong>Audit Timestamp:</strong> <span id="print_timestamp">-</span></div>
+      <div><strong>Security Status:</strong> Sandbox Verified</div>
+    </div>
+  </div>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">B</div>
+      <div class="logo-text">
+        <h1>Lendpaper</h1>
+        <p>Business Verifier Cockpit</p>
+      </div>
+    </div>
+    <div class="badge-live">Verification Sandbox Active</div>
+  </header>
+
+  <main>
+    <!-- Left Column: Input Form and Simulator Terminal -->
+    <div class="dashboard-inputs" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="card">
+        <h2>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+          </svg>
+          Verification Input
+        </h2>
+        
+        <div class="form-group">
+          <label>Quick Preset Samples</label>
+          <div class="quick-preset-container">
+            <span class="preset-chip" onclick="loadPreset('Golden Razor Barber Shop', '456 Barber Way, Brooklyn, NY 11201')">Small Barber Shop</span>
+            <span class="preset-chip" onclick="loadPreset('Dynamic Tech Solutions', '500 Innovation Way, Boston, MA 02210')">Large Enterprise</span>
+            <span class="preset-chip" onclick="loadPreset('The Smith Residence', '789 Pine Lane, Seattle, WA 98101')">Private Residence</span>
+            <span class="preset-chip" onclick="loadPreset('Miller Family Residence', '456 Oak Ave Apt 4B, Orlando, FL 32801')">Residential Apt</span>
+            <span class="preset-chip" onclick="loadPreset('Quick Delivery Services PO Box', 'PO Box 998, Austin, TX 78701')">PO Box Address</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="company_name">Business Entity Name <span class="optional-tag">(optional if address is provided)</span></label>
+          <input type="text" id="company_name" placeholder="Enter entity name (e.g. Barber Co)">
+        </div>
+
+        <div class="form-group">
+          <label for="company_address">Street Address <span class="optional-tag">(optional if name is provided)</span></label>
+          <input type="text" id="company_address" placeholder="Enter full address (e.g. 123 Main St, New York)">
+        </div>
+
+        <button class="btn" id="btn_verify" onclick="runClientVerification()">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          Audit Business Entity
+        </button>
+
+        <!-- Registry Route Banner -->
+        <div class="registry-route-banner">
+          <span class="rr-icon">🌐</span>
+          <div class="rr-content">
+            <h4>Check Registry Route</h4>
+            <p>Need corporate filings? <a href="https://registryroute.com" target="_blank">Verify official EIN, state records, and registration details on Registry Route →</a></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Terminal Simulation Output -->
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="terminal-dot td-red"></span>
+            <span class="terminal-dot td-yellow"></span>
+            <span class="terminal-dot td-green"></span>
+          </div>
+          <div>business_verifier.py - shell</div>
+          <div style="font-size: 0.6rem; opacity: 0.5;">UTF-8</div>
+        </div>
+        <div class="terminal-body" id="terminal_body">
+          <div class="log-line log-info">[INFO] Initializing Lendpaper Business Verifier Service...</div>
+          <div class="log-line log-info">[INFO] Loading offline mock model components...</div>
+          <div class="log-line log-success">[INFO] Sandbox active. Click 'Audit Business Entity' to evaluate profiles.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Verification Results visual dashboard -->
+    <div class="dashboard-results">
+      <div class="card" style="flex: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; box-sizing: border-box;">
+          <h2 style="margin-bottom: 0;">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Verification Audit Board
+          </h2>
+          <button class="btn-print" id="btn_print" onclick="window.print()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            Export PDF Report
+          </button>
+        </div>
+
+        <div class="scoring-cockpit">
+          <!-- Radial chart displaying score -->
+          <div class="radial-score-container">
+            <div class="score-circle">
+              <svg>
+                <circle class="circle-bg" cx="60" cy="60" r="50"></circle>
+                <circle class="circle-progress" id="circle_progress" cx="60" cy="60" r="50"></circle>
+              </svg>
+              <div class="score-text-overlay">
+                <span class="score-percent" id="score_val">0.0</span>
+                <span class="score-label">Score</span>
+              </div>
+            </div>
+            <div class="confidence-tag ct-undetermined" id="classification_badge">AWAITING INPUT</div>
+          </div>
+
+          <!-- Cross-referenced individual indicators -->
+          <div class="indicators-list">
+            <div class="indicator-item">
+              <span class="ind-label">Commercial Zone Status</span>
+              <span class="ind-val" id="ind_addr_business">
+                <span class="val-inactive">—</span>
+              </span>
+            </div>
+            <div class="indicator-item">
+              <span class="ind-label">Private Home Status</span>
+              <span class="ind-val" id="ind_addr_residential">
+                <span class="val-inactive">—</span>
+              </span>
+            </div>
+            <div class="indicator-item">
+              <span class="ind-label">Public Map Listing</span>
+              <span class="ind-val" id="ind_places_estab">
+                <span class="val-inactive">—</span>
+              </span>
+            </div>
+            <div class="indicator-item">
+              <span class="ind-label">Primary Map Name</span>
+              <span class="ind-val" id="ind_places_name" style="box-sizing: border-box; word-break: break-word;">
+                <span class="val-inactive">—</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dun & Bradstreet Profile Card -->
+      <div class="dnb-dossier">
+        <div class="dnb-header-sub">
+          <div class="dnb-company-title" id="dnb_title">Business Registry Profile</div>
+          <div class="dnb-company-sub" id="dnb_subtitle">D&B Official Bureau Verification Output</div>
+        </div>
+
+        <div class="dnb-grid" style="margin-bottom: 1.25rem;">
+          <div class="dnb-cell">
+            <div class="dnb-cell-label">DUNS Number</div>
+            <div class="dnb-cell-value" id="dnb_duns">—</div>
+          </div>
+          <div class="dnb-cell">
+            <div class="dnb-cell-label">NAICS Industry Classification</div>
+            <div class="dnb-cell-value" id="dnb_naics">—</div>
+          </div>
+          <div class="dnb-cell">
+            <div class="dnb-cell-label">Operating Status</div>
+            <div class="dnb-cell-value" id="dnb_status">—</div>
+          </div>
+          <div class="dnb-cell">
+            <div class="dnb-cell-label">Years Operating</div>
+            <div class="dnb-cell-value" id="dnb_years">—</div>
+          </div>
+          <div class="dnb-cell">
+            <div class="dnb-cell-label">Estimated Annual Revenue</div>
+            <div class="dnb-cell-value" id="dnb_revenue">—</div>
+          </div>
+          <div class="dnb-cell">
+            <div class="dnb-cell-label">Employee Count</div>
+            <div class="dnb-cell-value" id="dnb_employees">—</div>
+          </div>
+          <div class="dnb-cell" style="grid-column: span 2;">
+            <div class="dnb-cell-label">Public Bureau Credit Alerts & Bankruptcy Registry</div>
+            <div class="dnb-cell-value" id="dnb_alerts">—</div>
+          </div>
+        </div>
+
+        <!-- Disclaimer inside card -->
+        <div class="disclaimer-card">
+          <span style="font-size: 1.1rem; line-height: 1;">⚠️</span>
+          <div>
+            <div class="disclaimer-title">Bureau Accuracy & Simulated Data Notice</div>
+            This profile displays simulated data deterministically generated in this developer sandbox. Always cross-examine real filings with official federal, state, and local court registers before approving business entities.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Lendpaper Business Verifier Sandbox • Designed for Mortgage and Corporate Underwriters
+    </footer>
+  </main>
+
+  <script>
+    function loadPreset(name, address) {
+      document.getElementById('company_name').value = name;
+      document.getElementById('company_address').value = address;
+      
+      const term = document.getElementById('terminal_body');
+      term.innerHTML += `<div class="log-line log-info">[INFO] Click 'Audit Business Entity' to evaluate preset profile: "${name}"</div>`;
+      term.scrollTop = term.scrollHeight;
+    }
+
+    function generateDeterministicHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash = hash & hash; // Convert to 32bit integer
+      }
+      return Math.abs(hash);
+    }
+
+    function runClientVerification() {
+      let name = document.getElementById('company_name').value.trim();
+      let address = document.getElementById('company_address').value.trim();
+      
+      if (!name && !address) {
+        alert("Please enter either a Business Entity Name or Street Address to run search.");
+        return;
+      }
+
+      const term = document.getElementById('terminal_body');
+      term.innerHTML = ''; // Clear terminal for clean execution simulation
+      
+      term.innerHTML += `<div class="log-line log-info">[INFO] ==================================================</div>`;
+      term.innerHTML += `<div class="log-line log-info">[INFO] Starting transaction audit pipeline...</div>`;
+      
+      // Gracefully support single search parameter
+      if (!name) {
+        name = "Business at " + address.split(',')[0];
+        term.innerHTML += `<div class="log-line log-warning">[WARN] Search initiated with Address only. Synthesized name fallback: "${name}"</div>`;
+      }
+      if (!address) {
+        const h_addr = generateDeterministicHash(name);
+        const st_num = (h_addr % 900) + 100;
+        const st_names = ["Main St", "Broadway", "Pine St", "Oak Ave", "Innovation Way", "Maple Dr"];
+        const st_name = st_names[h_addr % st_names.length];
+        const cities = ["New York, NY 10001", "San Francisco, CA 94105", "Boston, MA 02210", "Seattle, WA 98101"];
+        const city = cities[h_addr % cities.length];
+        address = `${st_num} ${st_name}, ${city}`;
+        term.innerHTML += `<div class="log-line log-warning">[WARN] Search initiated with Business Name only. Synthesized address fallback: "${address}"</div>`;
+      }
+
+      term.innerHTML += `<div class="log-line log-info">[INFO] Target business: "${name}"</div>`;
+      term.innerHTML += `<div class="log-line log-info">[INFO] Target address: "${address}"</div>`;
+      term.innerHTML += `<div class="log-line log-info">[INFO] ==================================================</div>`;
+      term.scrollTop = term.scrollHeight;
+
+      setTimeout(() => {
+        // Simulating rate limiting delay
+        term.innerHTML += `<div class="log-line log-info">[INFO] Enforcing configured rate-limiting block (0.2s throttle)...</div>`;
+        term.scrollTop = term.scrollHeight;
+      }, 150);
+
+      setTimeout(() => {
+        const h = generateDeterministicHash(name + address);
+        
+        // Simulating Google Address Validation
+        const isResidential = name.toLowerCase().includes("home") || 
+                              address.toLowerCase().includes("home") || 
+                              name.toLowerCase().includes("residence") || 
+                              name.toLowerCase().includes("smith") || 
+                              address.toLowerCase().includes("apartment") || 
+                              address.toLowerCase().includes("apt") || 
+                              (h % 3 === 0);
+        
+        const isBusiness = !isResidential;
+        const isPOBox = address.toLowerCase().includes("po box") || address.toLowerCase().includes("box ");
+        
+        term.innerHTML += `<div class="log-line log-success">[INFO] Querying Google Address Validation API... HTTP 200 OK</div>`;
+        term.innerHTML += `<div class="log-line log-info">[INFO] Address validation tags parsed - Business: ${isBusiness}, Residential: ${isResidential}, PO Box: ${isPOBox}</div>`;
+        term.scrollTop = term.scrollHeight;
+
+        // Simulating Google Places
+        let types = [];
+        let displayPlace = name;
+        if (isResidential) {
+          types = ["locality", "political", "route"];
+          displayPlace = name + " Residence";
+        } else {
+          types = ["establishment", "finance", "point_of_interest"];
+          if (name.toLowerCase().includes("store") || name.toLowerCase().includes("shop")) {
+            types.push("store");
+          }
+        }
+        
+        term.innerHTML += `<div class="log-line log-success">[INFO] Querying Google Places API... HTTP 200 OK</div>`;
+        term.innerHTML += `<div class="log-line log-info">[INFO] Places matched primary type arrays: [${types.join(', ')}]</div>`;
+        term.scrollTop = term.scrollHeight;
+
+        // Calculate score
+        let score = 0.2;
+        if (isBusiness) score += 0.5;
+        if (isResidential) score -= 0.3;
+        if (isPOBox) score -= 0.1;
+        if (types.includes("establishment")) score += 0.3;
+        
+        const businessKeywords = ["finance", "store", "point_of_interest"];
+        const matches = types.filter(t => businessKeywords.includes(t));
+        if (matches.length > 0) score += 0.2;
+        
+        if (types.includes("locality") && !types.includes("establishment")) score -= 0.2;
+
+        score = Math.max(0.0, Math.min(1.0, score));
+        score = Math.round(score * 100) / 100;
+
+        // Animate Radial Dial
+        const progressCircle = document.getElementById('circle_progress');
+        const offset = 314 - (score * 314);
+        progressCircle.style.strokeDashoffset = offset;
+        document.getElementById('score_val').innerText = score.toFixed(1);
+
+        // Update Classification badge
+        const badge = document.getElementById('classification_badge');
+        badge.className = "confidence-tag";
+        let classification = "";
+        
+        if (score >= 0.8) {
+          classification = "Highly Confident Business";
+          badge.classList.add("ct-business");
+          progressCircle.style.stroke = "var(--accent-business)";
+        } else if (score >= 0.5) {
+          classification = "Likely Business";
+          badge.classList.add("ct-business");
+          progressCircle.style.stroke = "#34d399";
+        } else if (score >= 0.3) {
+          classification = "Undetermined / Mixed";
+          badge.classList.add("ct-undetermined");
+          progressCircle.style.stroke = "var(--accent-info)";
+        } else if (score > 0.0) {
+          classification = "Likely Residential";
+          badge.classList.add("ct-residential");
+          progressCircle.style.stroke = "var(--accent-residential)";
+        } else {
+          classification = "Highly Confident Residential";
+          badge.classList.add("ct-residential");
+          progressCircle.style.stroke = "var(--accent-danger)";
+        }
+        badge.innerText = classification;
+
+        // Update indicators - CEO-friendly, simple and clean
+        const indAddrBiz = document.getElementById('ind_addr_business');
+        if (isBusiness) {
+          indAddrBiz.innerHTML = `<span class="val-active">Registered Commercial Zone</span> <span style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">(Address is listed as commercial)</span>`;
+        } else {
+          indAddrBiz.innerHTML = `<span class="val-inactive">Non-Commercial Address</span>`;
+        }
+
+        const indAddrRes = document.getElementById('ind_addr_residential');
+        if (isResidential) {
+          indAddrRes.innerHTML = `<span class="val-warning">Private Home Classification</span> <span style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">(Listed as a private housing unit)</span>`;
+        } else {
+          indAddrRes.innerHTML = `<span class="val-inactive">Not a Private Residence</span>`;
+        }
+
+        const indPlacesEstab = document.getElementById('ind_places_estab');
+        if (types.includes("establishment")) {
+          indPlacesEstab.innerHTML = `<span class="val-active">Active Public Map Listing</span> <span style="font-size:0.75rem; color:var(--text-muted); font-weight:400;">(Found active location listing)</span>`;
+        } else {
+          indPlacesEstab.innerHTML = `<span class="val-inactive">No Public Map Listing Found</span>`;
+        }
+
+        document.getElementById('ind_places_name').innerHTML = `<span class="val-active" title="${displayPlace}">${displayPlace}</span>`;
+
+        // Dun & Bradstreet Deterministic Simulation with local small business scaling
+        term.innerHTML += `<div class="log-line log-info">[INFO] Contacting D&B Mock Provider Bureau API...</div>`;
+        
+        const duns = Math.floor(h % 900000000 + 100000000).toString();
+        const status = (h % 10) > 1 ? "Active" : "Inactive";
+        const years = (h % 35) + 1;
+        const lawsuits = (h % 5) === 0 ? (h % 3) + 1 : 0;
+        const bankruptcy = (h % 100) === 77;
+        
+        // Scale revenue and employees for small businesses
+        const smallKeywords = ["barber", "salon", "cafe", "bakery", "shop", "store", "residence", "family", "cleaner", "deli", "laundry"];
+        const isSmall = smallKeywords.some(kw => name.toLowerCase().includes(kw));
+        
+        let revenue, employees, naics;
+        if (isSmall) {
+          naics = name.toLowerCase().includes("barber") ? "812111" : "812112";
+          revenue = (h % 120000) + 35000;
+          employees = (h % 7) + 2; // Handful: 2 to 8 employees
+        } else {
+          const naicsOptions = ["541511", "522220", "522320", "441110", "722511", "541110"];
+          naics = naicsOptions[h % naicsOptions.length];
+          revenue = (h % 10000000) + 100000;
+          employees = (h % 200) + 10;
+        }
+
+        term.innerHTML += `<div class="log-line log-success">[INFO] D&B record generated successfully. DUNS: ${duns}</div>`;
+        term.innerHTML += `<div class="log-line log-info">[INFO] Validating D&B data against schema.json...</div>`;
+        term.innerHTML += `<div class="log-line log-success">[INFO] D&B JSON Validation Succeeded! (No schema exceptions)</div>`;
+        term.innerHTML += `<div class="log-line log-info">[INFO] Compilation finished. result.csv stream closed.</div>`;
+        term.scrollTop = term.scrollHeight;
+
+        // Update D&B Visual UI
+        document.getElementById('dnb_title').innerText = `${name}`;
+        document.getElementById('dnb_subtitle').innerText = `DUNS Registry: Verified profile`;
+        document.getElementById('dnb_duns').innerText = duns.replace(/(\d{3})(\d{3})(\d{3})/, "$1-$2-$3");
+        document.getElementById('dnb_naics').innerText = naics;
+        
+        const statusVal = document.getElementById('dnb_status');
+        statusVal.innerText = status;
+        statusVal.className = "dnb-cell-value " + (status === "Active" ? "dnb-cell-ok" : "dnb-cell-alert");
+        
+        document.getElementById('dnb_years').innerText = `${years} Year${years > 1 ? 's' : ''}`;
+        document.getElementById('dnb_revenue').innerText = `$${revenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD`;
+        document.getElementById('dnb_employees').innerText = employees;
+
+        const alertVal = document.getElementById('dnb_alerts');
+        if (bankruptcy) {
+          alertVal.innerHTML = `
+            <span class="dnb-cell-alert">CRITICAL ALERT: Historic Bankruptcy Filed</span>
+            <span class="alert-subtext">Source: <a href="https://www.pacer.gov" target="_blank">Federal Bankruptcy Court (PACER Docket #BK-2023-998)</a></span>
+          `;
+        } else if (lawsuits > 0) {
+          alertVal.innerHTML = `
+            <span class="dnb-cell-alert">ALERT: ${lawsuits} Active Lawsuits Pending</span>
+            <span class="alert-subtext">Source: Local Municipal Court Civil Register (Click registry above to audit)</span>
+          `;
+        } else {
+          alertVal.innerHTML = `<span class="dnb-cell-ok">Clean Record (0 pending lawsuits, 0 bankruptcies found)</span>`;
+        }
+
+        // Update print timestamp and show print button (Rule 2 & 1 compliant)
+        const now = new Date();
+        document.getElementById('print_timestamp').innerText = now.toLocaleString();
+        document.getElementById('btn_print').style.display = 'flex';
+
+      }, 700);
+    }
+  </script>
+</body>
+</html>

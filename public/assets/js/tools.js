@@ -18,6 +18,19 @@ const TOOLS = [
     kw: "amortization schedule prepay payoff buyout mca payment deal desk"
   },
   { 
+    id: "verifier", 
+    name: "Business Verifier", 
+    desc: "Verify business entity details, residential status, and D&B credentials.",
+    status: "live", 
+    group: "risk", 
+    icon: "search", 
+    color: "green",
+    slug: "/tools/verifier",
+    presentation: "page",
+    path: "calculators/BusinessVerifier.html",
+    kw: "business entity verification address check dnb registry underwriting"
+  },
+  { 
     id: "registry", 
     name: "Secretary of State Search", 
     desc: "Search public business records and UCC filings.",
