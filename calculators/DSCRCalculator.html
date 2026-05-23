@@ -873,8 +873,8 @@ function renderScenarios(){
     h += '<div class="scen-body"><div class="scen-row"><div class="scen-field"><label>Amount ($)</label><input type="number" value="'+sc.amount+'" oninput="updScen('+sc.id+',\'amount\',this.value)"></div></div>';
     h += '<div class="scen-row"><div class="scen-field"><label>Term (yrs)</label><input type="number" value="'+sc.term+'" oninput="updScen('+sc.id+',\'term\',this.value)"></div><div class="scen-field"><label>Rate (%)</label><input type="number" step="0.1" value="'+sc.rate+'" oninput="updScen('+sc.id+',\'rate\',this.value)"></div></div></div>';
     h += '<div class="scen-foot"><div class="scen-mp"><span>Payment:</span><span>'+fmt(mp)+'/mo</span></div>';
-    if(S.mode==='both' || S.mode==='bdscr') h += '<div class="dscr-result"><div class="dscr-label">BDSCR</div><div class="dscr-val '+(db>=1.15?'dscr-pass':'dscr-fail')+'">'+db.toFixed(2)+'</div><div class="dscr-min">min 1.15x</div></div>';
-    if(S.mode==='both' || S.mode==='gdscr') h += '<div class="dscr-result"><div class="dscr-label">GDSCR</div><div class="dscr-val '+(dg>=1.0?'dscr-pass':'dscr-fail')+'">'+dg.toFixed(2)+'</div><div class="dscr-min">min 1.00x</div></div>';
+    if(S.mode==='both' || S.mode==='bdscr') h += '<div class="dscr-result dscr-bdscr"><div class="dscr-label">BDSCR</div><div class="dscr-val '+(db>=1.15?'dscr-pass':'dscr-fail')+'">'+db.toFixed(2)+'</div><div class="dscr-min">min 1.15x</div></div>';
+    if(S.mode==='both' || S.mode==='gdscr') h += '<div class="dscr-result dscr-gdscr"><div class="dscr-label">GDSCR</div><div class="dscr-val '+(dg>=1.0?'dscr-pass':'dscr-fail')+'">'+dg.toFixed(2)+'</div><div class="dscr-min">min 1.00x</div></div>';
     h += '</div></div>';
   });
   document.getElementById('scenGrid').innerHTML = h;
@@ -885,7 +885,41 @@ function addScenario(){ S.scenarios.push({id:nid(), name:'Scenario '+(S.scenario
 function rmScen(id){ S.scenarios = S.scenarios.filter(s => s.id !== id); renderScenarios(); }
 function updScen(id,f,v){ S.scenarios.forEach(s => { if(s.id===id) s[f] = (f==='name'?v:parseFloat(v)||0); }); updScenarioDisplays(); renderSummaries(); }
 
-function updScenarioDisplays(){ renderScenarios(); }
+function updScenarioDisplays(){
+  var cd = getCalcData();
+  var rn = document.getElementById('refiNotice');
+  if (rn) {
+    rn.style.display = cd.refi > 0 ? 'block' : 'none';
+    rn.innerHTML = 'Refinancing active: ' + fmt(cd.refi) + '/yr excluded from calculation.';
+  }
+  
+  S.scenarios.forEach(function(sc){
+    var card = document.querySelector('.scen-card[data-scen-id="'+sc.id+'"]');
+    if (!card) return;
+    
+    var mp = calcPmt(sc.amount, sc.rate, sc.term);
+    var db = (mp*12+cd.bObl)>0 ? cd.ebida/(mp*12+cd.bObl) : 0;
+    var dg = (mp*12+cd.gObl)>0 ? cd.global/(mp*12+cd.gObl) : 0;
+    
+    // Update payment display surgically
+    var mpEl = card.querySelector('.scen-mp span:last-child');
+    if (mpEl) mpEl.innerHTML = fmt(mp) + '/mo';
+    
+    // Update BDSCR surgically
+    var bdscrVal = card.querySelector('.dscr-bdscr .dscr-val');
+    if (bdscrVal) {
+      bdscrVal.textContent = db.toFixed(2);
+      bdscrVal.className = 'dscr-val ' + (db >= 1.15 ? 'dscr-pass' : 'dscr-fail');
+    }
+    
+    // Update GDSCR surgically
+    var gdscrVal = card.querySelector('.dscr-gdscr .dscr-val');
+    if (gdscrVal) {
+      gdscrVal.textContent = dg.toFixed(2);
+      gdscrVal.className = 'dscr-val ' + (dg >= 1.0 ? 'dscr-pass' : 'dscr-fail');
+    }
+  });
+}
 
 function renderSummaries(){
   var cd = getCalcData();
