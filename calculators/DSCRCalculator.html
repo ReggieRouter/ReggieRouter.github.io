@@ -858,6 +858,32 @@ function getCalcData(){
 }
 
 function renderScenarios(){
+  var activeEl = document.activeElement;
+  var activeScenId = null;
+  var activeField = null;
+  var selStart = null;
+  var selEnd = null;
+
+  if (activeEl && activeEl.tagName === 'INPUT' && activeEl.closest('.scen-card')) {
+    var card = activeEl.closest('.scen-card');
+    activeScenId = card.getAttribute('data-scen-id');
+    if (activeEl.classList.contains('scen-name')) {
+      activeField = 'name';
+    } else {
+      var label = activeEl.closest('.scen-field') ? activeEl.closest('.scen-field').querySelector('label') : null;
+      if (label) {
+        var labelText = label.textContent.toLowerCase();
+        if (labelText.includes('amount')) activeField = 'amount';
+        else if (labelText.includes('term')) activeField = 'term';
+        else if (labelText.includes('rate')) activeField = 'rate';
+      }
+    }
+    try {
+      selStart = activeEl.selectionStart;
+      selEnd = activeEl.selectionEnd;
+    } catch(e) {}
+  }
+
   var cd = getCalcData();
   var rn = document.getElementById('refiNotice');
   rn.style.display = cd.refi > 0 ? 'block' : 'none';
@@ -879,6 +905,32 @@ function renderScenarios(){
   });
   document.getElementById('scenGrid').innerHTML = h;
   document.getElementById('noScenMsg').style.display = S.scenarios.length ? 'none' : 'block';
+
+  if (activeScenId && activeField) {
+    var newCard = document.querySelector('.scen-card[data-scen-id="'+activeScenId+'"]');
+    if (newCard) {
+      var newEl = null;
+      if (activeField === 'name') {
+        newEl = newCard.querySelector('.scen-name');
+      } else {
+        var fields = newCard.querySelectorAll('.scen-field');
+        fields.forEach(function(f) {
+          var labelText = f.querySelector('label').textContent.toLowerCase();
+          if (labelText.includes(activeField)) {
+            newEl = f.querySelector('input');
+          }
+        });
+      }
+      if (newEl) {
+        newEl.focus();
+        try {
+          if (selStart !== null && selEnd !== null) {
+            newEl.setSelectionRange(selStart, selEnd);
+          }
+        } catch(e) {}
+      }
+    }
+  }
 }
 
 function addScenario(){ S.scenarios.push({id:nid(), name:'Scenario '+(S.scenarios.length+1), amount:0, term:10, rate:10}); renderScenarios(); }
