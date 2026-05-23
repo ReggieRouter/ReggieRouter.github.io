@@ -161,6 +161,50 @@
     </div>
   </section>
 
+  <section class="section-wwm">
+    <div class="wwm-grid">
+      <div class="wwm-left">
+        <h2 class="wwm-headline">Ready to work together?</h2>
+        <p class="wwm-body">LendPaper is a tool — but the founder is also available for custom builds, white-label deployments, and hands-on enablement training. The same methodology that helped scale NerdWallet B2B lending from $9M to $44M ARR.</p>
+        <div class="wwm-buttons">
+          <a href="mailto:info@lendpaper.com?subject=Let%27s%20work%20together&body=Hi%20Steve%2C%0A%0AI%27m%20interested%20in%20working%20with%20LendPaper." class="wwm-btn-primary">Email Steve</a>
+          <button class="wwm-btn-secondary" onclick="try{window.parent.navigateToView('contact')}catch(e){}">View services</button>
+        </div>
+      </div>
+      <div class="wwm-right">
+        <div class="wwm-mini-cards">
+          <div class="wwm-mini-card">
+            <div class="wwm-mini-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div class="wwm-mini-text">
+              <span class="wwm-mini-title">Custom tooling</span>
+              <span class="wwm-mini-desc">Built for your desk's exact product mix</span>
+            </div>
+          </div>
+          <div class="wwm-mini-card">
+            <div class="wwm-mini-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <div class="wwm-mini-text">
+              <span class="wwm-mini-title">White-label</span>
+              <span class="wwm-mini-desc">Your logo, LendPaper as silent infrastructure</span>
+            </div>
+          </div>
+          <div class="wwm-mini-card">
+            <div class="wwm-mini-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </div>
+            <div class="wwm-mini-text">
+              <span class="wwm-mini-title">Enablement training</span>
+              <span class="wwm-mini-desc">M.Ed methodology from ex-NerdWallet</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer class="lendpaper-cta">
     <span>Ready to protect your pipeline?</span>
     <a href="mailto:info@lendpaper.com" class="cta-link">info@lendpaper.com</a>
@@ -499,5 +543,90 @@
   @media (max-width: 768px) {
     .grid-two-col, .grid-split-founder, .grid-four-col { grid-template-columns: 1fr; }
     .lendpaper-container { padding: 20px; }
+  }
+
+  /* WORK WITH ME */
+  .section-wwm {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 32px 36px;
+    margin-bottom: 36px;
+  }
+  .wwm-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .wwm-headline {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--bg-dark-card);
+    margin: 0 0 10px 0;
+  }
+  .wwm-body {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin: 0 0 18px 0;
+  }
+  .wwm-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .wwm-btn-primary {
+    display: inline-flex; align-items: center;
+    background: #0a4d2c; color: #fff;
+    font-family: var(--font-stack);
+    font-size: 13px; font-weight: 600;
+    padding: 9px 18px; border-radius: 6px;
+    text-decoration: none;
+    transition: opacity 150ms ease;
+  }
+  .wwm-btn-primary:hover { opacity: 0.88; }
+  .wwm-btn-secondary {
+    display: inline-flex; align-items: center;
+    background: transparent; color: #0a4d2c;
+    font-family: var(--font-stack);
+    font-size: 13px; font-weight: 600;
+    padding: 9px 18px; border-radius: 6px;
+    border: 1.5px solid #0a4d2c;
+    cursor: pointer;
+    transition: background 150ms ease;
+  }
+  .wwm-btn-secondary:hover { background: rgba(10,77,44,0.06); }
+
+  .wwm-mini-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .wwm-mini-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 13px 14px;
+  }
+  .wwm-mini-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    background: #e8f5ec; color: #0a4d2c;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .wwm-mini-icon svg { width: 15px; height: 15px; }
+  .wwm-mini-text { display: flex; flex-direction: column; }
+  .wwm-mini-title { font-size: 13px; font-weight: 700; color: var(--bg-dark-card); margin-bottom: 2px; }
+  .wwm-mini-desc { font-size: 11.5px; color: var(--text-muted); line-height: 1.35; }
+
+  @media (max-width: 768px) {
+    .wwm-grid { grid-template-columns: 1fr; gap: 24px; }
+    .section-wwm { padding: 24px 20px; }
   }
 </style>

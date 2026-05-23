@@ -520,6 +520,84 @@ input { font-family: inherit; }
 .contact-row a:hover { text-decoration: underline; }
 .contact-label { color: var(--text-muted); min-width: 80px; }
 
+/* ==================== Services ==================== */
+
+.svc-header { margin-bottom: 24px; }
+.svc-page-title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); margin-bottom: 6px; }
+.svc-page-sub { font-size: 13px; color: var(--text-muted); max-width: 520px; line-height: 1.5; }
+
+.svc-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.svc-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.svc-card-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+}
+.svc-card-icon svg { width: 18px; height: 18px; }
+.svc-card-icon.green { background: var(--accent-soft); color: var(--accent-hover); }
+.svc-card-icon.amber { background: var(--warning-soft); color: #B45309; }
+.svc-card-icon.blue  { background: var(--info-soft); color: #1D4ED8; }
+.svc-card-title { font-size: 13.5px; font-weight: 700; color: var(--text); margin-bottom: 6px; letter-spacing: -0.01em; }
+.svc-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+
+.svc-cred-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--bg-alt); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 11px 16px;
+  margin-bottom: 16px; font-size: 12px; color: var(--text-muted);
+}
+.svc-cred-item strong { color: var(--text); }
+.svc-cred-sep { color: var(--border-hover); font-weight: 400; }
+
+.svc-fit {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.svc-fit-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text-faint); margin-bottom: 10px;
+}
+.svc-fit-grid { display: flex; flex-direction: column; gap: 7px; }
+.svc-fit-item {
+  display: flex; gap: 10px; align-items: baseline;
+  font-size: 12.5px; color: var(--text-muted); line-height: 1.45;
+}
+.svc-fit-check { color: var(--accent); font-weight: 700; flex-shrink: 0; font-size: 11px; }
+
+.svc-cta-block {
+  background: #0a4d2c; border-radius: var(--radius);
+  padding: 24px 28px 22px;
+}
+.svc-cta-heading {
+  font-size: 17px; font-weight: 800; color: #fff;
+  letter-spacing: -0.02em; margin-bottom: 7px;
+}
+.svc-cta-copy {
+  font-size: 13px; color: #a7f3d0; line-height: 1.55;
+  margin-bottom: 16px; max-width: 460px;
+}
+.svc-cta-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #fff; color: #0a4d2c;
+  font-size: 13px; font-weight: 700; padding: 8px 18px;
+  border-radius: var(--radius-sm); text-decoration: none;
+  transition: opacity var(--transition);
+}
+.svc-cta-btn:hover { opacity: 0.90; }
+.svc-cta-btn svg { flex-shrink: 0; }
+
 /* ==================== Mobile overlay ==================== */
 
 .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 15; }
@@ -828,22 +906,75 @@ input { font-family: inherit; }
         </div>
       </div>
 
-      <!-- Contact -->
+      <!-- Services -->
       <div class="view" id="view-contact">
-        <div class="contact-card">
-          <h3>LendPaper Services</h3>
-          <p>Want custom tools, white-label branding, M.Ed Enablement from former NerdWallet and Lendio at a reasonable rate? Talk to us.</p>
-          <div class="contact-row">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <span class="contact-label">Email</span>
-            <a href="mailto:info@lendpaper.com?subject=Interested%20in%20LendPaper%20Services&amp;body=Hi%20LendPaper%2C%20I'm%20interested%20in%20your%20services.%20Reply%20and%20let's%20set%20a%20time.">info@lendpaper.com</a>
+
+        <div class="svc-header">
+          <h2 class="svc-page-title">LendPaper Services</h2>
+          <p class="svc-page-sub">Custom tooling and enablement for lending desks that have outgrown the defaults.</p>
+        </div>
+
+        <div class="svc-cards">
+          <div class="svc-card">
+            <div class="svc-card-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <h3 class="svc-card-title">Custom tooling</h3>
+            <p class="svc-card-desc">A calculator, deal math tool, or data workflow built for your exact product mix. Ships in weeks, not quarters. You own the output.</p>
           </div>
-          <div class="contact-row" style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 4px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
-            <span class="contact-label">Services</span>
-            <span style="color: var(--text-muted)">Custom calculators, white-label, API integrations</span>
+          <div class="svc-card">
+            <div class="svc-card-icon amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <h3 class="svc-card-title">White-label</h3>
+            <p class="svc-card-desc">Your logo. Your brand. LendPaper as silent infrastructure. Professional estimate documents that belong to your desk — not ours.</p>
+          </div>
+          <div class="svc-card">
+            <div class="svc-card-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </div>
+            <h3 class="svc-card-title">Enablement training</h3>
+            <p class="svc-card-desc">Loan officer and ISO training built on M.Ed methodology. From someone who ran revenue enablement at NerdWallet. Not a deck — a system. Includes call scripts, objection handling frameworks, and deal-stage messaging — built for your specific loan products.</p>
           </div>
         </div>
+
+        <div class="svc-cred-bar">
+          <span class="svc-cred-item"><strong>$9M→$44M</strong> ARR scaled at NerdWallet B2B</span>
+          <span class="svc-cred-sep">·</span>
+          <span class="svc-cred-item"><strong>30%→90%+</strong> AI underwriting accuracy</span>
+          <span class="svc-cred-sep">·</span>
+          <span class="svc-cred-item"><strong>M.Ed</strong> Boston University</span>
+          <span class="svc-cred-sep">·</span>
+          <span class="svc-cred-item">Ex-NerdWallet · Ex-Lendio</span>
+        </div>
+
+        <div class="svc-fit">
+          <p class="svc-fit-title">Good fit for</p>
+          <div class="svc-fit-grid">
+            <div class="svc-fit-item">
+              <span class="svc-fit-check">✓</span>
+              <span>ISO desks that have outgrown spreadsheets but aren't ready for enterprise SaaS</span>
+            </div>
+            <div class="svc-fit-item">
+              <span class="svc-fit-check">✓</span>
+              <span>Direct lenders who want white-label estimate documents without a full SaaS subscription</span>
+            </div>
+            <div class="svc-fit-item">
+              <span class="svc-fit-check">✓</span>
+              <span>Sales leaders who need reps closing faster without guessing on DSCR or stacking limits</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="svc-cta-block">
+          <h3 class="svc-cta-heading">Tell me what's broken.</h3>
+          <p class="svc-cta-copy">Your desk has a workflow problem I haven't built a fix for yet. Describe it. I'll tell you if I can solve it — and what it would cost.</p>
+          <a href="mailto:info@lendpaper.com?subject=Here%27s%20what%27s%20broken%20on%20my%20desk&body=Hi%20Steve%2C%0A%0AHere%27s%20the%20problem%20I%27m%20running%20into%3A%0A%0A" class="svc-cta-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email Steve
+          </a>
+        </div>
+
       </div>
 
       <!-- Why LendPaper View -->
