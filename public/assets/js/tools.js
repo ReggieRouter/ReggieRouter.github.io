@@ -17,6 +17,7 @@ const TOOLS = [
     path: "calculators/AmoScheduleCalculator.html",
     kw: "amortization schedule prepay payoff buyout mca payment deal desk"
   },
+  /*
   { 
     id: "verifier", 
     name: "Business Verifier", 
@@ -30,6 +31,7 @@ const TOOLS = [
     path: "calculators/BusinessVerifier.html",
     kw: "business entity verification address check dnb registry underwriting"
   },
+  */
   { 
     id: "registry", 
     name: "Secretary of State Search", 
@@ -141,6 +143,7 @@ const TOOLS = [
     href: "#",
     kw: "lender directory database search buy box"
   },
+  /*
   { 
     id: "scripting", 
     name: "Scripting", 
@@ -153,6 +156,7 @@ const TOOLS = [
     isPaid: true,
     kw: "scripting code api custom automation developer javascript"
   }
+  */
 ];
 
 // Exporting for use in other files
