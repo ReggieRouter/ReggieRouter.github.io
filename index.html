@@ -365,6 +365,7 @@ input { font-family: inherit; }
 .pill-live { background: var(--accent-soft); color: var(--accent-hover); }
 .pill-soon { background: var(--bg-alt); color: var(--text-faint); border: 1px solid var(--border); }
 .pill-new  { background: var(--warning-soft); color: #92400E; }
+.pill-paid { background: #FFFBEB; color: #92400E; border: 1px solid #FCD34D; }
 
 .card-arrow {
   color: var(--text-muted); flex-shrink: 0;
@@ -1022,8 +1023,8 @@ input { font-family: inherit; }
 </div>
 
 <!-- External Data -->
-<script src="/public/assets/js/tools.js?v=2026.05.22.0830"></script>
-<script src="/public/assets/js/glossary.js?v=2026.05.22.0830"></script>
+<script src="public/assets/js/tools.js?v=2026.05.22.0830"></script>
+<script src="public/assets/js/glossary.js?v=2026.05.22.0830"></script>
 
 <script>
 /* ============================================================
@@ -1044,6 +1045,7 @@ var ICO = {
   trendUp:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
   lineChart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-6 6-3-3-3 3"/></svg>',
   flag:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
+  code:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
   arrow:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
 };
 
@@ -1059,10 +1061,15 @@ function cardHTML(t, i) {
   
   var onclick = dis ? '' : ' onclick="handleToolClick(event, \''+t.id+'\')"';
 
+  var metaHTML = '<span class="pill '+pillCls+'">'+pillTxt+'</span>';
+  if (t.isPaid) {
+    metaHTML += '<span class="pill pill-paid" style="margin-left: 4px;">Paid</span>';
+  }
+
   return '<'+tag+href+target+' class="'+cls+'" '+onclick+' data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
     +'<div class="card-icon '+t.color+'">'+ICO[t.icon]+'</div>'
     +'<div class="card-body"><div class="card-name">'+t.name+'</div><div class="card-desc">'+t.desc+'</div></div>'
-    +'<div class="card-meta"><span class="pill '+pillCls+'">'+pillTxt+'</span>'
+    +'<div class="card-meta">'+metaHTML
     +(dis?'':'<span class="card-arrow">'+ICO.arrow+'</span>')
     +'</div></'+tag+'>';
 }

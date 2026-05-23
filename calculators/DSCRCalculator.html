@@ -305,7 +305,7 @@
 .print-header-content, .print-footer-legal, .print-watermark { display: none; }
 
 /* Direct PDF Export Styles - Rigorous Hiding */
-body.pdf-export-mode { background: white !important; }
+body.pdf-export-mode { background: white !important; display: block !important; min-height: 0 !important; height: auto !important; }
 body.pdf-export-mode .no-print, 
 body.pdf-export-mode header, 
 body.pdf-export-mode .modal-header, 
@@ -320,7 +320,7 @@ body.pdf-export-mode .print-header-content { display: block !important; margin-b
 body.pdf-export-mode .print-header-content img { display: none !important; }
 body.pdf-export-mode .print-header-content h1 { display: none !important; }
 
-body.pdf-export-mode .lp-main { padding: 0 !important; display: block !important; max-width: 800px !important; margin: 0 auto !important; }
+body.pdf-export-mode .lp-main { padding: 0 !important; display: block !important; max-width: 100% !important; width: 100% !important; margin: 0 auto !important; }
 body.pdf-export-mode .lp-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; }
 body.pdf-export-mode .lp-body { display: none !important; }
 body.pdf-export-mode .dscr-print-view { display: block !important; }
@@ -1041,7 +1041,7 @@ async function runPDF() {
         margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
         filename: `LendPaper_DSCR_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, logging: false, useCORS: true },
+        html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 800 },
         jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
     };
 

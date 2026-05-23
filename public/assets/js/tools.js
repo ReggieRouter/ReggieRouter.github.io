@@ -14,7 +14,7 @@ const TOOLS = [
     color: "green",
     slug: "/tools/payment-breakdown",
     presentation: "page",
-    path: "/calculators/AmoScheduleCalculator.html",
+    path: "calculators/AmoScheduleCalculator.html",
     kw: "amortization schedule prepay payoff buyout mca payment deal desk"
   },
   { 
@@ -41,7 +41,7 @@ const TOOLS = [
     color: "green",
     slug: "/tools/dscr",
     presentation: "page",
-    path: "/calculators/DSCRCalculator.html",
+    path: "calculators/DSCRCalculator.html",
     kw: "coverage dscr ratio revenue bank statement underwriting"
   },
   { 
@@ -54,7 +54,7 @@ const TOOLS = [
     color: "green",
     slug: "/tools/fundability",
     presentation: "page",
-    path: "/calculators/FundabilityCalculator.html",
+    path: "calculators/FundabilityCalculator.html",
     kw: "net funding wire origination fundability stacking risk positions"
   },
   { 
@@ -67,7 +67,7 @@ const TOOLS = [
     color: "green",
     slug: "/tools/sba-fees",
     presentation: "page",
-    path: "/calculators/SBAFeesCalculator.html",
+    path: "calculators/SBAFeesCalculator.html",
     kw: "sba fees rates scenario builder 7a guarantee packaging search closing"
   },
   { 
@@ -127,6 +127,18 @@ const TOOLS = [
     color: "slate",
     href: "#",
     kw: "lender directory database search buy box"
+  },
+  { 
+    id: "scripting", 
+    name: "Scripting", 
+    desc: "Automate custom calculations and rules via LendPaper JS APIs.",
+    status: "soon", 
+    group: "deal-math", 
+    icon: "code", 
+    color: "amber", 
+    href: "#",
+    isPaid: true,
+    kw: "scripting code api custom automation developer javascript"
   }
 ];
 
