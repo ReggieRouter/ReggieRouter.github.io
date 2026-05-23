@@ -563,7 +563,7 @@ async function handleLendPaperSavePDF() {
         margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
         filename: `LendPaper_SBA_Fees_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 800 },
+        html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 800, scrollX: 0, scrollY: 0 },
         jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
     };
 
