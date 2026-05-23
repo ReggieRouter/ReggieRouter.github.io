@@ -853,6 +853,13 @@ input { font-family: inherit; }
         </div>
       </div>
 
+      <!-- Legal Estimates View -->
+      <div class="view" id="view-legal-estimates" style="padding: 0; height: 100%;">
+        <div id="legalPageContainer" style="width: 100%; height: 100%;">
+          <iframe id="lp-legal-iframe" src="legal/estimates/index.html" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+      </div>
+
       <!-- Search results -->
       <div class="view" id="view-search">
         <div class="search-meta visible" id="searchMeta"></div>
@@ -1262,13 +1269,13 @@ function navigateToView(v) {
 }
 
 var currentView='home', prevView='home';
-var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Services','search':'Search results', 'tool': 'Tool', 'why': 'Why LendPaper'};
+var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Services','search':'Search results', 'tool': 'Tool', 'why': 'Why LendPaper', 'legal/estimates': 'Estimate Disclaimer'};
 
 function switchView(v) {
   if (v !== 'search' && v !== 'tool') prevView = v;
   currentView = v;
   document.querySelectorAll('.view').forEach(function(el){ el.classList.remove('active'); });
-  var t = document.getElementById('view-'+v);
+  var t = document.getElementById('view-'+v.replace(/\//g, '-'));
   if (t) t.classList.add('active');
   document.getElementById('topbarTitle').textContent = (v === 'tool') ? 'Tool' : (titles[v] || 'LendPaper');
   document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });

@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" href="../public/assets/brand/apple-touch-icon-180x180.png">
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
     <script src="../public/assets/js/calculator-app.js"></script>
+    <script src="../public/assets/js/pdf-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Typography & Core Variables */
@@ -308,14 +309,14 @@
         body.pdf-export-mode .tooltiptext, 
         body.pdf-export-mode .lp-howto, 
         body.pdf-export-mode .remove-card-btn { display: none !important; }
-        body.pdf-export-mode .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
-        body.pdf-export-mode .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
+        body.pdf-export-mode .print-header-content { display: block !important; margin-bottom: 20px !important; padding-top: 0 !important; }
+        body.pdf-export-mode .print-header-content img { display: none !important; }
         body.pdf-export-mode .print-header-content h1 { display: none !important; }
 
         body.pdf-export-mode main { padding: 0 !important; display: block !important; max-width: 1000px !important; margin: 0 auto !important; min-height: 0 !important; height: auto !important; }
         body.pdf-export-mode .modal-shell { box-shadow: none !important; border: none !important; max-width: 100% !important; margin: 0 auto !important; break-inside: auto !important; }
-        body.pdf-export-mode .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
-        body.pdf-export-mode .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
+        body.pdf-export-mode .print-footer-legal { display: none !important; }
+        body.pdf-export-mode .print-watermark { display: none !important; }
         body.pdf-export-mode .takeaway-eyebrow { display: none !important; }
         body.pdf-export-mode .table-scroll-container { max-height: none !important; overflow: visible !important; }
         body.pdf-export-mode .no-print { display: none !important; }
@@ -585,11 +586,43 @@
             btn.innerHTML = "Generating...";
             btn.disabled = true;
 
+            // Render Gate Input Validation
+            const cards = document.querySelectorAll('[id^="cardContainer-"]');
+            let isValid = true;
+            if (cards.length === 0) {
+                isValid = false;
+            } else {
+                cards.forEach(card => {
+                    const id = card.id.split('-')[1];
+                    const amtInput = document.getElementById(`amt-${id}`);
+                    const termInput = document.getElementById(`term-${id}`);
+                    const factorInput = document.getElementById(`factor-${id}`);
+                    
+                    const amt = amtInput ? parseFloat(amtInput.value) : 0;
+                    const term = termInput ? parseFloat(termInput.value) : 0;
+                    const factor = factorInput ? parseFloat(factorInput.value) : 0;
+                    
+                    if (!amt || !term || !factor) {
+                        isValid = false;
+                    }
+                });
+            }
+
+            if (!isValid) {
+                window.PDF_HELPER.showToast("Complete your inputs to generate this document.", true);
+                btn.innerHTML = origText;
+                btn.disabled = false;
+                return;
+            }
+
+            // Setup custom print header band dynamically per plan tier
+            window.PDF_HELPER.initPrintLayout("PAYMENT BREAKDOWN");
+
             document.body.classList.add('pdf-export-mode');
             
             const element = document.querySelector('main');
             const opt = {
-                margin: [10, 10],
+                margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
                 filename: `LendPaper_Amortization_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, logging: false, useCORS: true },
@@ -597,7 +630,10 @@
             };
 
             try {
-                await html2pdf().set(opt).from(element).save();
+                // Generate PDF and inject dynamic page-specific footers
+                await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+                    window.PDF_HELPER.addPdfFooters(pdf);
+                }).save();
             } finally {
                 document.body.classList.remove('pdf-export-mode');
                 btn.innerHTML = origText;
@@ -1419,6 +1455,9 @@
 
         window.onload = () => {
             addCard();
+            if (typeof window.PDF_HELPER !== 'undefined') {
+                window.PDF_HELPER.initPrintLayout("PAYMENT BREAKDOWN");
+            }
             if (window.self !== window.top) document.body.classList.add('is-embedded');
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                 console.log('%c origination fee field online. you\'re doing better than you think.', 'color:#1D9E75; font-style:italic;');

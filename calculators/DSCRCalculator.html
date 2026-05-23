@@ -19,6 +19,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
 <script src="../public/assets/js/calculator-app.js"></script>
+<script src="../public/assets/js/pdf-helper.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
@@ -308,48 +309,23 @@ body.pdf-export-mode { background: white !important; }
 body.pdf-export-mode .no-print, 
 body.pdf-export-mode header, 
 body.pdf-export-mode .modal-header, 
-body.pdf-export-mode .pdf-btn, 
-body.pdf-export-mode .pdf-hint, 
-body.pdf-export-mode .sc-collapse, 
-body.pdf-export-mode .add-btn, 
-body.pdf-export-mode .debt-rm, 
-body.pdf-export-mode .owner-rm, 
-body.pdf-export-mode .scen-rm, 
-body.pdf-export-mode .refi-btn, 
-body.pdf-export-mode .addbacks-btn, 
-body.pdf-export-mode .lender-ctx-btn, 
-body.pdf-export-mode .tab-bar, 
-body.pdf-export-mode .ent-toggle-bar, 
 body.pdf-export-mode .lc-modal, 
-body.pdf-export-mode .pdf-picker, 
 body.pdf-export-mode .lp-disclaimer, 
 body.pdf-export-mode .tooltip-icon, 
 body.pdf-export-mode .lp-howto,
 body.pdf-export-mode .calc-card-header,
 body.pdf-export-mode .gated-overlay { display: none !important; }
 
-body.pdf-export-mode .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
-body.pdf-export-mode .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
-body.pdf-export-mode .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
+body.pdf-export-mode .print-header-content { display: block !important; margin-bottom: 20px !important; padding-top: 0 !important; }
+body.pdf-export-mode .print-header-content img { display: none !important; }
+body.pdf-export-mode .print-header-content h1 { display: none !important; }
 
 body.pdf-export-mode .lp-main { padding: 0 !important; display: block !important; max-width: 800px !important; margin: 0 auto !important; }
 body.pdf-export-mode .lp-container { border: none !important; box-shadow: none !important; max-width: 100% !important; width: 100% !important; }
-body.pdf-export-mode .lp-body { padding: 0 !important; }
-body.pdf-export-mode .sc { border: none !important; border-bottom: 1px solid #e5e7eb !important; border-radius: 0 !important; margin-bottom: 24px !important; break-inside: avoid; }
-body.pdf-export-mode .sc-body { display: block !important; }
-body.pdf-export-mode .sc.collapsed .sc-body { display: block !important; }
-body.pdf-export-mode .sc.pdf-hide { display: none !important; }
-body.pdf-export-mode .gated-section.is-locked .sc-body { opacity: 1 !important; filter: none !important; }
-body.pdf-export-mode .inp { border: none !important; padding-left: 18px !important; font-weight: 700 !important; }
-body.pdf-export-mode .save-field input { border: none !important; padding: 0 !important; font-weight: 800 !important; }
-body.pdf-export-mode .owner-name { border: none !important; }
-body.pdf-export-mode .scen-name { border: none !important; }
-body.pdf-export-mode .mode-bar { background: transparent !important; border: none !important; padding: 0 !important; }
-body.pdf-export-mode .mode-btn:not(.active) { display: none !important; }
-body.pdf-export-mode .mode-btn.active { background: transparent !important; color: var(--lp-dark) !important; text-align: left !important; font-size: 14px !important; padding: 0 !important; }
-
-body.pdf-export-mode .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
-body.pdf-export-mode .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
+body.pdf-export-mode .lp-body { display: none !important; }
+body.pdf-export-mode .dscr-print-view { display: block !important; }
+body.pdf-export-mode .print-footer-legal { display: none !important; }
+body.pdf-export-mode .print-watermark { display: none !important; }
 
 .lp-disclaimer {
     font-size: 10px;
@@ -579,6 +555,8 @@ body.pdf-export-mode .print-watermark { display: block !important; font-size: 10
                 </div>
             </div>
         </div>
+
+        <div class="dscr-print-view print-only" id="dscrPrintView"></div>
 
         <div class="print-footer-legal">
             THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
@@ -931,11 +909,136 @@ async function runPDF() {
     btn.innerHTML = "Generating...";
     btn.disabled = true;
 
+    // 1. Render Gate check
+    const hasEbida = Object.values(S.ebida).some(v => v > 0);
+    const hasScenarioAmount = S.scenarios.some(s => s.amount > 0);
+    
+    if (!hasEbida || !hasScenarioAmount) {
+        window.PDF_HELPER.showToast("Complete your inputs to generate this document.", true);
+        btn.innerHTML = origText;
+        btn.disabled = false;
+        return;
+    }
+
+    // 2. Build the dynamic print-view HTML
+    const printView = document.getElementById('dscrPrintView');
+    if (printView) {
+        const activeEntity = S.entity ? ENTITIES.find(x => x.id === S.entity) : null;
+        const entityName = activeEntity ? activeEntity.name : "Not Selected";
+        const taxForm = activeEntity ? activeEntity.form : "N/A";
+        
+        let reqDocs = "Select an entity type to view required documents.";
+        if (activeEntity) {
+            var lines = LINE_ITEMS[activeEntity.form] || {};
+            reqDocs = Object.keys(lines).map(k => `<li><strong>${lines[k].ref}</strong>${lines[k].helper ? ' (' + lines[k].helper + ')' : ''}</li>`).join('');
+            reqDocs = `<ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #4B5563;">${reqDocs}</ul>`;
+        }
+
+        // EBIDA Rows
+        let ebidaRows = "";
+        let totalEbida = 0;
+        Object.keys(S.ebida).forEach(k => {
+            const val = S.ebida[k];
+            totalEbida += val;
+            const label = k.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+            ebidaRows += `
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #F3F4F6; font-size: 13px;">
+                    <span style="color: #4B5563;">${label}</span>
+                    <span style="font-weight: 600; color: #111827;">${fmt(val)}</span>
+                </div>
+            `;
+        });
+
+        // Scenario rows
+        let cd = getCalcData();
+        let scenarioCardsHTML = "";
+        S.scenarios.forEach(sc => {
+            const mp = calcPmt(sc.amount, sc.rate, sc.term);
+            const db = (mp*12+cd.bObl)>0 ? cd.ebida/(mp*12+cd.bObl) : 0;
+            const dg = (mp*12+cd.gObl)>0 ? cd.global/(mp*12+cd.gObl) : 0;
+            const pass = (S.mode==='bdscr'?db>=1.15:(S.mode==='gdscr'?dg>=1.0:(db>=1.15&&dg>=1.0)));
+            
+            let dscrResultsHTML = "";
+            if (S.mode === 'both' || S.mode === 'bdscr') {
+                dscrResultsHTML += `
+                    <div style="text-align: center; background: ${db >= 1.15 ? '#F0FDF4' : '#FEF2F2'}; border: 1px solid ${db >= 1.15 ? '#BBF7D0' : '#FCA5A5'}; padding: 10px; border-radius: 8px; flex: 1;">
+                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #4B5563;">BDSCR</div>
+                        <div style="font-size: 20px; font-weight: 800; color: ${db >= 1.15 ? '#14532D' : '#991B1B'};">${db.toFixed(2)}</div>
+                        <div style="font-size: 9px; color: #6B7280; margin-top: 2px;">min 1.15x</div>
+                    </div>
+                `;
+            }
+            if (S.mode === 'both' || S.mode === 'gdscr') {
+                dscrResultsHTML += `
+                    <div style="text-align: center; background: ${dg >= 1.0 ? '#F0FDF4' : '#FEF2F2'}; border: 1px solid ${dg >= 1.0 ? '#BBF7D0' : '#FCA5A5'}; padding: 10px; border-radius: 8px; flex: 1;">
+                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #4B5563;">GDSCR</div>
+                        <div style="font-size: 20px; font-weight: 800; color: ${dg >= 1.0 ? '#14532D' : '#991B1B'};">${dg.toFixed(2)}</div>
+                        <div style="font-size: 9px; color: #6B7280; margin-top: 2px;">min 1.00x</div>
+                    </div>
+                `;
+            }
+
+            scenarioCardsHTML += `
+                <div style="border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; margin-bottom: 16px; background: #FFFFFF; break-inside: avoid; page-break-inside: avoid;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px; margin-bottom: 14px;">
+                        <span style="font-size: 15px; font-weight: 800; color: #111827;">${sc.name}</span>
+                        <span style="font-size: 13px; font-weight: 500; color: #4B5563;">Payment: <strong>${fmt(mp)}/mo</strong></span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; font-size: 12px; color: #4B5563;">
+                        <div>Amount: <strong style="color: #111827;">${fmt(sc.amount)}</strong></div>
+                        <div>Term: <strong style="color: #111827;">${sc.term} Years</strong></div>
+                        <div>Rate: <strong style="color: #111827;">${sc.rate}%</strong></div>
+                    </div>
+                    <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+                        ${dscrResultsHTML}
+                    </div>
+                    <div style="font-size: 12.5px; color: ${pass ? '#14532D' : '#991B1B'}; font-weight: 600; padding: 8px 12px; background: ${pass ? '#F0FDF4' : '#FEF2F2'}; border-radius: 6px; border: 1px solid ${pass ? '#BBF7D0' : '#FCA5A5'};">
+                        ${pass ? '✔ PASS - Likely to approve.' : '✘ FAIL - Below lender DSCR thresholds.'}
+                    </div>
+                </div>
+            `;
+        });
+
+        printView.innerHTML = `
+            <div style="margin-bottom: 24px; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 20px;">
+                <div>
+                    <h3 style="font-size: 12px; font-weight: 800; color: #111827; margin-top: 0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Entity & Tax Form Information</h3>
+                    <div style="font-size: 13px; color: #111827; font-weight: 600; margin-bottom: 6px;">Entity Type: <span style="font-weight: 700; color: #14532D;">${entityName}</span></div>
+                    <div style="font-size: 13px; color: #111827; font-weight: 600; margin-bottom: 12px;">Tax Form: <span style="font-weight: 700; color: #14532D;">${taxForm}</span></div>
+                    <h4 style="font-size: 11px; font-weight: 700; color: #6B7280; margin-top: 0; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Required Tax Documents</h4>
+                    ${reqDocs}
+                </div>
+                <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h3 style="font-size: 11px; font-weight: 800; color: #6B7280; margin-top: 0; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #E5E7EB; padding-bottom: 6px;">EBIDA Summary</h3>
+                        ${ebidaRows}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 14px; padding-top: 10px; border-top: 1.5px solid #E5E7EB; font-weight: 800; font-size: 13px;">
+                        <span style="color: #111827;">Total EBIDA</span>
+                        <span style="color: #14532D;">${fmt(totalEbida)}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="font-size: 12px; font-weight: 800; color: #111827; margin-top: 0; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Scenario Cash Flow Modeling</h3>
+            <div>
+                ${scenarioCardsHTML}
+            </div>
+            
+            <div style="font-size: 10px; color: #6B7280; background: #F9FAFB; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; margin-top: 20px;">
+                <strong>SBA SOP Baseline Reference:</strong> BDSCR min 1.15x is required for all loans > $350k. GDSCR min 1.00x is typically required for global cash flow coverage.
+            </div>
+        `;
+    }
+
+    // Setup custom print header band dynamically per plan tier
+    window.PDF_HELPER.initPrintLayout("DSCR ANALYSIS");
+
     document.body.classList.add('pdf-export-mode');
     
     const element = document.querySelector('.lp-main');
     const opt = {
-        margin: [10, 10],
+        margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
         filename: `LendPaper_DSCR_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, logging: false, useCORS: true },
@@ -943,7 +1046,10 @@ async function runPDF() {
     };
 
     try {
-        await html2pdf().set(opt).from(element).save();
+        // Generate PDF and inject dynamic page-specific footers
+        await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+            window.PDF_HELPER.addPdfFooters(pdf);
+        }).save();
     } finally {
         document.body.classList.remove('pdf-export-mode');
         btn.innerHTML = origText;
@@ -1011,6 +1117,7 @@ function setRandomBusinessPlaceholder() {
 // Init
 renderEntities(); renderMode(); renderEbida(); renderDebts(); renderOwners(); renderScenarios(); renderSummaries();
 setRandomBusinessPlaceholder();
+if (typeof window.PDF_HELPER !== 'undefined') window.PDF_HELPER.initPrintLayout("DSCR ANALYSIS");
 
 if (window.self !== window.top) {
     document.body.classList.add('is-embedded');

@@ -13,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
 <script src="../public/assets/js/calculator-app.js"></script>
+<script src="../public/assets/js/pdf-helper.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
@@ -409,9 +410,9 @@ body.pdf-export-mode .tooltip-icon,
 body.pdf-export-mode .lp-definition,
 body.pdf-export-mode .lp-inputs { display: none !important; }
 
-body.pdf-export-mode .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
-body.pdf-export-mode .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
-body.pdf-export-mode .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
+body.pdf-export-mode .print-header-content { display: block !important; margin-bottom: 20px !important; padding-top: 0 !important; }
+body.pdf-export-mode .print-header-content img { display: none !important; }
+body.pdf-export-mode .print-header-content h1 { display: none !important; }
 
 body.pdf-export-mode .lp-main { display: block !important; max-width: 800px !important; margin: 0 auto !important; padding: 0 !important; width: 800px !important; }
 body.pdf-export-mode .lp-card { border: none !important; box-shadow: none !important; break-inside: avoid; margin-bottom: 40px !important; width: 100% !important; max-width: 100% !important; display: block !important; }
@@ -419,8 +420,8 @@ body.pdf-export-mode .card-body-flex { display: block !important; width: 100% !i
 body.pdf-export-mode .lp-results { background: white !important; padding: 0 !important; display: block !important; width: 100% !important; }
 body.pdf-export-mode .lp-footer-container { display: block !important; width: 100% !important; margin-top: 40px !important; }
 
-body.pdf-export-mode .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
-body.pdf-export-mode .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
+body.pdf-export-mode .print-footer-legal { display: none !important; }
+body.pdf-export-mode .print-watermark { display: none !important; }
 body.pdf-export-mode .tk-eyebrow { display: none !important; }
 body.pdf-export-mode .card-center-title { display: none !important; }
 </style>
@@ -514,11 +515,43 @@ async function handleLendPaperSavePDF() {
     btn.innerHTML = "Generating...";
     btn.disabled = true;
 
+    // Render Gate check: Amount, term, rate for each card modeled
+    const cards = document.querySelectorAll('[id^="card-"]');
+    let isValid = true;
+    if (cards.length === 0) {
+        isValid = false;
+    } else {
+        cards.forEach(card => {
+            const id = card.id.split('-')[1];
+            const amountEl = document.getElementById(`loanAmount-${id}`);
+            const termEl = document.getElementById(`termYears-${id}`);
+            const rateEl = document.getElementById(`rateSpread-${id}`);
+            
+            const amount = amountEl ? parseFloat(amountEl.value) : 0;
+            const term = termEl ? parseFloat(termEl.value) : 0;
+            const rate = rateEl ? parseFloat(rateEl.value) : 0;
+            
+            if (!amount || !term || !rate) {
+                isValid = false;
+            }
+        });
+    }
+
+    if (!isValid) {
+        window.PDF_HELPER.showToast("Complete your inputs to generate this document.", true);
+        btn.innerHTML = origText;
+        btn.disabled = false;
+        return;
+    }
+
+    // Setup custom print header band dynamically per plan tier
+    window.PDF_HELPER.initPrintLayout("SBA 7(a) RATES & FEES");
+
     document.body.classList.add('pdf-export-mode');
     
     const element = document.querySelector('.lp-main');
     const opt = {
-        margin: [10, 10],
+        margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
         filename: `LendPaper_SBA_Fees_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, logging: false, useCORS: true },
@@ -526,7 +559,10 @@ async function handleLendPaperSavePDF() {
     };
 
     try {
-        await html2pdf().set(opt).from(element).save();
+        // Generate PDF and inject dynamic page-specific footers
+        await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+            window.PDF_HELPER.addPdfFooters(pdf);
+        }).save();
     } finally {
         document.body.classList.remove('pdf-export-mode');
         btn.innerHTML = origText;
@@ -715,6 +751,9 @@ function copyResults(id) {
 
 window.onload = () => {
     addCard();
+    if (typeof window.PDF_HELPER !== 'undefined') {
+        window.PDF_HELPER.initPrintLayout("SBA 7(a) RATES & FEES");
+    }
     if (window.self !== window.top) {
         document.body.classList.add('is-embedded');
     }

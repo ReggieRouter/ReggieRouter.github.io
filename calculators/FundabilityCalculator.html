@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
     <script src="../public/assets/js/calculator-app.js"></script>
+    <script src="../public/assets/js/pdf-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -362,9 +363,9 @@
         body.pdf-export-mode .calc-card-header,
         body.pdf-export-mode .lp-tabs { display: none !important; }
         
-        body.pdf-export-mode .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
-        body.pdf-export-mode .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
-        body.pdf-export-mode .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
+        body.pdf-export-mode .print-header-content { display: block !important; margin-bottom: 20px !important; padding-top: 0 !important; }
+        body.pdf-export-mode .print-header-content img { display: none !important; }
+        body.pdf-export-mode .print-header-content h1 { display: none !important; }
 
         body.pdf-export-mode .lp-main { display: block !important; max-width: 800px !important; margin: 0 auto !important; padding: 0 !important; width: 800px !important; }
         body.pdf-export-mode .lp-container { width: 100% !important; max-width: 100% !important; border: none !important; box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; display: block !important; }
@@ -372,8 +373,8 @@
         body.pdf-export-mode .lp-inputs { display: none !important; }
         body.pdf-export-mode .panel { display: block !important; width: 100% !important; }
         
-        body.pdf-export-mode .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
-        body.pdf-export-mode .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
+        body.pdf-export-mode .print-footer-legal { display: none !important; }
+        body.pdf-export-mode .print-watermark { display: none !important; }
         body.pdf-export-mode .tk-eyebrow { display: none !important; }
     </style>
 </head>
@@ -641,11 +642,43 @@
         btn.innerHTML = "Generating...";
         btn.disabled = true;
 
+        // Render Gate validation: revenue input + at least one position modeled
+        const monthlyRevVal = document.getElementById('monthly_rev').value;
+        const monthlyRev = monthlyRevVal ? parseFloat(monthlyRevVal.replace(/[^0-9.]/g, '')) : 0;
+        
+        let posCount = 0;
+        document.querySelectorAll('#positions_wrap .pos-row').forEach(row => {
+            const amtVal = row.querySelector('.pos-amt').value;
+            const amt = amtVal ? parseFloat(amtVal.replace(/[^0-9.]/g, '')) : 0;
+            if (amt > 0) {
+                posCount++;
+            }
+        });
+        
+        const fundAmtVal = document.getElementById('funding_amt').value;
+        const fundAmt = fundAmtVal ? parseFloat(fundAmtVal.replace(/[^0-9.]/g, '')) : 0;
+        const factorVal = document.getElementById('factor').value;
+        const factor = factorVal ? parseFloat(factorVal.replace(/[^0-9.]/g, '')) : 0;
+        const termValInput = document.getElementById('term_val').value;
+        const termVal = termValInput ? parseFloat(termValInput.replace(/[^0-9.]/g, '')) : 0;
+        
+        const hasNewFunding = fundAmt > 0 && factor > 0 && termVal > 0;
+        
+        if (!monthlyRev || (posCount === 0 && !hasNewFunding)) {
+            window.PDF_HELPER.showToast("Complete your inputs to generate this document.", true);
+            btn.innerHTML = origText;
+            btn.disabled = false;
+            return;
+        }
+
+        // Setup custom print header band dynamically per plan tier
+        window.PDF_HELPER.initPrintLayout("FUNDABILITY ESTIMATE");
+
         document.body.classList.add('pdf-export-mode');
         
         const element = document.querySelector('.lp-main');
         const opt = {
-            margin: [10, 10],
+            margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
             filename: `LendPaper_Fundability_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, logging: false, useCORS: true },
@@ -653,7 +686,10 @@
         };
 
         try {
-            await html2pdf().set(opt).from(element).save();
+            // Generate PDF and inject dynamic page-specific footers
+            await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+                window.PDF_HELPER.addPdfFooters(pdf);
+            }).save();
         } finally {
             document.body.classList.remove('pdf-export-mode');
             btn.innerHTML = origText;
@@ -922,6 +958,9 @@
         addPosition(450, 'daily');
         bindTips();
         runAll();
+        if (typeof window.PDF_HELPER !== 'undefined') {
+            window.PDF_HELPER.initPrintLayout("FUNDABILITY ESTIMATE");
+        }
         if (window.self !== window.top) {
             document.body.classList.add('is-embedded');
         }

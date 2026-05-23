@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
+  <!-- Base background block matching the desaturated slate-green shift (#2D6A4F) -->
+  <rect width="24" height="24" rx="5" fill="#2D6A4F"/>
+  <!-- Outline Document Sheet & L Monogram Monoline Glyph in White -->
+  <path d="M4 4v16h11l5-5V4H4z" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M15 20v-5h5" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M9 9v6" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M9 15h4" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter"/>
+  <!-- Outbound Arrow (↗) Overlaid in the Bottom-Right Quadrant -->
+  <path d="M15 15h4m0 0v-4m0 4l-5-5" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Circular Notification Badge in top-right corner in Amber/Gold (#D4A017) -->
+  <circle cx="19.5" cy="4.5" r="3.5" fill="#D4A017" stroke="white" stroke-width="0.8"/>
+</svg>
