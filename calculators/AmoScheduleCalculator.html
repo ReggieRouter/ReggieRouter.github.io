@@ -332,6 +332,16 @@
         body.pdf-export-mode .takeaway-eyebrow { display: none !important; }
         body.pdf-export-mode .table-scroll-container { max-height: none !important; overflow: visible !important; }
         body.pdf-export-mode .no-print { display: none !important; }
+        body.pdf-export-mode .lp-form-panel { display: none !important; }
+        body.pdf-export-mode .lp-results-panel { width: 100% !important; border-left: none !important; background: #fff !important; }
+
+        /* Print-only loan parameter summary */
+        .pdf-loan-params { display: none; }
+        body.pdf-export-mode .pdf-loan-params { display: block !important; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; background: #F9FAFB; }
+        .pdf-params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+        .pdf-param-label { font-size: 10px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+        .pdf-param-value { font-size: 13px; font-weight: 600; color: #111827; }
+
         .fee-unit { cursor: pointer; user-select: none; transition: color 0.15s; }
         .fee-unit:hover { color: #14532D !important; }
         .track-btn { padding: 4px 10px; border-radius: 99px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border: 1.5px solid #E5E7EB; color: #94A3B8; cursor: pointer; transition: all 0.15s; background: transparent; font-family: inherit; }
@@ -591,7 +601,26 @@
 
     <script>
         const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.";
-        
+
+        function populatePdfParams(id) {
+            const amt = parseFloat(document.getElementById(`amt-${id}`)?.value) || 0;
+            const factor = parseFloat(document.getElementById(`factor-${id}`)?.value) || 0;
+            const term = parseInt(document.getElementById(`term-${id}`)?.value) || 0;
+            const freq = document.getElementById(`freq-${id}`)?.value || '';
+            const feeInput = parseFloat(document.getElementById(`fee-${id}`)?.value) || 0;
+            const feeIsDollar = document.getElementById(`feeWrap-${id}`)?.dataset.feeMode === 'dollar';
+            const startDate = document.getElementById(`start-${id}`)?.value || '';
+            const freqLabels = { daily: 'Daily', weekly: 'Weekly', semimonthly: 'Semi-Monthly', monthly: 'Monthly' };
+            const feeDisplay = feeIsDollar ? fmtUsd.format(feeInput) : feeInput.toFixed(1) + '%';
+            const set = (eid, val) => { const el = document.getElementById(eid); if (el) el.textContent = val; };
+            set(`ppAmt-${id}`, fmtUsd.format(amt));
+            set(`ppFactor-${id}`, factor.toFixed(2) + 'x');
+            set(`ppTerm-${id}`, term + ' months');
+            set(`ppFreq-${id}`, freqLabels[freq] || freq);
+            set(`ppFee-${id}`, feeDisplay);
+            set(`ppStart-${id}`, startDate);
+        }
+
         async function handleLendPaperSavePDF() {
             const btn = event.currentTarget;
             const origText = btn.innerHTML;
@@ -630,6 +659,12 @@
             // Setup custom print header band dynamically per plan tier
             window.PDF_HELPER.initPrintLayout("PAYMENT BREAKDOWN");
 
+            // Populate read-only loan parameter summary (replaces hidden form in PDF)
+            cards.forEach(card => {
+                const cid = card.id.split('-')[1];
+                populatePdfParams(cid);
+            });
+
             if (cards.length > 1) {
                 document.body.classList.add('multi-scenario');
             }
@@ -640,7 +675,7 @@
                 margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
                 filename: `LendPaper_Amortization_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 740 },
+                html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 740, scrollX: 0, scrollY: 0 },
                 jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
             };
 
@@ -909,7 +944,7 @@
                 </div>
 
                 <div class="flex flex-col md:flex-row">
-                    <div class="w-full md:w-[50%] p-[20px] sm:p-[32px] flex flex-col relative">
+                    <div class="lp-form-panel w-full md:w-[50%] p-[20px] sm:p-[32px] flex flex-col relative">
                         <div class="lp-howto relative pr-8" id="intro-box-${id}" style="display: ${isDismissed ? 'none' : 'block'};">
                             <button onclick="dismissIntro()" class="absolute top-2.5 right-3 text-[#6B7280] hover:text-[#14532D] transition-colors font-bold text-base leading-none no-print" style="background: transparent; border: none; cursor: pointer;" aria-label="Dismiss">&times;</button>
                             Enter the financing amount, rate, and term. You'll see the exact <strong>payment schedule</strong> — and what to tell your borrower about total cost and prepayment savings.
@@ -994,8 +1029,18 @@
                         <input type="number" id="discPct-${id}" value="25" min="0" max="100" style="display:none">
                     </div>
 
-                    <div class="w-full md:w-[50%] p-[20px] sm:p-[32px] flex flex-col results-col">
+                    <div class="lp-results-panel w-full md:w-[50%] p-[20px] sm:p-[32px] flex flex-col results-col">
                         <div>
+                            <div class="pdf-loan-params" id="pdfParams-${id}">
+                                <div class="pdf-params-grid">
+                                    <div><div class="pdf-param-label">Financing Amount</div><div class="pdf-param-value" id="ppAmt-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Cost per Dollar</div><div class="pdf-param-value" id="ppFactor-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Term</div><div class="pdf-param-value" id="ppTerm-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Payment Frequency</div><div class="pdf-param-value" id="ppFreq-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Origination Fee</div><div class="pdf-param-value" id="ppFee-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Start Date</div><div class="pdf-param-value" id="ppStart-${id}">—</div></div>
+                                </div>
+                            </div>
                             <div class="mb-6 pb-6 border-b border-[#E5E7EB]">
                                 <div class="text-[11px] text-[#64748B] font-bold uppercase tracking-wider mb-2" id="lblPmt-${id}">Est. payment</div>
                                 <div class="text-[42px] font-black text-[#14532D] leading-none tracking-tight" id="valPmt-${id}">$0.00</div>
