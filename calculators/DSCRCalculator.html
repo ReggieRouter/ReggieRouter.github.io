@@ -1043,6 +1043,16 @@ async function runPDF() {
     // Setup custom print header band dynamically per plan tier
     window.PDF_HELPER.initPrintLayout("DSCR ANALYSIS");
 
+    const cards = document.querySelectorAll('[id^="card-"]');
+    if (cards.length > 1) {
+        document.body.classList.add('multi-scenario');
+    }
+
+    window.scrollTo(0, 0);
+    document.documentElement.scrollLeft = 0;
+    document.body.scrollLeft = 0;
+    await new Promise(r => setTimeout(r, 50));
+
     document.body.classList.add('pdf-export-mode');
     
     const element = document.querySelector('.lp-main');
