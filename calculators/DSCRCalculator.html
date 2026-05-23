@@ -340,10 +340,12 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     font-size: 10px;
     font-weight: 600;
     text-align: center;
-    padding: 12px 24px 24px;
+    padding: 14px 24px;
     color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    border-top: 1px solid var(--lp-border);
+    background: var(--gray-50);
 }
 
 /* Override global lp-definition to match lp-howto green-tinted style */
@@ -573,11 +575,11 @@ body.pdf-export-mode .print-watermark { display: none !important; }
         <div class="print-watermark">
             Powered by LendPaper | info@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.
         </div>
-    </div>
-</div>
 
-<div class="lp-disclaimer">
-    DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+        <div class="lp-disclaimer no-print">
+            DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+        </div>
+    </div>
 </div>
 
 <div class="lc-modal" id="lenderCtxModal" onclick="if(event.target===this)closeLenderCtx()">
@@ -984,7 +986,7 @@ function renderSummaries(){
     h += '<div class="sum-card '+(pass?'sum-pass':'sum-fail')+'"><div class="sum-text"><strong>'+sc.name+':</strong> '+ (S.mode==='both'?'BDSCR '+db.toFixed(2)+' & GDSCR '+dg.toFixed(2) : (S.mode==='gdscr'?'GDSCR '+dg.toFixed(2):'BDSCR '+db.toFixed(2))) + (pass?' - Likely to approve.':' - Below thresholds.') + '</div></div>';
   });
   document.getElementById('summaries').innerHTML = h;
-  document.getElementById('sopBaseline').innerHTML = '<div style="font-size:11px; color:var(--lp-text-muted); background:var(--gray-50); padding:12px; border-radius:10px; border:1px solid var(--lp-border);"><strong>SBA SOP Baseline:</strong> BDSCR min 1.15x for loans > $350k. GDSCR min 1.00x.</div>';
+  document.getElementById('sopBaseline').innerHTML = '<div style="font-size:11px; color:var(--lp-text-muted); background:var(--gray-50); padding:12px; border-radius:10px; border:1px solid var(--lp-border);"><strong>SBA SOP Baseline Reference:</strong> BDSCR min 1.15x per SBA SOP 50 10 7 (Standard 7(a) loans). GDSCR min 1.00x when global cash flow analysis is required (typically for loans &gt; $350k or where business cash flow alone is insufficient).</div>';
 }
 
 function toggleSc(btn){ var sc=btn.closest('.sc'); sc.classList.toggle('collapsed'); btn.innerHTML=sc.classList.contains('collapsed')?'&#9660;':'&#9650;'; }
@@ -1121,7 +1123,7 @@ async function runPDF() {
             </div>
             
             <div style="font-size: 10px; color: #6B7280; background: #F9FAFB; padding: 12px; border-radius: 8px; border: 1px solid #E5E7EB; margin-top: 20px;">
-                <strong>SBA SOP Baseline Reference:</strong> BDSCR min 1.15x is required for all loans > $350k. GDSCR min 1.00x is typically required for global cash flow coverage.
+                <strong>SBA SOP Baseline Reference:</strong> BDSCR min 1.15x per SBA SOP 50 10 7 (Standard 7(a) loans). GDSCR min 1.00x when global cash flow analysis is required (typically for loans &gt; $350k or where business cash flow alone is insufficient). EBIDA = Net Income + Interest + Depreciation + Amortization + Owner Compensation add-backs per standard SBA underwriting.
             </div>
         `;
     }
@@ -1134,30 +1136,18 @@ async function runPDF() {
         document.body.classList.add('multi-scenario');
     }
 
+    window.scrollTo(0, 0);
+    document.documentElement.scrollLeft = 0;
+    document.body.scrollLeft = 0;
+    await new Promise(r => setTimeout(r, 50));
+
     document.body.classList.add('pdf-export-mode');
 
     window.scrollTo(0, 0);
     document.documentElement.scrollLeft = 0;
     document.body.scrollLeft = 0;
-    const mainEl = document.querySelector('.lp-main');
-    if (mainEl) mainEl.scrollLeft = 0;
-    const containerEl = document.querySelector('.lp-container');
-    if (containerEl) containerEl.scrollLeft = 0;
+    await new Promise(r => setTimeout(r, 100));
 
-    try {
-        if (window.parent && window.parent !== window) {
-            window.parent.scrollTo(0, 0);
-            if (window.parent.document.documentElement) {
-                window.parent.document.documentElement.scrollLeft = 0;
-            }
-            if (window.parent.document.body) {
-                window.parent.document.body.scrollLeft = 0;
-            }
-        }
-    } catch (e) {}
-
-    await new Promise(r => setTimeout(r, 50));
-    
     const element = document.querySelector('.lp-main');
     const opt = {
         margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
