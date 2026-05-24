@@ -7,7 +7,7 @@ Always verify contrast before finalizing UI changes.
 
 **CRITICAL BRANDING RULE:** NEVER use the word "Lendio" or any Lendio-branded assets (e.g., lendio-logo.jpg) in any content, code, or metadata. The project identity is EXCLUSIVELY **LendPaper**. Any mention of Lendio is a critical failure.
 
-**Engineering Standards (v1.7):**
+**Engineering Standards (v1.8):**
 - **UI Layout:** Modals MUST be vertically centered in the viewport with minimal dead space. Use `align-items: center` in the main flex container.
 - **PDF/Print Infrastructure:**
     - EVERY print output MUST include the primary **LendPaper logo** (`logo-lockup-light.svg`) centered at the top, followed by a professional report title.
@@ -25,6 +25,19 @@ Always verify contrast before finalizing UI changes.
         - Font size: `11px`.
         - Line height: `1.6`.
 - **Components:** Tooltip icons must use a lowercase 'i'. Explanation boxes are currently retired.
+- **Glossary UI/UX Standards:**
+    - **Dynamic Cross-Linking**: Overlapping and related terms in glossary definitions (e.g. `Factor Rate`, `Amortization`, `DSCR`, `APR`, `UCC-1`) MUST be dynamically parsed at runtime and cross-linked using dot-underlined hyperlinks (`.glossary-link`).
+    - **Visual Highlighting**: Clicking a cross-link or selecting a glossary term MUST trigger a smooth-scroll jump and a temporary pulsing gold highlight transition (`.g-item-highlight` using `#D4A017`) to immediately guide the user's attention.
+    - **Category Pill Navigation**: Glossary controls MUST include a scrollable category filter bar displaying count badges per category (e.g. `Underwriting`, `Credit`, `Legal & Compliance`, `CRE & ABL`, `Equipment & Factoring`, `Sales & Brokerage`, `Core Finance`).
+    - **Collapsible Examples/Calculations**: Detailed real-world calculations and examples MUST be automatically parsed and rendered inside collapsible accordions styled with gold alert left-borders (`.g-example-entry`).
+- **SEO & Routing Standards:**
+    - **Canonicalization**: Every view/route MUST include a canonical link `<link rel="canonical" href="https://lendpaper.com/...">` in the `<head>` to prevent indexing duplication.
+    - **Heading Hierarchy**: Every Single-Page-App dashboard MUST maintain semantic SEO by including a visually-hidden `<h1>` element specifying the core page search intent (e.g. `"LendPaper - Commercial Lending Calculators & Broker Tools"`).
+    - **Crawl Configuration**: Maintain a root `/robots.txt` that correctly references an authoritative `/sitemap.xml` listing all indexable URLs (`/`, `/lendpaper-why.html`, `/legal/estimates/`).
+- **Legal Compliance Terminology:**
+    - **Cold Calling (TCPA/DNC)**: All broker/BDR solicitation guides and vocabulary MUST explicitly outline federal `TCPA` and `DNC Registry` constraints and warn about statutory violation fees.
+    - **State Disclosure Laws (APR Mandate)**: Under CA (SB 1235) and NY (SB 5470), commercial alternative funding (MCA/RBF) contracts MUST declare an estimated APR alongside factor rates and total finance charges.
+    - **Purchase Receivables**: Maintain deep operational distinction that Merchant Cash Advances (MCA) and Revenue-Based Financing (RBF) are legally structured as sales of future receivables at a discount, ensuring there is no absolute repayment covenant, which exempts them from traditional state usury caps.
 
 **Quality Check Mandate:**
 - **File Integrity:** After every file edit, you MUST verify that the file ends exactly at `</html>` (for HTML files) or the appropriate closing tag/brace. NEVER leave stray characters, duplicated code blocks, or "garbage" text after the logical end of a file.
