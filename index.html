@@ -389,6 +389,54 @@ input { font-family: inherit; }
 .glossary-header { margin-bottom: 20px; }
 .glossary-subtitle { font-size: 13px; color: var(--text-muted); }
 
+.glossary-search-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 16px;
+}
+
+.glossary-category-wrap {
+  margin-bottom: 16px;
+}
+.glossary-category-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.glossary-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.category-pill {
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.category-pill:hover {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+  background: var(--accent-soft);
+}
+.category-pill.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
 .glossary-controls-wrap {
   position: sticky; top: 0; z-index: 10;
   background: var(--bg-page); padding: 12px 0;
@@ -418,30 +466,6 @@ input { font-family: inherit; }
 .letter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .letter-btn:disabled { opacity: 0.3; cursor: default; background: transparent; border-color: transparent; }
 
-.glossary-category-select {
-  height: 28px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  padding: 0 10px;
-  outline: none;
-  cursor: pointer;
-  transition: border-color var(--transition), color var(--transition);
-  font-family: inherit;
-  margin-left: 6px;
-  flex-shrink: 0;
-}
-.glossary-category-select:hover {
-  border-color: var(--accent);
-  color: var(--accent-hover);
-}
-.glossary-category-select:focus {
-  border-color: var(--accent);
-}
-
 .glossary-section { margin-bottom: 24px; }
 .glossary-letter-header {
   position: sticky; top: 52px; z-index: 9;
@@ -461,7 +485,7 @@ input { font-family: inherit; }
 }
 
 .g-item {
-  display: grid; grid-template-columns: 180px 1fr;
+  display: grid; grid-template-columns: 30% 70%;
   background: var(--bg); border-bottom: 1px solid var(--border);
   transition: background var(--transition);
   position: relative;
@@ -472,15 +496,23 @@ input { font-family: inherit; }
   content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
   background: var(--accent); opacity: 0; transition: opacity var(--transition);
 }
-.g-item:hover { background: var(--bg-alt); }
+.g-item:hover { background: var(--accent-soft) !important; }
 .g-item:hover::before { opacity: 1; }
-/* Permanent accent for first entry under a letter */
-.glossary-section .g-item:first-child::before { opacity: 0.5; }
-.glossary-section .g-item:first-child:hover::before { opacity: 1; }
 
 /* Alternating row background */
 .g-item:nth-child(even) { background: #fafafa; }
-.g-item:nth-child(even):hover { background: var(--bg-alt); }
+.g-item:nth-child(even):hover { background: var(--accent-soft) !important; }
+
+.g-term-cat {
+  display: inline-block; padding: 2px 6px; border-radius: 100px;
+  font-size: 8.5px; font-weight: 700; text-transform: uppercase;
+  margin-top: 6px; width: fit-content; border: 1px solid rgba(0,0,0,0.03);
+  transition: all var(--transition);
+}
+.g-term-cat:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
 
 .g-term { padding: 16px; border-right: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; min-width: 0; overflow-wrap: anywhere; }
 .g-term-name { font-size: 13.5px; font-weight: 700; color: var(--text); line-height: 1.3; }
@@ -950,7 +982,7 @@ input { font-family: inherit; }
         <div class="nav-label">Reference</div>
         <button class="nav-item" data-view="glossary" onclick="navigateToView('glossary')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-          Glossary
+          Glossary<span class="nav-count" id="count-glossary">178</span>
         </button>
       </div>
       <div class="nav-divider"></div>
@@ -967,7 +999,6 @@ input { font-family: inherit; }
     </nav>
 
     <div class="sidebar-footer">
-      <p>Custom tooling &amp; white-labeling available.<br><a href="mailto:info@lendpaper.com?subject=Interested%20in%20LendPaper%20Services&amp;body=Hi%20LendPaper%2C%20I'm%20interested%20in%20your%20services.%20Reply%20and%20let's%20set%20a%20time.">info@lendpaper.com</a></p>
     </div>
   </aside>
 
@@ -1009,8 +1040,24 @@ input { font-family: inherit; }
       <!-- Glossary -->
       <div class="view" id="view-glossary">
         <div class="glossary-header">
-          <p class="glossary-subtitle">95 terms to help you navigate commercial lending — and growing.</p>
+          <p class="glossary-subtitle">The reference tab you keep open on calls.</p>
         </div>
+
+        <div class="glossary-search-wrap">
+          <span class="search-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+          <input id="glossarySearchInput" class="search-input" type="search" placeholder="Search 178 terms..." autocomplete="off" spellcheck="false" aria-label="Search glossary" oninput="filterGlossary(this.value)">
+          <button id="glossarySearchClear" class="search-clear" aria-label="Clear search" onclick="clearGlossarySearch()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="glossary-category-wrap">
+          <div class="glossary-category-label">I'm working in...</div>
+          <div class="glossary-categories" id="glossaryCategories"></div>
+        </div>
+
         <div class="glossary-controls-wrap">
           <div class="glossary-controls" id="letterBar"></div>
         </div>
@@ -1450,9 +1497,11 @@ function highlightGlossaryTerm(termName) {
       setGlossaryCategory('All');
     }
     
-    const searchInput = document.getElementById('search-input');
+    const searchInput = document.getElementById('search-input') || document.getElementById('glossarySearchInput');
     if (searchInput && searchInput.value) {
       searchInput.value = '';
+      const clearBtn = document.getElementById('glossarySearchClear') || document.getElementById('searchClear');
+      if (clearBtn) clearBtn.classList.remove('visible');
       filterGlossary('');
     }
     
@@ -1539,7 +1588,7 @@ function gItemHTML(g) {
     <div class="g-term">
       <span class="g-term-name">${g.term}</span>
       ${g.abbrev ? `<span class="g-term-abbrev">${g.abbrev}</span>` : ''}
-      <span class="g-term-cat" style="background: ${catColorMap[cat]}; color: ${catTextColorMap[cat]}; display: inline-block; padding: 2px 6px; border-radius: 100px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; margin-top: 6px; width: fit-content; border: 1px solid rgba(0,0,0,0.03);">${cat}</span>
+      <span class="g-term-cat cursor-pointer" onclick="setGlossaryCategory('${cat}')" style="background: ${catColorMap[cat]}; color: ${catTextColorMap[cat]};">${cat}</span>
     </div>
     <div class="g-def">${defHtml}</div>
   </div>`;
@@ -1553,6 +1602,10 @@ function toggleGDetails(btn) {
 
 function setGlossaryCategory(cat) {
   currentGlossaryCategory = cat;
+  
+  document.querySelectorAll('.category-pill').forEach(pill => {
+    pill.classList.toggle('active', pill.textContent.trim() === cat);
+  });
   
   const selectEl = document.getElementById('glossaryCategorySelect');
   if (selectEl) {
@@ -1626,16 +1679,15 @@ function renderGlossary() {
     const ch = String.fromCharCode(i);
     bar += `<button class="letter-btn" onclick="scrollToLetter('${ch}')" data-letter="${ch}">${ch}</button>`;
   }
+  document.getElementById('letterBar').innerHTML = bar;
   
   const categories = ['All', 'Underwriting', 'Credit', 'Legal & Compliance', 'CRE & ABL', 'Equipment & Factoring', 'Sales & Brokerage', 'Core Finance'];
-  bar += `<select class="glossary-category-select" id="glossaryCategorySelect" onchange="setGlossaryCategory(this.value)">`;
+  let catHtml = '';
   categories.forEach(cat => {
-    const selectedAttr = cat === currentGlossaryCategory ? 'selected' : '';
-    bar += `<option value="${cat}" ${selectedAttr}>${cat}</option>`;
+    const activeClass = cat === currentGlossaryCategory ? 'active' : '';
+    catHtml += `<button class="category-pill ${activeClass}" onclick="setGlossaryCategory('${cat}')">${cat}</button>`;
   });
-  bar += `</select>`;
-  
-  document.getElementById('letterBar').innerHTML = bar;
+  document.getElementById('glossaryCategories').innerHTML = catHtml;
   
   const contentArea = document.getElementById('content');
   contentArea.addEventListener('scroll', () => {
@@ -1697,12 +1749,29 @@ function filterGlossary(q) {
   document.querySelectorAll('.letter-btn').forEach(btn => {
     btn.style.display = hideLetters ? 'none' : '';
   });
+
+  const glossaryClearBtn = document.getElementById('glossarySearchClear');
+  if (glossaryClearBtn) {
+    glossaryClearBtn.classList.toggle('visible', !!q);
+  }
+}
+
+function clearGlossarySearch() {
+  const inp = document.getElementById('glossarySearchInput');
+  if (inp) inp.value = '';
+  const btn = document.getElementById('glossarySearchClear');
+  if (btn) btn.classList.remove('visible');
+  filterGlossary('');
 }
 
 function updateCounts() {
   document.getElementById('count-deal').textContent = TOOLS.filter(function(t){return t.group==='deal-math';}).length;
   document.getElementById('count-risk').textContent = TOOLS.filter(function(t){return t.group==='risk';}).length;
   document.getElementById('count-data').textContent = TOOLS.filter(function(t){return t.group==='data';}).length;
+  const glossEl = document.getElementById('count-glossary');
+  if (glossEl && typeof GLOSSARY !== 'undefined') {
+    glossEl.textContent = GLOSSARY.length;
+  }
 }
 
 /* ---- View switching ---- */
@@ -1733,6 +1802,25 @@ function switchView(v) {
   if (nb) nb.classList.add('active');
   document.getElementById('content').scrollTop = 0;
   closeMobile();
+
+  const searchWrap = document.querySelector('.search-wrap');
+  if (searchWrap) {
+    if (v === 'glossary') {
+      searchWrap.style.display = 'none';
+    } else {
+      searchWrap.style.display = '';
+    }
+  }
+
+  if (v !== 'glossary') {
+    const glossaryInp = document.getElementById('glossarySearchInput');
+    if (glossaryInp && glossaryInp.value) {
+      glossaryInp.value = '';
+      const glossaryClearBtn = document.getElementById('glossarySearchClear');
+      if (glossaryClearBtn) glossaryClearBtn.classList.remove('visible');
+      filterGlossary('');
+    }
+  }
 }
 
 /* ---- Search ---- */
