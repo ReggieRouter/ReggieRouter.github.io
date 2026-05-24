@@ -1214,6 +1214,15 @@ var ICO = {
   arrow:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
 };
 
+const taglines = [
+  "The reference tab you keep open on calls.",
+  "Built for lenders, not textbooks.",
+  "Stop Googling mid-call.",
+  "Know it before they ask.",
+  "Your edge on every call."
+];
+const randomTagline = taglines[Math.floor(Math.random() * taglines.length)];
+
 /* ---- Render ---- */
 function cardHTML(t, i) {
   var dis = t.status === 'soon';
@@ -1644,7 +1653,12 @@ function renderGlossary() {
   
   const subtitle = document.querySelector('.glossary-subtitle');
   if (subtitle) {
-    subtitle.textContent = `${GLOSSARY.length} terms to help you navigate commercial lending — and growing.`;
+    subtitle.textContent = randomTagline;
+  }
+  
+  const searchInput = document.getElementById('glossarySearchInput');
+  if (searchInput) {
+    searchInput.placeholder = `Search ${GLOSSARY.length} terms...`;
   }
 
   GLOSSARY.sort((a, b) => a.term.localeCompare(b.term)).forEach(g => {
