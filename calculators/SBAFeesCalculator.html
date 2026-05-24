@@ -556,6 +556,8 @@ async function handleLendPaperSavePDF() {
     // Setup custom print header band dynamically per plan tier
     window.PDF_HELPER.initPrintLayout("SBA 7(a) RATES & FEES");
 
+    await window.PDF_HELPER.resetScroll(50);
+
     if (cards.length > 1) {
         document.body.classList.add('multi-scenario');
     }
@@ -567,10 +569,7 @@ async function handleLendPaperSavePDF() {
 
     document.body.classList.add('pdf-export-mode');
 
-    window.scrollTo(0, 0);
-    document.documentElement.scrollLeft = 0;
-    document.body.scrollLeft = 0;
-    await new Promise(r => setTimeout(r, 100));
+    await window.PDF_HELPER.resetScroll(100);
 
     const element = document.querySelector('.lp-main');
     const opt = {

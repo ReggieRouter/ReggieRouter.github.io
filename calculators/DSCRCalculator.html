@@ -1139,17 +1139,11 @@ async function runPDF() {
         document.body.classList.add('multi-scenario');
     }
 
-    window.scrollTo(0, 0);
-    document.documentElement.scrollLeft = 0;
-    document.body.scrollLeft = 0;
-    await new Promise(r => setTimeout(r, 50));
+    await window.PDF_HELPER.resetScroll(50);
 
     document.body.classList.add('pdf-export-mode');
 
-    window.scrollTo(0, 0);
-    document.documentElement.scrollLeft = 0;
-    document.body.scrollLeft = 0;
-    await new Promise(r => setTimeout(r, 100));
+    await window.PDF_HELPER.resetScroll(100);
 
     const element = document.querySelector('.lp-main');
     const opt = {

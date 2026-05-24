@@ -684,6 +684,9 @@
         window.PDF_HELPER.initPrintLayout("FUNDABILITY ESTIMATE");
 
         const cards = document.querySelectorAll('[id^="card-"]');
+
+        await window.PDF_HELPER.resetScroll(50);
+
         if (cards.length > 1) {
             document.body.classList.add('multi-scenario');
         }
@@ -695,12 +698,9 @@
 
         document.body.classList.add('pdf-export-mode');
 
-        window.scrollTo(0, 0);
-        document.documentElement.scrollLeft = 0;
-        document.body.scrollLeft = 0;
-        await new Promise(r => setTimeout(r, 100));
+        await window.PDF_HELPER.resetScroll(100);
 
-        const element = document.body;
+        const element = document.querySelector('.lp-main');
         const opt = {
             margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
             filename: `LendPaper_Fundability_estimate_${new Date().toISOString().slice(0,10)}.pdf`,

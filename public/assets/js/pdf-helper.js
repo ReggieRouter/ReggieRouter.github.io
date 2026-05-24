@@ -118,6 +118,13 @@ window.PDF_HELPER = {
         headerEl.innerHTML = headerHTML;
     },
     
+    resetScroll: async function(delayMs) {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollLeft = 0;
+        document.body.scrollLeft = 0;
+        await new Promise(r => setTimeout(r, delayMs));
+    },
+
     addPdfFooters: function(pdf) {
         if (pdf.footersAdded) return;
         pdf.footersAdded = true;
