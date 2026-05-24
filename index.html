@@ -813,7 +813,63 @@ input { font-family: inherit; }
 }
 @media (max-width: 600px) {
   .featured-grid, .live-tools-grid, .soon-grid { grid-template-columns: 1fr; }
-  .greeting-text { font-size: 28px; }
+/* ==================== Category Pills & Highlights ==================== */
+.category-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 4px 8px;
+  margin-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.category-pills::-webkit-scrollbar { display: none; }
+.category-pill {
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  transition: all var(--transition);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.category-pill:hover { border-color: var(--accent); color: var(--accent-hover); }
+.category-pill.active {
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  border-color: var(--accent);
+}
+.glossary-link {
+  color: var(--accent-hover);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  cursor: pointer;
+  font-weight: 600;
+  transition: color var(--transition);
+}
+.glossary-link:hover {
+  color: var(--accent);
+  text-decoration-style: solid;
+}
+.g-item-highlight {
+  background-color: rgba(212, 160, 23, 0.15) !important;
+  transition: background-color 0.3s ease;
+}
+.g-item-highlight::before {
+  opacity: 1 !important;
+  background: #D4A017 !important;
+}
+.g-item-highlight-fade {
+  background-color: var(--bg) !important;
+  transition: background-color 0.5s ease;
+}
+.g-example-entry {
+  border-left: 2px solid #D4A017 !important;
+  background: rgba(212, 160, 23, 0.03) !important;
 }
 </style>
 </head>
@@ -924,6 +980,7 @@ input { font-family: inherit; }
           <p class="glossary-subtitle">95 terms to help you navigate commercial lending — and growing.</p>
         </div>
         <div class="glossary-controls-wrap">
+          <div class="category-pills" id="categoryPills"></div>
           <div class="glossary-controls" id="letterBar"></div>
         </div>
         <div class="glossary-grid" id="glossaryGrid"></div>
@@ -1289,34 +1346,169 @@ function renderCat(cat, id) {
   document.getElementById(id).innerHTML = html + '</div>';
 }
 
+let currentGlossaryCategory = 'All';
+
+function getTermCategory(g) {
+  const kw = (g.keywords || '').toLowerCase() + ' ' + g.term.toLowerCase() + ' ' + (g.def || '').toLowerCase();
+  if (kw.includes('underwriting') || kw.includes('uw') || kw.includes('red flag') || kw.includes('ebitda') || kw.includes('risk') || kw.includes('negative days') || kw.includes('deposit count') || kw.includes('ledger') || kw.includes('kiting') || kw.includes('stipulation') || kw.includes('stip') || kw.includes('nsf')) {
+    return 'Underwriting';
+  }
+  if (kw.includes('credit') || kw.includes('fico') || kw.includes('bureau') || kw.includes('paydex') || kw.includes('paynet') || kw.includes('tradeline') || kw.includes('utilization') || kw.includes('mop') || kw.includes('bankruptcy')) {
+    return 'Credit';
+  }
+  if (kw.includes('legal') || kw.includes('compliance') || kw.includes('ucc') || kw.includes('tila') || kw.includes('kyc') || kw.includes('law') || kw.includes('subordination') || kw.includes('court') || kw.includes('contract') || kw.includes('guarantee') || kw.includes('licens') || kw.includes('disclos')) {
+    return 'Legal & Compliance';
+  }
+  if (kw.includes('real estate') || kw.includes('cre') || kw.includes('mortgage') || kw.includes('ltv') || kw.includes('cltv') || kw.includes('cost') || kw.includes('yield') || kw.includes('environmental') || kw.includes('landlord')) {
+    return 'CRE & ABL';
+  }
+  if (kw.includes('factoring') || kw.includes('lease') || kw.includes('equipment') || kw.includes('efa') || kw.includes('invoice')) {
+    return 'Equipment & Factoring';
+  }
+  if (kw.includes('broker') || kw.includes('sales') || kw.includes('commission') || kw.includes('iso') || kw.includes('markup') || kw.includes('sell rate') || kw.includes('submission') || kw.includes('one-pager') || kw.includes('points') || kw.includes('acquisition')) {
+    return 'Sales & Brokerage';
+  }
+  return 'Core Finance';
+}
+
+function linkGlossaryTerms(defText, currentTerm) {
+  let text = defText;
+  
+  const links = [
+    { phrase: /factor rate/gi, term: "Factor Rate (FR)" },
+    { phrase: /amortization/gi, term: "Amortization" },
+    { phrase: /amortize/gi, term: "Amortization" },
+    { phrase: /dscr/gi, term: "DSCR (Debt Service Coverage Ratio)" },
+    { phrase: /apr/gi, term: "APR (Annual Percentage Rate)" },
+    { phrase: /simple interest/gi, term: "Simple Interest" },
+    { phrase: /underwriting/gi, term: "Underwriting" },
+    { phrase: /personal guarantee/gi, term: "Personal Guarantee (PG)" },
+    { phrase: /ucc-1/gi, term: "Lien (Blanket / UCC-1)" },
+    { phrase: /ucc/gi, term: "UCC (Uniform Commercial Code)" },
+    { phrase: /line of credit/gi, term: "Line of Credit (LOC)" },
+    { phrase: /factoring/gi, term: "Invoice Factoring" },
+    { phrase: /net out/gi, term: "Net Out (Net Payoff)" },
+    { phrase: /net payoff/gi, term: "Net Out (Net Payoff)" },
+    { phrase: /check kiting/gi, term: "Check Kiting" },
+    { phrase: /negative days/gi, term: "Negative Days" },
+    { phrase: /nsf/gi, term: "ACH Return Codes (R-Codes)" },
+    { phrase: /good standing/gi, term: "Good Standing" },
+    { phrase: /active corporate status/gi, term: "Active Corporate Status" }
+  ];
+  
+  links.forEach(l => {
+    if (currentTerm.toLowerCase().includes(l.term.toLowerCase()) || l.term.toLowerCase().includes(currentTerm.toLowerCase())) {
+      return;
+    }
+    
+    text = text.replace(l.phrase, (match) => {
+      return `<span class="glossary-link" onclick="highlightGlossaryTerm('${l.term}')">${match}</span>`;
+    });
+  });
+  
+  return text;
+}
+
+function highlightGlossaryTerm(termName) {
+  document.querySelectorAll('.g-item').forEach(item => item.classList.remove('g-item-highlight', 'g-item-highlight-fade'));
+  
+  const cleanId = 'g-term-' + termName.replace(/\s+/g, '-').replace(/[()"]/g, '');
+  const el = document.getElementById(cleanId);
+  if (el) {
+    if (el.style.display === 'none') {
+      setGlossaryCategory('All');
+    }
+    
+    const searchInput = document.getElementById('search-input');
+    if (searchInput && searchInput.value) {
+      searchInput.value = '';
+      filterGlossary('');
+    }
+    
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    const btn = el.querySelector('.g-details-btn');
+    const content = el.querySelector('.g-details-content');
+    if (btn && content && !content.classList.contains('show')) {
+      toggleGDetails(btn);
+    }
+    
+    el.classList.add('g-item-highlight');
+    
+    setTimeout(() => {
+      el.classList.add('g-item-highlight-fade');
+      setTimeout(() => {
+        el.classList.remove('g-item-highlight', 'g-item-highlight-fade');
+      }, 500);
+    }, 2000);
+  }
+}
+
 function gItemHTML(g) {
   let defHtml = g.def;
-  // Handle specific sub-column replacement for technical relationships
-  if (defHtml.includes("<strong>Relationship to")) {
+  
+  defHtml = linkGlossaryTerms(defHtml, g.term);
+  
+  const cat = getTermCategory(g);
+  
+  const catColorMap = {
+    'Underwriting': 'rgba(16, 185, 129, 0.1)',
+    'Credit': 'rgba(59, 130, 246, 0.1)',
+    'Legal & Compliance': 'rgba(239, 68, 68, 0.1)',
+    'CRE & ABL': 'rgba(139, 92, 246, 0.1)',
+    'Equipment & Factoring': 'rgba(236, 72, 153, 0.1)',
+    'Sales & Brokerage': 'rgba(245, 158, 11, 0.1)',
+    'Core Finance': 'rgba(107, 114, 128, 0.1)'
+  };
+  const catTextColorMap = {
+    'Underwriting': 'var(--accent-hover)',
+    'Credit': '#2563eb',
+    'Legal & Compliance': '#dc2626',
+    'CRE & ABL': '#7c3aed',
+    'Equipment & Factoring': '#db2777',
+    'Sales & Brokerage': '#d97706',
+    'Core Finance': '#4b5563'
+  };
+
+  const hasRelationships = defHtml.includes("<strong>Relationship to");
+  const hasExample = defHtml.includes("<strong>Example:") || defHtml.includes("<strong>Calculation:");
+  
+  if (hasRelationships || hasExample) {
     const parts = defHtml.split('<br><br>');
     const baseDef = parts[0];
     const details = parts.slice(1).map(p => {
-      const match = p.match(/<strong>(.*?)<\/strong>:\s*(.*)/);
-      if (match) return `<div class="g-sub-entry"><span class="g-sub-title">${match[1]}</span><span>${match[2]}</span></div>`;
+      const match = p.match(/<strong>(.*?)<\/strong>:\s*(.*)/s);
+      if (match) {
+        let label = match[1];
+        let content = match[2];
+        let sectionClass = "g-sub-entry";
+        if (label.toLowerCase().includes('example') || label.toLowerCase().includes('calculation')) {
+          sectionClass += " g-example-entry";
+        }
+        return `<div class="${sectionClass}"><span class="g-sub-title">${label}</span><span>${content}</span></div>`;
+      }
       return `<div class="g-sub-entry">${p}</div>`;
     }).join('');
+    
+    const accordionTitle = hasExample ? 'Examples & Calculations' : 'Technical Relationships';
     
     defHtml = `
       <div style="width: 100%;">
         <div>${baseDef}</div>
         <button class="g-details-btn" onclick="toggleGDetails(this)">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s;"><polyline points="6 9 12 15 18 9"></polyline></svg>
-          Technical Relationships
+          ${accordionTitle}
         </button>
         <div class="g-details-content">${details}</div>
       </div>
     `;
   }
 
-  return `<div class="g-item" id="g-term-${g.term.replace(/\s+/g, '-').replace(/[()"]/g, '')}" data-kw="${g.term.toLowerCase()} ${g.def.toLowerCase()}">
+  return `<div class="g-item" id="g-term-${g.term.replace(/\s+/g, '-').replace(/[()"]/g, '')}" data-category="${cat}" data-kw="${g.term.toLowerCase()} ${g.def.toLowerCase()}">
     <div class="g-term">
       <span class="g-term-name">${g.term}</span>
       ${g.abbrev ? `<span class="g-term-abbrev">${g.abbrev}</span>` : ''}
+      <span class="g-term-cat" style="background: ${catColorMap[cat]}; color: ${catTextColorMap[cat]}; display: inline-block; padding: 2px 6px; border-radius: 100px; font-size: 8.5px; font-weight: 700; text-transform: uppercase; margin-top: 6px; width: fit-content; border: 1px solid rgba(0,0,0,0.03);">${cat}</span>
     </div>
     <div class="g-def">${defHtml}</div>
   </div>`;
@@ -1328,11 +1520,57 @@ function toggleGDetails(btn) {
   btn.querySelector('svg').style.transform = content.classList.contains('show') ? 'rotate(180deg)' : '';
 }
 
+function setGlossaryCategory(cat) {
+  currentGlossaryCategory = cat;
+  
+  document.querySelectorAll('.category-pill').forEach(b => {
+    b.classList.toggle('active', b.dataset.category === cat);
+  });
+  
+  let found = 0;
+  document.querySelectorAll('.glossary-section').forEach(sec => {
+    let secFound = 0;
+    sec.querySelectorAll('.g-item').forEach(item => {
+      const itemCat = item.dataset.category;
+      const searchVal = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '';
+      const kwMatch = item.dataset.kw.includes(searchVal);
+      const catMatch = (cat === 'All' || itemCat === cat);
+      const match = kwMatch && catMatch;
+      
+      item.style.display = match ? '' : 'none';
+      if (match) { secFound++; found++; }
+    });
+    sec.style.display = secFound ? '' : 'none';
+  });
+  
+  document.getElementById('glossaryEmpty').classList.toggle('visible', found === 0);
+  document.getElementById('glossaryGrid').style.display = found ? '' : 'none';
+  
+  const barWrap = document.getElementById('letterBar').parentElement;
+  const searchVal = document.getElementById('search-input') ? document.getElementById('search-input').value : '';
+  if (barWrap) {
+    barWrap.style.display = (searchVal || cat !== 'All') ? 'none' : 'block';
+  }
+}
+
 function renderGlossary() {
   const grid = document.getElementById('glossaryGrid');
   const grouped = {};
+  
+  const subtitle = document.querySelector('.glossary-subtitle');
+  if (subtitle) {
+    subtitle.textContent = `${GLOSSARY.length} terms to help you navigate commercial lending — and growing.`;
+  }
+  
+  const categories = ['All', 'Underwriting', 'Credit', 'Legal & Compliance', 'CRE & ABL', 'Equipment & Factoring', 'Sales & Brokerage', 'Core Finance'];
+  let pillsHtml = '';
+  categories.forEach(cat => {
+    const count = cat === 'All' ? GLOSSARY.length : GLOSSARY.filter(g => getTermCategory(g) === cat).length;
+    pillsHtml += `<button class="category-pill ${cat === currentGlossaryCategory ? 'active' : ''}" onclick="setGlossaryCategory('${cat}')" data-category="${cat}">${cat} <span style="opacity: 0.6; font-size: 9px; font-weight: normal;">(${count})</span></button>`;
+  });
+  document.getElementById('categoryPills').innerHTML = pillsHtml;
+
   GLOSSARY.sort((a, b) => a.term.localeCompare(b.term)).forEach(g => {
-    // Strip leading quotes or symbols for grouping purposes
     let l = g.term.replace(/^[^a-zA-Z0-9]+/, '')[0].toUpperCase();
     if (!grouped[l]) grouped[l] = [];
     grouped[l].push(g);
@@ -1349,11 +1587,6 @@ function renderGlossary() {
   });
   grid.innerHTML = html;
 
-  const letters = {};
-  GLOSSARY.forEach(g => { 
-    let l = g.term.replace(/^[^a-zA-Z0-9]+/, '')[0].toUpperCase();
-    letters[l] = true; 
-  });
   let bar = '';
   for (let i = 65; i <= 90; i++) {
     const ch = String.fromCharCode(i);
@@ -1361,7 +1594,6 @@ function renderGlossary() {
   }
   document.getElementById('letterBar').innerHTML = bar;
   
-  // Setup scroll listener for highlight
   const contentArea = document.getElementById('content');
   contentArea.addEventListener('scroll', () => {
     if (currentView !== 'glossary') return;
@@ -1376,6 +1608,8 @@ function renderGlossary() {
       b.classList.toggle('active', b.dataset.letter === activeLetter);
     });
   });
+
+  setGlossaryCategory(currentGlossaryCategory);
 }
 
 function scrollToLetter(l) {
@@ -1387,12 +1621,10 @@ function scrollToLetter(l) {
     grid.style.display = 'block';
     empty.classList.remove('visible');
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    // Adjust for sticky header
     setTimeout(() => {
         document.getElementById('content').scrollBy(0, -60);
     }, 500);
   } else {
-    // If no section exists for this letter, show the charming empty state
     grid.style.display = 'none';
     empty.classList.add('visible');
     document.getElementById('content').scrollTop = 0;
@@ -1405,7 +1637,11 @@ function filterGlossary(q) {
   document.querySelectorAll('.glossary-section').forEach(sec => {
     let secFound = 0;
     sec.querySelectorAll('.g-item').forEach(item => {
-      const match = item.dataset.kw.includes(q);
+      const itemCat = item.dataset.category;
+      const catMatch = (currentGlossaryCategory === 'All' || itemCat === currentGlossaryCategory);
+      const kwMatch = item.dataset.kw.includes(q);
+      const match = kwMatch && catMatch;
+      
       item.style.display = match ? '' : 'none';
       if (match) { secFound++; found++; }
     });
@@ -1414,7 +1650,9 @@ function filterGlossary(q) {
   document.getElementById('glossaryEmpty').classList.toggle('visible', found === 0);
   document.getElementById('glossaryGrid').style.display = found ? '' : 'none';
   const barWrap = document.getElementById('letterBar').parentElement;
-  if (barWrap) barWrap.style.display = q ? 'none' : 'block';
+  if (barWrap) {
+    barWrap.style.display = (q || currentGlossaryCategory !== 'All') ? 'none' : 'block';
+  }
 }
 
 function updateCounts() {

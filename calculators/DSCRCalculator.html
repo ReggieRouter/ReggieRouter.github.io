@@ -313,6 +313,9 @@
 /* Print-only elements hidden by default on screen */
 .print-header-content, .print-footer-legal, .print-watermark { display: none; }
 
+/* PDF print view hidden until export mode is active */
+.dscr-print-view { display: none; }
+
 /* Direct PDF Export Styles - Rigorous Hiding */
 body.pdf-export-mode { background: white !important; display: block !important; min-height: 0 !important; height: auto !important; }
 body.pdf-export-mode .no-print, 
@@ -1164,6 +1167,7 @@ async function runPDF() {
         }).save();
     } finally {
         document.body.classList.remove('pdf-export-mode');
+        if (printView) printView.innerHTML = '';
         btn.innerHTML = origText;
         btn.disabled = false;
     }
