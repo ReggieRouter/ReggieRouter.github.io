@@ -424,7 +424,7 @@ body.pdf-export-mode .print-header-content img { display: none !important; }
 body.pdf-export-mode .print-header-content h1 { display: none !important; }
 
 body.pdf-export-mode .lp-main { display: block !important; max-width: 100% !important; margin: 0 auto !important; padding: 0 !important; width: 100% !important; }
-body.pdf-export-mode .lp-card { border: none !important; box-shadow: none !important; break-inside: avoid; margin-bottom: 40px !important; width: 100% !important; max-width: 100% !important; display: block !important; }
+body.pdf-export-mode .lp-card { border: none !important; box-shadow: none !important; overflow: visible !important; break-inside: avoid; margin-bottom: 40px !important; width: 100% !important; max-width: 100% !important; display: block !important; }
 body.pdf-export-mode .card-body-flex { display: block !important; width: 100% !important; }
 body.pdf-export-mode .lp-results { background: white !important; padding: 0 !important; display: block !important; width: 100% !important; }
 body.pdf-export-mode .lp-footer-container { display: block !important; width: 100% !important; margin-top: 40px !important; }
@@ -562,11 +562,6 @@ async function handleLendPaperSavePDF() {
         document.body.classList.add('multi-scenario');
     }
 
-    window.scrollTo(0, 0);
-    document.documentElement.scrollLeft = 0;
-    document.body.scrollLeft = 0;
-    await new Promise(r => setTimeout(r, 50));
-
     document.body.classList.add('pdf-export-mode');
 
     await window.PDF_HELPER.resetScroll(100);
@@ -576,7 +571,7 @@ async function handleLendPaperSavePDF() {
         margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
         filename: `LendPaper_SBA_Fees_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 800, scrollX: 0, scrollY: 0 },
+        html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 800, scrollX: window.scrollX || 0, scrollY: window.scrollY || 0 },
         jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
     };
 
