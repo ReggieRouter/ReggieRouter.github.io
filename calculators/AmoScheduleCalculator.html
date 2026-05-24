@@ -907,6 +907,26 @@ const element = document.querySelector('main');
             calcCard(id);
         }
 
+        function cycleTermUnit(id) {
+            const wrap = document.getElementById(`termWrap-${id}`);
+            const label = document.getElementById(`termUnitLabel-${id}`);
+            if (!wrap || !label) return;
+            const currentUnit = wrap.dataset.termUnit || 'mos';
+            
+            let nextUnit = 'mos';
+            if (currentUnit === 'mos') {
+                nextUnit = 'wks';
+            } else if (currentUnit === 'wks') {
+                nextUnit = 'days';
+            } else {
+                nextUnit = 'mos';
+            }
+            
+            wrap.dataset.termUnit = nextUnit;
+            label.textContent = nextUnit;
+            calcCard(id);
+        }
+
         function updateHeaders() {
             const cards = document.querySelectorAll('.modal-shell');
             const totalCount = cards.length;
@@ -990,9 +1010,11 @@ const element = document.querySelector('main');
 
                                 <div>
                                     <label class="flex items-end min-h-[32px]">Term</label>
-                                    <div class="lp-input-group">
+                                    <div class="lp-input-group" id="termWrap-${id}" data-term-unit="mos">
                                         <input type="number" id="term-${id}" value="${id===1 ? 12 : 18}" min="0" class="lp-input text-right" oninput="calcCard(${id})">
-                                        <span class="pr-3 pl-2 text-[#94A3B8] font-bold border-l border-[#E5E7EB]">mos</span>
+                                        <button id="termUnitBtn-${id}" type="button" onclick="cycleTermUnit(${id})" class="pr-3 pl-2 text-[#94A3B8] font-bold border-l border-[#E5E7EB] hover:text-[#14532D] transition-colors flex items-center gap-1 cursor-pointer select-none" style="background:transparent;font-family:inherit;font-size:11px;text-transform:lowercase">
+                                            <span id="termUnitLabel-${id}">mos</span> <span style="font-size:11px;color:#94A3B8">⇄</span>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -1270,7 +1292,10 @@ const element = document.querySelector('main');
                 if (sel) {
                     html = `"You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}."`;
                 } else {
-                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span> over ${c.term} months — repaying <strong>${fmtUsd.format(c.payback)}</strong> total."`;
+                    const unitLabel = c.termUnit === 'wks' ? (c.term === 1 ? 'week' : 'weeks') :
+                                      (c.termUnit === 'days' ? (c.term === 1 ? 'day' : 'days') :
+                                      (c.term === 1 ? 'month' : 'months'));
+                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span> over ${c.term} ${unitLabel} — repaying <strong>${fmtUsd.format(c.payback)}</strong> total."`;
                 }
             } else if (track.key === 'apr') {
                 if (sel) {
@@ -1374,6 +1399,7 @@ const element = document.querySelector('main');
             const amt = cleanNumericInput(document.getElementById(`amt-${id}`).value);
             const factor = cleanNumericInput(document.getElementById(`factor-${id}`).value);
             const term = cleanNumericInput(document.getElementById(`term-${id}`).value);
+            const termUnit = document.getElementById(`termWrap-${id}`)?.dataset.termUnit || 'mos';
             const feeInput = cleanNumericInput(document.getElementById(`fee-${id}`).value) || 0;
             const feeIsDollar = document.getElementById(`feeWrap-${id}`)?.dataset.feeMode === 'dollar';
             const freq = document.getElementById(`freq-${id}`).value;
@@ -1383,6 +1409,13 @@ const element = document.querySelector('main');
             const discPct = cleanNumericInput(document.getElementById(`discPct-${id}`).value) || 0;
 
             if(!amt || !factor || !term) return;
+
+            let termMonths = term;
+            if (termUnit === 'wks') {
+                termMonths = term / 4.333;
+            } else if (termUnit === 'days') {
+                termMonths = term / 30;
+            }
 
             // Synchronize Stepper Pill
             const stepperPill = document.getElementById(`stepper-pill-${id}`);
@@ -1401,10 +1434,12 @@ const element = document.querySelector('main');
             let startDate = parseLocalDate(startDateStr);
 
             let periods, pmtLabel, pYear, freqName;
-            if (freq === 'daily') { periods = Math.round(term * 21.66); pmtLabel = 'Daily payment'; pYear = 252; freqName = 'day'; }
-            else if (freq === 'weekly') { periods = Math.round(term * 4.333); pmtLabel = 'Weekly payment'; pYear = 52; freqName = 'week'; }
-            else if (freq === 'semimonthly') { periods = term * 2; pmtLabel = 'Semi-mo payment'; pYear = 24; freqName = 'semi-month'; }
-            else { periods = term; pmtLabel = 'Monthly payment'; pYear = 12; freqName = 'month'; }
+            if (freq === 'daily') { periods = Math.round(termMonths * 21.66); pmtLabel = 'Daily payment'; pYear = 252; freqName = 'day'; }
+            else if (freq === 'weekly') { periods = Math.round(termMonths * 4.333); pmtLabel = 'Weekly payment'; pYear = 52; freqName = 'week'; }
+            else if (freq === 'semimonthly') { periods = Math.round(termMonths * 2); pmtLabel = 'Semi-mo payment'; pYear = 24; freqName = 'semi-month'; }
+            else { periods = Math.round(termMonths); pmtLabel = 'Monthly payment'; pYear = 12; freqName = 'month'; }
+
+            periods = Math.max(1, periods);
 
             // Clear active selection if the term has shrunk below the selected period
             if (rowSelection[id] && rowSelection[id].period > periods) {
@@ -1421,7 +1456,7 @@ const element = document.querySelector('main');
             const moEquivEl = document.getElementById(`moEquiv-${id}`);
             if (moEquivEl) {
                 if (freq === 'daily' || freq === 'weekly') {
-                    moEquivEl.textContent = '≈ $' + Math.round(payback / term).toLocaleString('en-US') + '/mo';
+                    moEquivEl.textContent = '≈ $' + Math.round(payback / termMonths).toLocaleString('en-US') + '/mo';
                     moEquivEl.style.display = '';
                 } else {
                     moEquivEl.style.display = 'none';
@@ -1502,7 +1537,7 @@ const element = document.querySelector('main');
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
             renderDetailRow(id);
 
-            lastCalc[id] = { pmt, freqName, term, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate };
+            lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate };
             renderTakeaway(id);
         }
 
