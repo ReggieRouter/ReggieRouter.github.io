@@ -982,7 +982,7 @@ input { font-family: inherit; }
         <div class="nav-label">Reference</div>
         <button class="nav-item" data-view="glossary" onclick="navigateToView('glossary')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-          Glossary<span class="nav-count" id="count-glossary">178</span>
+          Glossary
         </button>
       </div>
       <div class="nav-divider"></div>
@@ -1218,8 +1218,7 @@ const taglines = [
   "The reference tab you keep open on calls.",
   "Built for lenders, not textbooks.",
   "Stop Googling mid-call.",
-  "Know it before they ask.",
-  "Your edge on every call."
+  "Know it before they ask."
 ];
 const randomTagline = taglines[Math.floor(Math.random() * taglines.length)];
 
@@ -1782,10 +1781,6 @@ function updateCounts() {
   document.getElementById('count-deal').textContent = TOOLS.filter(function(t){return t.group==='deal-math';}).length;
   document.getElementById('count-risk').textContent = TOOLS.filter(function(t){return t.group==='risk';}).length;
   document.getElementById('count-data').textContent = TOOLS.filter(function(t){return t.group==='data';}).length;
-  const glossEl = document.getElementById('count-glossary');
-  if (glossEl && typeof GLOSSARY !== 'undefined') {
-    glossEl.textContent = GLOSSARY.length;
-  }
 }
 
 /* ---- View switching ---- */
