@@ -976,7 +976,7 @@ const element = document.querySelector('main');
                                 </div>
 
                                 <div>
-                                    <label class="flex items-center">
+                                    <label class="flex items-end min-h-[32px]">
                                         Cost per Dollar Borrowed
                                         <span class="tooltip ml-1 no-print">
                                             <span class="w-[14px] h-[14px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9px] font-bold italic transition-colors bg-white">i</span>
@@ -989,7 +989,7 @@ const element = document.querySelector('main');
                                 </div>
 
                                 <div>
-                                    <label>Term</label>
+                                    <label class="flex items-end min-h-[32px]">Term</label>
                                     <div class="lp-input-group">
                                         <input type="number" id="term-${id}" value="${id===1 ? 12 : 18}" min="0" class="lp-input text-right" oninput="calcCard(${id})">
                                         <span class="pr-3 pl-2 text-[#94A3B8] font-bold border-l border-[#E5E7EB]">mos</span>
