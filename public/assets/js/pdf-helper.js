@@ -365,6 +365,38 @@ window.PDF_HELPER = {
             document.body.classList.add('multi-scenario');
         }
 
+        // Save original inline style values for exact restoration afterwards
+        const origHtmlWidth = document.documentElement.style.width;
+        const origHtmlMinWidth = document.documentElement.style.minWidth;
+        const origHtmlMaxWidth = document.documentElement.style.maxWidth;
+        const origHtmlOverflow = document.documentElement.style.overflow;
+        const origHtmlMargin = document.documentElement.style.margin;
+        const origHtmlPadding = document.documentElement.style.padding;
+
+        const origBodyWidth = document.body.style.width;
+        const origBodyMinWidth = document.body.style.minWidth;
+        const origBodyMaxWidth = document.body.style.maxWidth;
+        const origBodyOverflow = document.body.style.overflow;
+        const origBodyMargin = document.body.style.margin;
+        const origBodyPadding = document.body.style.padding;
+
+        // Nuclear strict 800px constraint on live DOM to force identical coordinate spaces!
+        // Aligning elements to the top-left (margin: 0, padding: 0) is CRITICAL to ensure that
+        // bounding client rect left coordinate is exactly 0px, avoiding left-shifting or right-clipping on the canvas.
+        document.documentElement.style.setProperty('width', '800px', 'important');
+        document.documentElement.style.setProperty('min-width', '800px', 'important');
+        document.documentElement.style.setProperty('max-width', '800px', 'important');
+        document.documentElement.style.setProperty('overflow', 'visible', 'important');
+        document.documentElement.style.setProperty('margin', '0', 'important');
+        document.documentElement.style.setProperty('padding', '0', 'important');
+
+        document.body.style.setProperty('width', '800px', 'important');
+        document.body.style.setProperty('min-width', '800px', 'important');
+        document.body.style.setProperty('max-width', '800px', 'important');
+        document.body.style.setProperty('overflow', 'visible', 'important');
+        document.body.style.setProperty('margin', '0', 'important');
+        document.body.style.setProperty('padding', '0', 'important');
+
         // Setup custom print header band dynamically per plan tier in the live DOM
         this.initPrintLayout(title);
 
@@ -432,6 +464,21 @@ window.PDF_HELPER = {
             console.error("PDF generation exception:", e);
             this.showToast("Failed to generate PDF.", true);
         } finally {
+            // Restore original inline style values
+            document.documentElement.style.width = origHtmlWidth;
+            document.documentElement.style.minWidth = origHtmlMinWidth;
+            document.documentElement.style.maxWidth = origHtmlMaxWidth;
+            document.documentElement.style.overflow = origHtmlOverflow;
+            document.documentElement.style.margin = origHtmlMargin;
+            document.documentElement.style.padding = origHtmlPadding;
+
+            document.body.style.width = origBodyWidth;
+            document.body.style.minWidth = origBodyMinWidth;
+            document.body.style.maxWidth = origBodyMaxWidth;
+            document.body.style.overflow = origBodyOverflow;
+            document.body.style.margin = origBodyMargin;
+            document.body.style.padding = origBodyPadding;
+
             // Restore original CSS transforms on ancestor elements
             transformedAncestors.forEach(item => {
                 try {

@@ -156,3 +156,119 @@ body.is-embedded .modal-shell { border: none; box-shadow: none; border-radius: 0
   }
 }
 
+/* ==========================================
+   GLOBAL PDF EXPORT OVERRIDES (Anti-Clipping)
+   ========================================== */
+html.pdf-export-mode,
+body.pdf-export-mode {
+  width: 800px !important;
+  min-width: 800px !important;
+  max-width: 800px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  overflow: visible !important;
+  overflow-anchor: none !important; /* Disable scroll anchoring layout shifts */
+}
+
+/* Deep force overflow visible and scale limits across all elements */
+body.pdf-export-mode * {
+  overflow: visible !important;
+  max-width: 100% !important;
+  min-width: 0 !important;   /* Strips static desktop min-widths */
+  min-height: 0 !important;  /* Strips static vertical heights */
+  box-sizing: border-box !important;
+  letter-spacing: normal !important; /* Fixes html2canvas horizontal text shift bug! */
+}
+
+/* Force standard full width on captured main layouts to match windowWidth: 800 */
+body.pdf-export-mode main,
+body.pdf-export-mode .lp-main {
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  padding: 12px 16px !important; /* Safety padding so elements are never flush against canvas edges */
+  box-sizing: border-box !important;
+  display: block !important;
+  position: static !important;
+  transform: none !important;
+}
+
+/* Hardened Flexbox overrides for grids (bypasses html2canvas Grid Gap bugs) */
+body.pdf-export-mode .pdf-params-grid,
+body.pdf-export-mode .lp-params-grid,
+body.pdf-export-mode .pdf-stats-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0 !important;
+}
+body.pdf-export-mode .pdf-params-grid > div,
+body.pdf-export-mode .lp-params-grid > div,
+body.pdf-export-mode .pdf-stats-grid > div {
+  width: 50% !important;
+  max-width: 50% !important;
+  padding-right: 12px !important;
+  margin-bottom: 12px !important;
+}
+body.pdf-export-mode .lp-inline-stats {
+  display: flex !important;
+  gap: 0 !important;
+}
+body.pdf-export-mode .lp-inline-stats > div {
+  width: 33.333% !important;
+  max-width: 33.333% !important;
+  padding-right: 8px !important;
+}
+
+/* Ensure all major container components scale symmetrically, align perfectly, and drop fixed/transform offsets */
+body.pdf-export-mode .modal-shell,
+body.pdf-export-mode .lp-container,
+body.pdf-export-mode .lp-card,
+body.pdf-export-mode .container,
+body.pdf-export-mode .card,
+body.pdf-export-mode .sc,
+body.pdf-export-mode .sc-body,
+body.pdf-export-mode .takeaway,
+body.pdf-export-mode .callout,
+body.pdf-export-mode .table-scroll-container,
+body.pdf-export-mode .lp-results {
+  overflow: visible !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  position: static !important; /* Strips fixed/absolute offsets in capture mode */
+  transform: none !important;    /* Strips zoom/scale translations in capture mode */
+}
+
+/* Collapse side-by-side structures in export mode */
+body.pdf-export-mode .card-body-flex,
+body.pdf-export-mode .panel-container,
+body.pdf-export-mode .modal-shell > div.flex {
+  display: block !important;
+  width: 100% !important;
+  position: static !important;
+  transform: none !important;
+}
+
+/* Ensure body contents have consistent bounds */
+body.pdf-export-mode .lp-body {
+  padding: 8px !important;
+}
+
+/* Centralized Sandbox-Proof PDF Print Container */
+body.pdf-export-mode #lp-pdf-print-container {
+  position: static !important;
+  transform: none !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 12px 16px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  background: #ffffff !important;
+  overflow: visible !important;
+}
