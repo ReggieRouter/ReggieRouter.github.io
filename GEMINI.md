@@ -13,6 +13,12 @@ Always verify contrast before finalizing UI changes.
     - EVERY print output MUST include the primary **LendPaper logo** (`logo-lockup-light.svg`) centered at the top, followed by a professional report title.
     - EVERY print output MUST include the mandatory legal disclaimer at the bottom of the page, including the "Powered by LendPaper" attribution.
     - Print layouts should be clean, single-column where possible, and strictly maintain the brand's 'Inter' typography.
+    - **Anti-Clipping & Coordinate Alignment (Rigorous Controls):**
+        - Ensure both `html` and `body` are snapped to the top-left boundary (`margin: 0 !important; padding: 0 !important;`) when `pdf-export-mode` is active.
+        - Force a global `min-width: 0 !important; max-width: 100% !important;` and `letter-spacing: normal !important;` on all elements inside `body.pdf-export-mode` to prevent `html2canvas` text shifts and boundary overflow clipping.
+        - Collapse any side-by-side flexbox or grid layouts (e.g. input vs. output columns) to a clean vertical block stack (`display: block !important;` or `flex-direction: column !important;`) for paper printing.
+        - Strip positioning and dynamic scale transforms on top-level layout wrappers (`.modal-shell`, `.lp-container`, `main`, `.lp-card`) by setting `position: static !important; transform: none !important;` to bypass viewport rendering shifts.
+        - **Nuclear Scroll Reset:** Before capture, execute a comprehensive horizontal scroll reset on the local document, all elements, and the parent window/iframe shell.
 - **Net Requirement Tool:** 
     - Input model is simplified to a single "Target Net %" entry rather than a multi-row comparison table. 
     - Results should prioritize the "Min. to Borrower" and "Max Payoff" values.
