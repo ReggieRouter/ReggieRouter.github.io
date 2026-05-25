@@ -19,9 +19,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="../public/assets/brand/favicon.svg">
     <link rel="apple-touch-icon" href="../public/assets/brand/apple-touch-icon-180x180.png">
-    <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
-    <script src="../public/assets/js/calculator-app.js"></script>
-    <script src="../public/assets/js/pdf-helper.js"></script>
+    <link rel="stylesheet" href="../public/assets/css/calculator-shell.css?v=2026.05.25.1000">
+    <script src="../public/assets/js/calculator-app.js?v=2026.05.25.1000"></script>
+    <script src="../public/assets/js/pdf-helper.js?v=2026.05.25.1000"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Typography & Core Variables */
@@ -325,15 +325,51 @@
         body.pdf-export-mode .print-header-content img { display: none !important; }
         body.pdf-export-mode .print-header-content h1 { display: none !important; }
 
-        body.pdf-export-mode main { padding: 0 !important; display: block !important; max-width: 100% !important; width: 100% !important; margin: 0 auto !important; min-height: 0 !important; height: auto !important; }
-        body.pdf-export-mode .modal-shell { box-shadow: none !important; border: none !important; overflow: visible !important; max-width: 100% !important; margin: 0 auto !important; break-inside: auto !important; }
+        /* Hardened Export-Mode Overrides (User Safety Recommendations) */
+        body.pdf-export-mode * {
+            overflow: visible !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            box-sizing: border-box !important;
+            letter-spacing: normal !important; /* Fixes html2canvas text shift bug! */
+        }
+        body.pdf-export-mode main { 
+            padding: 12px 16px !important; /* Gutter safety margin */
+            display: block !important; 
+            max-width: 100% !important; 
+            width: 100% !important; 
+            margin: 0 auto !important; 
+            min-height: 0 !important; 
+            height: auto !important; 
+            position: static !important;
+            transform: none !important;
+        }
+        body.pdf-export-mode .modal-shell,
+        body.pdf-export-mode .lp-results-panel { 
+            width: 100% !important;
+            max-width: 100% !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            box-shadow: none !important; 
+            border: none !important; 
+            break-inside: auto !important; 
+            background: #fff !important;
+            position: static !important;
+            transform: none !important;
+        }
+        body.pdf-export-mode .modal-shell > div.flex {
+            display: block !important;
+            width: 100% !important;
+            position: static !important;
+            transform: none !important;
+        }
         body.pdf-export-mode .print-footer-legal { display: none !important; }
         body.pdf-export-mode .print-watermark { display: none !important; }
         body.pdf-export-mode .takeaway-eyebrow { display: none !important; }
-        body.pdf-export-mode .table-scroll-container { max-height: none !important; overflow: visible !important; }
+        body.pdf-export-mode .table-scroll-container { max-height: none !important; overflow: visible !important; width: 100% !important; }
         body.pdf-export-mode .no-print { display: none !important; }
         body.pdf-export-mode .lp-form-panel { display: none !important; }
-        body.pdf-export-mode .lp-results-panel { width: 100% !important; border-left: none !important; background: #fff !important; }
 
         /* Print-only loan parameter summary */
         .pdf-loan-params { display: none; }
@@ -677,36 +713,11 @@
                 populatePdfParams(cid);
             });
 
-            await window.PDF_HELPER.resetScroll(50);
-
-            if (cards.length > 1) {
-                document.body.classList.add('multi-scenario');
-            }
-
-            document.body.classList.add('pdf-export-mode');
-
-            await window.PDF_HELPER.resetScroll(100);
-
+            const isMultiScenario = cards.length > 1;
             const element = document.querySelector('main');
-            const opt = {
-                margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
-                filename: `LendPaper_Amortization_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 800, scrollX: window.scrollX || 0, scrollY: window.scrollY || 0 },
-                jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
-            };
+            const filename = `LendPaper_Amortization_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
-            try {
-                // Generate PDF and inject dynamic page-specific footers
-                await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
-                    window.PDF_HELPER.addPdfFooters(pdf);
-                }).save();
-            } finally {
-                document.body.classList.remove('pdf-export-mode');
-                document.body.classList.remove('multi-scenario');
-                btn.innerHTML = origText;
-                btn.disabled = false;
-            }
+            await window.PDF_HELPER.generatePDF(element, "PAYMENT BREAKDOWN", filename, btn, origText, isMultiScenario);
         }
         
         const holidays = [
@@ -1195,7 +1206,7 @@
                     </div>
                 </div>
 
-                <div class="hidden print:block border-t border-[#E5E7EB] pt-8 px-[32px] pb-[40px] mt-4">
+                <div class="hidden print:block border-t border-[#E5E7EB] pt-8 px-[32px] pb-[16px] mt-4">
                     <div class="text-[14px] font-black text-[#111827] mb-6 uppercase tracking-[0.1em] border-b-4 border-[#111827] pb-3">Complete Payment Schedule</div>
                     <table class="min-w-full text-left text-[11px]">
                         <thead>
