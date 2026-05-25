@@ -119,11 +119,65 @@ window.PDF_HELPER = {
     },
     
     resetScroll: async function(delayMs) {
+        // 1. Reset local window scroll offsets
         window.scrollTo(0, 0);
-        document.documentElement.scrollLeft = 0;
-        document.body.scrollLeft = 0;
+        if (document.documentElement) {
+            document.documentElement.scrollLeft = 0;
+            document.documentElement.scrollTop = 0;
+        }
+        if (document.body) {
+            document.body.scrollLeft = 0;
+            document.body.scrollTop = 0;
+        }
+
+        // 2. Nuclear Reset: Clear horizontal and vertical scroll offsets on EVERY single element in the DOM
+        try {
+            const allElements = document.querySelectorAll('*');
+            allElements.forEach(el => {
+                if (el.scrollLeft > 0) {
+                    el.scrollLeft = 0;
+                }
+                // Do not reset scrollTop on the documentElement or body to prevent throwing off the primary window position
+                if (el.scrollTop > 0 && el !== document.documentElement && el !== document.body) {
+                    el.scrollTop = 0;
+                }
+            });
+        } catch (e) {
+            console.warn("PDF Helper: Failed to reset internal element scrolls:", e);
+        }
+
+        // 3. Reset horizontal scroll values on main captured elements (redundancy safeguard)
+        const mainEl = document.querySelector('.lp-main') || document.querySelector('main');
+        if (mainEl) {
+            mainEl.scrollLeft = 0;
+        }
+        const containerEl = document.querySelector('.lp-container') || document.querySelector('.modal-shell') || document.querySelector('.lp-card');
+        if (containerEl) {
+            containerEl.scrollLeft = 0;
+        }
+
+        // 4. Reset parent window scroll if running within an embedded iframe
+        try {
+            if (window.parent && window.parent !== window) {
+                window.parent.scrollTo(0, 0);
+                if (window.parent.document.documentElement) {
+                    window.parent.document.documentElement.scrollLeft = 0;
+                    window.parent.document.documentElement.scrollTop = 0;
+                }
+                if (window.parent.document.body) {
+                    window.parent.document.body.scrollLeft = 0;
+                    window.parent.document.body.scrollTop = 0;
+                }
+            }
+        } catch (e) {
+            // Suppress cross-origin security warnings if parent is on a different domain
+            console.warn("PDF Helper: Could not scroll parent window due to cross-origin policies:", e);
+        }
+
+        // 5. Wait for the browser layout to settle down after scroll offsets are cleared
         await new Promise(r => setTimeout(r, delayMs));
     },
+
 
     addPdfFooters: function(pdf) {
         if (pdf.footersAdded) return;
@@ -293,6 +347,105 @@ window.PDF_HELPER = {
                 pdf.textWithLink("lendpaper.com/legal/estimates", startX, currentY, { url: "https://lendpaper.com/legal/estimates" });
             } catch(e) {
                 pdf.text("lendpaper.com/legal/estimates", startX, currentY);
+            }
+        }
+    },
+
+    generatePDF: async function(element, title, filename, btn, origText, isMultiScenario = false) {
+        const self = this;
+
+        // 1. Temporarily apply export-mode classes to live html AND body so the browser computes
+        //    layout reflow at the correct 800px viewport. Without this, <html> stays at full
+        //    viewport width (e.g. 1440px) while <body> is constrained to 800px — creating a
+        //    coordinate mismatch between live DOM measurements and the cloned render document,
+        //    which causes left-side clipping and right-side blank space in the output PDF.
+        document.documentElement.classList.add('pdf-export-mode');
+        document.body.classList.add('pdf-export-mode');
+        if (isMultiScenario) {
+            document.body.classList.add('multi-scenario');
+        }
+
+        // Setup custom print header band dynamically per plan tier in the live DOM
+        this.initPrintLayout(title);
+
+        // Perform scroll resets on live DOM to ensure parameters are cleanly populated
+        await this.resetScroll(50);
+
+        // 2. TRANSFORM SHIELD:
+        // Traverse up the DOM tree and temporarily disable any CSS transforms (scale, translate)
+        // on parent/ancestor elements so html2canvas computes coordinate bounds at exactly 1:1 scale.
+        const transformedAncestors = [];
+        try {
+            let curr = element;
+            while (curr && curr !== document.documentElement) {
+                const style = window.getComputedStyle(curr);
+                if (style.transform && style.transform !== 'none') {
+                    transformedAncestors.push({
+                        element: curr,
+                        originalTransform: curr.style.transform
+                    });
+                    curr.style.setProperty('transform', 'none', 'important');
+                }
+                curr = curr.parentElement;
+            }
+        } catch (err) {
+            console.warn("PDF Helper: Failed to shield ancestor transforms:", err);
+        }
+
+        // Force synchronous layout calculations on the live element
+        element.offsetHeight;
+
+        // Let layout settle in browser painting frame.
+        // 350ms (up from 150ms) gives the amortization table time to fully reflow after
+        // .table-scroll-container expands from max-height:480px to unconstrained height.
+        await new Promise(r => setTimeout(r, 350));
+
+        const opt = {
+            margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
+            filename: filename,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { 
+                scale: 2, 
+                logging: false, 
+                useCORS: true, 
+                windowWidth: 800, 
+                scrollX: 0, 
+                scrollY: 0,
+                onclone: (clonedDoc) => {
+                    // Force the html2canvas internal clone body and documentElement to have pdf-export-mode
+                    clonedDoc.documentElement.classList.add('pdf-export-mode');
+                    clonedDoc.body.classList.add('pdf-export-mode');
+                    if (isMultiScenario) {
+                        clonedDoc.body.classList.add('multi-scenario');
+                    }
+                }
+            },
+            jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
+        };
+
+        try {
+            // Render directly from the live DOM element (completely shielded from transforms!)
+            await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+                self.addPdfFooters(pdf);
+            }).save();
+        } catch (e) {
+            console.error("PDF generation exception:", e);
+            this.showToast("Failed to generate PDF.", true);
+        } finally {
+            // Restore original CSS transforms on ancestor elements
+            transformedAncestors.forEach(item => {
+                try {
+                    item.element.style.transform = item.originalTransform;
+                } catch (e) {}
+            });
+
+            // Restore live DOM class state
+            document.documentElement.classList.remove('pdf-export-mode');
+            document.body.classList.remove('pdf-export-mode');
+            document.body.classList.remove('multi-scenario');
+            if (btn) {
+                btn.innerHTML = origText;
+                btn.disabled = false;
             }
         }
     }
