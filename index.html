@@ -1410,15 +1410,15 @@ function getContextualGreeting() {
   if (month === 0 && date === 1) return "New year. New pipeline."; // Jan 1
   if (month === 11 && date === 31) return "New year. New pipeline."; // Dec 31
   if (month === 6 && date === 4) return "Freedom to fund."; // Jul 4
-  if (month === 10 && date === 11) return "Still here. So are we."; // Nov 11
+  if (month === 10 && date === 11) return "Markets closed. You're not."; // Nov 11
   if (month === 11 && date === 24) return "Wrapping things up."; // Dec 24
   if (month === 11 && date === 25) return "Even Santa needed working capital."; // Dec 25
 
   // Floating Holidays
-  if (month === 0 && day === 1 && date === getNthWeekdayOfMonth(year, 0, 1, 3)) return "Still here. So are we."; // 3rd Mon in Jan
+  if (month === 0 && day === 1 && date === getNthWeekdayOfMonth(year, 0, 1, 3)) return "Markets closed. You're not."; // 3rd Mon in Jan
   if (month === 1 && day === 1 && date === getNthWeekdayOfMonth(year, 1, 1, 3)) return "Markets closed. You're not."; // 3rd Mon in Feb
-  if (month === 4 && day === 1 && date === getLastWeekdayOfMonth(year, 4, 1)) return "Still here. So are we."; // Last Mon in May
-  if (month === 8 && day === 1 && date === getNthWeekdayOfMonth(year, 8, 1, 1)) return "Still here. So are we."; // 1st Mon in Sep
+  if (month === 4 && day === 1 && date === getLastWeekdayOfMonth(year, 4, 1)) return "Markets closed. You're not."; // Last Mon in May
+  if (month === 8 && day === 1 && date === getNthWeekdayOfMonth(year, 8, 1, 1)) return "Markets closed. You're not."; // 1st Mon in Sep
   if (month === 10 && day === 4 && date === getNthWeekdayOfMonth(year, 10, 4, 4)) return "Grateful for every deal that got done."; // 4th Thu in Nov
 
   // 2. Financial Calendar Triggers
