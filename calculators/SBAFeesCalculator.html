@@ -299,28 +299,31 @@ label {
     margin-bottom: 8px;
 }
 
-/* Pill Button */
+/* Pill Button - styled to match .lp-btn-secondary from Payment Breakdown */
 .lp-pill-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 16px;
-    border: 2px dashed var(--lp-border);
-    border-radius: 99px;
-    font-size: 12px;
+    height: 38px;
+    padding: 0 16px;
+    border: 2px solid var(--lp-green);
+    border-radius: 8px;
+    font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--lp-text-muted);
+    letter-spacing: 0.08em;
+    color: var(--lp-green);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
     background: transparent;
     font-family: inherit;
     margin: 0 auto 32px;
+    white-space: nowrap;
 }
 .lp-pill-btn:hover {
-    border-color: var(--lp-green);
+    background-color: var(--lp-green-light);
     color: var(--lp-green);
+    border-color: var(--lp-green);
 }
 
 .lp-actions { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
@@ -532,7 +535,7 @@ body.pdf-export-mode .card-center-title { display: none !important; }
         <h1>SBA 7(a) Rates & Fees</h1>
     </div>
     <div class="flex justify-center mb-8 no-print">
-        <button class="lp-pill-btn" onclick="addCard()">+ Compare Scenarios</button>
+        <button class="lp-pill-btn" onclick="addCard()">+ Compare</button>
     </div>
     
     <div id="cardsContainer" class="cards-container">

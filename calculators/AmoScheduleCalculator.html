@@ -652,10 +652,18 @@
             background: #D1D5DB;
         }
         .lp-stepper-val {
-            min-width: 32px;
+            width: 38px;
+            min-width: 38px;
             text-align: center;
             font-variant-numeric: tabular-nums;
-            padding: 0 4px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-weight: 700;
+            font-size: 12px;
+            color: #111827;
+            cursor: text;
         }
 
         /* Clickable Rows & Chevron Hover Affordances */
@@ -1024,11 +1032,50 @@
             let val = parseInt(input.value, 10);
             if (isNaN(val)) val = 25;
             val += delta;
-            val = Math.max(0, Math.min(50, val)); // Clamp strictly between 0% and 50%
+            val = Math.max(0, Math.min(100, val)); // Clamp strictly between 0% and 100%
             input.value = val;
             const display = document.getElementById(`stepper-val-${id}`);
-            if (display) display.textContent = val + '%';
+            if (display) {
+                if (display.tagName === 'INPUT') {
+                    display.value = val + '%';
+                } else {
+                    display.textContent = val + '%';
+                }
+            }
             calcCard(id);
+        }
+
+        function handleStepperFocus(el) {
+            let val = el.value.replace('%', '');
+            el.value = val;
+            el.select();
+        }
+
+        function handleStepperBlur(id, el) {
+            let val = parseInt(el.value, 10);
+            if (isNaN(val)) {
+                const hiddenInput = document.getElementById(`discPct-${id}`);
+                val = hiddenInput ? parseInt(hiddenInput.value, 10) : 25;
+            }
+            val = Math.max(0, Math.min(100, val)); // Clamp strictly between 0% and 100%
+            const hiddenInput = document.getElementById(`discPct-${id}`);
+            if (hiddenInput) hiddenInput.value = val;
+            el.value = val + '%';
+            calcCard(id);
+        }
+
+        function handleStepperKey(event, id, el) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                el.blur();
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                const hiddenInput = document.getElementById(`discPct-${id}`);
+                if (hiddenInput) {
+                    el.value = hiddenInput.value + '%';
+                }
+                el.blur();
+            }
         }
 
         const feeToggleTimes = {};
@@ -1327,7 +1374,7 @@
                         <div style="display:flex; align-items:center; gap:10px;">
                             <div class="lp-stepper-pill" id="stepper-pill-${id}">
                                 <button type="button" onclick="adjustDiscount(${id}, -1)" class="lp-stepper-btn" aria-label="Decrease discount">&minus;</button>
-                                <span class="lp-stepper-val" id="stepper-val-${id}">25%</span>
+                                <input type="text" class="lp-stepper-val" id="stepper-val-${id}" value="25%" onfocus="handleStepperFocus(this)" onblur="handleStepperBlur(${id}, this)" onkeydown="handleStepperKey(event, ${id}, this)">
                                 <button type="button" onclick="adjustDiscount(${id}, 1)" class="lp-stepper-btn" aria-label="Increase discount">&plus;</button>
                             </div>
                             <label class="prepay-toggle" for="enablePrepay-${id}">
@@ -1590,7 +1637,11 @@
             }
             const stepperValEl = document.getElementById(`stepper-val-${id}`);
             if (stepperValEl) {
-                stepperValEl.textContent = discPct + '%';
+                if (stepperValEl.tagName === 'INPUT') {
+                    stepperValEl.value = discPct + '%';
+                } else {
+                    stepperValEl.textContent = discPct + '%';
+                }
             }
 
             const payback = amt * factor;
