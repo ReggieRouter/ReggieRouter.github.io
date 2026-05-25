@@ -340,6 +340,75 @@
         .print-header-content { display: none; }
         .print-footer-legal { display: none; }
         .print-watermark { display: none; }
+/* ===== Native-print engine (universal) ===== */
+@page {
+    size: letter portrait;
+    margin: 0.45in 0.55in 0.85in 0.55in;
+}
+@page :first {
+    margin-top: 0.35in;
+}
+@page {
+    @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 7pt;
+        color: #9CA3AF;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        padding-bottom: 0.15in;
+    }
+}
+
+@media print {
+    html, body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    /* Hide siblings of main + the print footer overlay */
+    body.pdf-export-mode > *:not(.lp-main):not(main):not(.lp-print-footer):not(#lp-print-modal-overlay):not(#tt) { display: none !important; }
+    /* Keep table rows & cards from splitting across pages */
+    body.pdf-export-mode tr,
+    body.pdf-export-mode .sc,
+    body.pdf-export-mode .lp-card,
+    body.pdf-export-mode .verdict,
+    body.pdf-export-mode .hero-output,
+    body.pdf-export-mode .takeaway { page-break-inside: avoid !important; break-inside: avoid !important; }
+    /* Force-hide Tailwind .hidden sections that were marked print:block under html2pdf */
+    body.pdf-export-mode div.hidden { display: none !important; }
+    /* Hide the dynamic takeaway/quote (cycles through on-screen, duplicates info in print) */
+    body.pdf-export-mode .takeaway { display: none !important; }
+    /* Strip orphan tooltip asterisks that have no hover text in print */
+    body.pdf-export-mode sup { display: none !important; }
+    /* Hide tooltip icons in print (the (i) circles) */
+    body.pdf-export-mode .tooltip-icon { display: none !important; }
+    /* Custom footer rendered on every page */
+    .lp-print-footer {
+        display: block !important;
+        position: fixed;
+        bottom: 0.2in;
+        left: 0.55in;
+        right: 0.55in;
+        font-size: 5.5pt;
+        line-height: 1.45;
+        color: #9CA3AF;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .lp-print-footer .lp-print-footer-top {
+        font-size: 7pt;
+        color: #6B7280;
+        margin-bottom: 4px;
+        border-top: 0.5pt solid #E5E7EB;
+        padding-top: 6px;
+    }
+    .lp-print-footer a { color: #14532D; font-weight: 700; text-decoration: none; }
+    .lp-print-footer .lp-print-footer-disclaimer { font-size: 5.5pt; color: #9CA3AF; }
+}
+/* Hidden in screen view */
+.lp-print-footer { display: none; }
+/* ===== End native-print block ===== */
+
         @media print {
             body { background: white !important; }
             .no-print, header, .modal-header, .lp-actions, .lp-pill-btn, .remove-card-btn, .lp-disclaimer, .tooltip-icon, .lp-howto, .lp-tab-sub, .shared-strip { display: none !important; }
@@ -431,6 +500,14 @@
             </button>
         </div>
 
+        <!-- Panel howto / intro copy — sits ABOVE the inputs so the instruction is read first -->
+        <div class="lp-howto" id="howto_net">
+            Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
+        </div>
+        <div class="lp-howto" id="howto_risk" style="display:none">
+            Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
+        </div>
+
         <!-- Shared funding amount -->
         <div class="shared-strip">
             <label for="funding_amt">New funding under review</label>
@@ -442,9 +519,6 @@
 
         <!-- ============ PANEL: NET REQUIREMENT ============ -->
         <div class="panel active" id="panel_net">
-            <div class="lp-howto">
-                Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
-            </div>
             <div class="lp-inputs">
                 <label for="net_pct">Net Requirement <span class="tooltip-icon" data-tip="Percentage of the new funding that must go directly to the borrower.">i</span></label>
                 <div class="input-wrap">
@@ -482,9 +556,6 @@
 
         <!-- ============ PANEL: POSITION RISK ============ -->
         <div class="panel" id="panel_risk">
-            <div class="lp-howto">
-                Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
-            </div>
             <div class="lp-inputs">
                 <div class="lp-section-label">Revenue</div>
                 <div class="lp-group" style="margin-bottom: 0;">
@@ -545,14 +616,14 @@
 
             <div class="lp-results">
                 <div id="verdict" class="verdict">
-                    <div class="verdict-eyebrow" id="verdict_eyebrow">Stacking verdict</div>
+                    <div class="verdict-eyebrow" id="verdict_eyebrow">Position risk</div>
                     <div class="verdict-headline" id="verdict_headline">—</div>
                     <div class="verdict-sub" id="verdict_sub"></div>
                 </div>
 
                 <div class="hero-grid">
                     <div class="hero-output">
-                        <div class="hero-label">Debt-service ratio <span class="tooltip-icon" data-tip="Total monthly debt service (all positions + new) divided by monthly revenue. The primary stacking risk signal.">i</span></div>
+                        <div class="hero-label">Debt-service ratio <span class="tooltip-icon" data-tip="Total monthly debt service (all positions + new) divided by monthly revenue. The primary position-risk signal.">i</span></div>
                         <div id="hero_dsr" class="hero-value">—</div>
                     </div>
                     <div class="hero-output">
@@ -684,33 +755,17 @@
         window.PDF_HELPER.initPrintLayout("FUNDABILITY ESTIMATE");
 
         const cards = document.querySelectorAll('[id^="card-"]');
-
-        await window.PDF_HELPER.resetScroll(50);
-
         if (cards.length > 1) {
             document.body.classList.add('multi-scenario');
         }
 
-        document.body.classList.add('pdf-export-mode');
-
-        await window.PDF_HELPER.resetScroll(100);
-
         const element = document.querySelector('.lp-main');
-        const opt = {
-            margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
-            filename: `LendPaper_Fundability_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 800, scrollX: window.scrollX || 0, scrollY: window.scrollY || 0 },
-            jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
-        };
+        const filename = `LendPaper_Fundability_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
         try {
-            // Generate PDF and inject dynamic page-specific footers
-            await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
-                window.PDF_HELPER.addPdfFooters(pdf);
-            }).save();
+            await window.PDF_HELPER.generatePDF(element, "FUNDABILITY ESTIMATE", filename, btn, origText);
         } finally {
-            document.body.classList.remove('pdf-export-mode');
+            document.body.classList.remove('multi-scenario');
             btn.innerHTML = origText;
             btn.disabled = false;
         }
@@ -722,6 +777,9 @@
         document.getElementById('tab_risk').classList.toggle('active', which === 'risk');
         document.getElementById('panel_net').classList.toggle('active', which === 'net');
         document.getElementById('panel_risk').classList.toggle('active', which === 'risk');
+        // Toggle the corresponding intro/howto block (moved out of panels so it sits ABOVE the inputs)
+        document.getElementById('howto_net').style.display = (which === 'net') ? '' : 'none';
+        document.getElementById('howto_risk').style.display = (which === 'risk') ? '' : 'none';
     }
 
     // Tooltips
@@ -890,7 +948,7 @@
         const head = document.getElementById('verdict_headline');
         const sub = document.getElementById('verdict_sub');
         const eyebrow = document.getElementById('verdict_eyebrow');
-        eyebrow.textContent = 'Stacking verdict — ' + ordinal(posNum) + ' position';
+        eyebrow.textContent = 'Position risk — ' + ordinal(posNum) + ' position';
 
         if (dsr === null) {
             setVerdictColor(box, head, sub, eyebrow, 'low');
@@ -952,7 +1010,7 @@
             dataPairs["Total exposure"] = document.getElementById('res_exposure').innerText;
         }
         const borderLine = "─────────────────────────────";
-        let payload = `[Position / Stacking Risk] — LendPaper\n${borderLine}\n`;
+        let payload = `[Position Risk] — LendPaper\n${borderLine}\n`;
         Object.entries(dataPairs).forEach(([l, v]) => { payload += `${l.padEnd(26)}: ${v}\n`; });
         payload += `${borderLine}\n${WATERMARK_FOOTER}`;
         navigator.clipboard.writeText(payload).then(showToast);
@@ -985,6 +1043,20 @@
         }
     };
 </script>
+
+
+<!-- Print-only footer rendered by the browser's native print engine on every page -->
+<div class="lp-print-footer">
+    <div class="lp-print-footer-top">
+        Generated via LendPaper  |  <a href="https://lendpaper.com">lendpaper.com</a>
+        &nbsp;·&nbsp;
+        White-label and custom branding available  -  <a href="mailto:info@lendpaper.com">info@lendpaper.com</a>
+    </div>
+    <div class="lp-print-footer-disclaimer">
+        ESTIMATES ONLY — NOT FINANCIAL ADVICE. These figures are preliminary estimates generated by the user (lender, broker, or ISO) using LendPaper software. LendPaper is a software provider only — not a lender, broker, financial advisor, or institution. LendPaper does not verify inputs, guarantee calculations, or determine final loan terms. Actual terms are subject to lender underwriting and final approval.
+        Full terms: <a href="https://lendpaper.com/legal/estimates">lendpaper.com/legal/estimates</a>
+    </div>
+</div>
 
 </body>
 </html>

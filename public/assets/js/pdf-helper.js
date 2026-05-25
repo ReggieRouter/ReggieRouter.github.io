@@ -53,7 +53,7 @@ window.PDF_HELPER = {
         
         if (tier === 'free') {
             headerHTML = `
-                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 12px 12px 12px !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
+                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 0 10px 0 !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
                     <div class="print-header-left"></div>
                     <div class="print-header-right" style="text-align: right !important; display: flex !important; flex-direction: column !important; align-items: flex-end !important;">
                         <div style="display: flex !important; align-items: center !important; gap: 6px !important;">
@@ -71,7 +71,7 @@ window.PDF_HELPER = {
             `;
         } else if (tier === 'pro' || tier === 'branded') {
             headerHTML = `
-                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 12px 12px 12px !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
+                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 0 10px 0 !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
                     <div class="print-header-left" style="display: flex !important; align-items: center !important; gap: 8px !important;">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #14532D !important;">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"/>
@@ -93,7 +93,7 @@ window.PDF_HELPER = {
             `;
         } else if (tier === 'whitelabel' || tier === 'enterprise') {
             headerHTML = `
-                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 12px 12px 12px !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
+                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 0 10px 0 !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
                     <div class="print-header-left" style="display: flex !important; align-items: center !important; gap: 8px !important;">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #111827 !important;">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"/>
@@ -110,7 +110,7 @@ window.PDF_HELPER = {
         }
         
         headerHTML += `
-            <div style="text-align: center !important; margin-top: 16px !important; margin-bottom: 24px !important;">
+            <div style="text-align: center !important; margin-top: 8px !important; margin-bottom: 16px !important;">
                 <h1 class="pdf-document-title" style="display: block !important; font-size: 20px !important; font-weight: 800 !important; color: #111827 !important; margin: 0 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">${title}</h1>
             </div>
         `;
@@ -354,147 +354,135 @@ window.PDF_HELPER = {
     generatePDF: async function(element, title, filename, btn, origText, isMultiScenario = false) {
         const self = this;
 
-        // 1. Temporarily apply export-mode classes to live html AND body so the browser computes
-        //    layout reflow at the correct 800px viewport. Without this, <html> stays at full
-        //    viewport width (e.g. 1440px) while <body> is constrained to 800px — creating a
-        //    coordinate mismatch between live DOM measurements and the cloned render document,
-        //    which causes left-side clipping and right-side blank space in the output PDF.
+        // STEP 1 — Show one-time educational modal (returns false if user cancels)
+        const proceed = await this.showPrintEducationModal();
+        if (!proceed) {
+            if (btn) {
+                btn.innerHTML = origText;
+                btn.disabled = false;
+            }
+            return;
+        }
+
+        // STEP 2 — Apply print-mode classes so pdf-export-mode + @media print CSS takes effect
         document.documentElement.classList.add('pdf-export-mode');
         document.body.classList.add('pdf-export-mode');
         if (isMultiScenario) {
             document.body.classList.add('multi-scenario');
         }
 
-        // Save original inline style values for exact restoration afterwards
-        const origHtmlWidth = document.documentElement.style.width;
-        const origHtmlMinWidth = document.documentElement.style.minWidth;
-        const origHtmlMaxWidth = document.documentElement.style.maxWidth;
-        const origHtmlOverflow = document.documentElement.style.overflow;
-        const origHtmlMargin = document.documentElement.style.margin;
-        const origHtmlPadding = document.documentElement.style.padding;
-
-        const origBodyWidth = document.body.style.width;
-        const origBodyMinWidth = document.body.style.minWidth;
-        const origBodyMaxWidth = document.body.style.maxWidth;
-        const origBodyOverflow = document.body.style.overflow;
-        const origBodyMargin = document.body.style.margin;
-        const origBodyPadding = document.body.style.padding;
-
-        // Nuclear strict 800px constraint on live DOM to force identical coordinate spaces!
-        // Aligning elements to the top-left (margin: 0, padding: 0) is CRITICAL to ensure that
-        // bounding client rect left coordinate is exactly 0px, avoiding left-shifting or right-clipping on the canvas.
-        document.documentElement.style.setProperty('width', '800px', 'important');
-        document.documentElement.style.setProperty('min-width', '800px', 'important');
-        document.documentElement.style.setProperty('max-width', '800px', 'important');
-        document.documentElement.style.setProperty('overflow', 'visible', 'important');
-        document.documentElement.style.setProperty('margin', '0', 'important');
-        document.documentElement.style.setProperty('padding', '0', 'important');
-
-        document.body.style.setProperty('width', '800px', 'important');
-        document.body.style.setProperty('min-width', '800px', 'important');
-        document.body.style.setProperty('max-width', '800px', 'important');
-        document.body.style.setProperty('overflow', 'visible', 'important');
-        document.body.style.setProperty('margin', '0', 'important');
-        document.body.style.setProperty('padding', '0', 'important');
-
-        // Setup custom print header band dynamically per plan tier in the live DOM
+        // STEP 3 — Build the print header dynamically per tier
         this.initPrintLayout(title);
 
-        // Perform scroll resets on live DOM to ensure parameters are cleanly populated
-        await this.resetScroll(50);
+        // STEP 4 — Set document title; browsers use this as the suggested PDF filename
+        const origDocTitle = document.title;
+        document.title = filename.replace(/\.pdf$/i, '');
 
-        // 2. TRANSFORM SHIELD:
-        // Traverse up the DOM tree and temporarily disable any CSS transforms (scale, translate)
-        // on parent/ancestor elements so html2canvas computes coordinate bounds at exactly 1:1 scale.
-        const transformedAncestors = [];
-        try {
-            let curr = element;
-            while (curr && curr !== document.documentElement) {
-                const style = window.getComputedStyle(curr);
-                if (style.transform && style.transform !== 'none') {
-                    transformedAncestors.push({
-                        element: curr,
-                        originalTransform: curr.style.transform
-                    });
-                    curr.style.setProperty('transform', 'none', 'important');
-                }
-                curr = curr.parentElement;
-            }
-        } catch (err) {
-            console.warn("PDF Helper: Failed to shield ancestor transforms:", err);
-        }
-
-        // Force synchronous layout calculations on the live element
-        element.offsetHeight;
-
-        // Let layout settle in browser painting frame.
-        // 350ms (up from 150ms) gives the amortization table time to fully reflow after
-        // .table-scroll-container expands from max-height:480px to unconstrained height.
-        await new Promise(r => setTimeout(r, 350));
-
-        const opt = {
-            margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
-            filename: filename,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
-                scale: 2, 
-                logging: false, 
-                useCORS: true, 
-                windowWidth: 800, 
-                scrollX: 0, 
-                scrollY: 0,
-                onclone: (clonedDoc) => {
-                    // Force the html2canvas internal clone body and documentElement to have pdf-export-mode
-                    clonedDoc.documentElement.classList.add('pdf-export-mode');
-                    clonedDoc.body.classList.add('pdf-export-mode');
-                    if (isMultiScenario) {
-                        clonedDoc.body.classList.add('multi-scenario');
-                    }
-                }
-            },
-            jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
-        };
+        // Let the browser apply the print-mode reflow before opening the dialog
+        await new Promise(r => setTimeout(r, 250));
 
         try {
-            // Render directly from the live DOM element (completely shielded from transforms!)
-            await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
-                self.addPdfFooters(pdf);
-            }).save();
+            // STEP 5 — Open the browser's native print dialog. User chooses
+            // "Save as PDF" as the destination. The print engine renders directly
+            // from CSS using @page rules — no html2canvas, no clip drift.
+            window.print();
         } catch (e) {
-            console.error("PDF generation exception:", e);
-            this.showToast("Failed to generate PDF.", true);
+            console.error("Print dialog failed:", e);
+            this.showToast("Failed to open print dialog.", true);
         } finally {
-            // Restore original inline style values
-            document.documentElement.style.width = origHtmlWidth;
-            document.documentElement.style.minWidth = origHtmlMinWidth;
-            document.documentElement.style.maxWidth = origHtmlMaxWidth;
-            document.documentElement.style.overflow = origHtmlOverflow;
-            document.documentElement.style.margin = origHtmlMargin;
-            document.documentElement.style.padding = origHtmlPadding;
+            // Restore document title
+            document.title = origDocTitle;
 
-            document.body.style.width = origBodyWidth;
-            document.body.style.minWidth = origBodyMinWidth;
-            document.body.style.maxWidth = origBodyMaxWidth;
-            document.body.style.overflow = origBodyOverflow;
-            document.body.style.margin = origBodyMargin;
-            document.body.style.padding = origBodyPadding;
+            // Remove print-mode classes after a delay (dialog may read styles async)
+            setTimeout(() => {
+                document.documentElement.classList.remove('pdf-export-mode');
+                document.body.classList.remove('pdf-export-mode');
+                document.body.classList.remove('multi-scenario');
+            }, 1000);
 
-            // Restore original CSS transforms on ancestor elements
-            transformedAncestors.forEach(item => {
-                try {
-                    item.element.style.transform = item.originalTransform;
-                } catch (e) {}
-            });
-
-            // Restore live DOM class state
-            document.documentElement.classList.remove('pdf-export-mode');
-            document.body.classList.remove('pdf-export-mode');
-            document.body.classList.remove('multi-scenario');
             if (btn) {
                 btn.innerHTML = origText;
                 btn.disabled = false;
             }
         }
+    },
+
+    showPrintEducationModal: function() {
+        return new Promise((resolve) => {
+            // If user has previously opted out, skip the modal
+            if (localStorage.getItem('lp_print_modal_dismissed') === 'true') {
+                resolve(true);
+                return;
+            }
+
+            // Build modal — white card with a visual mini-mockup of the print dialog
+            const overlay = document.createElement('div');
+            overlay.id = 'lp-print-modal-overlay';
+            overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(17,24,39,0.45);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:20px;';
+
+            // Two visual rows showing what to do:
+            // 1) Destination = Save as PDF (the field they want)
+            // 2) Headers and footers = unchecked (the field they need to turn OFF)
+            // Plus a primary "Got it, continue" button.
+            overlay.innerHTML =
+                '<div style="background:white;border-radius:14px;max-width:420px;width:100%;padding:28px 28px 22px;box-shadow:0 20px 60px rgba(0,0,0,0.18);">'
+
+                // Header
+                + '<div style="text-align:center;margin-bottom:6px;">'
+                + '<div style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:#F0FDF4;margin-bottom:10px;">'
+                + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/></svg>'
+                + '</div>'
+                + '<h3 style="margin:0 0 4px;font-size:18px;font-weight:700;color:#111827;">One quick step</h3>'
+                + '<p style="margin:0;font-size:13px;color:#6B7280;line-height:1.5;">In the print dialog that opens next:</p>'
+                + '</div>'
+
+                // Visual mockup card 1: Destination = Save as PDF
+                + '<div style="margin-top:18px;padding:12px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#FAFAFA;display:flex;align-items:center;justify-content:space-between;gap:12px;">'
+                + '<div style="font-size:12px;color:#6B7280;font-weight:500;">Destination</div>'
+                + '<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;background:white;border:1.5px solid #14532D;border-radius:6px;font-size:13px;font-weight:600;color:#14532D;">'
+                + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+                + 'Save as PDF</div>'
+                + '</div>'
+
+                // Visual mockup card 2: Uncheck Headers and footers
+                + '<div style="margin-top:8px;padding:12px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#FAFAFA;display:flex;align-items:center;justify-content:space-between;gap:12px;">'
+                + '<div style="font-size:12px;color:#6B7280;font-weight:500;">Headers and footers</div>'
+                + '<div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#991B1B;">'
+                + '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1.5px solid #991B1B;border-radius:4px;background:white;"></span>'
+                + 'Uncheck</div>'
+                + '</div>'
+
+                // Then click Save
+                + '<p style="margin:14px 0 0;font-size:13px;color:#374151;text-align:center;line-height:1.5;">Then click <strong>Save</strong>.</p>'
+
+                // Footer: don't-show-again + Continue
+                + '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:18px;margin-top:18px;border-top:1px solid #F3F4F6;">'
+                + '<label style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B7280;cursor:pointer;user-select:none;">'
+                + '<input type="checkbox" id="lp-print-dont-show-again" style="cursor:pointer;width:14px;height:14px;">Don\'t show again</label>'
+                + '<div style="display:flex;gap:8px;">'
+                + '<button id="lp-print-cancel" style="padding:8px 14px;border:1px solid #D1D5DB;background:white;color:#374151;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;">Cancel</button>'
+                + '<button id="lp-print-continue" style="padding:8px 18px;border:none;background:#14532D;color:white;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">Got it, continue</button>'
+                + '</div></div>'
+
+                + '</div>';
+
+            document.body.appendChild(overlay);
+
+            const cleanup = (result) => {
+                const dontShow = document.getElementById('lp-print-dont-show-again');
+                if (dontShow && dontShow.checked && result) {
+                    localStorage.setItem('lp_print_modal_dismissed', 'true');
+                }
+                overlay.remove();
+                resolve(result);
+            };
+
+            document.getElementById('lp-print-continue').addEventListener('click', () => cleanup(true));
+            document.getElementById('lp-print-cancel').addEventListener('click', () => cleanup(false));
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) cleanup(false);
+            });
+        });
     }
 };
 

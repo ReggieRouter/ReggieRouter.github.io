@@ -392,6 +392,75 @@ label {
 /* Print-only elements hidden by default on screen */
 .print-header-content, .print-footer-legal, .print-watermark { display: none !important; }
 
+/* ===== Native-print engine (universal) ===== */
+@page {
+    size: letter portrait;
+    margin: 0.45in 0.55in 0.85in 0.55in;
+}
+@page :first {
+    margin-top: 0.35in;
+}
+@page {
+    @bottom-right {
+        content: "Page " counter(page) " of " counter(pages);
+        font-size: 7pt;
+        color: #9CA3AF;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        padding-bottom: 0.15in;
+    }
+}
+
+@media print {
+    html, body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    /* Hide siblings of main + the print footer overlay */
+    body.pdf-export-mode > *:not(.lp-main):not(main):not(.lp-print-footer):not(#lp-print-modal-overlay):not(#tt) { display: none !important; }
+    /* Keep table rows & cards from splitting across pages */
+    body.pdf-export-mode tr,
+    body.pdf-export-mode .sc,
+    body.pdf-export-mode .lp-card,
+    body.pdf-export-mode .verdict,
+    body.pdf-export-mode .hero-output,
+    body.pdf-export-mode .takeaway { page-break-inside: avoid !important; break-inside: avoid !important; }
+    /* Force-hide Tailwind .hidden sections that were marked print:block under html2pdf */
+    body.pdf-export-mode div.hidden { display: none !important; }
+    /* Hide the dynamic takeaway/quote (cycles through on-screen, duplicates info in print) */
+    body.pdf-export-mode .takeaway { display: none !important; }
+    /* Strip orphan tooltip asterisks that have no hover text in print */
+    body.pdf-export-mode sup { display: none !important; }
+    /* Hide tooltip icons in print (the (i) circles) */
+    body.pdf-export-mode .tooltip-icon { display: none !important; }
+    /* Custom footer rendered on every page */
+    .lp-print-footer {
+        display: block !important;
+        position: fixed;
+        bottom: 0.2in;
+        left: 0.55in;
+        right: 0.55in;
+        font-size: 5.5pt;
+        line-height: 1.45;
+        color: #9CA3AF;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .lp-print-footer .lp-print-footer-top {
+        font-size: 7pt;
+        color: #6B7280;
+        margin-bottom: 4px;
+        border-top: 0.5pt solid #E5E7EB;
+        padding-top: 6px;
+    }
+    .lp-print-footer a { color: #14532D; font-weight: 700; text-decoration: none; }
+    .lp-print-footer .lp-print-footer-disclaimer { font-size: 5.5pt; color: #9CA3AF; }
+}
+/* Hidden in screen view */
+.lp-print-footer { display: none; }
+/* ===== End native-print block ===== */
+
 @media print {
     body { background: white !important; }
     .no-print, header, .modal-header, .lp-actions, .lp-pill-btn, .remove-card-btn, .lp-disclaimer, .tooltip-icon, .lp-definition { display: none !important; }
@@ -556,32 +625,17 @@ async function handleLendPaperSavePDF() {
     // Setup custom print header band dynamically per plan tier
     window.PDF_HELPER.initPrintLayout("SBA 7(a) RATES & FEES");
 
-    await window.PDF_HELPER.resetScroll(50);
-
     if (cards.length > 1) {
         document.body.classList.add('multi-scenario');
     }
 
-    document.body.classList.add('pdf-export-mode');
-
-    await window.PDF_HELPER.resetScroll(100);
-
     const element = document.querySelector('.lp-main');
-    const opt = {
-        margin: [10, 10, 25, 10], // Set bottom margin to 25mm to clear running footers
-        filename: `LendPaper_SBA_Fees_estimate_${new Date().toISOString().slice(0,10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, logging: false, useCORS: true, windowWidth: 800, scrollX: window.scrollX || 0, scrollY: window.scrollY || 0 },
-        jsPDF: { unit: 'mm', format: 'letter', orientation: 'portrait' }
-    };
+    const filename = `LendPaper_SBA_Fees_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
     try {
-        // Generate PDF and inject dynamic page-specific footers
-        await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
-            window.PDF_HELPER.addPdfFooters(pdf);
-        }).save();
+        await window.PDF_HELPER.generatePDF(element, "SBA 7(a) RATES & FEES", filename, btn, origText);
     } finally {
-        document.body.classList.remove('pdf-export-mode');
+        document.body.classList.remove('multi-scenario');
         btn.innerHTML = origText;
         btn.disabled = false;
     }
@@ -781,5 +835,19 @@ window.onload = () => {
     body.is-embedded .modal-header { display: none !important; }
     body.is-embedded .lp-main { display: block; padding: 0; }
 </style>
+
+<!-- Print-only footer rendered by the browser's native print engine on every page -->
+<div class="lp-print-footer">
+    <div class="lp-print-footer-top">
+        Generated via LendPaper  |  <a href="https://lendpaper.com">lendpaper.com</a>
+        &nbsp;·&nbsp;
+        White-label and custom branding available  -  <a href="mailto:info@lendpaper.com">info@lendpaper.com</a>
+    </div>
+    <div class="lp-print-footer-disclaimer">
+        ESTIMATES ONLY — NOT FINANCIAL ADVICE. These figures are preliminary estimates generated by the user (lender, broker, or ISO) using LendPaper software. LendPaper is a software provider only — not a lender, broker, financial advisor, or institution. LendPaper does not verify inputs, guarantee calculations, or determine final loan terms. Actual terms are subject to lender underwriting and final approval.
+        Full terms: <a href="https://lendpaper.com/legal/estimates">lendpaper.com/legal/estimates</a>
+    </div>
+</div>
+
 </body>
 </html>

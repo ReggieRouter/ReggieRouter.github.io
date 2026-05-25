@@ -21,7 +21,7 @@
     <link rel="apple-touch-icon" href="../public/assets/brand/apple-touch-icon-180x180.png">
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css?v=2026.05.25.1000">
     <script src="../public/assets/js/calculator-app.js?v=2026.05.25.1000"></script>
-    <script src="../public/assets/js/pdf-helper.js?v=2026.05.25.1000"></script>
+    <script src="../public/assets/js/pdf-helper.js?v=2026.05.25.1200"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Typography & Core Variables */
@@ -298,17 +298,92 @@
         .print-header-content { display: none; }
         .print-footer-legal, .print-watermark { display: none; }
 
+        /* Native print: @page rules control the actual PDF page geometry */
+        @page {
+            size: letter portrait;
+            margin: 0.45in 0.55in 1.15in 0.55in;
+        }
+        @page :first {
+            margin-top: 0.35in;
+        }
+        @page {
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-size: 7pt;
+                color: #9CA3AF;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                padding-bottom: 0.15in;
+            }
+        }
+
         @media print {
-            body { background: white !important; min-height: 0 !important; height: auto !important; }
+            html, body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            body { min-height: 0 !important; height: auto !important; }
             main { min-height: 0 !important; height: auto !important; }
             .no-print, header, .action-buttons, .tooltiptext, .lp-howto, .remove-card-btn { display: none !important; }
             .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
             .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
             .print-header-content h1 { font-size: 22px; font-weight: 800; color: var(--brand-primary); margin: 0; text-transform: uppercase; }
             .modal-shell { box-shadow: none !important; border: none !important; max-width: 100% !important; margin: 0 auto !important; break-inside: auto !important; }
-            .print-footer-legal { display: block !important; margin-top: 40px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
-            .print-watermark { display: block !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; margin-top: 12px !important; }
+            body.pdf-export-mode > *:not(main):not(.lp-print-footer):not(#lp-print-modal-overlay) { display: none !important; }
+            body.pdf-export-mode tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+            body.pdf-export-mode .pdf-hero-block,
+            body.pdf-export-mode .pdf-stats-grid,
+            body.pdf-export-mode .callout,
+            body.pdf-export-mode .takeaway { page-break-inside: avoid !important; break-inside: avoid !important; }
+            /* Keep the inline payoff callout glued to the row that triggered it */
+            body.pdf-export-mode tr[class*="amo-detail-for-"] {
+                page-break-before: avoid !important;
+                break-before: avoid !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            /* Make sure the prepay-target-row green highlight prints */
+            body.pdf-export-mode .prepay-target-row td {
+                background: #DCFCE7 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            /* Force hide the duplicate "Complete Payment Schedule" block — it was for the old html2pdf path */
+            body.pdf-export-mode div.hidden { display: none !important; }
+            /* Better print table spacing — closer to the ideal-version padding */
+            body.pdf-export-mode .table-scroll-container { border: none !important; }
+            body.pdf-export-mode .table-scroll-container table { font-size: 10.5pt !important; }
+            body.pdf-export-mode .table-scroll-container td,
+            body.pdf-export-mode .table-scroll-container th { padding: 8px 10px !important; }
+            /* The lonely APR* — pin the sup so it stays attached to the label */
+            body.pdf-export-mode sup { vertical-align: super !important; font-size: 7pt !important; line-height: 0 !important; }
+            .lp-print-footer {
+                display: block !important;
+                position: fixed;
+                bottom: 0.15in;
+                left: 0.55in;
+                right: 0.55in;
+                max-height: 0.85in;
+                overflow: hidden;
+                font-size: 5pt;
+                line-height: 1.35;
+                color: #9CA3AF;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            }
+            .lp-print-footer .lp-print-footer-top {
+                font-size: 6.5pt;
+                color: #6B7280;
+                margin-bottom: 3px;
+                border-top: 0.5pt solid #E5E7EB;
+                padding-top: 5px;
+            }
+            .lp-print-footer a { color: #14532D; font-weight: 700; text-decoration: none; }
+            .lp-print-footer .lp-print-footer-disclaimer { font-size: 5pt; color: #9CA3AF; }
         }
+        /* Hidden in screen view — only visible during print */
+        .lp-print-footer { display: none; }
 
         /* Direct PDF Export Styles */
         body.pdf-export-mode { background: white !important; min-height: 0 !important; height: auto !important; }
@@ -334,26 +409,39 @@
             box-sizing: border-box !important;
             letter-spacing: normal !important; /* Fixes html2canvas text shift bug! */
         }
-        body.pdf-export-mode main { 
-            padding: 12px 16px !important; /* Gutter safety margin */
-            display: block !important; 
-            max-width: 100% !important; 
-            width: 100% !important; 
-            margin: 0 auto !important; 
-            min-height: 0 !important; 
-            height: auto !important; 
+        body.pdf-export-mode main {
+            padding: 0 !important; /* @page margins handle gutters */
+            display: block !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            min-height: 0 !important;
+            height: auto !important;
             position: static !important;
             transform: none !important;
         }
-        body.pdf-export-mode .modal-shell,
-        body.pdf-export-mode .lp-results-panel { 
+        /* Native print: @page margins handle gutters, modal-shell just centers */
+        body.pdf-export-mode .modal-shell {
+            width: 100% !important;
+            max-width: 720px !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            break-inside: auto !important;
+            background: #fff !important;
+            position: static !important;
+            transform: none !important;
+            box-sizing: border-box !important;
+        }
+        body.pdf-export-mode .lp-results-panel {
             width: 100% !important;
             max-width: 100% !important;
             margin-left: auto !important;
             margin-right: auto !important;
-            box-shadow: none !important; 
-            border: none !important; 
-            break-inside: auto !important; 
+            box-shadow: none !important;
+            border: none !important;
+            break-inside: auto !important;
             background: #fff !important;
             position: static !important;
             transform: none !important;
@@ -374,7 +462,7 @@
         /* Print-only loan parameter summary */
         .pdf-loan-params { display: none; }
         body.pdf-export-mode .pdf-loan-params { display: block !important; border: 1px solid #E5E7EB; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; background: #F9FAFB; }
-        .pdf-params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+        .pdf-params-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 32px; row-gap: 14px; }
         .pdf-param-label { font-size: 10px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
         .pdf-param-value { font-size: 13px; font-weight: 600; color: #111827; }
 
@@ -618,6 +706,53 @@
         /* Origination fee easter egg */
         .fee-egg { font-size: 12px; color: #6B7280; font-style: italic; opacity: 0; max-height: 0; overflow: hidden; transition: opacity 0.4s, max-height 0.3s; margin-top: 0; }
         .fee-egg.visible { opacity: 1; max-height: 24px; margin-top: 5px; }
+
+        /* PDF layout: weekly payment hero is left-aligned per the perfect example */
+        body.pdf-export-mode .pdf-hero-block { text-align: left !important; margin-top: 4px !important; margin-bottom: 20px !important; padding-bottom: 16px !important; }
+
+        /* PDF layout: show the 2x2 stats grid (Est. Total Payback / Total Interest / Cost per Dollar / APR) */
+        body.pdf-export-mode .pdf-stats-grid { display: grid !important; }
+
+        /* PDF polish: keep the takeaway summary visible in print and match the May 23 PDF format.
+           Keep the soft card look (light bg, green left accent), but hide the on-screen-only
+           "What you tell the borrower" eyebrow and the cycle-arrow nav (those are .no-print).
+           Quote-mark characters are stripped from the renderTakeaway template strings. */
+        body.pdf-export-mode .takeaway { background: #FFFFFF !important; border: 1px solid #E5E7EB !important; border-left: 4px solid #14532D !important; border-radius: 12px !important; padding: 16px 18px !important; margin-top: 14px !important; box-shadow: none !important; }
+        body.pdf-export-mode .takeaway .takeaway-eyebrow { display: none !important; }
+        body.pdf-export-mode .takeaway-body { padding: 0 !important; }
+        body.pdf-export-mode .takeaway-content,
+        body.pdf-export-mode [id^="takeaway-content-"] { font-size: 14px !important; color: #111827 !important; line-height: 1.55 !important; font-weight: 600 !important; }
+
+        /* PDF polish: hide the orphan APR asterisk in print (the tooltip text doesn't render anyway) */
+        body.pdf-export-mode .pdf-stats-grid sup { display: none !important; }
+
+        /* PDF polish: de-emphasize APR (legally required but visually secondary to payback/interest) */
+        body.pdf-export-mode .pdf-stats-grid > div:last-child .text-\[10px\],
+        body.pdf-export-mode #outApr-1, body.pdf-export-mode [id^="outApr-"] {
+            color: #6B7280 !important;
+            font-weight: 600 !important;
+        }
+        body.pdf-export-mode [id^="outApr-"] { font-size: 14px !important; }
+
+        /* PDF polish: tighten the print header (lendpaper logo + tagline + PAYMENT BREAKDOWN title)
+           — reduce empty space at top of page 1 */
+        body.pdf-export-mode .print-header-content { margin-bottom: 12px !important; padding-top: 0 !important; }
+        body.pdf-export-mode .pdf-document-title { margin-top: 8px !important; margin-bottom: 16px !important; }
+
+        /* PDF layout: fixed-column amortization table — order: # | Date | Payment | Principal | Interest | Balance */
+        body.pdf-export-mode .table-scroll-container table { table-layout: fixed !important; width: 100% !important; }
+        body.pdf-export-mode .table-scroll-container table th:nth-child(1),
+        body.pdf-export-mode .table-scroll-container table td:nth-child(1) { width: 5% !important; }
+        body.pdf-export-mode .table-scroll-container table th:nth-child(2),
+        body.pdf-export-mode .table-scroll-container table td:nth-child(2) { width: 17% !important; }
+        body.pdf-export-mode .table-scroll-container table th:nth-child(3),
+        body.pdf-export-mode .table-scroll-container table td:nth-child(3) { width: 18% !important; }
+        body.pdf-export-mode .table-scroll-container table th:nth-child(4),
+        body.pdf-export-mode .table-scroll-container table td:nth-child(4) { width: 18% !important; }
+        body.pdf-export-mode .table-scroll-container table th:nth-child(5),
+        body.pdf-export-mode .table-scroll-container table td:nth-child(5) { width: 16% !important; }
+        body.pdf-export-mode .table-scroll-container table th:nth-child(6),
+        body.pdf-export-mode .table-scroll-container table td:nth-child(6) { width: 26% !important; }
     </style>
 </head>
 <body>
@@ -654,18 +789,32 @@
             const amt = parseFloat(document.getElementById(`amt-${id}`)?.value) || 0;
             const factor = parseFloat(document.getElementById(`factor-${id}`)?.value) || 0;
             const term = parseInt(document.getElementById(`term-${id}`)?.value) || 0;
-            const freq = document.getElementById(`freq-${id}`)?.value || '';
-            const feeInput = parseFloat(document.getElementById(`fee-${id}`)?.value) || 0;
-            const feeIsDollar = document.getElementById(`feeWrap-${id}`)?.dataset.feeMode === 'dollar';
-            const startDate = document.getElementById(`start-${id}`)?.value || '';
-            const freqLabels = { daily: 'Daily', weekly: 'Weekly', semimonthly: 'Semi-Monthly', monthly: 'Monthly' };
-            const feeDisplay = feeIsDollar ? fmtUsd.format(feeInput) : feeInput.toFixed(1) + '%';
+            const termUnit = document.getElementById(`termWrap-${id}`)?.dataset.termUnit || 'mos';
+            const startDateRaw = document.getElementById(`start-${id}`)?.value || '';
+            const freq = document.getElementById(`freq-${id}`)?.value || 'weekly';
+            const feeVal = parseFloat(document.getElementById(`fee-${id}`)?.value) || 0;
+            const feeMode = document.getElementById(`feeWrap-${id}`)?.dataset.feeMode || 'pct';
+
+            // Format ISO date (2026-05-25) as US long (May 25, 2026) for consistency
+            let startDate = '—';
+            if (startDateRaw) {
+                const [yr, mo, day] = startDateRaw.split('-').map(Number);
+                if (yr && mo && day) {
+                    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    startDate = `${months[mo-1]} ${day}, ${yr}`;
+                }
+            }
+
+            const termUnitLabels = { mos: 'months', wks: 'weeks', days: 'days' };
+            const freqLabels = { daily: 'Daily', weekly: 'Weekly', biweekly: 'Bi-weekly', semimonthly: 'Semi-monthly', monthly: 'Monthly' };
+            const feeText = feeMode === 'pct' ? (feeVal.toFixed(1) + '%') : fmtUsd.format(feeVal);
+
             const set = (eid, val) => { const el = document.getElementById(eid); if (el) el.textContent = val; };
             set(`ppAmt-${id}`, fmtUsd.format(amt));
             set(`ppFactor-${id}`, factor.toFixed(2) + 'x');
-            set(`ppTerm-${id}`, term + ' months');
+            set(`ppTerm-${id}`, term + ' ' + (termUnitLabels[termUnit] || 'months'));
             set(`ppFreq-${id}`, freqLabels[freq] || freq);
-            set(`ppFee-${id}`, feeDisplay);
+            set(`ppFee-${id}`, feeText);
             set(`ppStart-${id}`, startDate);
         }
 
@@ -1084,7 +1233,7 @@
                             <div class="pdf-loan-params" id="pdfParams-${id}">
                                 <div class="pdf-params-grid">
                                     <div><div class="pdf-param-label">Financing Amount</div><div class="pdf-param-value" id="ppAmt-${id}">—</div></div>
-                                    <div><div class="pdf-param-label">Cost per Dollar</div><div class="pdf-param-value" id="ppFactor-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Factor Rate</div><div class="pdf-param-value" id="ppFactor-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Term</div><div class="pdf-param-value" id="ppTerm-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Payment Frequency</div><div class="pdf-param-value" id="ppFreq-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Origination Fee</div><div class="pdf-param-value" id="ppFee-${id}">—</div></div>
@@ -1194,10 +1343,10 @@
                                     <tr>
                                         <th class="p-3 font-bold text-[#6B7280] w-[40px] text-center">#</th>
                                         <th class="p-3 font-bold text-[#111827]">Date</th>
-                                        <th class="p-3 font-bold text-[#111827]">Payment</th>
-                                        <th class="p-3 font-bold text-[#111827]">Principal</th>
-                                        <th class="p-3 font-bold text-[#111827]">Interest</th>
-                                        <th class="p-3 font-bold text-[#111827]">Remaining Balance</th>
+                                        <th class="p-3 font-bold text-[#111827] text-right">Payment</th>
+                                        <th class="p-3 font-bold text-[#111827] text-right">Principal</th>
+                                        <th class="p-3 font-bold text-[#111827] text-right">Interest</th>
+                                        <th class="p-3 font-bold text-[#14532D] text-right">Remaining Balance</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tableBody-${id}" class="divide-y divide-[#F3F4F6]"></tbody>
@@ -1206,17 +1355,17 @@
                     </div>
                 </div>
 
-                <div class="hidden print:block border-t border-[#E5E7EB] pt-8 px-[32px] pb-[16px] mt-4">
+                <div class="hidden border-t border-[#E5E7EB] pt-8 px-[32px] pb-[16px] mt-4">
                     <div class="text-[14px] font-black text-[#111827] mb-6 uppercase tracking-[0.1em] border-b-4 border-[#111827] pb-3">Complete Payment Schedule</div>
                     <table class="min-w-full text-left text-[11px]">
                         <thead>
                             <tr class="border-b-2 border-[#111827]">
                                 <th class="py-3 font-black text-[#111827] uppercase w-[32px]">#</th>
                                 <th class="py-3 font-black text-[#111827] uppercase">Date</th>
-                                <th class="py-3 font-black text-[#111827] uppercase">Payment</th>
-                                <th class="py-3 font-black text-[#111827] uppercase">Principal</th>
-                                <th class="py-3 font-black text-[#111827] uppercase">Interest</th>
-                                <th class="py-3 font-black text-[#111827] uppercase text-right">Remaining Balance</th>
+                                <th class="py-3 font-black text-[#111827] uppercase text-right">Payment</th>
+                                <th class="py-3 font-black text-[#111827] uppercase text-right">Principal</th>
+                                <th class="py-3 font-black text-[#111827] uppercase text-right">Interest</th>
+                                <th class="py-3 font-black text-[#14532D] uppercase text-right">Remaining Balance</th>
                             </tr>
                         </thead>
                         <tbody id="printTableBody-${id}" class="divide-y divide-[#E5E7EB]"></tbody>
@@ -1307,26 +1456,26 @@
             let html;
             if (track.key === 'summary') {
                 if (sel) {
-                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}."`;
+                    html = `You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}.`;
                 } else {
                     const unitLabel = c.termUnit === 'wks' ? (c.term === 1 ? 'week' : 'weeks') :
                                       (c.termUnit === 'days' ? (c.term === 1 ? 'day' : 'days') :
                                       (c.term === 1 ? 'month' : 'months'));
-                    html = `"You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span> over ${c.term} ${unitLabel} — repaying <strong>${fmtUsd.format(c.payback)}</strong> total."`;
+                    html = `You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span> over ${c.term} ${unitLabel} — repaying <strong>${fmtUsd.format(c.payback)}</strong> total.`;
                 }
             } else if (track.key === 'apr') {
                 if (sel) {
-                    html = `"You're looking at <strong>${c.apr.toFixed(1)}% APR</strong> on net funded. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>."`;
+                    html = `You're looking at <strong>${c.apr.toFixed(1)}% APR</strong> on net funded. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>.`;
                 } else {
-                    html = `"You're looking at <strong>${fmtUsd.format(c.totalCost)}</strong> in total funding costs — a <strong>${c.apr.toFixed(1)}% APR</strong>, or <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>."`;
+                    html = `You're looking at <strong>${fmtUsd.format(c.totalCost)}</strong> in total funding costs — a <strong>${c.apr.toFixed(1)}% APR</strong>, or <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>.`;
                 }
             } else if (track.key === 'perdollar') {
-                html = `"For every dollar you receive, you're paying back <strong>${c.factor.toFixed(2)}</strong> — that's <strong>${c.centsDisplay}¢ on the dollar</strong>. On <strong>${fmtUsd.format(c.amt)}</strong> funded, you repay <strong>${fmtUsd.format(c.payback)}</strong> total."`;
+                html = `For every dollar you receive, you're paying back <strong>${c.factor.toFixed(2)}</strong> — that's <strong>${c.centsDisplay}¢ on the dollar</strong>. On <strong>${fmtUsd.format(c.amt)}</strong> funded, you repay <strong>${fmtUsd.format(c.payback)}</strong> total.`;
             } else if (track.key === 'prepay') {
                 if (sel && sel.savings > 0) {
-                    html = `"Pay off on your ${payoffLink(id, sel)} — your buyout drops to <strong>${fmtUsd.format(sel.buyout)}</strong>, saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest."`;
+                    html = `Pay off on your ${payoffLink(id, sel)} — your buyout drops to <strong>${fmtUsd.format(sel.buyout)}</strong>, saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest.`;
                 } else {
-                    html = `"This deal has a <strong>${c.discPct}%</strong> pre-pay discount — pay off early and keep the unearned interest savings. Click any row below to model the exact buyout."`;
+                    html = `This deal has a <strong>${c.discPct}%</strong> pre-pay discount — pay off early and keep the unearned interest savings. Click any row below to model the exact buyout.`;
                 }
             }
 
@@ -1344,7 +1493,7 @@
                 const fullTermEl = document.getElementById(`outFullTermDate-${id}`);
                 if (fullTermEl && lastCalc[id]) fullTermEl.innerText = lastCalc[id].maturityDate || '—';
                 const phraseEl = document.getElementById(`outSavingsPhrase-${id}`);
-                if (phraseEl) phraseEl.innerText = `Saves ${fmtUsd.format(sel.savings)} if paid off by ${sel.date}`;
+                if (phraseEl) phraseEl.innerText = `Save ${fmtUsd.format(sel.savings)} with early payoff by ${sel.date}`;
             } else {
                 summary.classList.add('hidden');
             }
@@ -1529,15 +1678,18 @@
                     rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, date: dateStr, day: dateDay, month: dateMonth, year: dateYear };
                 }
 
+                const dateCellContent = isSelected
+                    ? `${dateStr} <span style="font-size:10px;font-weight:700;color:#14532D;white-space:nowrap">&middot; payoff &#10003;</span>`
+                    : dateStr;
                 const row = `
                     <td class="p-3 font-medium text-[#94A3B8] text-center text-[11px]">${i}</td>
-                    <td class="p-3 font-medium text-[#64748B]">${dateStr}</td>
-                    <td class="p-3 font-bold">${fmtUsd.format(pmt)}</td>
-                    <td class="p-3">${fmtUsd.format(principal)}</td>
-                    <td class="p-3">${fmtUsd.format(interest)}</td>
-                    <td class="p-3 font-extrabold text-[#14532D] relative">${fmtUsd.format(balance)}<span class="amo-row-chevron no-print absolute right-3 top-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-150 text-[#14532D] font-bold text-[14px]">→</span></td>`;
+                    <td class="p-3 font-medium text-[#64748B] relative">${dateCellContent}<span class="amo-row-chevron no-print absolute right-3 top-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-150 text-[#14532D] font-bold text-[14px]">→</span></td>
+                    <td class="p-3 font-bold text-right">${fmtUsd.format(pmt)}</td>
+                    <td class="p-3 text-right">${fmtUsd.format(principal)}</td>
+                    <td class="p-3 text-right">${fmtUsd.format(interest)}</td>
+                    <td class="p-3 font-extrabold text-[#14532D] text-right">${fmtUsd.format(balance)}</td>`;
                 tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? ' prepay-target-row' : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" data-year="${dateYear}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
-                const printRow = `<td>${i}</td><td>${dateStr}</td><td>${fmtUsd.format(pmt)}</td><td>${fmtUsd.format(principal)}</td><td>${fmtUsd.format(interest)}</td><td>${fmtUsd.format(balance)}</td>`;
+                const printRow = `<td>${i}</td><td>${dateStr}</td><td style="text-align:right">${fmtUsd.format(pmt)}</td><td style="text-align:right">${fmtUsd.format(principal)}</td><td style="text-align:right">${fmtUsd.format(interest)}</td><td style="text-align:right;color:#14532D;font-weight:800">${fmtUsd.format(balance)}</td>`;
                 printTbodyHTML += `<tr>${printRow}</tr>`;
                 if(balance <= 0) break;
             }
@@ -1588,5 +1740,18 @@
             }
         };
     </script>
+
+    <!-- Print-only footer rendered by the browser's native print engine on every page -->
+    <div class="lp-print-footer">
+        <div class="lp-print-footer-top">
+            Generated via LendPaper  |  <a href="https://lendpaper.com">lendpaper.com</a>
+            &nbsp;·&nbsp;
+            White-label and custom branding available  -  <a href="mailto:info@lendpaper.com">info@lendpaper.com</a>
+        </div>
+        <div class="lp-print-footer-disclaimer">
+            ESTIMATES ONLY — NOT FINANCIAL ADVICE. These figures are preliminary estimates generated by the user (lender, broker, or ISO) using LendPaper software. LendPaper is a software provider only — not a lender, broker, financial advisor, or institution. LendPaper does not verify inputs, guarantee calculations, or determine final loan terms. Actual terms are subject to lender underwriting and final approval.
+            Full terms: <a href="https://lendpaper.com/legal/estimates">lendpaper.com/legal/estimates</a>
+        </div>
+    </div>
 </body>
 </html>
