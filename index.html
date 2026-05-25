@@ -806,8 +806,8 @@ input { font-family: inherit; }
   animation: slideFadeIn 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .greeting-text {
-  font-size: 38px; font-weight: 800; letter-spacing: -0.025em;
-  color: var(--text); line-height: 1.1; margin-bottom: 8px;
+  font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+  color: var(--text); line-height: 1.2; margin-bottom: 6px;
 }
 .greeting-sub { font-size: 13px; color: var(--text-muted); display: none; }
 
@@ -1505,7 +1505,7 @@ function renderHome() {
   html += '</div>';
 
   if (liveRest.length) {
-    html += '<div class="home-section-label">Live Tools</div><div class="live-tools-grid">';
+    html += '<div class="home-section-label">More Tools</div><div class="live-tools-grid">';
     liveRest.forEach(function(t, i){ html += cardHTML(t, i); });
     html += '</div>';
   }
