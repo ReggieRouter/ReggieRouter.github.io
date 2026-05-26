@@ -1287,11 +1287,11 @@
   <div class="lp-modal" style="max-width:480px;">
     <button class="lp-modal-close" data-close="info-risk-backdrop">&times;</button>
     <h3 class="lp-modal-title" style="margin-bottom:16px;">Risk Band</h3>
-    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">Risk is calculated from minimum personal credit score required and product type. MCA products automatically raise risk by one tier.</p>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">Risk is calculated from minimum personal credit score required and product type. MCA products automatically raise risk by one tier. Tiers sort top to bottom: easiest to qualify → hardest.</p>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#EFF6FF;border:1px solid #BFDBFE;">
         <span style="width:10px;height:10px;border-radius:50%;background:#3B82F6;flex-shrink:0;margin-top:4px;"></span>
-        <div><div style="font-weight:600;font-size:13px;color:#1D4ED8;margin-bottom:3px;">No FICO Required</div><div style="font-size:12px;color:#1E40AF;">Lender does not require a minimum personal credit score. Typically revenue-based underwriting only.</div></div>
+        <div><div style="font-weight:600;font-size:13px;color:#1D4ED8;margin-bottom:3px;">No FICO Required <span style="font-weight:400;font-size:11px;color:#3B82F6;">(sorts first)</span></div><div style="font-size:12px;color:#1E40AF;">No minimum credit score — lender qualifies purely on revenue and bank history. Broadest borrower pool. Appears under the "Low" filter chip.</div></div>
       </div>
       <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#F0FDF4;border:1px solid #A7F3D0;">
         <span style="width:10px;height:10px;border-radius:50%;background:#16A34A;flex-shrink:0;margin-top:4px;"></span>
@@ -2904,7 +2904,7 @@
   const determineRisk = (fico, products = []) => {
     const hasMCA = products.includes('MCA');
     const mcaOnly = products.length > 0 && products.every(p => p === 'MCA');
-    if (fico === 0 && !hasMCA) return { label: 'No FICO Required', dot: 'blue', code: 'low' };
+    if (fico === 0 && !hasMCA) return { label: 'No FICO Required', dot: 'blue', code: 'nofico' };
     if (fico === 0 && hasMCA) return { label: 'Moderate Risk', dot: 'yellow', code: 'mod' };
     // MCA bumps risk one tier; MCA-only lenders are always at least Moderate
     if (fico >= 600 && !hasMCA) return { label: 'Low Risk Band', dot: 'green', code: 'low' };
@@ -2993,9 +2993,10 @@
         if (!matchesName && !matchesState && !matchesRest) return false;
       }
 
-      // Risk category
+      // Risk category — 'nofico' is treated as 'low' for filter purposes
       const risk = determineRisk(l.fico, l.products);
-      if (activeFilters.risk !== 'all' && risk.code !== activeFilters.risk) return false;
+      const filterCode = risk.code === 'nofico' ? 'low' : risk.code;
+      if (activeFilters.risk !== 'all' && filterCode !== activeFilters.risk) return false;
 
       // Product Type
       if (activeFilters.product !== 'all' && !l.products.includes(activeFilters.product)) return false;
@@ -3041,9 +3042,13 @@
           valA = a.restrictions.join(', ').toLowerCase();
           valB = b.restrictions.join(', ').toLowerCase();
         } else if (sortColumn === 'risk') {
-          const rankMap = { 'low': 0, 'mod': 1, 'high': 2 };
-          valA = rankMap[determineRisk(a.fico, a.products).code] ?? 0;
-          valB = rankMap[determineRisk(b.fico, b.products).code] ?? 0;
+          const rankMap = { 'nofico': 0, 'low': 1, 'mod': 2, 'high': 3 };
+          valA = rankMap[determineRisk(a.fico, a.products).code] ?? 1;
+          valB = rankMap[determineRisk(b.fico, b.products).code] ?? 1;
+          // tiebreak alphabetically within same tier
+          if (valA === valB) {
+            return a.name.localeCompare(b.name) * (sortDirection === 'asc' ? 1 : -1);
+          }
         }
 
         if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
