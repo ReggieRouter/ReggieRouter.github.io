@@ -328,7 +328,7 @@
     background: var(--color-brand-dark);
     color: #FFFFFF;
     font-weight: 500;
-    padding: 10px 12px;
+    padding: 12px 12px;
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
@@ -355,7 +355,7 @@
   }
 
   .lp-data-table td {
-    padding: 10px 12px;
+    padding: 16px 12px;
     border-bottom: 1px solid var(--color-border);
     vertical-align: middle;
     background-color: #FFFFFF;
@@ -379,13 +379,13 @@
 
   .lp-row-interactive {
     cursor: pointer;
-    transition: background-color 0.15s;
+    transition: background-color 0.12s ease;
   }
   .lp-row-interactive:hover td {
-    background-color: #FFFFFF !important;
+    background-color: #EEF9F3 !important;
   }
   .lp-row-interactive:hover td.lp-sticky-col {
-    background-color: #FFFFFF !important;
+    background-color: #EEF9F3 !important;
     box-shadow: inset 3px 0 0 var(--color-brand-mid), 2px 0 5px -2px rgba(0, 0, 0, 0.08);
   }
   .lp-row-interactive:hover .lp-row-chevron:not(.expanded) {
@@ -394,10 +394,10 @@
   }
 
   .lp-row-highlight {
-    background-color: var(--color-brand-light);
+    background-color: transparent;
   }
   .lp-row-highlight td {
-    background-color: #EDFDF5; /* Solid equivalent for the light green row highlight */
+    background-color: #FFFFFF;
   }
 
   .lp-lender-cell {
@@ -524,9 +524,9 @@
   /* Tag Micro-UI Elements */
   .lp-tags-container {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    max-width: 260px;
+    flex-direction: column;
+    gap: 3px;
+    max-width: 160px;
   }
   .lp-tag {
     display: inline-block;
@@ -535,7 +535,8 @@
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 11px;
-    white-space: nowrap;
+    white-space: normal;
+    line-height: 1.3;
   }
 
   /* Status Indicator System */
@@ -1077,7 +1078,7 @@
 
 <div class="lendpaper-container">
   <header class="lp-doc-header">
-    <a href="https://lendpaper.com/waterfall" style="text-decoration: none; display: inline-block;">
+    <a href="https://lendpaper.com" style="text-decoration: none; display: inline-block;">
       <div class="lp-wordmark">
         <span class="lp-glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/><path d="M9 9v6"/><path d="M9 15h4"/></svg></span><span class="lp-text-bold">lend</span><span class="lp-text-reg">paper</span><span class="lp-period">.</span>
       </div>
@@ -1193,12 +1194,12 @@
           <tr>
             <th data-col="name">Lender name <span class="sort-icon"></span></th>
             <th data-col="products">Product types <span class="sort-icon"></span></th>
+            <th data-col="risk">Risk band <span class="sort-icon"></span></th>
             <th class="num-col" data-col="fico">Min FICO <span class="sort-icon"></span></th>
             <th class="num-col" data-col="tib">Min TIB (mo.) <span class="sort-icon"></span></th>
             <th class="num-col" data-col="rev">Min monthly rev <span class="sort-icon"></span></th>
             <th class="num-col" data-col="stacking">Max stacking <span class="sort-icon"></span></th>
             <th data-col="restrictions">Restricted industries <span class="sort-icon"></span></th>
-            <th data-col="risk">Risk band <span class="sort-icon"></span></th>
           </tr>
         </thead>
         <tbody id="lender-table-body">
@@ -3154,17 +3155,17 @@
           </div>
         </td>
         <td><div style="display:flex; flex-wrap:wrap; gap:4px; max-width:180px;">${productsHtml}</div></td>
-        <td class="num-col">${lender.fico === 0 ? '<span class="lp-tbd">—</span>' : lender.fico}</td>
-        <td class="num-col">${lender.tib === 0 ? '<span class="lp-tbd">—</span>' : lender.tib}</td>
-        <td class="num-col">${formatCurrency(lender.rev)}</td>
-        <td class="num-col">${lender.stacking === 999 ? 'Unlimited' : (lender.stacking === 0 ? '<span class="lp-tbd">—</span>' : lender.stacking)}</td>
-        <td>${restrictionsHtml}</td>
         <td>
           <span style="display:flex; align-items:center; gap: 4px;">
             <span class="lp-status-dot ${risk.dot}"></span>
             ${risk.label}
           </span>
         </td>
+        <td class="num-col">${lender.fico === 0 ? '<span class="lp-tbd">—</span>' : lender.fico}</td>
+        <td class="num-col">${lender.tib === 0 ? '<span class="lp-tbd">—</span>' : lender.tib}</td>
+        <td class="num-col">${formatCurrency(lender.rev)}</td>
+        <td class="num-col">${lender.stacking === 999 ? 'Unlimited' : (lender.stacking === 0 ? '<span class="lp-tbd">—</span>' : lender.stacking)}</td>
+        <td>${restrictionsHtml}</td>
       `;
 
       // Append Main Row
