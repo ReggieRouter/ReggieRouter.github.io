@@ -2,12 +2,21 @@
 <html lang="en">
 <head>
 <!-- Google tag (gtag.js) -->
+<script>
+  // Disable tracking on localhost, local IPs, and staging/preview environments
+  const hostname = window.location.hostname;
+  const isProduction = hostname === 'lendpaper.com' || hostname === 'www.lendpaper.com';
+
+  if (!isProduction) {
+    window['ga-disable-G-S3YBZV6RF9'] = true;
+    console.log('[GA4] Local development detected. Production tracking disabled.');
+  }
+</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-S3YBZV6RF9"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-S3YBZV6RF9');
 </script>
 <meta charset="UTF-8">

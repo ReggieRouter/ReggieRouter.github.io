@@ -1,0 +1,11 @@
+# Ignore the messy stuff
+node_modules/
+.git/
+*.zip
+*.bak
+scratch/
+*v1.5md.txt
+dist/
+build/
+*.log
+.DS_Store

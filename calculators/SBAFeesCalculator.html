@@ -1,13 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- Google tag (gtag.js) -->
+<!-- Google tag (gtag.js) with IFrame Safeguard -->
+<script>
+  const hostname = window.location.hostname;
+  const isProduction = hostname === 'lendpaper.com' || hostname === 'www.lendpaper.com';
+  
+  // Detect if this page is embedded inside an iframe on our own domain
+  let isSelfEmbedded = false;
+  try {
+    isSelfEmbedded = window.self !== window.top && window.top.location.hostname === hostname;
+  } catch (e) {
+    // Cross-origin embedding (e.g. brokers' CRMs) will throw an error here, which is fine
+    isSelfEmbedded = false;
+  }
+
+  // Disable tracking if:
+  // 1. We are not on the production domain (local development) OR
+  // 2. We are embedded inside our own shell (to avoid double-counting index.html + calculator)
+  if (!isProduction || isSelfEmbedded) {
+    window['ga-disable-G-S3YBZV6RF9'] = true;
+    console.log('[GA4] Dev or Self-embedded mode detected. Tracking disabled to prevent double-counting.');
+  }
+</script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-S3YBZV6RF9"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-S3YBZV6RF9');
 </script>
 <meta charset="UTF-8">
