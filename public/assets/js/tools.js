@@ -67,7 +67,7 @@ const TOOLS = [
     group: "data",
     icon: "tiers",
     color: "green",
-    slug: "/waterfall",
+    slug: "/tools/waterfall",
     presentation: "page",
     path: "waterfall.html",
     kw: "lender waterfall buy box fico tib revenue product type filter match"
