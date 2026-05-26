@@ -223,6 +223,17 @@
     margin-bottom: 8px;
   }
 
+  @media (max-width: 640px) {
+    .lp-chip-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+    }
+    .lp-chip-label {
+      min-width: unset;
+    }
+  }
+
   .lp-chip-label {
     font-size: 11px;
     font-weight: 500;
@@ -1147,11 +1158,11 @@
         </div>
       </div>
 
-      <!-- Signals chips + Reset -->
+      <!-- Features chips + Reset -->
       <div class="lp-chip-row">
         <span class="lp-chip-label">
-          <span class="lp-info-wrap">Signals
-            <button class="lp-info-btn" data-modal="info-signals" aria-label="About Signals">i</button>
+          <span class="lp-info-wrap">Features
+            <button class="lp-info-btn" data-modal="info-signals" aria-label="About Lender Features">i</button>
           </span>
         </span>
         <div class="lp-chip-group" id="signals-group">
@@ -1270,7 +1281,7 @@
       <h3 class="lp-modal-title">Submit an update</h3>
     </div>
     <div class="lp-modal-body">
-      <p class="lp-modal-desc">Spot something outdated? Underwriting managers, direct lenders, and brokers can submit corrections, updated rulesets, or request a new lender be added to the waterfall.</p>
+      <p class="lp-modal-desc">ISO reps often use LendPaper as their source of truth for underwriting criteria — help keep it accurate. Underwriting managers, direct lenders, and brokers can submit corrections, updated rulesets, or request a new lender be added to the waterfall.</p>
       <div class="lp-modal-action-box">
         <span class="action-box-label">Send underwriting guidelines to:</span>
         <a href="mailto:info@lendpaper.com" class="lp-modal-email-btn">
@@ -1343,8 +1354,8 @@
 <div class="lp-modal-backdrop" id="info-signals-backdrop">
   <div class="lp-modal" style="max-width:460px;">
     <button class="lp-modal-close" data-close="info-signals-backdrop">&times;</button>
-    <h3 class="lp-modal-title" style="margin-bottom:16px;">Lender Signals</h3>
-    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">Signals highlight lender-specific traits that affect the borrower experience. Filter by one or more to narrow the waterfall.</p>
+    <h3 class="lp-modal-title" style="margin-bottom:16px;">Lender Features</h3>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">These features highlight lender-specific traits that affect the borrower experience. Filter by one or more to narrow the waterfall.</p>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#EEF2FF;border:1px solid #C7D2FE;">
         <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#EEF2FF;color:#4F46E5;border:1px solid #C7D2FE;flex-shrink:0;text-transform:uppercase;margin-top:2px;">SOFT PULL</span>
@@ -2931,7 +2942,7 @@
     noCollateral: false
   };
 
-  let sortColumn = 'fico'; // default: Min FICO ascending
+  let sortColumn = 'name'; // default: alphabetical A→Z
   let sortDirection = 'asc';
   let expandedLenderId = null;
 
@@ -3106,7 +3117,7 @@
       } else if (lender.restrictions.length > 0) {
         restrictionsHtml = `<div class="lp-tags-container">${lender.restrictions.map(t => `<span class="lp-tag">${t.toLowerCase()}</span>`).join('')}</div>`;
       } else {
-        restrictionsHtml = `<span style="color:#9CA3AF;font-size:11px;">None</span>`;
+        restrictionsHtml = `<span class="lp-tbd">—</span>`;
       }
 
       const risk = determineRisk(lender.fico, lender.products);
