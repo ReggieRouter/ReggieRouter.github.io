@@ -3139,7 +3139,7 @@
 
   let sortColumn = 'name'; // default: alphabetical A→Z
   let sortDirection = 'asc';
-  let expandedLenderId = null;
+  let expandedLenderId = 7; // PEAC pre-expanded as example
 
   // DOM Elements
   const tbody = document.getElementById('lender-table-body');
@@ -3693,30 +3693,6 @@
     renderTable();
   });
 
-  // Hover to auto-expand after ~2000ms
-  let hoverTimer = null;
-  let currentHoverId = null;
-
-  tbody.addEventListener('mouseover', (e) => {
-    const tr = e.target.closest('.lp-row-interactive');
-    if (!tr) return;
-    const id = parseInt(tr.dataset.id);
-    if (id === currentHoverId) return;
-    currentHoverId = id;
-    clearTimeout(hoverTimer);
-    if (expandedLenderId === id) return;
-    hoverTimer = setTimeout(() => {
-      expandedLenderId = id;
-      currentHoverId = null;
-      renderTable();
-    }, 2000);
-  });
-
-  tbody.addEventListener('mouseleave', () => {
-    clearTimeout(hoverTimer);
-    hoverTimer = null;
-    currentHoverId = null;
-  });
 
   // Submit a Lender modal
   const fabBtn = document.getElementById('fab-btn');
