@@ -381,10 +381,26 @@ window.PDF_HELPER = {
         // Let the browser apply the print-mode reflow before opening the dialog
         await new Promise(r => setTimeout(r, 250));
 
+        // Inject hidden forensic fingerprint before printing.
+        // White text: invisible to eye, extractable by any PDF text tool or Select All+Copy.
+        var _fpId = 'LP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        var _fpPayload = [
+            'LENDPAPER-DOC-ID:' + _fpId,
+            'TS:' + new Date().toISOString(),
+            'ORIGIN:' + window.location.href,
+            'REF:' + (document.referrer || 'direct'),
+            'TZ:' + ((typeof Intl !== 'undefined' && Intl.DateTimeFormat) ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'unknown'),
+            'LANG:' + navigator.language,
+            'SCR:' + (screen.width + 'x' + screen.height),
+            'UA:' + navigator.userAgent
+        ].join(' | ');
+        var _fpDiv = document.createElement('div');
+        _fpDiv.id = 'lp-doc-fingerprint';
+        _fpDiv.setAttribute('aria-hidden', 'true');
+        _fpDiv.textContent = _fpPayload;
+        document.body.appendChild(_fpDiv);
+
         try {
-            // STEP 5 — Open the browser's native print dialog. User chooses
-            // "Save as PDF" as the destination. The print engine renders directly
-            // from CSS using @page rules — no html2canvas, no clip drift.
             window.print();
         } catch (e) {
             console.error("Print dialog failed:", e);
@@ -393,12 +409,14 @@ window.PDF_HELPER = {
             // Restore document title
             document.title = origDocTitle;
 
-            // Remove print-mode classes after a delay (dialog may read styles async)
+            // Remove print-mode classes and fingerprint after dialog clears
             setTimeout(() => {
                 document.documentElement.classList.remove('pdf-export-mode');
                 document.body.classList.remove('pdf-export-mode');
                 document.body.classList.remove('multi-scenario');
-            }, 1000);
+                var fp = document.getElementById('lp-doc-fingerprint');
+                if (fp) fp.parentNode.removeChild(fp);
+            }, 1500);
 
             if (btn) {
                 btn.innerHTML = origText;

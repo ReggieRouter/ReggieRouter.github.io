@@ -113,7 +113,7 @@
 
 /* -- Form Reference Badges -- */
 .form-ref-badge { display: inline-block; background: var(--lp-green-light); border: 1px solid var(--lp-border); color: var(--lp-green); font-family: monospace; font-size: 11px; padding: 2px 8px; border-radius: 99px; }
-.helper-text { font-size: 11px; color: var(--lp-text-muted); font-weight: 400; display: block; margin-top: 4px; line-height: 1.4; }
+.helper-text { font-size: 11px; color: var(--lp-text-muted) !important; font-weight: 400; display: block; margin-top: 4px; line-height: 1.4; text-transform: none; }
 .pers-ref { font-size: 10px; color: var(--lp-green); font-weight: 600; display: block; margin-top: 2px; }
 
 /* -- Mode toggle -- */
@@ -132,7 +132,11 @@
 
 /* -- Inputs -- */
 .inp-group { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 16px; }
-.inp-label { font-size: 11px; font-weight: 700; color: var(--lp-dark); flex: 0 0 220px; padding-top: 8px; text-transform: uppercase; letter-spacing: 0.025em; }
+@keyframes label-flash { 0% { color: var(--lp-dark); } 40% { color: var(--lp-green); } 100% { color: var(--lp-green); } }
+@keyframes label-scroll-in { 0%, 100% { color: var(--lp-dark); } 40% { color: var(--lp-green); } }
+.inp-label { font-size: 12px; font-weight: 500; color: var(--lp-dark); flex: 0 0 220px; padding-top: 8px; }
+.inp-group:focus-within .inp-label { animation: label-flash .3s ease forwards; }
+.inp-label.label-scroll-flash { animation: label-scroll-in 0.6s ease; }
 @media (max-width: 640px) {
     .inp-group { flex-direction: column; gap: 4px; }
     .inp-label { flex: 0 0 auto; padding-top: 0; margin-bottom: 4px; }
@@ -177,6 +181,7 @@
 /* -- Scenario card -- */
 .scen-grid { display: flex; flex-wrap: wrap; gap: 12px; }
 .scen-card { width: calc(50% - 6px); border: 2px solid var(--lp-border); border-radius: 16px; overflow: hidden; transition: all .15s; }
+.scen-grid .scen-card:only-child { width: 100%; }
 @media (max-width: 640px) { .scen-card { width: 100%; } }
 .scen-card.refi-active { border-color: var(--lp-green); }
 .scen-hd { background: var(--gray-50); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--lp-border); }
@@ -661,26 +666,18 @@ body.pdf-export-mode .print-watermark { display: none !important; }
             <button class="sc-collapse" onclick="closeLenderCtx()" style="font-size:24px;">&times;</button>
         </div>
         <div class="lc-modal-body">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <div style="padding:12px; border:1px solid var(--lp-border); border-radius:12px;">
-                    <div class="lc lc-sb">Bank B</div>
-                    <div style="font-size:13px; margin-top:8px;">BDSCR <strong>&ge; 1.10x</strong></div>
-                </div>
-                <div style="padding:12px; border:1px solid var(--lp-border); border-radius:12px;">
-                    <div class="lc lc-gh">Category A</div>
-                    <div style="font-size:13px; margin-top:8px;">BDSCR <strong>&ge; 1.15x</strong></div>
-                </div>
-                <div style="padding:12px; border:1px solid var(--lp-border); border-radius:12px;">
-                    <div class="lc lc-Bank-A">Bank A</div>
-                    <div style="font-size:13px; margin-top:8px;">GDSCR <strong>&ge; 1.00x</strong> + BDSCR <strong>&ge; 1.10x</strong></div>
-                </div>
-            </div>
+            <div id="lenderGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;"></div>
         </div>
     </div>
 </div>
 
 <script>
 const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.";
+var LENDERS = [
+  { name: 'Bank B',     chipClass: 'lc-sb',      bdscr: '≥ 1.10x', gdscr: null },
+  { name: 'Category A', chipClass: 'lc-gh',      bdscr: '≥ 1.15x', gdscr: null },
+  { name: 'Bank A',     chipClass: 'lc-Bank-A',  bdscr: '≥ 1.10x', gdscr: '≥ 1.00x' }
+];
 var ENTITIES = [
   {id:'sole', name:'Sole Prop', taxation:'pass', form:'1040 Schedule C', dot:'pass', llcText:'Includes Single-Member LLC (default)'},
   {id:'partnership', name:'Partnership', taxation:'pass', form:'Form 1065', dot:'pass', llcText:'Includes Multi-Member LLC (default)'},
@@ -860,6 +857,20 @@ function renderEbida() {
   });
   document.getElementById('ebidaInputs').innerHTML = h;
   updEbidaTotal();
+  setTimeout(observeLabelFlash, 60);
+}
+
+function observeLabelFlash() {
+  if (!window.IntersectionObserver) return;
+  var obs = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      var lbl = entry.target.querySelector('.inp-label');
+      if (lbl) { lbl.classList.remove('label-scroll-flash'); void lbl.offsetWidth; lbl.classList.add('label-scroll-flash'); }
+      obs.unobserve(entry.target);
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.inp-group').forEach(function(g) { obs.observe(g); });
 }
 
 function updEbida(k,v){ S.ebida[k] = parseFloat(v)||0; updEbidaTotal(); updScenarioDisplays(); renderSummaries(); }
@@ -971,7 +982,7 @@ function renderScenarios(){
     
     h += '<div class="scen-card" data-scen-id="'+sc.id+'"><div class="scen-hd"><input class="scen-name" value="'+sc.name+'" oninput="updScen('+sc.id+',\'name\',this.value)"><button class="scen-rm" onclick="rmScen('+sc.id+')">&times;</button></div>';
     h += '<div class="scen-body"><div class="scen-row"><div class="scen-field"><label>Amount ($)</label><input type="number" value="'+sc.amount+'" oninput="updScen('+sc.id+',\'amount\',this.value)"></div></div>';
-    h += '<div class="scen-row"><div class="scen-field"><label>Term (yrs)</label><input type="number" value="'+sc.term+'" oninput="updScen('+sc.id+',\'term\',this.value)"></div><div class="scen-field"><label>Rate (%)</label><input type="number" step="0.1" value="'+sc.rate+'" oninput="updScen('+sc.id+',\'rate\',this.value)"></div></div></div>';
+    h += '<div class="scen-row"><div class="scen-field"><label>Term (yrs)</label><input type="number" value="'+sc.term+'" oninput="updScen('+sc.id+',\'term\',this.value)"><span class="helper-text">SBA 7(a) max: 10 yrs working capital/equipment &middot; 25 yrs real estate.</span></div><div class="scen-field"><label>Rate (%)</label><input type="number" step="0.1" value="'+sc.rate+'" oninput="updScen('+sc.id+',\'rate\',this.value)"><span class="helper-text">SBA 7(a) variable rates typically 10.5%&ndash;13.5% (WSJ Prime + 2.25&ndash;4.75%). Fixed rates vary by lender.</span></div></div></div>';
     h += '<div class="scen-foot"><div class="scen-mp"><span>Payment:</span><span>'+fmt(mp)+'/mo</span></div>';
     if(S.mode==='both' || S.mode==='bdscr') h += '<div class="dscr-result dscr-bdscr"><div class="dscr-label">BDSCR</div><div class="dscr-val '+(db>=1.15?'dscr-pass':'dscr-fail')+'">'+db.toFixed(2)+'</div><div class="dscr-min">min 1.15x</div></div>';
     if(S.mode==='both' || S.mode==='gdscr') h += '<div class="dscr-result dscr-gdscr"><div class="dscr-label">GDSCR</div><div class="dscr-val '+(dg>=1.0?'dscr-pass':'dscr-fail')+'">'+dg.toFixed(2)+'</div><div class="dscr-min">min 1.00x</div></div>';
@@ -1050,6 +1061,12 @@ function updScenarioDisplays(){
 function renderSummaries(){
   var cd = getCalcData();
   var h = '';
+  var needsGdscr = (S.mode === 'gdscr' || S.mode === 'both');
+  var pInc = cd.global - cd.ebida;
+  var pDebt = cd.gObl - cd.bObl;
+  if(needsGdscr && pInc === 0 && pDebt === 0){
+    h += '<div style="background:#fffbe6; border:1px solid #f6c90e; border-radius:10px; padding:10px 14px; font-size:12px; color:#7a5c00; margin-bottom:10px;">&#9888; GDSCR includes personal income &amp; debts &mdash; head to the <strong>Personal</strong> tab to add owner financials for a complete picture.</div>';
+  }
   S.scenarios.forEach(function(sc){
     var mp = calcPmt(sc.amount, sc.rate, sc.term);
     var db = (mp*12+cd.bObl)>0 ? cd.ebida/(mp*12+cd.bObl) : 0;
@@ -1058,7 +1075,21 @@ function renderSummaries(){
     h += '<div class="sum-card '+(pass?'sum-pass':'sum-fail')+'"><div class="sum-text"><strong>'+sc.name+':</strong> '+ (S.mode==='both'?'BDSCR '+db.toFixed(2)+' & GDSCR '+dg.toFixed(2) : (S.mode==='gdscr'?'GDSCR '+dg.toFixed(2):'BDSCR '+db.toFixed(2))) + (pass?' - Likely to approve.':' - Below thresholds.') + '</div></div>';
   });
   document.getElementById('summaries').innerHTML = h;
-  document.getElementById('sopBaseline').innerHTML = '<div style="font-size:11px; color:var(--lp-text-muted); background:var(--gray-50); padding:12px; border-radius:10px; border:1px solid var(--lp-border);"><strong>SBA SOP Baseline Reference:</strong> BDSCR min 1.15x per SBA SOP 50 10 7 (Standard 7(a) loans). GDSCR min 1.00x when global cash flow analysis is required (typically for loans &gt; $350k or where business cash flow alone is insufficient).</div>';
+  document.getElementById('sopBaseline').innerHTML = '<div style="font-size:11px; color:var(--lp-text-muted); background:var(--gray-50); padding:12px; border-radius:10px; border:1px solid var(--lp-border); display:flex; justify-content:space-between; align-items:center; gap:12px;"><span><strong>SBA SOP Baseline Reference:</strong> BDSCR min 1.15x per SBA SOP 50 10 7 (Standard 7(a) loans). GDSCR min 1.00x when global cash flow analysis is required (typically for loans &gt; $350k or where business cash flow alone is insufficient).</span><button class="lender-ctx-btn" onclick="openLenderCtx()" style="white-space:nowrap;">Lender thresholds →</button></div>';
+}
+
+function renderLenderModal() {
+  var h = '';
+  LENDERS.forEach(function(l) {
+    h += '<div style="padding:12px; border:1px solid var(--lp-border); border-radius:12px;">';
+    h += '<div class="lc ' + l.chipClass + '">' + l.name + '</div>';
+    h += '<div style="font-size:13px; margin-top:8px;">BDSCR <strong>' + l.bdscr + '</strong></div>';
+    if (l.gdscr !== null) {
+      h += '<div style="font-size:13px; margin-top:4px;">GDSCR <strong>' + l.gdscr + '</strong></div>';
+    }
+    h += '</div>';
+  });
+  document.getElementById('lenderGrid').innerHTML = h;
 }
 
 function toggleSc(btn){ var sc=btn.closest('.sc'); sc.classList.toggle('collapsed'); btn.innerHTML=sc.classList.contains('collapsed')?'&#9660;':'&#9650;'; }
@@ -1279,7 +1310,7 @@ function setRandomBusinessPlaceholder() {
 
 
 // Init
-renderEntities(); renderMode(); renderEbida(); renderDebts(); renderOwners(); renderScenarios(); renderSummaries();
+renderEntities(); renderMode(); renderEbida(); renderDebts(); renderOwners(); renderScenarios(); renderSummaries(); renderLenderModal();
 setRandomBusinessPlaceholder();
 if (typeof window.PDF_HELPER !== 'undefined') window.PDF_HELPER.initPrintLayout("DSCR ANALYSIS");
 
@@ -1291,6 +1322,44 @@ if (window.self !== window.top) {
     body.is-embedded { background: transparent; }
     body.is-embedded .modal-header { display: none !important; }
     body.is-embedded .lp-main { display: block; padding: 0; }
+</style>
+<style>
+@media print {
+    body.pdf-export-mode::after {
+        content: 'lendpaper.com';
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-35deg);
+        font-size: 18pt;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        color: rgba(20, 83, 45, 0.07);
+        z-index: 99997;
+        pointer-events: none;
+        white-space: nowrap;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+}
+#lp-doc-fingerprint { display: none; }
+@media print {
+    #lp-doc-fingerprint {
+        display: block !important;
+        position: fixed !important;
+        bottom: 38mm !important;
+        left: 8mm !important;
+        right: 8mm !important;
+        font-size: 3.5pt !important;
+        line-height: 1.4 !important;
+        color: #FFFFFF !important;
+        background: transparent !important;
+        z-index: 99999 !important;
+        pointer-events: none !important;
+        font-family: monospace !important;
+        white-space: normal !important;
+        word-break: break-all !important;
+    }
+}
 </style>
 
 <!-- Print-only footer rendered by the browser's native print engine on every page -->
