@@ -131,20 +131,6 @@ const TOOLS = [
     href: "#",
     kw: "legal compliance regulation disclosure check"
   },
-  { 
-    id: "ucc-leads", 
-    name: "UCC leads database", 
-    desc: "Searchable UCC filings by state, date, and secured party.",
-    status: "live", 
-    group: "data", 
-    icon: "db", 
-    color: "green",
-    slug: "https://www.registryroute.com/",
-    presentation: "external",
-    path: "https://www.registryroute.com/",
-    target: "_blank",
-    kw: "ucc leads filings database lookup secured prospecting"
-  },
   /*
   { 
     id: "scripting", 
