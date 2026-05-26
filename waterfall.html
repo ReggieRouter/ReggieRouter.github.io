@@ -105,54 +105,12 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
   }
 
-  .lp-filter-grid {
-    display: grid;
-    grid-template-columns: 1.8fr 1fr 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 14px;
-  }
-
-  .lp-filter-grid-cat {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 14px;
-    align-items: flex-start;
-  }
-
-  .lp-filter-grid-cat .lp-filter-group:first-child {
-    flex: 0 0 auto;
-  }
-
-  .lp-filter-grid-cat .lp-filter-group:last-child {
-    flex: 1 1 auto;
-  }
-
-  @media (max-width: 900px) {
-    .lp-filter-grid {
-      grid-template-columns: 1fr 1fr !important;
-    }
-    .lp-filter-grid-cat {
-      flex-direction: column;
-    }
-  }
-  @media (max-width: 500px) {
-    .lp-filter-grid {
-      grid-template-columns: 1fr !important;
-    }
-  }
-
-  .lp-filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
   .lp-filter-label {
     font-size: 11px;
     text-transform: uppercase;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    letter-spacing: 0.05em;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    letter-spacing: 0.06em;
   }
 
   .search-wrapper {
@@ -195,43 +153,52 @@
     flex-wrap: wrap;
   }
 
-  .filter-btn {
-    flex: 0 0 auto;
-    background: #F3F4F6;
-    border: 1px solid var(--color-border);
-    color: var(--color-text-secondary);
-    padding: 9px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.2s;
-    text-align: center;
-    white-space: nowrap;
-  }
-  .filter-btn:hover {
-    background: #E5E7EB;
-  }
-  .filter-btn.active {
-    background: var(--color-brand-dark);
-    border-color: var(--color-brand-dark);
-    color: #FFFFFF;
+  /* Slider layout — stacked (label → value → slider → range hints) */
+  .lp-filter-search-row {
+    margin-bottom: 16px;
   }
 
-  .range-box {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  .lp-filter-sliders-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 16px;
   }
+
+  @media (max-width: 700px) {
+    .lp-filter-sliders-row { grid-template-columns: 1fr; }
+  }
+
+  .lp-slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .lp-slider-value {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+    margin: 3px 0 2px;
+  }
+
+  .lp-slider-range {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-top: 3px;
+  }
+
   .range-slider {
-    flex: 1;
     -webkit-appearance: none;
     width: 100%;
-    height: 6px;
-    border-radius: 3px;
+    height: 4px;
+    border-radius: 2px;
     background: #E5E7EB;
     outline: none;
+    margin: 2px 0;
   }
   .range-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -244,87 +211,89 @@
     transition: transform 0.1s;
   }
   .range-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-  }
-  .range-value {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-brand-dark);
-    min-width: 60px;
-    text-align: right;
+    transform: scale(1.15);
   }
 
-  .toggles-row {
+  /* Filter chip rows */
+  .lp-chip-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding-top: 16px;
-    margin-top: 4px;
-    border-top: 1px solid var(--color-border);
     align-items: center;
-    justify-content: space-between;
-  }
-
-  .checkbox-group {
-    display: flex;
-    gap: 18px;
+    gap: 10px;
     flex-wrap: wrap;
+    margin-bottom: 8px;
   }
 
-  .custom-checkbox {
+  .lp-chip-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+
+  .lp-chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .chip-btn {
+    font-size: 13px;
+    font-weight: 400;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 0.5px solid var(--color-border);
+    background: #FFFFFF;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    white-space: nowrap;
     display: inline-flex;
     align-items: center;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    user-select: none;
+    gap: 5px;
+    line-height: 1;
   }
-
-  .custom-checkbox input {
-    display: none;
+  .chip-btn:hover {
+    border-color: var(--color-brand-mid);
+    color: var(--color-brand-dark);
   }
-
-  .checkbox-box {
-    width: 18px;
-    height: 18px;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    margin-right: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #F9FAFB;
-    transition: all 0.2s;
-  }
-
-  .custom-checkbox input:checked + .checkbox-box {
-    background: var(--color-brand-accent);
-    border-color: var(--color-brand-accent);
-  }
-
-  .custom-checkbox input:checked + .checkbox-box::after {
-    content: '✓';
+  .chip-btn.active {
+    background: var(--color-brand-dark);
+    border-color: var(--color-brand-dark);
     color: #FFFFFF;
-    font-size: 12px;
-    font-weight: 700;
+    font-weight: 500;
   }
 
   .reset-btn {
     background: none;
     border: none;
-    color: var(--color-text-secondary);
+    color: var(--color-text-muted);
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 400;
     cursor: pointer;
-    text-decoration: underline;
-    display: inline-block;
+    text-decoration: none;
     padding: 0;
-    width: auto;
-    transition: color 0.15s ease;
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.15s;
   }
   .reset-btn:hover {
     color: var(--color-brand-dark);
+    text-decoration: underline;
+  }
+
+  .lp-filter-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 10px;
+    margin-top: 4px;
+    border-top: 1px solid var(--color-border);
   }
 
   /* Table Framework */
@@ -347,21 +316,31 @@
   .lp-data-table th {
     background: var(--color-brand-dark);
     color: #FFFFFF;
-    font-weight: 600;
+    font-weight: 500;
     padding: 10px 12px;
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
     transition: background-color 0.2s;
+    font-size: 13px;
   }
   .lp-data-table th:hover {
     background: #11281E;
   }
-  .lp-data-table th .sort-indicator {
-    display: inline-block;
-    margin-left: 4px;
-    font-size: 11px;
-    opacity: 0.7;
+  .lp-data-table th .sort-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 5px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    vertical-align: middle;
+  }
+  .lp-data-table th:hover .sort-icon {
+    opacity: 0.5;
+  }
+  .lp-data-table th.sort-asc .sort-icon,
+  .lp-data-table th.sort-desc .sort-icon {
+    opacity: 1;
   }
 
   .lp-data-table td {
@@ -676,16 +655,142 @@
     border-radius: 0 6px 6px 0;
   }
 
-  /* Callout & Footer Elements */
-  .lp-callout {
-    margin-top: 24px;
-    background: #F0FDF4;
-    border-left: 3.5px solid var(--color-brand-mid);
+  /* Reference info cards */
+  .lp-ref-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #FFFFFF;
+    border: 0.5px solid var(--color-border);
+    border-radius: 10px;
     padding: 14px 16px;
-    border-radius: 0 8px 8px 0;
-    font-size: 12.5px;
+    margin-top: 12px;
+  }
+
+  .lp-ref-card-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    background: var(--color-bg-main);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+
+  .lp-ref-card-body { flex: 1; }
+
+  .lp-ref-card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin: 0 0 3px 0;
+  }
+
+  .lp-ref-card-subtitle {
+    font-size: 12px;
+    color: var(--color-text-secondary);
     line-height: 1.45;
-    color: #14532D;
+    margin: 0;
+  }
+
+  .lp-ref-card-chevron {
+    color: var(--color-text-muted);
+    align-self: center;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+  .lp-ref-card-chevron.open {
+    transform: rotate(180deg);
+  }
+
+  .lp-ref-card-expand {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    padding: 10px 16px 4px 64px;
+    display: none;
+  }
+  .lp-ref-card-expand.open { display: block; }
+  .lp-ref-card-expand a { color: var(--color-brand-mid); font-weight: 500; }
+
+  /* Disclaimer clickable card */
+  .lp-ref-card.clickable { cursor: pointer; transition: border-color 0.15s; }
+  .lp-ref-card.clickable:hover { border-color: #C5C9D0; }
+
+  /* More tools section */
+  .lp-more-tools { margin-top: 20px; }
+
+  .lp-more-tools-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: 10px;
+  }
+
+  .lp-tool-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  @media (max-width: 600px) {
+    .lp-tool-cards-grid { grid-template-columns: 1fr; }
+  }
+
+  .lp-tool-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #FFFFFF;
+    border: 0.5px solid var(--color-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .lp-tool-card:hover {
+    border-color: var(--color-brand-mid);
+    box-shadow: 0 2px 8px rgba(45, 106, 79, 0.08);
+  }
+
+  .lp-tool-card-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    background: var(--color-bg-main);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-brand-dark);
+    flex-shrink: 0;
+  }
+
+  .lp-tool-card-body { flex: 1; }
+
+  .lp-tool-card-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin: 0 0 2px 0;
+  }
+
+  .lp-tool-card-desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .lp-tool-card-chevron {
+    color: var(--color-text-muted);
+    flex-shrink: 0;
   }
 
   /* Floating Action Button (Pill style CTA) */
@@ -839,55 +944,6 @@
     color: #FFFFFF;
   }
 
-  /* Legal Disclaimer Panel */
-  .lp-disclaimer-header {
-    margin-top: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--color-danger-bg);
-    border-left: 3.5px solid var(--color-danger);
-    padding: 10px 16px;
-    border-radius: 0 8px 8px 0;
-    font-size: 12px;
-    font-weight: 600;
-    color: #991B1B;
-    cursor: pointer;
-    user-select: none;
-    transition: border-radius 0.15s;
-  }
-  .lp-disclaimer-header.open {
-    border-radius: 0 8px 0 0;
-  }
-  .lp-disclaimer-toggle-icon {
-    font-size: 10px;
-    transition: transform 0.2s;
-  }
-  .lp-disclaimer-toggle-icon.open {
-    transform: rotate(180deg);
-  }
-  .lp-disclaimer-body {
-    background-color: var(--color-danger-bg);
-    border-left: 3.5px solid var(--color-danger);
-    border-top: 1px solid #FECACA;
-    padding: 14px 16px;
-    border-radius: 0 0 8px 0;
-    font-size: 11.5px;
-    line-height: 1.5;
-    color: #991B1B;
-    display: none;
-  }
-  .lp-disclaimer-body.open {
-    display: block;
-  }
-  .lp-disclaimer-body a {
-    color: #991B1B;
-    font-weight: 700;
-    text-decoration: underline;
-  }
-  .lp-disclaimer-body a:hover {
-    color: var(--color-brand-dark);
-  }
 
   .empty-state {
     text-align: center;
@@ -921,115 +977,79 @@
 
     <!-- Interactive Filters Dashboard -->
     <div class="lp-filter-panel">
-      <div class="lp-filter-grid">
-        <!-- Search -->
-        <div class="lp-filter-group">
-          <span class="lp-filter-label">Search Lenders</span>
-          <div class="search-wrapper">
-            <div class="search-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </div>
-            <input type="text" id="matrix-search" class="search-input" placeholder="Search by lender name, state, or restriction...">
-          </div>
-        </div>
 
-        <!-- FICO Slider -->
-        <div class="lp-filter-group">
-          <span class="lp-filter-label">Client FICO Score</span>
-          <div class="range-box">
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-              <input type="range" id="fico-range" class="range-slider" min="0" max="700" step="25" value="0">
-              <div class="range-limits" style="display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted); padding: 0 2px;">
-                <span>300</span>
-                <span>850</span>
-              </div>
-            </div>
-            <span class="range-value" id="fico-val">Any</span>
+      <!-- Search — full width -->
+      <div class="lp-filter-search-row">
+        <div class="search-wrapper">
+          <div class="search-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
           </div>
-        </div>
-
-        <!-- TIB Slider -->
-        <div class="lp-filter-group">
-          <span class="lp-filter-label">Months in Business</span>
-          <div class="range-box">
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-              <input type="range" id="tib-range" class="range-slider" min="0" max="24" step="1" value="0">
-              <div class="range-limits" style="display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted); padding: 0 2px;">
-                <span>0 mo</span>
-                <span>24 mo</span>
-              </div>
-            </div>
-            <span class="range-value" id="tib-val">Any</span>
-          </div>
-        </div>
-
-        <!-- Revenue Slider -->
-        <div class="lp-filter-group">
-          <span class="lp-filter-label">Monthly Revenue</span>
-          <div class="range-box">
-            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-              <input type="range" id="rev-range" class="range-slider" min="0" max="50000" step="2500" value="0">
-              <div class="range-limits" style="display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted); padding: 0 2px;">
-                <span>$0</span>
-                <span>$50,000+</span>
-              </div>
-            </div>
-            <span class="range-value" id="rev-val">Any</span>
-          </div>
+          <input type="text" id="matrix-search" class="search-input" placeholder="Search by lender name, state, or restricted industry">
         </div>
       </div>
 
-      <div class="lp-filter-grid-cat">
-        <!-- Risk Filter -->
-        <div class="lp-filter-group">
-          <span class="lp-filter-label">Risk Category</span>
-          <div class="btn-group" id="risk-group">
-            <button class="filter-btn active" data-risk="all">All</button>
-            <button class="filter-btn" data-risk="low">Low</button>
-            <button class="filter-btn" data-risk="mod">Moderate</button>
-            <button class="filter-btn" data-risk="high">High</button>
-          </div>
+      <!-- Sliders — three side by side -->
+      <div class="lp-filter-sliders-row">
+        <div class="lp-slider-group">
+          <span class="lp-filter-label">Client FICO score</span>
+          <div class="lp-slider-value" id="fico-val">300</div>
+          <input type="range" id="fico-range" class="range-slider" min="0" max="700" step="25" value="0">
+          <div class="lp-slider-range"><span>300</span><span>850</span></div>
         </div>
-
-        <!-- Product Type Filter -->
-        <div class="lp-filter-group">
-          <span class="lp-filter-label">Product Type</span>
-          <div class="btn-group" id="product-group">
-            <button class="filter-btn active" data-product="all">All Products</button>
-            <button class="filter-btn" data-product="LOC">LOC</button>
-            <button class="filter-btn" data-product="MCA">MCA</button>
-            <button class="filter-btn" data-product="BLA">BLA</button>
-            <button class="filter-btn" data-product="Equipment">Equipment</button>
-            <button class="filter-btn" data-product="SBA">SBA</button>
-          </div>
+        <div class="lp-slider-group">
+          <span class="lp-filter-label">Months in business</span>
+          <div class="lp-slider-value" id="tib-val">0 mo</div>
+          <input type="range" id="tib-range" class="range-slider" min="0" max="24" step="1" value="0">
+          <div class="lp-slider-range"><span>0 mo</span><span>24 mo</span></div>
+        </div>
+        <div class="lp-slider-group">
+          <span class="lp-filter-label">Monthly revenue</span>
+          <div class="lp-slider-value" id="rev-val">$0</div>
+          <input type="range" id="rev-range" class="range-slider" min="0" max="50000" step="2500" value="0">
+          <div class="lp-slider-range"><span>$0</span><span>$50k+</span></div>
         </div>
       </div>
 
-      <!-- Quick Toggles -->
-      <div class="toggles-row">
-        <div class="checkbox-group">
-          <label class="custom-checkbox">
-            <input type="checkbox" id="toggle-soft-pull">
-            <span class="checkbox-box"></span>
-            Soft Pull Only
-          </label>
-          <label class="custom-checkbox">
-            <input type="checkbox" id="toggle-bank-verify">
-            <span class="checkbox-box"></span>
-            Requires Bank Verification
-          </label>
-          <label class="custom-checkbox">
-            <input type="checkbox" id="toggle-no-collateral">
-            <span class="checkbox-box"></span>
-            No Hard Collateral Required
-          </label>
-          <span style="border-left: 1px solid var(--color-border); height: 16px; margin: 0 4px 0 12px; align-self: center;"></span>
-          <button id="reset-filters" class="reset-btn">
-            Reset Filters
-          </button>
+      <!-- Risk band chips -->
+      <div class="lp-chip-row">
+        <span class="lp-chip-label">Risk band</span>
+        <div class="lp-chip-group" id="risk-group">
+          <button class="chip-btn active" data-risk="all">All</button>
+          <button class="chip-btn" data-risk="low">Low</button>
+          <button class="chip-btn" data-risk="mod">Moderate</button>
+          <button class="chip-btn" data-risk="high">High</button>
         </div>
-        <div id="results-count" style="display: flex; flex-direction: column; align-items: flex-end;"></div>
       </div>
+
+      <!-- Product type chips -->
+      <div class="lp-chip-row">
+        <span class="lp-chip-label">Product</span>
+        <div class="lp-chip-group" id="product-group">
+          <button class="chip-btn active" data-product="all">All</button>
+          <button class="chip-btn" data-product="LOC">LOC</button>
+          <button class="chip-btn" data-product="MCA">MCA</button>
+          <button class="chip-btn" data-product="BLA">BLA</button>
+          <button class="chip-btn" data-product="Equipment">Equipment</button>
+          <button class="chip-btn" data-product="SBA">SBA</button>
+        </div>
+      </div>
+
+      <!-- Signals chips + Reset -->
+      <div class="lp-chip-row">
+        <span class="lp-chip-label">Signals</span>
+        <div class="lp-chip-group" id="signals-group">
+          <button class="chip-btn" data-signal="softPull">Soft pull</button>
+          <button class="chip-btn" data-signal="bankVerify">Bank verified</button>
+          <button class="chip-btn" data-signal="noCollateral">No hard collateral</button>
+        </div>
+        <button id="reset-filters" class="reset-btn">Reset filters</button>
+      </div>
+
+      <!-- Footer credit -->
+      <div class="lp-filter-footer">
+        <div id="results-count"></div>
+      </div>
+
     </div>
 
     <!-- Lender Table -->
@@ -1037,14 +1057,14 @@
       <table class="lp-data-table">
         <thead>
           <tr>
-            <th data-col="name">Lender Name <span class="sort-indicator"></span></th>
-            <th data-col="products">Product Types <span class="sort-indicator"></span></th>
-            <th class="num-col" data-col="fico">Min FICO <span class="sort-indicator"></span></th>
-            <th class="num-col" data-col="tib">Min TIB (Mo.) <span class="sort-indicator"></span></th>
-            <th class="num-col" data-col="rev">Min Monthly Rev <span class="sort-indicator"></span></th>
-            <th class="num-col" data-col="stacking">Max Stacking <span class="sort-indicator"></span></th>
-            <th data-col="restrictions">Restricted Industries <span class="sort-indicator"></span></th>
-            <th data-col="risk">Risk Band <span class="sort-indicator"></span></th>
+            <th data-col="name">Lender name <span class="sort-icon"></span></th>
+            <th data-col="products">Product types <span class="sort-icon"></span></th>
+            <th class="num-col" data-col="fico">Min FICO <span class="sort-icon"></span></th>
+            <th class="num-col" data-col="tib">Min TIB (mo.) <span class="sort-icon"></span></th>
+            <th class="num-col" data-col="rev">Min monthly rev <span class="sort-icon"></span></th>
+            <th class="num-col" data-col="stacking">Max stacking <span class="sort-icon"></span></th>
+            <th data-col="restrictions">Restricted industries <span class="sort-icon"></span></th>
+            <th data-col="risk">Risk band <span class="sort-icon"></span></th>
           </tr>
         </thead>
         <tbody id="lender-table-body">
@@ -1053,21 +1073,67 @@
     </div>
   </section>
 
-  <!-- Footer Callout -->
-  <div class="lp-callout">
-    <strong>How to use this matrix:</strong> Set your client's FICO score, months in business, and monthly revenue using the sliders above — the table updates instantly to show only eligible lenders. Click any row to expand full underwriting specs, verification sourcing, and direct application portals.
+  <!-- How to use card -->
+  <div class="lp-ref-card">
+    <div class="lp-ref-card-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div class="lp-ref-card-body">
+      <p class="lp-ref-card-title">How to use this matrix</p>
+      <p class="lp-ref-card-subtitle">Set FICO, months in business, and revenue — table filters to eligible lenders instantly. Click any row for full underwriting specs, verification sourcing, and direct application portals.</p>
+    </div>
   </div>
 
   <!-- Regulatory & Accuracy Disclaimer (collapsible) -->
-  <div class="lp-disclaimer-header" id="disclaimer-toggle">
-    <span>⚠&nbsp; Regulatory &amp; Accuracy Disclaimer — click to expand</span>
-    <span class="lp-disclaimer-toggle-icon" id="disclaimer-icon">▼</span>
+  <div class="lp-ref-card clickable" id="disclaimer-toggle">
+    <div class="lp-ref-card-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <div class="lp-ref-card-body">
+      <p class="lp-ref-card-title">Regulatory &amp; accuracy disclaimer</p>
+      <p class="lp-ref-card-subtitle">Underwriting specs change frequently — click to expand.</p>
+    </div>
+    <div class="lp-ref-card-chevron" id="disclaimer-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
   </div>
-  <div class="lp-disclaimer-body" id="disclaimer-body">
+  <div class="lp-ref-card-expand" id="disclaimer-body">
     This is an early-stage, active development version of the LendPaper Lender Waterfall Engine. Alternative lending underwriting criteria, FICO thresholds, restricted industries, and stacking regulations are updated frequently by funding institutions and may change without notice. While we synchronize this database regularly, some entries may contain outdated criteria or technical inaccuracies. <strong>Brokers must verify all terms directly with lender underwriters prior to contract execution.</strong>
     <br><br>
     <strong>Are you an underwriting manager or direct lender?</strong> To submit updated rulesets, correct guidelines, or request inclusion in our waterfall, please email <a href="mailto:info@lendpaper.com">info@lendpaper.com</a> with your direct submission desk contact.
   </div>
+
+  <!-- More tools -->
+  <div class="lp-more-tools">
+    <div class="lp-more-tools-label">More tools</div>
+    <div class="lp-tool-cards-grid">
+      <a class="lp-tool-card" href="/tools/fundability">
+        <div class="lp-tool-card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div class="lp-tool-card-body">
+          <p class="lp-tool-card-name">Fundability</p>
+          <p class="lp-tool-card-desc">Net requirement and stacking risk assessment</p>
+        </div>
+        <div class="lp-tool-card-chevron">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </a>
+      <a class="lp-tool-card" href="/tools/dscr">
+        <div class="lp-tool-card-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="lp-tool-card-body">
+          <p class="lp-tool-card-name">DSCR calculator</p>
+          <p class="lp-tool-card-desc">Debt service coverage and payment-to-revenue benchmarking</p>
+        </div>
+        <div class="lp-tool-card-chevron">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </a>
+    </div>
+  </div>
+
 </div>
 
 <!-- Floating Action Button (Pill style CTA) -->
@@ -2635,6 +2701,11 @@
     return { label: 'High Risk / Heavy Verification', dot: 'red', code: 'high' };
   };
 
+  // Sort icon SVGs
+  const SORT_ICON_DEFAULT = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M3 9l4-4 4 4M7 5v14M13 15l4 4 4-4M17 5v14"/></svg>`;
+  const SORT_ICON_UP    = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
+  const SORT_ICON_DOWN  = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M12 5v14M5 12l7 7 7-7"/></svg>`;
+
   // State Management
   let activeFilters = {
     search: '',
@@ -2648,27 +2719,52 @@
     noCollateral: false
   };
 
-  let sortColumn = null;
-  let sortDirection = null; // null, 'asc', or 'desc'
+  let sortColumn = 'fico'; // default: Min FICO ascending
+  let sortDirection = 'asc';
   let expandedLenderId = null;
 
   // DOM Elements
   const tbody = document.getElementById('lender-table-body');
   const searchInput = document.getElementById('matrix-search');
-  const riskButtons = document.querySelectorAll('#risk-group .filter-btn');
-  const productButtons = document.querySelectorAll('#product-group .filter-btn');
+  const riskButtons = document.querySelectorAll('#risk-group .chip-btn');
+  const productButtons = document.querySelectorAll('#product-group .chip-btn');
+  const signalButtons = document.querySelectorAll('#signals-group .chip-btn');
   const ficoSlider = document.getElementById('fico-range');
   const ficoVal = document.getElementById('fico-val');
   const tibSlider = document.getElementById('tib-range');
   const tibVal = document.getElementById('tib-val');
   const revSlider = document.getElementById('rev-range');
   const revVal = document.getElementById('rev-val');
-  const softPullCheck = document.getElementById('toggle-soft-pull');
-  const bankVerifyCheck = document.getElementById('toggle-bank-verify');
-  const noCollateralCheck = document.getElementById('toggle-no-collateral');
   const resultsCount = document.getElementById('results-count');
   const resetBtn = document.getElementById('reset-filters');
   const tableHeaders = document.querySelectorAll('.lp-data-table th[data-col]');
+
+  // Update sort icons on all column headers
+  const updateSortIndicators = () => {
+    tableHeaders.forEach(th => {
+      th.classList.remove('sort-asc', 'sort-desc');
+      const icon = th.querySelector('.sort-icon');
+      if (icon) icon.innerHTML = SORT_ICON_DEFAULT;
+    });
+    if (sortColumn && sortDirection) {
+      const activeTh = document.querySelector(`.lp-data-table th[data-col="${sortColumn}"]`);
+      if (activeTh) {
+        activeTh.classList.add('sort-' + sortDirection);
+        const icon = activeTh.querySelector('.sort-icon');
+        if (icon) icon.innerHTML = sortDirection === 'asc' ? SORT_ICON_UP : SORT_ICON_DOWN;
+      }
+    }
+  };
+
+  // Set dynamic total count in footer (runs once)
+  const renderFooterCount = () => {
+    resultsCount.innerHTML =
+      `<span style="font-weight:500;color:var(--color-text-primary);font-size:13px;">${lenderData.length}</span>` +
+      `<span style="color:var(--color-text-secondary);font-size:13px;"> verified lenders</span>` +
+      `<span style="color:var(--color-border);margin:0 7px;font-size:13px;">·</span>` +
+      `<a href="#" id="submit-lender-link" style="font-size:13px;color:var(--color-text-secondary);text-decoration:none;" ` +
+      `onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">+ Submit your lender</a>`;
+  };
 
   // Render Engine
   const renderTable = () => {
@@ -2743,13 +2839,7 @@
       });
     }
 
-    // Update count
-    resultsCount.innerHTML = `
-      <div style="font-weight: 700; font-size: 13px; color: var(--color-brand-dark); text-align: right;">${filtered.length} Verified Lenders</div>
-      <div style="font-size: 11px; font-weight: 400; color: var(--color-text-secondary); margin-top: 1px; text-align: right;">
-        Coverage expanding — <a href="#" id="submit-lender-link" style="color: var(--color-brand-mid); text-decoration: underline; font-weight: 500;">submit a lender to add yours</a>
-      </div>
-    `;
+    // Footer count is static (set once via renderFooterCount), nothing to update here
 
     if (filtered.length === 0) {
       const tr = document.createElement('tr');
@@ -2787,17 +2877,16 @@
         return `<span class="badge-product ${classMap[p] || 'bla'}">${p}</span>`;
       }).join(' ');
 
-      // Truncate tag badges on row view if there are too many (e.g. for PEAC)
+      // Cap visible restriction tags at 2 across all rows
+      const MAX_TAGS = 2;
       let restrictionsHtml = '';
-      if (lender.restrictions.length > 0) {
-        if (lender.restrictions.length > 5) {
-          const visibleTags = lender.restrictions.slice(0, 4).map(t => `<span class="lp-tag">${t.toLowerCase()}</span>`).join('');
-          restrictionsHtml = `<div class="lp-tags-container">${visibleTags}<span class="lp-tag" style="background-color: #E6FDF5; color: var(--color-brand-mid); font-weight: 600;">+${lender.restrictions.length - 4} more</span></div>`;
-        } else {
-          restrictionsHtml = `<div class="lp-tags-container">${lender.restrictions.map(t => `<span class="lp-tag">${t.toLowerCase()}</span>`).join('')}</div>`;
-        }
+      if (lender.restrictions.length > MAX_TAGS) {
+        const visibleTags = lender.restrictions.slice(0, MAX_TAGS).map(t => `<span class="lp-tag">${t.toLowerCase()}</span>`).join('');
+        restrictionsHtml = `<div class="lp-tags-container">${visibleTags}<span class="lp-tag" style="background-color:#E6FDF5;color:var(--color-brand-mid);font-weight:500;">+${lender.restrictions.length - MAX_TAGS}</span></div>`;
+      } else if (lender.restrictions.length > 0) {
+        restrictionsHtml = `<div class="lp-tags-container">${lender.restrictions.map(t => `<span class="lp-tag">${t.toLowerCase()}</span>`).join('')}</div>`;
       } else {
-        restrictionsHtml = `<span style="color: #9CA3AF; font-size: 11px;">None Specified</span>`;
+        restrictionsHtml = `<span style="color:#9CA3AF;font-size:11px;">None</span>`;
       }
 
       const risk = determineRisk(lender.fico);
@@ -3029,15 +3118,15 @@
     });
   };
 
-  // Search Input Handler
+  // Search
   searchInput.addEventListener('input', (e) => {
     activeFilters.search = e.target.value;
     renderTable();
   });
 
-  // Risk Filter Click Handlers
+  // Risk chips (exclusive)
   riskButtons.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       riskButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeFilters.risk = btn.dataset.risk;
@@ -3045,9 +3134,9 @@
     });
   });
 
-  // Product Filter Click Handlers
+  // Product chips (exclusive)
   productButtons.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', () => {
       productButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       activeFilters.product = btn.dataset.product;
@@ -3055,47 +3144,39 @@
     });
   });
 
-  // Sliders Handlers
+  // Signal chips (independent toggles)
+  signalButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('active');
+      activeFilters[btn.dataset.signal] = btn.classList.contains('active');
+      renderTable();
+    });
+  });
+
+  // Sliders
   ficoSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value);
     activeFilters.fico = val;
-    ficoVal.textContent = val === 0 ? 'Any' : `${val}+`;
+    ficoVal.textContent = val === 0 ? '300' : String(val);
     renderTable();
   });
 
   tibSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value);
     activeFilters.tib = val;
-    tibVal.textContent = val === 0 ? 'Any' : `${val}+ Mo.`;
+    tibVal.textContent = `${val} mo`;
     renderTable();
   });
 
   revSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value);
     activeFilters.rev = val;
-    revVal.textContent = val === 0 ? 'Any' : `${formatCurrency(val)}+`;
+    revVal.textContent = val === 0 ? '$0' : new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
     renderTable();
   });
 
-  // Checkboxes Handlers
-  softPullCheck.addEventListener('change', (e) => {
-    activeFilters.softPull = e.target.checked;
-    renderTable();
-  });
-
-  bankVerifyCheck.addEventListener('change', (e) => {
-    activeFilters.bankVerify = e.target.checked;
-    renderTable();
-  });
-
-  noCollateralCheck.addEventListener('change', (e) => {
-    activeFilters.noCollateral = e.target.checked;
-    renderTable();
-  });
-
-  // Reset Button Handler
+  // Reset
   resetBtn.addEventListener('click', () => {
-    // Reset inputs
     searchInput.value = '';
     activeFilters.search = '';
 
@@ -3107,126 +3188,80 @@
     productButtons[0].classList.add('active');
     activeFilters.product = 'all';
 
+    signalButtons.forEach(b => b.classList.remove('active'));
+    activeFilters.softPull = false;
+    activeFilters.bankVerify = false;
+    activeFilters.noCollateral = false;
+
     ficoSlider.value = 0;
     activeFilters.fico = 0;
-    ficoVal.textContent = 'Any';
+    ficoVal.textContent = '300';
 
     tibSlider.value = 0;
     activeFilters.tib = 0;
-    tibVal.textContent = 'Any';
+    tibVal.textContent = '0 mo';
 
     revSlider.value = 0;
     activeFilters.rev = 0;
-    revVal.textContent = 'Any';
-
-    softPullCheck.checked = false;
-    activeFilters.softPull = false;
-
-    bankVerifyCheck.checked = false;
-    activeFilters.bankVerify = false;
-
-    noCollateralCheck.checked = false;
-    activeFilters.noCollateral = false;
+    revVal.textContent = '$0';
 
     renderTable();
   });
 
-  // Table Sorting Handlers
+  // Column sort (toggle asc/desc; clicking different column resets to asc)
   tableHeaders.forEach(th => {
     th.addEventListener('click', () => {
       const col = th.dataset.col;
       if (sortColumn === col) {
-        if (sortDirection === 'asc') {
-          sortDirection = 'desc';
-        } else {
-          sortColumn = null;
-          sortDirection = null;
-        }
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
       } else {
         sortColumn = col;
         sortDirection = 'asc';
       }
-
-      // Reset indicators
-      tableHeaders.forEach(header => {
-        const ind = header.querySelector('.sort-indicator');
-        if (ind) ind.textContent = '';
-      });
-
-      // Set current indicator
-      if (sortColumn && sortDirection) {
-        const currentIndicator = th.querySelector('.sort-indicator');
-        if (currentIndicator) {
-          currentIndicator.textContent = sortDirection === 'asc' ? '▲' : '▼';
-        }
-      }
-
+      updateSortIndicators();
       renderTable();
     });
   });
 
-  // Row Click Expand Handler
+  // Row expand/collapse
   tbody.addEventListener('click', (e) => {
     const tr = e.target.closest('.lp-row-interactive');
     if (!tr) return;
-
-    // Check if clicked element was a link inside the row
     if (e.target.closest('a') || e.target.closest('button')) return;
-
     const lenderId = parseInt(tr.dataset.id);
-    if (expandedLenderId === lenderId) {
-      expandedLenderId = null;
-    } else {
-      expandedLenderId = lenderId;
-    }
+    expandedLenderId = expandedLenderId === lenderId ? null : lenderId;
     renderTable();
   });
 
-  // Initial Sort Indicator is not set (default sort state = no sort applied)
-
-  // Submit a Lender Modal Handlers
+  // Submit a Lender modal
   const fabBtn = document.getElementById('fab-btn');
   const modalBackdrop = document.getElementById('submit-modal-backdrop');
   const modalClose = document.getElementById('submit-modal-close');
 
-  const openModal = () => {
-    modalBackdrop.classList.add('open');
-  };
+  const openModal = () => modalBackdrop.classList.add('open');
+  const closeModal = () => modalBackdrop.classList.remove('open');
 
-  const closeModal = () => {
-    modalBackdrop.classList.remove('open');
-  };
-
-  fabBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openModal();
-  });
-
+  fabBtn.addEventListener('click', (e) => { e.stopPropagation(); openModal(); });
   modalClose.addEventListener('click', closeModal);
-  modalBackdrop.addEventListener('click', (e) => {
-    if (e.target === modalBackdrop) closeModal();
-  });
+  modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
 
-  // Modal delegation from results count
+  // Footer "submit" link opens modal
   resultsCount.addEventListener('click', (e) => {
-    if (e.target && e.target.id === 'submit-lender-link') {
-      e.preventDefault();
-      openModal();
-    }
+    if (e.target && e.target.id === 'submit-lender-link') { e.preventDefault(); openModal(); }
   });
 
-  // Disclaimer Toggle
+  // Disclaimer expand/collapse
   document.getElementById('disclaimer-toggle').addEventListener('click', () => {
     const body = document.getElementById('disclaimer-body');
     const icon = document.getElementById('disclaimer-icon');
-    const header = document.getElementById('disclaimer-toggle');
     const isOpen = body.classList.contains('open');
     body.classList.toggle('open', !isOpen);
     icon.classList.toggle('open', !isOpen);
-    header.classList.toggle('open', !isOpen);
   });
 
-  // Initial Render
+  // Initial render
+  renderFooterCount();
+  updateSortIndicators();
   renderTable();
 </script>
 </body>
