@@ -390,6 +390,21 @@
     gap: 10px;
   }
 
+  .lp-row-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    min-width: 18px;
+    color: var(--color-text-muted);
+    transition: transform 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+  .lp-row-chevron.expanded {
+    transform: rotate(90deg);
+    color: var(--color-brand-mid);
+  }
+
   .lender-logo {
     width: 36px;
     height: 36px;
@@ -956,6 +971,125 @@
     margin-bottom: 12px;
     color: #9CA3AF;
   }
+
+  /* Muted TBD */
+  .lp-tbd {
+    color: #D1D5DB;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  /* Info icon button */
+  .lp-info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1px solid #D1D5DB;
+    background: none;
+    color: #9CA3AF;
+    font-size: 9px;
+    font-weight: 700;
+    font-style: italic;
+    font-family: Georgia, serif;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: border-color 0.15s, color 0.15s;
+    flex-shrink: 0;
+    vertical-align: middle;
+  }
+  .lp-info-btn:hover, .lp-info-btn.active {
+    border-color: var(--color-brand-mid);
+    color: var(--color-brand-mid);
+  }
+
+  /* Info popover */
+  .lp-info-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .lp-info-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 260px;
+    background: #FFFFFF;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    z-index: 300;
+    display: none;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+  .lp-info-popover.open { display: block; }
+  .lp-info-popover strong {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-primary);
+    margin-bottom: 6px;
+  }
+  .lp-info-popover dl { margin: 0; }
+  .lp-info-popover dt {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 11.5px;
+    margin-top: 5px;
+  }
+  .lp-info-popover dd { margin: 0 0 3px 0; }
+
+  /* Product badge tooltip */
+  .badge-product {
+    position: relative;
+  }
+  .badge-product::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1F2937;
+    color: #fff;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    z-index: 100;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .badge-product:hover::after { opacity: 1; }
+
+  /* RegistryRoute check button */
+  .lp-rr-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--color-brand-mid);
+    text-decoration: none;
+    margin-top: 4px;
+    letter-spacing: 0.01em;
+    transition: color 0.15s;
+    white-space: nowrap;
+  }
+  .lp-rr-btn:hover { color: var(--color-brand-dark); text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -991,7 +1125,7 @@
       <!-- Sliders — three side by side -->
       <div class="lp-filter-sliders-row">
         <div class="lp-slider-group">
-          <span class="lp-filter-label">Client FICO score</span>
+          <span class="lp-filter-label">Personal Credit Score</span>
           <div class="lp-slider-value" id="fico-val">300</div>
           <input type="range" id="fico-range" class="range-slider" min="0" max="700" step="25" value="0">
           <div class="lp-slider-range"><span>300</span><span>850</span></div>
@@ -1001,6 +1135,10 @@
           <div class="lp-slider-value" id="tib-val">0 mo</div>
           <input type="range" id="tib-range" class="range-slider" min="0" max="24" step="1" value="0">
           <div class="lp-slider-range"><span>0 mo</span><span>24 mo</span></div>
+          <a href="https://registryroute.com" target="_blank" rel="noopener" class="lp-rr-btn">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Check in RegistryRoute
+          </a>
         </div>
         <div class="lp-slider-group">
           <span class="lp-filter-label">Monthly revenue</span>
@@ -1012,7 +1150,16 @@
 
       <!-- Risk band chips -->
       <div class="lp-chip-row">
-        <span class="lp-chip-label">Risk band</span>
+        <span class="lp-chip-label">
+          <span class="lp-info-wrap">Risk band
+            <button class="lp-info-btn" data-popover="risk" aria-label="What is Risk Band?">i
+              <div class="lp-info-popover" id="popover-risk">
+                <strong>Risk Band</strong>
+                Derived from minimum credit score and product type. Low = 600+ FICO on traditional products. Moderate = 500–599, or MCA with strong credit. High = below 500, or MCA-only lenders regardless of FICO.
+              </div>
+            </button>
+          </span>
+        </span>
         <div class="lp-chip-group" id="risk-group">
           <button class="chip-btn active" data-risk="all">All</button>
           <button class="chip-btn" data-risk="low">Low</button>
@@ -1023,7 +1170,22 @@
 
       <!-- Product type chips -->
       <div class="lp-chip-row">
-        <span class="lp-chip-label">Product</span>
+        <span class="lp-chip-label">
+          <span class="lp-info-wrap">Product
+            <button class="lp-info-btn" data-popover="product" aria-label="Product type definitions">i
+              <div class="lp-info-popover" id="popover-product">
+                <strong>Product Types</strong>
+                <dl>
+                  <dt>LOC</dt><dd>Line of Credit — revolving facility, draw as needed.</dd>
+                  <dt>MCA</dt><dd>Merchant Cash Advance — revenue-based advance, not a loan. Repaid via daily/weekly split of deposits.</dd>
+                  <dt>BLA</dt><dd>Business Term Loan — fixed repayment schedule, typically 6–36 months.</dd>
+                  <dt>Equipment</dt><dd>Equipment Financing — asset-secured loan for machinery or vehicles.</dd>
+                  <dt>SBA</dt><dd>SBA Loan — government-backed, lower rates, longer terms up to 25 years.</dd>
+                </dl>
+              </div>
+            </button>
+          </span>
+        </span>
         <div class="lp-chip-group" id="product-group">
           <button class="chip-btn active" data-product="all">All</button>
           <button class="chip-btn" data-product="LOC">LOC</button>
@@ -1036,7 +1198,20 @@
 
       <!-- Signals chips + Reset -->
       <div class="lp-chip-row">
-        <span class="lp-chip-label">Signals</span>
+        <span class="lp-chip-label">
+          <span class="lp-info-wrap">Signals
+            <button class="lp-info-btn" data-popover="signals" aria-label="What are Signals?">i
+              <div class="lp-info-popover" id="popover-signals">
+                <strong>Lender Signals</strong>
+                <dl>
+                  <dt>Soft pull</dt><dd>Pre-qualification uses a soft inquiry — no impact to the borrower's credit score.</dd>
+                  <dt>Bank verified</dt><dd>Lender verifies statements via open banking (Plaid/Finicity) rather than PDF uploads.</dd>
+                  <dt>No hard collateral</dt><dd>No real estate, equipment, or major assets required as security.</dd>
+                </dl>
+              </div>
+            </button>
+          </span>
+        </span>
         <div class="lp-chip-group" id="signals-group">
           <button class="chip-btn" data-signal="softPull">Soft pull</button>
           <button class="chip-btn" data-signal="bankVerify">Bank verified</button>
@@ -1137,9 +1312,9 @@
 </div>
 
 <!-- Floating Action Button (Pill style CTA) -->
-<button class="lp-fab" id="fab-btn" title="Submit a Lender">
+<button class="lp-fab" id="fab-btn" title="Submit an update">
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-  Submit a Lender
+  Submit an update
 </button>
 
 <!-- Premium Modal Backdrop & Modal -->
@@ -1150,10 +1325,10 @@
       <div class="lp-modal-logo-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-dark)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       </div>
-      <h3 class="lp-modal-title">Submit a Lender</h3>
+      <h3 class="lp-modal-title">Submit an update</h3>
     </div>
     <div class="lp-modal-body">
-      <p class="lp-modal-desc">Underwriting managers and direct lenders can submit updated rulesets, correct guidelines, or request lender inclusion directly in our scenario engine.</p>
+      <p class="lp-modal-desc">Spot something outdated? Underwriting managers, direct lenders, and brokers can submit corrections, updated rulesets, or request a new lender be added to the waterfall.</p>
       <div class="lp-modal-action-box">
         <span class="action-box-label">Send underwriting guidelines to:</span>
         <a href="mailto:info@lendpaper.com" class="lp-modal-email-btn">
@@ -2688,17 +2863,32 @@
   }
 ];
 
+  // Normalize placeholder sentinel values (1 = data not yet sourced)
+  lenderData.forEach(l => {
+    if (l.fico === 1) l.fico = 300;
+    if (l.tib === 1) l.tib = 0;
+    if (l.rev === 1) l.rev = 0;
+    if (l.stacking === 1) l.stacking = 0;
+    // Enforce 300 as minimum displayable FICO floor
+    if (l.fico > 0 && l.fico < 300) l.fico = 300;
+  });
+
   // Helper Functions
   const formatCurrency = (num) => {
-    if (num === 0) return 'TBD';
+    if (num === 0) return '<span class="lp-tbd">—</span>';
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
   };
 
-  const determineRisk = (fico) => {
-    if (fico === 0) return { label: 'No FICO Required', dot: 'blue', code: 'low' };
-    if (fico >= 600) return { label: 'Low Risk Band', dot: 'green', code: 'low' };
-    if (fico >= 500 && fico < 600) return { label: 'Moderate Risk', dot: 'yellow', code: 'mod' };
-    return { label: 'High Risk / Heavy Verification', dot: 'red', code: 'high' };
+  const determineRisk = (fico, products = []) => {
+    const hasMCA = products.includes('MCA');
+    const mcaOnly = products.length > 0 && products.every(p => p === 'MCA');
+    if (fico === 0 && !hasMCA) return { label: 'No FICO Required', dot: 'blue', code: 'low' };
+    if (fico === 0 && hasMCA) return { label: 'Moderate Risk', dot: 'yellow', code: 'mod' };
+    // MCA bumps risk one tier; MCA-only lenders are always at least Moderate
+    if (fico >= 600 && !hasMCA) return { label: 'Low Risk Band', dot: 'green', code: 'low' };
+    if (fico >= 600 && hasMCA) return { label: 'Moderate Risk', dot: 'yellow', code: 'mod' };
+    if (fico >= 500 && !mcaOnly) return { label: 'Moderate Risk', dot: 'yellow', code: 'mod' };
+    return { label: 'High Risk', dot: 'red', code: 'high' };
   };
 
   // Sort icon SVGs
@@ -2782,7 +2972,7 @@
       }
 
       // Risk category
-      const risk = determineRisk(l.fico);
+      const risk = determineRisk(l.fico, l.products);
       if (activeFilters.risk !== 'all' && risk.code !== activeFilters.risk) return false;
 
       // Product Type
@@ -2866,15 +3056,17 @@
       trMain.dataset.id = lender.id;
 
       // Product Type Badges
+      const PRODUCT_LABELS = {
+        'LOC': 'Line of Credit',
+        'MCA': 'Merchant Cash Advance',
+        'BLA': 'Business Term Loan',
+        'Equipment': 'Equipment Financing',
+        'SBA': 'SBA Loan'
+      };
       const productsHtml = lender.products.map(p => {
-        const classMap = {
-          'LOC': 'loc',
-          'MCA': 'mca',
-          'BLA': 'bla',
-          'Equipment': 'equipment',
-          'SBA': 'sba'
-        };
-        return `<span class="badge-product ${classMap[p] || 'bla'}">${p}</span>`;
+        const classMap = { 'LOC': 'loc', 'MCA': 'mca', 'BLA': 'bla', 'Equipment': 'equipment', 'SBA': 'sba' };
+        const tooltip = PRODUCT_LABELS[p] || p;
+        return `<span class="badge-product ${classMap[p] || 'bla'}" data-tooltip="${tooltip}">${p}</span>`;
       }).join(' ');
 
       // Cap visible restriction tags at 2 across all rows
@@ -2889,7 +3081,7 @@
         restrictionsHtml = `<span style="color:#9CA3AF;font-size:11px;">None</span>`;
       }
 
-      const risk = determineRisk(lender.fico);
+      const risk = determineRisk(lender.fico, lender.products);
 
       // Create Mini Badges
       let badgesHtml = '';
@@ -2906,6 +3098,9 @@
       trMain.innerHTML = `
         <td class="lp-sticky-col">
           <div class="lp-lender-cell">
+            <span class="lp-row-chevron${isExpanded ? ' expanded' : ''}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </span>
             ${logoHtml}
             <div class="lp-lender-name-wrapper">
               <span class="lp-lender-name">${lender.name}</span>
@@ -2914,16 +3109,15 @@
           </div>
         </td>
         <td><div style="display:flex; flex-wrap:wrap; gap:4px; max-width:180px;">${productsHtml}</div></td>
-        <td class="num-col">${lender.fico === 0 ? 'TBD' : lender.fico}</td>
-        <td class="num-col">${lender.tib === 0 ? 'TBD' : lender.tib}</td>
+        <td class="num-col">${lender.fico === 0 ? '<span class="lp-tbd">—</span>' : lender.fico}</td>
+        <td class="num-col">${lender.tib === 0 ? '<span class="lp-tbd">—</span>' : lender.tib}</td>
         <td class="num-col">${formatCurrency(lender.rev)}</td>
-        <td class="num-col">${lender.stacking === 999 ? 'Unlimited' : (lender.stacking === 0 ? 'TBD' : lender.stacking)}</td>
+        <td class="num-col">${lender.stacking === 999 ? 'Unlimited' : (lender.stacking === 0 ? '<span class="lp-tbd">—</span>' : lender.stacking)}</td>
         <td>${restrictionsHtml}</td>
         <td>
           <span style="display:flex; align-items:center; gap: 4px;">
             <span class="lp-status-dot ${risk.dot}"></span>
             ${risk.label}
-            <span class="lp-expand-toggle" style="margin-left: auto; font-size: 14px; font-weight: 700; color: #14532D; transition: transform 0.2s;">${isExpanded ? '▲' : '▼'}</span>
           </span>
         </td>
       `;
@@ -3257,6 +3451,33 @@
     const isOpen = body.classList.contains('open');
     body.classList.toggle('open', !isOpen);
     icon.classList.toggle('open', !isOpen);
+  });
+
+  // Info popover toggle
+  let activePopover = null;
+  document.querySelectorAll('.lp-info-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = 'popover-' + btn.dataset.popover;
+      const popover = document.getElementById(id);
+      if (!popover) return;
+      const isOpen = popover.classList.contains('open');
+      // close any open popover
+      if (activePopover && activePopover !== popover) {
+        activePopover.classList.remove('open');
+        activePopover.closest('.lp-info-btn')?.classList.remove('active');
+      }
+      popover.classList.toggle('open', !isOpen);
+      btn.classList.toggle('active', !isOpen);
+      activePopover = !isOpen ? popover : null;
+    });
+  });
+  document.addEventListener('click', () => {
+    if (activePopover) {
+      activePopover.classList.remove('open');
+      activePopover.closest('.lp-info-btn')?.classList.remove('active');
+      activePopover = null;
+    }
   });
 
   // Initial render
