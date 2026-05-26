@@ -13,9 +13,9 @@
 <meta charset="UTF-8">
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2026.05.25.1000">
+<meta name="version" content="2026.05.26.1000">
 <script type="text/javascript">
-  window.CURRENT_VERSION = "2026.05.25.1000";
+  window.CURRENT_VERSION = "2026.05.26.1000";
 
   // Force active cleanup of legacy service workers
   if ('serviceWorker' in navigator) {
@@ -1307,7 +1307,7 @@ input { font-family: inherit; }
 </div>
 
 <!-- External Data -->
-<script src="public/assets/js/tools.js?v=2026.05.23.1015"></script>
+<script src="public/assets/js/tools.js?v=2026.05.26.1000"></script>
 <script src="public/assets/js/glossary.js?v=2026.05.23.1015"></script>
 
 <script>
@@ -1330,7 +1330,8 @@ var ICO = {
   lineChart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-6 6-3-3-3 3"/></svg>',
   flag:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
   code:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
-  arrow:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+  arrow:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  tiers:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="5" y="10" width="14" height="4" rx="1"/><rect x="7" y="17" width="10" height="4" rx="1"/></svg>'
 };
 
 const taglines = [
@@ -1581,9 +1582,9 @@ function updateGreeting() {
 }
 
 /* ---- Featured card renderer ---- */
-var featuredIds = ['amo', 'registry', 'dscr'];
+var featuredIds = ['amo', 'registry', 'waterfall'];
 var featuredLabels = {
-  'amo': 'Most used', 'registry': 'Due diligence',
+  'amo': 'Most used', 'registry': 'Due diligence', 'waterfall': 'Lender match',
   'sba-rates': 'SBA 7(a)', 'dscr': 'Risk & coverage', 'fundability': 'Deal math'
 };
 

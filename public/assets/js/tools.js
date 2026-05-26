@@ -46,18 +46,31 @@ const TOOLS = [
     target: "_blank",
     kw: "ucc lookup search public records registry route"
   },
-  { 
-    id: "dscr", 
-    name: "DSCR calculator", 
+  {
+    id: "dscr",
+    name: "DSCR calculator",
     desc: "Debt service coverage ratio and payment-to-revenue benchmarking.",
-    status: "live", 
-    group: "risk", 
-    icon: "refresh", 
+    status: "live",
+    group: "risk",
+    icon: "refresh",
     color: "green",
     slug: "/tools/dscr",
     presentation: "page",
     path: "calculators/DSCRCalculator.html",
     kw: "coverage dscr ratio revenue bank statement underwriting"
+  },
+  {
+    id: "waterfall",
+    name: "Lender Waterfall",
+    desc: "Filter by FICO, revenue, time in business, and product type.",
+    status: "live",
+    group: "data",
+    icon: "tiers",
+    color: "green",
+    slug: "/waterfall",
+    presentation: "page",
+    path: "waterfall.html",
+    kw: "lender waterfall buy box fico tib revenue product type filter match"
   },
   { 
     id: "fundability", 
@@ -131,17 +144,6 @@ const TOOLS = [
     path: "https://www.registryroute.com/",
     target: "_blank",
     kw: "ucc leads filings database lookup secured prospecting"
-  },
-  { 
-    id: "lender-dir", 
-    name: "Lender directory", 
-    desc: "Verified database of commercial lenders and buy boxes.",
-    status: "soon", 
-    group: "data", 
-    icon: "search", 
-    color: "slate",
-    href: "#",
-    kw: "lender directory database search buy box"
   },
   /*
   { 
