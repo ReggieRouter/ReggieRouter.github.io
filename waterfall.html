@@ -26,7 +26,7 @@
 
   body {
     background-color: var(--color-bg-main);
-    padding: 24px;
+    padding: 0;
     margin: 0;
     font-family: var(--font-stack);
     color: var(--color-text-primary);
@@ -36,7 +36,7 @@
     background: var(--color-bg-card);
     border: 1px solid var(--color-border);
     border-radius: 12px;
-    padding: 32px;
+    padding: 24px 20px;
     max-width: 1200px;
     margin: 0 auto;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
@@ -308,8 +308,11 @@
   }
 
   /* Table Framework */
+  /* WIDTH BUDGET: toolPageContainer=1100px, body-padding=0, container-padding=40px → ~1060px wrapper.
+     Table min-width below must stay ≤ 1060px or scrolling kicks in. */
   .lp-table-wrapper {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     border: 1px solid var(--color-border);
     border-radius: 8px;
     margin-bottom: 24px;
@@ -318,6 +321,7 @@
 
   .lp-data-table {
     width: 100%;
+    min-width: 860px;
     border-collapse: separate;
     border-spacing: 0;
     font-size: 12.5px;
@@ -551,6 +555,7 @@
   .lp-status-dot.yellow { background-color: #EAB308; }
   .lp-status-dot.red { background-color: #DC2626; }
   .lp-status-dot.blue { background-color: #3B82F6; }
+  .lp-status-dot.gray { background-color: #6B7280; }
 
   /* Collapsible Details Drawer Styling */
   .detail-row {
@@ -1072,6 +1077,25 @@
     white-space: nowrap;
   }
   .lp-rr-btn:hover { color: var(--color-brand-dark); text-decoration: underline; }
+
+  /* Stacking at-limit indicator */
+  .lp-at-limit {
+    color: #D97706;
+    font-weight: 700;
+  }
+  .lp-at-limit-badge {
+    font-size: 9px;
+    font-weight: 700;
+    background: #FEF3C7;
+    color: #92400E;
+    padding: 1px 4px;
+    border-radius: 3px;
+    border: 1px solid #FDE68A;
+    margin-left: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    vertical-align: middle;
+  }
 </style>
 </head>
 <body>
@@ -1162,6 +1186,18 @@
           <button class="chip-btn" data-product="BLA">BLA</button>
           <button class="chip-btn" data-product="Equipment">Equipment</button>
           <button class="chip-btn" data-product="SBA">SBA</button>
+        </div>
+      </div>
+
+      <!-- Position chips -->
+      <div class="lp-chip-row">
+        <span class="lp-chip-label">Position #</span>
+        <div class="lp-chip-group" id="pos-group">
+          <button class="chip-btn active" data-pos="all">Any</button>
+          <button class="chip-btn" data-pos="1">1st</button>
+          <button class="chip-btn" data-pos="2">2nd</button>
+          <button class="chip-btn" data-pos="3">3rd</button>
+          <button class="chip-btn" data-pos="4">4th+</button>
         </div>
       </div>
 
@@ -1410,7 +1446,7 @@
     "support_phone": "",
     "source_url": "",
     "source_snippet": "",
-    "logo_url": "public/assets/lenders/bitty_advance.png",
+    "logo_url": "public/assets/lenders/Bitty%20Advance.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1582,7 +1618,7 @@
     "support_phone": "",
     "source_url": "",
     "source_snippet": "",
-    "logo_url": "public/assets/lenders/peac_solutions.png",
+    "logo_url": "public/assets/lenders/PEAC.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1617,7 +1653,7 @@
     "support_phone": "",
     "source_url": "",
     "source_snippet": "",
-    "logo_url": "",
+    "logo_url": "public/assets/lenders/CFG.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1652,7 +1688,7 @@
     "support_phone": "",
     "source_url": "",
     "source_snippet": "",
-    "logo_url": "public/assets/lenders/spartan_capital.png",
+    "logo_url": "public/assets/lenders/Spartan.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1684,7 +1720,7 @@
     "support_phone": "855-326-3564",
     "source_url": "https://www.mulliganfunding.com/frequently-asked-questions/",
     "source_snippet": "Thank you for your interest in Mulligan Funding. This URL may have been typed in error or the page was removed and no longer exists. Use the navigation menu at the top of this page, or TAKE ME TO THE HOMEPAGE BUSINESS FUNDING RENEWAL PRIVACY POLICY CONTACT US FREQUENTLY ASKED QUESTIONS Final loan decision may be subject to underwriting by FinWise Bank. Approval and Funding Speed - Approval and funding speed refer to applications submitted during standard business hours (Monday-Friday, 7 AM - 5 PM PT.) Most approvals happen within a few hours on completed submissions. Delays could occur due to unforeseen circumstances or if additional information or verification is required. The majority of Mulligan Funding, LLC business loans are issued by FinWise Bank, a Utah state-chartered bank. Member FDIC. Exclusions may apply. Mulligan Funding, LLC | 4715 Viewridge Avenue, Suite 100 | San Diego, CA 92123 \u00a9 2026 Mulligan Funding. All Rights Reserved.",
-    "logo_url": "public/assets/lenders/mulligan_funding.png",
+    "logo_url": "public/assets/lenders/Mulligan%20Funding.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1813,7 +1849,7 @@
     "support_phone": "",
     "source_url": "https://byzfunder.com/",
     "source_snippet": "Funding that flexes to your business \u2014 up to $500K, approved in minutes, funded in hours. No red tape. Get Qualified in 30 Seconds How much financing do you need? Select amount $10K $25K $50K $75K $100K $150K $200K $250K $300K+ How long have you been in business? Select Less than 6 months 6 - 12 months 1 - 2 years 2 - 5 years 5 - 10 years 10+ years What's your monthly gross sales? Select range $0 - $15k $15k - $40k $40k - $75k $75k - $250k $250k+ What's your personal credit score? Okay < 499 Fair 500-600 Good 601-700 Great 701+ Submit Business owners hustle. Byzfunder matches their speed. We've funded 25,000+ businesses with over $1.5Billion deployed. While banks waste weeks on paperwork, we approve in hours and fund the same day. 25,000+ Businesses Funded Same Day Average Approval $1.5 Billion Deployed Up To Date How it works Bold. Fast. No BS FAST Approved today, funded TODAY. SIMPLE Revenue talks, Flex terms. As little as 3 documents, and done. SECURE Straightforward funding, no gimmicks. Apply for funding Same day approvals Funds in hours Get funding up to Next level service Our difference Why we don't do slow? While banks pile on paperwork and committees, we cut through the BS. Three documents get you approved. Your revenue matters more than your credit score. No hidden fees, no early payment penalties, no tying up your house as collateral. We built our entire process around one thing: getting you funded fast so you can get back to growing your business. Period. Apply for funding Minimum Requirements 1 Year+ in business $20,000+ Monthly Revenue US Based Company No Hassle, No Obligation No hidden fees, no penalties for early payoff, and no pressure. Flexible Repayment Plans We adapt to your cash flow so you can focus on growth. Stop Waiting, Start Growing Approved today, funded today Get my money Call now: 877.470.4795 Subscribe Join our newsletter to stay up to date on features and releases. Sign up By clicking Sign Up you're confirming that you agree with our Terms and Conditions. Company About Us Careers Press Contact Financing MCA Term Loan ByzFlex Industries Retail Restaurants Construction Manufacturing Others Resources Blog Case Studies FAQs Support ByzCares \u00a9 2026 Byzfunder. All rights reserved. Privacy Policy Terms & Conditions Cookies Settings For California, term loans are arranged or made pursuant to the California Financing Law \u2014 License Number: 6031098. We value your privacy We use cookies to keep the site secure, understand how it's used, and improve your experience. You can accept all, reject non-essential cookies, or customize your choices. Read more in our Privacy Policy. Accept all Reject all Customize -- HTML: <script type=\"application/ld+json\"> { \"@context\": \"https://schema.org\", \"@type\": \"FinancialService\", \"name\": \"ByzFunder\", \"description\": \"Fast business funding solutions including merchant cash advances, revenue-based financing, and business lines of credit.\", \"url\": \"https://byzfunder.com\", \"telephone\": \"+1-888-476-0755\", \"email\": \"info@byzfunder.com\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"112 West 34th Street\", \"addressLocality\": \"New York\", \"addressRegion\": \"NY\", \"postalCode\": \"10120\", \"addressCountry\": \"US\" }, \"areaServed\": { \"@type\": \"Country\", \"name\": \"US\" } } <\/script> <script type=\"application/ld+json\"> { \"@context\": \"https://schema.org\", \"@type\": \"Organization\", \"@id\": \"https://byzfunder.com/#organization\", \"name\": \"ByzFunder\", \"url\": \"https://byzfunder.com/\", \"logo\": \"https://byzfunder.com/assets/images/byzfunder-logo.png\", \"telephone\": \"+1-888-476-0755\", \"email\": \"info@byzfunder.com\", \"description\": \"ByzFunder provides fast and flexible business funding solutions for small and mid-sized businesses across the U.S.\", \"address\": { \"@type\": \"PostalAddress\", \"streetAddress\": \"112 West 34th Street, 18th Floor\", \"addressLocality\": \"New York\", \"addressRegion\": \"NY\", \"postalCode\": \"10120\", \"addressCountry\": \"US\" }, \"sameAs\": [ \"https://www.linkedin.com/company/byzfunder2/\", \"https://www.facebook.com/get.byzfunder/\", \"https://www.instagram.com/get.byzfunder\" ], \"foundingDate\": \"2016\", \"founder\": { \"@type\": \"Person\", \"name\": \"ByzFunder Team\" }, \"contactPoint\": { \"@type\": \"ContactPoint\", \"telephone\": \"+1-888-476-0755\", \"contactType\": \"Customer Service\", \"areaServed\": \"US\", \"availableLanguage\": [\"English\"] } } <\/script>",
-    "logo_url": "https://byzfunder.com/assets/images/byzfunder-logo.png",
+    "logo_url": "public/assets/lenders/Byzfunder.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1910,7 +1946,7 @@
     "support_phone": "888-542-6179",
     "source_url": "https://redlinecapitalinc.com/",
     "source_snippet": "Fast, Flexible Business Funding \u2014 $30K to $2M in 24\u201348 Hours... All Credit Welcome... Business operating time: Less than 6 months... Gross Monthly Revenue: Less than $4,000... Our Dynamic Funding Services: Business Line of Credit, Working Capital, Term Loan, Revenue-Based Financing, SBA Loans, Equipment Financing... \"Best Merchant Cash Advance Lenders for Electricians\"... Stated Credit Score: Select Option 500 and below... Industry: Select Option Automotive - Sales... Services (Professional) - Tax Preparation... CALL US: 888-542-6179 info@redlinecapitalinc.com",
-    "logo_url": "public/assets/lenders/redline_capital_inc.png",
+    "logo_url": "public/assets/lenders/Redline.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1920,6 +1956,7 @@
   {
     "id": 99,
     "name": "Lendio",
+    "all_risk": true,
     "fico": 0,
     "tib": 0,
     "rev": 0,
@@ -2051,7 +2088,7 @@
     "support_phone": "",
     "source_url": "https://rapidfinance.com/help-center/faqs/",
     "source_snippet": "*Small Business Financial Solutions, LLC offers term loans and lines of credit (pursuant to its California Lenders License No. 603-I855) and factoring in California. Small Business Financial Solutions, LLC and Rapid Financial Services, LLC offer term loans, lines of credit and factoring outside of California. Commercial Servicing Company, LLC arranges term loans and lines of credit in California (pursuant to its California Finance Lenders License No. 603-J299) and arranges term loans, SBA loans, lines of credit, factoring, asset-based loans, commercial real estate loans and business credit cards outside of California. Description: Small Business Loans and Financing up to $500k",
-    "logo_url": "public/assets/lenders/rapid_finance.svg",
+    "logo_url": "public/assets/lenders/Rapid.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2093,6 +2130,7 @@
   {
     "id": 98,
     "name": "Fundera",
+    "all_risk": true,
     "fico": 550,
     "tib": 6,
     "rev": 5000,
@@ -2378,7 +2416,7 @@
     "support_phone": "",
     "source_url": "https://www.nationalbusinesscapital.com/partner-faq/",
     "source_snippet": "Business LoansTerm LoansBusiness Line of CreditCash Flow FinancingSubordinated DebtEquipment FinancingSeize your opportunity to grow your business and gain access to the capital you need.",
-    "logo_url": "public/assets/lenders/national_business_capital.svg",
+    "logo_url": "public/assets/lenders/National%20Business%20Capital.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2472,37 +2510,6 @@
     "source_url": "https://fundkite.com/",
     "source_snippet": "Funding Range $10K - $2M. 6 months in operation or more. $20K+ in monthly revenue. Credit score of 550 or higher. Minimum Approval Criteria: 1 Year in business, business bank account, $10K/month gross deposits, 5+ deposits per month. Our products are purchases of account receivables and are not business loans. FundKite offers Revenue-Based Financing, noting that our products are purchases of account receivables and are not business loans. Fundkite does not offer loans, it provides revenue based Financing, based on your business gross sales. Your repayment adjusts with your revenue\u2014pay more when you earn more, less when you earn less. Repayment plan based on a percentage of the business\u2019s Gross Sales, until fully repaid. No credit impact to apply. submit application and bank statements. Once final approval is made, funds will be available in your account within 24 hours. This is especially useful for businesses with variable operating expenses, such as restaurants, retail stores, construction companies, e-commerce brands, and professional service organizations. No Hidden Fees or Middlemen. Speak to Funding Expert: (877) 502-5003. Restricted Industries (link in footer).",
     "logo_url": "public/assets/lenders/fundkite.png",
-    "early_payment_discount": false,
-    "preferred_industries": [],
-    "max_funding_amount": 0,
-    "max_term_months": 0,
-    "payment_frequencies": []
-  },
-  {
-    "id": 81,
-    "name": "QuickBridge Funding, LLC",
-    "fico": 0,
-    "tib": 0,
-    "rev": 0,
-    "stacking": 0,
-    "restrictions": [],
-    "detailed_restrictions": [],
-    "products": [
-      "BLA"
-    ],
-    "updated_at": "2026-05-24 00:27:32.592963",
-    "submission_url": "",
-    "soft_pull": true,
-    "bank_verified": false,
-    "bank_statements": null,
-    "hard_collateral": false,
-    "hq_state": "CA",
-    "hq_address": "46 Discovery, Suite 200 Irvine, CA 92618",
-    "support_email": "",
-    "support_phone": "888.233.9085",
-    "source_url": "https://www.quickbridge.com/frequently-asked-questions/",
-    "source_snippet": "\u00a9 2026 QuickBridge Funding, LLC 46 Discovery, Suite 200 Irvine, CA 92618 FINANCING SOLUTIONS Small Business Loans Working Capital Loans Short Term Loans Bridge Loans Payroll Loans WHO WE SERVE Architecture Firm Loans Transportation Business Loans Healthcare Business Loans Poultry Farm Loans Gas Station Loans CONTACT US 888.233.9085 APPLY ONLINE 3. Early Payoff Discounts: QuickBridge offers special opportunities for its customers to terminate contracts early and receive a discount in the process. Early payment discount amounts and details will be provided prior to acceptance of terms and funding. Customers must pay off the balance in full, be current, and in good standing to take advantage of the discount within the time parameters. 4. No Impact on Credit Score: Your credit score helps us determine your eligibility for financing as well as your financing terms. Exploring your financing options with us does not impact your credit score. If you apply with us and we are unable to offer financing to you, we may try to match you with one of our partners to obtain financing, and they may perform a hard credit pull to determine your eligibility for financing. 5. Automatic Payments: Business product payments are withdrawn via Automatic Clearing House (ACH) Monday through Friday excluding bank holidays.",
-    "logo_url": "public/assets/lenders/quickbridge_funding_llc.svg",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2736,7 +2743,7 @@
     "support_phone": "(800) 631-2423",
     "source_url": "https://www.supergcapital.com/",
     "source_snippet": "Founded in 2008 by successful entrepreneur Darrin Ginsberg, Super G Capital has redefined ISO financing with innovative loan products. ...Our expertise lies in offering loans secured by an ISO\u2019s residual portfolio. Loan amounts range from $100,000 to $5,000,000, with flexible terms of 12 to 48 months. ...Specialized Expertise: We focus exclusively on residual-based businesses like ISOs, MSPs, VARs, and agents. Revenue-Driven Financing: Our loans are based on monthly recurring revenue... Loan Size: $100,000 to $5,000,000, Minimum monthly residual of $10,000. Terms & Timing: We offer 1 to 4 year amortizations and can fund in as little as 10 days. ...If you have questions or want to speak to a representative, please call us at (800) 631-2423. HTML snippet: <meta property=\"og:image\" content=\"https://www.supergcapital.com/wp-content/uploads/2024/02/sgf-logo-new-white.png\">",
-    "logo_url": "public/assets/lenders/superg_capital.png",
+    "logo_url": "public/assets/lenders/Super%20G.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2767,7 +2774,7 @@
     "support_phone": "",
     "source_url": "https://kalamatacapitalgroup.com/",
     "source_snippet": "lender_name: \"Kalamata Capital Group\"\nmin_fico: Estimated 550 based on 'small-medium business' and general MCA market without explicit FICO mention.\nmin_tib_months: Estimated 6 months based on 'Growing your business every day' suggesting established businesses, common for alternative lenders.\nmin_monthly_revenue: Estimated $10,000 based on 'small-medium business' and common MCA requirements.\nmax_position_stacking: Estimated 2 based on typical MCA market practices.\nrestricted_industries: No explicitly restricted industries mentioned, only 'QUALIFYING INDUSTRIES'.\nproduct_types: HTML meta description '<meta content=\"Kalamata Capital Group - Merchant Cash Advance\" name=\"description\">'\npreferred_industries: 'QUALIFYING INDUSTRIES RETAIL, WHOLESALE & ECOMMERCE MEDICAL, DENTAL & PHARMACEUTICAL TRUCKING, CONSTRUCTION & LOGISTICS RESTAURANT, HOTEL & FRANCHISES'\nlender_logo_url: '<img src=\"https://cdn.prod.website-files.com/5ddd9889a0ceb069bad95c45/64cbb1febe8cac9e217d95c4_Kalamata%20logo%20with%20TM.png\" width=\"199\" alt=\"\" class=\"logo\">'\nhq_state: 'Bethesda, Maryland'\nhq_address: '7200 Wisconsin Ave #500 Bethesda, MD 20814'\nbroker_support_phone: 'We are not currently accepting new broker relationships at this time.' Implies no specific broker support. The (800) 200-4071 number is a general contact.",
-    "logo_url": "public/assets/lenders/kalamata_capital_group.png",
+    "logo_url": "public/assets/lenders/Kalamata.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2900,6 +2907,180 @@
     "max_funding_amount": 0,
     "max_term_months": 0,
     "payment_frequencies": []
+  },
+  {
+    "id": 130,
+    "name": "Grasshopper Bank",
+    "fico": 650,
+    "tib": 12,
+    "rev": 10000,
+    "stacking": 1,
+    "restrictions": [],
+    "detailed_restrictions": [],
+    "products": ["LOC", "BLA"],
+    "updated_at": "2026-05-26 00:00:00",
+    "submission_url": "",
+    "soft_pull": false,
+    "bank_verified": false,
+    "bank_statements": null,
+    "hard_collateral": false,
+    "hq_state": "",
+    "hq_address": "",
+    "support_email": "",
+    "support_phone": "",
+    "source_url": "https://www.grasshopper.bank/",
+    "source_snippet": "",
+    "logo_url": "",
+    "early_payment_discount": false,
+    "preferred_industries": [],
+    "max_funding_amount": 0,
+    "max_term_months": 0,
+    "payment_frequencies": []
+  },
+  {
+    "id": 131,
+    "name": "Ramp",
+    "fico": 0,
+    "tib": 12,
+    "rev": 50000,
+    "stacking": 1,
+    "restrictions": [],
+    "detailed_restrictions": [],
+    "products": ["LOC"],
+    "updated_at": "2026-05-26 00:00:00",
+    "submission_url": "",
+    "soft_pull": true,
+    "bank_verified": false,
+    "bank_statements": null,
+    "hard_collateral": false,
+    "hq_state": "NY",
+    "hq_address": "",
+    "support_email": "",
+    "support_phone": "",
+    "source_url": "https://ramp.com/",
+    "source_snippet": "",
+    "logo_url": "",
+    "early_payment_discount": false,
+    "preferred_industries": [],
+    "max_funding_amount": 0,
+    "max_term_months": 0,
+    "payment_frequencies": []
+  },
+  {
+    "id": 132,
+    "name": "Cerebro Capital",
+    "fico": 650,
+    "tib": 24,
+    "rev": 15000,
+    "stacking": 1,
+    "restrictions": [],
+    "detailed_restrictions": [],
+    "products": ["BLA", "SBA", "Equipment"],
+    "updated_at": "2026-05-26 00:00:00",
+    "submission_url": "",
+    "soft_pull": false,
+    "bank_verified": false,
+    "bank_statements": null,
+    "hard_collateral": false,
+    "hq_state": "",
+    "hq_address": "",
+    "support_email": "",
+    "support_phone": "",
+    "source_url": "https://cerebrocapital.com/",
+    "source_snippet": "",
+    "logo_url": "",
+    "early_payment_discount": false,
+    "preferred_industries": [],
+    "max_funding_amount": 0,
+    "max_term_months": 0,
+    "payment_frequencies": []
+  },
+  {
+    "id": 133,
+    "name": "Live Oak Bank",
+    "fico": 650,
+    "tib": 24,
+    "rev": 20000,
+    "stacking": 1,
+    "restrictions": [],
+    "detailed_restrictions": [],
+    "products": ["BLA", "SBA"],
+    "updated_at": "2026-05-26 00:00:00",
+    "submission_url": "",
+    "soft_pull": false,
+    "bank_verified": false,
+    "bank_statements": null,
+    "hard_collateral": false,
+    "hq_state": "NC",
+    "hq_address": "",
+    "support_email": "",
+    "support_phone": "",
+    "source_url": "https://www.liveoakbank.com/",
+    "source_snippet": "",
+    "logo_url": "",
+    "early_payment_discount": false,
+    "preferred_industries": [],
+    "max_funding_amount": 0,
+    "max_term_months": 0,
+    "payment_frequencies": []
+  },
+  {
+    "id": 134,
+    "name": "NewTek",
+    "fico": 600,
+    "tib": 24,
+    "rev": 10000,
+    "stacking": 1,
+    "restrictions": [],
+    "detailed_restrictions": [],
+    "products": ["LOC", "BLA", "SBA", "Equipment"],
+    "updated_at": "2026-05-26 00:00:00",
+    "submission_url": "",
+    "soft_pull": false,
+    "bank_verified": false,
+    "bank_statements": null,
+    "hard_collateral": false,
+    "hq_state": "NY",
+    "hq_address": "",
+    "support_email": "",
+    "support_phone": "",
+    "source_url": "https://www.newtekbusiness.com/",
+    "source_snippet": "",
+    "logo_url": "",
+    "early_payment_discount": false,
+    "preferred_industries": [],
+    "max_funding_amount": 0,
+    "max_term_months": 0,
+    "payment_frequencies": []
+  },
+  {
+    "id": 135,
+    "name": "Vanguard Equities",
+    "fico": 500,
+    "tib": 6,
+    "rev": 10000,
+    "stacking": 1,
+    "restrictions": [],
+    "detailed_restrictions": [],
+    "products": ["MCA", "BLA"],
+    "updated_at": "2026-05-26 00:00:00",
+    "submission_url": "",
+    "soft_pull": false,
+    "bank_verified": false,
+    "bank_statements": null,
+    "hard_collateral": false,
+    "hq_state": "",
+    "hq_address": "",
+    "support_email": "",
+    "support_phone": "",
+    "source_url": "https://vanguardequities.com/",
+    "source_snippet": "",
+    "logo_url": "",
+    "early_payment_discount": false,
+    "preferred_industries": [],
+    "max_funding_amount": 0,
+    "max_term_months": 0,
+    "payment_frequencies": []
   }
 ];
 
@@ -2931,6 +3112,12 @@
     return { label: 'High Risk', dot: 'red', code: 'high' };
   };
 
+  // Wraps determineRisk; marketplace/broker lenders marked all_risk:true serve all borrower tiers
+  const getLenderRisk = (lender) => {
+    if (lender.all_risk) return { label: 'All Risk Tiers', dot: 'gray', code: 'allrisk' };
+    return determineRisk(lender.fico, lender.products);
+  };
+
   // Sort icon SVGs
   const SORT_ICON_DEFAULT = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M3 9l4-4 4 4M7 5v14M13 15l4 4 4-4M17 5v14"/></svg>`;
   const SORT_ICON_UP    = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
@@ -2941,6 +3128,7 @@
     search: '',
     risk: 'all',
     product: 'all',
+    pos: 'all',
     fico: 0,
     tib: 0,
     rev: 0,
@@ -2959,6 +3147,7 @@
   const riskButtons = document.querySelectorAll('#risk-group .chip-btn');
   const productButtons = document.querySelectorAll('#product-group .chip-btn');
   const signalButtons = document.querySelectorAll('#signals-group .chip-btn');
+  const posButtons = document.querySelectorAll('#pos-group .chip-btn');
   const ficoSlider = document.getElementById('fico-range');
   const ficoVal = document.getElementById('fico-val');
   const tibSlider = document.getElementById('tib-range');
@@ -3011,13 +3200,20 @@
         if (!matchesName && !matchesState && !matchesRest) return false;
       }
 
-      // Risk category — 'nofico' is treated as 'low' for filter purposes
-      const risk = determineRisk(l.fico, l.products);
+      // Risk category — 'nofico' is treated as 'low'; 'allrisk' always passes
+      const risk = getLenderRisk(l);
       const filterCode = risk.code === 'nofico' ? 'low' : risk.code;
-      if (activeFilters.risk !== 'all' && filterCode !== activeFilters.risk) return false;
+      if (activeFilters.risk !== 'all' && filterCode !== activeFilters.risk && risk.code !== 'allrisk') return false;
 
       // Product Type
       if (activeFilters.product !== 'all' && !l.products.includes(activeFilters.product)) return false;
+
+      // Position # — filter out lenders whose stacking limit is below the required position
+      // stacking=0 (TBD) and stacking=999 (unlimited) always pass
+      if (activeFilters.pos !== 'all') {
+        const pos = parseInt(activeFilters.pos);
+        if (l.stacking !== 0 && l.stacking !== 999 && l.stacking < pos) return false;
+      }
 
       // Numeric thresholds (Min requirements must be <= selected slider filter value)
       // If slider is 0, we treat it as 'Any' (ignore restriction)
@@ -3060,9 +3256,9 @@
           valA = a.restrictions.join(', ').toLowerCase();
           valB = b.restrictions.join(', ').toLowerCase();
         } else if (sortColumn === 'risk') {
-          const rankMap = { 'nofico': 0, 'low': 1, 'mod': 2, 'high': 3 };
-          valA = rankMap[determineRisk(a.fico, a.products).code] ?? 1;
-          valB = rankMap[determineRisk(b.fico, b.products).code] ?? 1;
+          const rankMap = { 'nofico': 0, 'allrisk': 0, 'low': 1, 'mod': 2, 'high': 3 };
+          valA = rankMap[getLenderRisk(a).code] ?? 1;
+          valB = rankMap[getLenderRisk(b).code] ?? 1;
           // tiebreak alphabetically within same tier
           if (valA === valB) {
             return a.name.localeCompare(b.name) * (sortDirection === 'asc' ? 1 : -1);
@@ -3127,7 +3323,7 @@
         restrictionsHtml = `<span class="lp-tbd">—</span>`;
       }
 
-      const risk = determineRisk(lender.fico, lender.products);
+      const risk = getLenderRisk(lender);
 
       // Create Mini Badges
       let badgesHtml = '';
@@ -3164,7 +3360,15 @@
         <td class="num-col">${lender.fico === 0 ? '<span class="lp-tbd">—</span>' : lender.fico}</td>
         <td class="num-col">${lender.tib === 0 ? '<span class="lp-tbd">—</span>' : lender.tib}</td>
         <td class="num-col">${formatCurrency(lender.rev)}</td>
-        <td class="num-col">${lender.stacking === 999 ? 'Unlimited' : (lender.stacking === 0 ? '<span class="lp-tbd">—</span>' : lender.stacking)}</td>
+        <td class="num-col">${(() => {
+          if (lender.stacking === 999) return 'Unlimited';
+          if (lender.stacking === 0) return '<span class="lp-tbd">—</span>';
+          const posFilter = activeFilters.pos !== 'all' ? parseInt(activeFilters.pos) : null;
+          if (posFilter && lender.stacking === posFilter) {
+            return `<span class="lp-at-limit">${lender.stacking}<span class="lp-at-limit-badge">max</span></span>`;
+          }
+          return lender.stacking;
+        })()}</td>
         <td>${restrictionsHtml}</td>
       `;
 
@@ -3393,6 +3597,17 @@
     });
   });
 
+  // Position chips (exclusive)
+  posButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      posButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilters.pos = btn.dataset.pos;
+      localStorage.setItem('lp_pos_filter', activeFilters.pos);
+      renderTable();
+    });
+  });
+
   // Sliders
   ficoSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value);
@@ -3433,6 +3648,11 @@
     activeFilters.bankVerify = false;
     activeFilters.noCollateral = false;
 
+    posButtons.forEach(b => b.classList.remove('active'));
+    posButtons[0].classList.add('active');
+    activeFilters.pos = 'all';
+    localStorage.removeItem('lp_pos_filter');
+
     ficoSlider.value = 0;
     activeFilters.fico = 0;
     ficoVal.textContent = '300';
@@ -3463,7 +3683,7 @@
     });
   });
 
-  // Row expand/collapse
+  // Row expand/collapse on click
   tbody.addEventListener('click', (e) => {
     const tr = e.target.closest('.lp-row-interactive');
     if (!tr) return;
@@ -3471,6 +3691,31 @@
     const lenderId = parseInt(tr.dataset.id);
     expandedLenderId = expandedLenderId === lenderId ? null : lenderId;
     renderTable();
+  });
+
+  // Hover to auto-expand after ~900ms
+  let hoverTimer = null;
+  let currentHoverId = null;
+
+  tbody.addEventListener('mouseover', (e) => {
+    const tr = e.target.closest('.lp-row-interactive');
+    if (!tr) return;
+    const id = parseInt(tr.dataset.id);
+    if (id === currentHoverId) return;
+    currentHoverId = id;
+    clearTimeout(hoverTimer);
+    if (expandedLenderId === id) return;
+    hoverTimer = setTimeout(() => {
+      expandedLenderId = id;
+      currentHoverId = null;
+      renderTable();
+    }, 900);
+  });
+
+  tbody.addEventListener('mouseleave', () => {
+    clearTimeout(hoverTimer);
+    hoverTimer = null;
+    currentHoverId = null;
   });
 
   // Submit a Lender modal
@@ -3522,7 +3767,18 @@
     });
   });
 
-  // Initial render
+  // Initial render — seed position filter from URL param (?pos=N) or localStorage
+  (() => {
+    const urlPos = new URLSearchParams(window.location.search).get('pos');
+    const stored = localStorage.getItem('lp_pos_filter');
+    const seed = urlPos || stored;
+    if (seed && seed !== 'all' && ['1','2','3','4'].includes(seed)) {
+      activeFilters.pos = seed;
+      posButtons.forEach(b => {
+        b.classList.toggle('active', b.dataset.pos === seed);
+      });
+    }
+  })();
   renderFooterCount();
   updateSortIndicators();
   renderTable();

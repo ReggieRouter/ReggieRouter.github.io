@@ -636,10 +636,20 @@
             </div>
 
             <div class="lp-results">
+                <div id="wf-context" style="display:none; font-size:12px; color:#475569; background:#f8fafc; border:1px solid #e5e7eb; border-radius:8px; padding:8px 12px; margin-bottom:12px; display:none;">
+                    <span id="wf-context-text"></span>
+                    <a href="../waterfall.html" style="margin-left:8px; color:var(--lp-green); font-weight:700; text-decoration:none; font-size:12px;">Edit filter →</a>
+                </div>
                 <div id="verdict" class="verdict">
                     <div class="verdict-eyebrow" id="verdict_eyebrow">Position risk</div>
                     <div class="verdict-headline" id="verdict_headline">—</div>
                     <div class="verdict-sub" id="verdict_sub"></div>
+                </div>
+                <div id="wf-cta" style="display:none; margin-top:-8px; margin-bottom:16px;">
+                    <a id="wf-cta-link" href="../waterfall.html" style="display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; font-weight:700; color:var(--lp-green); text-decoration:none; border:1.5px solid var(--lp-green); padding:10px 14px; border-radius:10px; background:var(--lp-green-light); transition:all 0.15s;">
+                        <span id="wf-cta-label">View eligible lenders in waterfall</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
                 </div>
 
                 <div class="hero-grid">
@@ -997,6 +1007,20 @@
         setVerdictColor(box, head, sub, eyebrow, band);
         head.textContent = headline;
         sub.textContent = note;
+
+        // Sync position to waterfall CTA + localStorage
+        const posParam = posNum >= 4 ? '4' : String(posNum);
+        localStorage.setItem('lp_pos_filter', posParam);
+        const ctaEl = document.getElementById('wf-cta');
+        const ctaLink = document.getElementById('wf-cta-link');
+        const ctaLabel = document.getElementById('wf-cta-label');
+        if (ctaEl && ctaLink) {
+            ctaEl.style.display = 'block';
+            ctaLink.href = `../waterfall.html?pos=${posParam}`;
+            const ordinals = ['', '1st', '2nd', '3rd', '4th+'];
+            const posLabel = posNum >= 4 ? '4th+' : (ordinals[posNum] || posNum + 'th');
+            ctaLabel.textContent = `View lenders that allow a ${posLabel} position →`;
+        }
     }
 
     function setVerdictColor(box, head, sub, eyebrow, band) {
@@ -1061,6 +1085,20 @@
         }
         if (window.self !== window.top) {
             document.body.classList.add('is-embedded');
+        }
+        // Show context note if the waterfall has an active position filter set
+        const storedPos = localStorage.getItem('lp_pos_filter');
+        if (storedPos && storedPos !== 'all') {
+            const ordinals = ['', '1st', '2nd', '3rd', '4th+'];
+            const posNum = parseInt(storedPos);
+            const label = posNum >= 4 ? '4th+' : (ordinals[posNum] || posNum + 'th');
+            const ctxEl = document.getElementById('wf-context');
+            const ctxText = document.getElementById('wf-context-text');
+            if (ctxEl && ctxText) {
+                ctxText.textContent = `Waterfall is filtered to ${label} position.`;
+                ctxEl.style.display = 'flex';
+                ctxEl.style.alignItems = 'center';
+            }
         }
     };
 </script>
