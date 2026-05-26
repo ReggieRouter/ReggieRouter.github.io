@@ -991,63 +991,28 @@
     border: 1px solid #D1D5DB;
     background: none;
     color: #9CA3AF;
-    font-size: 9px;
-    font-weight: 700;
-    font-style: italic;
-    font-family: Georgia, serif;
+    font-size: 10px;
+    font-weight: 600;
+    font-style: normal;
+    font-family: var(--font-stack);
     cursor: pointer;
     line-height: 1;
     padding: 0;
-    transition: border-color 0.15s, color 0.15s;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
     flex-shrink: 0;
     vertical-align: middle;
   }
-  .lp-info-btn:hover, .lp-info-btn.active {
+  .lp-info-btn:hover {
     border-color: var(--color-brand-mid);
     color: var(--color-brand-mid);
+    background: #F0FDF4;
   }
 
-  /* Info popover */
   .lp-info-wrap {
-    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 5px;
   }
-  .lp-info-popover {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    width: 260px;
-    background: #FFFFFF;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 12px 14px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    z-index: 300;
-    display: none;
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--color-text-secondary);
-  }
-  .lp-info-popover.open { display: block; }
-  .lp-info-popover strong {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--color-text-primary);
-    margin-bottom: 6px;
-  }
-  .lp-info-popover dl { margin: 0; }
-  .lp-info-popover dt {
-    font-weight: 600;
-    color: var(--color-text-primary);
-    font-size: 11.5px;
-    margin-top: 5px;
-  }
-  .lp-info-popover dd { margin: 0 0 3px 0; }
 
   /* Product badge tooltip */
   .badge-product {
@@ -1152,12 +1117,7 @@
       <div class="lp-chip-row">
         <span class="lp-chip-label">
           <span class="lp-info-wrap">Risk band
-            <button class="lp-info-btn" data-popover="risk" aria-label="What is Risk Band?">i
-              <div class="lp-info-popover" id="popover-risk">
-                <strong>Risk Band</strong>
-                Derived from minimum credit score and product type. Low = 600+ FICO on traditional products. Moderate = 500–599, or MCA with strong credit. High = below 500, or MCA-only lenders regardless of FICO.
-              </div>
-            </button>
+            <button class="lp-info-btn" data-modal="info-risk" aria-label="About Risk Band">i</button>
           </span>
         </span>
         <div class="lp-chip-group" id="risk-group">
@@ -1172,18 +1132,7 @@
       <div class="lp-chip-row">
         <span class="lp-chip-label">
           <span class="lp-info-wrap">Product
-            <button class="lp-info-btn" data-popover="product" aria-label="Product type definitions">i
-              <div class="lp-info-popover" id="popover-product">
-                <strong>Product Types</strong>
-                <dl>
-                  <dt>LOC</dt><dd>Line of Credit — revolving facility, draw as needed.</dd>
-                  <dt>MCA</dt><dd>Merchant Cash Advance — revenue-based advance, not a loan. Repaid via daily/weekly split of deposits.</dd>
-                  <dt>BLA</dt><dd>Business Term Loan — fixed repayment schedule, typically 6–36 months.</dd>
-                  <dt>Equipment</dt><dd>Equipment Financing — asset-secured loan for machinery or vehicles.</dd>
-                  <dt>SBA</dt><dd>SBA Loan — government-backed, lower rates, longer terms up to 25 years.</dd>
-                </dl>
-              </div>
-            </button>
+            <button class="lp-info-btn" data-modal="info-product" aria-label="About Product Types">i</button>
           </span>
         </span>
         <div class="lp-chip-group" id="product-group">
@@ -1200,16 +1149,7 @@
       <div class="lp-chip-row">
         <span class="lp-chip-label">
           <span class="lp-info-wrap">Signals
-            <button class="lp-info-btn" data-popover="signals" aria-label="What are Signals?">i
-              <div class="lp-info-popover" id="popover-signals">
-                <strong>Lender Signals</strong>
-                <dl>
-                  <dt>Soft pull</dt><dd>Pre-qualification uses a soft inquiry — no impact to the borrower's credit score.</dd>
-                  <dt>Bank verified</dt><dd>Lender verifies statements via open banking (Plaid/Finicity) rather than PDF uploads.</dd>
-                  <dt>No hard collateral</dt><dd>No real estate, equipment, or major assets required as security.</dd>
-                </dl>
-              </div>
-            </button>
+            <button class="lp-info-btn" data-modal="info-signals" aria-label="About Signals">i</button>
           </span>
         </span>
         <div class="lp-chip-group" id="signals-group">
@@ -1335,6 +1275,86 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           info@lendpaper.com
         </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Info Modal: Risk Band -->
+<div class="lp-modal-backdrop" id="info-risk-backdrop">
+  <div class="lp-modal" style="max-width:480px;">
+    <button class="lp-modal-close" data-close="info-risk-backdrop">&times;</button>
+    <h3 class="lp-modal-title" style="margin-bottom:16px;">Risk Band</h3>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">Risk is calculated from minimum personal credit score required and product type. MCA products automatically raise risk by one tier.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#EFF6FF;border:1px solid #BFDBFE;">
+        <span style="width:10px;height:10px;border-radius:50%;background:#3B82F6;flex-shrink:0;margin-top:4px;"></span>
+        <div><div style="font-weight:600;font-size:13px;color:#1D4ED8;margin-bottom:3px;">No FICO Required</div><div style="font-size:12px;color:#1E40AF;">Lender does not require a minimum personal credit score. Typically revenue-based underwriting only.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#F0FDF4;border:1px solid #A7F3D0;">
+        <span style="width:10px;height:10px;border-radius:50%;background:#16A34A;flex-shrink:0;margin-top:4px;"></span>
+        <div><div style="font-weight:600;font-size:13px;color:#15803D;margin-bottom:3px;">Low Risk Band</div><div style="font-size:12px;color:#166534;">600+ personal credit score, non-MCA products. Traditional underwriting with strong applicant profile.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FFFBEB;border:1px solid #FDE68A;">
+        <span style="width:10px;height:10px;border-radius:50%;background:#EAB308;flex-shrink:0;margin-top:4px;"></span>
+        <div><div style="font-weight:600;font-size:13px;color:#A16207;margin-bottom:3px;">Moderate Risk</div><div style="font-size:12px;color:#854D0E;">500–599 credit score, or 600+ score with MCA product. Expect higher factor rates and tighter stacking limits.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FEF2F2;border:1px solid #FECACA;">
+        <span style="width:10px;height:10px;border-radius:50%;background:#DC2626;flex-shrink:0;margin-top:4px;"></span>
+        <div><div style="font-weight:600;font-size:13px;color:#DC2626;margin-bottom:3px;">High Risk</div><div style="font-size:12px;color:#B91C1C;">Below 500 credit score, or MCA-only lender with sub-600 FICO threshold. Heavy verification, higher cost of capital, limited stacking.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Info Modal: Product Types -->
+<div class="lp-modal-backdrop" id="info-product-backdrop">
+  <div class="lp-modal" style="max-width:500px;">
+    <button class="lp-modal-close" data-close="info-product-backdrop">&times;</button>
+    <h3 class="lp-modal-title" style="margin-bottom:16px;">Product Types</h3>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#F5F3FF;border:1px solid #DDD6FE;">
+        <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#F3E8FF;color:#7E22CE;border:1px solid #E9D5FF;flex-shrink:0;margin-top:1px;">LOC</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:2px;">Line of Credit</div><div style="font-size:12px;color:var(--color-text-secondary);">Revolving credit facility — draw, repay, and draw again up to the approved limit. Interest on drawn balance only.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#F0F9FF;border:1px solid #BAE6FD;">
+        <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#E0F2FE;color:#0369A1;border:1px solid #BAE6FD;flex-shrink:0;margin-top:1px;">MCA</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:2px;">Merchant Cash Advance</div><div style="font-size:12px;color:var(--color-text-secondary);">Revenue-based advance, not a loan. Repaid via a daily or weekly split of bank deposits. No fixed term — payoff speed ties to revenue.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#F0FDFA;border:1px solid #CCFBF1;">
+        <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#E6FFFA;color:#0D9488;border:1px solid #CCFBF1;flex-shrink:0;margin-top:1px;">BLA</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:2px;">Business Term Loan</div><div style="font-size:12px;color:var(--color-text-secondary);">Fixed repayment schedule with set daily or weekly ACH payments. Typically 6–36 month terms.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FFF7ED;border:1px solid #FED7AA;">
+        <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#FFEDD5;color:#C2410C;border:1px solid #FED7AA;flex-shrink:0;margin-top:1px;">EQP</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:2px;">Equipment Financing</div><div style="font-size:12px;color:var(--color-text-secondary);">Asset-secured loan for machinery, vehicles, or equipment. The financed asset serves as collateral — often lower rates than unsecured products.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FEFCE8;border:1px solid #FEF08A;">
+        <span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:#FEF9C3;color:#A16207;border:1px solid #FEF08A;flex-shrink:0;margin-top:1px;">SBA</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:2px;">SBA Loan</div><div style="font-size:12px;color:var(--color-text-secondary);">Government-backed loan. Longer terms (up to 25 years), lower rates, but slower approval and stricter qualification.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Info Modal: Signals -->
+<div class="lp-modal-backdrop" id="info-signals-backdrop">
+  <div class="lp-modal" style="max-width:460px;">
+    <button class="lp-modal-close" data-close="info-signals-backdrop">&times;</button>
+    <h3 class="lp-modal-title" style="margin-bottom:16px;">Lender Signals</h3>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">Signals highlight lender-specific traits that affect the borrower experience. Filter by one or more to narrow the waterfall.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#EEF2FF;border:1px solid #C7D2FE;">
+        <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#EEF2FF;color:#4F46E5;border:1px solid #C7D2FE;flex-shrink:0;text-transform:uppercase;margin-top:2px;">SOFT PULL</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:3px;">Soft Credit Pull</div><div style="font-size:12px;color:var(--color-text-secondary);">Pre-qualification uses a soft inquiry — no impact to the borrower's personal credit score. Hard pull may still occur at funding.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#ECFDF5;border:1px solid #A7F3D0;">
+        <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;flex-shrink:0;text-transform:uppercase;margin-top:2px;">BANK VFD</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:3px;">Bank Verified</div><div style="font-size:12px;color:var(--color-text-secondary);">Lender verifies statements via open banking (Plaid, Finicity, or similar) instead of PDF uploads — faster review, fewer stips.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FFF5F5;border:1px solid #FECACA;">
+        <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#FFF5F5;color:#E11D48;border:1px solid #FECACA;flex-shrink:0;text-transform:uppercase;margin-top:2px;">NO COLL</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:3px;">No Hard Collateral</div><div style="font-size:12px;color:var(--color-text-secondary);">No real estate, equipment, or major assets pledged as security. Typically UCC blanket lien only — lower barrier for borrowers.</div></div>
       </div>
     </div>
   </div>
@@ -3019,8 +3039,9 @@
           valA = a.restrictions.join(', ').toLowerCase();
           valB = b.restrictions.join(', ').toLowerCase();
         } else if (sortColumn === 'risk') {
-          valA = a.fico; // sort risk by fico
-          valB = b.fico;
+          const rankMap = { 'low': 0, 'mod': 1, 'high': 2 };
+          valA = rankMap[determineRisk(a.fico, a.products).code] ?? 0;
+          valB = rankMap[determineRisk(b.fico, b.products).code] ?? 0;
         }
 
         if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
@@ -3453,31 +3474,27 @@
     icon.classList.toggle('open', !isOpen);
   });
 
-  // Info popover toggle
-  let activePopover = null;
-  document.querySelectorAll('.lp-info-btn').forEach(btn => {
+  // Info modal open
+  document.querySelectorAll('.lp-info-btn[data-modal]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = 'popover-' + btn.dataset.popover;
-      const popover = document.getElementById(id);
-      if (!popover) return;
-      const isOpen = popover.classList.contains('open');
-      // close any open popover
-      if (activePopover && activePopover !== popover) {
-        activePopover.classList.remove('open');
-        activePopover.closest('.lp-info-btn')?.classList.remove('active');
-      }
-      popover.classList.toggle('open', !isOpen);
-      btn.classList.toggle('active', !isOpen);
-      activePopover = !isOpen ? popover : null;
+      const backdrop = document.getElementById(btn.dataset.modal + '-backdrop');
+      if (backdrop) backdrop.classList.add('open');
     });
   });
-  document.addEventListener('click', () => {
-    if (activePopover) {
-      activePopover.classList.remove('open');
-      activePopover.closest('.lp-info-btn')?.classList.remove('active');
-      activePopover = null;
-    }
+
+  // Info modal close — close button or backdrop click
+  document.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const backdrop = document.getElementById(el.dataset.close);
+      if (backdrop) backdrop.classList.remove('open');
+    });
+  });
+  document.querySelectorAll('#info-risk-backdrop, #info-product-backdrop, #info-signals-backdrop').forEach(backdrop => {
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) backdrop.classList.remove('open');
+    });
   });
 
   // Initial render
