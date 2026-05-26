@@ -24,6 +24,9 @@ the wordmark in mixed weight (bold "lend", regular "paper") with a period.
 "Scenario Modeling Engine" — appears as a subordinate descriptor beneath the
 wordmark on generated documents. Not required on all surfaces.
 
+### LendPaper Fit
+**Perfect.** Lean sales and underwriting desks are facing crushing transaction volumes. They are actively hunting for tools to eliminate manual calculation errors, speed up deal structuring, and maximize throughput per employee without adding W2 overhead.
+
 ---
 
 ## 2. Color System

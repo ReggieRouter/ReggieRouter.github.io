@@ -258,8 +258,9 @@
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
-    padding-top: 12px;
-    border-top: 1px dashed var(--color-border);
+    padding-top: 16px;
+    margin-top: 4px;
+    border-top: 1px solid var(--color-border);
     align-items: center;
     justify-content: space-between;
   }
@@ -312,21 +313,18 @@
   .reset-btn {
     background: none;
     border: none;
-    color: var(--color-brand-mid);
+    color: var(--color-text-secondary);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 10px 0;
-    justify-content: flex-end;
-    width: 100%;
-    text-align: right;
+    text-decoration: underline;
+    display: inline-block;
+    padding: 0;
+    width: auto;
+    transition: color 0.15s ease;
   }
   .reset-btn:hover {
     color: var(--color-brand-dark);
-    text-decoration: underline;
   }
 
   /* Table Framework */
@@ -335,12 +333,14 @@
     border: 1px solid var(--color-border);
     border-radius: 8px;
     margin-bottom: 24px;
+    position: relative;
   }
 
   .lp-data-table {
     width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12.5px;
     text-align: left;
   }
 
@@ -348,7 +348,7 @@
     background: var(--color-brand-dark);
     color: #FFFFFF;
     font-weight: 600;
-    padding: 12px 14px;
+    padding: 10px 12px;
     white-space: nowrap;
     cursor: pointer;
     user-select: none;
@@ -365,9 +365,26 @@
   }
 
   .lp-data-table td {
-    padding: 14px 14px;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--color-border);
     vertical-align: middle;
+    background-color: #FFFFFF;
+  }
+
+  /* Sticky First Column */
+  .lp-data-table th:first-child,
+  .lp-data-table td.lp-sticky-col {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.08);
+  }
+  .lp-data-table th:first-child {
+    z-index: 11;
+    background-color: var(--color-brand-dark) !important;
+  }
+  .lp-data-table td.lp-sticky-col {
+    background-color: #FFFFFF;
   }
 
   .lp-row-interactive {
@@ -375,11 +392,17 @@
     transition: background-color 0.2s;
   }
   .lp-row-interactive:hover {
-    background-color: rgba(45, 106, 79, 0.05) !important;
+    background-color: #F0FDF4 !important; /* light green tint consistent with the calc */
+  }
+  .lp-row-interactive:hover td {
+    background-color: #F0FDF4 !important;
   }
 
   .lp-row-highlight {
     background-color: var(--color-brand-light);
+  }
+  .lp-row-highlight td {
+    background-color: #EDFDF5; /* Solid equivalent for the light green row highlight */
   }
 
   .lp-lender-cell {
@@ -521,15 +544,23 @@
   /* Collapsible Details Drawer Styling */
   .detail-row {
     display: none;
-    background-color: #F9FAFB;
   }
   .detail-row.expanded {
     display: table-row;
   }
+  .detail-row td {
+    padding: 0 !important;
+    background-color: transparent !important;
+    border-bottom: 1px solid var(--color-border);
+  }
 
   .lp-detail-drawer {
     padding: 24px;
-    border-bottom: 1px solid var(--color-border);
+    margin: 12px 14px 20px 14px;
+    background-color: #F0FDF4; /* Light green tint matching --brand-tint from Payment Breakdown calc */
+    border: 1px solid rgba(45, 106, 79, 0.12);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.03);
     animation: slideDown 0.25s ease-out;
   }
 
@@ -657,69 +688,155 @@
     color: #14532D;
   }
 
-  /* Floating Action Button */
+  /* Floating Action Button (Pill style CTA) */
   .lp-fab {
     position: fixed;
     bottom: 28px;
     right: 28px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--color-brand-mid);
+    height: 40px;
+    padding: 0 18px;
+    border-radius: 20px;
+    background: var(--color-brand-dark);
     color: #FFFFFF;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 14px rgba(45, 106, 79, 0.35);
+    gap: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 14px rgba(26, 60, 46, 0.35);
     z-index: 200;
-    transition: transform 0.15s, box-shadow 0.15s;
+    transition: transform 0.15s, box-shadow 0.15s, background-color 0.15s;
   }
   .lp-fab:hover {
-    transform: scale(1.08);
-    box-shadow: 0 6px 18px rgba(45, 106, 79, 0.45);
+    transform: scale(1.05);
+    box-shadow: 0 6px 18px rgba(26, 60, 46, 0.45);
+    background: #11281E;
   }
-  .lp-fab-popup {
+
+  /* Premium Modal CSS */
+  .lp-modal-backdrop {
     position: fixed;
-    bottom: 90px;
-    right: 28px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .lp-modal-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .lp-modal {
     background: #FFFFFF;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    padding: 16px 18px;
-    width: 270px;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.10);
-    z-index: 199;
-    display: none;
-    animation: slideDown 0.2s ease-out;
+    border-radius: 16px;
+    padding: 32px;
+    width: 90%;
+    max-width: 440px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    position: relative;
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .lp-fab-popup.open {
-    display: block;
+  .lp-modal-backdrop.open .lp-modal {
+    transform: translateY(0) scale(1);
   }
-  .lp-fab-popup-title {
-    font-weight: 700;
-    font-size: 13px;
-    color: var(--color-text-primary);
-    margin-bottom: 6px;
-  }
-  .lp-fab-popup-desc {
-    font-size: 12px;
+  .lp-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
     color: var(--color-text-secondary);
-    line-height: 1.5;
-    margin-bottom: 12px;
+    cursor: pointer;
+    line-height: 1;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, color 0.2s;
   }
-  .lp-fab-popup a {
+  .lp-modal-close:hover {
+    background-color: var(--color-bg-main);
+    color: var(--color-text-primary);
+  }
+  .lp-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .lp-modal-logo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background-color: var(--color-brand-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lp-modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-brand-dark);
+    margin: 0;
+  }
+  .lp-modal-desc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0 0 24px 0;
+  }
+  .lp-modal-action-box {
+    background-color: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .action-box-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+  .lp-modal-email-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    color: var(--color-brand-mid);
-    font-weight: 600;
-    font-size: 12.5px;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 44px;
+    background-color: var(--color-brand-dark);
+    color: #FFFFFF;
     text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(26, 60, 46, 0.15);
   }
-  .lp-fab-popup a:hover {
-    text-decoration: underline;
+  .lp-modal-email-btn:hover {
+    background-color: #11281E;
+    transform: translateY(-1px);
+    color: #FFFFFF;
   }
 
   /* Legal Disclaimer Panel */
@@ -789,9 +906,11 @@
 
 <div class="lendpaper-container">
   <header class="lp-doc-header">
-    <div class="lp-wordmark">
-      <span class="lp-glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/><path d="M9 9v6"/><path d="M9 15h4"/></svg></span><span class="lp-text-bold">lend</span><span class="lp-text-reg">paper</span><span class="lp-period">.</span>
-    </div>
+    <a href="https://lendpaper.com/waterfall" style="text-decoration: none; display: inline-block;">
+      <div class="lp-wordmark">
+        <span class="lp-glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/><path d="M9 9v6"/><path d="M9 15h4"/></svg></span><span class="lp-text-bold">lend</span><span class="lp-text-reg">paper</span><span class="lp-period">.</span>
+      </div>
+    </a>
     <div class="lp-tagline">Scenario Modeling Engine</div>
   </header>
 
@@ -818,7 +937,13 @@
         <div class="lp-filter-group">
           <span class="lp-filter-label">Client FICO Score</span>
           <div class="range-box">
-            <input type="range" id="fico-range" class="range-slider" min="0" max="700" step="25" value="0">
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <input type="range" id="fico-range" class="range-slider" min="0" max="700" step="25" value="0">
+              <div class="range-limits" style="display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted); padding: 0 2px;">
+                <span>300</span>
+                <span>850</span>
+              </div>
+            </div>
             <span class="range-value" id="fico-val">Any</span>
           </div>
         </div>
@@ -827,7 +952,13 @@
         <div class="lp-filter-group">
           <span class="lp-filter-label">Months in Business</span>
           <div class="range-box">
-            <input type="range" id="tib-range" class="range-slider" min="0" max="24" step="1" value="0">
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <input type="range" id="tib-range" class="range-slider" min="0" max="24" step="1" value="0">
+              <div class="range-limits" style="display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted); padding: 0 2px;">
+                <span>0 mo</span>
+                <span>24 mo</span>
+              </div>
+            </div>
             <span class="range-value" id="tib-val">Any</span>
           </div>
         </div>
@@ -836,7 +967,13 @@
         <div class="lp-filter-group">
           <span class="lp-filter-label">Monthly Revenue</span>
           <div class="range-box">
-            <input type="range" id="rev-range" class="range-slider" min="0" max="50000" step="2500" value="0">
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+              <input type="range" id="rev-range" class="range-slider" min="0" max="50000" step="2500" value="0">
+              <div class="range-limits" style="display: flex; justify-content: space-between; font-size: 10px; color: var(--color-text-muted); padding: 0 2px;">
+                <span>$0</span>
+                <span>$50,000+</span>
+              </div>
+            </div>
             <span class="range-value" id="rev-val">Any</span>
           </div>
         </div>
@@ -886,14 +1023,12 @@
             <span class="checkbox-box"></span>
             No Hard Collateral Required
           </label>
-        </div>
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <div id="results-count" style="font-size: 12px; font-weight: 600; color: var(--color-text-secondary);"></div>
-          <button id="reset-filters" class="reset-btn" style="width: auto; padding: 0;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2v6h6M21.5 22v-6h-6"></path><path d="M22 11.5A10 10 0 0 0 12.5 3 10 10 0 0 0 4 8l-1.5 2M2 12.5a10 10 0 0 0 9.5 8.5 10 10 0 0 0 8.5-5l1.5-2"></path></svg>
+          <span style="border-left: 1px solid var(--color-border); height: 16px; margin: 0 4px 0 12px; align-self: center;"></span>
+          <button id="reset-filters" class="reset-btn">
             Reset Filters
           </button>
         </div>
+        <div id="results-count" style="display: flex; flex-direction: column; align-items: flex-end;"></div>
       </div>
     </div>
 
@@ -903,12 +1038,12 @@
         <thead>
           <tr>
             <th data-col="name">Lender Name <span class="sort-indicator"></span></th>
-            <th>Product Types</th>
+            <th data-col="products">Product Types <span class="sort-indicator"></span></th>
             <th class="num-col" data-col="fico">Min FICO <span class="sort-indicator"></span></th>
             <th class="num-col" data-col="tib">Min TIB (Mo.) <span class="sort-indicator"></span></th>
             <th class="num-col" data-col="rev">Min Monthly Rev <span class="sort-indicator"></span></th>
             <th class="num-col" data-col="stacking">Max Stacking <span class="sort-indicator"></span></th>
-            <th>Restricted Industries</th>
+            <th data-col="restrictions">Restricted Industries <span class="sort-indicator"></span></th>
             <th data-col="risk">Risk Band <span class="sort-indicator"></span></th>
           </tr>
         </thead>
@@ -935,17 +1070,33 @@
   </div>
 </div>
 
-<!-- Floating Action Button -->
-<button class="lp-fab" id="fab-btn" title="Submit data corrections">
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+<!-- Floating Action Button (Pill style CTA) -->
+<button class="lp-fab" id="fab-btn" title="Submit a Lender">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+  Submit a Lender
 </button>
-<div class="lp-fab-popup" id="fab-popup">
-  <div class="lp-fab-popup-title">Data corrections &amp; submissions</div>
-  <div class="lp-fab-popup-desc">Underwriting managers can submit updated rulesets, correct guidelines, or request lender inclusion directly.</div>
-  <a href="mailto:info@lendpaper.com">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-    info@lendpaper.com
-  </a>
+
+<!-- Premium Modal Backdrop & Modal -->
+<div class="lp-modal-backdrop" id="submit-modal-backdrop">
+  <div class="lp-modal" id="submit-modal">
+    <button class="lp-modal-close" id="submit-modal-close">&times;</button>
+    <div class="lp-modal-header">
+      <div class="lp-modal-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-dark)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <h3 class="lp-modal-title">Submit a Lender</h3>
+    </div>
+    <div class="lp-modal-body">
+      <p class="lp-modal-desc">Underwriting managers and direct lenders can submit updated rulesets, correct guidelines, or request lender inclusion directly in our scenario engine.</p>
+      <div class="lp-modal-action-box">
+        <span class="action-box-label">Send underwriting guidelines to:</span>
+        <a href="mailto:info@lendpaper.com" class="lp-modal-email-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          info@lendpaper.com
+        </a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -2497,8 +2648,8 @@
     noCollateral: false
   };
 
-  let sortColumn = 'name';
-  let sortDirection = 'asc'; // 'asc' or 'desc'
+  let sortColumn = null;
+  let sortDirection = null; // null, 'asc', or 'desc'
   let expandedLenderId = null;
 
   // DOM Elements
@@ -2556,36 +2707,49 @@
     });
 
     // 2. Sort dataset
-    filtered.sort((a, b) => {
-      let valA, valB;
-      
-      if (sortColumn === 'name') {
-        valA = a.name.toLowerCase();
-        valB = b.name.toLowerCase();
-      } else if (sortColumn === 'fico') {
-        valA = a.fico;
-        valB = b.fico;
-      } else if (sortColumn === 'tib') {
-        valA = a.tib;
-        valB = b.tib;
-      } else if (sortColumn === 'rev') {
-        valA = a.rev;
-        valB = b.rev;
-      } else if (sortColumn === 'stacking') {
-        valA = a.stacking;
-        valB = b.stacking;
-      } else if (sortColumn === 'risk') {
-        valA = a.fico; // sort risk by fico
-        valB = b.fico;
-      }
+    if (sortColumn && sortDirection) {
+      filtered.sort((a, b) => {
+        let valA, valB;
+        
+        if (sortColumn === 'name') {
+          valA = a.name.toLowerCase();
+          valB = b.name.toLowerCase();
+        } else if (sortColumn === 'products') {
+          valA = a.products.join(', ').toLowerCase();
+          valB = b.products.join(', ').toLowerCase();
+        } else if (sortColumn === 'fico') {
+          valA = a.fico;
+          valB = b.fico;
+        } else if (sortColumn === 'tib') {
+          valA = a.tib;
+          valB = b.tib;
+        } else if (sortColumn === 'rev') {
+          valA = a.rev;
+          valB = b.rev;
+        } else if (sortColumn === 'stacking') {
+          valA = a.stacking;
+          valB = b.stacking;
+        } else if (sortColumn === 'restrictions') {
+          valA = a.restrictions.join(', ').toLowerCase();
+          valB = b.restrictions.join(', ').toLowerCase();
+        } else if (sortColumn === 'risk') {
+          valA = a.fico; // sort risk by fico
+          valB = b.fico;
+        }
 
-      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
-      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
 
     // Update count
-    resultsCount.textContent = `Showing ${filtered.length} Lender${filtered.length === 1 ? '' : 's'}`;
+    resultsCount.innerHTML = `
+      <div style="font-weight: 700; font-size: 13px; color: var(--color-brand-dark); text-align: right;">${filtered.length} Verified Lenders</div>
+      <div style="font-size: 11px; font-weight: 400; color: var(--color-text-secondary); margin-top: 1px; text-align: right;">
+        Coverage expanding — <a href="#" id="submit-lender-link" style="color: var(--color-brand-mid); text-decoration: underline; font-weight: 500;">submit a lender to add yours</a>
+      </div>
+    `;
 
     if (filtered.length === 0) {
       const tr = document.createElement('tr');
@@ -2651,7 +2815,7 @@
         : `<span class="lender-logo" style="background: linear-gradient(135deg, #E6FDF5, #A7F3D0);">${initials}</span>`;
 
       trMain.innerHTML = `
-        <td>
+        <td class="lp-sticky-col">
           <div class="lp-lender-cell">
             ${logoHtml}
             <div class="lp-lender-name-wrapper">
@@ -2670,7 +2834,7 @@
           <span style="display:flex; align-items:center; gap: 4px;">
             <span class="lp-status-dot ${risk.dot}"></span>
             ${risk.label}
-            <span style="margin-left: auto; font-size: 10px; color: var(--color-text-muted);">${isExpanded ? '▲' : '▼'}</span>
+            <span class="lp-expand-toggle" style="margin-left: auto; font-size: 14px; font-weight: 700; color: #14532D; transition: transform 0.2s;">${isExpanded ? '▲' : '▼'}</span>
           </span>
         </td>
       `;
@@ -2895,21 +3059,21 @@
   ficoSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value);
     activeFilters.fico = val;
-    ficoVal.textContent = val === 0 ? 'Any' : `>= ${val} FICO`;
+    ficoVal.textContent = val === 0 ? 'Any' : `${val}+`;
     renderTable();
   });
 
   tibSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value);
     activeFilters.tib = val;
-    tibVal.textContent = val === 0 ? 'Any' : `>= ${val} Mo.`;
+    tibVal.textContent = val === 0 ? 'Any' : `${val}+ Mo.`;
     renderTable();
   });
 
   revSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value);
     activeFilters.rev = val;
-    revVal.textContent = val === 0 ? 'Any' : `>= ${formatCurrency(val)}`;
+    revVal.textContent = val === 0 ? 'Any' : `${formatCurrency(val)}+`;
     renderTable();
   });
 
@@ -2972,7 +3136,12 @@
     th.addEventListener('click', () => {
       const col = th.dataset.col;
       if (sortColumn === col) {
-        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        if (sortDirection === 'asc') {
+          sortDirection = 'desc';
+        } else {
+          sortColumn = null;
+          sortDirection = null;
+        }
       } else {
         sortColumn = col;
         sortDirection = 'asc';
@@ -2985,9 +3154,11 @@
       });
 
       // Set current indicator
-      const currentIndicator = th.querySelector('.sort-indicator');
-      if (currentIndicator) {
-        currentIndicator.textContent = sortDirection === 'asc' ? '▲' : '▼';
+      if (sortColumn && sortDirection) {
+        const currentIndicator = th.querySelector('.sort-indicator');
+        if (currentIndicator) {
+          currentIndicator.textContent = sortDirection === 'asc' ? '▲' : '▼';
+        }
       }
 
       renderTable();
@@ -3011,18 +3182,37 @@
     renderTable();
   });
 
-  // Initial Sort Indicator
-  document.querySelector('[data-col="name"] .sort-indicator').textContent = '▲';
+  // Initial Sort Indicator is not set (default sort state = no sort applied)
 
-  // FAB Toggle
+  // Submit a Lender Modal Handlers
   const fabBtn = document.getElementById('fab-btn');
-  const fabPopup = document.getElementById('fab-popup');
+  const modalBackdrop = document.getElementById('submit-modal-backdrop');
+  const modalClose = document.getElementById('submit-modal-close');
+
+  const openModal = () => {
+    modalBackdrop.classList.add('open');
+  };
+
+  const closeModal = () => {
+    modalBackdrop.classList.remove('open');
+  };
+
   fabBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    fabPopup.classList.toggle('open');
+    openModal();
   });
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#fab-popup')) fabPopup.classList.remove('open');
+
+  modalClose.addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', (e) => {
+    if (e.target === modalBackdrop) closeModal();
+  });
+
+  // Modal delegation from results count
+  resultsCount.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'submit-lender-link') {
+      e.preventDefault();
+      openModal();
+    }
   });
 
   // Disclaimer Toggle

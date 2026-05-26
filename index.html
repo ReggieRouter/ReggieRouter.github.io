@@ -1063,6 +1063,10 @@ input { font-family: inherit; }
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
           Data &amp; leads<span class="nav-count" id="count-data">0</span>
         </button>
+        <button class="nav-item" data-view="waterfall" onclick="handleToolClick(event, 'waterfall')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="5" y="10" width="14" height="4" rx="1"/><rect x="7" y="17" width="10" height="4" rx="1"/></svg>
+          Lender Waterfall
+        </button>
       </div>
       <div class="nav-divider"></div>
       <div class="nav-section">
@@ -1405,6 +1409,12 @@ function openTool(t, push, urlOverride) {
     if (iframe && versionedPath) {
         // Always force a reload of the iframe content to reset state
         iframe.src = versionedPath;
+    }
+    // Highlight the sidebar item if there is one matching the tool ID
+    var tb = document.querySelector('.nav-item[data-view="'+t.id+'"]');
+    if (tb) {
+      document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+      tb.classList.add('active');
     }
   }
   
