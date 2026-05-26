@@ -1107,16 +1107,17 @@
           <div class="lp-slider-range"><span>300</span><span>850</span></div>
         </div>
         <div class="lp-slider-group">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-            <span class="lp-filter-label">Months in business</span>
+          <span class="lp-filter-label">Months in business</span>
+          <div class="lp-slider-value" id="tib-val">0 mo</div>
+          <input type="range" id="tib-range" class="range-slider" min="0" max="24" step="1" value="0">
+          <div class="lp-slider-range">
+            <span>0 mo</span>
             <a href="https://registryroute.com" target="_blank" rel="noopener" class="lp-rr-btn">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               Check in RegistryRoute
             </a>
+            <span>24 mo</span>
           </div>
-          <div class="lp-slider-value" id="tib-val">0 mo</div>
-          <input type="range" id="tib-range" class="range-slider" min="0" max="24" step="1" value="0">
-          <div class="lp-slider-range"><span>0 mo</span><span>24 mo</span></div>
         </div>
         <div class="lp-slider-group">
           <span class="lp-filter-label">Monthly revenue</span>
@@ -1158,11 +1159,11 @@
         </div>
       </div>
 
-      <!-- Features chips + Reset -->
+      <!-- Verification chips + Reset -->
       <div class="lp-chip-row">
         <span class="lp-chip-label">
-          <span class="lp-info-wrap">Features
-            <button class="lp-info-btn" data-modal="info-signals" aria-label="About Lender Features">i</button>
+          <span class="lp-info-wrap">Verification
+            <button class="lp-info-btn" data-modal="info-signals" aria-label="About Verification">i</button>
           </span>
         </span>
         <div class="lp-chip-group" id="signals-group">
@@ -1354,8 +1355,8 @@
 <div class="lp-modal-backdrop" id="info-signals-backdrop">
   <div class="lp-modal" style="max-width:460px;">
     <button class="lp-modal-close" data-close="info-signals-backdrop">&times;</button>
-    <h3 class="lp-modal-title" style="margin-bottom:16px;">Lender Features</h3>
-    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">These features highlight lender-specific traits that affect the borrower experience. Filter by one or more to narrow the waterfall.</p>
+    <h3 class="lp-modal-title" style="margin-bottom:16px;">Verification</h3>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">These traits describe how a lender verifies and qualifies applicants. Filter by one or more to narrow the waterfall.</p>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#EEF2FF;border:1px solid #C7D2FE;">
         <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#EEF2FF;color:#4F46E5;border:1px solid #C7D2FE;flex-shrink:0;text-transform:uppercase;margin-top:2px;">SOFT PULL</span>
@@ -2985,7 +2986,7 @@
       `<span style="font-weight:500;color:var(--color-text-primary);font-size:13px;">${lenderData.length}</span>` +
       `<span style="color:var(--color-text-secondary);font-size:13px;"> verified lenders</span>` +
       `<span style="color:var(--color-border);margin:0 7px;font-size:13px;">·</span>` +
-      `<a href="#" id="submit-lender-link" style="font-size:13px;color:var(--color-text-secondary);text-decoration:none;" ` +
+      `<a href="#" id="submit-lender-link" style="font-size:13px;color:var(--color-brand-mid);font-weight:500;text-decoration:none;" ` +
       `onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">+ Submit your lender</a>`;
   };
 
