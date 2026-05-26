@@ -3693,7 +3693,7 @@
     renderTable();
   });
 
-  // Hover to auto-expand after ~900ms
+  // Hover to auto-expand after ~2000ms
   let hoverTimer = null;
   let currentHoverId = null;
 
@@ -3709,7 +3709,7 @@
       expandedLenderId = id;
       currentHoverId = null;
       renderTable();
-    }, 900);
+    }, 2000);
   });
 
   tbody.addEventListener('mouseleave', () => {
