@@ -559,6 +559,69 @@ input { font-family: inherit; }
 .empty p { font-size: 12.5px; color: var(--text-muted); }
 .empty a { color: var(--accent); font-weight: 600; }
 
+/* ==================== Glossary propose-term form ==================== */
+.glossary-propose-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 14px; padding: 8px 18px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 999px; cursor: pointer;
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  transition: background var(--transition);
+}
+.glossary-propose-btn:hover { background: var(--accent-hover); }
+
+.glossary-propose-form {
+  display: none; flex-direction: column; gap: 12px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; margin-top: 12px;
+}
+.glossary-propose-form.visible { display: flex; }
+.glossary-propose-form .suggest-field { display: flex; flex-direction: column; gap: 5px; }
+.glossary-propose-form .suggest-field label { font-size: 11.5px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.02em; }
+.glossary-propose-form input,
+.glossary-propose-form textarea {
+  font-family: var(--font); font-size: 13px; color: var(--text);
+  background: var(--bg-alt); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 10px;
+  transition: border-color var(--transition); outline: none; resize: none; width: 100%;
+}
+.glossary-propose-form input.invalid { border-color: var(--danger); box-shadow: 0 0 0 2px rgba(239,68,68,0.12); }
+.glossary-propose-form textarea { height: 72px; line-height: 1.5; }
+.glossary-propose-form input:focus,
+.glossary-propose-form textarea:focus { border-color: var(--accent); }
+.glossary-propose-form input::placeholder,
+.glossary-propose-form textarea::placeholder { color: var(--text-faint); }
+.glossary-form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.glossary-cancel-btn {
+  padding: 7px 14px; background: transparent; border: 1px solid var(--border);
+  border-radius: 999px; cursor: pointer; font-family: var(--font);
+  font-size: 13px; font-weight: 600; color: var(--text-muted);
+  transition: border-color var(--transition), color var(--transition);
+}
+.glossary-cancel-btn:hover { border-color: var(--accent); color: var(--accent); }
+.glossary-submit-btn {
+  padding: 7px 16px; background: var(--accent); color: #fff;
+  border: none; border-radius: 999px; cursor: pointer; font-family: var(--font);
+  font-size: 13px; font-weight: 600; transition: background var(--transition);
+}
+.glossary-submit-btn:hover:not(:disabled) { background: var(--accent-hover); }
+.glossary-submit-btn:disabled { opacity: 0.6; cursor: default; }
+.glossary-propose-success {
+  display: none; font-size: 13px; color: var(--accent-hover); font-weight: 600;
+  text-align: center; padding: 4px 0;
+}
+.glossary-propose-success.visible { display: block; }
+
+/* Tier-4 "Other mentions" separator */
+.glossary-tier4-header {
+  font-size: 11px; font-weight: 700; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 16px 0 8px;
+  display: flex; align-items: center; gap: 10px;
+}
+.glossary-tier4-header::before,
+.glossary-tier4-header::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
 /* ==================== Search meta ==================== */
 
 .search-meta { font-size: 12px; color: var(--text-faint); margin-bottom: 20px; display: none; }
@@ -1153,12 +1216,31 @@ input { font-family: inherit; }
           <div class="glossary-controls" id="letterBar"></div>
         </div>
         <div id="glossaryGrid"></div>
+        <div id="glossarySearchResults" style="display:none;"></div>
         <div class="empty" id="glossaryEmpty">
           <div class="empty-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="7" x2="16" y2="7"/><line x1="12" y1="11" x2="16" y2="11"/><line x1="12" y1="15" x2="14" y2="15"/></svg>
           </div>
-          <h3>Coming soon</h3>
-          <p>We're new. Launched in May 2025. We're adding fast.</p>
+          <h3>Nobody knows everything, including us.</h3>
+          <p>But we read our messages. Tell us if we're missing a term.</p>
+          <button class="glossary-propose-btn" onclick="showProposeForm()">Propose a term</button>
+        </div>
+        <div class="glossary-propose-form" id="glossaryProposeForm">
+          <div id="glossaryProposeFormBody" style="display:flex;flex-direction:column;gap:12px;">
+            <div class="suggest-field">
+              <label for="proposeTermName">Term <span style="color:var(--danger)">*</span></label>
+              <input id="proposeTermName" name="term" type="text" placeholder="e.g. Debt Service Coverage Ratio" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="suggest-field">
+              <label for="proposeTermDef">How would you define it? <span style="font-weight:400;color:var(--text-faint)">(optional)</span></label>
+              <textarea id="proposeTermDef" name="definition" placeholder="Share what you know — even a rough draft helps."></textarea>
+            </div>
+            <div class="glossary-form-actions">
+              <button type="button" class="glossary-cancel-btn" onclick="hideProposeForm()">Cancel</button>
+              <button type="button" class="glossary-submit-btn" id="proposeTermSubmit" onclick="submitProposeTerm()">Send it →</button>
+            </div>
+          </div>
+          <div class="glossary-propose-success" id="glossaryProposeSuccess">Got it — we'll take a look. Thank you.</div>
         </div>
       </div>
 
@@ -1879,40 +1961,16 @@ function toggleGDetails(btn) {
 
 function setGlossaryCategory(cat) {
   currentGlossaryCategory = cat;
-  
+
   document.querySelectorAll('.category-pill').forEach(pill => {
     pill.classList.toggle('active', pill.textContent.trim() === cat);
   });
-  
+
   const selectEl = document.getElementById('glossaryCategorySelect');
-  if (selectEl) {
-    selectEl.value = cat;
-  }
-  
-  let found = 0;
-  const searchVal = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '';
-  
-  document.querySelectorAll('.glossary-section').forEach(sec => {
-    let secFound = 0;
-    sec.querySelectorAll('.g-item').forEach(item => {
-      const itemCat = item.dataset.category;
-      const kwMatch = item.dataset.kw.includes(searchVal);
-      const catMatch = (cat === 'All' || itemCat === cat);
-      const match = kwMatch && catMatch;
-      
-      item.style.display = match ? '' : 'none';
-      if (match) { secFound++; found++; }
-    });
-    sec.style.display = secFound ? '' : 'none';
-  });
-  
-  document.getElementById('glossaryEmpty').classList.toggle('visible', found === 0);
-  document.getElementById('glossaryGrid').style.display = found ? '' : 'none';
-  
-  const hideLetters = (searchVal || cat !== 'All');
-  document.querySelectorAll('.letter-btn').forEach(btn => {
-    btn.style.display = hideLetters ? 'none' : '';
-  });
+  if (selectEl) selectEl.value = cat;
+
+  const searchInput = document.getElementById('glossarySearchInput');
+  filterGlossary(searchInput ? searchInput.value : '');
 }
 
 function renderGlossary() {
@@ -2008,34 +2066,102 @@ function scrollToLetter(l) {
   }
 }
 
+function stripPunct(s) {
+  return (s || '').replace(/[^a-z0-9\s]/gi, '').toLowerCase();
+}
+
 function filterGlossary(q) {
-  q = q.toLowerCase();
-  let found = 0;
-  document.querySelectorAll('.glossary-section').forEach(sec => {
-    let secFound = 0;
-    sec.querySelectorAll('.g-item').forEach(item => {
-      const itemCat = item.dataset.category;
-      const catMatch = (currentGlossaryCategory === 'All' || itemCat === currentGlossaryCategory);
-      const kwMatch = item.dataset.kw.includes(q);
-      const match = kwMatch && catMatch;
-      
-      item.style.display = match ? '' : 'none';
-      if (match) { secFound++; found++; }
+  const raw       = (q || '').trim();
+  const qStripped = stripPunct(raw);
+  const tokens    = qStripped.split(/\s+/).filter(Boolean);
+
+  // Clear button
+  const clearBtn = document.getElementById('glossarySearchClear');
+  if (clearBtn) clearBtn.classList.toggle('visible', !!raw);
+
+  // Letter bar visibility
+  const hideLetters = (raw || currentGlossaryCategory !== 'All');
+  document.querySelectorAll('.letter-btn').forEach(btn => btn.style.display = hideLetters ? 'none' : '');
+
+  const gridEl    = document.getElementById('glossaryGrid');
+  const emptyEl   = document.getElementById('glossaryEmpty');
+  const proposeEl = document.getElementById('glossaryProposeForm');
+  const resultsEl = document.getElementById('glossarySearchResults');
+
+  if (!raw) {
+    // No query — restore alphabetical grid, filter by category only
+    resultsEl.style.display = 'none';
+    let found = 0;
+    document.querySelectorAll('#glossaryGrid .glossary-section').forEach(sec => {
+      let secFound = 0;
+      sec.querySelectorAll('.g-item').forEach(item => {
+        const catMatch = (currentGlossaryCategory === 'All' || item.dataset.category === currentGlossaryCategory);
+        item.style.display = catMatch ? '' : 'none';
+        if (catMatch) { secFound++; found++; }
+      });
+      sec.style.display = secFound ? '' : 'none';
     });
-    sec.style.display = secFound ? '' : 'none';
-  });
-  document.getElementById('glossaryEmpty').classList.toggle('visible', found === 0);
-  document.getElementById('glossaryGrid').style.display = found ? '' : 'none';
-  
-  const hideLetters = (q || currentGlossaryCategory !== 'All');
-  document.querySelectorAll('.letter-btn').forEach(btn => {
-    btn.style.display = hideLetters ? 'none' : '';
+    emptyEl.classList.toggle('visible', found === 0);
+    if (found) { proposeEl.classList.remove('visible'); }
+    gridEl.style.display = found ? '' : 'none';
+    return;
+  }
+
+  // ── Tiered search ──────────────────────────────────────────────
+  const tier1 = [], tier2 = [], tier3 = [], tier4 = [];
+
+  GLOSSARY.forEach(g => {
+    if (currentGlossaryCategory !== 'All' && getTermCategory(g) !== currentGlossaryCategory) return;
+
+    const tName = stripPunct(g.term);
+    const tBody = stripPunct((g.def || '') + ' ' + (g.keywords || ''));
+
+    if (tName === qStripped) {
+      tier1.push(g);
+    } else if (qStripped && tName.startsWith(qStripped)) {
+      tier2.push(g);
+    } else if (
+      (qStripped && tName.includes(qStripped)) ||
+      (tokens.length > 1 && tokens.every(t => tName.includes(t)))
+    ) {
+      tier3.push(g);
+    } else if (
+      (qStripped && tBody.includes(qStripped)) ||
+      (tokens.length > 0 && tokens.every(t => tName.includes(t) || tBody.includes(t)))
+    ) {
+      tier4.push(g);
+    }
   });
 
-  const glossaryClearBtn = document.getElementById('glossarySearchClear');
-  if (glossaryClearBtn) {
-    glossaryClearBtn.classList.toggle('visible', !!q);
+  const alpha = (a, b) => a.term.localeCompare(b.term);
+  tier1.sort(alpha); tier2.sort(alpha); tier3.sort(alpha); tier4.sort(alpha);
+
+  const tier123   = [...tier1, ...tier2, ...tier3];
+  const showTier4 = tier4.length > 0 && tier123.length < 3;
+  const total     = tier123.length + (showTier4 ? tier4.length : 0);
+
+  if (total === 0) {
+    gridEl.style.display = 'none';
+    resultsEl.style.display = 'none';
+    emptyEl.classList.add('visible');
+    return;
   }
+
+  // Hide empty state and its propose form; show results
+  emptyEl.classList.remove('visible');
+  proposeEl.classList.remove('visible');
+  gridEl.style.display = 'none';
+  resultsEl.style.display = '';
+
+  let html = '';
+  if (tier123.length > 0) {
+    html += `<div class="glossary-section"><div class="glossary-grid-inner">${tier123.map(gItemHTML).join('')}</div></div>`;
+  }
+  if (showTier4) {
+    if (tier123.length > 0) html += `<div class="glossary-tier4-header">Other mentions</div>`;
+    html += `<div class="glossary-section"><div class="glossary-grid-inner">${tier4.map(gItemHTML).join('')}</div></div>`;
+  }
+  resultsEl.innerHTML = html;
 }
 
 function clearGlossarySearch() {
@@ -2044,6 +2170,50 @@ function clearGlossarySearch() {
   const btn = document.getElementById('glossarySearchClear');
   if (btn) btn.classList.remove('visible');
   filterGlossary('');
+}
+
+/* ---- Propose Glossary Term ---- */
+function showProposeForm() {
+  document.getElementById('glossaryProposeForm').classList.add('visible');
+  document.getElementById('proposeTermName').focus();
+}
+
+function hideProposeForm() {
+  document.getElementById('glossaryProposeForm').classList.remove('visible');
+  document.getElementById('glossaryProposeFormBody').style.display = '';
+  document.getElementById('glossaryProposeSuccess').classList.remove('visible');
+  document.getElementById('proposeTermName').value = '';
+  document.getElementById('proposeTermDef').value = '';
+  document.getElementById('proposeTermName').classList.remove('invalid');
+  var btn = document.getElementById('proposeTermSubmit');
+  btn.disabled = false;
+  btn.textContent = 'Send it →';
+}
+
+function submitProposeTerm() {
+  var termEl    = document.getElementById('proposeTermName');
+  var defEl     = document.getElementById('proposeTermDef');
+  var submitEl  = document.getElementById('proposeTermSubmit');
+  var bodyEl    = document.getElementById('glossaryProposeFormBody');
+  var successEl = document.getElementById('glossaryProposeSuccess');
+
+  var termVal = termEl.value.trim();
+  if (!termVal) {
+    termEl.classList.add('invalid');
+    termEl.focus();
+    return;
+  }
+  termEl.classList.remove('invalid');
+
+  var defVal  = defEl.value.trim();
+  var subject = encodeURIComponent('Glossary term proposal: ' + termVal);
+  var body    = encodeURIComponent(
+    'Term: ' + termVal + (defVal ? '\n\nDefinition:\n' + defVal : '')
+  );
+  window.location.href = 'mailto:info@lendpaper.com?subject=' + subject + '&body=' + body;
+
+  bodyEl.style.display = 'none';
+  successEl.classList.add('visible');
 }
 
 function updateCounts() {
