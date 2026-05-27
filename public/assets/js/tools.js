@@ -85,11 +85,11 @@ var TOOLS = [
     path: "/calculators/FundabilityCalculator.html",
     kw: "net funding wire origination fundability stacking risk positions"
   },
-  { 
-    id: "sba-rates", 
-    name: "SBA rates & fees", 
+  {
+    id: "sba-rates",
+    name: "SBA rates & fees",
     desc: "Dynamic SBA 7(a) scenario builder with guarantee fee logic.",
-    status: "soon",
+    status: "hidden",
     group: "deal-math",
     icon: "flag",
     color: "green",
@@ -98,8 +98,21 @@ var TOOLS = [
     path: "/calculators/SBAFeesCalculator.html",
     kw: "sba fees rates scenario builder 7a guarantee packaging search closing"
   },
-  { 
-    id: "roi", 
+  {
+    id: "naics",
+    name: "NAICS Search",
+    desc: "Look up NAICS and SIC codes by industry — fast reference for restricted industry checks.",
+    status: "soon",
+    group: "data",
+    icon: "search",
+    color: "green",
+    slug: "/tools/naics",
+    presentation: "page",
+    path: "/calculators/NAICSSearch.html",
+    kw: "naics sic code industry search lookup classification restricted"
+  },
+  {
+    id: "roi",
     name: "ROI Analysis", 
     desc: "Identify the break even point.",
     status: "soon", 
