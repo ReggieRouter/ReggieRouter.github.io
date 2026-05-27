@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  const hostname = window.location.hostname;
+  const isProduction = hostname === 'lendpaper.com' || hostname === 'www.lendpaper.com';
+  if (!isProduction) {
+    window['ga-disable-G-S3YBZV6RF9'] = true;
+  }
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S3YBZV6RF9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-S3YBZV6RF9');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — LendPaper</title>
+<meta name="description" content="LendPaper privacy policy. How we handle data on lendpaper.com.">
+<link rel="canonical" href="https://lendpaper.com/privacy">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
+<style>
+    :root {
+        --bg-main: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --accent-green: #14532D;
+        --accent-green-hover: #0f4022;
+        --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+        font-family: var(--font-stack);
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 60px auto;
+        padding: 0 24px;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 24px;
+        margin-bottom: 32px;
+    }
+
+    .logo-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .logo-lend  { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: #111827; }
+    .logo-paper { font-size: 22px; font-weight: 300; letter-spacing: -0.02em; color: var(--text-muted); }
+    .logo-dot   { font-size: 22px; font-weight: 800; color: var(--accent-green); }
+
+    .back-btn {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--accent-green);
+        text-decoration: none;
+        border: 1px solid var(--border-color);
+        padding: 6px 12px;
+        border-radius: 6px;
+        background: var(--bg-card);
+        transition: all 150ms ease;
+    }
+    .back-btn:hover { background: var(--bg-main); border-color: var(--text-muted); }
+
+    h1 {
+        font-size: 32px;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        color: #0f172a;
+        margin: 0 0 8px 0;
+    }
+
+    .last-updated {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 32px;
+        font-weight: 500;
+    }
+
+    .intro {
+        font-size: 15px;
+        color: var(--text-main);
+        margin-bottom: 40px;
+        line-height: 1.7;
+    }
+
+    .section {
+        margin-bottom: 20px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .section h2 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 12px 0;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 8px;
+    }
+
+    .section p {
+        font-size: 13.5px;
+        color: var(--text-muted);
+        margin: 0 0 10px 0;
+        line-height: 1.6;
+    }
+    .section p:last-child { margin-bottom: 0; }
+
+    .section ul {
+        font-size: 13.5px;
+        color: var(--text-muted);
+        margin: 0;
+        padding-left: 20px;
+        line-height: 1.7;
+    }
+
+    .section a { color: var(--accent-green); font-weight: 600; text-decoration: none; }
+    .section a:hover { text-decoration: underline; }
+
+    .no-collect {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+    .no-collect h2 { color: var(--accent-green); border-color: #bbf7d0; }
+
+    .footer {
+        border-top: 1px solid var(--border-color);
+        margin-top: 60px;
+        padding-top: 24px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .footer-links { margin-bottom: 8px; }
+    .footer-links a { color: var(--accent-green); text-decoration: none; font-weight: 600; }
+    .footer-links a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+        .container { margin: 30px auto; }
+        h1 { font-size: 26px; }
+        .header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <a href="/" class="logo-link">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+        <path d="M4 4v16h11l5-5V4H4z"/>
+        <path d="M15 20v-5h5"/>
+        <path d="M9 9v6"/>
+        <path d="M9 15h4"/>
+      </svg>
+      <div><span class="logo-lend">lend</span><span class="logo-paper">paper</span><span class="logo-dot">.</span></div>
+    </a>
+    <a href="/" class="back-btn">← Back to LendPaper</a>
+  </div>
+
+  <h1>Privacy Policy</h1>
+  <p class="last-updated">Last updated: May 2026</p>
+
+  <p class="intro">LendPaper is a free tool for commercial lenders, brokers, and ISOs. We built it to be useful, not to harvest your data. This page explains plainly what we collect, why, and how.</p>
+
+  <div class="section no-collect">
+    <h2>What we don't collect</h2>
+    <p>LendPaper does not require account creation or login. No personally identifiable information is needed to use any calculator, lookup tool, or reference on this site. Your deal inputs — loan amounts, rates, borrower details — are processed locally in your browser and are never transmitted to or stored by LendPaper.</p>
+  </div>
+
+  <div class="section">
+    <h2>1. Analytics (Google Analytics 4)</h2>
+    <p>We use Google Analytics 4 (GA4) to understand how the site is used — which tools are opened, how often, and from what general geography. This data is aggregated and anonymized. We use it to decide what to build next.</p>
+    <p>GA4 sets cookies and collects standard browser signals (IP address, device type, referral source). This data is processed by Google under their <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy Policy</a>. GA4 is disabled on localhost and preview environments.</p>
+  </div>
+
+  <div class="section">
+    <h2>2. Feedback forms (Formspree)</h2>
+    <p>The "Suggest" widget and "Propose a term" form let you submit optional feedback. These forms may collect:</p>
+    <ul>
+      <li>Your idea or term suggestion (text you type)</li>
+      <li>Your role (Broker, Loan Officer, Lender, or Other)</li>
+      <li>Your email address, if you choose to provide it</li>
+    </ul>
+    <p style="margin-top:10px;">Submissions are sent to LendPaper via <a href="https://formspree.io" target="_blank" rel="noopener">Formspree</a>, a third-party form service. Your submission is used only to improve LendPaper. If you include your email, we may reply personally — we won't add you to a mailing list or share your address.</p>
+  </div>
+
+  <div class="section">
+    <h2>3. Cookies</h2>
+    <p>LendPaper uses the following cookies and local storage:</p>
+    <ul>
+      <li><strong>GA4 cookies</strong> (_ga, _ga_*) — analytics, set by Google, expire after 2 years</li>
+      <li><strong>sessionStorage keys</strong> (lp_rotation_message, lp_update_attempt, lp_tue_thu_pref) — session-only preferences for greeting display, cleared when you close the tab</li>
+    </ul>
+    <p style="margin-top:10px;">We do not use advertising cookies or tracking pixels from any ad network.</p>
+  </div>
+
+  <div class="section">
+    <h2>4. Third-party services</h2>
+    <ul>
+      <li><strong>Google Analytics 4</strong> — usage analytics (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>)</li>
+      <li><strong>Formspree</strong> — feedback form delivery (<a href="https://formspree.io/legal/privacy-policy" target="_blank" rel="noopener">Formspree Privacy Policy</a>)</li>
+    </ul>
+    <p style="margin-top:10px;">We do not sell, rent, or share your data with any third party for advertising or commercial purposes.</p>
+  </div>
+
+  <div class="section">
+    <h2>5. Children's privacy</h2>
+    <p>LendPaper is a professional B2B tool intended for adults working in commercial lending. We do not knowingly collect information from anyone under 18.</p>
+  </div>
+
+  <div class="section">
+    <h2>6. Changes to this policy</h2>
+    <p>If we make material changes to this policy, we'll update the "Last updated" date at the top of this page. Continued use of LendPaper after changes constitutes acceptance of the updated policy.</p>
+  </div>
+
+  <div class="section">
+    <h2>7. Contact</h2>
+    <p>Questions about this policy or how your data is handled:<br>
+    <a href="mailto:info@lendpaper.com">info@lendpaper.com</a> &nbsp;·&nbsp; <a href="https://lendpaper.com">lendpaper.com</a></p>
+  </div>
+
+  <div class="footer">
+    <div class="footer-links">
+      <a href="/">Home</a> &nbsp;·&nbsp;
+      <a href="/legal/estimates">Estimate Disclaimer</a> &nbsp;·&nbsp;
+      <a href="mailto:info@lendpaper.com">info@lendpaper.com</a>
+    </div>
+    <p>© 2026 LendPaper. All rights reserved.</p>
+  </div>
+
+</div>
+</body>
+</html>
