@@ -1191,7 +1191,11 @@
 
       <!-- Position chips -->
       <div class="lp-chip-row">
-        <span class="lp-chip-label">Position #</span>
+        <span class="lp-chip-label">
+          <span class="lp-info-wrap">Position #
+            <button class="lp-info-btn" data-modal="info-position" aria-label="About Position Number">i</button>
+          </span>
+        </span>
         <div class="lp-chip-group" id="pos-group">
           <button class="chip-btn active" data-pos="all">Any</button>
           <button class="chip-btn" data-pos="1">1st</button>
@@ -1416,6 +1420,35 @@
   </div>
 </div>
 
+<!-- Info Modal: Position # -->
+<div class="lp-modal-backdrop" id="info-position-backdrop">
+  <div class="lp-modal" style="max-width:480px;">
+    <button class="lp-modal-close" data-close="info-position-backdrop">&times;</button>
+    <h3 class="lp-modal-title" style="margin-bottom:16px;">Position #</h3>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;"><strong>Stack position</strong> refers to where a new funding sits in relation to a borrower's existing advances or loans — 1st means no prior positions, 2nd means one advance already outstanding, and so on.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="padding:12px 14px;border-radius:8px;background:#F0FDF4;border:1px solid #A7F3D0;">
+        <div style="font-weight:600;font-size:13px;color:#15803D;margin-bottom:4px;">How the filter works</div>
+        <div style="font-size:12px;color:#166534;">Selecting "2nd" shows all lenders whose max stacking limit is ≥ 2 — they'll fund a borrower who already has one advance outstanding. A lender with max stacking of 3 appears in 1st, 2nd, and 3rd position results.</div>
+      </div>
+      <div style="padding:12px 14px;border-radius:8px;background:#FFFBEB;border:1px solid #FDE68A;">
+        <div style="font-weight:600;font-size:13px;color:#A16207;margin-bottom:4px;">Higher position = higher risk</div>
+        <div style="font-size:12px;color:#854D0E;">Each additional position increases lender risk and reduces approval odds. Many lenders cap at 1st or 2nd position. Stacking beyond a lender's stated max is an automatic decline.</div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:14px 16px;border-radius:8px;background:#F9FAFB;border:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--color-text-primary);margin-bottom:2px;">Assess full position risk</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);">Fundability scores stacking risk alongside FICO, TIB, and revenue in one view.</div>
+      </div>
+      <button onclick="(function(){ try { var t = window.parent.TOOLS && window.parent.TOOLS.find(function(x){return x.id==='fundability';}); if(t){ document.getElementById('info-position-backdrop').classList.remove('open'); window.parent.openTool(t, true); } } catch(e){} })()" style="flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--color-brand-dark);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;">
+        Open Fundability
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Full Dataset payload exported from Beekeeper Studio SQL DB
   const lenderData = [
@@ -1446,7 +1479,7 @@
     "support_phone": "",
     "source_url": "",
     "source_snippet": "",
-    "logo_url": "public/assets/lenders/Bitty%20Advance.png",
+    "logo_url": "public/assets/lenders/Bitty Advance.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1482,7 +1515,7 @@
     "support_phone": "",
     "source_url": "",
     "source_snippet": "",
-    "logo_url": "public/assets/lenders/expansion_capital.png",
+    "logo_url": "public/assets/lenders/Expansion Capital Group.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1720,7 +1753,7 @@
     "support_phone": "855-326-3564",
     "source_url": "https://www.mulliganfunding.com/frequently-asked-questions/",
     "source_snippet": "Thank you for your interest in Mulligan Funding. This URL may have been typed in error or the page was removed and no longer exists. Use the navigation menu at the top of this page, or TAKE ME TO THE HOMEPAGE BUSINESS FUNDING RENEWAL PRIVACY POLICY CONTACT US FREQUENTLY ASKED QUESTIONS Final loan decision may be subject to underwriting by FinWise Bank. Approval and Funding Speed - Approval and funding speed refer to applications submitted during standard business hours (Monday-Friday, 7 AM - 5 PM PT.) Most approvals happen within a few hours on completed submissions. Delays could occur due to unforeseen circumstances or if additional information or verification is required. The majority of Mulligan Funding, LLC business loans are issued by FinWise Bank, a Utah state-chartered bank. Member FDIC. Exclusions may apply. Mulligan Funding, LLC | 4715 Viewridge Avenue, Suite 100 | San Diego, CA 92123 \u00a9 2026 Mulligan Funding. All Rights Reserved.",
-    "logo_url": "public/assets/lenders/Mulligan%20Funding.png",
+    "logo_url": "public/assets/lenders/Mulligan Funding.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1752,7 +1785,7 @@
     "support_phone": "",
     "source_url": "https://fundbox.com/resources/articles/business-line-of-credit-requirements/",
     "source_snippet": "404 Sorry, the page you're looking for isn't here Let's try this again Go To Homepage Ok, let's see if we can help you find the right page. Visit our support center or contact us for help to get started.",
-    "logo_url": "public/assets/lenders/fundbox.svg",
+    "logo_url": "public/assets/lenders/Fundbox.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -1911,7 +1944,7 @@
     "support_phone": "",
     "source_url": "https://cobaltfundingsolutions.com/",
     "source_snippet": "Access Denied You don't have permission to access \"http://www.searchhounds.com/articles/building-your-emergency-fund-a-complete-guide.html?\" on this server. Reference #18.77fd117.1779598682.b7afd1b4 https://errors.edgesuite.net/18.77fd117.1779598682.b7afd1b4",
-    "logo_url": "",
+    "logo_url": "public/assets/lenders/Cobalt Funding.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2012,7 +2045,7 @@
     "support_phone": "(844) 501-8662",
     "source_url": "https://www.credibly.com/business-loans/requirements/",
     "source_snippet": "Oops... Page not found We\u2019re sorry, but it seems like you\u2019ve taken a wrong turn. The page you\u2019re looking for may have been moved, deleted, or never existed in the first place.",
-    "logo_url": "public/assets/lenders/credibly.svg",
+    "logo_url": "public/assets/lenders/Credibly.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2079,7 +2112,7 @@
     "support_phone": "",
     "source_url": "https://www.cancapital.com/",
     "source_snippet": "CAN Capital \u2013 Small Business Loans And Working Capital Loan \u2013 Small Business Loans and Working Capital Loans. The world is changing, and so is your small business. Working capital is a short-term loan, with terms that meet your needs, that can be used for just about anything your business requires to keep moving forward. Having the right equipment is essential to the success of your small business. Equipment financing is a great option, loaded with benefits, to get the equipment you need to move your business forward. Ecommerce working capital helps to give online sellers access to fast, flexible funding to manage cash flow, restock inventory, and invest in growth. CAN Capital, Inc. makes capital available to businesses through business loans made by WebBank, makes equipment financing available through its CAN Capital Equipment Finance division and makes business lines of credit available through providers of that product. <link rel=\"shortcut icon\" href=\"https://www.cancapital.com/wp-content/themes/CANCapital/favicon.ico\">",
-    "logo_url": "public/assets/lenders/can_capital.ico",
+    "logo_url": "public/assets/lenders/CAN Capital.ico",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2177,7 +2210,7 @@
     "support_phone": "1-800-766-0460",
     "source_url": "https://www.fundthrough.com/",
     "source_snippet": "FundThrough is an AI tech enabled invoice factoring platform that gets your invoices paid ahead of net terms\u2013in days\u2013to correct cash flow timing that blocks growth and operations. We\u2019re a complement to your banking relationship: when approvals are slow or get denied, you always have capital on-demand. Get paid, put your funds to work, and get back to business with a partner trusted by thousands of businesses and recognized in the financing industry. Managing over $1M in Outstanding Invoices? High invoice volumes shouldn't mean rigid terms. We offer Flexible Pricing designed specifically for enterprise-level cash flow needs. $3B+ Invoices factored How much we've paid to businesses like yours (and counting!). Consistent cash flow you control Net terms are now optional. Invoice your customer and get instant payment for large enterprise or government invoices anytime. Bonus: it\u2019s non-dilutive and debt-free! Get paid in a day (after first funding). Get 100% of your invoice value up front, less one flat fee No required minimum funding after your first invoice funding Choose which customers whose invoices you want to factor Only factor invoices when needed; only pay when you factor. Unlimited funding, for as much as you have in eligible invoices Choose which invoices you want to fund (a.k.a., spot factoring) Optional accounting platform integrations to import eligible invoices. Sign up for FundThrough with your email address or connect your QuickBooks, OpenInvoice, or other accounting platform. We wait for your customer to pay on net terms. As a team of entrepreneurs, finance, and tech professionals, we understand why cash flow is the top problem facing small and medium sized businesses. Since 2014, we\u2019ve been funding invoices to help businesses like yours grow and thrive. FundThrough USA Inc. loans are made or arranged pursuant to a California Finance Lenders Law license. 260 Spadina Avenue, Suite 400, Toronto, Canada, M5T 2E4. info@fundthrough.com. 1-800-766-0460. The HTML schema graph also contains: \"logo\":{\"@type\":\"ImageObject\",\"inLanguage\":\"en-US\",\"@id\":\"https:\\/\\/www.fundthrough.com\\/#\\/schema\\/logo\\/image\\/\",\"url\":\"https:\\/\\/www.fundthrough.com\\/wp-content\\/uploads\\/2021\\/01\\/ft-logo-primary.png\"}. The meta description: \"Invoice Factoring &amp; Invoice Financing: Get Paid In A Day | FundThrough\".",
-    "logo_url": "public/assets/lenders/fundthrough.png",
+    "logo_url": "public/assets/lenders/FundThrough.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2208,7 +2241,7 @@
     "support_phone": "888-820-7580",
     "source_url": "https://www.gigglefinance.com/faq",
     "source_snippet": "Giggle Finance is an innovative online platform designed to provide fast, transparent financial support for 1099 workers, independent contractors, app-based freelancers, small business owners, and self-employed professionals.\nWho can use Giggle\u2019s services? Giggle Finance is tailored for 1099 workers, independent contractors, consultants, freelancers, small business owners, and self-employed professionals across the U.S. As long as you\u2019ve been in business for at least three months, you\u2019re eligible to apply.\nWhat are Giggle\u2019s requirements? Our requirements are simple: At least $1,500 in monthly revenue; At least three months in business; Credit score is not a factor. We\u2019re here to help you access fast funding without the traditional hurdles.\nHow can I apply? Complete the online application \u2013 Fill out basic information about your business and connect your bank account.\nWhat is the maximum amount I can receive? Qualified applicants can receive up to $10,000, and repeat customers in good standing can access up to $20,000.\nHow flexible is Giggle\u2019s payment schedule? We set up weekly payments.\nWhat is a Giggle Advance? The Giggle Advance is our financing solution for small business owners. We purchase a portion of your future sales, giving you immediate access to capital.\n3250 NE 1st Ave #305 Miami, FL 33137\ninfo@gigglefinance.com\n888-820-7580\nhttps://gigglefinance.com/wp-content/uploads/2024/05/GIGGLE-finance-logo.svg",
-    "logo_url": "public/assets/lenders/giggle_finance.svg",
+    "logo_url": "public/assets/lenders/Giggle.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2240,7 +2273,7 @@
     "support_phone": "(888) 216-9619",
     "source_url": "https://www.bluevine.com/blog/business-line-of-credit-requirements/",
     "source_snippet": "As one example of how lenders set minimums, Bluevine\u2019s line of credit minimum qualifications include a personal FICO score of 625+. For context, Bluevine\u2019s line of credit minimum qualifications include being in business for 12+ months. Lenders\u2019 minimum revenue requirements vary, but Bluevine\u2019s line of credit minimum qualifications include $10,000 in monthly revenue (or $120,000 annually). If you already have a line of credit, stacking additional loans or credit lines can create issues\u2014Bluevine notes that stacking loans or credit lines can negatively impact an existing credit line.",
-    "logo_url": "public/assets/lenders/bluevine.png",
+    "logo_url": "public/assets/lenders/Bluevine.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2272,7 +2305,7 @@
     "support_phone": "",
     "source_url": "https://www.forafinancial.com/faq/",
     "source_snippet": "Your business must be up-and-running for at least six months and generate $17,000 per month in gross sales with a minimum 570 FICO score.",
-    "logo_url": "public/assets/lenders/fora_financial.png",
+    "logo_url": "public/assets/lenders/Fora Financial.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2304,7 +2337,7 @@
     "support_phone": "(888) 269-4246",
     "source_url": "https://www.ondeck.com/resources/business-loans-requirements",
     "source_snippet": "By using this website, you agree to our use of cookies to collect and record information about your browsing session, to optimize site functionality, for analytical purposes, and to advertise to you through third parties. Learn more at \t Cookie NoticeOnDeckSmall Business LoansResourcesAbout Us(888) 269-4246Sign InSee My OptionsSorry, this page cannot be found.Learn more about our products:Small Business LoansSmall Business Line of CreditShort-Term LoansMost Recent Blog PostsHow to Get Vendor Discounts: 5 Key Negotiating StrategiesRead Full ArticleHow to Create a Business Newsletter That Keeps Customers Coming BackRead Full ArticleThe Best ZIP Codes to Start a Small Business in AmericaRead Full ArticleThe Places in America Where Small Businesses Are ThrivingRead Full ArticleSmall Business LoansBusiness Line of CreditTerm LoanResourcesFree Business Credit ScoreSmall Business Loans ExplainedSmall Business Trend ReportBusiness BlogFAQsContact UsRestricted IndustriesSitemapAbout UsWho We ArePartner With UsLegalPrivacy PolicySecurity PolicyTerms of UseDo Not Sell or Share My Personal InformationCalifornia Collection NoticeBack to TopOnDeckOnDeck's Facebook feedOnDeck's Twitter feedOnDeck's LinkedIn profileOnDeck's Instagram feedBetter Business Bureau Accedited Business, A+ RatingInnovative Lending Platform AssociationForbes Advisor, Best of 2023, Best Small Business LoansSame-Day Funding is only available Monday \t Friday before 10:30 a.m. ET. If checkout is done before 10:30 a.m. ET, funds will typically be available by 5 p.m. local time the same day. If checkout is done after 10:30 a.m. ET, or on a weekend or bank holiday, it will not qualify for Same-Day Funding and funds will be deposited within 2 \t 3 business days.Instant Funding is not available the same day you execute your line of credit agreement. Instant Funding requires registration and is subject to the Instant Funding Terms & Conditions. Instant Funding is limited to open lines of credit for draws between $1,000 - $10,000, and you can only make one draw request per day. Not all banks or debit card providers participate, and you must register a business debit card matching the information associated with your OnDeck account. Transfers are typically completed within 30 minutes, but may be subject to additional restrictions or delays.There are some industries we cannot serve (see list of restricted industries). In addition, OnDeck does not lend to businesses in North Dakota. Other underwriting requirements may apply.When you pay off an OnDeck term loan early, you may still need to pay a portion of the unpaid interest expense as stated in the loan agreement. The specific percentage will be disclosed in your loan agreement.Eligibility for the lowest rates is very limited, available only to businesses with the strongest creditworthiness and cash flows, and typically businesses that have shown an excellent payment history on prior loan products with OnDeck. The average rate for term loans is 56.4% APR and the average rate for lines of credit is 56.6% APR. Averages are based on loans originated in the half-year ending June 30, 2025.All lines of credit require a minimum draw of $1,000 at origination.Only customers who have previously renewed a term loan are eligible for a 0% origination fee. For customers renewing a term loan for the first time, a discounted origination fee will apply. No discount to the origination fee will be applied if you are approved for, and accept, a renewal loan of 24 months.Loans are subject to lender approval. Depending on the state where your business is located and other attributes of your business and the loan, your business loan may be issued by a member of the OnDeck family of companies or by Celtic Bank. Your loan agreement will identify the lender prior to your signing. Only select customers with strong credit profiles and sufficient verified monthly revenue who meet specific underwriting requirements are eligible for loans of $400K.OnDeck\u00ae is a Registered Trademark. All rights reserved.4700 W. Daybreak Pkwy., Suite 200, South Jordan, UT 84009",
-    "logo_url": "public/assets/lenders/ondeck.svg",
+    "logo_url": "public/assets/lenders/OnDeck.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2339,7 +2372,7 @@
     "support_phone": "",
     "source_url": "https://www.nationalbusinesscapital.com/partner-faq/",
     "source_snippet": "Business LoansTerm LoansBusiness Line of CreditCash Flow FinancingSubordinated DebtEquipment FinancingSeize your opportunity to grow your business and gain access to the capital you need.",
-    "logo_url": "public/assets/lenders/National%20Business%20Capital.png",
+    "logo_url": "public/assets/lenders/National Business Capital.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2370,7 +2403,7 @@
     "support_phone": "888-244-9099",
     "source_url": "https://www.forwardfinancing.com/faq/",
     "source_snippet": "What products are available through Forward Financing? What is revenue-based financing? Why do you utilize daily or weekly payments? What if I want to pay the full amount early? Does applying with Forward Financing impact credit scores? Are there any industries that Forward Financing will not fund? What are the minimum eligibility requirements to qualify for funding from Forward Financing? What information do you need from me to apply? Contact Us 888-244-9099 Copyright \u00a9 2026 Forward Financing LLC, 53 State Street, 20th Floor, Boston, MA 02109. <img src=\"https://www.forwardfinancing.com/wp-content/uploads/2022/03/Group-42.svg\" ... caption=\"Forward Financing\">",
-    "logo_url": "public/assets/lenders/forward_financing.svg",
+    "logo_url": "public/assets/lenders/Forward Financing.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2401,7 +2434,7 @@
     "support_phone": "(877) 494-1499",
     "source_url": "https://www.mantisfunding.com/faq/",
     "source_snippet": "At Mantis Funding, we\u2019ll work diligently with you to help your business acquire the funds it needs fast. We partner with companies from a wide range of industries and understand the need for revenue-based financing options. We create custom revenue-based financing options to suit and strengthen your business. Whether you need $5,000 or $500,000, we\u2019ll be here to assist you every step of the way. How Does Revenue-Based Financing Work? Mantis Funding offers revenue-based financing to small business owners, which is an alternative form of financing that exchanges working capital for a set amount of the business\u2019 future revenue, and it\u2019s based upon the revenue that the business generates monthly. Qualifications: Qualifying businesses are offered between $5,000 \u2013 $500,000 in working capital. Payment is automatically debited daily or weekly from the business bank account. Estimated payment period is between 3 \u2013 6 months. Eligibility Criteria: Business has been operational in the U.S. for more than 6 months. Own 50% or more of the business. Minimal credit score check, low credit scores OK! Our application requires the business owner\u2019s name, social security number, business name, tax ID, and the last three months of the business bank statements. We will also require a copy of the business owner\u2019s driver\u2019s license and a voided check from the business bank account.",
-    "logo_url": "public/assets/lenders/mantis_funding.png",
+    "logo_url": "public/assets/lenders/Mantis Funding.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2432,7 +2465,7 @@
     "support_phone": "(877) 502-5003",
     "source_url": "https://fundkite.com/",
     "source_snippet": "Funding Range $10K - $2M. 6 months in operation or more. $20K+ in monthly revenue. Credit score of 550 or higher. Minimum Approval Criteria: 1 Year in business, business bank account, $10K/month gross deposits, 5+ deposits per month. Our products are purchases of account receivables and are not business loans. FundKite offers Revenue-Based Financing, noting that our products are purchases of account receivables and are not business loans. Fundkite does not offer loans, it provides revenue based Financing, based on your business gross sales. Your repayment adjusts with your revenue\u2014pay more when you earn more, less when you earn less. Repayment plan based on a percentage of the business\u2019s Gross Sales, until fully repaid. No credit impact to apply. submit application and bank statements. Once final approval is made, funds will be available in your account within 24 hours. This is especially useful for businesses with variable operating expenses, such as restaurants, retail stores, construction companies, e-commerce brands, and professional service organizations. No Hidden Fees or Middlemen. Speak to Funding Expert: (877) 502-5003. Restricted Industries (link in footer).",
-    "logo_url": "public/assets/lenders/fundkite.png",
+    "logo_url": "public/assets/lenders/Fundkite.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2463,7 +2496,7 @@
     "support_phone": "888-851-8859",
     "source_url": "https://legendfunding.com/",
     "source_snippet": "Direct funding. Transparent underwriting. Reliable execution. We help ISOs close more deals with less friction. Approvals in 2-3hrs. All 50 States Nation Wide Coverage. Over a decade of underwriting experience. Legend Funding was built on the belief that small businesses deserve a faster, fairer, and more transparent path to capital. As a direct funder, we provide funding solutions tailored to real everyday business needs. Legend Funding\u00ae is a top provider of business cash advances to small and medium sized businesses. A quick cash injection through a Merchant Cash Advance can be a powerful tool for any business. From growth initiatives to emergency funding, we provide immediate unsecured lines of credit to your business. No credit check required. Simple Requirements. From application to funding in under 24 hours.",
-    "logo_url": "public/assets/lenders/legend_funding.png",
+    "logo_url": "public/assets/lenders/Legend Funding.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2495,7 +2528,7 @@
     "support_phone": "(954) 947-8724",
     "source_url": "https://highlandhillcapital.com/",
     "source_snippet": "Highland Hill Capital is a leading innovator in the alternative finance market. We are fully accredited, pay attractive commissions and have a fast turnaround time. We have simplified the ISO/funder partnership to help business owners receive fully transparent funding that is quick, easy, and affordable. By doing so, we show that we are not only your best short-term financing option, but also a very viable long-term option as well. It is our goal to help ISO partners design a customized financial solution for their clients that provides a consistent influx of working capital to help facilitate future business success.Why Highland Hill Capital Dedicated ISO Manager Streamlined Funding Process Attractive Commissions Next Day Payout Volume Bonus No Restrictions Location 1100 Park Central Blvd S Suite 1200 Pompano Beach Fl 33064 Contact Us (954) 947-8724 info@highlandhillcap.com Apply Now. Logo URL: https://www.highlandhillcap.com/wp-content/uploads/2022/06/HHC-logo.jpg",
-    "logo_url": "public/assets/lenders/highland_hill_capital.jpg",
+    "logo_url": "public/assets/lenders/Highland Hill Capital.jpg",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2530,7 +2563,7 @@
     "support_phone": "877-453-6394",
     "source_url": "https://lendzi.com/",
     "source_snippet": "Make your most educated business decision yet. Compare lending options and get funded fast. Small Business Loans. For entrepreneurs and seasoned business owners alike. Secure essential funds at any point in your company\u2019s development. Startup Business Loans. Secure funding to take a viable next step \u2014 hire employees, buy equipment, upgrade your tech and pay for inventory. Real Estate Loans. Personal Loans. SBA Loans. The Small Business Administration (SBA) can help you get the funding you need for your business. How It Works: 1 Apply. Fill out one simple application. There is no fee or obligation, and it will not impact your credit. 2 Compare. Explore small business loan options from 60+ lenders. We\u2019ll help you choose the best one. 3 Secure Funding. Get the capital you need in as little as 24 hours. Our Products: Business line of credit. SBA Loan. Business term loan. Equipment financing. Merchant cash advance. Don\u2019t waste more money or time than you need to. Let Lendzi help you compare lending options with a no-cost, no-obligation application and you could receive funding in 24 hours. Our streamlined process and proprietary algorithm match you with loan options from a nationwide network of esteemed lenders. Lendzi works effectively and efficiently so you can secure funding that can be transferred to you ASAP. Even if you\u2019ve been turned down elsewhere, we\u2019re here to help you get the business loans you need. Austin Office 6836 Bee Caves Rd, Suite I-260 Austin, TX 78746. California Office 2100 E Grand Ave, Suite 320 El Segundo, CA 90245. New York Office 352 7th Ave, Suite 1402 New York, NY 10001. Boca Raton Office 150 E Palmetto Park Rd, Suite 800 Boca Raton, FL 33432. info@lendzi.com. (877) - 4LENDZI (877) - 453-6394. Products: Main Street Lending Program, Invoice Factoring, Merchant Cash Advance, Equipment Financing, Loan Calculators.",
-    "logo_url": "public/assets/lenders/lendzi.png",
+    "logo_url": "public/assets/lenders/Lendzi.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2565,7 +2598,7 @@
     "support_phone": "1 (855) 933-8638",
     "source_url": "https://unitedcapitalsource.com/",
     "source_snippet": "Get your business funded with United Capital Source. Over $1.6 billion funded to small businesses through our marketplace. Quick funding options that won\u2019t affect credit. Access to 75+ lenders with multiple products to choose from. Financing up to $5 million in as few as 3 days. A range of funding options for your business: Business Line of Credit, Business Term Loans, Merchant Cash Advance, SBA Loans, Invoice/Receivables Factoring, Revenue-Based Financing, Bad Credit Business Loans, Working Capital Loans, Equipment Financing, Home Equity Line of Credit, Employee Tax Retention Credit Advance. United Capital Source has secured financing for 250+ industries: Restaurants/Bars, Doctors/Medical Practices, Construction/Contracting, Hotels & Lodging, Beauty Salons & Spas, Retail Stores, Auto Repairs & Sales, Landscaping Services. Current monthly sales deposit average to your business bank account? $0 - $5,000. Secured & unsecured options with no personal guarantee. NY Headquarters: 1399 Franklin Ave Suite 200, Garden City, NY 11530. info@unitedcapitalsource.com. 1 (855) 933-8638.",
-    "logo_url": "public/assets/lenders/united_capital_source.png",
+    "logo_url": "public/assets/lenders/United Capital Source.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2596,7 +2629,7 @@
     "support_phone": "",
     "source_url": "https://www.everestbusinessfunding.com/",
     "source_snippet": "Everest Business Funding provides revenue-based financing to business owners. Partnering with Everest Business Funding can provide you with FAST ACCESS to working capital up to $2M to power your business plans, big or small. Funding Is Based On Your Daily Cash-Flow, Not On Your Credit. Our tailored funding options empower businesses with strong revenue\u2014regardless of credit history\u2014to access the capital they need to expand, manage cash flow, or seize growth opportunities. Enterprises seeking quick funding without traditional collateral requirements. WHO WE SERVE: Healthcare Providers, Food & Beverage Establishments, Retail Businesses, Service-Based Enterprises, Seasonal Businesses, Manufacturing & Wholesale. 12496 NW 25th St, Miami, FL 33182.",
-    "logo_url": "public/assets/lenders/everest_business_funding.png",
+    "logo_url": "public/assets/lenders/Everest Business Funding.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2628,7 +2661,7 @@
     "support_phone": "8007048675",
     "source_url": "https://www.libertasfunding.com/",
     "source_snippet": "Libertas; Seize growth opportunities with $500K\u201310M* in short-term, revenue-based financing... *Can be as low as $100k; Business term loans issued by WebBank; For more information about Libertas Funding LLC, please contact us via our website https://libertasfunding.com/partner-with-us#partner-form or toll-free telephone number 8007048675; Libertas Funding offers short-term, revenue-based financing for SMBs on a growth trajectory.",
-    "logo_url": "public/assets/lenders/libertas_funding.jpg",
+    "logo_url": "public/assets/lenders/Libertas Funding.jpg",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2666,7 +2699,7 @@
     "support_phone": "(800) 631-2423",
     "source_url": "https://www.supergcapital.com/",
     "source_snippet": "Founded in 2008 by successful entrepreneur Darrin Ginsberg, Super G Capital has redefined ISO financing with innovative loan products. ...Our expertise lies in offering loans secured by an ISO\u2019s residual portfolio. Loan amounts range from $100,000 to $5,000,000, with flexible terms of 12 to 48 months. ...Specialized Expertise: We focus exclusively on residual-based businesses like ISOs, MSPs, VARs, and agents. Revenue-Driven Financing: Our loans are based on monthly recurring revenue... Loan Size: $100,000 to $5,000,000, Minimum monthly residual of $10,000. Terms & Timing: We offer 1 to 4 year amortizations and can fund in as little as 10 days. ...If you have questions or want to speak to a representative, please call us at (800) 631-2423. HTML snippet: <meta property=\"og:image\" content=\"https://www.supergcapital.com/wp-content/uploads/2024/02/sgf-logo-new-white.png\">",
-    "logo_url": "public/assets/lenders/Super%20G.png",
+    "logo_url": "public/assets/lenders/Super G.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2822,7 +2855,7 @@
     "support_phone": "",
     "source_url": "https://www.grasshopper.bank/",
     "source_snippet": "",
-    "logo_url": "",
+    "logo_url": "public/assets/lenders/grasshopper bank.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2880,7 +2913,7 @@
     "support_phone": "",
     "source_url": "https://cerebrocapital.com/",
     "source_snippet": "",
-    "logo_url": "",
+    "logo_url": "public/assets/lenders/Cerebro.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2909,7 +2942,7 @@
     "support_phone": "",
     "source_url": "https://www.liveoakbank.com/",
     "source_snippet": "",
-    "logo_url": "",
+    "logo_url": "public/assets/lenders/Live Oak Bank.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -2938,7 +2971,7 @@
     "support_phone": "",
     "source_url": "https://www.newtekbusiness.com/",
     "source_snippet": "",
-    "logo_url": "",
+    "logo_url": "public/assets/lenders/newtek.png",
     "early_payment_discount": false,
     "preferred_industries": [],
     "max_funding_amount": 0,
@@ -3662,7 +3695,7 @@
       if (backdrop) backdrop.classList.remove('open');
     });
   });
-  document.querySelectorAll('#info-risk-backdrop, #info-product-backdrop, #info-signals-backdrop').forEach(backdrop => {
+  document.querySelectorAll('#info-risk-backdrop, #info-product-backdrop, #info-signals-backdrop, #info-position-backdrop').forEach(backdrop => {
     backdrop.addEventListener('click', (e) => {
       if (e.target === backdrop) backdrop.classList.remove('open');
     });
