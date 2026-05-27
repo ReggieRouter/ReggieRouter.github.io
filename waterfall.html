@@ -2536,41 +2536,6 @@
     "payment_frequencies": []
   },
   {
-    "id": 91,
-    "name": "Lendzi",
-    "fico": 500,
-    "tib": 6,
-    "rev": 5000,
-    "stacking": 1,
-    "restrictions": [],
-    "detailed_restrictions": [],
-    "products": [
-      "LOC",
-      "MCA",
-      "BLA",
-      "SBA",
-      "Equipment"
-    ],
-    "updated_at": "2026-05-24 00:59:28.262662",
-    "submission_url": "",
-    "soft_pull": true,
-    "bank_verified": true,
-    "bank_statements": null,
-    "hard_collateral": false,
-    "hq_state": "TX",
-    "hq_address": "6836 Bee Caves Rd, Suite I-260 Austin, TX 78746",
-    "support_email": "info@lendzi.com",
-    "support_phone": "877-453-6394",
-    "source_url": "https://lendzi.com/",
-    "source_snippet": "Make your most educated business decision yet. Compare lending options and get funded fast. Small Business Loans. For entrepreneurs and seasoned business owners alike. Secure essential funds at any point in your company\u2019s development. Startup Business Loans. Secure funding to take a viable next step \u2014 hire employees, buy equipment, upgrade your tech and pay for inventory. Real Estate Loans. Personal Loans. SBA Loans. The Small Business Administration (SBA) can help you get the funding you need for your business. How It Works: 1 Apply. Fill out one simple application. There is no fee or obligation, and it will not impact your credit. 2 Compare. Explore small business loan options from 60+ lenders. We\u2019ll help you choose the best one. 3 Secure Funding. Get the capital you need in as little as 24 hours. Our Products: Business line of credit. SBA Loan. Business term loan. Equipment financing. Merchant cash advance. Don\u2019t waste more money or time than you need to. Let Lendzi help you compare lending options with a no-cost, no-obligation application and you could receive funding in 24 hours. Our streamlined process and proprietary algorithm match you with loan options from a nationwide network of esteemed lenders. Lendzi works effectively and efficiently so you can secure funding that can be transferred to you ASAP. Even if you\u2019ve been turned down elsewhere, we\u2019re here to help you get the business loans you need. Austin Office 6836 Bee Caves Rd, Suite I-260 Austin, TX 78746. California Office 2100 E Grand Ave, Suite 320 El Segundo, CA 90245. New York Office 352 7th Ave, Suite 1402 New York, NY 10001. Boca Raton Office 150 E Palmetto Park Rd, Suite 800 Boca Raton, FL 33432. info@lendzi.com. (877) - 4LENDZI (877) - 453-6394. Products: Main Street Lending Program, Invoice Factoring, Merchant Cash Advance, Equipment Financing, Loan Calculators.",
-    "logo_url": "public/assets/lenders/lendzi.png",
-    "early_payment_discount": false,
-    "preferred_industries": [],
-    "max_funding_amount": 0,
-    "max_term_months": 0,
-    "payment_frequencies": []
-  },
-  {
     "id": 92,
     "name": "United Capital Source",
     "fico": 500,
@@ -3084,7 +3049,7 @@
   let sortColumn = 'name'; // default: alphabetical A→Z
   let sortDirection = 'asc';
   let manualSort = false; // true when user explicitly clicks a column header; auto-reverts on reset
-  let expandedLenderId = 7; // PEAC pre-expanded as example
+  let expandedLenderId = null; // PEAC pre-expanded removed
 
   // DOM Elements
   const tbody = document.getElementById('lender-table-body');

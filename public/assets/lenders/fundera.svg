@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="100%" height="100%">
-  <!-- Icon: Growth sprout/leaf -->
-  <path d="M30,45 C30,30 45,20 48,12 C48,22 38,35 30,45 Z" fill="#FF5A5F"/>
-  <path d="M32,45 C35,32 24,24 18,16 C20,26 27,37 32,45 Z" fill="#E34C43"/>
-  <circle cx="31" cy="45" r="2.5" fill="#2C3E50"/>
-  <!-- Text -->
-  <text x="65" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="800" fill="#111827" letter-spacing="-1px">fundera</text>
-</svg>
