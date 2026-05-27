@@ -3,7 +3,7 @@
  * Single source of truth for all calculators and tools.
  */
 
-const TOOLS = [
+var TOOLS = [
   { 
     id: "amo", 
     name: "Payment Breakdown", 
