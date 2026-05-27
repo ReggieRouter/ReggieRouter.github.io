@@ -22,9 +22,9 @@
 <meta charset="UTF-8">
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2026.05.26.1000">
+<meta name="version" content="2026.05.26.1001">
 <script type="text/javascript">
-  window.CURRENT_VERSION = "2026.05.26.1000";
+  window.CURRENT_VERSION = "2026.05.26.1001";
 
   // Force active cleanup of legacy service workers
   if ('serviceWorker' in navigator) {
@@ -818,7 +818,7 @@ input { font-family: inherit; }
   font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
   color: var(--text); line-height: 1.2; margin-bottom: 6px;
 }
-.greeting-sub { font-size: 13px; color: var(--text-muted); display: none; }
+.greeting-sub { font-size: 13px; color: var(--text-muted); }
 
 /* ==================== Featured tool cards ==================== */
 .featured-grid {
@@ -1138,7 +1138,7 @@ input { font-family: inherit; }
           <span class="search-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </span>
-          <input id="glossarySearchInput" class="search-input" type="search" placeholder="Search 196 terms..." autocomplete="off" spellcheck="false" aria-label="Search glossary" oninput="filterGlossary(this.value)">
+          <input id="glossarySearchInput" class="search-input" type="search" placeholder="Search 218 terms..." autocomplete="off" spellcheck="false" aria-label="Search glossary" oninput="filterGlossary(this.value)">
           <button id="glossarySearchClear" class="search-clear" aria-label="Clear search" onclick="clearGlossarySearch()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -1320,7 +1320,7 @@ input { font-family: inherit; }
 </div>
 
 <!-- External Data -->
-<script src="public/assets/js/tools.js?v=2026.05.26.1000"></script>
+<script src="public/assets/js/tools.js?v=2026.05.26.1001"></script>
 <script src="public/assets/js/glossary.js?v=2026.05.23.1015"></script>
 
 <script>
@@ -1490,6 +1490,28 @@ var rotationPool = [
   "Know your product. Know your borrower."
 ];
 
+var phraseBank = [
+  "Close faster. Underwrite smarter.",
+  "The deal you need is one conversation away.",
+  "Every rep who hit quota started somewhere in their pipeline.",
+  "Be the person who follows up.",
+  "Clarity closes. Know your numbers.",
+  "Busy day or slow day — work it the same way.",
+  "The best deals take patience.",
+  "Show up prepared. The rest follows.",
+  "What's the next move on your biggest deal?"
+];
+var lastPhraseIdx = -1;
+
+function getSubtitle() {
+  var idx;
+  do { 
+    idx = Math.floor(Math.random() * phraseBank.length); 
+  } while (idx === lastPhraseIdx && phraseBank.length > 1);
+  lastPhraseIdx = idx;
+  return phraseBank[idx];
+}
+
 function getNthWeekdayOfMonth(year, month, weekday, n) {
   var date = new Date(year, month, 1);
   var count = 0;
@@ -1597,7 +1619,10 @@ function updateGreeting() {
   var gt = document.getElementById('greetingText');
   var gs = document.getElementById('greetingSubtitle');
   if (gt) gt.textContent = getContextualGreeting();
-  if (gs) gs.style.display = 'none';
+  if (gs) {
+    gs.textContent = getSubtitle();
+    gs.style.display = 'block';
+  }
 }
 
 /* ---- Featured card renderer ---- */
