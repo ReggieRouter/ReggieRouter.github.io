@@ -2440,64 +2440,64 @@ overlay.addEventListener('click', closeMobile);
 
 /* ---- Modal System Functions ---- */
 function openFeatureRequest(id, name) {
-  document.getElementById(‘frm-name’).textContent = name;
-  document.getElementById(‘frm-tool-name’).value = name;
-  document.getElementById(‘frm-form’).style.display = ‘flex’;
-  document.getElementById(‘frm-success-msg’).style.display = ‘none’;
-  document.getElementById(‘frm-error-msg’).style.display = ‘none’;
-  document.getElementById(‘frm-hint-text’).style.display = ‘block’;
-  document.getElementById(‘frm-email-input’).value = ‘’;
-  var btn = document.getElementById(‘frm-submit-btn’);
+  document.getElementById('frm-name').textContent = name;
+  document.getElementById('frm-tool-name').value = name;
+  document.getElementById('frm-form').style.display = 'flex';
+  document.getElementById('frm-success-msg').style.display = 'none';
+  document.getElementById('frm-error-msg').style.display = 'none';
+  document.getElementById('frm-hint-text').style.display = 'block';
+  document.getElementById('frm-email-input').value = '';
+  var btn = document.getElementById('frm-submit-btn');
   btn.disabled = false;
-  document.getElementById(‘frm-submit-label’).textContent = ‘Send request →’;
-  document.getElementById(‘frm-overlay’).classList.add(‘open’);
+  document.getElementById('frm-submit-label').textContent = 'Send request →';
+  document.getElementById('frm-overlay').classList.add('open');
 }
 function closeFRM() {
-  document.getElementById(‘frm-overlay’).classList.remove(‘open’);
+  document.getElementById('frm-overlay').classList.remove('open');
   setTimeout(function() {
-    document.getElementById(‘frm-form’).style.display = ‘flex’;
-    document.getElementById(‘frm-success-msg’).style.display = ‘none’;
-    document.getElementById(‘frm-error-msg’).style.display = ‘none’;
-    document.getElementById(‘frm-hint-text’).style.display = ‘block’;
-    document.getElementById(‘frm-email-input’).value = ‘’;
-    var btn = document.getElementById(‘frm-submit-btn’);
+    document.getElementById('frm-form').style.display = 'flex';
+    document.getElementById('frm-success-msg').style.display = 'none';
+    document.getElementById('frm-error-msg').style.display = 'none';
+    document.getElementById('frm-hint-text').style.display = 'block';
+    document.getElementById('frm-email-input').value = '';
+    var btn = document.getElementById('frm-submit-btn');
     btn.disabled = false;
-    document.getElementById(‘frm-submit-label’).textContent = ‘Send request →’;
+    document.getElementById('frm-submit-label').textContent = 'Send request →';
   }, 300);
 }
 
 /* ---- Feature Request Form ---- */
 (function() {
-  var FORMSPREE_ID = ‘xbdbwlky’;
-  document.getElementById(‘frm-form’).addEventListener(‘submit’, function(e) {
+  var FORMSPREE_ID = 'xbdbwlky';
+  document.getElementById('frm-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    var submitBtn   = document.getElementById(‘frm-submit-btn’);
-    var submitLabel = document.getElementById(‘frm-submit-label’);
-    var errorMsg    = document.getElementById(‘frm-error-msg’);
-    var successMsg  = document.getElementById(‘frm-success-msg’);
-    var hintText    = document.getElementById(‘frm-hint-text’);
-    submitLabel.textContent = ‘Sending…’;
+    var submitBtn   = document.getElementById('frm-submit-btn');
+    var submitLabel = document.getElementById('frm-submit-label');
+    var errorMsg    = document.getElementById('frm-error-msg');
+    var successMsg  = document.getElementById('frm-success-msg');
+    var hintText    = document.getElementById('frm-hint-text');
+    submitLabel.textContent = 'Sending…';
     submitBtn.disabled = true;
-    errorMsg.style.display = ‘none’;
-    fetch(‘https://formspree.io/f/’ + FORMSPREE_ID, {
-      method: ‘POST’,
+    errorMsg.style.display = 'none';
+    fetch('https://formspree.io/f/' + FORMSPREE_ID, {
+      method: 'POST',
       body: new FormData(this),
-      headers: { ‘Accept’: ‘application/json’ }
+      headers: { 'Accept': 'application/json' }
     }).then(function(res) {
       if (res.ok) {
-        document.getElementById(‘frm-form’).style.display = ‘none’;
-        hintText.style.display = ‘none’;
-        successMsg.style.display = ‘block’;
+        document.getElementById('frm-form').style.display = 'none';
+        hintText.style.display = 'none';
+        successMsg.style.display = 'block';
         setTimeout(function() { closeFRM(); }, 2800);
       } else {
-        errorMsg.style.display = ‘block’;
+        errorMsg.style.display = 'block';
         submitBtn.disabled = false;
-        submitLabel.textContent = ‘Send request →’;
+        submitLabel.textContent = 'Send request →';
       }
     }).catch(function() {
-      errorMsg.style.display = ‘block’;
+      errorMsg.style.display = 'block';
       submitBtn.disabled = false;
-      submitLabel.textContent = ‘Send request →’;
+      submitLabel.textContent = 'Send request →';
     });
   });
 })();
