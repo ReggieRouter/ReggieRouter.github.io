@@ -1220,8 +1220,8 @@
     border-color: var(--color-brand-mid);
   }
   .lp-pos-dot.cap {
-    background: #D97706;
-    border-color: #D97706;
+    background: var(--color-brand-mid);
+    border-color: var(--color-brand-mid);
   }
   .lp-pos-meta {
     font-size: 10px;
@@ -6246,8 +6246,7 @@
             dots.push(`<span class="lp-pos-dot"></span>`);
           }
         }
-        const meta = atCap ? `<span class="lp-pos-meta" style="color:#D97706;font-weight:700;">MAX</span>` : '';
-        return `<div class="lp-pos-cell"><div class="lp-pos-dots">${dots.join('')}</div>${meta}</div>`;
+        return `<div class="lp-pos-cell"><div class="lp-pos-dots">${dots.join('')}</div></div>`;
       })();
 
       // Risk band (composite)
