@@ -2179,7 +2179,7 @@
       <!-- Risk appetite chips -->
       <div class="lp-chip-row">
         <span class="lp-chip-label">
-          <span class="lp-info-wrap">Accepts borrowers
+          <span class="lp-info-wrap">Risk appetite
             <button class="lp-info-btn" data-modal="info-risk" aria-label="About Risk Appetite">i</button>
           </span>
         </span>
@@ -2204,7 +2204,7 @@
           <button class="chip-btn" data-product="Term">Term</button>
           <button class="chip-btn" data-product="LOC">LOC</button>
           <button class="chip-btn" data-product="SBA">SBA</button>
-          <button class="chip-btn" data-product="Finance">Finance</button>
+          <button class="chip-btn" data-product="Finance">Equip</button>
           <button class="chip-btn" data-product="CRE">CRE</button>
           <button class="chip-btn" data-product="Factor">Factor</button>
         </div>
@@ -2312,7 +2312,7 @@
           <div id="legend-pop" class="lp-legend-pop" role="dialog" aria-label="Trust signal key">
             <h6>Trust signals (under lender name)</h6>
             <div id="legend-items"></div>
-            <h6 style="margin-top:14px;">Accepts borrowers</h6>
+            <h6 style="margin-top:14px;">Risk appetite</h6>
             <div id="legend-risk"></div>
           </div>
         </span>
@@ -2341,7 +2341,7 @@
           <tr>
             <th data-col="name">Lender <span class="sort-icon"></span></th>
             <th data-col="products">Products <span class="sort-icon"></span></th>
-            <th data-col="risk">Accepts borrowers <span class="sort-icon"></span></th>
+            <th data-col="risk">Risk appetite <span class="sort-icon"></span></th>
             <th class="num-col" data-col="fico">Min FICO <span class="sort-icon"></span></th>
             <th class="num-col" data-col="tib">TIB (mo.) <span class="sort-icon"></span></th>
             <th class="num-col" data-col="rev">Monthly rev <span class="sort-icon"></span></th>
@@ -5882,9 +5882,12 @@
     if (lender.hard_collateral) score -= 1;
     if (lender.bank_verified)   score -= 0.5;
 
-    if (score <= 2)   return { label: 'Low',      dot: 'green',  code: 'low',  score, pillBg: '#EAF3DE', pillColor: '#27500A' };
-    if (score <= 4)   return { label: 'Moderate', dot: 'yellow', code: 'mod',  score, pillBg: '#FAEEDA', pillColor: '#633806' };
-    return            { label: 'High',      dot: 'red',    code: 'high', score, pillBg: '#FAECE7', pillColor: '#712B13' };
+    // Range buckets: lenders accepting higher-risk borrowers implicitly accept lower-risk ones too.
+    // score ≤ 1.5 → strict lender (low only); higher score = broader acceptance.
+    if (score <= 1.5) return { label: 'Low only',        dot: 'green',  code: 'low',     score, pillBg: '#EAF3DE', pillColor: '#27500A' };
+    if (score <= 3.5) return { label: 'Low–Moderate',   dot: 'green',  code: 'lowmod',  score, pillBg: '#EAF3DE', pillColor: '#27500A' };
+    if (score <= 5.5) return { label: 'Moderate–High',  dot: 'yellow', code: 'modhigh', score, pillBg: '#FAEEDA', pillColor: '#633806' };
+    return            { label: 'All risk tiers',  dot: 'red',    code: 'allrisk', score, pillBg: '#FAECE7', pillColor: '#712B13' };
   };
 
   // Wraps determineRisk; marketplace/broker lenders marked all_risk:true serve all borrower tiers
@@ -5935,6 +5938,9 @@
   };
   const PRODUCT_CLASS = {
     MCA: 'mca', Term: 'term', LOC: 'loc', SBA: 'sba', Finance: 'finance', CRE: 'cre', Factor: 'factor',
+  };
+  const PRODUCT_SHORT = {
+    MCA: 'MCA', Term: 'Term', LOC: 'LOC', SBA: 'SBA', Finance: 'Equip', CRE: 'CRE', Factor: 'Factor',
   };
   const PRODUCT_ORDER = ['MCA', 'Term', 'LOC', 'SBA', 'Finance', 'CRE', 'Factor'];
   function normalizeProduct(raw) {
@@ -6077,9 +6083,12 @@
         if (!matchesName && !matchesProducts && !matchesInd && !matchesPhone && !matchesEmail && !matchesRestr && !matchesCollat) return false;
       }
 
-      // Risk category — 'allrisk' marketplace lenders always pass
+      // Risk filter — hierarchical: "Low" shows lenders who accept low-risk borrowers (includes broader ones too)
       const risk = getLenderRisk(l);
-      if (activeFilters.risk !== 'all' && risk.code !== activeFilters.risk && risk.code !== 'allrisk') return false;
+      if (activeFilters.risk !== 'all') {
+        const accepts = { low: ['low','lowmod','allrisk'], mod: ['lowmod','modhigh','allrisk'], high: ['modhigh','allrisk'] };
+        if (!(accepts[activeFilters.risk] ?? []).includes(risk.code)) return false;
+      }
 
       // Product Type — match normalized canonical codes
       if (activeFilters.product !== 'all') {
@@ -6168,7 +6177,7 @@
           valA = a.stacking;
           valB = b.stacking;
         } else if (sortColumn === 'risk') {
-          const rankMap = { 'allrisk': 0, 'low': 1, 'mod': 2, 'high': 3 };
+          const rankMap = { 'low': 1, 'lowmod': 2, 'modhigh': 3, 'allrisk': 4 };
           valA = rankMap[getLenderRisk(a).code] ?? 1;
           valB = rankMap[getLenderRisk(b).code] ?? 1;
           // tiebreak alphabetically within same tier
@@ -6216,7 +6225,7 @@
       const visibleP = canonical.slice(0, MAX_PROD);
       const hiddenP = canonical.slice(MAX_PROD);
       const productsHtml = visibleP.map(p =>
-        `<span class="badge-product ${PRODUCT_CLASS[p]}" data-tooltip="${PRODUCT_LABELS[p]}">${p}</span>`
+        `<span class="badge-product ${PRODUCT_CLASS[p]}" data-tooltip="${PRODUCT_LABELS[p]}">${PRODUCT_SHORT[p] ?? p}</span>`
       ).join(' ') + (
         hiddenP.length > 0
           ? ` <span class="badge-product-more" title="${hiddenP.map(p => PRODUCT_LABELS[p]).join(' · ')}">+${hiddenP.length}</span>`
@@ -7170,7 +7179,7 @@
           </tr>
         </thead>
         <tbody>
-          ${rowFor('Accepts borrowers', lenders.map(l => riskPillHTML(getLenderRisk(l))))}
+          ${rowFor('Risk appetite', lenders.map(l => riskPillHTML(getLenderRisk(l))))}
           ${rowFor('Min FICO', ficoVals.map(v => cellNum(v, bestFico)))}
           ${rowFor('Time in business', tibVals.map(v => cellNum(v, bestTib, x => x + ' mo')))}
           ${rowFor('Min monthly revenue', revVals.map(v => cellNum(v, bestRev, x => formatCurrency(x))))}
