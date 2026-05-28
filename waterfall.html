@@ -2471,24 +2471,24 @@
 <div class="lp-modal-backdrop" id="info-risk-backdrop">
   <div class="lp-modal" style="max-width:480px;">
     <button class="lp-modal-close" data-close="info-risk-backdrop">&times;</button>
-    <h3 class="lp-modal-title" style="margin-bottom:16px;">Risk appetite</h3>
-    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">Shows the borrower risk profile this lender accepts, based on minimum credit score, time in business, revenue, and product type. MCA products raise the tier by one. Tiers sort top to bottom: easiest to qualify → hardest.</p>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#EFF6FF;border:1px solid #BFDBFE;">
-        <span style="width:10px;height:10px;border-radius:50%;background:#3B82F6;flex-shrink:0;margin-top:4px;"></span>
-        <div><div style="font-weight:600;font-size:13px;color:#1D4ED8;margin-bottom:3px;">No FICO Required <span style="font-weight:400;font-size:11px;color:#3B82F6;">(sorts first)</span></div><div style="font-size:12px;color:#1E40AF;">No minimum credit score — lender qualifies purely on revenue and bank history. Broadest borrower pool. Appears under the "Low" filter chip.</div></div>
+    <h3 class="lp-modal-title" style="margin-bottom:8px;">Risk appetite</h3>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 14px 0;">Shows what borrower profile a lender will accept — not a judgment on the lender. A lender that accepts high-risk borrowers will also take moderate and low-risk ones. Score is composite: credit score minimum, time in business, monthly revenue, and product type (MCA raises the score).</p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#EAF3DE;border:1px solid #C3E6A3;">
+        <span style="display:inline-block;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:500;background:#EAF3DE;color:#27500A;border:1px solid #C3E6A3;white-space:nowrap;flex-shrink:0;">Low only</span>
+        <div style="font-size:12px;color:#166534;">Strict underwriting — 650+ FICO, 18+ months TIB, $50k+ monthly revenue, no MCA. Borrower profile must be strong. Typically banks, SBA-preferred lenders, and traditional term lenders.</div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#F0FDF4;border:1px solid #A7F3D0;">
-        <span style="width:10px;height:10px;border-radius:50%;background:#16A34A;flex-shrink:0;margin-top:4px;"></span>
-        <div><div style="font-weight:600;font-size:13px;color:#27500A;margin-bottom:3px;">Low</div><div style="font-size:12px;color:#166534;">600+ personal credit score, non-MCA products. Traditional underwriting with strong applicant profile.</div></div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#EAF3DE;border:1px solid #C3E6A3;">
+        <span style="display:inline-block;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:500;background:#EAF3DE;color:#27500A;border:1px solid #C3E6A3;white-space:nowrap;flex-shrink:0;">Low–Moderate</span>
+        <div style="font-size:12px;color:#166534;">600–650 FICO range, 12–18 months TIB, $25k–$50k monthly revenue. Will consider borrowers with decent but imperfect profiles.</div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FFFBEB;border:1px solid #FDE68A;">
-        <span style="width:10px;height:10px;border-radius:50%;background:#EAB308;flex-shrink:0;margin-top:4px;"></span>
-        <div><div style="font-weight:600;font-size:13px;color:#633806;margin-bottom:3px;">Moderate</div><div style="font-size:12px;color:#854D0E;">500–599 credit score, or 600+ score with MCA product. Expect higher factor rates and tighter stacking limits.</div></div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FAEEDA;border:1px solid #F5CFA0;">
+        <span style="display:inline-block;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:500;background:#FAEEDA;color:#633806;border:1px solid #F5CFA0;white-space:nowrap;flex-shrink:0;">Moderate–High</span>
+        <div style="font-size:12px;color:#854D0E;">500–599 FICO, 6–12 months TIB, $10k–$25k monthly revenue. Frequently offers MCA alongside term products. Higher factor rates and tighter stacking limits.</div>
       </div>
-      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FEF2F2;border:1px solid #FECACA;">
-        <span style="width:10px;height:10px;border-radius:50%;background:#DC2626;flex-shrink:0;margin-top:4px;"></span>
-        <div><div style="font-weight:600;font-size:13px;color:#712B13;margin-bottom:3px;">High</div><div style="font-size:12px;color:#B91C1C;">Below 500 credit score, or MCA-only lender with sub-600 FICO threshold. Heavy verification, higher cost of capital, limited stacking.</div></div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FAECE7;border:1px solid #F5C6B8;">
+        <span style="display:inline-block;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:500;background:#FAECE7;color:#712B13;border:1px solid #F5C6B8;white-space:nowrap;flex-shrink:0;">All risk tiers</span>
+        <div style="font-size:12px;color:#B91C1C;">Sub-500 FICO or no credit check, under 6 months TIB, under $10k monthly revenue, often MCA-only. Broadest borrower pool — highest cost of capital and most verification-heavy.</div>
       </div>
     </div>
   </div>
