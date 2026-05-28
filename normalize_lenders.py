@@ -42,9 +42,18 @@ DISPLAY_NAME_EXCEPTIONS = [
 # Hard renames: applied BEFORE suffix stripping. Old name → canonical name.
 # These fix casing, rebrands, or known data-entry errors from Beekeeper Studio.
 LENDER_RENAMES = {
-    "FUNDINGO": "Fundingo",
-    "American Express": "AmEx Kabbage",
-    "Quickbridge Funding, LLC": "QuickBridge",   # deduplicate with existing QuickBridge row
+    "FUNDINGO":                "Fundingo",
+    "American Express":        "AmEx Kabbage",
+    "Quickbridge Funding, LLC":"QuickBridge",      # deduplicate with existing QuickBridge row
+    "Fenix Capital Funding":   "Fenix",
+    "Expansion Capital":       "ECG",
+    "Cobalt Funding Solutions":"Cobalt",
+    "CFGMS":                   "CFG",
+    "Capfront":                "CapFront",
+    "Biz Capital Miami":       "BusinessCapital",
+    "Accord Business Funding": "Accord",
+    "Square Loans":            "Square Financing",
+    "Fox Business Funding":    "Fox",
 }
 
 # Lenders to exclude entirely (removed from product/market).
@@ -68,16 +77,32 @@ LOGO_OVERRIDES = {
     "Mantis Funding":         "Mantis Funding.png",
     "Giggle Finance":         "Giggle.png",
     "FundThrough":            "Fundthrough.png",
-    "Cobalt Funding Solutions": "Cobalt Funding.png",
-    "Expansion Capital":      "Expansion Capital Group.png",
-    "Forward Financing":      "Forward Financing.png",
-    "Greenbox Capital":       "Greenbox Capital.png",
-    "National Business Capital": "National Business Capital.png",
-    "PEAC Solutions":         "PEAC.png",
-    "QuickBridge":            "Quickbridge.png",
-    "Small Business Funding": "Small business funding.png",
-    "Grasshopper Bank":       "grasshopper bank.png",
-    "Highland Hill Capital":  "Highland Hill.png",
+    "Cobalt":                  "Cobalt Funding.png",
+    "ECG":                     "Expansion Capital Group.png",
+    "Forward Financing":       "Forward Financing.png",
+    "Greenbox Capital":        "Greenbox Capital.png",
+    "National Business Capital":"National Business Capital.png",
+    "PEAC Solutions":          "PEAC.png",
+    "QuickBridge":             "Quickbridge.png",
+    "Small Business Funding":  "Small business funding.png",
+    "Grasshopper Bank":        "grasshopper bank.png",
+    "Highland Hill Capital":   "Highland Hill.png",
+    # New uploads (2026-05-28)
+    "Square Financing":        "Square Financing.png",
+    "PayPal Working Capital":  "Paypal.png",
+    "Fundbox":                 "Fundbox.png",
+    "AmEx Kabbage":            "AmEx Kabbage.png",
+    "BusinessCapital":         "business_capital_llc_logo.png",
+    "1st Alliance Group":      "1st alliance funding.png",
+    "Splash Advance":          "Splash Advance.png",
+    "Shopify Capital":         "Shopify Lending.png",
+    "ROK Financial":           "rok financial.png",
+}
+
+# Products overrides — set canonical product list for specific lenders.
+PRODUCTS_OVERRIDES = {
+    "CapFront":         ["Term Loan", "Equipment"],
+    "Grasshopper Bank": ["SBA"],
 }
 
 # Fields whose source_snippet content is known to contain raw HTML or <script> tags.
@@ -160,6 +185,10 @@ def normalize(lenders: list) -> list:
 
         # 4. Resolve logo
         lender["logo_url"] = resolve_logo(lender)
+
+        # 4b. Apply products override if defined
+        if name in PRODUCTS_OVERRIDES:
+            lender["products"] = PRODUCTS_OVERRIDES[name]
 
         # 5. Check critical fields
         missing = []
