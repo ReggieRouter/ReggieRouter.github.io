@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="100%" height="100%">
-  <!-- Icon: Box in a box -->
-  <rect x="15" y="12" width="36" height="36" rx="8" fill="none" stroke="#3CC5AA" stroke-width="4"/>
-  <rect x="25" y="22" width="16" height="16" rx="4" fill="#3CC5AA"/>
-  <!-- Text -->
-  <text x="65" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="800" fill="#111827" letter-spacing="-1px">fundbox</text>
-</svg>
