@@ -2726,7 +2726,7 @@
       "support_phone": "",
       "source_url": "https://www.americanexpress.com/us/business/blueprint/",
       "source_snippet": "We\u2019re having trouble finding the page you\u2019re looking for. This could be because: The URL (page address) was entered incorrectly The page has moved The page no longer exists Here are a few things you can do: Re-enter the URL Use the menu to explore the site Visit the American Express homepage \u200b ABOUT About American Express Newsroom Investor Relations Careers Global Network Contact Us PRODUCTS & SERVICES Credit Cards Business Credit Cards Corporate Programs View All Gift Cards Savings Accounts & CDs Download the App LINKS YOU MAY LIKE Membership Rewards FICO\u00ae Score and Insights CreditSecure\u00ae Accept Amex Cards Refer A Friend SpendSmart\u00ae ADDITIONAL INFORMATION Credit Intel \u2013 Financial Education Center Amex Business Intel\u2122 - B2B Education Center Supplier Code of Conduct Credit Score 101 Frequently Asked Questions United StatesChange Country Terms of ServicePrivacy CenterDo Not Sell or Share My Personal InformationAdChoicesSecurity CenterCard AgreementsServicemember BenefitsSite Map All users of our online services are subject to our Privacy Statement and agree to be bound by the Terms of Service. Please review. \u00a9 2026 American Express. All rights reserved",
-      "logo_url": "https://www.americanexpress.com/content/dam/amex/us/brand/amex-logo-blue.svg",
+      "logo_url": "public/assets/lenders/AmEx Kabbage.png",
       "early_payment_discount": false,
       "preferred_industries": [],
       "max_funding_amount": 0,
@@ -5466,35 +5466,6 @@
     },
     {
       "id": 1085,
-      "name": "AmEx Kabbage",
-      "fico": 0,
-      "tib": 0,
-      "rev": 0,
-      "stacking": 1,
-      "restrictions": [],
-      "detailed_restrictions": [],
-      "products": [],
-      "updated_at": "2026-05-27",
-      "submission_url": "",
-      "soft_pull": false,
-      "bank_verified": false,
-      "bank_statements": null,
-      "hard_collateral": false,
-      "hq_state": "",
-      "hq_address": "",
-      "support_email": "",
-      "support_phone": "",
-      "source_url": "",
-      "source_snippet": "",
-      "logo_url": "public/assets/lenders/AmEx Kabbage.png",
-      "early_payment_discount": false,
-      "preferred_industries": [],
-      "max_funding_amount": 0,
-      "max_term_months": 0,
-      "payment_frequencies": []
-    },
-    {
-      "id": 1085,
       "name": "BusinessCapital",
       "fico": 0,
       "tib": 0,
@@ -5823,6 +5794,20 @@
     // Enforce 300 as minimum displayable FICO floor
     if (l.fico > 0 && l.fico < 300) l.fico = 300;
   });
+  // De-dup guard: keep the entry with the most populated fields when names collide.
+  // Prevents duplicate rows if future data imports add a same-named lender twice.
+  (() => {
+    const seen = new Map();
+    const score = l => (l.fico > 0 ? 1 : 0) + (l.tib > 0 ? 1 : 0) + (l.rev > 0 ? 1 : 0)
+      + (l.products && l.products.length ? 1 : 0) + (l.submission_url ? 1 : 0)
+      + (l.source_url ? 1 : 0) + (l.support_phone ? 1 : 0);
+    lenderData.forEach(l => {
+      const key = l.name.toLowerCase().trim();
+      if (!seen.has(key) || score(l) > score(seen.get(key))) seen.set(key, l);
+    });
+    lenderData.length = 0;
+    seen.forEach(l => lenderData.push(l));
+  })();
 
   // Helper Functions
   const formatCurrency = (num) => {
@@ -6025,6 +6010,7 @@
   // DISPLAY_NAME_OVERRIDES — permanent naming rules. Add entries here to lock a lender's display name.
   // DO NOT remove entries — each was manually approved to prevent auto-stripping from reverting it.
   const DISPLAY_NAME_OVERRIDES = {
+    'American Express': 'AmEx',
     'Accord Business Funding': 'Accord',
     'CFGMS': 'CFG MS',
     'In Advance Capital': 'In Advance Capital',
