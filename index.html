@@ -1212,14 +1212,14 @@ input { font-family: inherit; }
       <div class="nav-divider"></div>
       <div class="nav-section">
         <div class="nav-label">Administration</div>
-        <a class="nav-item" href="http://127.0.0.1:8000/admin" target="_blank" style="text-decoration: none;">
+        <button class="nav-item" data-view="admin" onclick="navigateToView('admin')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
           Admin Panel
-        </a>
-        <a class="nav-item" href="http://127.0.0.1:8000/registry" target="_blank" style="text-decoration: none;">
+        </button>
+        <button class="nav-item" data-view="registry" onclick="navigateToView('registry')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
           States Registry
-        </a>
+        </button>
       </div>
     </nav>
 
@@ -1264,6 +1264,14 @@ input { font-family: inherit; }
       <div class="view" id="view-deal-math"><div id="dealMathCards"></div><div class="empty" id="dealEmpty"><h3>No matching deal tools.</h3><p>Try a different search term.</p></div></div>
       <div class="view" id="view-risk"><div id="riskCards"></div><div class="empty" id="riskEmpty"><h3>No matching risk tools.</h3><p>Try a different search term.</p></div></div>
       <div class="view" id="view-data"><div id="dataCards"></div><div class="empty" id="dataEmpty"><h3>No matching data tools.</h3><p>Try a different search term.</p></div></div>
+
+      <!-- Waterfall Admin & States Registry Inline Dashboards -->
+      <div class="view" id="view-admin" style="padding: 0; height: 100%; min-height: calc(100vh - 56px); background: #070913;">
+        <iframe id="iframe-admin" src="" style="width: 100%; height: 100%; border: none; min-height: calc(100vh - 56px); display: block;" allow="clipboard-write"></iframe>
+      </div>
+      <div class="view" id="view-registry" style="padding: 0; height: 100%; min-height: calc(100vh - 56px); background: #070913;">
+        <iframe id="iframe-registry" src="" style="width: 100%; height: 100%; border: none; min-height: calc(100vh - 56px); display: block;" allow="clipboard-write"></iframe>
+      </div>
 
       <!-- Glossary -->
       <div class="view" id="view-glossary">
@@ -2327,7 +2335,7 @@ function navigateToView(v) {
 }
 
 var currentView='home', prevView='home';
-var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Services','search':'Search results', 'tool': 'Tool', 'why': 'Why LendPaper', 'legal/estimates': 'Estimate Disclaimer'};
+var titles = {'home':'Home','deal-math':'Deal math','risk':'Risk & underwriting','data':'Data & leads','glossary':'Glossary','contact':'Services','search':'Search results', 'tool': 'Tool', 'why': 'Why LendPaper', 'legal/estimates': 'Estimate Disclaimer', 'admin': 'Waterfall Admin Dashboard', 'registry': 'States Registry'};
 
 function switchView(v) {
   if (v !== 'search' && v !== 'tool') prevView = v;
@@ -2344,7 +2352,7 @@ function switchView(v) {
 
   const searchWrap = document.querySelector('.search-wrap');
   if (searchWrap) {
-    if (v === 'glossary') {
+    if (v === 'glossary' || v === 'admin' || v === 'registry') {
       searchWrap.style.display = 'none';
     } else {
       searchWrap.style.display = '';
@@ -2655,6 +2663,21 @@ document.addEventListener('keydown', (e) => {
 })();
 
 /* ---- Init ---- */
+(function resolveIframeHosts() {
+  const isLocalFile = window.location.protocol === 'file:';
+  const apiHost = isLocalFile ? 'http://127.0.0.1:8000' : '';
+  
+  const iframeAdmin = document.getElementById('iframe-admin');
+  if (iframeAdmin) {
+    iframeAdmin.src = apiHost + '/admin';
+  }
+  
+  const iframeRegistry = document.getElementById('iframe-registry');
+  if (iframeRegistry) {
+    iframeRegistry.src = apiHost + '/registry';
+  }
+})();
+
 renderHome();
 renderCat('deal-math','dealMathCards');
 renderCat('risk','riskCards');
