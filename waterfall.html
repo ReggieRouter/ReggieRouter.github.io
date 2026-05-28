@@ -2847,40 +2847,6 @@
       "payment_frequencies": []
     },
     {
-      "id": 330,
-      "name": "Headway Capital Partners",
-      "fico": 600,
-      "tib": 6,
-      "rev": 10000,
-      "stacking": 1,
-      "restrictions": [],
-      "detailed_restrictions": [],
-      "products": [
-        "Line of Credit"
-      ],
-      "updated_at": "2026-05-27 19:10:15.157624",
-      "submission_url": "",
-      "soft_pull": true,
-      "bank_verified": false,
-      "bank_statements": 3,
-      "hard_collateral": false,
-      "hq_state": "UT",
-      "hq_address": "4700 W. Daybreak Pkwy., Suite 200 | South Jordan, UT 84009",
-      "support_email": "",
-      "support_phone": "866-698-8494",
-      "source_url": "https://www.headwaycapital.com",
-      "source_snippet": "By using this website, you agree to our use of cookies to collect and record information about your browsing session, to optimize site functionality, for analytical purposes, and to advertise to you through third parties. Learn more at \u200e Cookie Notice Small Business Loans About Us 866.698.8494 Apply Now Log In True Line of Credit\u2122 for Your Business Apply Now Applying will not impact your credit score.1 Easy Application See if you qualify in minutes. Fast Funding Money as soon as tomorrow.2 Save on Interest No prepayment penalties. Use our small business loan calculator to see how much you could get and what your payments might look like with a Headway Capital business line of credit. What's your desired credit limit? $50,000 What repayment term works for you? 12 Months 18 Months 24 Months How often do you want to make payments? Weekly Monthly Weekly Payment Amount*: $883.00 Apply Now We\u2019re currently accepting new customer applications. Applying will not impact your credit score. *This business loan calculator assumes a monthly interest rate of 3.3% and a 2% draw fee. Your interest rate and credit limit may vary based on your application. No draw fee in CO, GA, IN, NJ and OK. The Headway Capital Difference Headway Capital Line of Credit Term Loan* Merchant Cash Advance (MCA)* Longer Payment Repay over 12 \u2013 24 months. Yes Yes No Flexible Schedule Choose from weekly and monthly repayment options. Yes No No Revolving Credit Draw when you need and pay interest only on funds drawn. Yes No No Fast Funding Receive funds within one business day of approval. Yes Yes Yes Prepayment Benefits Pay off early and reduce your cost. Yes Yes No *Typical offers from online alternative lenders Trusted by Thousands of Hardworking Business Owners Read More Reviews A Business Partner You Can Depend On Public Company We are part of Enova International (NYSE: ENVA), a publicly traded company that has serviced more than 5 million consumers since 2004. Online Lenders Alliance Dedicated to Customers We are committed to the highest standards of conduct and work hard to create the very best experience for each one of our customers. Bank-Level Data Security We protect your information with bank-level security and 128-bit encryption. Headway Capital is certified by TrustedSite. 1We always do a soft inquiry unless your credit file is restricted, in which case we would ask you to contact the credit bureau to lift the restriction. Doing so may result in a hard pull. 2Funds are typically sent within one business day after approval. Rates & Terms About Us Contact Us FAQ News & Media Reviews Blog Resources Small Business Loans Line of Credit Working Capital Fast Loans Online Loans Headway Capital, LLC. | 4700 W. Daybreak Pkwy., Suite 200 | South Jordan, UT 84009 California Residents: Headway Capital California License Lender No. 60DBO 44216. Do Not Sell or Share My Personal Information California Collection Notice Terms of Use Privacy Policy Sitemap",
-      "logo_url": "public/assets/lenders/headwaycapitalpartners.png",
-      "early_payment_discount": true,
-      "preferred_industries": [],
-      "max_funding_amount": 50000,
-      "max_term_months": 24,
-      "payment_frequencies": [
-        "Weekly",
-        "Monthly"
-      ]
-    },
-    {
       "id": 88,
       "name": "Highland Hill Capital",
       "fico": 550,
@@ -4879,7 +4845,10 @@
   };
 
   // Helper: strip common legal suffixes for display
+  // Exceptions: names that must NOT be stripped (add to this list as needed)
+  const DISPLAY_NAME_EXCEPTIONS = ['In Advance Capital'];
   function displayName(name) {
+    if (DISPLAY_NAME_EXCEPTIONS.includes(name)) return name;
     return name.replace(/\s+(Capital|Funding|Advance|Solutions|Finance|Financial)(\s*,?\s*LLC)?$/i, '').trim();
   }
 
