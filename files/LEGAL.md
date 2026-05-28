@@ -138,7 +138,7 @@ any Generated Document as shared with a borrower or end-client.
 
 ### Section 7 — Contact
 For questions about this disclaimer or LendPaper's platform:
-info@lendpaper.com · lendpaper.com
+hello@lendpaper.com · lendpaper.com
 
 ---
 

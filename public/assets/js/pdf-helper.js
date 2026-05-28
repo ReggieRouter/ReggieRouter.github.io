@@ -237,9 +237,9 @@ window.PDF_HELPER = {
                 pdf.setTextColor(20, 83, 45); // Green for the link
                 pdf.setFont("helvetica", "bold");
                 try {
-                    pdf.textWithLink("info@lendpaper.com", startX, y2, { url: "mailto:info@lendpaper.com" });
+                    pdf.textWithLink("hello@lendpaper.com", startX, y2, { url: "mailto:hello@lendpaper.com" });
                 } catch(e) {
-                    pdf.text("info@lendpaper.com", startX, y2);
+                    pdf.text("hello@lendpaper.com", startX, y2);
                 }
             } else if (tier === 'pro' || tier === 'branded') {
                 let startX = 10;
@@ -275,7 +275,7 @@ window.PDF_HELPER = {
                 pdf.setTextColor(20, 83, 45);
                 pdf.setFont("helvetica", "bold");
                 try {
-                    pdf.textWithLink("white-label plans", startX, y2, { url: "mailto:info@lendpaper.com?subject=Interested%20in%20White-Label%20Plans" });
+                    pdf.textWithLink("white-label plans", startX, y2, { url: "mailto:hello@lendpaper.com?subject=Interested%20in%20White-Label%20Plans" });
                 } catch(e) {
                     pdf.text("white-label plans", startX, y2);
                 }
@@ -291,12 +291,12 @@ window.PDF_HELPER = {
                 
                 pdf.setFont("helvetica", "bold");
                 try {
-                    pdf.textWithLink("info@lendpaper.com", startX, y1, { url: "mailto:info@lendpaper.com" });
+                    pdf.textWithLink("hello@lendpaper.com", startX, y1, { url: "mailto:hello@lendpaper.com" });
                 } catch(e) {
-                    pdf.text("info@lendpaper.com", startX, y1);
+                    pdf.text("hello@lendpaper.com", startX, y1);
                 }
                 
-                let seg2Width = pdf.getTextWidth("info@lendpaper.com");
+                let seg2Width = pdf.getTextWidth("hello@lendpaper.com");
                 startX += seg2Width;
                 
                 pdf.setFont("helvetica", "normal");

@@ -163,7 +163,7 @@ Remove this footer and add your logo — ask about white-label plans.
 
 ### White-Label Tier
 ```
-Powered by LendPaper  |  info@lendpaper.com  |  lendpaper.com
+Powered by LendPaper  |  hello@lendpaper.com  |  lendpaper.com
 ```
 
 ### Enterprise Tier

@@ -14,7 +14,7 @@
 ### Open Graph / Twitter meta tags (absolute URLs required)
 ```html
 <meta property="og:title" content="[Page Title] — LendPaper" />
-<meta property="og:description" content="[1-line description]. Questions? Email stephengowa@gmail.com" />
+<meta property="og:description" content="[1-line description]. Questions? Email hello@lendpaper.com" />
 <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
 <meta property="og:url" content="https://lendpaper.com/[page-slug]" />
 <meta property="og:type" content="website" />

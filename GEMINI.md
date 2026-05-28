@@ -166,7 +166,7 @@ It is never suppressed. See `/docs/LEGAL.md` for the exact string.
 | Main site | lendpaper.com |
 | Upgrade / pricing | lendpaper.com/upgrade |
 | Legal disclaimer page | lendpaper.com/legal/estimates |
-| Contact | info@lendpaper.com |
+| Contact | hello@lendpaper.com |
 
 These URLs must be consistent across all PDF templates, email templates,
 UI copy, and the codebase. Do not hardcode variations.

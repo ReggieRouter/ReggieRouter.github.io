@@ -132,7 +132,7 @@
 <style>
 /*
  * LendPaper Homepage — Dashboard Layout
- * lendpaper.com | info@lendpaper.com
+ * lendpaper.com | hello@lendpaper.com
  * v2.0
  */
 
@@ -1214,7 +1214,7 @@ input { font-family: inherit; }
     <div class="sidebar-footer">
       <p style="font-style:italic;opacity:0.75;margin-bottom:6px;">Built by someone who worked the desk.</p>
       <p>© 2026 LendPaper</p>
-      <p><a href="mailto:stephengowa@gmail.com">info@lendpaper.com</a> &nbsp;·&nbsp; <a href="/privacy">Privacy</a></p>
+      <p><a href="mailto:hello@lendpaper.com">hello@lendpaper.com</a> &nbsp;·&nbsp; <a href="/privacy">Privacy</a></p>
     </div>
   </aside>
 
@@ -1369,7 +1369,7 @@ input { font-family: inherit; }
         <div class="svc-cta-block">
           <h3 class="svc-cta-heading">Tell me what's broken.</h3>
           <p class="svc-cta-copy">Your desk has a workflow problem I haven't built a fix for yet. Describe it. I'll tell you if I can solve it — and what it would cost.</p>
-          <a href="mailto:stephengowa@gmail.com?subject=Here%27s%20what%27s%20broken%20on%20my%20desk&body=Hi%20Steve%2C%0A%0AHere%27s%20the%20problem%20I%27m%20running%20into%3A%0A%0A" class="svc-cta-btn">
+          <a href="mailto:hello@lendpaper.com?subject=Here%27s%20what%27s%20broken%20on%20my%20desk&body=Hi%20Steve%2C%0A%0AHere%27s%20the%20problem%20I%27m%20running%20into%3A%0A%0A" class="svc-cta-btn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             Email Steve
           </a>
@@ -1399,7 +1399,7 @@ input { font-family: inherit; }
         <div style="margin-top:24px" id="searchGlossaryResults"></div>
         <div class="empty" id="searchEmpty">
           <div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-          <h3>Nothing matched.</h3><p>Try different keywords or <a href="mailto:stephengowa@gmail.com">request a tool</a>.</p>
+          <h3>Nothing matched.</h3><p>Try different keywords or <a href="mailto:hello@lendpaper.com">request a tool</a>.</p>
         </div>
       </div>
 
@@ -2289,7 +2289,7 @@ function submitProposeTerm() {
   var body    = encodeURIComponent(
     'Term: ' + termVal + (defVal ? '\n\nDefinition:\n' + defVal : '')
   );
-  window.location.href = 'mailto:info@lendpaper.com?subject=' + subject + '&body=' + body;
+  window.location.href = 'mailto:hello@lendpaper.com?subject=' + subject + '&body=' + body;
 
   bodyEl.style.display = 'none';
   successEl.classList.add('visible');
@@ -2413,7 +2413,7 @@ function openFeatureRequest(id, name) {
   document.getElementById('frm-name').textContent = name;
   var subject = encodeURIComponent('Feature request: ' + name);
   var body = encodeURIComponent('Hi LendPaper,\n\nI’d love to see the ' + name + ' tool added to LendPaper.\n\nFeel free to loop me in when it ships.\n\n— ');
-  document.getElementById('frm-email-btn').href = 'mailto:info@lendpaper.com?subject=' + subject + '&body=' + body;
+  document.getElementById('frm-email-btn').href = 'mailto:hello@lendpaper.com?subject=' + subject + '&body=' + body;
   document.getElementById('frm-overlay').classList.add('open');
 }
 function closeFRM() {

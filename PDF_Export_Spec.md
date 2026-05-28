@@ -246,7 +246,7 @@ Per-calculator titles:
     These figures are estimates for informational purposes only. Actual loan terms, rates, and fees will be determined by the lender upon final review.
   </span>
   <span class="plug">
-    Powered by LendPaper · info@lendpaper.com · lendpaper.com — Ask about whitelabeling and custom tools.
+    Powered by LendPaper · hello@lendpaper.com · lendpaper.com — Ask about whitelabeling and custom tools.
   </span>
 </footer>
 ```
@@ -311,7 +311,7 @@ await page.pdf({
   footerTemplate: `
     <div style="width:100%; font-size:8pt; color:#64748b; text-align:center; padding:0 0.55in; line-height:1.4;">
       <div>These figures are estimates for informational purposes only. Actual loan terms, rates, and fees will be determined by the lender upon final review.</div>
-      <div style="color:#94a3b8;">Powered by LendPaper · info@lendpaper.com · lendpaper.com — Ask about whitelabeling and custom tools.</div>
+      <div style="color:#94a3b8;">Powered by LendPaper · hello@lendpaper.com · lendpaper.com — Ask about whitelabeling and custom tools.</div>
     </div>
   `,
 });

@@ -69,7 +69,7 @@ DELTA & COMPARISON
 Use the following JavaScript architecture as the single source of truth for all calculations, copying, printing, and explanation components:
 
 ```javascript
-const WATERMARK_FOOTER = "Powered by LendPaper | info@lendpaper.com | lendpaper.com — Custom branding available";
+const WATERMARK_FOOTER = "Powered by LendPaper | hello@lendpaper.com | lendpaper.com — Custom branding available";
 
 function cleanNumericInput(value) {
   if (value === null || value === undefined || value === '') return null;
