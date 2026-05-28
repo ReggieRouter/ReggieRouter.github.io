@@ -451,7 +451,7 @@
     flex-direction: column;
     gap: 2px;
     min-width: 0;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .lp-lender-name {
@@ -1196,26 +1196,7 @@
   .lp-signal.collat { color: #B91C1C; background: #FEF2F2; border-color: #FECACA; }
   .lp-signal.payoff { color: #B45309; background: #FFFBEB; border-color: #FDE68A; }
   .lp-signal.nofico { color: #1D4ED8; background: #EFF6FF; border-color: #BFDBFE; }
-  /* tooltip via title attr is fine; add CSS tooltip on hover */
-  .lp-signal::after {
-    content: attr(data-label);
-    position: absolute;
-    bottom: calc(100% + 5px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1F2937;
-    color: #fff;
-    padding: 3px 7px;
-    border-radius: 4px;
-    font-size: 10.5px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s;
-    z-index: 50;
-    font-weight: 500;
-  }
-  .lp-signal:hover::after { opacity: 1; }
+  /* tooltip rendered via JS floating div (see bottom of script) — escapes overflow-x:auto */
 
   /* ----- ROW: position dots for stacking ----- */
   .lp-pos-dots {
@@ -7830,7 +7811,7 @@
       // Trust signal icons (compact, hover-labelled). Order is intentional: positive → cautionary.
       const SIG_ICONS = {
         soft:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>',
-        bank:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9h14v-9"/><path d="M9 14v3"/><path d="M15 14v3"/></svg>',
+        bank:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>',
         payoff:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
         collat:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
         nofico:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="5" y1="20" x2="19" y2="4"/></svg>',
@@ -8541,7 +8522,7 @@
   const SIG_LEGEND = [
     { cls: 'nofico', label: 'No FICO check — credit-score-blind lender',     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="5" y1="20" x2="19" y2="4"/></svg>' },
     { cls: 'soft',   label: 'Soft pull only (no credit-score impact)',       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>' },
-    { cls: 'bank',   label: 'Bank statements required for funding',           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9h14v-9"/><path d="M9 14v3"/><path d="M15 14v3"/></svg>' },
+    { cls: 'bank',   label: 'Bank statements required for funding',           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>' },
     { cls: 'payoff', label: 'Offers an early-payoff discount',                icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' },
     { cls: 'collat', label: 'Hard collateral required (e.g. UCC, real estate)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>' },
   ];
@@ -8872,6 +8853,37 @@
   renderFooterCount();
   updateSortIndicators();
   renderTable();
+
+  // Floating tooltip for .lp-signal — positioned fixed so it escapes overflow-x:auto table container
+  (function() {
+    const tip = document.createElement('div');
+    tip.style.cssText = 'position:fixed;background:#1F2937;color:#fff;padding:3px 7px;border-radius:4px;font-size:10.5px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:9999;';
+    document.body.appendChild(tip);
+    document.addEventListener('mouseover', (e) => {
+      const el = e.target.closest('.lp-signal');
+      if (!el) return;
+      const label = el.dataset.label;
+      if (!label) return;
+      tip.textContent = label;
+      // Position off-screen first so offsetWidth reflects the new text before painting
+      tip.style.left = '-9999px';
+      tip.style.top = '-9999px';
+      tip.style.opacity = '1';
+      const r = el.getBoundingClientRect();
+      const tipW = tip.offsetWidth;
+      const tipH = tip.offsetHeight;
+      let left = r.left + r.width / 2 - tipW / 2;
+      let top = r.top - tipH - 5;
+      left = Math.max(4, Math.min(left, window.innerWidth - tipW - 4));
+      top = Math.max(4, top);
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+    });
+    document.addEventListener('mouseout', (e) => {
+      if (e.target.closest('.lp-signal')) tip.style.opacity = '0';
+    });
+  })();
+
   // v2026-05-28
 </script>
 </body>
