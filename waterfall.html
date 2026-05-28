@@ -533,6 +533,34 @@
     color: #1D4ED8;
     border: 1px solid #BFDBFE;
   }
+  .badge-product.term {
+    background-color: #E6FFFA;
+    color: #0D9488;
+    border: 1px solid #CCFBF1;
+  }
+  .badge-product.finance {
+    background-color: #FFEDD5;
+    color: #C2410C;
+    border: 1px solid #FED7AA;
+  }
+  .badge-product.factor {
+    background-color: #F1F5F9;
+    color: #475569;
+    border: 1px solid #E2E8F0;
+  }
+  /* "+N more" pill for product overflow */
+  .badge-product-more {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    background: #F9FAFB;
+    color: var(--color-brand-mid);
+    border: 1px dashed var(--color-brand-mid);
+    cursor: help;
+    display: inline-block;
+  }
 
   .num-col {
     text-align: right;
@@ -1135,6 +1163,955 @@
   .lp-info-icon:hover {
     color: var(--color-brand-mid);
   }
+
+  /* ───────────────────────────────────────────────────────────────
+     REFINEMENT LAYER — May 2026
+     Goals: cleaner row scanning · KISS · surface depth only on click
+     ─────────────────────────────────────────────────────────────── */
+
+  /* ----- ROW: trust signal icons replace text mini-badges ----- */
+  .lp-signal-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 3px;
+    align-items: center;
+  }
+  .lp-signal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    color: #6B7280;
+    background: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    cursor: help;
+    position: relative;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .lp-signal svg { width: 10px; height: 10px; }
+  .lp-signal.soft { color: #4F46E5; background: #EEF2FF; border-color: #C7D2FE; }
+  .lp-signal.bank { color: #059669; background: #ECFDF5; border-color: #A7F3D0; }
+  .lp-signal.collat { color: #B91C1C; background: #FEF2F2; border-color: #FECACA; }
+  .lp-signal.payoff { color: #B45309; background: #FFFBEB; border-color: #FDE68A; }
+  .lp-signal.nofico { color: #1D4ED8; background: #EFF6FF; border-color: #BFDBFE; }
+  /* tooltip via title attr is fine; add CSS tooltip on hover */
+  .lp-signal::after {
+    content: attr(data-label);
+    position: absolute;
+    bottom: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1F2937;
+    color: #fff;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 10.5px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    z-index: 50;
+    font-weight: 500;
+  }
+  .lp-signal:hover::after { opacity: 1; }
+
+  /* ----- ROW: position dots for stacking ----- */
+  .lp-pos-dots {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .lp-pos-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #E5E7EB;
+    border: 1px solid #D1D5DB;
+  }
+  .lp-pos-dot.filled {
+    background: var(--color-brand-mid);
+    border-color: var(--color-brand-mid);
+  }
+  .lp-pos-dot.cap {
+    background: #D97706;
+    border-color: #D97706;
+  }
+  .lp-pos-meta {
+    font-size: 10px;
+    color: var(--color-text-muted);
+    margin-left: 4px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+  .lp-pos-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  /* ----- FILTERS: "More filters" button + popover ----- */
+  .lp-more-filters-wrap {
+    position: relative;
+    margin-left: auto;
+  }
+  .lp-more-filters-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: #FFFFFF;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: border-color 0.12s, color 0.12s, background 0.12s;
+    font-family: inherit;
+  }
+  .lp-more-filters-btn:hover {
+    border-color: var(--color-brand-mid);
+    color: var(--color-brand-dark);
+    background: #F0FDF4;
+  }
+  .lp-more-filters-btn.has-active {
+    background: #F0FDF4;
+    color: var(--color-brand-dark);
+    border-color: var(--color-brand-mid);
+    font-weight: 600;
+  }
+  .lp-more-filters-btn .lp-count-pill {
+    background: var(--color-brand-mid);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 8px;
+    line-height: 1.4;
+  }
+  .lp-more-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 320px;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(15, 30, 25, 0.12), 0 2px 4px rgba(0,0,0,0.04);
+    padding: 16px;
+    z-index: 60;
+    display: none;
+  }
+  .lp-more-popover.open { display: block; }
+  .lp-more-popover h5 {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary);
+    margin: 0 0 8px 0;
+  }
+  .lp-more-popover .lp-mf-section {
+    margin-bottom: 14px;
+  }
+  .lp-more-popover .lp-mf-section:last-child { margin-bottom: 0; }
+  .lp-mf-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .lp-mf-chip {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: #F9FAFB;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.12s;
+  }
+  .lp-mf-chip:hover {
+    border-color: var(--color-brand-mid);
+    color: var(--color-brand-dark);
+  }
+  .lp-mf-chip.active {
+    background: var(--color-brand-mid);
+    color: #fff;
+    border-color: var(--color-brand-mid);
+  }
+  .lp-mf-slider-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .lp-mf-slider-wrap input[type="range"] {
+    width: 100%;
+    accent-color: var(--color-brand-mid);
+  }
+  .lp-mf-slider-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--color-text-muted);
+  }
+  .lp-mf-slider-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-brand-dark);
+  }
+  .lp-mf-clear {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    font-family: inherit;
+  }
+  .lp-mf-clear:hover { color: var(--color-brand-mid); }
+  .lp-mf-footer {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* ----- DROPDOWN: refined drawer with icon rhythm ----- */
+  .lp-drawer-v2 {
+    padding: 22px 24px 20px 24px;
+    margin: 10px 14px 20px 14px;
+    background: #FFFFFF;
+    border: 1px solid rgba(45, 106, 79, 0.18);
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(15, 30, 25, 0.06), inset 4px 0 0 var(--color-brand-mid);
+    animation: slideDown 0.22s ease-out;
+  }
+  .lp-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+    gap: 16px;
+  }
+  .lp-drawer-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-brand-dark);
+    letter-spacing: -0.01em;
+  }
+  .lp-drawer-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--color-text-muted);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .lp-drawer-meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+  .lp-drawer-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 28px;
+  }
+  @media (max-width: 780px) {
+    .lp-drawer-grid { grid-template-columns: 1fr; gap: 22px; }
+  }
+
+  .lp-section-head {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 12px;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--color-brand-dark);
+  }
+  .lp-section-head svg {
+    color: var(--color-brand-mid);
+    width: 13px;
+    height: 13px;
+  }
+  /* Tame any raw inline SVG glyphs across the drawer/footer */
+  .lp-drawer-meta svg,
+  .lp-drawer-footer-left svg,
+  .lp-drawer-footer a svg {
+    width: 11px;
+    height: 11px;
+    vertical-align: -1px;
+  }
+  .lp-restr-banner svg { width: 12px; height: 12px; }
+
+  .lp-spec-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .lp-spec-row {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid #F1F5F3;
+    font-size: 12.5px;
+  }
+  .lp-spec-row:last-child { border-bottom: none; }
+  .lp-spec-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    background: #F0FDF4;
+    color: var(--color-brand-mid);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lp-spec-icon svg { width: 12px; height: 12px; }
+  .lp-spec-icon.neutral { background: #F3F4F6; color: #6B7280; }
+  .lp-spec-icon.warn { background: #FFFBEB; color: #B45309; }
+  .lp-spec-icon.info { background: #EFF6FF; color: #1D4ED8; }
+  .lp-spec-label {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+  .lp-spec-val {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .lp-spec-val.muted { color: var(--color-text-muted); font-weight: 500; }
+  .lp-spec-val.affirm { color: var(--color-brand-mid); }
+  .lp-spec-val.deny { color: #9CA3AF; }
+
+  /* Contact column items */
+  .lp-contact-row {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #F1F5F3;
+    align-items: flex-start;
+    font-size: 12.5px;
+  }
+  .lp-contact-row:last-child { border-bottom: none; }
+  .lp-contact-text {
+    color: var(--color-text-primary);
+    font-weight: 500;
+    word-break: break-word;
+    line-height: 1.45;
+  }
+  .lp-contact-text a {
+    color: var(--color-brand-mid);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .lp-contact-text a:hover {
+    text-decoration: underline;
+    color: var(--color-brand-dark);
+  }
+  .lp-contact-sub {
+    font-size: 10.5px;
+    color: var(--color-text-muted);
+    margin-top: 1px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+
+  /* Restrictions banner inside drawer */
+  .lp-restr-banner {
+    margin-top: 18px;
+    padding: 12px 14px;
+    background: #F9FAFB;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .lp-restr-banner.custom {
+    background: #FFFBEB;
+    border-color: #FDE68A;
+  }
+  .lp-restr-banner-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .lp-restr-banner.custom .lp-restr-banner-icon {
+    background: #fff;
+    border-color: #FDE68A;
+    color: #B45309;
+  }
+  .lp-restr-banner-icon svg { width: 12px; height: 12px; }
+  .lp-restr-title {
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .lp-restr-banner.custom .lp-restr-title { color: #92400E; }
+  .lp-restr-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .lp-restr-chip {
+    font-size: 11px;
+    background: #fff;
+    border: 1px solid #FDE68A;
+    color: #92400E;
+    border-radius: 4px;
+    padding: 2px 7px;
+    line-height: 1.4;
+  }
+  .lp-restr-toggle {
+    background: none;
+    border: none;
+    color: var(--color-brand-mid);
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 6px;
+    font-family: inherit;
+  }
+  .lp-restr-toggle:hover { text-decoration: underline; }
+  .lp-restr-full {
+    display: none;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .lp-restr-full.open { display: flex; }
+  .lp-restr-full .lp-restr-chip {
+    background: #F3F4F6;
+    border-color: #E5E7EB;
+    color: #4B5563;
+  }
+
+  /* Sourcing footer */
+  .lp-drawer-footer {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--color-text-muted);
+  }
+  .lp-drawer-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .lp-drawer-footer-left span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .lp-std-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    background: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 3px 9px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .lp-std-pill:hover {
+    color: var(--color-brand-dark);
+    border-color: var(--color-brand-mid);
+    background: #F0FDF4;
+  }
+  .lp-drawer-footer a {
+    color: var(--color-brand-mid);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .lp-drawer-footer a:hover {
+    color: var(--color-brand-dark);
+    text-decoration: underline;
+  }
+
+  /* Detailed restrictions table (PEAC etc.) — keep but lighter */
+  .lp-detailed-restr {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: #F9FAFB;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+  }
+
+  /* Make the empty-state row a bit nicer */
+  .lp-data-table .empty-state {
+    padding: 38px 20px;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 13px;
+  }
+
+  /* ───────────────────────────────────────────────────────────────
+     #6 — FAB yields to Compare bar when the bar is visible
+     ─────────────────────────────────────────────────────────────── */
+  body.compare-on .lp-fab {
+    transform: translateY(80px);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.25s, opacity 0.2s;
+  }
+  .lp-fab { transition: transform 0.25s, opacity 0.2s; }
+
+  /* ───────────────────────────────────────────────────────────────
+     #7 — Data completeness meter (removed)
+     ─────────────────────────────────────────────────────────────── */
+
+  /* ───────────────────────────────────────────────────────────────
+     #11 — Density toggle (Compact ↔ Comfortable)
+     ─────────────────────────────────────────────────────────────── */
+  .lp-data-table.compact td { padding: 9px 12px; font-size: 12.5px; }
+  .lp-data-table.compact .lender-logo { width: 28px; height: 28px; }
+  .lp-data-table.compact .lp-lender-name { font-size: 13px; }
+  .lp-data-table.compact .lp-signal { width: 14px; height: 14px; }
+  .lp-data-table.compact .lp-signal svg { width: 9px; height: 9px; }
+
+  /* ───────────────────────────────────────────────────────────────
+     #5 — Responsive: hide low-priority cols on narrow viewports
+     ─────────────────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .lp-data-table th[data-col="products"],
+    .lp-data-table td:nth-child(2) { display: none; }
+  }
+  @media (max-width: 720px) {
+    .lp-data-table th[data-col="risk"],
+    .lp-data-table th[data-col="tib"],
+    .lp-data-table td:nth-child(3),
+    .lp-data-table td:nth-child(5) { display: none; }
+    .lp-filter-sliders-row { flex-direction: column; }
+    .lp-chip-row { flex-wrap: wrap; }
+  }
+
+  /* ───────────────────────────────────────────────────────────────
+     RISK STRIPE on left edge of each row (replaces Risk band column)
+     ─────────────────────────────────────────────────────────────── */
+  .lp-data-table td.lp-sticky-col {
+    box-shadow: inset 3px 0 0 var(--risk-color, transparent), 2px 0 5px -2px rgba(0, 0, 0, 0.08);
+    /* the hover rule below replaces this stripe with brand green */
+  }
+  /* hover already overrides box-shadow elsewhere — re-affirm so risk stripe yields to brand green on hover */
+  .lp-row-interactive:hover td.lp-sticky-col {
+    box-shadow: inset 3px 0 0 var(--color-brand-mid), 2px 0 5px -2px rgba(0, 0, 0, 0.08);
+  }
+  /* legend swatch shown in the toolbar */
+  .lp-risk-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11.5px;
+    color: var(--color-text-secondary);
+    margin-left: 14px;
+  }
+  .lp-risk-key-swatch {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .lp-risk-key-swatch i {
+    width: 8px;
+    height: 14px;
+    border-radius: 2px;
+    background: var(--c);
+    display: inline-block;
+  }
+
+  /* ───────────────────────────────────────────────────────────────
+     LEGEND popover for trust signal icons (under "Lender" header)
+     ─────────────────────────────────────────────────────────────── */
+  .lp-data-table th:first-child .lp-legend-btn {
+    color: rgba(255,255,255,0.65);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    width: 14px;
+    height: 14px;
+    font-size: 9px;
+    line-height: 1;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 6px;
+    vertical-align: middle;
+    padding: 0;
+    font-family: inherit;
+    position: relative;
+  }
+  .lp-data-table th:first-child .lp-legend-btn:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.18);
+  }
+  .lp-legend-pop {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 240px;
+    background: #fff;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 22px rgba(15,30,25,0.18);
+    padding: 12px;
+    z-index: 80;
+    display: none;
+    text-align: left;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+  .lp-legend-pop.open { display: block; }
+  .lp-legend-pop h6 {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary);
+    margin: 0 0 8px 0;
+  }
+  .lp-legend-item {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 11.5px;
+    color: var(--color-text-primary);
+    align-items: center;
+  }
+  .lp-legend-item .lp-signal {
+    cursor: default;
+  }
+
+  /* ───────────────────────────────────────────────────────────────
+     EXPAND-ALL toolbar above the table
+     ─────────────────────────────────────────────────────────────── */
+  .lp-table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 4px 0 8px 0;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .lp-toolbar-left {
+    font-size: 12.5px;
+    color: var(--color-text-secondary);
+  }
+  .lp-toolbar-left strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+  .lp-toolbar-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .lp-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.12s, color 0.12s, background 0.12s;
+  }
+  .lp-expand-btn:hover {
+    border-color: var(--color-brand-mid);
+    color: var(--color-brand-dark);
+    background: #F0FDF4;
+  }
+  .lp-expand-btn svg { width: 12px; height: 12px; }
+
+  /* ───────────────────────────────────────────────────────────────
+     COMPARE — row checkbox + sticky bar + modal
+     ─────────────────────────────────────────────────────────────── */
+  .lp-cmp-check {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid #D1D5DB;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s, border-color 0.12s, background 0.12s;
+    opacity: 0;
+  }
+  .lp-row-interactive:hover .lp-cmp-check,
+  .lp-cmp-check.checked,
+  .lp-cmp-check:focus-visible {
+    opacity: 1;
+  }
+  .lp-cmp-check:hover { border-color: var(--color-brand-mid); }
+  .lp-cmp-check.checked {
+    background: var(--color-brand-mid);
+    border-color: var(--color-brand-mid);
+  }
+  .lp-cmp-check.checked::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  .lp-compare-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: var(--color-brand-dark);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 12px;
+    box-shadow: 0 14px 38px rgba(15, 30, 25, 0.32), 0 2px 4px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 90;
+    transition: transform 0.22s ease-out;
+    font-family: inherit;
+    max-width: calc(100vw - 32px);
+  }
+  .lp-compare-bar.visible {
+    transform: translateX(-50%) translateY(0);
+  }
+  .lp-compare-bar-text {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .lp-compare-bar-text strong {
+    font-weight: 700;
+  }
+  .lp-compare-thumbs {
+    display: flex;
+    gap: -4px;
+  }
+  .lp-compare-thumb {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: #fff;
+    border: 2px solid var(--color-brand-dark);
+    object-fit: contain;
+    margin-left: -6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .lp-compare-thumb:first-child { margin-left: 0; }
+  .lp-compare-bar button {
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12.5px;
+    border-radius: 6px;
+    padding: 7px 14px;
+    transition: background 0.12s, color 0.12s;
+  }
+  .lp-compare-open {
+    background: #fff;
+    color: var(--color-brand-dark);
+  }
+  .lp-compare-open:hover { background: #F0FDF4; }
+  .lp-compare-clear {
+    background: transparent;
+    color: rgba(255,255,255,0.8);
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    padding: 6px 10px !important;
+  }
+  .lp-compare-clear:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+  }
+
+  /* Compare modal */
+  .lp-cmp-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 25, 20, 0.5);
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    z-index: 200;
+    overflow-y: auto;
+    padding: 32px 16px;
+  }
+  .lp-cmp-modal-backdrop.open { display: flex; }
+  .lp-cmp-modal {
+    background: #fff;
+    width: 100%;
+    max-width: 1080px;
+    border-radius: 12px;
+    box-shadow: 0 30px 60px rgba(15,30,25,0.35);
+    overflow: hidden;
+  }
+  .lp-cmp-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .lp-cmp-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-brand-dark);
+  }
+  .lp-cmp-modal-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: inherit;
+  }
+  .lp-cmp-modal-close:hover { background: #F3F4F6; color: var(--color-text-primary); }
+
+  .lp-cmp-grid {
+    display: grid;
+    overflow-x: auto;
+  }
+  .lp-cmp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .lp-cmp-table th {
+    text-align: left;
+    padding: 14px 14px;
+    background: #F9FAFB;
+    border-bottom: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    vertical-align: top;
+    min-width: 180px;
+  }
+  .lp-cmp-table th:last-child { border-right: none; }
+  .lp-cmp-table th .cmp-head-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 7px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+    object-fit: contain;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .lp-cmp-table th .cmp-head-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-brand-dark);
+    letter-spacing: -0.01em;
+  }
+  .lp-cmp-table th .cmp-head-meta {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .lp-cmp-table th .cmp-remove {
+    margin-top: 8px;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    text-decoration: underline;
+  }
+  .lp-cmp-table th .cmp-remove:hover { color: #B91C1C; }
+  .lp-cmp-table th:first-child {
+    background: #fff;
+    border-right: 1px solid var(--color-border);
+    min-width: 140px;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-secondary);
+    font-weight: 700;
+  }
+  .lp-cmp-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #F1F5F3;
+    border-right: 1px solid var(--color-border);
+    vertical-align: top;
+    color: var(--color-text-primary);
+    font-weight: 500;
+    background: #fff;
+  }
+  .lp-cmp-table td:last-child { border-right: none; }
+  .lp-cmp-table tr td:first-child,
+  .lp-cmp-table tr th:first-child {
+    background: #F9FAFB;
+  }
+  .lp-cmp-best {
+    color: var(--color-brand-mid);
+    font-weight: 700;
+    background: #ECFDF5;
+    padding: 1px 6px;
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 1px #A7F3D0;
+  }
+  .lp-cmp-muted { color: var(--color-text-muted); font-weight: 400; }
 </style>
 </head>
 <body>
@@ -1163,7 +2140,7 @@
           <div class="search-icon">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
           </div>
-          <input type="text" id="matrix-search" class="search-input" placeholder="Search by lender name, state, or restricted industry">
+          <input type="text" id="matrix-search" class="search-input" placeholder="Search by lender name, state, or product…">
         </div>
       </div>
 
@@ -1191,8 +2168,8 @@
         <div class="lp-slider-group">
           <span class="lp-filter-label">Monthly revenue</span>
           <div class="lp-slider-value" id="rev-val">$0</div>
-          <input type="range" id="rev-range" class="range-slider" min="0" max="50000" step="2500" value="0">
-          <div class="lp-slider-range"><span>$0</span><span>$50k+</span></div>
+          <input type="range" id="rev-range" class="range-slider" min="0" max="100000" step="2500" value="0">
+          <div class="lp-slider-range"><span>$0</span><span>$100k+</span></div>
         </div>
       </div>
 
@@ -1220,12 +2197,13 @@
         </span>
         <div class="lp-chip-group" id="product-group">
           <button class="chip-btn active" data-product="all">All</button>
-          <button class="chip-btn" data-product="LOC">LOC</button>
           <button class="chip-btn" data-product="MCA">MCA</button>
-          <button class="chip-btn" data-product="BLA">BLA</button>
-          <button class="chip-btn" data-product="Equipment">Equipment</button>
+          <button class="chip-btn" data-product="Term">Term</button>
+          <button class="chip-btn" data-product="LOC">LOC</button>
           <button class="chip-btn" data-product="SBA">SBA</button>
+          <button class="chip-btn" data-product="Finance">Finance</button>
           <button class="chip-btn" data-product="CRE">CRE</button>
+          <button class="chip-btn" data-product="Factor">Factor</button>
         </div>
       </div>
 
@@ -1245,7 +2223,7 @@
         </div>
       </div>
 
-      <!-- Verification chips + Reset -->
+      <!-- Verification chips + More filters + Reset -->
       <div class="lp-chip-row">
         <span class="lp-chip-label">
           <span class="lp-info-wrap">Verification
@@ -1257,6 +2235,59 @@
           <button class="chip-btn" data-signal="bankVerify">Bank verified</button>
           <button class="chip-btn" data-signal="noCollateral">No hard collateral</button>
         </div>
+
+        <div class="lp-more-filters-wrap">
+          <button id="more-filters-btn" class="lp-more-filters-btn" type="button" aria-haspopup="true" aria-expanded="false">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+            More filters
+            <span id="more-filters-count" class="lp-count-pill" style="display:none;">0</span>
+          </button>
+          <div id="more-filters-popover" class="lp-more-popover" role="dialog" aria-label="More filters">
+            <div class="lp-mf-section">
+              <h5>Minimum Funding Available</h5>
+              <div class="lp-mf-slider-wrap">
+                <div class="lp-mf-slider-val" id="maxfund-val">Any</div>
+                <input type="range" id="maxfund-range" min="0" max="2000000" step="50000" value="0">
+                <div class="lp-mf-slider-meta"><span>Any</span><span>$2M+</span></div>
+              </div>
+            </div>
+            <div class="lp-mf-section">
+              <h5>Need term ≥</h5>
+              <div class="lp-mf-slider-wrap">
+                <div class="lp-mf-slider-val" id="minterm-val">Any</div>
+                <input type="range" id="minterm-range" min="0" max="60" step="6" value="0">
+                <div class="lp-mf-slider-meta"><span>Any</span><span>60 mo+</span></div>
+              </div>
+            </div>
+            <div class="lp-mf-section">
+              <h5>Payment Frequency</h5>
+              <div class="lp-mf-chips" id="freq-chips">
+                <button type="button" class="lp-mf-chip" data-freq="Daily">Daily</button>
+                <button type="button" class="lp-mf-chip" data-freq="Weekly">Weekly</button>
+                <button type="button" class="lp-mf-chip" data-freq="Monthly">Monthly</button>
+                <button type="button" class="lp-mf-chip" data-freq="Bi-Weekly">Bi-Weekly</button>
+              </div>
+            </div>
+            <div class="lp-mf-section">
+              <h5>Preferred Industry</h5>
+              <select id="industry-select" style="width:100%;padding:7px 8px;border:1px solid var(--color-border);border-radius:6px;font-size:12px;font-family:inherit;color:var(--color-text-primary);background:#fff;">
+                <option value="">Any</option>
+              </select>
+            </div>
+            <div class="lp-mf-section">
+              <h5>Other</h5>
+              <div class="lp-mf-chips" id="other-chips">
+                <button type="button" class="lp-mf-chip" data-other="earlyPayoff">Early-payoff discount</button>
+                <button type="button" class="lp-mf-chip" data-other="hasLogo">Direct lender (not broker)</button>
+                <button type="button" class="lp-mf-chip" data-other="hasContact">Has broker desk contact</button>
+              </div>
+            </div>
+            <div class="lp-mf-footer">
+              <button id="mf-clear" type="button" class="lp-mf-clear">Clear advanced filters</button>
+            </div>
+          </div>
+        </div>
+
         <button id="reset-filters" class="reset-btn">Reset filters</button>
       </div>
 
@@ -1267,6 +2298,39 @@
 
     </div>
 
+    <!-- Toolbar above the table: legend, count, expand-all -->
+    <div class="lp-table-toolbar">
+      <div class="lp-toolbar-left">
+        <span class="lp-info-wrap" style="position:relative;">
+          <button id="legend-btn" type="button" class="lp-expand-btn" aria-haspopup="true" aria-expanded="false" style="font-size:11.5px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Key
+          </button>
+          <div id="legend-pop" class="lp-legend-pop" role="dialog" aria-label="Trust signal key">
+            <h6>Trust signals (under lender name)</h6>
+            <div id="legend-items"></div>
+            <h6 style="margin-top:14px;">Risk band</h6>
+            <div id="legend-risk"></div>
+          </div>
+        </span>
+        <span class="lp-risk-key" aria-hidden="true" style="display:none;">
+          <span class="lp-risk-key-swatch" style="--c:#16A34A;"><i></i>Low</span>
+          <span class="lp-risk-key-swatch" style="--c:#EAB308;"><i></i>Moderate</span>
+          <span class="lp-risk-key-swatch" style="--c:#DC2626;"><i></i>High</span>
+        </span>
+      </div>
+      <div class="lp-toolbar-right">
+        <button id="density-btn" type="button" class="lp-expand-btn" title="Toggle row density">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+          <span id="density-label">Comfortable</span>
+        </button>
+        <button id="expand-all-btn" type="button" class="lp-expand-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          <span id="expand-all-label">Expand all</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Lender Table -->
     <div class="lp-table-wrapper">
       <table class="lp-data-table">
@@ -1274,12 +2338,11 @@
           <tr>
             <th data-col="name">Lender <span class="sort-icon"></span></th>
             <th data-col="products">Products <span class="sort-icon"></span></th>
-            <th data-col="risk">Risk band <span class="lp-info-icon" title="Low Risk Band: 600+ FICO, no MCA. Moderate Risk: 600+ FICO with MCA, or 500+ FICO non-MCA-only. High Risk: 500 FICO MCA-only. No FICO Required: lender doesn't use credit score.">ⓘ</span> <span class="sort-icon"></span></th>
+            <th data-col="risk">Risk band <span class="sort-icon"></span></th>
             <th class="num-col" data-col="fico">Min FICO <span class="sort-icon"></span></th>
             <th class="num-col" data-col="tib">TIB (mo.) <span class="sort-icon"></span></th>
             <th class="num-col" data-col="rev">Monthly rev <span class="sort-icon"></span></th>
-            <th class="num-col" data-col="stacking">Stacking <span class="sort-icon"></span></th>
-            <th data-col="restrictions">Restrictions <span class="sort-icon"></span></th>
+            <th class="num-col" data-col="stacking">Positions <span class="sort-icon"></span></th>
           </tr>
         </thead>
         <tbody id="lender-table-body">
@@ -1349,6 +2412,25 @@
     </div>
   </div>
 
+</div>
+
+<!-- Compare bar (hidden by default) -->
+<div class="lp-compare-bar" id="compare-bar" role="region" aria-label="Compare lenders">
+  <div class="lp-compare-thumbs" id="compare-thumbs"></div>
+  <div class="lp-compare-bar-text"><strong id="compare-count">0</strong> lenders selected</div>
+  <button class="lp-compare-open" id="compare-open">Compare side-by-side →</button>
+  <button class="lp-compare-clear" id="compare-clear">Clear</button>
+</div>
+
+<!-- Compare modal -->
+<div class="lp-cmp-modal-backdrop" id="cmp-modal-backdrop" role="dialog" aria-modal="true" aria-label="Lender comparison">
+  <div class="lp-cmp-modal">
+    <div class="lp-cmp-modal-header">
+      <div class="lp-cmp-modal-title">Side-by-side comparison</div>
+      <button class="lp-cmp-modal-close" id="cmp-modal-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="lp-cmp-grid" id="cmp-grid"></div>
+  </div>
 </div>
 
 <!-- Floating Action Button (Pill style CTA) -->
@@ -1907,7 +2989,7 @@
         "support_phone": "",
         "source_url": "https://www.bay1st.com",
         "source_snippet": "Funder name: Bay 1st Bank. Call support phone .",
-        "logo_url": "public/assets/lenders/bay1stbank.png",
+        "logo_url": "",
         "early_payment_discount": true,
         "preferred_industries": [],
         "max_funding_amount": 0,
@@ -2584,7 +3666,7 @@
         "support_phone": "929-531-9989",
         "source_url": "https://www.cashable.com",
         "source_snippet": "Funder name: Cashable. Call support phone 929-531-9989.",
-        "logo_url": "public/assets/lenders/cashable.png",
+        "logo_url": "",
         "early_payment_discount": false,
         "preferred_industries": [],
         "max_funding_amount": 0,
@@ -3004,7 +4086,7 @@
         "support_phone": "713-694-5920",
         "source_url": "https://www.flashfunding.com",
         "source_snippet": "Funder name: Flash Funding. Call support phone 713-694-5920.",
-        "logo_url": "public/assets/lenders/flashfunding.png",
+        "logo_url": "",
         "early_payment_discount": false,
         "preferred_industries": [],
         "max_funding_amount": 0,
@@ -3162,7 +4244,7 @@
         "support_phone": "212-971-9244",
         "source_url": "https://www.foxbusinessfunding.com",
         "source_snippet": "",
-        "logo_url": "public/assets/lenders/foxbusinessfunding.png",
+        "logo_url": "",
         "early_payment_discount": false,
         "preferred_industries": [],
         "max_funding_amount": 0,
@@ -3311,7 +4393,7 @@
         "support_phone": "",
         "source_url": "https://www.fundingo.com/",
         "source_snippet": "Our Loan Management Platform. Loan Origination. Loan Servicing. Loan Underwriting. Designed by lending professionals, for lending professionals. Our loan management software platform was created by people with deep experience in the lending industry. At FUNDINGO, we work closely with each organization to configure our loan management software systems to your specific preferences.",
-        "logo_url": "public/assets/lenders/fundingo.png",
+        "logo_url": "",
         "early_payment_discount": false,
         "preferred_industries": [],
         "max_funding_amount": 0,
@@ -3667,7 +4749,7 @@
         "support_phone": "888-760-1845",
         "source_url": "https://www.inadvancecapital.com",
         "source_snippet": "Funder name: In Advance Capital. Call support phone 888-760-1845.",
-        "logo_url": "public/assets/lenders/inadvancecapital.png",
+        "logo_url": "",
         "early_payment_discount": false,
         "preferred_industries": [],
         "max_funding_amount": 0,
@@ -4202,7 +5284,7 @@
         "support_phone": "(347) 765-2588",
         "source_url": "https://www.merkfunding.com",
         "source_snippet": "Funder name: Merk Funding. Call support phone (347) 765-2588.",
-        "logo_url": "public/assets/lenders/merkfunding.png",
+        "logo_url": "",
         "early_payment_discount": false,
         "preferred_industries": [],
         "max_funding_amount": 0,
@@ -5446,7 +6528,7 @@
         "support_phone": "877-822-1333",
         "source_url": "https://www.tritoncapital.com",
         "source_snippet": "Funder name: Triton Capital. Call support phone 877-822-1333.",
-        "logo_url": "public/assets/lenders/tritoncapital.png",
+        "logo_url": "",
         "early_payment_discount": false,
         "preferred_industries": [],
         "max_funding_amount": 0,
@@ -5673,7 +6755,7 @@
         "support_phone": "877-253-7686",
         "source_url": "https://www.unitedfirstfinancial.com",
         "source_snippet": "Funder name: United First. Call support phone 877-253-7686.",
-        "logo_url": "public/assets/lenders/unitedfirst.png",
+        "logo_url": "",
         "early_payment_discount": false,
         "preferred_industries": [],
         "max_funding_amount": 0,
@@ -5851,7 +6933,7 @@
         "support_phone": "212-220-8970",
         "source_url": "https://www.worldbusinesslenders.com",
         "source_snippet": "WBL is a direct lender specializing in providing real-estate secured business loans and access to capital to support the growth and development of under-served small-to-medium sized businesses that lack access to traditional funding. We make working capital available to eligible businesses for expansion and growth. World Business Lenders provided outstanding service to me in the development and execution of their loan product. This service was quick and efficient, and their professionals took the time to go over the documents thoroughly to ensure understanding. The most significant service to me was everyone’s positive approach and our overall interaction. The WBL loan product is one that can benefit business growth and success. Looking forward to a mutually beneficial business relationship. Joyce Samme Automotive Group, LLC World Business Lenders has helped me build my real estate business two fold in the past few years. The customer service throughout the loan application process has been amazing and we will always recommend any business looking to grow to go with WBL for your funding needs. Anthony A.D. Peterson Enterprises, Inc. Main Office 615 Hope Road Eatontown, NJ 07724 Sales +1 (888) 898-9495 General Inquiries +1 (800) 432-9359 Business loans are offered by World Business Lenders, LLC or its affiliated companies, including WBL California, LLC (License #60DBO-41841—Loans made or arranged pursuant to a California Financing Law license). Each lender requires certain supporting documentation with each new loan application. All applications are subject to the lender’s eligibility requirements, underwriting guidelines, other terms and conditions, approval and acceptance.",
-        "logo_url": "public/assets/lenders/worldbusinesslenders.png",
+        "logo_url": "",
         "early_payment_discount": false,
         "preferred_industries": [
             "Wholesaler",
@@ -6359,22 +7441,58 @@
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
   };
 
-  const determineRisk = (fico, products = []) => {
-    const hasMCA = products.includes('MCA');
-    const mcaOnly = products.length > 0 && products.every(p => p === 'MCA');
-    if (fico === 0 && !hasMCA) return { label: 'No FICO Required', dot: 'blue', code: 'nofico' };
-    if (fico === 0 && hasMCA) return { label: 'Moderate Risk', dot: 'yellow', code: 'mod' };
-    // MCA bumps risk one tier; MCA-only lenders are always at least Moderate
-    if (fico >= 600 && !hasMCA) return { label: 'Low Risk Band', dot: 'green', code: 'low' };
-    if (fico >= 600 && hasMCA) return { label: 'Moderate Risk', dot: 'yellow', code: 'mod' };
-    if (fico >= 500 && !mcaOnly) return { label: 'Moderate Risk', dot: 'yellow', code: 'mod' };
-    return { label: 'High Risk', dot: 'red', code: 'high' };
+  // Composite risk band: aggregates FICO, TIB, Monthly Rev, product mix, and mitigators.
+  // Higher numeric score = lender taking on more risk = riskier band.
+  // The dot color drives the visual (green/yellow/red); "No FICO check" is surfaced as a separate
+  // trust signal icon, not a risk band variant.
+  const determineRisk = (lender) => {
+    const fico = lender.fico || 0;
+    const tib  = lender.tib  || 0;
+    const rev  = lender.rev  || 0;
+    const canon = normalizeProducts(lender.products);
+    const hasMCA  = canon.includes('MCA');
+    const mcaOnly = canon.length > 0 && canon.every(p => p === 'MCA');
+
+    let score = 0;
+
+    // FICO minimum — lower bar = lender is taking on credit-weak borrowers
+    if (fico === 0)            score += 1.5;   // no credit check at all
+    else if (fico < 550)       score += 2;
+    else if (fico < 600)       score += 1.5;
+    else if (fico < 650)       score += 1;
+    else if (fico < 700)       score += 0.5;
+
+    // Time in business — lower bar = newer (riskier) businesses
+    if (tib === 0)             score += 0.5;
+    else if (tib <= 3)         score += 2;
+    else if (tib <= 6)         score += 1.5;
+    else if (tib <= 12)        score += 1;
+    else if (tib <= 18)        score += 0.5;
+
+    // Monthly revenue — lower bar = smaller (riskier) operations
+    if (rev === 0)             score += 0.5;
+    else if (rev <= 10000)     score += 2;
+    else if (rev <= 25000)     score += 1.5;
+    else if (rev <= 50000)     score += 1;
+    else if (rev <= 100000)    score += 0.5;
+
+    // Product mix — MCA tilts toward higher-velocity/higher-cost lending
+    if (mcaOnly)               score += 1;
+    else if (hasMCA)           score += 0.5;
+
+    // Mitigators — secured + verified means lender has belt + suspenders
+    if (lender.hard_collateral) score -= 1;
+    if (lender.bank_verified)   score -= 0.5;
+
+    if (score <= 2)   return { label: 'Low Risk',      dot: 'green',  code: 'low',  score };
+    if (score <= 4)   return { label: 'Moderate Risk', dot: 'yellow', code: 'mod',  score };
+    return            { label: 'High Risk',      dot: 'red',    code: 'high', score };
   };
 
   // Wraps determineRisk; marketplace/broker lenders marked all_risk:true serve all borrower tiers
   const getLenderRisk = (lender) => {
     if (lender.all_risk) return { label: 'All Risk Tiers', dot: 'gray', code: 'allrisk' };
-    return determineRisk(lender.fico, lender.products);
+    return determineRisk(lender);
   };
 
   // Match score: measures how well a lender's minimums align with the borrower's profile.
@@ -6401,6 +7519,47 @@
   const SORT_ICON_UP    = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
   const SORT_ICON_DOWN  = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M12 5v14M5 12l7 7 7-7"/></svg>`;
 
+  // ─── Product taxonomy (single source of truth) ──────────────────
+  // Canonical codes used everywhere in the UI: MCA · Term · LOC · SBA · Finance · CRE · Factor
+  // Raw data has variants ("Term Loan", "BLA", "Equipment Financing", "BriteLine", etc.) — normalize first.
+  const STD_RESTRICTIONS_GLOBAL = ['Mining','Tobacco Manufacturing','Logging','Trucking','Freight Brokerage','Jewelry / Precious Metals / Scrap Metal','Vehicle Dealers','Financial Services / Insurance / Real Estate','Home Health Care','Building Cleaning & Maintenance','Photofinishing Labs','Lawyers / Legal Services','Non-Profits','Vice Industries','Cannabis / Marijuana','Adult Entertainment / Pornography','Landscaping'];
+  const PRODUCT_LABELS = {
+    MCA:     'MCA',                       // never spell out "Merchant Cash Advance"
+    Term:    'Term Loan',
+    LOC:     'Line of Credit',
+    SBA:     'SBA Loan',
+    Finance: 'Equipment Finance',
+    CRE:     'Commercial Real Estate',
+    Factor:  'Factoring',
+  };
+  const PRODUCT_CLASS = {
+    MCA: 'mca', Term: 'term', LOC: 'loc', SBA: 'sba', Finance: 'finance', CRE: 'cre', Factor: 'factor',
+  };
+  const PRODUCT_ORDER = ['MCA', 'Term', 'LOC', 'SBA', 'Finance', 'CRE', 'Factor'];
+  function normalizeProduct(raw) {
+    if (!raw) return null;
+    const r = String(raw).trim().toLowerCase();
+    if (r === 'mca' || r === 'merchant cash advance') return 'MCA';
+    if (r === 'term' || r === 'term loan' || r === 'bla' || r === 'small business loan' || r === 'business loan' || r === 'bridge loan' || r === 'working capital') return 'Term';
+    if (r === 'loc' || r === 'line of credit' || r === 'briteline' || r.includes('line of credit')) return 'LOC';
+    if (r === 'sba' || r.includes('sba')) return 'SBA';
+    if (r === 'cre' || r.includes('commercial real estate') || r.includes('real estate')) return 'CRE';
+    if (r.includes('equipment')) return 'Finance';
+    if (r.includes('factor') || r.includes('invoice') || r.includes('receivable')) return 'Factor';
+    return null; // drop unknowns — keeps the chip set tidy
+  }
+  function normalizeProducts(arr) {
+    const seen = new Set();
+    const out = [];
+    (arr || []).forEach(p => {
+      const c = normalizeProduct(p);
+      if (c && !seen.has(c)) { seen.add(c); out.push(c); }
+    });
+    // sort canonical order
+    out.sort((a, b) => PRODUCT_ORDER.indexOf(a) - PRODUCT_ORDER.indexOf(b));
+    return out;
+  }
+
   // State Management
   let activeFilters = {
     search: '',
@@ -6412,13 +7571,23 @@
     rev: 0,
     softPull: false,
     bankVerify: false,
-    noCollateral: false
+    noCollateral: false,
+    // Advanced (More filters popover)
+    minFunding: 0,        // min "max_funding_amount" — i.e. only show lenders who can fund >= this
+    minTerm: 0,           // min "max_term_months" — only show lenders whose max term >= this
+    freqs: [],            // selected payment frequencies (AND filter — lender must offer all selected)
+    industry: '',         // preferred industry match
+    earlyPayoff: false,
+    directOnly: false,    // hide pure broker/marketplace aggregators
+    hasContact: false     // has support_phone OR support_email
   };
 
   let sortColumn = 'name'; // default: alphabetical A→Z
   let sortDirection = 'asc';
   let manualSort = false; // true when user explicitly clicks a column header; auto-reverts on reset
-  let expandedLenderId = null; // PEAC pre-expanded removed
+  let expandedIds = new Set(); // multi-expand support
+  let compareIds = new Set();  // lenders selected for side-by-side comparison
+  let expandedLenderId = null; // legacy alias — kept for any stray reference
 
   // DOM Elements
   const tbody = document.getElementById('lender-table-body');
@@ -6481,27 +7650,38 @@
   }
 
   // Render Engine
-  const renderTable = () => {
+  let renderTable = () => {
     tbody.innerHTML = '';
     
     // 1. Filter dataset
     let filtered = lenderData.filter(l => {
-      // Search query (match name, state, restrictions)
+      // Search query — name, products, preferred industries, contact info, and (only) NON-standard restrictions.
+      // (State dropped — most lenders fund nationwide so it's not a useful filter. Std restriction list excluded
+      //  because it matches almost every lender and made search noisy.)
       if (activeFilters.search) {
         const q = activeFilters.search.toLowerCase();
-        const matchesName = l.name.toLowerCase().includes(q);
-        const matchesState = l.hq_state.toLowerCase().includes(q);
-        const matchesRest = l.restrictions.some(r => r.toLowerCase().includes(q));
-        if (!matchesName && !matchesState && !matchesRest) return false;
+        const matchesName    = l.name.toLowerCase().includes(q);
+        const matchesProducts = (l.products || []).some(p => p.toLowerCase().includes(q))
+                              || normalizeProducts(l.products).some(p => p.toLowerCase().includes(q) || PRODUCT_LABELS[p].toLowerCase().includes(q));
+        const matchesInd     = (l.preferred_industries || []).some(i => i.toLowerCase().includes(q));
+        const matchesPhone   = (l.support_phone || '').toLowerCase().includes(q);
+        const matchesEmail   = (l.support_email || '').toLowerCase().includes(q);
+        const isStdList = JSON.stringify((l.restrictions || []).slice().sort()) === JSON.stringify(STD_RESTRICTIONS_GLOBAL.slice().sort());
+        const matchesRestr   = !isStdList && (l.restrictions || []).some(r => r.toLowerCase().includes(q));
+        const matchesCollat  = (q === 'collateral' || q === 'no collateral' || q === 'unsecured') &&
+                               ((q === 'unsecured' || q === 'no collateral') ? !l.hard_collateral : !!l.hard_collateral);
+        if (!matchesName && !matchesProducts && !matchesInd && !matchesPhone && !matchesEmail && !matchesRestr && !matchesCollat) return false;
       }
 
-      // Risk category — 'nofico' is treated as 'low'; 'allrisk' always passes
+      // Risk category — 'allrisk' marketplace lenders always pass
       const risk = getLenderRisk(l);
-      const filterCode = risk.code === 'nofico' ? 'low' : risk.code;
-      if (activeFilters.risk !== 'all' && filterCode !== activeFilters.risk && risk.code !== 'allrisk') return false;
+      if (activeFilters.risk !== 'all' && risk.code !== activeFilters.risk && risk.code !== 'allrisk') return false;
 
-      // Product Type
-      if (activeFilters.product !== 'all' && !l.products.includes(activeFilters.product)) return false;
+      // Product Type — match normalized canonical codes
+      if (activeFilters.product !== 'all') {
+        const canon = normalizeProducts(l.products);
+        if (!canon.includes(activeFilters.product)) return false;
+      }
 
       // Position # — filter out lenders whose stacking limit is below the required position
       // stacking=0 (TBD) and stacking=999 (unlimited) always pass
@@ -6520,6 +7700,32 @@
       if (activeFilters.softPull && !l.soft_pull) return false;
       if (activeFilters.bankVerify && !l.bank_verified) return false;
       if (activeFilters.noCollateral && l.hard_collateral) return false; // No Hard Collateral is selected, filter out hard collateral lenders
+
+      // Advanced (More filters)
+      if (activeFilters.minFunding > 0) {
+        // Only filter when lender has a max_funding_amount on file
+        if (!l.max_funding_amount || l.max_funding_amount < activeFilters.minFunding) return false;
+      }
+      if (activeFilters.freqs && activeFilters.freqs.length > 0) {
+        const lf = (l.payment_frequencies || []).map(f => f.toLowerCase());
+        // Lender must offer ALL selected frequencies
+        if (!activeFilters.freqs.every(f => lf.includes(f.toLowerCase()))) return false;
+      }
+      if (activeFilters.earlyPayoff && !l.early_payment_discount) return false;
+      if (activeFilters.directOnly) {
+        // Heuristic: direct lenders have at least one product specified and aren't pure marketplaces.
+        // Marker: marketplaces tend to be marked all_risk:true (we use this elsewhere as the "serves all tiers" flag).
+        if (l.all_risk) return false;
+      }
+      if (activeFilters.hasContact && !l.support_phone && !l.support_email) return false;
+      if (activeFilters.minTerm > 0) {
+        if (!l.max_term_months || l.max_term_months < activeFilters.minTerm) return false;
+      }
+      if (activeFilters.industry) {
+        const ind = activeFilters.industry.toLowerCase();
+        const list = (l.preferred_industries || []).map(s => s.toLowerCase());
+        if (!list.some(x => x.includes(ind) || ind.includes(x))) return false;
+      }
 
       return true;
     });
@@ -6557,11 +7763,8 @@
         } else if (sortColumn === 'stacking') {
           valA = a.stacking;
           valB = b.stacking;
-        } else if (sortColumn === 'restrictions') {
-          valA = a.restrictions.join(', ').toLowerCase();
-          valB = b.restrictions.join(', ').toLowerCase();
         } else if (sortColumn === 'risk') {
-          const rankMap = { 'nofico': 0, 'allrisk': 0, 'low': 1, 'mod': 2, 'high': 3 };
+          const rankMap = { 'allrisk': 0, 'low': 1, 'mod': 2, 'high': 3 };
           valA = rankMap[getLenderRisk(a).code] ?? 1;
           valB = rankMap[getLenderRisk(b).code] ?? 1;
           // tiebreak alphabetically within same tier
@@ -6581,7 +7784,7 @@
     if (filtered.length === 0) {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td colspan="8" class="empty-state">
+        <td colspan="7" class="empty-state">
           <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:block; margin: 0 auto 8px auto;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
           No lenders found matching the active filter criteria. Try resetting or adjusting the sliders.
         </td>
@@ -6592,8 +7795,9 @@
 
     // Render Rows
     filtered.forEach((lender, index) => {
-      const isExpanded = expandedLenderId === lender.id;
-      
+      const isExpanded = expandedIds.has(lender.id);
+      const isCompared = compareIds.has(lender.id);
+
       // Main lender row
       const trMain = document.createElement('tr');
       trMain.classList.add('lp-row-interactive');
@@ -6602,64 +7806,82 @@
       }
       trMain.dataset.id = lender.id;
 
-      // Product Type Badges
-      const PRODUCT_LABELS = {
-        'LOC': 'Line of Credit',
-        'MCA': 'Merchant Cash Advance',
-        'BLA': 'Business Term Loan',
-        'Equipment': 'Equipment Financing',
-        'SBA': 'SBA Loan',
-        'CRE': 'Commercial Real Estate'
-      };
-      const productsHtml = lender.products.map(p => {
-        const classMap = { 'LOC': 'loc', 'MCA': 'mca', 'BLA': 'bla', 'Equipment': 'equipment', 'SBA': 'sba', 'CRE': 'cre' };
-        const tooltip = PRODUCT_LABELS[p] || p;
-        return `<span class="badge-product ${classMap[p] || 'bla'}" data-tooltip="${tooltip}">${p}</span>`;
-      }).join(' ');
+      // Product badges — normalize, dedupe, sort, then show first 3 + "+N" overflow
+      const canonical = normalizeProducts(lender.products);
+      const MAX_PROD = 3;
+      const visibleP = canonical.slice(0, MAX_PROD);
+      const hiddenP = canonical.slice(MAX_PROD);
+      const productsHtml = visibleP.map(p =>
+        `<span class="badge-product ${PRODUCT_CLASS[p]}" data-tooltip="${PRODUCT_LABELS[p]}">${p}</span>`
+      ).join(' ') + (
+        hiddenP.length > 0
+          ? ` <span class="badge-product-more" title="${hiddenP.map(p => PRODUCT_LABELS[p]).join(' · ')}">+${hiddenP.length}</span>`
+          : ''
+      ) || '<span class="lp-tbd">—</span>';
 
       const STD_RESTRICTIONS = ['Mining','Tobacco Manufacturing','Logging','Trucking','Freight Brokerage','Jewelry / Precious Metals / Scrap Metal','Vehicle Dealers','Financial Services / Insurance / Real Estate','Home Health Care','Building Cleaning & Maintenance','Photofinishing Labs','Lawyers / Legal Services','Non-Profits','Vice Industries','Cannabis / Marijuana','Adult Entertainment / Pornography','Landscaping'];
       const STD_KEY = JSON.stringify(STD_RESTRICTIONS.slice().sort());
       const isStdRestrictions = JSON.stringify((lender.restrictions || []).slice().sort()) === STD_KEY;
-      const STD_TOOLTIP = 'Standard exclusions: Mining, Tobacco, Logging, Trucking, Freight Brokerage, Jewelry/Metals, Vehicle Dealers, Financial Services/Insurance/Real Estate, Home Health Care, Building Cleaning & Maintenance, Photofinishing Labs, Lawyers/Legal Services, Non-Profits, Vice Industries, Cannabis, Adult Entertainment, Landscaping';
-      let restrictionsHtml = '';
-      if (lender.restrictions.length === 0) {
-        restrictionsHtml = `<span class="lp-tbd">—</span>`;
-      } else if (isStdRestrictions) {
-        restrictionsHtml = `<span class="lp-tag-std" title="${STD_TOOLTIP}">std</span>`;
-      } else {
-        const MAX_TAGS = 3;
-        if (lender.restrictions.length > MAX_TAGS) {
-          const visibleTags = lender.restrictions.slice(0, MAX_TAGS).map(t => `<span class="lp-tag">${t.toLowerCase()}</span>`).join('');
-          restrictionsHtml = `<div class="lp-tags-container">${visibleTags}<span class="lp-tag" style="background-color:#E6FDF5;color:var(--color-brand-mid);font-weight:500;">+${lender.restrictions.length - MAX_TAGS}</span></div>`;
-        } else {
-          restrictionsHtml = `<div class="lp-tags-container">${lender.restrictions.map(t => `<span class="lp-tag">${t.toLowerCase()}</span>`).join('')}</div>`;
-        }
-      }
+      const customRestrictions = (lender.restrictions && lender.restrictions.length > 0 && !isStdRestrictions) ? lender.restrictions : [];
 
       const risk = getLenderRisk(lender);
 
-      // Create Mini Badges
-      let badgesHtml = '';
-      if (lender.soft_pull) badgesHtml += `<span class="badge-mini soft-pull">Soft Pull</span> `;
-      if (lender.bank_verified) badgesHtml += `<span class="badge-mini bank" title="This lender requires bank verification — they confirm revenue directly from bank statements or read-only bank access (e.g. Plaid). ${lender.bank_statements ? lender.bank_statements + ' months of statements required.' : ''}">Bank Stmts Req'd</span> `;
-      if (lender.hard_collateral) badgesHtml += `<span class="badge-mini collateral">Collateral Req</span> `;
+
+      // Trust signal icons (compact, hover-labelled). Order is intentional: positive → cautionary.
+      const SIG_ICONS = {
+        soft:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>',
+        bank:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9h14v-9"/><path d="M9 14v3"/><path d="M15 14v3"/></svg>',
+        payoff:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+        collat:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+        nofico:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="5" y1="20" x2="19" y2="4"/></svg>',
+      };
+      let signalsHtml = '';
+      if (lender.fico === 0) signalsHtml += `<span class="lp-signal nofico" data-label="No FICO check — credit-score-blind">${SIG_ICONS.nofico}</span>`;
+      if (lender.soft_pull) signalsHtml += `<span class="lp-signal soft" data-label="Soft pull only">${SIG_ICONS.soft}</span>`;
+      if (lender.bank_verified) signalsHtml += `<span class="lp-signal bank" data-label="Bank statements required${lender.bank_statements ? ' · '+lender.bank_statements+' mo' : ''}">${SIG_ICONS.bank}</span>`;
+      if (lender.early_payment_discount) signalsHtml += `<span class="lp-signal payoff" data-label="Early-payoff discount">${SIG_ICONS.payoff}</span>`;
+      if (lender.hard_collateral) signalsHtml += `<span class="lp-signal collat" data-label="Hard collateral required">${SIG_ICONS.collat}</span>`;
+      const signalsRow = signalsHtml ? `<div class="lp-signal-row">${signalsHtml}</div>` : '';
 
       // Get logo or fallback initials
       const initials = lender.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-      const logoHtml = lender.logo_url 
-        ? `<img class="lender-logo" src="${lender.logo_url}" alt="${lender.name} logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="lender-logo" style="display:none; background: linear-gradient(135deg, #E6FDF5, #A7F3D0);">${initials}</span>`
+      const logoHtml = lender.logo_url
+        ? `<img class="lender-logo" loading="lazy" decoding="async" src="${lender.logo_url}" alt="${lender.name} logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"><span class="lender-logo" style="display:none; background: linear-gradient(135deg, #E6FDF5, #A7F3D0);">${initials}</span>`
         : `<span class="lender-logo" style="background: linear-gradient(135deg, #E6FDF5, #A7F3D0);">${initials}</span>`;
 
+      // Stacking: position dots (●●○○) — visual scan beats a number
+      const stackingHtml = (() => {
+        if (lender.stacking === 0) return '<span class="lp-tbd">—</span>';
+        if (lender.stacking === 999) {
+          return `<div class="lp-pos-cell"><div class="lp-pos-dots">${[1,2,3,4].map(()=>`<span class="lp-pos-dot filled"></span>`).join('')}<span style="font-size:9px;color:var(--color-brand-mid);margin-left:2px;font-weight:700;">∞</span></div></div>`;
+        }
+        const max = Math.min(lender.stacking, 4);
+        const posFilter = activeFilters.pos !== 'all' ? parseInt(activeFilters.pos) : null;
+        const atCap = posFilter && lender.stacking === posFilter;
+        const dots = [];
+        for (let i = 1; i <= 4; i++) {
+          if (i <= max) {
+            dots.push(`<span class="lp-pos-dot ${atCap && i === max ? 'cap' : 'filled'}"></span>`);
+          } else {
+            dots.push(`<span class="lp-pos-dot"></span>`);
+          }
+        }
+        const meta = atCap ? `<span class="lp-pos-meta" style="color:#D97706;font-weight:700;">MAX</span>` : '';
+        return `<div class="lp-pos-cell"><div class="lp-pos-dots">${dots.join('')}</div>${meta}</div>`;
+      })();
+
+      // Risk band (composite)
       trMain.innerHTML = `
         <td class="lp-sticky-col">
           <div class="lp-lender-cell">
+            <span class="lp-cmp-check ${isCompared ? 'checked' : ''}" data-cmp="${lender.id}" role="checkbox" aria-checked="${isCompared}" aria-label="Add ${lender.name} to comparison" title="Add to comparison"></span>
             <span class="lp-row-chevron${isExpanded ? ' expanded' : ''}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </span>
             ${logoHtml}
             <div class="lp-lender-name-wrapper">
               <span class="lp-lender-name">${displayName(lender.name)}</span>
-              <div class="lp-lender-badges">${badgesHtml}</div>
+              ${signalsRow}
             </div>
           </div>
         </td>
@@ -6673,16 +7895,7 @@
         <td class="num-col">${lender.fico === 0 ? '<span class="lp-tbd">—</span>' : lender.fico}</td>
         <td class="num-col">${lender.tib === 0 ? '<span class="lp-tbd">—</span>' : lender.tib}</td>
         <td class="num-col">${formatCurrency(lender.rev)}</td>
-        <td class="num-col">${(() => {
-          if (lender.stacking === 999) return 'Unlimited';
-          if (lender.stacking === 0) return '<span class="lp-tbd">—</span>';
-          const posFilter = activeFilters.pos !== 'all' ? parseInt(activeFilters.pos) : null;
-          if (posFilter && lender.stacking === posFilter) {
-            return `<span class="lp-at-limit">${lender.stacking}<span class="lp-at-limit-badge">max</span></span>`;
-          }
-          return lender.stacking;
-        })()}</td>
-        <td>${restrictionsHtml}</td>
+        <td class="num-col">${stackingHtml}</td>
       `;
 
       // Append Main Row
@@ -6692,36 +7905,8 @@
       if (isExpanded) {
         const trDetail = document.createElement('tr');
         trDetail.classList.add('detail-row', 'expanded');
-        
-        const emailLink = lender.support_email 
-          ? `<a class="contact-link" href="mailto:${lender.support_email}">
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-               ${lender.support_email}
-             </a>`
-          : `<span style="color:var(--color-text-muted);">Not Sourced</span>`;
 
-        const phoneLink = lender.support_phone
-          ? `<a class="contact-link" href="tel:${lender.support_phone.replace(/[^0-9+]/g, '')}">
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-               ${lender.support_phone}
-             </a>`
-          : `<span style="color:var(--color-text-muted);">Not Sourced</span>`;
-
-        const applyButton = lender.submission_url
-          ? `<a class="btn-submit" href="${lender.submission_url}" target="_blank">
-               Submit Application Online
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left:6px;"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-             </a>`
-          : `<span style="font-size:12px; color:var(--color-text-secondary); text-align:center; display:block; padding: 12px; border: 1px dashed var(--color-border); border-radius: 6px; background:#FFFFFF;">No web portal — reach this lender via broker desk: call or email the contact below.</span>`;
-
-        const mapLink = lender.hq_address 
-          ? `<a class="contact-link" style="font-weight:500; font-size:12px;" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lender.hq_address)}" target="_blank">
-               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-               ${lender.hq_address}
-             </a>`
-          : `<span style="color:var(--color-text-muted);">Not Sourced</span>`;
-
-        // Format updated_at date
+        // Format updated date
         const fmtDate = (s) => {
           if (!s) return null;
           const d = new Date(s);
@@ -6729,102 +7914,246 @@
         };
         const updatedLabel = fmtDate(lender.updated_at);
 
-        // Only show contact column if there's actual contact data
-        const hasContactData = lender.hq_address || lender.support_email || lender.support_phone;
+        // Spec icons — small, tinted, give each field its own visual identity
+        const ICON = {
+          credit:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><line x1="3" y1="11" x2="21" y2="11"/></svg>',
+          bank:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9h14v-9"/></svg>',
+          shield:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+          payoff:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6m0 8v6m-9-9h6m4 0h6"/></svg>',
+          funding:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+          term:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+          freq:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+          industry:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 20V8l5 4V8l5 4V8l4 4v8"/></svg>',
+          position:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/></svg>',
+          phone:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13 1.05.37 2.07.7 3a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.93.33 1.95.57 3 .7A2 2 0 0 1 22 16.92z"/></svg>',
+          mail:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+          pin:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+          info:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+          warn:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+          ext:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>',
+          clock:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 15 14"/></svg>',
+        };
+
+        // Build spec rows — ONLY include rows where we have a meaningful value
+        // (sparse fields are hidden, not shown as "—")
+        const specRows = [];
+        specRows.push(`
+          <div class="lp-spec-row">
+            <span class="lp-spec-icon">${ICON.credit}</span>
+            <span class="lp-spec-label">Credit pull</span>
+            <span class="lp-spec-val ${lender.soft_pull ? 'affirm' : ''}">${lender.soft_pull ? 'Soft pull only' : 'Hard pull required'}</span>
+          </div>`);
+        specRows.push(`
+          <div class="lp-spec-row">
+            <span class="lp-spec-icon">${ICON.bank}</span>
+            <span class="lp-spec-label">Bank statements</span>
+            <span class="lp-spec-val ${lender.bank_verified ? '' : 'muted'}">${lender.bank_verified ? 'Required' + (lender.bank_statements ? ` · ${lender.bank_statements} mo` : '') : 'Not required'}</span>
+          </div>`);
+        specRows.push(`
+          <div class="lp-spec-row">
+            <span class="lp-spec-icon ${lender.hard_collateral ? 'warn' : ''}">${ICON.shield}</span>
+            <span class="lp-spec-label">Collateral</span>
+            <span class="lp-spec-val">${lender.hard_collateral ? 'Hard collateral' : 'Unsecured'}</span>
+          </div>`);
+        if (lender.early_payment_discount) {
+          specRows.push(`
+            <div class="lp-spec-row">
+              <span class="lp-spec-icon">${ICON.payoff}</span>
+              <span class="lp-spec-label">Early-payoff discount</span>
+              <span class="lp-spec-val affirm">Available</span>
+            </div>`);
+        }
+        if (lender.max_funding_amount && lender.max_funding_amount > 0) {
+          specRows.push(`
+            <div class="lp-spec-row">
+              <span class="lp-spec-icon">${ICON.funding}</span>
+              <span class="lp-spec-label">Max funding</span>
+              <span class="lp-spec-val">${formatCurrency(lender.max_funding_amount)}</span>
+            </div>`);
+        }
+        if (lender.max_term_months && lender.max_term_months > 0) {
+          specRows.push(`
+            <div class="lp-spec-row">
+              <span class="lp-spec-icon">${ICON.term}</span>
+              <span class="lp-spec-label">Max term</span>
+              <span class="lp-spec-val">${lender.max_term_months} months</span>
+            </div>`);
+        }
+        if (lender.payment_frequencies && lender.payment_frequencies.length > 0) {
+          specRows.push(`
+            <div class="lp-spec-row">
+              <span class="lp-spec-icon">${ICON.freq}</span>
+              <span class="lp-spec-label">Payment frequency</span>
+              <span class="lp-spec-val">${lender.payment_frequencies.map(f => f.charAt(0).toUpperCase() + f.slice(1).toLowerCase()).join(' · ')}</span>
+            </div>`);
+        }
+        // Stacking — show as text inside drawer (the dots are in the row)
+        if (lender.stacking && lender.stacking > 0) {
+          const stackTxt = lender.stacking === 999 ? 'Unlimited positions' : `Up to ${lender.stacking}${['','st','nd','rd'][lender.stacking] || 'th'} position`;
+          specRows.push(`
+            <div class="lp-spec-row">
+              <span class="lp-spec-icon">${ICON.position}</span>
+              <span class="lp-spec-label">Stacking limit</span>
+              <span class="lp-spec-val">${stackTxt}</span>
+            </div>`);
+        }
+        if (lender.preferred_industries && lender.preferred_industries.length > 0) {
+          const indChips = lender.preferred_industries.slice(0, 6).map(t => `<span style="background:#ECFDF5;color:#047857;font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;">${t}</span>`).join(' ');
+          const more = lender.preferred_industries.length > 6 ? ` <span style="font-size:11px;color:var(--color-text-muted);">+${lender.preferred_industries.length - 6} more</span>` : '';
+          specRows.push(`
+            <div class="lp-spec-row" style="grid-template-columns:22px 1fr;align-items:flex-start;">
+              <span class="lp-spec-icon" style="margin-top:1px;">${ICON.industry}</span>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <span class="lp-spec-label">Preferred industries</span>
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">${indChips}${more}</div>
+              </div>
+            </div>`);
+        }
+
+        // Build contact column — hide entirely if no contact data
+        const contactRows = [];
+        if (lender.hq_address) {
+          const mapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lender.hq_address)}`;
+          contactRows.push(`
+            <div class="lp-contact-row">
+              <span class="lp-spec-icon neutral">${ICON.pin}</span>
+              <div>
+                <div class="lp-contact-sub">Headquarters</div>
+                <div class="lp-contact-text"><a href="${mapHref}" target="_blank" rel="noopener">${lender.hq_address}</a></div>
+              </div>
+            </div>`);
+        } else if (lender.hq_state) {
+          contactRows.push(`
+            <div class="lp-contact-row">
+              <span class="lp-spec-icon neutral">${ICON.pin}</span>
+              <div>
+                <div class="lp-contact-sub">Headquarters</div>
+                <div class="lp-contact-text">${lender.hq_state}</div>
+              </div>
+            </div>`);
+        }
+        if (lender.support_phone) {
+          contactRows.push(`
+            <div class="lp-contact-row">
+              <span class="lp-spec-icon neutral">${ICON.phone}</span>
+              <div>
+                <div class="lp-contact-sub">Broker desk</div>
+                <div class="lp-contact-text"><a href="tel:${lender.support_phone.replace(/[^0-9+]/g,'')}">${lender.support_phone}</a></div>
+              </div>
+            </div>`);
+        }
+        if (lender.support_email) {
+          contactRows.push(`
+            <div class="lp-contact-row">
+              <span class="lp-spec-icon neutral">${ICON.mail}</span>
+              <div>
+                <div class="lp-contact-sub">Email</div>
+                <div class="lp-contact-text"><a href="mailto:${lender.support_email}">${lender.support_email}</a></div>
+              </div>
+            </div>`);
+        }
+        const hasContactData = contactRows.length > 0;
+
+        // Restrictions banner: keep loud + obvious for CUSTOM lists, quiet for the standard set.
+        let restrBannerHtml = '';
+        let stdFooterPill = '';
+        if (customRestrictions.length > 0) {
+          const chips = customRestrictions.map(r => `<span class="lp-restr-chip">${r}</span>`).join('');
+          restrBannerHtml = `
+            <div class="lp-restr-banner custom">
+              <span class="lp-restr-banner-icon">${ICON.warn}</span>
+              <div style="flex:1;min-width:0;">
+                <div class="lp-restr-title">${customRestrictions.length} non-standard restricted industries</div>
+                <div style="font-size:11.5px;">This lender's exclusion list differs from the industry-standard set.</div>
+                <div class="lp-restr-chips">${chips}</div>
+              </div>
+            </div>`;
+        } else if (isStdRestrictions) {
+          // Quiet footer pill — the standard list is the default; just expose it on demand.
+          const stdId = `std-${lender.id}`;
+          const stdChips = STD_RESTRICTIONS.map(r => `<span class="lp-restr-chip">${r}</span>`).join('');
+          stdFooterPill = `
+            <span class="lp-std-pill" data-target="${stdId}" title="Industry-standard 17-category exclusion list">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              Standard exclusions (17) ▾
+            </span>
+            <div class="lp-restr-full" id="${stdId}" style="margin-top:10px;">${stdChips}</div>`;
+        }
+        // If lender has detailed_restrictions (e.g. PEAC SIC codes), still show them below
+        let detailedRestrHtml = '';
+        if (lender.detailed_restrictions && lender.detailed_restrictions.length > 0) {
+          detailedRestrHtml = `
+            <div class="lp-detailed-restr">
+              <div class="lp-section-head"><span style="display:inline-flex;width:14px;height:14px;align-items:center;justify-content:center;">${ICON.warn}</span> SIC Code Guidelines — ${lender.detailed_restrictions.length} entries</div>
+              <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:12px;text-align:left;">
+                  <thead>
+                    <tr style="border-bottom:2px solid var(--color-brand-dark);">
+                      <th style="padding:8px;font-weight:700;color:var(--color-brand-dark);">Industry</th>
+                      <th style="padding:8px;font-weight:700;color:var(--color-brand-dark);">SIC</th>
+                      <th style="padding:8px;font-weight:700;color:var(--color-brand-dark);">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${lender.detailed_restrictions.map(r => {
+                      let cmt;
+                      if (!r.comments) cmt = `<span style="color:var(--color-text-muted);font-style:italic;">None</span>`;
+                      else if (r.comments.includes('NO exceptions allowed')) cmt = `<span style="background:#FEE2E2;color:#991B1B;padding:2px 6px;border-radius:4px;font-weight:700;font-size:10.5px;">${r.comments}</span>`;
+                      else if (r.comments.includes('NSF')) cmt = `<span style="background:#FEF3C7;color:#B45309;padding:2px 6px;border-radius:4px;font-weight:600;font-size:10.5px;">${r.comments}</span>`;
+                      else cmt = `<span style="color:var(--color-text-secondary);">${r.comments}</span>`;
+                      return `<tr style="border-bottom:1px solid var(--color-border);"><td style="padding:8px;font-weight:600;color:var(--color-brand-dark);">${r.industry}</td><td style="padding:8px;font-family:monospace;color:var(--color-text-secondary);">${r.sic}</td><td style="padding:8px;">${cmt}</td></tr>`;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>`;
+        }
+
+        // Footer: source + updated + HQ state (when not shown in contact)
+        const footerLeft = [];
+        if (lender.hq_state && !lender.hq_address) footerLeft.push(`<span>${ICON.pin} ${lender.hq_state}</span>`);
+        else if (lender.hq_state) footerLeft.push(`<span>${lender.hq_state}</span>`);
+        if (updatedLabel) footerLeft.push(`<span>${ICON.clock} Updated ${updatedLabel}</span>`);
 
         trDetail.innerHTML = `
-          <td colspan="8">
-            <div class="lp-detail-drawer">
-              <div style="font-size:15px; font-weight:700; color:var(--color-text); margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--color-border);">${lender.name}</div>
-              <div class="lp-detail-grid" style="grid-template-columns: ${hasContactData ? '1fr 1fr' : '1fr'};">
-                <!-- Column 1: Underwriting Specs -->
-                <div class="detail-section">
-                  <h4 class="detail-title">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line></svg>
-                    Underwriting Specs
-                  </h4>
-                  <div class="detail-item">
-                    <span class="detail-label">Credit Pull</span>
-                    <span class="detail-value">${lender.soft_pull ? 'Soft Pull Only' : 'Hard Pull Required'}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">Bank Statements</span>
-                    <span class="detail-value">${lender.bank_verified ? 'Required' + (lender.bank_statements ? ` — ${lender.bank_statements} months` : '') : 'Not Required'}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">Collateral</span>
-                    <span class="detail-value">${lender.hard_collateral ? 'Hard Collateral Required' : 'Unsecured'}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="detail-label">Early Payoff Discount</span>
-                    <span class="detail-value">${lender.early_payment_discount ? 'Available' : 'Not Offered'}</span>
-                  </div>
-                  ${lender.max_funding_amount ? `<div class="detail-item"><span class="detail-label">Max Funding</span><span class="detail-value">${formatCurrency(lender.max_funding_amount)}</span></div>` : ''}
-                  ${lender.max_term_months ? `<div class="detail-item"><span class="detail-label">Max Term</span><span class="detail-value">${lender.max_term_months} months</span></div>` : ''}
-                  ${lender.payment_frequencies && lender.payment_frequencies.length > 0 ? `<div class="detail-item"><span class="detail-label">Payment Frequency</span><span class="detail-value">${lender.payment_frequencies.map(f => f.charAt(0).toUpperCase() + f.slice(1)).join(', ')}</span></div>` : ''}
-                  ${lender.preferred_industries && lender.preferred_industries.length > 0 ? `<div class="detail-item"><span class="detail-label">Preferred Industries</span><div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:2px;">${lender.preferred_industries.map(t => `<span class="lp-tag" style="background-color:#ECFDF5; color:#047857; font-weight:600;">${t.toLowerCase()}</span>`).join('')}</div></div>` : ''}
-                  ${applyButton}
-                  <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px;">
-                    ${lender.hq_state ? `<span style="font-size:11px; color:var(--color-text-muted);">HQ: ${lender.hq_state}</span>` : ''}
-                    ${lender.source_url ? `<a class="contact-link" style="font-size:11px;" href="${lender.source_url}" target="_blank" rel="noopener">Source <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg></a>` : ''}
-                    ${updatedLabel ? `<span style="font-size:11px; color:var(--color-text-muted);">Updated ${updatedLabel}</span>` : ''}
-                  </div>
+          <td colspan="7">
+            <div class="lp-drawer-v2">
+              <div class="lp-drawer-header">
+                <div class="lp-drawer-title">${lender.name}</div>
+                <div class="lp-drawer-meta">
+                  <span><span class="lp-status-dot ${risk.dot}"></span> ${risk.label}</span>
                 </div>
-
-                <!-- Column 2: Contact (only if contact data exists) -->
-                ${hasContactData ? `
-                <div class="detail-section">
-                  <h4 class="detail-title">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    Broker Contact
-                  </h4>
-                  ${lender.hq_address ? `<div class="detail-item"><span class="detail-label">Address</span>${mapLink}</div>` : ''}
-                  ${lender.support_email ? `<div class="detail-item"><span class="detail-label">Email</span>${emailLink}</div>` : ''}
-                  ${lender.support_phone ? `<div class="detail-item"><span class="detail-label">Phone</span>${phoneLink}</div>` : ''}
-                </div>` : ''}
               </div>
 
-              <!-- Collapsible Detailed Industry Restrictions (e.g. for PEAC Solutions) -->
-              ${lender.detailed_restrictions && lender.detailed_restrictions.length > 0 ? `
-                <div class="detail-section" style="margin-top: 20px;">
-                  <h4 class="detail-title" style="border-bottom: 1px solid var(--color-border); padding-bottom: 8px; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    ${lender.name} – Restricted Industries & SIC Code Guidelines
-                  </h4>
-                  <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
-                      <thead>
-                        <tr style="border-bottom: 2px solid var(--color-brand-dark); background-color: #F3F4F6;">
-                          <th style="padding: 10px 8px; font-weight: 700; color: var(--color-brand-dark);">Restricted Industry</th>
-                          <th style="padding: 10px 8px; font-weight: 700; color: var(--color-brand-dark);">SIC Code(s)</th>
-                          <th style="padding: 10px 8px; font-weight: 700; color: var(--color-brand-dark);">Comments / Required Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        ${lender.detailed_restrictions.map(r => {
-                          let commentsHtml = r.comments;
-                          if (r.comments.includes('NO exceptions allowed')) {
-                            commentsHtml = `<span style="background-color: var(--color-danger-bg); color: var(--color-danger); padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10.5px;">${r.comments}</span>`;
-                          } else if (r.comments.includes('NSF')) {
-                            commentsHtml = `<span style="background-color: var(--color-warning-bg); color: #B45309; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10.5px;">${r.comments}</span>`;
-                          } else if (r.comments) {
-                            commentsHtml = `<span style="color: var(--color-text-secondary); font-weight: 500;">${r.comments}</span>`;
-                          } else {
-                            commentsHtml = `<span style="color: var(--color-text-muted); font-style: italic;">None Specified</span>`;
-                          }
-                          return `
-                            <tr style="border-bottom: 1px solid var(--color-border);">
-                              <td style="padding: 10px 8px; font-weight: 600; color: var(--color-brand-dark);">${r.industry}</td>
-                              <td style="padding: 10px 8px; font-family: monospace; font-weight: 600; color: var(--color-text-secondary);">${r.sic}</td>
-                              <td style="padding: 10px 8px;">${commentsHtml}</td>
-                            </tr>
-                          `;
-                        }).join('')}
-                      </tbody>
-                    </table>
-                  </div>
+              <div class="lp-drawer-grid">
+                <!-- Underwriting -->
+                <div>
+                  <div class="lp-section-head">${ICON.shield} Underwriting Specs</div>
+                  <div class="lp-spec-list">${specRows.join('')}</div>
                 </div>
-              ` : ''}
+                <!-- Contact (only if we have any) -->
+                ${hasContactData ? `
+                <div>
+                  <div class="lp-section-head">${ICON.phone} Broker Contact</div>
+                  ${contactRows.join('')}
+                </div>` : `
+                <div style="display:flex;align-items:center;justify-content:center;text-align:center;background:#F9FAFB;border:1px dashed var(--color-border);border-radius:8px;padding:24px;color:var(--color-text-muted);font-size:12px;">
+                  No broker-desk contact on file.<br><a href="mailto:info@lendpaper.com?subject=Lender contact: ${encodeURIComponent(lender.name)}" style="color:var(--color-brand-mid);text-decoration:none;font-weight:600;">Submit one →</a>
+                </div>`}
+              </div>
+
+              ${restrBannerHtml}
+              ${detailedRestrHtml}
+
+              <div class="lp-drawer-footer">
+                <div class="lp-drawer-footer-left">
+                  ${footerLeft.join('')}
+                  ${stdFooterPill}
+                </div>
+                <div>
+                  ${lender.source_url ? `<a href="${lender.source_url}" target="_blank" rel="noopener">View lender site ${ICON.ext}</a>` : ''}
+                </div>
+              </div>
             </div>
           </td>
         `;
@@ -6901,6 +8230,158 @@
     renderTable();
   });
 
+  // ─── More filters popover ───────────────────────────────────────
+  const moreBtn = document.getElementById('more-filters-btn');
+  const morePop = document.getElementById('more-filters-popover');
+  const moreCountPill = document.getElementById('more-filters-count');
+  const maxfundSlider = document.getElementById('maxfund-range');
+  const maxfundVal = document.getElementById('maxfund-val');
+  const freqChips = document.querySelectorAll('#freq-chips .lp-mf-chip');
+  const otherChips = document.querySelectorAll('#other-chips .lp-mf-chip');
+  const mfClear = document.getElementById('mf-clear');
+
+  const fmtMoney = (v) => v === 0 ? 'Any' : (v >= 1000000 ? `$${(v/1000000).toFixed(v % 1000000 === 0 ? 0 : 1)}M+` : `$${(v/1000).toFixed(0)}k+`);
+
+  const countAdvanced = () => {
+    let n = 0;
+    if (activeFilters.minFunding > 0) n++;
+    if (activeFilters.minTerm > 0) n++;
+    if (activeFilters.freqs.length > 0) n += activeFilters.freqs.length;
+    if (activeFilters.industry) n++;
+    if (activeFilters.earlyPayoff) n++;
+    if (activeFilters.directOnly) n++;
+    if (activeFilters.hasContact) n++;
+    return n;
+  };
+  const syncMoreBtn = () => {
+    const n = countAdvanced();
+    if (n > 0) {
+      moreBtn.classList.add('has-active');
+      moreCountPill.style.display = 'inline-block';
+      moreCountPill.textContent = String(n);
+    } else {
+      moreBtn.classList.remove('has-active');
+      moreCountPill.style.display = 'none';
+    }
+  };
+
+  moreBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = morePop.classList.toggle('open');
+    moreBtn.setAttribute('aria-expanded', String(isOpen));
+  });
+  // Click-outside to close
+  document.addEventListener('click', (e) => {
+    if (!morePop.classList.contains('open')) return;
+    if (morePop.contains(e.target) || moreBtn.contains(e.target)) return;
+    morePop.classList.remove('open');
+    moreBtn.setAttribute('aria-expanded', 'false');
+  });
+
+  maxfundSlider.addEventListener('input', (e) => {
+    const v = parseInt(e.target.value);
+    activeFilters.minFunding = v;
+    maxfundVal.textContent = fmtMoney(v);
+    syncMoreBtn();
+    renderTable();
+  });
+
+  freqChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const f = chip.dataset.freq;
+      const idx = activeFilters.freqs.indexOf(f);
+      if (idx === -1) { activeFilters.freqs.push(f); chip.classList.add('active'); }
+      else { activeFilters.freqs.splice(idx, 1); chip.classList.remove('active'); }
+      syncMoreBtn();
+      renderTable();
+    });
+  });
+
+  otherChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const k = chip.dataset.other;
+      chip.classList.toggle('active');
+      const on = chip.classList.contains('active');
+      if (k === 'earlyPayoff') activeFilters.earlyPayoff = on;
+      if (k === 'hasLogo') activeFilters.directOnly = on;
+      if (k === 'hasContact') activeFilters.hasContact = on;
+      syncMoreBtn();
+      renderTable();
+    });
+  });
+
+  // Min term slider
+  const mintermSlider = document.getElementById('minterm-range');
+  const mintermVal = document.getElementById('minterm-val');
+  if (mintermSlider) {
+    mintermSlider.addEventListener('input', (e) => {
+      const v = parseInt(e.target.value);
+      activeFilters.minTerm = v;
+      mintermVal.textContent = v === 0 ? 'Any' : `${v} mo+`;
+      syncMoreBtn();
+      renderTable();
+    });
+  }
+
+  // Industry select — populated from data on init
+  const industrySelect = document.getElementById('industry-select');
+  if (industrySelect) {
+    const indCount = {};
+    lenderData.forEach(l => (l.preferred_industries || []).forEach(ind => {
+      const k = ind.trim();
+      if (!k) return;
+      indCount[k] = (indCount[k] || 0) + 1;
+    }));
+    // Sort by frequency desc, then alpha
+    const indEntries = Object.entries(indCount).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    indEntries.forEach(([name, n]) => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = `${name} (${n})`;
+      industrySelect.appendChild(opt);
+    });
+    industrySelect.addEventListener('change', (e) => {
+      activeFilters.industry = e.target.value;
+      syncMoreBtn();
+      renderTable();
+    });
+  }
+
+  mfClear.addEventListener('click', () => {
+    activeFilters.minFunding = 0;
+    activeFilters.minTerm = 0;
+    activeFilters.freqs = [];
+    activeFilters.earlyPayoff = false;
+    activeFilters.directOnly = false;
+    activeFilters.hasContact = false;
+    activeFilters.industry = '';
+    maxfundSlider.value = 0;
+    maxfundVal.textContent = 'Any';
+    if (mintermSlider) { mintermSlider.value = 0; mintermVal.textContent = 'Any'; }
+    if (industrySelect) industrySelect.value = '';
+    freqChips.forEach(c => c.classList.remove('active'));
+    otherChips.forEach(c => c.classList.remove('active'));
+    syncMoreBtn();
+    renderTable();
+  });
+
+  // ─── Drawer: "View full list" toggle for standard restrictions ──
+  tbody.addEventListener('click', (e) => {
+    const btn = e.target.closest('.lp-restr-toggle, .lp-std-pill');
+    if (!btn) return;
+    e.stopPropagation();
+    const id = btn.dataset.target;
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isOpen = el.classList.toggle('open');
+    if (btn.classList.contains('lp-restr-toggle')) {
+      btn.textContent = isOpen ? 'Hide full list' : 'View full list';
+    } else {
+      // pill: flip the chevron glyph
+      btn.innerHTML = btn.innerHTML.replace(isOpen ? '▾' : '▴', isOpen ? '▴' : '▾');
+    }
+  });
+
   // Reset
   resetBtn.addEventListener('click', () => {
     manualSort = false; // restore match-score auto-sort for next slider interaction
@@ -6937,6 +8418,16 @@
     activeFilters.rev = 0;
     revVal.textContent = '$0';
 
+    // Advanced filters
+    activeFilters.minFunding = 0;
+    activeFilters.freqs = [];
+    activeFilters.earlyPayoff = false;
+    activeFilters.directOnly = false;
+    if (maxfundSlider) { maxfundSlider.value = 0; maxfundVal.textContent = 'Any'; }
+    freqChips.forEach(c => c.classList.remove('active'));
+    otherChips.forEach(c => c.classList.remove('active'));
+    syncMoreBtn();
+
     renderTable();
   });
 
@@ -6957,13 +8448,25 @@
     });
   });
 
-  // Row expand/collapse on click
+  // Row expand/collapse + compare checkbox click
   tbody.addEventListener('click', (e) => {
+    // Compare checkbox click — does NOT toggle row
+    const cmp = e.target.closest('.lp-cmp-check');
+    if (cmp) {
+      e.stopPropagation();
+      const id = parseInt(cmp.dataset.cmp);
+      if (compareIds.has(id)) compareIds.delete(id);
+      else compareIds.add(id);
+      syncCompareBar();
+      renderTable();
+      return;
+    }
     const tr = e.target.closest('.lp-row-interactive');
     if (!tr) return;
     if (e.target.closest('a') || e.target.closest('button')) return;
     const lenderId = parseInt(tr.dataset.id);
-    expandedLenderId = expandedLenderId === lenderId ? null : lenderId;
+    if (expandedIds.has(lenderId)) expandedIds.delete(lenderId);
+    else expandedIds.add(lenderId);
     renderTable();
   });
 
@@ -7029,6 +8532,343 @@
       });
     }
   })();
+  // ───────────────────────────────────────────────────────────────
+  // SIGNAL KEY popover (above table, left side of toolbar)
+  // ───────────────────────────────────────────────────────────────
+  const legendBtn = document.getElementById('legend-btn');
+  const legendPop = document.getElementById('legend-pop');
+  const legendItemsHost = document.getElementById('legend-items');
+  const SIG_LEGEND = [
+    { cls: 'nofico', label: 'No FICO check — credit-score-blind lender',     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="5" y1="20" x2="19" y2="4"/></svg>' },
+    { cls: 'soft',   label: 'Soft pull only (no credit-score impact)',       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>' },
+    { cls: 'bank',   label: 'Bank statements required for funding',           icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v9h14v-9"/><path d="M9 14v3"/><path d="M15 14v3"/></svg>' },
+    { cls: 'payoff', label: 'Offers an early-payoff discount',                icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' },
+    { cls: 'collat', label: 'Hard collateral required (e.g. UCC, real estate)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="1.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>' },
+  ];
+  if (legendItemsHost) {
+    legendItemsHost.innerHTML = SIG_LEGEND.map(s =>
+      `<div class="lp-legend-item"><span class="lp-signal ${s.cls}">${s.icon}</span><span>${s.label}</span></div>`
+    ).join('');
+  }
+  const legendRiskHost = document.getElementById('legend-risk');
+  if (legendRiskHost) {
+    const RISK_KEY = [
+      { c: '#16A34A', label: 'Low — 600+ FICO, no MCA' },
+      { c: '#EAB308', label: 'Moderate — 600+ FICO w/ MCA, or 500+ non-MCA-only' },
+      { c: '#DC2626', label: 'High — 500 FICO MCA-only' },
+      { c: '#3B82F6', label: 'No FICO required — lender ignores credit score' },
+      { c: '#6B7280', label: 'All-risk — marketplace, serves every tier' },
+    ];
+    legendRiskHost.innerHTML = RISK_KEY.map(r =>
+      `<div class="lp-legend-item" style="grid-template-columns:8px 1fr;gap:10px;"><i style="width:6px;height:18px;border-radius:2px;background:${r.c};display:inline-block;"></i><span>${r.label}</span></div>`
+    ).join('');
+  }
+  if (legendBtn) {
+    legendBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = legendPop.classList.toggle('open');
+      legendBtn.setAttribute('aria-expanded', String(isOpen));
+    });
+    document.addEventListener('click', (e) => {
+      if (!legendPop.classList.contains('open')) return;
+      if (legendPop.contains(e.target) || legendBtn.contains(e.target)) return;
+      legendPop.classList.remove('open');
+      legendBtn.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  // ───────────────────────────────────────────────────────────────
+  // EXPAND-ALL toggle (operates on the currently-filtered set)
+  // ───────────────────────────────────────────────────────────────
+  const expandAllBtn = document.getElementById('expand-all-btn');
+  const expandAllLabel = document.getElementById('expand-all-label');
+  function getFilteredIds() {
+    // Helper: re-derive the visible set without re-rendering (mirrors filter logic).
+    // Simpler: read rendered rows from the DOM.
+    return Array.from(document.querySelectorAll('#lender-table-body .lp-row-interactive'))
+      .map(tr => parseInt(tr.dataset.id))
+      .filter(n => !isNaN(n));
+  }
+  function syncExpandAllBtn() {
+    if (!expandAllBtn) return;
+    const ids = getFilteredIds();
+    if (ids.length === 0) {
+      expandAllLabel.textContent = 'Expand all';
+      return;
+    }
+    const allExpanded = ids.every(id => expandedIds.has(id));
+    expandAllLabel.textContent = allExpanded ? 'Collapse all' : 'Expand all';
+    const icon = expandAllBtn.querySelector('svg');
+    if (icon) icon.style.transform = allExpanded ? 'rotate(180deg)' : 'rotate(0)';
+  }
+  if (expandAllBtn) {
+    expandAllBtn.addEventListener('click', () => {
+      const ids = getFilteredIds();
+      if (ids.length === 0) return;
+      const allExpanded = ids.every(id => expandedIds.has(id));
+      if (allExpanded) ids.forEach(id => expandedIds.delete(id));
+      else ids.forEach(id => expandedIds.add(id));
+      renderTable();
+    });
+  }
+
+  // Patch renderTable to sync the expand-all button after every render.
+  const _origRender = renderTable;
+  renderTable = function() { _origRender(); syncExpandAllBtn(); };
+
+  // ───────────────────────────────────────────────────────────────
+  // COMPARE — sticky bar + side-by-side modal
+  // ───────────────────────────────────────────────────────────────
+  const compareBar = document.getElementById('compare-bar');
+  const compareCountEl = document.getElementById('compare-count');
+  const compareThumbsEl = document.getElementById('compare-thumbs');
+  const compareOpenBtn = document.getElementById('compare-open');
+  const compareClearBtn = document.getElementById('compare-clear');
+  const cmpBackdrop = document.getElementById('cmp-modal-backdrop');
+  const cmpClose = document.getElementById('cmp-modal-close');
+  const cmpGrid = document.getElementById('cmp-grid');
+  const MAX_COMPARE = 4;
+
+  function syncCompareBar() {
+    const n = compareIds.size;
+    if (n === 0) {
+      compareBar.classList.remove('visible');
+      document.body.classList.remove('compare-on');
+      return;
+    }
+    compareBar.classList.add('visible');
+    document.body.classList.add('compare-on');
+    compareCountEl.textContent = String(n);
+    // Thumbnails
+    const lenders = lenderData.filter(l => compareIds.has(l.id));
+    compareThumbsEl.innerHTML = lenders.slice(0, 5).map(l => {
+      if (l.logo_url) {
+        return `<img class="lp-compare-thumb" src="${l.logo_url}" alt="${l.name}" onerror="this.style.display='none';"/>`;
+      }
+      const initials = l.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      return `<span class="lp-compare-thumb" style="display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--color-brand-dark);">${initials}</span>`;
+    }).join('');
+    compareOpenBtn.disabled = n < 2;
+    compareOpenBtn.style.opacity = n < 2 ? '0.55' : '1';
+    compareOpenBtn.style.cursor = n < 2 ? 'not-allowed' : 'pointer';
+  }
+
+  function clearCompare() {
+    compareIds.clear();
+    syncCompareBar();
+    renderTable();
+  }
+
+  if (compareClearBtn) compareClearBtn.addEventListener('click', clearCompare);
+
+  function openCompareModal() {
+    if (compareIds.size < 2) return;
+    const lenders = lenderData.filter(l => compareIds.has(l.id)).slice(0, MAX_COMPARE);
+    if (lenders.length < 2) return;
+
+    // Build comparison rows
+    const fmtMoneyVal = (v) => v ? formatCurrency(v) : '<span class="lp-cmp-muted">—</span>';
+    const fmtNum = (v) => (v && v !== 0) ? v : '<span class="lp-cmp-muted">—</span>';
+    const fmtBool = (b, t, f) => b ? `<span class="lp-cmp-best">${t}</span>` : `<span class="lp-cmp-muted">${f}</span>`;
+
+    // Numeric best-of helpers (lower-is-better for FICO/TIB/Rev; higher-is-better for funding/term/stacking)
+    const lowerBest = (vals) => {
+      const filt = vals.filter(v => v && v > 0);
+      return filt.length ? Math.min(...filt) : null;
+    };
+    const higherBest = (vals) => {
+      const filt = vals.filter(v => v && v > 0 && v !== 999);
+      return filt.length ? Math.max(...filt) : null;
+    };
+    const ficoVals = lenders.map(l => l.fico);
+    const tibVals  = lenders.map(l => l.tib);
+    const revVals  = lenders.map(l => l.rev);
+    const fundVals = lenders.map(l => l.max_funding_amount);
+    const termVals = lenders.map(l => l.max_term_months);
+    const stkVals  = lenders.map(l => l.stacking);
+    const bestFico = lowerBest(ficoVals);
+    const bestTib  = lowerBest(tibVals);
+    const bestRev  = lowerBest(revVals);
+    const bestFund = higherBest(fundVals);
+    const bestTerm = higherBest(termVals);
+    const bestStk  = higherBest(stkVals);
+
+    const cellNum = (v, best, fmt) => {
+      if (!v || v === 0) return `<span class="lp-cmp-muted">—</span>`;
+      const text = fmt ? fmt(v) : v;
+      return v === best ? `<span class="lp-cmp-best">${text}</span>` : text;
+    };
+
+    const headCells = lenders.map(l => {
+      const r = getLenderRisk(l);
+      const initials = l.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      const logo = l.logo_url
+        ? `<img class="cmp-head-logo" src="${l.logo_url}" alt="${l.name}" onerror="this.style.display='none'"/>`
+        : `<div class="cmp-head-logo" style="background:linear-gradient(135deg,#E6FDF5,#A7F3D0);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--color-brand-dark);">${initials}</div>`;
+      return `<th>
+        ${logo}
+        <div class="cmp-head-name">${displayName(l.name)}</div>
+        <div class="cmp-head-meta"><span class="lp-status-dot ${r.dot}" style="display:inline-block;vertical-align:middle;margin-right:4px;"></span>${r.label}</div>
+        <button class="cmp-remove" data-id="${l.id}">Remove</button>
+      </th>`;
+    }).join('');
+
+    const rowFor = (label, cells) => `<tr><td>${label}</td>${cells.map(c => `<td>${c}</td>`).join('')}</tr>`;
+
+    // Products cells
+    const productsCells = lenders.map(l => {
+      const canon = normalizeProducts(l.products);
+      return canon.length === 0
+        ? '<span class="lp-cmp-muted">—</span>'
+        : canon.map(p => `<span class="badge-product ${PRODUCT_CLASS[p]}" style="margin-right:4px;">${p}</span>`).join('');
+    });
+
+    // Restrictions cells
+    const STD_KEY = JSON.stringify(['Mining','Tobacco Manufacturing','Logging','Trucking','Freight Brokerage','Jewelry / Precious Metals / Scrap Metal','Vehicle Dealers','Financial Services / Insurance / Real Estate','Home Health Care','Building Cleaning & Maintenance','Photofinishing Labs','Lawyers / Legal Services','Non-Profits','Vice Industries','Cannabis / Marijuana','Adult Entertainment / Pornography','Landscaping'].sort());
+    const restrictionsCells = lenders.map(l => {
+      const list = l.restrictions || [];
+      if (list.length === 0) return '<span class="lp-cmp-muted">None on file</span>';
+      const isStd = JSON.stringify(list.slice().sort()) === STD_KEY;
+      if (isStd) return `<span class="lp-cmp-muted">Standard list (17)</span>`;
+      return `${list.length} custom <span class="lp-cmp-muted" style="font-size:11px;">${list.slice(0, 3).join(', ')}${list.length > 3 ? '…' : ''}</span>`;
+    });
+
+    // Signals row
+    const signalsCells = lenders.map(l => {
+      const s = [];
+      if (l.soft_pull) s.push('Soft pull');
+      if (l.bank_verified) s.push('Bank verify' + (l.bank_statements ? ` (${l.bank_statements}mo)` : ''));
+      if (l.early_payment_discount) s.push('Early payoff');
+      if (l.hard_collateral) s.push('Collateral');
+      return s.length === 0 ? '<span class="lp-cmp-muted">—</span>' : s.join(' · ');
+    });
+
+    // Contact cells
+    const contactCells = lenders.map(l => {
+      const parts = [];
+      if (l.support_phone) parts.push(`<a href="tel:${l.support_phone.replace(/[^0-9+]/g,'')}" style="color:var(--color-brand-mid);text-decoration:none;font-weight:600;">${l.support_phone}</a>`);
+      if (l.support_email) parts.push(`<a href="mailto:${l.support_email}" style="color:var(--color-brand-mid);text-decoration:none;font-weight:600;font-size:11.5px;">${l.support_email}</a>`);
+      if (l.hq_state) parts.push(`<span class="lp-cmp-muted">${l.hq_state}</span>`);
+      return parts.length === 0 ? '<span class="lp-cmp-muted">—</span>' : parts.join('<br>');
+    });
+
+    const stackingCell = (v) => {
+      if (v === 999) return 'Unlimited';
+      if (!v || v === 0) return '<span class="lp-cmp-muted">—</span>';
+      const text = `Up to ${v}${['','st','nd','rd'][v] || 'th'}`;
+      return v === bestStk ? `<span class="lp-cmp-best">${text}</span>` : text;
+    };
+
+    cmpGrid.innerHTML = `
+      <div style="padding:14px 22px 0; font-size:11.5px; color:var(--color-text-muted); display:flex; align-items:center; gap:6px;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#ECFDF5;border:1px solid #A7F3D0;"></span>
+        <span>Highlighted values = <strong style="color:var(--color-brand-mid);">most flexible</strong> in this set — lowest required FICO/TIB/Rev, highest available funding/term/positions. Best lender depends on borrower profile.</span>
+      </div>
+      <table class="lp-cmp-table">
+        <thead>
+          <tr>
+            <th>Lender</th>
+            ${headCells}
+          </tr>
+        </thead>
+        <tbody>
+          ${rowFor('Risk band', lenders.map(l => { const r = getLenderRisk(l); return `<span class="lp-status-dot ${r.dot}" style="display:inline-block;vertical-align:middle;margin-right:5px;"></span>${r.label}`; }))}
+          ${rowFor('Min FICO', ficoVals.map(v => cellNum(v, bestFico)))}
+          ${rowFor('Time in business', tibVals.map(v => cellNum(v, bestTib, x => x + ' mo')))}
+          ${rowFor('Min monthly revenue', revVals.map(v => cellNum(v, bestRev, x => formatCurrency(x))))}
+          ${rowFor('Max funding', fundVals.map(v => cellNum(v, bestFund, x => formatCurrency(x))))}
+          ${rowFor('Max term', termVals.map(v => cellNum(v, bestTerm, x => x + ' months')))}
+          ${rowFor('Stacking', stkVals.map(stackingCell))}
+          ${rowFor('Products', productsCells)}
+          ${rowFor('Payment frequency', lenders.map(l => (l.payment_frequencies && l.payment_frequencies.length) ? l.payment_frequencies.join(' · ') : '<span class="lp-cmp-muted">—</span>'))}
+          ${rowFor('Trust signals', signalsCells)}
+          ${rowFor('Restricted industries', restrictionsCells)}
+          ${rowFor('Broker contact', contactCells)}
+        </tbody>
+      </table>
+    `;
+
+    cmpBackdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  if (compareOpenBtn) compareOpenBtn.addEventListener('click', openCompareModal);
+  if (cmpClose) cmpClose.addEventListener('click', () => {
+    cmpBackdrop.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+  if (cmpBackdrop) cmpBackdrop.addEventListener('click', (e) => {
+    if (e.target === cmpBackdrop) {
+      cmpBackdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+  // Remove buttons inside the modal
+  if (cmpGrid) cmpGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.cmp-remove');
+    if (!btn) return;
+    const id = parseInt(btn.dataset.id);
+    compareIds.delete(id);
+    syncCompareBar();
+    renderTable();
+    if (compareIds.size < 2) {
+      cmpBackdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    } else {
+      openCompareModal();
+    }
+  });
+
+  // Search placeholder rotation — slow cycle so users discover what's searchable.
+  // Pauses when the input is focused or has a value.
+  (function rotateSearchPlaceholder() {
+    const HINTS = [
+      'Search by lender name…',
+      'Search by product — try MCA, SBA, Term, LOC…',
+      'Search by preferred industry — try restaurant, trucking, medical…',
+      'Search by phone number or email…',
+      'Try "unsecured" to find no-collateral lenders',
+    ];
+    let i = 0;
+    searchInput.placeholder = HINTS[0];
+    setInterval(() => {
+      if (document.activeElement === searchInput) return;
+      if (searchInput.value) return;
+      i = (i + 1) % HINTS.length;
+      // brief fade for grace
+      searchInput.style.transition = 'opacity 0.25s';
+      searchInput.style.opacity = '0.4';
+      setTimeout(() => {
+        searchInput.placeholder = HINTS[i];
+        searchInput.style.opacity = '1';
+      }, 250);
+    }, 6000);
+  })();
+
+  // ───────────────────────────────────────────────────────────────
+  // DENSITY toggle — Compact ↔ Comfortable, persists in localStorage
+  // ───────────────────────────────────────────────────────────────
+  const densityBtn = document.getElementById('density-btn');
+  const densityLabel = document.getElementById('density-label');
+  const tableEl = document.querySelector('.lp-data-table');
+  function applyDensity(mode) {
+    if (mode === 'compact') {
+      tableEl.classList.add('compact');
+      densityLabel.textContent = 'Compact';
+    } else {
+      tableEl.classList.remove('compact');
+      densityLabel.textContent = 'Comfortable';
+    }
+    localStorage.setItem('lp_density', mode);
+  }
+  applyDensity(localStorage.getItem('lp_density') || 'comfortable');
+  if (densityBtn) {
+    densityBtn.addEventListener('click', () => {
+      const cur = tableEl.classList.contains('compact') ? 'compact' : 'comfortable';
+      applyDensity(cur === 'compact' ? 'comfortable' : 'compact');
+    });
+  }
+
   renderFooterCount();
   updateSortIndicators();
   renderTable();
