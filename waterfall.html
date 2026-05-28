@@ -625,6 +625,17 @@
   .lp-status-dot.blue { background-color: #3B82F6; }
   .lp-status-dot.gray { background-color: #6B7280; }
 
+  /* Risk appetite pill */
+  .risk-pill {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    line-height: 1.4;
+  }
+
   /* Collapsible Details Drawer Styling */
   .detail-row {
     display: none;
@@ -2165,11 +2176,11 @@
         </div>
       </div>
 
-      <!-- Risk band chips -->
+      <!-- Risk appetite chips -->
       <div class="lp-chip-row">
         <span class="lp-chip-label">
-          <span class="lp-info-wrap">Risk band
-            <button class="lp-info-btn" data-modal="info-risk" aria-label="About Risk Band">i</button>
+          <span class="lp-info-wrap">Accepts borrowers
+            <button class="lp-info-btn" data-modal="info-risk" aria-label="About Risk Appetite">i</button>
           </span>
         </span>
         <div class="lp-chip-group" id="risk-group">
@@ -2301,7 +2312,7 @@
           <div id="legend-pop" class="lp-legend-pop" role="dialog" aria-label="Trust signal key">
             <h6>Trust signals (under lender name)</h6>
             <div id="legend-items"></div>
-            <h6 style="margin-top:14px;">Risk band</h6>
+            <h6 style="margin-top:14px;">Accepts borrowers</h6>
             <div id="legend-risk"></div>
           </div>
         </span>
@@ -2330,7 +2341,7 @@
           <tr>
             <th data-col="name">Lender <span class="sort-icon"></span></th>
             <th data-col="products">Products <span class="sort-icon"></span></th>
-            <th data-col="risk">Risk band <span class="sort-icon"></span></th>
+            <th data-col="risk">Accepts borrowers <span class="sort-icon"></span></th>
             <th class="num-col" data-col="fico">Min FICO <span class="sort-icon"></span></th>
             <th class="num-col" data-col="tib">TIB (mo.) <span class="sort-icon"></span></th>
             <th class="num-col" data-col="rev">Monthly rev <span class="sort-icon"></span></th>
@@ -2456,12 +2467,12 @@
   </div>
 </div>
 
-<!-- Info Modal: Risk Band -->
+<!-- Info Modal: Risk Appetite -->
 <div class="lp-modal-backdrop" id="info-risk-backdrop">
   <div class="lp-modal" style="max-width:480px;">
     <button class="lp-modal-close" data-close="info-risk-backdrop">&times;</button>
-    <h3 class="lp-modal-title" style="margin-bottom:16px;">Risk Band</h3>
-    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">Risk is calculated from minimum personal credit score required and product type. MCA products automatically raise risk by one tier. Tiers sort top to bottom: easiest to qualify → hardest.</p>
+    <h3 class="lp-modal-title" style="margin-bottom:16px;">Risk appetite</h3>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">Shows the borrower risk profile this lender accepts, based on minimum credit score, time in business, revenue, and product type. MCA products raise the tier by one. Tiers sort top to bottom: easiest to qualify → hardest.</p>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#EFF6FF;border:1px solid #BFDBFE;">
         <span style="width:10px;height:10px;border-radius:50%;background:#3B82F6;flex-shrink:0;margin-top:4px;"></span>
@@ -2469,15 +2480,15 @@
       </div>
       <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#F0FDF4;border:1px solid #A7F3D0;">
         <span style="width:10px;height:10px;border-radius:50%;background:#16A34A;flex-shrink:0;margin-top:4px;"></span>
-        <div><div style="font-weight:600;font-size:13px;color:#15803D;margin-bottom:3px;">Low Risk Band</div><div style="font-size:12px;color:#166534;">600+ personal credit score, non-MCA products. Traditional underwriting with strong applicant profile.</div></div>
+        <div><div style="font-weight:600;font-size:13px;color:#27500A;margin-bottom:3px;">Low</div><div style="font-size:12px;color:#166534;">600+ personal credit score, non-MCA products. Traditional underwriting with strong applicant profile.</div></div>
       </div>
       <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FFFBEB;border:1px solid #FDE68A;">
         <span style="width:10px;height:10px;border-radius:50%;background:#EAB308;flex-shrink:0;margin-top:4px;"></span>
-        <div><div style="font-weight:600;font-size:13px;color:#A16207;margin-bottom:3px;">Moderate Risk</div><div style="font-size:12px;color:#854D0E;">500–599 credit score, or 600+ score with MCA product. Expect higher factor rates and tighter stacking limits.</div></div>
+        <div><div style="font-weight:600;font-size:13px;color:#633806;margin-bottom:3px;">Moderate</div><div style="font-size:12px;color:#854D0E;">500–599 credit score, or 600+ score with MCA product. Expect higher factor rates and tighter stacking limits.</div></div>
       </div>
       <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FEF2F2;border:1px solid #FECACA;">
         <span style="width:10px;height:10px;border-radius:50%;background:#DC2626;flex-shrink:0;margin-top:4px;"></span>
-        <div><div style="font-weight:600;font-size:13px;color:#DC2626;margin-bottom:3px;">High Risk</div><div style="font-size:12px;color:#B91C1C;">Below 500 credit score, or MCA-only lender with sub-600 FICO threshold. Heavy verification, higher cost of capital, limited stacking.</div></div>
+        <div><div style="font-weight:600;font-size:13px;color:#712B13;margin-bottom:3px;">High</div><div style="font-size:12px;color:#B91C1C;">Below 500 credit score, or MCA-only lender with sub-600 FICO threshold. Heavy verification, higher cost of capital, limited stacking.</div></div>
       </div>
     </div>
   </div>
@@ -5871,16 +5882,19 @@
     if (lender.hard_collateral) score -= 1;
     if (lender.bank_verified)   score -= 0.5;
 
-    if (score <= 2)   return { label: 'Low Risk',      dot: 'green',  code: 'low',  score };
-    if (score <= 4)   return { label: 'Moderate Risk', dot: 'yellow', code: 'mod',  score };
-    return            { label: 'High Risk',      dot: 'red',    code: 'high', score };
+    if (score <= 2)   return { label: 'Low',      dot: 'green',  code: 'low',  score, pillBg: '#EAF3DE', pillColor: '#27500A' };
+    if (score <= 4)   return { label: 'Moderate', dot: 'yellow', code: 'mod',  score, pillBg: '#FAEEDA', pillColor: '#633806' };
+    return            { label: 'High',      dot: 'red',    code: 'high', score, pillBg: '#FAECE7', pillColor: '#712B13' };
   };
 
   // Wraps determineRisk; marketplace/broker lenders marked all_risk:true serve all borrower tiers
   const getLenderRisk = (lender) => {
-    if (lender.all_risk) return { label: 'All Risk Tiers', dot: 'gray', code: 'allrisk' };
+    if (lender.all_risk) return { label: 'All risk tiers', dot: 'red', code: 'allrisk', pillBg: '#FAECE7', pillColor: '#712B13' };
     return determineRisk(lender);
   };
+
+  const riskPillHTML = (risk) =>
+    `<span class="risk-pill" style="background:${risk.pillBg};color:${risk.pillColor};">${risk.label}</span>`;
 
   // Match score: measures how well a lender's minimums align with the borrower's profile.
   // Each active numeric slider contributes 0–1 (ratio of lender min to borrower value).
@@ -6275,12 +6289,7 @@
           </div>
         </td>
         <td><div style="display:flex; flex-wrap:wrap; gap:4px; max-width:180px;">${productsHtml}</div></td>
-        <td style="white-space: nowrap;">
-          <span style="display:inline-flex; align-items:center; gap: 5px;">
-            <span class="lp-status-dot ${risk.dot}"></span>
-            <span>${risk.label}</span>
-          </span>
-        </td>
+        <td>${riskPillHTML(risk)}</td>
         <td class="num-col">${lender.fico === 0 ? '<span class="lp-tbd">—</span>' : lender.fico}</td>
         <td class="num-col">${lender.tib === 0 ? '<span class="lp-tbd">—</span>' : lender.tib}</td>
         <td class="num-col">${formatCurrency(lender.rev)}</td>
@@ -7161,7 +7170,7 @@
           </tr>
         </thead>
         <tbody>
-          ${rowFor('Risk band', lenders.map(l => { const r = getLenderRisk(l); return `<span class="lp-status-dot ${r.dot}" style="display:inline-block;vertical-align:middle;margin-right:5px;"></span>${r.label}`; }))}
+          ${rowFor('Accepts borrowers', lenders.map(l => riskPillHTML(getLenderRisk(l))))}
           ${rowFor('Min FICO', ficoVals.map(v => cellNum(v, bestFico)))}
           ${rowFor('Time in business', tibVals.map(v => cellNum(v, bestTib, x => x + ' mo')))}
           ${rowFor('Min monthly revenue', revVals.map(v => cellNum(v, bestRev, x => formatCurrency(x))))}
