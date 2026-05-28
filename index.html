@@ -451,6 +451,15 @@ input { font-family: inherit; }
   text-align: center; font-size: 11px; color: var(--text-faint);
   margin: 10px 0 0;
 }
+.frm-input {
+  font-family: var(--font); font-size: 13px; color: var(--text);
+  background: var(--bg-alt); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 10px;
+  transition: border-color var(--transition); outline: none;
+  width: 100%; box-sizing: border-box;
+}
+.frm-input:focus { border-color: var(--accent); }
+.frm-input::placeholder { color: var(--text-faint); }
 
 /* ==================== Glossary ==================== */
 
@@ -804,6 +813,7 @@ input { font-family: inherit; }
   font-size: 13px; font-weight: 700; padding: 8px 18px;
   border-radius: var(--radius-sm); text-decoration: none;
   transition: opacity var(--transition);
+  border: none; cursor: pointer;
 }
 .svc-cta-btn:hover { opacity: 0.90; }
 .svc-cta-btn svg { flex-shrink: 0; }
@@ -1214,7 +1224,7 @@ input { font-family: inherit; }
     <div class="sidebar-footer">
       <p style="font-style:italic;opacity:0.75;margin-bottom:6px;">Built by someone who worked the desk.</p>
       <p>© 2026 LendPaper</p>
-      <p><a href="mailto:info@lendpaper.com">info@lendpaper.com</a> &nbsp;·&nbsp; <a href="/privacy">Privacy</a></p>
+      <p><a href="mailto:stephengowa@gmail.com">info@lendpaper.com</a> &nbsp;·&nbsp; <a href="/privacy">Privacy</a></p>
     </div>
   </aside>
 
@@ -1369,10 +1379,10 @@ input { font-family: inherit; }
         <div class="svc-cta-block">
           <h3 class="svc-cta-heading">Tell me what's broken.</h3>
           <p class="svc-cta-copy">Your desk has a workflow problem I haven't built a fix for yet. Describe it. I'll tell you if I can solve it — and what it would cost.</p>
-          <a href="mailto:info@lendpaper.com?subject=Here%27s%20what%27s%20broken%20on%20my%20desk&body=Hi%20Steve%2C%0A%0AHere%27s%20the%20problem%20I%27m%20running%20into%3A%0A%0A" class="svc-cta-btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            Email Steve
-          </a>
+          <button onclick="openSuggestPanel()" class="svc-cta-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Send a message
+          </button>
         </div>
 
       </div>
@@ -1399,7 +1409,7 @@ input { font-family: inherit; }
         <div style="margin-top:24px" id="searchGlossaryResults"></div>
         <div class="empty" id="searchEmpty">
           <div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-          <h3>Nothing matched.</h3><p>Try different keywords or <a href="mailto:info@lendpaper.com">request a tool</a>.</p>
+          <h3>Nothing matched.</h3><p>Try different keywords or <a href="mailto:stephengowa@gmail.com">request a tool</a>.</p>
         </div>
       </div>
 
@@ -1471,12 +1481,18 @@ input { font-family: inherit; }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     </div>
     <h3 class="frm-title">You want <span id="frm-name">this</span>.</h3>
-    <p class="frm-body">Your vote helps us decide what ships next. Hit send and we'll loop you in the moment it's live.</p>
-    <a id="frm-email-btn" href="#" class="frm-cta">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      Send request →
-    </a>
-    <p class="frm-hint">Opens your email. One send, done.</p>
+    <p class="frm-body">Your vote helps decide what ships next. Drop your email and we'll loop you in the moment it's live.</p>
+    <form id="frm-form" style="display:flex;flex-direction:column;gap:10px;">
+      <input type="hidden" id="frm-tool-name" name="tool">
+      <input type="email" id="frm-email-input" name="email" class="frm-input" placeholder="your@email.com" required>
+      <button type="submit" id="frm-submit-btn" class="frm-cta">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span id="frm-submit-label">Send request →</span>
+      </button>
+    </form>
+    <p id="frm-success-msg" class="frm-hint" style="display:none;color:var(--accent-hover);font-weight:600;">Got it — we'll loop you in when it ships.</p>
+    <p id="frm-error-msg" class="frm-hint" style="display:none;color:var(--danger);">Something went wrong. Try again.</p>
+    <p class="frm-hint" id="frm-hint-text">No spam. Just a ping when it ships.</p>
   </div>
 </div>
 
@@ -2283,16 +2299,30 @@ function submitProposeTerm() {
     return;
   }
   termEl.classList.remove('invalid');
+  submitEl.disabled = true;
+  submitEl.textContent = 'Sending…';
 
-  var defVal  = defEl.value.trim();
-  var subject = encodeURIComponent('Glossary term proposal: ' + termVal);
-  var body    = encodeURIComponent(
-    'Term: ' + termVal + (defVal ? '\n\nDefinition:\n' + defVal : '')
-  );
-  window.location.href = 'mailto:info@lendpaper.com?subject=' + subject + '&body=' + body;
+  var data = new FormData();
+  data.append('term', termVal);
+  data.append('definition', defEl.value.trim());
+  data.append('_subject', 'Glossary term proposal: ' + termVal);
 
-  bodyEl.style.display = 'none';
-  successEl.classList.add('visible');
+  fetch('https://formspree.io/f/xbdbwlky', {
+    method: 'POST',
+    body: data,
+    headers: { 'Accept': 'application/json' }
+  }).then(function(res) {
+    if (res.ok) {
+      bodyEl.style.display = 'none';
+      successEl.classList.add('visible');
+    } else {
+      submitEl.disabled = false;
+      submitEl.textContent = 'Send it →';
+    }
+  }).catch(function() {
+    submitEl.disabled = false;
+    submitEl.textContent = 'Send it →';
+  });
 }
 
 function updateCounts() {
@@ -2410,15 +2440,67 @@ overlay.addEventListener('click', closeMobile);
 
 /* ---- Modal System Functions ---- */
 function openFeatureRequest(id, name) {
-  document.getElementById('frm-name').textContent = name;
-  var subject = encodeURIComponent('Feature request: ' + name);
-  var body = encodeURIComponent('Hi LendPaper,\n\nI’d love to see the ' + name + ' tool added to LendPaper.\n\nFeel free to loop me in when it ships.\n\n— ');
-  document.getElementById('frm-email-btn').href = 'mailto:info@lendpaper.com?subject=' + subject + '&body=' + body;
-  document.getElementById('frm-overlay').classList.add('open');
+  document.getElementById(‘frm-name’).textContent = name;
+  document.getElementById(‘frm-tool-name’).value = name;
+  document.getElementById(‘frm-form’).style.display = ‘flex’;
+  document.getElementById(‘frm-success-msg’).style.display = ‘none’;
+  document.getElementById(‘frm-error-msg’).style.display = ‘none’;
+  document.getElementById(‘frm-hint-text’).style.display = ‘block’;
+  document.getElementById(‘frm-email-input’).value = ‘’;
+  var btn = document.getElementById(‘frm-submit-btn’);
+  btn.disabled = false;
+  document.getElementById(‘frm-submit-label’).textContent = ‘Send request →’;
+  document.getElementById(‘frm-overlay’).classList.add(‘open’);
 }
 function closeFRM() {
-  document.getElementById('frm-overlay').classList.remove('open');
+  document.getElementById(‘frm-overlay’).classList.remove(‘open’);
+  setTimeout(function() {
+    document.getElementById(‘frm-form’).style.display = ‘flex’;
+    document.getElementById(‘frm-success-msg’).style.display = ‘none’;
+    document.getElementById(‘frm-error-msg’).style.display = ‘none’;
+    document.getElementById(‘frm-hint-text’).style.display = ‘block’;
+    document.getElementById(‘frm-email-input’).value = ‘’;
+    var btn = document.getElementById(‘frm-submit-btn’);
+    btn.disabled = false;
+    document.getElementById(‘frm-submit-label’).textContent = ‘Send request →’;
+  }, 300);
 }
+
+/* ---- Feature Request Form ---- */
+(function() {
+  var FORMSPREE_ID = ‘xbdbwlky’;
+  document.getElementById(‘frm-form’).addEventListener(‘submit’, function(e) {
+    e.preventDefault();
+    var submitBtn   = document.getElementById(‘frm-submit-btn’);
+    var submitLabel = document.getElementById(‘frm-submit-label’);
+    var errorMsg    = document.getElementById(‘frm-error-msg’);
+    var successMsg  = document.getElementById(‘frm-success-msg’);
+    var hintText    = document.getElementById(‘frm-hint-text’);
+    submitLabel.textContent = ‘Sending…’;
+    submitBtn.disabled = true;
+    errorMsg.style.display = ‘none’;
+    fetch(‘https://formspree.io/f/’ + FORMSPREE_ID, {
+      method: ‘POST’,
+      body: new FormData(this),
+      headers: { ‘Accept’: ‘application/json’ }
+    }).then(function(res) {
+      if (res.ok) {
+        document.getElementById(‘frm-form’).style.display = ‘none’;
+        hintText.style.display = ‘none’;
+        successMsg.style.display = ‘block’;
+        setTimeout(function() { closeFRM(); }, 2800);
+      } else {
+        errorMsg.style.display = ‘block’;
+        submitBtn.disabled = false;
+        submitLabel.textContent = ‘Send request →’;
+      }
+    }).catch(function() {
+      errorMsg.style.display = ‘block’;
+      submitBtn.disabled = false;
+      submitLabel.textContent = ‘Send request →’;
+    });
+  });
+})();
 
 function openModal(url) {
     const overlay = document.getElementById('lp-modal-overlay');
@@ -2580,11 +2662,12 @@ document.addEventListener('keydown', (e) => {
 
 /* ---- Suggest Widget ---- */
 (function() {
-  var FORMSPREE_ID = 'YOUR_FORMSPREE_ID'; // Replace with ID from formspree.io
+  var FORMSPREE_ID = 'xbdbwlky';
 
   var btn   = document.getElementById('suggest-btn');
   var panel = document.getElementById('suggest-panel');
   var form  = document.getElementById('suggest-form');
+  window.openSuggestPanel = function() { panel.classList.add('open'); };
   var successEl = document.getElementById('suggest-success');
   var errorEl   = document.getElementById('suggest-error');
   var submitBtn = document.getElementById('suggest-submit');
