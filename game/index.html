@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deal Desk Quiz — LendPaper</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
+<meta property="og:title" content="Deal Desk Quiz — LendPaper" />
+<meta property="og:description" content="Think you know alt-finance? Glossary quiz, objection handling, and a live leaderboard for MCA and SBA pros. Built by LendPaper." />
+<meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+<meta property="og:url" content="https://lendpaper.com/game" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+<style>
+:root{--green:#14532D;--green-h:#0f4022;--green-s:rgba(20,83,45,.1);--ok:#16a34a;--bad:#dc2626;--warn:#d97706;--bg:#f8faf9;--surf:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--r:12px;--sh:0 4px 24px rgba(0,0,0,.08);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;color:var(--text);}
+.wrap{width:100%;max-width:700px;}
+.logo{text-align:center;margin-bottom:22px;font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--green);text-transform:uppercase;}
+.logo span{color:#94a3b8;font-weight:400;}
+
+/* Screens */
+.screen{background:var(--surf);border-radius:16px;box-shadow:var(--sh);padding:36px 40px;display:none;}
+.screen.active{display:block;}
+
+/* Utilities */
+.btn{display:inline-block;background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:13px 26px;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s,transform .1s;letter-spacing:.02em;}
+.btn:hover{background:var(--green-h);transform:translateY(-1px);}
+.btn:active{transform:translateY(0);}
+.btn-ghost{background:transparent;color:var(--green);border:2px solid var(--green);}
+.btn-ghost:hover{background:var(--green-s);}
+.btn-sm{padding:9px 18px;font-size:13px;}
+.label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px;display:block;}
+.back-btn{background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;padding:0;margin-bottom:20px;display:flex;align-items:center;gap:6px;}
+.back-btn:hover{color:var(--text);}
+
+/* ── START SCREEN ── */
+.start-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:10px;}
+.start-title{font-size:30px;font-weight:800;line-height:1.25;margin-bottom:8px;}
+.start-sub{font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.6;}
+.mode-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.mode-card{border:2px solid var(--border);border-radius:var(--r);padding:20px 16px;cursor:pointer;transition:all .15s;text-align:center;background:var(--surf);}
+.mode-card:hover{border-color:var(--green);background:var(--green-s);transform:translateY(-2px);}
+.mode-card .mc-icon{font-size:28px;margin-bottom:10px;}
+.mode-card .mc-name{font-size:14px;font-weight:700;margin-bottom:4px;}
+.mode-card .mc-desc{font-size:12px;color:var(--muted);line-height:1.4;}
+.mode-card.accent-card{background:var(--green);border-color:var(--green);color:#fff;}
+.mode-card.accent-card .mc-name,.mode-card.accent-card .mc-desc{color:rgba(255,255,255,.85);}
+.mode-card.accent-card:hover{background:var(--green-h);}
+
+/* ── CATEGORY SCREEN ── */
+.cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.cat-card{border-radius:var(--r);padding:20px;cursor:pointer;transition:all .15s;border:2px solid transparent;display:flex;align-items:center;gap:14px;}
+.cat-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1);}
+.cat-card .cc-icon{font-size:32px;flex-shrink:0;}
+.cat-card .cc-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+.cat-card .cc-count{font-size:11px;opacity:.7;font-weight:600;}
+.cat-core{background:#dcfce7;color:#14532d;}.cat-uw{background:#dbeafe;color:#1e40af;}
+.cat-credit{background:#fce7f3;color:#9d174d;}.cat-legal{background:#ffedd5;color:#c2410c;}
+.cat-cre{background:#f1f5f9;color:#1e293b;}.cat-equip{background:#fef9c3;color:#854d0e;}
+.cat-sales{background:#ccfbf1;color:#134e4a;}.cat-tax{background:#ede9fe;color:#4c1d95;}
+
+/* ── DIFFICULTY SCREEN ── */
+.diff-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.diff-card{border:2px solid var(--border);border-radius:var(--r);padding:22px 20px;cursor:pointer;transition:all .15s;}
+.diff-card:hover{border-color:var(--green);background:var(--green-s);transform:translateY(-2px);}
+.diff-card .dc-icon{font-size:28px;margin-bottom:10px;}
+.diff-card .dc-name{font-size:15px;font-weight:700;margin-bottom:4px;}
+.diff-card .dc-desc{font-size:12px;color:var(--muted);line-height:1.4;}
+
+/* ── GLOSSARY QUIZ ── */
+.quiz-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.q-counter{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.score-pill{font-size:13px;font-weight:700;color:var(--green);background:var(--green-s);padding:4px 12px;border-radius:20px;}
+.progress-dots{display:flex;gap:5px;justify-content:center;margin-bottom:16px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .2s;}
+.dot.cur{background:var(--green);}.dot.c{background:var(--ok);}.dot.w{background:var(--bad);}.dot.t{background:var(--warn);}
+.timer-wrap{height:5px;background:var(--border);border-radius:99px;margin-bottom:24px;overflow:hidden;}
+.timer-bar{height:100%;background:var(--green);border-radius:99px;transition:width 1s linear,background .3s;}
+.timer-bar.urgent{background:var(--bad);}
+.q-type-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border:1.5px solid var(--border);padding:4px 10px;border-radius:6px;margin-bottom:14px;}
+.q-type-badge.t1{color:#1e40af;border-color:#bfdbfe;background:#eff6ff;}
+.q-type-badge.t2{color:#7e22ce;border-color:#e9d5ff;background:#faf5ff;}
+.q-type-badge.t3{color:#c2410c;border-color:#fed7aa;background:#fff7ed;}
+.cat-context{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:12px;}
+.q-text{font-size:21px;font-weight:700;line-height:1.4;margin-bottom:8px;}
+.q-hint{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
+.choices{display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
+.choice{width:100%;text-align:left;background:var(--surf);border:2px solid var(--border);border-radius:var(--r);padding:13px 16px;font-size:14px;line-height:1.4;color:var(--text);cursor:pointer;transition:all .15s;display:flex;gap:11px;align-items:flex-start;}
+.choice:hover:not(:disabled){border-color:var(--green);background:var(--green-s);}
+.choice .key{flex-shrink:0;font-size:10px;font-weight:700;background:var(--border);color:var(--muted);border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all .15s;}
+.choice:hover:not(:disabled) .key{background:var(--green);color:#fff;}
+.choice.correct{border-color:var(--ok)!important;background:rgba(22,163,74,.08)!important;color:var(--ok)!important;}
+.choice.correct .key{background:var(--ok);color:#fff;}
+.choice.wrong{border-color:var(--bad)!important;background:rgba(220,38,38,.08)!important;color:var(--bad)!important;}
+.choice.wrong .key{background:var(--bad);color:#fff;}
+.choice:disabled{cursor:not-allowed;opacity:.55;}
+.choice.correct:disabled,.choice.wrong:disabled{opacity:1;}
+.fb{min-height:32px;border-radius:8px;padding:7px 13px;font-size:13px;font-weight:600;transition:all .2s;}
+.fb.ok{background:rgba(22,163,74,.1);color:#15803d;}.fb.bad{background:rgba(220,38,38,.08);color:#b91c1c;}.fb.to{background:rgba(217,119,6,.1);color:#92400e;}
+.streak{text-align:center;font-size:13px;font-weight:700;color:var(--green);margin-top:8px;min-height:18px;}
+.q-body{transition:opacity .22s ease,transform .22s ease;}
+.q-body.leaving{opacity:0;transform:translateX(18px);}
+.q-body.entering{opacity:0;transform:translateX(-18px);}
+.q-body.visible{opacity:1;transform:translateX(0);}
+.acro-display{font-size:52px;font-weight:900;color:var(--green);letter-spacing:-.02em;margin-bottom:4px;}
+
+/* ── OBJECTION ROUND SELECT ── */
+.round-cards{display:flex;flex-direction:column;gap:12px;}
+.round-card{border:2px solid var(--border);border-radius:var(--r);padding:20px 22px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:16px;}
+.round-card:hover{border-color:var(--green);background:var(--green-s);transform:translateY(-1px);}
+.round-card .rc-num{font-size:28px;font-weight:900;color:var(--green);opacity:.25;flex-shrink:0;width:32px;}
+.round-card .rc-body{}
+.round-card .rc-name{font-size:15px;font-weight:700;margin-bottom:3px;}
+.round-card .rc-desc{font-size:12px;color:var(--muted);line-height:1.4;}
+.round-card.locked{opacity:.5;cursor:not-allowed;}
+.round-card.locked:hover{border-color:var(--border);background:var(--surf);transform:none;}
+
+/* ── OBJECTION QUIZ ── */
+.obj-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.obj-round-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.obj-score-pill{font-size:13px;font-weight:700;color:var(--green);background:var(--green-s);padding:4px 12px;border-radius:20px;}
+.obj-body{transition:opacity .22s ease,transform .22s ease;}
+.obj-body.leaving{opacity:0;transform:translateX(18px);}
+.obj-body.entering{opacity:0;transform:translateX(-18px);}
+.obj-body.visible{opacity:1;transform:translateX(0);}
+.obj-bubble{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:12px 12px 12px 3px;padding:16px 20px;font-size:16px;font-style:italic;color:#0c4a6e;margin-bottom:22px;line-height:1.5;position:relative;}
+.obj-prompt{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px;}
+.obj-choices{display:flex;flex-direction:column;gap:9px;margin-bottom:16px;}
+.obj-choice{width:100%;text-align:left;background:var(--surf);border:2px solid var(--border);border-radius:var(--r);padding:13px 16px;font-size:13px;line-height:1.5;color:var(--text);cursor:pointer;transition:all .15s;display:flex;gap:11px;align-items:flex-start;}
+.obj-choice:hover:not(:disabled){border-color:var(--green);background:var(--green-s);}
+.obj-choice .okey{flex-shrink:0;font-size:10px;font-weight:700;background:var(--border);color:var(--muted);border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all .15s;}
+.obj-choice:hover:not(:disabled) .okey{background:var(--green);color:#fff;}
+.obj-choice:disabled{cursor:not-allowed;opacity:.5;}
+.obj-choice.picked:disabled{opacity:1;}
+/* Tier colors */
+.obj-choice.tier-best{border-color:var(--ok)!important;background:rgba(22,163,74,.07)!important;}
+.obj-choice.tier-best .okey{background:var(--ok);color:#fff;}
+.obj-choice.tier-ok{border-color:#ca8a04!important;background:rgba(202,138,4,.07)!important;}
+.obj-choice.tier-ok .okey{background:#ca8a04;color:#fff;}
+.obj-choice.tier-wrong{border-color:#ea580c!important;background:rgba(234,88,12,.07)!important;}
+.obj-choice.tier-wrong .okey{background:#ea580c;color:#fff;}
+.obj-choice.tier-killer{border-color:var(--bad)!important;background:rgba(220,38,38,.07)!important;}
+.obj-choice.tier-killer .okey{background:var(--bad);color:#fff;}
+/* Coach panel */
+.coach-panel{border-radius:var(--r);padding:16px 18px;margin-bottom:16px;display:none;}
+.coach-panel.show{display:block;}
+.coach-tier{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.coach-tier.best{color:var(--ok);}.coach-tier.ok{color:#ca8a04;}.coach-tier.wrong{color:#ea580c;}.coach-tier.killer{color:var(--bad);}
+.coach-bg-best{background:rgba(22,163,74,.08);border:1.5px solid rgba(22,163,74,.2);}
+.coach-bg-ok{background:rgba(202,138,4,.08);border:1.5px solid rgba(202,138,4,.2);}
+.coach-bg-wrong{background:rgba(234,88,12,.08);border:1.5px solid rgba(234,88,12,.2);}
+.coach-bg-killer{background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.2);}
+.coach-note-text{font-size:13px;color:var(--text);line-height:1.5;margin-bottom:12px;}
+
+/* ── END SCREEN ── */
+.end-ring{width:90px;height:90px;border-radius:50%;background:var(--green-s);border:3px solid var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px;}
+.end-ring .rn{font-size:28px;font-weight:900;color:var(--green);line-height:1;}
+.end-ring .rd{font-size:11px;color:var(--muted);font-weight:600;}
+.end-rank{text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:6px;}
+.end-title{font-size:24px;font-weight:800;text-align:center;margin-bottom:6px;}
+.end-sub{text-align:center;font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:28px;}
+.stats{display:flex;gap:10px;margin-bottom:28px;}
+.stat{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;}
+.stat-v{font-size:20px;font-weight:800;color:var(--green);}
+.stat-l{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+.end-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;}
+/* Plug */
+.plug{margin-top:8px;display:flex;gap:14px;align-items:flex-start;background:var(--green-s);border:1.5px solid rgba(20,83,45,.18);border-radius:var(--r);padding:18px 20px;}
+.plug-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.plug-title{font-size:13px;font-weight:700;color:var(--green);margin-bottom:5px;}
+.plug-text{font-size:12px;color:var(--muted);line-height:1.6;}
+.plug-text a{color:var(--green);font-weight:600;text-decoration:none;}
+.plug-text a:hover{text-decoration:underline;}
+
+/* ── LEADERBOARD ── */
+.lb-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+.lb-tab{font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);cursor:pointer;background:var(--surf);color:var(--muted);transition:all .15s;}
+.lb-tab.active{background:var(--green);color:#fff;border-color:var(--green);}
+.lb-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;margin-bottom:6px;background:var(--bg);border:1.5px solid var(--border);}
+.lb-row.you{border-color:var(--green);background:var(--green-s);}
+.lb-rank{font-size:14px;font-weight:800;width:24px;text-align:center;flex-shrink:0;color:var(--muted);}
+.lb-rank.gold{color:#d97706;}.lb-rank.silver{color:#94a3b8;}.lb-rank.bronze{color:#b45309;}
+.lb-name{flex:1;font-size:14px;font-weight:600;}
+.lb-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--green);color:#fff;border-radius:4px;padding:1px 5px;margin-left:6px;}
+.lb-game-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:var(--border);color:var(--muted);border-radius:4px;padding:1px 5px;margin-left:4px;}
+.lb-right{text-align:right;flex-shrink:0;}
+.lb-score{font-size:15px;font-weight:800;color:var(--green);}
+.lb-meta{font-size:11px;color:var(--muted);}
+.lb-empty{text-align:center;padding:32px;color:var(--muted);font-size:14px;}
+
+/* ── NAME MODAL ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal-backdrop.hidden{display:none;}
+.modal-box{background:var(--surf);border-radius:16px;padding:32px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-title{font-size:22px;font-weight:800;margin-bottom:6px;}
+.modal-sub{font-size:14px;color:var(--muted);margin-bottom:22px;line-height:1.5;}
+.name-input{width:100%;border:2px solid var(--border);border-radius:var(--r);padding:12px 16px;font-size:15px;margin-bottom:14px;outline:none;font-family:inherit;transition:border .15s;}
+.name-input:focus{border-color:var(--green);}
+
+/* ── CHALLENGE BANNER ── */
+.challenge-banner{background:#0c4a6e;color:#fff;border-radius:10px;padding:10px 16px;margin-bottom:18px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;line-height:1.4;}
+.challenge-banner span{opacity:.85;}
+/* ── CALC CTA ── */
+.calc-cta{margin-top:10px;padding:11px 14px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;font-size:12px;color:#15803d;display:flex;align-items:center;gap:8px;}
+.calc-cta a{color:#14532d;font-weight:700;text-decoration:none;}
+.calc-cta a:hover{text-decoration:underline;}
+/* ── RESPONSIVE ── */
+@media(max-width:540px){
+  .screen{padding:24px 18px;}
+  .mode-cards{grid-template-columns:1fr;}
+  .cat-grid{grid-template-columns:1fr;}
+  .diff-cards{grid-template-columns:1fr;}
+  .stats{flex-direction:column;}
+  .end-btns{flex-direction:column;}
+  .q-text{font-size:17px;}
+  .acro-display{font-size:40px;}
+  .obj-bubble{font-size:14px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">LendPaper <span>/ Deal Desk</span></div>
+
+  <!-- NAME MODAL -->
+  <div class="modal-backdrop hidden" id="name-modal">
+    <div class="modal-box">
+      <div class="modal-title">What's your name?</div>
+      <div class="modal-sub">For the leaderboard. First name + last initial works.<br>e.g. Marco V.</div>
+      <input class="name-input" id="name-input" type="text" maxlength="22" placeholder="First name + initial" autocomplete="off">
+      <button class="btn" style="width:100%" onclick="submitName()">Save & Post Score</button>
+    </div>
+  </div>
+
+  <!-- START -->
+  <div id="s-start" class="screen active">
+    <div class="start-eyebrow">LendPaper Academy</div>
+    <div class="start-title">Don't worry, this paper isn't graded.</div>
+    <p class="start-sub">Glossary quiz, objection handling, and a live leaderboard. Pick your mode.</p>
+    <div class="mode-cards">
+      <div class="mode-card" onclick="startGame('all','all')">
+        <div class="mc-icon">🎲</div>
+        <div class="mc-name">Quick Play</div>
+        <div class="mc-desc">7 random glossary terms</div>
+      </div>
+      <div class="mode-card" onclick="showScreen('s-category')">
+        <div class="mc-icon">📂</div>
+        <div class="mc-name">By Category</div>
+        <div class="mc-desc">Tax, Underwriting, Credit…</div>
+      </div>
+      <div class="mode-card" onclick="showScreen('s-difficulty')">
+        <div class="mc-icon">🎯</div>
+        <div class="mc-name">By Difficulty</div>
+        <div class="mc-desc">Beginner to advanced</div>
+      </div>
+      <div class="mode-card accent-card" onclick="showScreen('s-obj-select')" style="grid-column:span 2;">
+        <div class="mc-icon">🎤</div>
+        <div class="mc-name">Objection Handling</div>
+        <div class="mc-desc">3 rounds · 7 scenarios each · Real closer situations</div>
+      </div>
+      <div class="mode-card" onclick="showScreen('s-leaderboard')">
+        <div class="mc-icon">🏆</div>
+        <div class="mc-name">Leaderboard</div>
+        <div class="mc-desc">Live rankings</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY SELECT -->
+  <div id="s-category" class="screen">
+    <button class="back-btn" onclick="showScreen('s-start')">← Back</button>
+    <span class="label">Choose a category</span>
+    <div class="cat-grid" id="cat-grid"></div>
+  </div>
+
+  <!-- DIFFICULTY SELECT -->
+  <div id="s-difficulty" class="screen">
+    <button class="back-btn" onclick="showScreen('s-start')">← Back</button>
+    <span class="label">Choose a difficulty</span>
+    <div class="diff-cards">
+      <div class="diff-card" onclick="startGame('all',1)"><div class="dc-icon">🌱</div><div class="dc-name">Beginner</div><div class="dc-desc">MCA, APR, DSCR, PG, and the basics.</div></div>
+      <div class="diff-card" onclick="startGame('all',2)"><div class="dc-icon">📈</div><div class="dc-name">Intermediate</div><div class="dc-desc">Underwriting flags, credit scores, deal structures.</div></div>
+      <div class="diff-card" onclick="startGame('all',3)"><div class="dc-icon">🎓</div><div class="dc-name">Advanced</div><div class="dc-desc">Legal, compliance, construction, deep credit.</div></div>
+      <div class="diff-card" onclick="startGame('all','all')"><div class="dc-icon">🔀</div><div class="dc-name">All Levels</div><div class="dc-desc">Random mix — no filter.</div></div>
+    </div>
+  </div>
+
+  <!-- OBJECTION ROUND SELECT -->
+  <div id="s-obj-select" class="screen">
+    <button class="back-btn" onclick="showScreen('s-start')">← Back</button>
+    <span class="label">Choose a round</span>
+    <div class="round-cards">
+      <div class="round-card" onclick="startObjectionGame(1)">
+        <div class="rc-num">1</div>
+        <div class="rc-body">
+          <div class="rc-name">The Rate Conversation</div>
+          <div class="rc-desc">Factor rate pushback, APR questions, shopping competitors, and the "bank loan is cheaper" objection.</div>
+        </div>
+      </div>
+      <div class="round-card" onclick="startObjectionGame(2)">
+        <div class="rc-num">2</div>
+        <div class="rc-body">
+          <div class="rc-name">Stalls & Delays</div>
+          <div class="rc-desc">"I need to think about it," partner approval, accountant said no, timing objections, and the email brush-off.</div>
+        </div>
+      </div>
+      <div class="round-card" onclick="startObjectionGame(3)">
+        <div class="rc-num">3</div>
+        <div class="rc-body">
+          <div class="rc-name">Fear & Doubt</div>
+          <div class="rc-desc">Predatory reputation, personal guarantees, bad past experiences, COJ concerns, and the "I don't need it" merchant.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GLOSSARY QUIZ -->
+  <div id="s-quiz" class="screen">
+    <div class="challenge-banner hidden" id="g-challenge-banner">🎯 <span id="g-challenge-txt"></span></div>
+    <div class="quiz-hdr">
+      <div class="q-counter" id="q-counter">Question 1 of 7</div>
+      <div class="score-pill" id="score-pill">0 pts</div>
+    </div>
+    <div class="progress-dots" id="dots"></div>
+    <div class="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+    <div class="q-body visible" id="q-body">
+      <div class="q-type-badge" id="q-type-badge">DEFINE THE TERM</div>
+      <div class="cat-context" id="cat-context"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-hint" id="q-hint"></div>
+      <div class="choices" id="choices"></div>
+      <div class="fb" id="fb"></div>
+      <div class="streak" id="streak"></div>
+    </div>
+  </div>
+
+  <!-- OBJECTION QUIZ -->
+  <div id="s-obj-quiz" class="screen">
+    <div class="challenge-banner hidden" id="o-challenge-banner">🎯 <span id="o-challenge-txt"></span></div>
+    <div class="obj-hdr">
+      <div class="obj-round-label" id="obj-round-label">Round 1 · Q1 of 7</div>
+      <div class="obj-score-pill" id="obj-score-pill">0 / 21</div>
+    </div>
+    <div class="progress-dots" id="obj-dots"></div>
+    <div class="obj-body visible" id="obj-body">
+      <div class="obj-prompt">The merchant says…</div>
+      <div class="obj-bubble" id="obj-bubble"></div>
+      <div class="obj-choices" id="obj-choices"></div>
+      <div class="coach-panel" id="coach-panel">
+        <div class="coach-tier" id="coach-tier"></div>
+        <div class="coach-note-text" id="coach-note"></div>
+        <div class="calc-cta hidden" id="calc-cta">🔢 Run the real numbers — <a href="https://lendpaper.com/tools/payment-breakdown" target="_blank">LendPaper Payment Breakdown Calculator ↗</a></div>
+        <button class="btn btn-sm" id="btn-obj-next" onclick="nextObj()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- END SCREEN -->
+  <div id="s-end" class="screen">
+    <div class="end-ring"><div class="rn" id="end-n">0</div><div class="rd" id="end-denom">/ 7</div></div>
+    <div class="end-rank" id="end-rank"></div>
+    <div class="end-title" id="end-title"></div>
+    <p class="end-sub" id="end-sub"></p>
+    <div class="stats" id="end-stats">
+      <div class="stat"><div class="stat-v" id="st-a">0</div><div class="stat-l" id="st-a-l">Points</div></div>
+      <div class="stat"><div class="stat-v" id="st-b">0</div><div class="stat-l" id="st-b-l">Best Streak</div></div>
+      <div class="stat"><div class="stat-v" id="st-c">—</div><div class="stat-l" id="st-c-l">Avg Speed</div></div>
+    </div>
+    <div class="end-btns">
+      <button class="btn" id="btn-replay">Deal Again</button>
+      <button class="btn btn-ghost" id="btn-challenge" onclick="copyChallengeLink(_lastMode)">🎯 Challenge a friend</button>
+      <button class="btn btn-ghost" onclick="showScreen('s-leaderboard')">🏆 Board</button>
+    </div>
+    <div class="plug">
+      <div class="plug-icon">📄</div>
+      <div class="plug-body">
+        <div class="plug-title">Share this on Slack — your ISO team will thank you.</div>
+        <div class="plug-text">LendPaper is a free toolkit for the alt-finance desk — rate calculators, lender waterfall, full glossary, and more.<br><a href="https://lendpaper.com" target="_blank">lendpaper.com</a> &nbsp;·&nbsp; <a href="mailto:hello@lendpaper.com">hello@lendpaper.com</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="s-leaderboard" class="screen">
+    <button class="back-btn" onclick="showScreen('s-start')">← Back</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span class="label" style="margin:0;">Top Scores</span>
+      <span id="lb-status" style="font-size:11px;color:var(--muted);"></span>
+    </div>
+    <div class="lb-tabs">
+      <div class="lb-tab active" onclick="setLbTab('all',this)">All Games</div>
+      <div class="lb-tab" onclick="setLbTab('glossary',this)">Glossary</div>
+      <div class="lb-tab" onclick="setLbTab('obj-r1',this)">Round 1</div>
+      <div class="lb-tab" onclick="setLbTab('obj-r2',this)">Round 2</div>
+      <div class="lb-tab" onclick="setLbTab('obj-r3',this)">Round 3</div>
+    </div>
+    <div id="lb-table"></div>
+    <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;">
+      <button class="btn btn-sm" onclick="startGame('all','all')">Play Now</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetLeaderboard()">Reset Fakes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// SUPABASE CONFIG  (fill in after setup)
+// ═══════════════════════════════════════
+const SUPABASE_URL     = 'PASTE_YOUR_PROJECT_URL_HERE';
+const SUPABASE_ANON_KEY= 'PASTE_YOUR_ANON_KEY_HERE';
+const SB_ON = SUPABASE_URL !== 'PASTE_YOUR_PROJECT_URL_HERE';
+
+async function sbInsert(row) {
+  if (!SB_ON) return null;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Prefer':'return=representation'},
+      body: JSON.stringify(row)
+    });
+    const data = await r.json();
+    return Array.isArray(data) ? data[0] : null;
+  } catch(e){ return null; }
+}
+
+async function sbFetch(game) {
+  if (!SB_ON) return null;
+  try {
+    const filter = game === 'all' ? '' : `&game=eq.${game}`;
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/scores?select=*&order=score.desc&limit=200${filter}`,
+      {headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`}});
+    return r.ok ? await r.json() : null;
+  } catch(e){ return null; }
+}
+
+// ═══════════════════════════════════════
+// GLOSSARY DATA
+// ═══════════════════════════════════════
+const CATS = {
+  core:{name:'Core Finance',icon:'💵',cls:'cat-core'},
+  underwriting:{name:'Underwriting',icon:'🔍',cls:'cat-uw'},
+  credit:{name:'Credit & Scores',icon:'📊',cls:'cat-credit'},
+  legal:{name:'Legal & Compliance',icon:'⚖️',cls:'cat-legal'},
+  cre:{name:'CRE & Real Estate',icon:'🏢',cls:'cat-cre'},
+  equipment:{name:'Equipment & Factoring',icon:'🔧',cls:'cat-equip'},
+  sales:{name:'Sales & Brokerage',icon:'🤝',cls:'cat-sales'},
+  tax:{name:'Tax & IRS',icon:'🧾',cls:'cat-tax'},
+};
+const TERMS=[
+{term:"Factor Rate (FR)",short:"A fixed decimal multiplier — e.g., 1.25 on $10k = $12.5k total, regardless of payoff speed.",cat:"core",diff:1},
+{term:"APR (Annual Percentage Rate)",short:"The total annual cost of capital including interest and fees, expressed as a percentage.",cat:"core",diff:1},
+{term:"Amortization",short:"Paying off debt with regular installments covering both principal and interest.",cat:"core",diff:1},
+{term:"Working Capital",short:"Capital for day-to-day operations — current assets minus current liabilities.",cat:"core",diff:1},
+{term:"Cash Flow (CF)",short:"The net movement of money in and out of a business.",cat:"core",diff:1},
+{term:"Simple Interest",short:"Interest calculated only on the original principal — no compounding.",cat:"core",diff:1},
+{term:"Compounding Interest",short:"Interest calculated on the original principal plus any accumulated past interest.",cat:"core",diff:1},
+{term:"Collateral",short:"An asset pledged to a lender as security — seized if the borrower defaults.",cat:"core",diff:1},
+{term:"Prime Rate",short:"The foundational U.S. banking rate that moves with the Federal Reserve's federal funds rate.",cat:"core",diff:1},
+{term:"Bridge Loan",short:"A short-term loan providing immediate cash flow until permanent financing is secured.",cat:"core",diff:1},
+{term:"EBITDA",short:"Earnings Before Interest, Depreciation, Taxes, and Amortization — a measure of true operating performance.",cat:"core",diff:1},
+{term:"Asset",short:"Any resource owned by a business with economic value that can be converted to cash.",cat:"core",diff:1},
+{term:"Liability",short:"A business's financial debts or obligations owed to other parties.",cat:"core",diff:1},
+{term:"Net Worth",short:"Total business assets minus total liabilities — represents net equity.",cat:"core",diff:1},
+{term:"Liquidity",short:"The ease with which an asset can be converted to cash without affecting its market price.",cat:"core",diff:1},
+{term:"Debt Service",short:"The total cash required to cover scheduled principal and interest payments over a period.",cat:"core",diff:1},
+{term:"DSCR (Debt Service Coverage Ratio)",short:"Net Operating Income divided by Total Debt Service — lenders typically require 1.25x or higher.",cat:"core",diff:2},
+{term:"Annual Interest Rate (AIR)",short:"The nominal yearly percentage charged on a funding product's principal, excluding fees.",cat:"core",diff:2},
+{term:"DTI (Debt-to-Income)",short:"A ratio comparing total monthly debt payments to gross monthly income.",cat:"core",diff:2},
+{term:"Refinance",short:"Replacing an existing debt with a new one — typically to secure lower rates or extend the term.",cat:"core",diff:2},
+{term:"Forbearance",short:"A temporary pause or reduction in payments granted by a lender during financial hardship.",cat:"core",diff:2},
+{term:"Variable Interest Rate",short:"An interest rate that fluctuates, typically tied to an index like WSJ Prime.",cat:"core",diff:2},
+{term:"Fixed Interest Rate",short:"An interest rate that remains constant for the entire lifespan of the funding.",cat:"core",diff:2},
+{term:"Cost of Capital",short:"The total expense of securing funding — factor fees, interest, origination points, and closing costs.",cat:"core",diff:2},
+{term:"Depreciation",short:"A non-cash expense reducing the taxable value of an asset over time — often added back during underwriting.",cat:"core",diff:2},
+{term:"Working Capital Ratio",short:"Current assets divided by current liabilities — measures ability to cover short-term obligations.",cat:"core",diff:2},
+{term:"Accrual Basis Accounting",short:"Revenue and expenses recorded when earned or incurred, regardless of when cash moves.",cat:"core",diff:3},
+{term:"Cash Basis Accounting",short:"Revenue recorded when cash is received; expenses recorded when cash is paid out.",cat:"core",diff:3},
+{term:"Underwriting",short:"The process of evaluating a borrower's financial health and risk to determine funding eligibility.",cat:"underwriting",diff:1},
+{term:"NSF (Non-Sufficient Funds)",short:"When a bank account lacks the balance to cover a transaction — a major red flag for underwriters.",cat:"underwriting",diff:1},
+{term:"Default",short:"Failing to make timely payments and violating the core terms of a funding agreement.",cat:"underwriting",diff:1},
+{term:"Delinquency",short:"When a payment is past due but not yet in full default — tracked in 30, 60, and 90-day buckets.",cat:"underwriting",diff:1},
+{term:"Float",short:"Cash reserves in a business's operating accounts — lenders prefer enough to cover 3–6 months of expenses.",cat:"underwriting",diff:1},
+{term:"Stipulation (Stip)",short:"A specific document or condition required by an underwriter before a deal can be cleared to close.",cat:"underwriting",diff:2},
+{term:"Negative Days",short:"Calendar days per month where a business bank balance falls below zero — underwriters cap this at 3–5.",cat:"underwriting",diff:2},
+{term:"Zeroing Out",short:"A red flag where a business frequently depletes its bank account to zero by month end.",cat:"underwriting",diff:2},
+{term:"Average Daily Deposits (ADD)",short:"The average daily deposit volume into a business account — used to gauge cash flow.",cat:"underwriting",diff:2},
+{term:"Concentration Risk",short:"The risk of more than ~30% of gross revenue coming from a single customer.",cat:"underwriting",diff:2},
+{term:"DataMerch",short:"An alt-finance data warehouse tracking borrower behavior and flagging defaults for lenders.",cat:"underwriting",diff:2},
+{term:"Credit Memo",short:"A comprehensive underwriting document justifying proposed terms by analyzing cash flow, collateral, and risk.",cat:"underwriting",diff:2},
+{term:"Bank Verification (IBV/BV)",short:"A mechanism for lenders to securely view a business's bank transaction history instantly via Plaid or Finicity.",cat:"underwriting",diff:2},
+{term:"Merchant Verification Call (MVC)",short:"A final recorded call before funding to verify contract terms and detect competitor stacking.",cat:"underwriting",diff:2},
+{term:"Landlord Verification (LLV)",short:"A verification confirming a merchant's lease status and standing with their landlord.",cat:"underwriting",diff:2},
+{term:"Daily Deposit Count",short:"The number of separate revenue deposits per month — underwriters look for at least 8–10.",cat:"underwriting",diff:2},
+{term:"Micro-Deposits",short:"Small test deposits (under $1.00) sent to verify bank account ownership before releasing a funding wire.",cat:"underwriting",diff:2},
+{term:"LexisNexis InstantID",short:"A third-party database used by underwriters to verify commercial identities and flag fraud risks.",cat:"underwriting",diff:3},
+{term:"Check Kiting",short:"A fraudulent practice of writing checks between accounts at different banks to inflate balances.",cat:"underwriting",diff:3},
+{term:"Average Ledger vs. Collected Balance",short:"Ledger balance includes uncleared checks; collected balance is actual liquid funds — underwriters use only collected.",cat:"underwriting",diff:3},
+{term:"Inter-Company Transfers",short:"Non-revenue deposits moved between a merchant's sister entities — underwriters scrub these from gross revenue.",cat:"underwriting",diff:3},
+{term:"OFAC Search",short:"A mandatory federal screen against the Office of Foreign Assets Control sanctions list.",cat:"underwriting",diff:3},
+{term:"FICO 8 / FICO 2",short:"Standardized credit scores from 300–850. FICO 8 for general creditworthiness; FICO 2 for mortgage lenders.",cat:"credit",diff:1},
+{term:"Derogatory Marks (DeRogs)",short:"Severe negative credit report items: bankruptcies, collections, civil judgments, repossessions, and foreclosures.",cat:"credit",diff:1},
+{term:"Utilization",short:"The ratio of outstanding credit balances to total available limits — high utilization heavily damages scores.",cat:"credit",diff:1},
+{term:"Super-Prime Credit",short:"The highest credit tier (FICO 780–850) — qualifies for the lowest commercial rates.",cat:"credit",diff:1},
+{term:"Prime Credit",short:"A highly creditworthy tier (FICO 660–779) qualifying for standard commercial bank terms.",cat:"credit",diff:1},
+{term:"Subprime Credit",short:"A higher-risk credit tier (FICO 580–619) typically qualifying for factor-rate alternative products.",cat:"credit",diff:1},
+{term:"Near-Prime Credit (Alt-A)",short:"A credit tier just below prime (FICO 620–659) served by alternative commercial term lenders.",cat:"credit",diff:2},
+{term:"Deep Subprime Credit",short:"The highest-risk credit tier (FICO below 580) — restricted to daily MCAs or asset-backed funding.",cat:"credit",diff:2},
+{term:"Soft Pull vs. Hard Pull",short:"Soft pulls don't affect credit scores; hard pulls do and are run just before contract execution.",cat:"credit",diff:2},
+{term:"Tax Lien",short:"A government claim against business assets for unpaid taxes — typically must be resolved before funding.",cat:"credit",diff:2},
+{term:"Adverse Action Notice",short:"A legally mandated disclosure explaining that credit was declined or approved on less favorable terms.",cat:"credit",diff:2},
+{term:"Charge-Off / Write-Off",short:"A creditor's declaration that a debt is unlikely to be collected — a severe negative credit marker.",cat:"credit",diff:2},
+{term:"Comparable Debt (Comp Debt)",short:"Previously held commercial accounts of similar size the borrower paid off — used to justify larger credit lines.",cat:"credit",diff:2},
+{term:"Trade Line (Trade Reference)",short:"An active or historical credit account listed on a credit report.",cat:"credit",diff:2},
+{term:"Paydex (DUNS)",short:"A 1–100 business credit score from Dun & Bradstreet — 80+ indicates on-time vendor payments.",cat:"credit",diff:2},
+{term:"Paynet Score",short:"A credit metric from Equifax assessing a business's payment history to predict probability of default.",cat:"credit",diff:3},
+{term:"Experian Intelliscore Plus",short:"A commercial credit risk rating (1–100) predicting likelihood of severe business payment delinquency.",cat:"credit",diff:3},
+{term:"D&B Rating",short:"Dun & Bradstreet's composite financial rating (e.g., 5A4) indicating net worth and creditworthiness.",cat:"credit",diff:3},
+{term:"DUNS Number",short:"A unique nine-digit identification number issued by Dun & Bradstreet to commercial businesses globally.",cat:"credit",diff:3},
+{term:"PayNet MasterScore",short:"A proprietary commercial score predicting the likelihood of business default or severe delinquency.",cat:"credit",diff:3},
+{term:"MOP Codes (Method of Payment)",short:"Credit report grid codes tracking payment health — R1/I1 for on-time, R9 for severe default.",cat:"credit",diff:3},
+{term:"DBT (Days Beyond Terms)",short:"The average number of days past invoice due date that a business takes to pay its vendors.",cat:"credit",diff:3},
+{term:"Chapter 7 Bankruptcy",short:"Liquidation bankruptcy — a court-appointed trustee sells non-exempt assets to pay creditors.",cat:"credit",diff:3},
+{term:"Chapter 11 Bankruptcy",short:"Corporate reorganization bankruptcy — business stays operational while restructuring debts under court oversight.",cat:"credit",diff:3},
+{term:"Chapter 13 Bankruptcy",short:"A court-approved debt repayment plan for individuals and sole proprietors spanning 3 to 5 years.",cat:"credit",diff:3},
+{term:"Statute of Limitations (Debt)",short:"The state-mandated timeframe during which a creditor can legally sue to collect an unpaid debt.",cat:"credit",diff:3},
+{term:"Personal Guarantee (PG)",short:"A legal promise by a business owner to be personally responsible for a business debt if the entity defaults.",cat:"legal",diff:1},
+{term:"Lien (Blanket / UCC-1)",short:"A legal claim on all generic business assets securing a debt — equipment, inventory, receivables.",cat:"legal",diff:1},
+{term:"UCC (Uniform Commercial Code)",short:"Standardized commercial laws — a UCC filing publicly establishes a lender's lien on borrower assets.",cat:"legal",diff:1},
+{term:"COJ (Confession of Judgement)",short:"A legal agreement where a borrower admits fault before a dispute arises — acts as an automatic guilty plea.",cat:"legal",diff:1},
+{term:"Good Standing",short:"A legal status confirming a company has met all statutory compliance requirements in its state.",cat:"legal",diff:1},
+{term:"Collateralized Loan",short:"A loan secured by specific assets the lender can seize and liquidate if the borrower defaults.",cat:"legal",diff:1},
+{term:"Unsecured Loan",short:"A funding product not backed by physical collateral — relies on cash flow and creditworthiness.",cat:"legal",diff:1},
+{term:"KYC (Know Your Customer)",short:"A mandatory compliance process to verify the identity of a business owner and entity legitimacy.",cat:"legal",diff:2},
+{term:"Active Corporate Status",short:"Confirmation that a business entity is legally active and has not been administratively dissolved.",cat:"legal",diff:2},
+{term:"Subordination Agreement",short:"A contract between two lenders establishing lien priority — one agrees to stand in junior position.",cat:"legal",diff:2},
+{term:"UCC-3 Termination",short:"A legal document filed to officially release a UCC-1 lien once a debt is paid in full.",cat:"legal",diff:2},
+{term:"Authorized Signatory",short:"The individual legally authorized to sign contracts and bind a corporation or LLC to credit agreements.",cat:"legal",diff:2},
+{term:"Cross-Corporate Guarantee",short:"Multiple distinct business entities owned by the same principal guaranteeing a credit product jointly.",cat:"legal",diff:2},
+{term:"Purchase Receivables",short:"A funder buys a business's future sales at a discount — the legal mechanism behind MCAs and RBFs.",cat:"legal",diff:3},
+{term:"Reconciliation Clause",short:"A mandatory MCA/RBF clause allowing payment adjustments based on actual revenue — confirms a true asset purchase.",cat:"legal",diff:3},
+{term:"Usury",short:"The illegal practice of lending at rates exceeding state-mandated caps — RBFs often avoid this as asset purchases.",cat:"legal",diff:3},
+{term:"TILA (Truth in Lending Act)",short:"A federal law requiring clear disclosure of credit costs and APR before contract signing.",cat:"legal",diff:3},
+{term:"BSA / AML (Bank Secrecy Act / Anti-Money Laundering)",short:"Federal regulations requiring financial institutions to monitor transactions and report suspicious activities.",cat:"legal",diff:3},
+{term:"UDAAP (Unfair, Deceptive, or Abusive Acts or Practices)",short:"Federal standards prohibiting misleading or abusive practices in credit marketing, terms, or collections.",cat:"legal",diff:3},
+{term:"FCRA (Fair Credit Reporting Act)",short:"The federal law regulating the collection and accuracy of consumer credit information by credit bureaus.",cat:"legal",diff:3},
+{term:"TCPA / DNC (Do Not Call)",short:"Federal regulations restricting unsolicited cold-calling and auto-dialers — critical compliance for ISO cold-callers.",cat:"legal",diff:3},
+{term:"LTV (Loan-to-Value)",short:"Active loan amount divided by the appraised value of real estate collateral — lenders cap at 75–80%.",cat:"cre",diff:1},
+{term:"ABL (Asset-Backed Loan)",short:"A loan secured by a specific asset — if not repaid, the lender seizes and liquidates the collateral.",cat:"cre",diff:1},
+{term:"CLTV (Combined Loan-to-Value)",short:"The sum of all active loans secured against a property divided by its total appraised value.",cat:"cre",diff:2},
+{term:"LTC (Loan-to-Cost)",short:"The ratio of a construction loan amount compared to the actual cost of building or renovating a project.",cat:"cre",diff:2},
+{term:"Owner-Occupied CRE",short:"Commercial real estate where the borrowing business occupies at least 51% — required for SBA mortgages.",cat:"cre",diff:2},
+{term:"Advance Rate",short:"The maximum percentage of an asset's appraised value a lender will advance — e.g., 80% of receivables.",cat:"cre",diff:2},
+{term:"Phase I ESA",short:"An environmental survey of commercial property verifying absence of historical contamination before issuing a mortgage.",cat:"cre",diff:2},
+{term:"Debt Yield",short:"Net Operating Income divided by Loan Amount — shows the lender's immediate return if they foreclosed today.",cat:"cre",diff:3},
+{term:"Retainage (Retention)",short:"A percentage (5–10%) withheld from a construction contract until full completion — creates severe cash flow constraints.",cat:"cre",diff:3},
+{term:"Lien Waiver",short:"A document signed by a subcontractor releasing mechanics' lien rights on a property in exchange for payment.",cat:"cre",diff:3},
+{term:"Mobilization Capital (Mobilization Funding)",short:"Short-term funding for contractors to cover project startup costs before the initial project draw is released.",cat:"cre",diff:3},
+{term:"Invoice Factoring",short:"Selling unpaid B2B invoices to a third party at a discount — the factor collects from the customer.",cat:"equipment",diff:1},
+{term:"Equipment Financing",short:"Funding to purchase business equipment, where the equipment itself serves as the primary collateral.",cat:"equipment",diff:1},
+{term:"Accounts Receivables (AR)",short:"Money owed to a business by customers for goods or services sold on credit — a short-term asset.",cat:"equipment",diff:1},
+{term:"Factoring Rate",short:"The percentage-based discount fee (typically 1–3% per 30 days) charged to advance funds against invoices.",cat:"equipment",diff:2},
+{term:"$1 Buyout Lease",short:"Equipment lease where the lessee assumes full ownership at term end for $1.00 — behaves like an installment loan.",cat:"equipment",diff:2},
+{term:"EFA (Equipment Finance Agreement)",short:"A commercial contract where the borrower owns the equipment from day one while the lender holds a security lien.",cat:"equipment",diff:2},
+{term:"Purchase Order (PO) Financing",short:"Short-term funding advanced to a borrower's suppliers to cover production costs for a verified purchase order.",cat:"equipment",diff:2},
+{term:"ACH Return Codes (R-Codes)",short:"Standard banking codes indicating why an ACH sweep failed — e.g., R01 for NSF, R08 for Stop Payment.",cat:"equipment",diff:3},
+{term:"Same-Day ACH",short:"An expedited ACH settlement network allowing payment sweeps to settle within the same business day.",cat:"equipment",diff:3},
+{term:"Re-Presentment",short:"Re-initiating a failed ACH draw after a return — governed by NACHA frequency regulations.",cat:"equipment",diff:3},
+{term:"RBF (Revenue Based Financing)",short:"Capital in exchange for a percentage of future sales — repaid dynamically via daily remits, not a loan.",cat:"sales",diff:1},
+{term:"Holdback",short:"A fixed percentage of daily credit card sales automatically withheld by a processor to repay RBF.",cat:"sales",diff:1},
+{term:"Remit",short:"The specified percentage of daily revenue automatically withheld to retire an RBF advance.",cat:"sales",diff:1},
+{term:"Origination Fee",short:"An upfront fee for processing a new funding application — typically a percentage of the total funding amount.",cat:"sales",diff:1},
+{term:"Buy Rate",short:"The base rate at which a lender funds a deal to a broker/ISO, before any markup or commission.",cat:"sales",diff:1},
+{term:"Sell Rate",short:"The final factor rate presented to the merchant — includes the broker's markup above the buy rate.",cat:"sales",diff:1},
+{term:"Points",short:"A unit of measurement for funding fees — one point equals exactly 1% of the total funding amount.",cat:"sales",diff:1},
+{term:"ISO (Independent Sales Organization)",short:"An independent brokerage that sources commercial leads and submits funding files to alternative lenders.",cat:"sales",diff:1},
+{term:"Clawback",short:"Recovery of previously paid commissions from brokers if a deal pays off too early.",cat:"sales",diff:1},
+{term:"Position (Stacking)",short:"The hierarchy of active funding products — first position gets paid back first in liquidation.",cat:"sales",diff:1},
+{term:"Stacking",short:"Taking new funding while a previous advance is still active — drastically increases default risk.",cat:"sales",diff:1},
+{term:"Markup / Upsell",short:"The pricing difference between a lender's buy rate and the sell rate — the broker's margin.",cat:"sales",diff:2},
+{term:"Co-Brokering",short:"Two independent brokers collaborating on a single deal and splitting the resulting commission.",cat:"sales",diff:2},
+{term:"Submission (Sub)",short:"The initial deal package sent by a broker to a lender — application and 3–6 months of bank statements.",cat:"sales",diff:2},
+{term:"Net Requirement",short:"The required percentage of new funding that must reach the borrower directly when paying off old debt.",cat:"sales",diff:2},
+{term:"Reverse Consolidation",short:"A product where a new funder deposits money daily/weekly to cover payments on multiple existing advances.",cat:"sales",diff:2},
+{term:"Syndication",short:"Multiple investors pool capital to jointly fund a large or high-risk business.",cat:"sales",diff:2},
+{term:"Early Payoff Discount (EPD)",short:"A contractual discount reducing total payback on a factor-rate deal when paid off significantly early.",cat:"sales",diff:2},
+{term:"Payoff Letter",short:"A formal document from a lender detailing the exact amount to fully settle a debt by a specific deadline.",cat:"sales",diff:2},
+{term:"Net Out (Net Payoff)",short:"The actual working capital a borrower receives after existing debt balances are paid off from gross proceeds.",cat:"sales",diff:2},
+{term:"TIB (Time in Business)",short:"The total duration a business has been operating — MCAs often require 3–6 months; banks require 2+ years.",cat:"sales",diff:2},
+{term:"NAICS Code",short:"A standardized six-digit code classifying businesses by industry — essential for SBA eligibility.",cat:"sales",diff:3},
+{term:"EIN (Employer Identification Number)",short:"A unique nine-digit tax ID assigned by the IRS — functions like a Social Security Number for a business.",cat:"tax",diff:1},
+{term:"Pass-Through Taxes",short:"A tax structure where business profits flow to owners' personal tax returns — applies to LLCs, S-Corps, sole props.",cat:"tax",diff:2},
+{term:"Double Taxation",short:"A structure where a C-Corp pays corporate income tax, then shareholders pay personal tax on dividends.",cat:"tax",diff:2},
+{term:"K-1 Schedule",short:"A federal tax document reporting a partner's share of income, losses, and deductions in a partnership or LLC.",cat:"tax",diff:2},
+{term:"Franchise Tax",short:"A state-level tax charged to corporations and LLCs for the privilege of doing business in that state.",cat:"tax",diff:2},
+{term:"Section 179 Deduction",short:"An IRS provision allowing businesses to deduct the full purchase price of qualifying equipment in the tax year financed.",cat:"tax",diff:2},
+{term:"IRS Form 4506-C",short:"The IRS authorization form allowing underwriters to pull official tax transcripts — required for SBA loans.",cat:"tax",diff:3},
+{term:"Schedule C (Form 1040)",short:"The federal tax schedule reporting profit or loss for sole proprietors and single-member LLCs.",cat:"tax",diff:3},
+{term:"Tax Transcript (IRS Transcript)",short:"An official summary of a tax return pulled directly from the IRS — used to detect fraudulent declarations.",cat:"tax",diff:3},
+{term:"IRS Form 941",short:"Employer's Quarterly Federal Tax Return — verifies employee headcount and federal tax liabilities.",cat:"tax",diff:3},
+{term:"W-2 vs. 1099 Workers",short:"The distinction between employees (W-2) and independent contractors (1099) — critical for SBA payroll calculations.",cat:"tax",diff:3},
+{term:"FUTA / SUTA",short:"Federal and State Unemployment Tax Acts — employer-paid payroll taxes funding unemployment programs.",cat:"tax",diff:3},
+];
+
+TERMS.forEach(t => {
+  const m = t.term.match(/^([A-Z][A-Z\/\s\-]{1,12}?)\s*\(([^)]+)\)$/);
+  if (m && m[1].replace(/[\s\/\-]/g,'').length >= 2) { t._acro = m[1].trim(); t._expansion = m[2].trim(); }
+});
+const ACRONYM_TERMS = TERMS.filter(t => t._acro);
+
+// ═══════════════════════════════════════
+// OBJECTION DATA — 21 SCENARIOS
+// ═══════════════════════════════════════
+const OBJECTIONS = [
+// ── ROUND 1: The Rate Conversation ──────────────────────────────
+{round:1, calcLink:true, merchant:'"Your factor rate is way too expensive."',
+ opts:[
+  {tier:'best',   text:"Let me show you what it looks like in daily dollars vs. your average deposits. Walk me through a typical month and we'll see if it actually registers.",   note:"Shifts from abstract cost to real daily impact. Gets the merchant talking instead of objecting."},
+  {tier:'ok',     text:"Depending on your statements, there may be room to move on the rate.",                                                                                    note:"Keeps the door open but makes it a price negotiation rather than a value conversation."},
+  {tier:'wrong',  text:"That rate is actually very competitive for your profile.",                                                                                                note:"Dismissive. Tells the merchant their concern is invalid — creates friction."},
+  {tier:'killer', text:"Yeah, that's the best I've got.",                                                                                                                        note:"You surrendered before trying anything. Conversation over."},
+]},
+{round:1, merchant:'"What\'s the APR? My accountant is going to ask."',
+ opts:[
+  {tier:'best',   text:"Great — this is a purchase of future receivables, not a loan, so traditional APR doesn't apply the same way. Total cost is [X]. What's your accountant's email? I'll put together a one-pager.",  note:"Validates the question, explains the structure correctly, and advances the deal by looping the accountant in proactively."},
+  {tier:'ok',     text:"We can work up that calculation — it's structured differently than a loan.",                                                                              note:"Accurate but vague. Doesn't give the accountant anything concrete or advance the deal."},
+  {tier:'wrong',  text:"APR doesn't really apply to this product.",                                                                                                              note:"Sounds evasive. The merchant and their accountant will both be suspicious."},
+  {tier:'killer', text:"I honestly don't know the APR off the top of my head.",                                                                                                  note:"Kills credibility immediately. You either don't know your product or you're dodging — neither is good."},
+]},
+{round:1, merchant:'"Another funder offered me 1.29. Can you match it?"',
+ opts:[
+  {tier:'best',   text:"Let's compare apples to apples — who's the funder, what's the term, daily ACH or split? A 1.29 over 4 months is different than over 8. Send me the offer and I'll be straight with you.",         note:"Reframes rate as one variable among several. Positions you as a consultant, not a competitor in a price war."},
+  {tier:'ok',     text:"Send me the offer and I'll see what I can do.",                                                                                                          note:"Reasonable, but you've accepted that price is the only variable that matters."},
+  {tier:'wrong',  text:"We can't match that, but we have advantages in other areas.",                                                                                            note:"Concedes the loss too quickly without knowing what the other offer actually looks like."},
+  {tier:'killer', text:"If they're at 1.29, you should probably just go with them.",                                                                                             note:"You just closed the deal for your competitor."},
+]},
+{round:1, merchant:'"Why can\'t I just get a bank loan? It\'s way cheaper."',
+ opts:[
+  {tier:'best',   text:"You absolutely should if you qualify — let's figure that out right now. Banks want 2+ years TIB, 680+ FICO, and 3–6 months to close. If that's you, I'll point you there myself.",                 note:"Addresses the comparison head-on. Establishes credibility by being willing to lose the deal if the bank is genuinely the right move."},
+  {tier:'ok',     text:"Bank loans are cheaper but take a lot longer — we can fund in 24–48 hours.",                                                                             note:"True but one-dimensional. Speed alone doesn't always justify the premium."},
+  {tier:'wrong',  text:"Banks probably won't approve you.",                                                                                                                      note:"Presumptuous and insulting. If you're wrong, you just lost the merchant."},
+  {tier:'killer', text:"That's just not realistic for most small businesses.",                                                                                                   note:"Dismissive. The merchant now feels talked down to."},
+]},
+{round:1, calcLink:true, merchant:'"What\'s the total payback on this deal?"',
+ opts:[
+  {tier:'best',   text:"On this deal it's [X]. That cost buys you capital today that would take months elsewhere — if you could get it at all. What are you planning to use it for? Let's make sure the ROI is there.",    note:"Gives the number directly, then immediately reframes cost as investment. The ROI question moves the merchant forward."},
+  {tier:'ok',     text:"Total payback is [X]. Let me pull that up for you right now.",                                                                                           note:"Accurate and transparent, but passive. You answered without advancing the close."},
+  {tier:'wrong',  text:"It depends on how fast you repay it.",                                                                                                                   note:"True for some products, but sounds evasive — especially on a factor-rate deal where it's fixed."},
+  {tier:'killer', text:"I'll have someone from the team send you a formal breakdown.",                                                                                            note:"Added a step, introduced delay, removed yourself from the relationship. Momentum killer."},
+]},
+{round:1, merchant:'"The daily payment is going to kill my cash flow."',
+ opts:[
+  {tier:'best',   text:"That's the most important thing to get right. Tell me your average daily deposits and we'll build the advance around a number you won't feel. Most merchants forget it's coming out within a week.", note:"Validates the concern, then gets the merchant to help solve it. Keeps you in control of the structure."},
+  {tier:'ok',     text:"We can look at a smaller advance to bring the daily down.",                                                                                              note:"Practical, but reactive. You're letting the objection dictate the structure."},
+  {tier:'wrong',  text:"The payment adjusts automatically with your revenue.",                                                                                                   note:"May not be accurate depending on the product. If it's fixed ACH, you've just misstated the terms."},
+  {tier:'killer', text:"That's a fixed payment — it's how the product is structured.",                                                                                           note:"Confirms their worst fear without offering any solution. Deal is dead."},
+]},
+{round:1, merchant:'"I\'ve heard MCAs charge 80–90% APR. That sounds criminal."',
+ opts:[
+  {tier:'best',   text:"When you convert any short-term product to APR it looks alarming — that math works on a 30-day loan too. The real question is: does the capital return more than it costs? Let's run that math.",  note:"Doesn't argue the rate — acknowledges it, reframes how to evaluate it. The ROI pivot is the standard close for cost objections."},
+  {tier:'ok',     text:"APR isn't really the right lens for this product since it's not a traditional loan.",                                                                    note:"Technically correct but sounds defensive. You need to offer an alternative framework, not just discredit theirs."},
+  {tier:'wrong',  text:"Our rates are very competitive for the market.",                                                                                                         note:"Doesn't address the concern at all. 'Competitive' next to '80–90% APR' is not reassuring."},
+  {tier:'killer', text:"That's just how alternative finance works. Banks aren't an option for most businesses.",                                                                  note:"Dismissive and slightly threatening. This ends the conversation and the relationship."},
+]},
+// ── ROUND 2: Stalls & Delays ─────────────────────────────────────
+{round:2, merchant:'"I need to think about it."',
+ opts:[
+  {tier:'best',   text:"Of course — what specifically do you need to think through? I want to make sure you have the right information before you decide, not after.",                                                      note:"Never accept a 'think about it' at face value. This response surfaces the real objection hiding behind it — professionally, not pushily."},
+  {tier:'ok',     text:"Totally understand. I'll follow up tomorrow — when's a good time?",                                                                                     note:"Polite but you've lost control of the timeline. You're now at the mercy of their calendar."},
+  {tier:'wrong',  text:"Take your time — the offer's good for 30 days.",                                                                                                        note:"You've just told them there's no urgency. Offers don't stay open 30 days in this industry."},
+  {tier:'killer', text:"Ok — call me when you're ready.",                                                                                                                        note:"You fully surrendered the close. This deal is gone."},
+]},
+{round:2, merchant:'"I need to run this by my business partner first."',
+ opts:[
+  {tier:'best',   text:"Absolutely — can we get them on a quick call right now? I find it's always faster to answer questions in real time than to play telephone. When are they usually free?",                           note:"Bringing the partner into the call is the gold standard. It removes a round-trip delay and lets you handle their questions directly."},
+  {tier:'ok',     text:"I can send over a one-pager that you both can review together.",                                                                                         note:"Reasonable, but you've introduced another step and lost direct access to the decision-maker."},
+  {tier:'wrong',  text:"Sure — just let me know what they say.",                                                                                                                 note:"You've handed the deal to someone you've never met. The partner will ask questions the merchant can't answer."},
+  {tier:'killer', text:"Tell them to reach out if they have any questions.",                                                                                                     note:"You're now three steps removed from the close. Almost no deal survives this path."},
+]},
+{round:2, merchant:'"My accountant told me not to do this."',
+ opts:[
+  {tier:'best',   text:"I'd love to get on a call with them — not to sell them, but because they're probably looking at this as a loan on the P&L. Can we loop them in? I can walk them through the structure in 10 minutes.", note:"The accountant objection is almost always solvable if you treat it as an education opportunity. Inviting them in is always the right move."},
+  {tier:'ok',     text:"I can send documentation that shows the full structure for them to review.",                                                                              note:"Better than doing nothing, but it puts the accountant in a position to find reasons to say no without anyone to answer their questions."},
+  {tier:'wrong',  text:"Accountants sometimes don't fully understand how these products work.",                                                                                  note:"You're insulting their trusted advisor. Even if it's partially true, saying it ends the relationship."},
+  {tier:'killer', text:"They're being overly cautious — this product is extremely common.",                                                                                      note:"You just called their accountant paranoid. Conversation over."},
+]},
+{round:2, merchant:'"The timing just isn\'t right. Call me in 3 months."',
+ opts:[
+  {tier:'best',   text:"Tell me what changes in 3 months. I want to understand what you're waiting for — sometimes the best time to fund is right before the peak, not after.",                                            note:"You need to know whether '3 months' means something real or is a polite dismissal. This question separates the two without being aggressive."},
+  {tier:'ok',     text:"I'll put a note in and reach out then. What's driving the timing?",                                                                                     note:"At least you asked the right follow-up — but you've surrendered the close for 90 days."},
+  {tier:'wrong',  text:"The offer expires, so we'd have to rerun your file in 3 months.",                                                                                       note:"True and worth mentioning, but leading with it sounds like a threat rather than helpful information."},
+  {tier:'killer', text:"Ok, I'll call you in 3 months.",                                                                                                                        note:"Deals die in 3 months. This one will too."},
+]},
+{round:2, merchant:'"I\'m waiting on a big invoice. I won\'t need capital once it comes in."',
+ opts:[
+  {tier:'best',   text:"When's that invoice due? In my experience they always slip — and if it does, you don't want to be scrambling. And if it comes in on time, you can pay this off early for a discount. You're covered either way.", note:"The 'it always slips' reframe is realistic, not fear-mongering. The early payoff pivot turns the invoice into a reason to fund now, not wait."},
+  {tier:'ok',     text:"Would bridge capital help cover the gap while you wait?",                                                                                                note:"Smart redirect, but you're solving a different problem than what was presented."},
+  {tier:'wrong',  text:"Ok — call me when you know more about the invoice.",                                                                                                    note:"You just handed your entire pipeline to a receivable you have no control over."},
+  {tier:'killer', text:"If you're getting a big payment you definitely don't need us.",                                                                                          note:"You just closed the deal against yourself."},
+]},
+{round:2, merchant:'"I\'m too busy right now. I can\'t deal with paperwork."',
+ opts:[
+  {tier:'best',   text:"That's exactly when my merchants usually call me — when the business is outpacing the capital. I can have you funded in 24 hours with 15 minutes of your time. What does tomorrow morning look like?", note:"Reframes 'too busy' as a signal the business is doing well. The 15-minute and specific time ask breaks the pattern."},
+  {tier:'ok',     text:"I handle everything on my end — all I need is a signature.",                                                                                             note:"Reduces friction, but doesn't create urgency or address why they're putting it off."},
+  {tier:'wrong',  text:"I understand — I'll try you again next week.",                                                                                                          note:"You've just given the deal a week to die."},
+  {tier:'killer', text:"Let me know when things slow down.",                                                                                                                     note:"Things never slow down. This is a soft goodbye."},
+]},
+{round:2, merchant:'"Just send me an email with all the details."',
+ opts:[
+  {tier:'best',   text:"Sending it now — but quick question first: what's the one thing that would make this a yes? That way I know what to highlight instead of flooding your inbox.",                                    note:"Complies AND surfaces the hidden objection. One of the most useful tactics in the space."},
+  {tier:'ok',     text:"I'll send it over — what's the best email and should I copy anyone else?",                                                                              note:"Organized and compliant. Misses the chance to surface the real concern but at least keeps momentum."},
+  {tier:'wrong',  text:"Sure — I'll send everything over. Let me know if you have any questions.",                                                                               note:"Generic and passive. You're now waiting with no follow-up commitment."},
+  {tier:'killer', text:"Sure. Feel free to reach back out whenever you've had a chance to look.",                                                                                note:"You just put the next step entirely in their hands. This deal has a 10% chance of closing."},
+]},
+// ── ROUND 3: Fear & Doubt ─────────────────────────────────────────
+{round:3, merchant:'"I\'ve heard MCAs target desperate businesses. It feels predatory."',
+ opts:[
+  {tier:'best',   text:"That reputation exists and some players have earned it. I can only control how I show up — and if this deal doesn't make sense for your business, I'll tell you that directly. Let's look at your numbers together and you decide.", note:"The most credible answer is the honest one. Acknowledging the reputation without being defensive builds more trust than denying it."},
+  {tier:'ok',     text:"There are bad actors in every industry. We operate transparently — you'll know the full cost upfront.",                                                  note:"Reasonable but defensive. You're drawing a line between 'us' and 'them' without really earning that distinction yet."},
+  {tier:'wrong',  text:"That's a misconception — MCAs are legitimate financial products used by thousands of businesses.",                                                       note:"Sounds like PR speak. The merchant's guard will go up, not down."},
+  {tier:'killer', text:"I understand your concern. Call me if you change your mind.",                                                                                            note:"You accepted the objection without countering it. Deal over."},
+]},
+{round:3, merchant:'"What happens if revenue drops and I can\'t make the daily payment?"',
+ opts:[
+  {tier:'best',   text:"That's the right question. If this is RBF, the daily pull is tied to your revenue — slow month, smaller payment. If it's ACH, let's right-size the advance so a slow month doesn't feel like a stretch. What does a bad month look like for you?", note:"Explains the product mechanics correctly, then immediately moves to right-sizing. The 'bad month' question pulls the merchant into solution mode."},
+  {tier:'ok',     text:"We can size the advance smaller so payments are more manageable in slow months.",                                                                        note:"Practical but doesn't address the underlying concern about what actually happens if they genuinely can't pay."},
+  {tier:'wrong',  text:"Default is serious — you'd really want to avoid that. Let's make sure you can handle the payment.",                                                     note:"You introduced the word 'default' unprompted. That's a fear anchor you don't want to plant."},
+  {tier:'killer', text:"If you can't pay, the funder would begin collections.",                                                                                                  note:"Technically accurate, maximally terrifying. This closes zero deals."},
+]},
+{round:3, merchant:'"I don\'t want to sign a personal guarantee."',
+ opts:[
+  {tier:'best',   text:"Fair concern — not every product or funder requires one. Let me check what your options look like. And even where PGs are required, they're a last resort, not a first response. Let's find you the best structure.",                             note:"Acknowledges the concern, doesn't minimize it, and moves toward a solution without over-explaining."},
+  {tier:'ok',     text:"Some products don't require a PG — let me see what's available for your situation.",                                                                    note:"Straightforward and practical. Gets to the point without unnecessary context."},
+  {tier:'wrong',  text:"A personal guarantee is standard across the industry. Everyone signs one.",                                                                              note:"Dismissive of a real concern — and also not entirely accurate. Not all products require PGs."},
+  {tier:'killer', text:"Without a PG we can't move forward on any product.",                                                                                                    note:"False and deal-ending. Multiple funders and products don't require PGs."},
+]},
+{round:3, merchant:'"I got burned by a funder before. They took more than they were supposed to."',
+ opts:[
+  {tier:'best',   text:"I'm sorry that happened. Every ACH on this deal comes through your bank statement with the exact amount from the contract. If anything ever looks off, you call me directly and I'm on the phone with the funding desk the same day.",              note:"Specific, personal accountability. You're not defending the industry — you're differentiating yourself with a concrete commitment."},
+  {tier:'ok',     text:"I want to make sure you have full visibility into every charge before we proceed. Tell me what happened.",                                               note:"Empathetic and thorough. Getting the full story also helps you prevent a repeat."},
+  {tier:'wrong',  text:"That funder was probably not reputable. We're different.",                                                                                               note:"Easy to say, hard to prove. The merchant has heard this before."},
+  {tier:'killer', text:"That's not something we would ever do. Our contracts are very clear.",                                                                                   note:"Every funder says this. Without a specific commitment, it's not reassuring."},
+]},
+{round:3, merchant:'"My lawyer said never sign a Confession of Judgement."',
+ opts:[
+  {tier:'best',   text:"Your lawyer isn't wrong — COJs are significant. NY and Florida have heavily restricted them. Tell me what state you're in and I'll find funders who don't require one. There are solid options.",                                                  note:"Respecting the lawyer's advice immediately builds trust. Knowing the state-level COJ landscape shows real expertise."},
+  {tier:'ok',     text:"That's a legitimate concern — some funders don't require a COJ. Let me see what I can structure.",                                                      note:"Solid. Doesn't argue with the lawyer and offers a path forward."},
+  {tier:'wrong',  text:"COJs are standard in alternative lending. Your lawyer may not be familiar with how they work in practice.",                                              note:"You're contradicting their lawyer. Even if you're partially right, this will cost you the deal."},
+  {tier:'killer', text:"We can't move forward without a COJ.",                                                                                                                  note:"False and shortsighted. You've eliminated yourself when alternatives exist."},
+]},
+{round:3, merchant:'"I\'m going to shop around and compare some other offers."',
+ opts:[
+  {tier:'best',   text:"You should — and let's do it right now while I'm on the phone. What matters most: lowest cost, fastest funding, or highest amount? I'll tell you honestly if someone else is a better fit.",                                                       note:"Disarming because it's collaborative rather than defensive. Shopping with the merchant is one of the most effective closing techniques in the space."},
+  {tier:'ok',     text:"Totally fair. I'll hold this offer 48 hours so you have something concrete to compare against.",                                                        note:"Reasonable. Creates a time boundary without pressure."},
+  {tier:'wrong',  text:"Multiple applications can hurt your credit score from the hard pulls.",                                                                                  note:"True, but leading with it sounds like a scare tactic rather than helpful information."},
+  {tier:'killer', text:"Go ahead and compare — call me when you're ready.",                                                                                                     note:"You've fully ceded control. Most merchants who shop never come back."},
+]},
+{round:3, merchant:'"Honestly, business is going really well. I don\'t need capital right now."',
+ opts:[
+  {tier:'best',   text:"That's the best time to set it up. The merchants who struggle are the ones who didn't have a facility in place before they needed it. What would you do with capital if it showed up tomorrow — even hypothetically?",                             note:"Reframes capital from reactive to offensive. The hypothetical question is powerful — it gets the merchant to sell themselves on a use case."},
+  {tier:'ok',     text:"A lot of our best merchants use capital offensively — locking in inventory, taking on bigger contracts. Is there anything you've been waiting to pull the trigger on?",                            note:"Good pivot to offense. Less disarming than the best answer but still effective."},
+  {tier:'wrong',  text:"Cash flow can change fast — you might need it sooner than you think.",                                                                                  note:"Fear-based and presumptuous. You're essentially saying things will go wrong."},
+  {tier:'killer', text:"Ok — reach out if your situation changes.",                                                                                                              note:"The classic soft goodbye. This deal is over."},
+]},
+];
+
+const OBJ_ROUNDS = {
+  1:{label:'Round 1 · The Rate Conversation', game:'obj-r1'},
+  2:{label:'Round 2 · Stalls & Delays',       game:'obj-r2'},
+  3:{label:'Round 3 · Fear & Doubt',          game:'obj-r3'},
+};
+const TIER_META = {
+  best:  {label:'🟢 Best move',   pts:3, cls:'best',   bgcls:'coach-bg-best'},
+  ok:    {label:'🟡 Acceptable',  pts:2, cls:'ok',     bgcls:'coach-bg-ok'},
+  wrong: {label:'🔴 Wrong move',  pts:1, cls:'wrong',  bgcls:'coach-bg-wrong'},
+  killer:{label:'⛔ Deal killer', pts:0, cls:'killer', bgcls:'coach-bg-killer'},
+};
+
+const OBJ_RANKS = [
+  {min:21,title:'Master Closer',    msg:"Perfect pitch. You've done this before."},
+  {min:18,title:'Veteran ISO',      msg:"Solid across the board. A couple more reps and you're unflappable."},
+  {min:14,title:'Working Closer',   msg:"Good instincts, some gaps. Review the stall objections."},
+  {min:9, title:'Developing',       msg:"You're in the right conversations but losing some unnecessarily."},
+  {min:0, title:'Green Pea',        msg:"Everyone had a first day. Run through the scenarios and try again."},
+];
+
+// ═══════════════════════════════════════
+// FAKE USERS (leaderboard seed)
+// ═══════════════════════════════════════
+const FAKE_USERS=[
+  {name:'Marco V.',    scores:[700,600,700,600],titles:['Senior Underwriter','Master Closer','Veteran ISO','Senior Underwriter']},
+  {name:'Dominic F.', scores:[600,700,600,700],titles:['Experienced ISO','Veteran ISO','Working Closer','Experienced ISO']},
+  {name:'Nico D.',     scores:[500,600,700,500],titles:['Junior Broker','Working Closer','Master Closer','Junior Broker']},
+  {name:'Omar H.',     scores:[700,500,700,600],titles:['Senior Underwriter','Working Closer','Master Closer','Senior Underwriter']},
+  {name:'Luca P.',     scores:[400,600,500,700],titles:['Experienced ISO','Working Closer','Developing','Master Closer']},
+  {name:'Hassan R.',   scores:[600,500,600,700],titles:['Junior Broker','Developing','Working Closer','Veteran ISO']},
+  {name:'Tariq S.',    scores:[500,400,500,600],titles:['Junior Broker','Developing','Working Closer','Working Closer']},
+  {name:'Tyler M.',    scores:[700,700,600,700],titles:['Senior Underwriter','Master Closer','Veteran ISO','Master Closer']},
+  {name:'Kayla B.',    scores:[400,500,400,500],titles:['Funding Desk Intern','Developing','Green Pea','Developing']},
+  {name:'Alyssa R.',   scores:[600,500,700,600],titles:['Experienced ISO','Working Closer','Master Closer','Veteran ISO']},
+];
+const FAKE_GAMES=['glossary','obj-r1','obj-r2','obj-r3'];
+const LS_KEY='lp_lb_v3';
+let LB_TAB='all';
+let SESSION_ID=null; // tracks the just-submitted row id
+
+function seedFakes(){
+  const now=Date.now(), DAY=86400000;
+  const entries=[];
+  FAKE_USERS.forEach(u=>{
+    u.scores.forEach((s,j)=>{
+      entries.push({id:'f'+Math.random().toString(36).slice(2),name:u.name,game:FAKE_GAMES[j],score:s,total:j===0?7:21,rank_title:u.titles[j],created_at:new Date(now-Math.floor(Math.random()*7*DAY)).toISOString(),fake:true});
+    });
+  });
+  return entries;
+}
+function loadLB(){
+  try{ const r=localStorage.getItem(LS_KEY); if(r) return JSON.parse(r); }catch(e){}
+  const s=seedFakes(); saveLB(s); return s;
+}
+function saveLB(e){ try{localStorage.setItem(LS_KEY,JSON.stringify(e));}catch(e){} }
+function resetLeaderboard(){ saveLB(seedFakes()); renderLeaderboard(); }
+loadLB(); // ensure seed exists
+
+// ═══════════════════════════════════════
+// PLAYER NAME
+// ═══════════════════════════════════════
+function getPlayerName(){ return localStorage.getItem('lp_name')||null; }
+function setPlayerName(n){ localStorage.setItem('lp_name',n.trim()); }
+
+let _pendingEnd=null; // holds end data while name modal is open
+
+function maybeShowNameModal(endData){
+  _pendingEnd=endData;
+  const name=getPlayerName();
+  if(!name){ document.getElementById('name-modal').classList.remove('hidden'); setTimeout(()=>document.getElementById('name-input').focus(),100); }
+  else{ finalizeEnd(name); }
+}
+function submitName(){
+  const val=(document.getElementById('name-input').value||'').trim();
+  if(!val){ document.getElementById('name-input').style.borderColor='var(--bad)'; return; }
+  setPlayerName(val);
+  document.getElementById('name-modal').classList.add('hidden');
+  finalizeEnd(val);
+}
+document.getElementById('name-input').addEventListener('keydown',e=>{ if(e.key==='Enter') submitName(); });
+
+async function finalizeEnd(name){
+  const d=_pendingEnd; if(!d) return;
+  const row={name, game:d.game, score:d.score, total:d.total, rank_title:d.rank};
+  // Save to Supabase
+  const inserted = await sbInsert(row);
+  if(inserted) SESSION_ID=inserted.id;
+  // Save to localStorage
+  const entries=loadLB();
+  entries.push({...row, id:SESSION_ID||('s'+Date.now()), created_at:new Date().toISOString(), you:true, fake:false});
+  saveLB(entries);
+  // Show end screen
+  populateEndScreen(d);
+  showScreen('s-end');
+}
+
+function populateEndScreen(d){
+  document.getElementById('end-n').textContent=d.correct;
+  document.getElementById('end-denom').textContent='/ '+d.total;
+  document.getElementById('end-rank').textContent=d.rank;
+  document.getElementById('end-title').textContent=d.title;
+  document.getElementById('end-sub').textContent=d.sub;
+  document.getElementById('st-a').textContent=d.scoreDisplay;
+  document.getElementById('st-a-l').textContent=d.aLabel;
+  document.getElementById('st-b').textContent=d.b;
+  document.getElementById('st-b-l').textContent=d.bLabel;
+  document.getElementById('st-c').textContent=d.c;
+  document.getElementById('st-c-l').textContent=d.cLabel;
+  document.getElementById('btn-replay').onclick=d.replay;
+}
+
+// ═══════════════════════════════════════
+// GLOSSARY GAME
+// ═══════════════════════════════════════
+let G={};
+const GL_RANKS=[
+  {min:7,title:'Senior Underwriter',msg:'Perfect score. You run the desk.'},
+  {min:6,title:'Experienced ISO',msg:"Solid. A couple more stacks and you're writing your own credit memos."},
+  {min:4,title:'Junior Broker',msg:'You know the basics. Study those R-Codes and factor rates.'},
+  {min:2,title:'Funding Desk Intern',msg:'You know some terms. The glossary is right there — use it.'},
+  {min:0,title:'Still Stacking Declines',msg:'Rough one. Every funder started somewhere.'},
+];
+const STREAKS=['','','🔥 2 in a row!','💰 3-deal streak!','📈 4 in a row!','🏆 5 straight!','⚡ 6 in a row!'];
+
+// ── Seeded RNG (mulberry32) for reproducible challenge games ──
+const GAME_URL = (location.hostname && location.hostname !== '') ? 'https://lendpaper.com/game' : location.href.split('?')[0];
+function mkRng(seed){let s=seed;return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function seededShuffle(arr,rng){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shuffle(a){return seededShuffle(a,mkRng(Math.random()*1e9|0));}
+
+// ── Challenge params from URL ──
+const _QS=new URLSearchParams(location.search);
+const CHALLENGE=_QS.has('s')?{seed:parseInt(_QS.get('s')),name:decodeURIComponent(_QS.get('cn')||'Someone'),target:parseInt(_QS.get('ct')||0),total:parseInt(_QS.get('tt')||21),mode:_QS.get('m')||'r1'}:null;
+
+let _currentSeed=0;
+function genSeed(){return Math.floor(Math.random()*999999)+1;}
+function buildChallengeUrl(mode,seed,name,score,total){
+  const p=new URLSearchParams({m:mode,s:seed,cn:encodeURIComponent(name),ct:score,tt:total});
+  return `${GAME_URL}?${p}`;
+}
+function copyChallengeLink(mode){
+  const url=buildChallengeUrl(mode,_currentSeed,getPlayerName()||'A friend',_lastEndScore,_lastEndTotal);
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=document.getElementById('btn-challenge');
+    if(btn){const orig=btn.textContent;btn.textContent='✓ Link copied!';setTimeout(()=>btn.textContent=orig,2500);}
+  });
+}
+let _lastEndScore=0,_lastEndTotal=7,_lastMode='g';
+
+let lastGlossaryArgs=['all','all'];
+function startGame(cat,diff,seed){
+  lastGlossaryArgs=[cat,diff];
+  _lastMode='g';
+  let pool=[...TERMS];
+  if(cat!=='all') pool=pool.filter(t=>t.cat===cat);
+  if(diff!=='all') pool=pool.filter(t=>t.diff===diff);
+  if(!pool.length) pool=[...TERMS];
+  const s=seed||genSeed(); _currentSeed=s;
+  const rng=mkRng(s);
+  const n=Math.min(7,pool.length);
+  const questions=seededShuffle(pool,rng).slice(0,n);
+  G={questions,total:n,idx:0,score:0,correct:0,streak:0,bestStreak:0,speeds:[],answered:false,interval:null,timeLeft:20,t0:null};
+  // Challenge banner
+  const banner=document.getElementById('g-challenge-banner');
+  const txt=document.getElementById('g-challenge-txt');
+  if(CHALLENGE&&CHALLENGE.mode==='g'){banner.classList.remove('hidden');txt.textContent=`${CHALLENGE.name} scored ${CHALLENGE.target} pts — can you beat it?`;}
+  else banner.classList.add('hidden');
+  showScreen('s-quiz');
+  buildDots('dots',n);
+  loadQ();
+}
+function buildDots(id,n){
+  const el=document.getElementById(id); el.innerHTML='';
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='dot'+(i===0?' cur':'');d.id=id+'-'+i;el.appendChild(d);}
+}
+function markDot(prefix,idx,r){
+  const d=document.getElementById(prefix+'-'+idx); if(d){d.className='dot '+r;}
+  const nx=document.getElementById(prefix+'-'+(idx+1)); if(nx) nx.classList.add('cur');
+}
+function loadQ(){
+  const t=G.questions[G.idx]; G.answered=false; G.t0=Date.now();
+  document.getElementById('q-counter').textContent=`Question ${G.idx+1} of ${G.total}`;
+  document.getElementById('score-pill').textContent=`${G.score} pts`;
+  document.getElementById('fb').textContent=''; document.getElementById('fb').className='fb';
+  document.getElementById('streak').textContent='';
+  const catMeta=CATS[t.cat];
+  document.getElementById('cat-context').textContent=catMeta?`${catMeta.icon} ${catMeta.name}`:'';
+  const type=pickType(t);
+  renderQ(t,type);
+  startTimer(type);
+}
+function pickType(t){ if(t._acro&&Math.random()<.45) return 'acronym'; return Math.random()<.5?'term2def':'def2term'; }
+function renderQ(t,type){
+  const badge=document.getElementById('q-type-badge'),qtxt=document.getElementById('q-text'),qhint=document.getElementById('q-hint'),choicesEl=document.getElementById('choices');
+  let prompt,hint,correctText,wrongPool,badgeText,badgeCls;
+  if(type==='acronym'){
+    badgeText='🔤 Crack the Acronym'; badgeCls='t3'; hint='What does this acronym stand for?';
+    correctText=t._expansion; wrongPool=shuffle(ACRONYM_TERMS.filter(x=>x!==t)).slice(0,3).map(x=>x._expansion);
+    qtxt.innerHTML=`<div class="acro-display">${t._acro}</div>`;
+  } else if(type==='term2def'){
+    badgeText='📖 Define the Term'; badgeCls='t1'; hint='Pick the correct definition.';
+    prompt=t.term; correctText=t.short; wrongPool=shuffle(TERMS.filter(x=>x!==t)).slice(0,3).map(x=>x.short);
+    qtxt.textContent=prompt;
+  } else {
+    badgeText='🏷 Name the Term'; badgeCls='t2'; hint='Which term matches this description?';
+    prompt=t.short; correctText=t.term; wrongPool=shuffle(TERMS.filter(x=>x!==t)).slice(0,3).map(x=>x.term);
+    qtxt.textContent=prompt;
+  }
+  badge.textContent=badgeText; badge.className='q-type-badge '+badgeCls;
+  qhint.textContent=hint;
+  const choices=shuffle([{text:correctText,correct:true},...wrongPool.map(w=>({text:w,correct:false}))]);
+  G._choices=choices;
+  choicesEl.innerHTML='';
+  ['1','2','3','4'].forEach((k,i)=>{
+    const btn=document.createElement('button'); btn.className='choice';
+    btn.innerHTML=`<span class="key">${k}</span><span>${choices[i].text}</span>`;
+    btn.addEventListener('click',()=>pick(i)); choicesEl.appendChild(btn);
+  });
+}
+function startTimer(){
+  clearInterval(G.interval); G.timeLeft=20;
+  const bar=document.getElementById('timer-bar'); bar.style.width='100%'; bar.className='timer-bar';
+  G.interval=setInterval(()=>{
+    G.timeLeft--; bar.style.width=(G.timeLeft/20*100)+'%';
+    if(G.timeLeft<=5) bar.classList.add('urgent');
+    if(G.timeLeft<=0){clearInterval(G.interval);if(!G.answered) timeout();}
+  },1000);
+}
+function pick(idx){
+  if(G.answered) return; G.answered=true; clearInterval(G.interval);
+  G.speeds.push((Date.now()-G.t0)/1000);
+  const btns=document.querySelectorAll('.choice'), isOk=G._choices[idx].correct;
+  btns.forEach((b,i)=>{b.disabled=true;if(G._choices[i].correct)b.classList.add('correct');else if(i===idx&&!isOk)b.classList.add('wrong');});
+  const fb=document.getElementById('fb');
+  if(isOk){G.correct++;G.streak++;G.score+=100;G.bestStreak=Math.max(G.bestStreak,G.streak);fb.textContent='✓ Correct! +100 pts';fb.className='fb ok';markDot('dots',G.idx,'c');const sk=document.getElementById('streak');sk.textContent=G.streak>=2?(STREAKS[Math.min(G.streak,STREAKS.length-1)]||`⚡ ${G.streak} in a row!`):'';}
+  else{G.streak=0;fb.textContent='✗ Not quite — correct answer highlighted above';fb.className='fb bad';markDot('dots',G.idx,'w');}
+  document.getElementById('score-pill').textContent=`${G.score} pts`;
+  setTimeout(nextQ,1200);
+}
+function timeout(){
+  if(G.answered) return; G.answered=true; G.streak=0; G.speeds.push(20);
+  document.querySelectorAll('.choice').forEach((b,i)=>{b.disabled=true;if(G._choices[i].correct)b.classList.add('correct');});
+  const fb=document.getElementById('fb'); fb.textContent="⏰ Time's up"; fb.className='fb to';
+  markDot('dots',G.idx,'t'); setTimeout(nextQ,1400);
+}
+function nextQ(){
+  G.idx++;
+  if(G.idx>=G.total){endGlossary();return;}
+  const body=document.getElementById('q-body');
+  body.classList.remove('visible'); body.classList.add('leaving');
+  setTimeout(()=>{loadQ();body.classList.remove('leaving');body.classList.add('entering');requestAnimationFrame(()=>requestAnimationFrame(()=>{body.classList.remove('entering');body.classList.add('visible');}));},230);
+}
+function endGlossary(){
+  clearInterval(G.interval);
+  const rank=GL_RANKS.find(r=>G.correct>=r.min);
+  const avg=G.speeds.length?(G.speeds.reduce((a,b)=>a+b,0)/G.speeds.length).toFixed(1)+'s':'—';
+  _lastEndScore=G.score; _lastEndTotal=700;
+  maybeShowNameModal({
+    game:'glossary', score:G.score, total:7, correct:G.correct, rank:rank.title,
+    title:G.correct>=6?'Deal cleared. 🎉':G.correct>=4?'Not bad, not bad.':'Back to the glossary with you.',
+    sub:rank.msg, scoreDisplay:G.score, aLabel:'Points', b:G.bestStreak, bLabel:'Best Streak', c:avg, cLabel:'Avg Speed',
+    replay:()=>startGame(...lastGlossaryArgs),
+  });
+}
+
+// ═══════════════════════════════════════
+// OBJECTION GAME
+// ═══════════════════════════════════════
+let OG={};
+let lastObjRound=1;
+
+function startObjectionGame(round,seed){
+  lastObjRound=round;
+  _lastMode='r'+round;
+  const s=seed||genSeed(); _currentSeed=s;
+  const rng=mkRng(s);
+  const pool=OBJECTIONS.filter(o=>o.round===round);
+  const scenarios=seededShuffle(pool,rng).slice(0,7);
+  OG={round, scenarios, idx:0, score:0, answered:false,
+      tally:{best:0,ok:0,wrong:0,killer:0}};
+  const rd=OBJ_ROUNDS[round];
+  // Challenge banner
+  const banner=document.getElementById('o-challenge-banner');
+  const txt=document.getElementById('o-challenge-txt');
+  const cMode='r'+round;
+  if(CHALLENGE&&CHALLENGE.mode===cMode){banner.classList.remove('hidden');txt.textContent=`${CHALLENGE.name} scored ${CHALLENGE.target} pts — can you beat it?`;}
+  else banner.classList.add('hidden');
+  showScreen('s-obj-quiz');
+  buildDots('obj-dots',scenarios.length);
+  loadObj();
+}
+function loadObj(){
+  OG.answered=false;
+  const s=OG.scenarios[OG.idx];
+  const rd=OBJ_ROUNDS[OG.round];
+  document.getElementById('obj-round-label').textContent=`${rd.label} · Q${OG.idx+1} of ${OG.scenarios.length}`;
+  document.getElementById('obj-score-pill').textContent=`${OG.score} pts`;
+  document.getElementById('obj-bubble').textContent=s.merchant;
+  document.getElementById('coach-panel').className='coach-panel';
+  renderObjChoices(s);
+}
+function renderObjChoices(s){
+  const el=document.getElementById('obj-choices'); el.innerHTML='';
+  const opts=shuffle([...s.opts]);
+  OG._opts=opts;
+  ['A','B','C','D'].forEach((k,i)=>{
+    const btn=document.createElement('button'); btn.className='obj-choice';
+    btn.innerHTML=`<span class="okey">${k}</span><span>${opts[i].text}</span>`;
+    btn.addEventListener('click',()=>pickObj(i)); el.appendChild(btn);
+  });
+}
+function pickObj(idx){
+  if(OG.answered) return; OG.answered=true;
+  const opt=OG._opts[idx];
+  const tm=TIER_META[opt.tier];
+  OG.score+=tm.pts;
+  OG.tally[opt.tier]++;
+  // Reveal all tiers
+  document.querySelectorAll('.obj-choice').forEach((b,i)=>{
+    b.disabled=true;
+    b.classList.add('tier-'+OG._opts[i].tier);
+    if(i===idx) b.classList.add('picked');
+  });
+  // Coach panel
+  const panel=document.getElementById('coach-panel');
+  const tierEl=document.getElementById('coach-tier');
+  tierEl.textContent=tm.label; tierEl.className='coach-tier '+tm.cls;
+  document.getElementById('coach-note').textContent=opt.note;
+  panel.className=`coach-panel show ${tm.bgcls}`;
+  document.getElementById('obj-score-pill').textContent=`${OG.score} pts`;
+  markDot('obj-dots',OG.idx,opt.tier==='best'?'c':opt.tier==='ok'?'t':'w');
+  // Show calc CTA for payback / factor rate scenarios
+  const calcEl=document.getElementById('calc-cta');
+  calcEl.className=OG.scenarios[OG.idx].calcLink?'calc-cta':'calc-cta hidden';
+}
+function nextObj(){
+  OG.idx++;
+  if(OG.idx>=OG.scenarios.length){endObjection();return;}
+  const body=document.getElementById('obj-body');
+  body.classList.remove('visible'); body.classList.add('leaving');
+  setTimeout(()=>{loadObj();body.classList.remove('leaving');body.classList.add('entering');requestAnimationFrame(()=>requestAnimationFrame(()=>{body.classList.remove('entering');body.classList.add('visible');}));},230);
+}
+function endObjection(){
+  _lastEndScore=OG.score; _lastEndTotal=21;
+  const rank=OBJ_RANKS.find(r=>OG.score>=r.min);
+  const t=OG.tally;
+  const rd=OBJ_ROUNDS[OG.round];
+  maybeShowNameModal({
+    game:rd.game, score:OG.score, total:21, correct:OG.score, rank:rank.title,
+    title:OG.score>=18?'Clean sheet. 🎉':OG.score>=14?'Solid closer.':'Keep working the objections.',
+    sub:rank.msg,
+    scoreDisplay:OG.score+'/21',
+    aLabel:'Score', b:`${t.best} best / ${t.ok} ok`,  bLabel:'Tier Breakdown', c:`${t.wrong} miss / ${t.killer} killer`, cLabel:'Misses',
+    replay:()=>startObjectionGame(lastObjRound),
+  });
+}
+
+// ═══════════════════════════════════════
+// LEADERBOARD
+// ═══════════════════════════════════════
+function setLbTab(tab,el){
+  LB_TAB=tab;
+  document.querySelectorAll('.lb-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderLeaderboard();
+}
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-new Date(ts).getTime())/1000);
+  if(s<60)return'just now';if(s<3600)return`${Math.floor(s/60)}m ago`;
+  if(s<86400)return`${Math.floor(s/3600)}h ago`;return`${Math.floor(s/86400)}d ago`;
+}
+const GAME_LABELS={'glossary':'Glossary','obj-r1':'R1','obj-r2':'R2','obj-r3':'R3'};
+async function renderLeaderboard(){
+  const statusEl=document.getElementById('lb-status');
+  statusEl.textContent=SB_ON?'Fetching live…':'Local only (Supabase not connected)';
+  let entries=loadLB();
+  if(SB_ON){
+    const live=await sbFetch(LB_TAB);
+    if(live&&live.length){
+      // Merge: keep fakes + add live, mark live entries that match session
+      const liveEntries=live.map(r=>({...r,fake:false,you:r.id===SESSION_ID}));
+      entries=[...entries.filter(e=>e.fake),...liveEntries];
+      statusEl.textContent='Live · '+new Date().toLocaleTimeString();
+    }
+  }
+  if(LB_TAB!=='all') entries=entries.filter(e=>e.game===LB_TAB);
+  // Best score per name
+  const best={};
+  entries.forEach(e=>{const k=e.name+(e.you?'_you':'');if(!best[k]||e.score>best[k].score)best[k]=e;});
+  const rows=Object.values(best).sort((a,b)=>b.score-a.score).slice(0,15);
+  const syms=['🥇','🥈','🥉']; const rcls=['gold','silver','bronze'];
+  const table=document.getElementById('lb-table');
+  if(!rows.length){table.innerHTML='<div class="lb-empty">No scores yet for this filter.</div>';return;}
+  table.innerHTML=rows.map((r,i)=>{
+    const sym=i<3?syms[i]:`#${i+1}`; const cls=i<3?rcls[i]:'';
+    const youTag=r.you?`<span class="lb-tag">You</span>`:'';
+    const gameTag=`<span class="lb-game-tag">${GAME_LABELS[r.game]||r.game}</span>`;
+    const scoreStr=r.game==='glossary'?`${r.score} pts`:`${r.score}/21`;
+    return`<div class="lb-row${r.you?' you':''}">
+      <div class="lb-rank ${cls}">${sym}</div>
+      <div class="lb-name">${r.name}${youTag}${gameTag}<br><span style="font-size:11px;color:var(--muted);font-weight:400;">${r.rank_title||''}</span></div>
+      <div class="lb-right"><div class="lb-score">${scoreStr}</div><div class="lb-meta">${timeAgo(r.created_at)}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// CATEGORY GRID
+// ═══════════════════════════════════════
+function buildCategoryGrid(){
+  const grid=document.getElementById('cat-grid'); grid.innerHTML='';
+  Object.entries(CATS).forEach(([key,cat])=>{
+    const count=TERMS.filter(t=>t.cat===key).length;
+    const card=document.createElement('div'); card.className=`cat-card ${cat.cls}`;
+    card.innerHTML=`<div class="cc-icon">${cat.icon}</div><div><div class="cc-name">${cat.name}</div><div class="cc-count">${count} terms</div></div>`;
+    card.addEventListener('click',()=>startGame(key,'all')); grid.appendChild(card);
+  });
+}
+buildCategoryGrid();
+
+// ═══════════════════════════════════════
+// SHARED
+// ═══════════════════════════════════════
+function showScreen(id){
+  clearInterval(G.interval);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='s-leaderboard') renderLeaderboard();
+}
+// Auto-launch challenge on page load
+if(CHALLENGE){
+  const modeMap={'g':()=>startGame('all','all',CHALLENGE.seed),'r1':()=>startObjectionGame(1,CHALLENGE.seed),'r2':()=>startObjectionGame(2,CHALLENGE.seed),'r3':()=>startObjectionGame(3,CHALLENGE.seed)};
+  const fn=modeMap[CHALLENGE.mode];
+  if(fn) setTimeout(fn,400);
+}
+
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('s-quiz').classList.contains('active')){
+    const map={'1':0,'2':1,'3':2,'4':3};
+    if(e.key in map){const btns=document.querySelectorAll('.choice');if(btns[map[e.key]]&&!btns[map[e.key]].disabled)btns[map[e.key]].click();}
+  }
+  if(document.getElementById('s-obj-quiz').classList.contains('active')){
+    const map={'a':0,'b':1,'c':2,'d':3,'1':0,'2':1,'3':2,'4':3};
+    const k=e.key.toLowerCase();
+    if(k in map){const btns=document.querySelectorAll('.obj-choice');if(btns[map[k]]&&!btns[map[k]].disabled)btns[map[k]].click();}
+    if((e.key==='Enter'||e.key===' ')&&OG.answered){nextObj();}
+  }
+});
+</script>
+</body>
+</html>
