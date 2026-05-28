@@ -24,6 +24,18 @@
 
 The OG image (`/public/assets/brand/og-image.png`) is 1200×630 — use it for every page.
 
+## SPA routing and OG stubs
+The site uses client-side routing (spa-github-pages pattern). `/tools/*` slugs have no real files — unknown paths fall through to `404.html` which redirects to `/?p=<path>`, then `index.html` restores the path and opens the tool.
+
+**iMessage/crawler problem:** crawlers see `404.html` (no OG tags) for `/tools/*` URLs.
+
+**Fix:** Create `tools/{slug}/index.html` stubs with OG tags + a JS redirect:
+```html
+<script>window.location.replace('/?p=tools/{slug}');</script>
+```
+This gives crawlers the OG tags they need, and users land in the SPA with the right tool open.
+Do this for every new tool added to `tools.js` with `presentation: "page"`.
+
 ## Waterfall dashboard (`waterfall.html`)
 - Lender display names have permanent overrides — never strip or revert them
 - See `DISPLAY_NAME_OVERRIDES` in `waterfall.html`
