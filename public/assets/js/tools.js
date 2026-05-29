@@ -72,18 +72,31 @@ var TOOLS = [
     path: "/waterfall.html",
     kw: "lender waterfall buy box fico tib revenue product type filter match"
   },
-  { 
-    id: "fundability", 
-    name: "Fundability", 
+  {
+    id: "fundability",
+    name: "Fundability",
     desc: "Combined net requirement and stacking risk assessment.",
-    status: "live", 
-    group: "deal-math", 
-    icon: "stack", 
+    status: "live",
+    group: "deal-math",
+    icon: "stack",
     color: "green",
     slug: "/tools/fundability",
     presentation: "page",
     path: "/calculators/FundabilityCalculator.html",
     kw: "net funding wire origination fundability stacking risk positions"
+  },
+  {
+    id: "objections",
+    name: "Closer's Playbook",
+    desc: "35 real objection scenarios with best-response coaching — rate, stalls, fear, qualification, and product questions.",
+    status: "live",
+    group: "deal-math",
+    icon: "trendUp",
+    color: "green",
+    slug: "/tools/objections",
+    presentation: "page",
+    path: "/tools/objections/index.html",
+    kw: "objection handling closer playbook sales training mca factor rate stall fear qualification coaching script response"
   },
   {
     id: "sba-rates",

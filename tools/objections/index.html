@@ -720,6 +720,12 @@ function renderDots() {
 // ── Init ─────────────────────────────────────────────────────────
 initTabs();
 render();
+
+// Hide topbar when loaded inside the LendPaper SPA iframe
+if (window.self !== window.top) {
+  var nav = document.querySelector('.topbar');
+  if (nav) nav.style.display = 'none';
+}
 </script>
 </body>
 </html>
