@@ -42,3 +42,26 @@ Do this for every new tool added to `tools.js` with `presentation: "page"`.
 
 ## PDF exports (amortization)
 - `html2canvas` config must include `scrollX: 0, scrollY: 0` — dropping these causes left-side content clipping
+
+## Tooltip / info icon standard
+The 📎 paperclip emoji is the site-wide tooltip trigger icon. Use it everywhere a field label, result, or UI element needs a help explanation:
+
+```html
+<span class="tooltip-icon" data-tip="Explanation text here.">📎</span>
+```
+
+CSS for `.tooltip-icon` (copy exactly — no circular badge, no `cursor: help`):
+```css
+.tooltip-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; cursor: pointer; margin-left: 6px;
+    opacity: 0.6; transition: opacity 0.15s; vertical-align: middle;
+}
+.tooltip-icon:hover { opacity: 1; }
+```
+
+Rules:
+- **Never** use `cursor: help` anywhere on the site — it triggers the macOS "?" cursor bubble
+- **Never** use a circular "i" badge or `?` character as a tooltip trigger
+- Use `cursor: pointer` everywhere tooltips or info overlays appear
+- In PDF export modes, hide tooltip icons: `body.pdf-export-mode .tooltip-icon { display: none !important; }`
