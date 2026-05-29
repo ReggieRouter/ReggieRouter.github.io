@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<base href="/">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -625,15 +626,32 @@
   .lp-status-dot.blue { background-color: #3B82F6; }
   .lp-status-dot.gray { background-color: #6B7280; }
 
-  /* Risk appetite pill */
-  .risk-pill {
+  /* Risk appetite — left-border stripe (spec: Option B) */
+  .risk-cell {
     display: inline-block;
-    border-radius: 20px;
-    padding: 3px 10px;
+    padding-left: 8px;
     font-size: 12px;
     font-weight: 500;
+    border-left: 3px solid;
+    border-radius: 3px 0 0 3px;
     white-space: nowrap;
     line-height: 1.4;
+  }
+  .risk-low      { border-color: #639922; color: #27500A; }
+  .risk-moderate { border-color: #BA7517; color: #633806; }
+  .risk-high     { border-color: #993C1D; color: #712B13; }
+  .risk-iso      { border-color: #185FA5; color: #0C447C; }
+  .risk-unknown  { border-color: var(--color-border); color: var(--color-text-muted); }
+  /* ISO badge on lender name cell */
+  .iso-badge {
+    font-size: 10px;
+    border: 0.5px solid #185FA5;
+    color: #185FA5;
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-left: 5px;
+    vertical-align: middle;
+    white-space: nowrap;
   }
 
   /* Collapsible Details Drawer Styling */
@@ -1730,16 +1748,9 @@
     .lp-chip-row { flex-wrap: wrap; }
   }
 
-  /* ───────────────────────────────────────────────────────────────
-     RISK STRIPE on left edge of each row (replaces Risk band column)
-     ─────────────────────────────────────────────────────────────── */
+  /* Sticky col drop shadow only — risk stripe removed (shown in Risk appetite cell instead) */
   .lp-data-table td.lp-sticky-col {
-    box-shadow: inset 3px 0 0 var(--risk-color, transparent), 2px 0 5px -2px rgba(0, 0, 0, 0.08);
-    /* the hover rule below replaces this stripe with brand green */
-  }
-  /* hover already overrides box-shadow elsewhere — re-affirm so risk stripe yields to brand green on hover */
-  .lp-row-interactive:hover td.lp-sticky-col {
-    box-shadow: inset 3px 0 0 var(--color-brand-mid), 2px 0 5px -2px rgba(0, 0, 0, 0.08);
+    box-shadow: 2px 0 5px -2px rgba(0, 0, 0, 0.08);
   }
   /* legend swatch shown in the toolbar */
   .lp-risk-key {
@@ -1891,7 +1902,7 @@
     align-items: center;
     justify-content: center;
     transition: opacity 0.15s, border-color 0.12s, background 0.12s;
-    opacity: 0;
+    opacity: 0.22;
   }
   .lp-row-interactive:hover .lp-cmp-check,
   .lp-cmp-check.checked,
@@ -2314,6 +2325,14 @@
             <div id="legend-items"></div>
             <h6 style="margin-top:14px;">Risk appetite</h6>
             <div id="legend-risk"></div>
+              <div id="legend-loc-types" style="display:none;margin-top:14px;">
+                <h6 style="margin-bottom:6px;">Line of Credit type</h6>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <span style="font-size:11px;background:#EFF6FF;color:#1D4ED8;border:0.5px solid #BFDBFE;border-radius:3px;padding:2px 7px;">Revolving</span>
+                  <span style="font-size:11px;background:#F5F3FF;color:#6D28D9;border:0.5px solid #DDD6FE;border-radius:3px;padding:2px 7px;">Traditional</span>
+                  <span style="font-size:11px;color:var(--color-text-muted);">— shown in expanded row</span>
+                </div>
+              </div>
           </div>
         </span>
         <span class="lp-risk-key" aria-hidden="true" style="display:none;">
@@ -2339,7 +2358,7 @@
       <table class="lp-data-table">
         <thead>
           <tr>
-            <th data-col="name">Lender <span class="sort-icon"></span></th>
+            <th data-col="name">Lender <span class="sort-icon"></span><br><span style="font-size:10px;font-weight:400;color:var(--color-text-muted);letter-spacing:0;">☐ select to compare</span></th>
             <th data-col="products">Products <span class="sort-icon"></span></th>
             <th data-col="risk">Risk appetite <span class="sort-icon"></span></th>
             <th class="num-col" data-col="fico">Min FICO <span class="sort-icon"></span></th>
@@ -2734,11 +2753,11 @@
       "fico": 0,
       "tib": 0,
       "rev": 0,
-      "stacking": 0,
+      "stacking": 1,
       "restrictions": [],
       "detailed_restrictions": [],
-      "products": [],
-      "updated_at": "2026-05-27 02:40:33.219345",
+      "products": ["Line of Credit"],
+      "updated_at": "2026-05-29",
       "submission_url": "",
       "soft_pull": false,
       "bank_verified": false,
@@ -2748,8 +2767,8 @@
       "hq_address": "",
       "support_email": "",
       "support_phone": "",
-      "source_url": "https://www.americanexpress.com/us/business/blueprint/",
-      "source_snippet": "We\u2019re having trouble finding the page you\u2019re looking for. This could be because: The URL (page address) was entered incorrectly The page has moved The page no longer exists Here are a few things you can do: Re-enter the URL Use the menu to explore the site Visit the American Express homepage \u200b ABOUT About American Express Newsroom Investor Relations Careers Global Network Contact Us PRODUCTS & SERVICES Credit Cards Business Credit Cards Corporate Programs View All Gift Cards Savings Accounts & CDs Download the App LINKS YOU MAY LIKE Membership Rewards FICO\u00ae Score and Insights CreditSecure\u00ae Accept Amex Cards Refer A Friend SpendSmart\u00ae ADDITIONAL INFORMATION Credit Intel \u2013 Financial Education Center Amex Business Intel\u2122 - B2B Education Center Supplier Code of Conduct Credit Score 101 Frequently Asked Questions United StatesChange Country Terms of ServicePrivacy CenterDo Not Sell or Share My Personal InformationAdChoicesSecurity CenterCard AgreementsServicemember BenefitsSite Map All users of our online services are subject to our Privacy Statement and agree to be bound by the Terms of Service. Please review. \u00a9 2026 American Express. All rights reserved",
+      "source_url": "https://www.americanexpress.com/en-us/business/blueprint",
+      "source_snippet": "",
       "logo_url": "public/assets/lenders/AmEx Kabbage.png",
       "early_payment_discount": false,
       "preferred_industries": [],
@@ -2815,6 +2834,10 @@
       "source_url": "https://www.backd.com",
       "source_snippet": "The Fastest and Easiest Way to Fund your Business GrowthDiscover the leading suite of business financial products built to fuel your business' growth, increase profitability, and bolster your cashflow.Apply NowLearn MoreFEATURED INBACKD CAPITALBusiness Capital SolutionsBusiness Line of CreditRevolving credit designed for flexibility and growth.Draw Funds AnytimeFrom $50K - $1MFlexible Terms Built Around Your Business NeedsSoft Credit Pull, Doesn't Affect Credit ScoreLearn MoreBusiness Term Loan1Simple and easy process to access working capital.Flexible Capital That Fuels GrowthFrom $50K - $250KTerms up to 24 monthsAutomatic Daily, Weekly, or Semi-Monthly PaymentsLearn MoreBACKD PAYMENTSBusiness Payment SolutionsFlexible Terms & Payment OptionsB2B Net TermsOffer Net Terms alongside or in place of in-house termsNet 15/30/45/60 & 90 termsB2B BNPLOffer financing for purchases in any channelFinancing options up to 24 monthsFlexible payment terms to suit any buyer's needsB2B Embedded FinanceOffer business customers business funding without leaving your webpageEnable your business customers with a direct capital infusionLearn MoreWHAT BUSINESSES SAY ABOUT BACKDOUR TRACK RECORD$1Bof financial backing approved to small businesses10K+businesses have worked with Backd to obtain the funding they need100K+payment transactions for merchants and buyers facilitated through BackdGet Capital for Your Business and Offer Flexible Payment Options to Your BuyersTerm Loan & Line of CreditAccess working capital with 24-hour turnarounds2 from $25K - $2M and revolving credit with competitive terms.Learn MoreNet Payment TermsGet Net 30 payment terms for qualifying purchases and flexible financing with payment options up to 24 months.Learn MoreNews and ResourcesWhat Is a Business Term Loan? A Guide for Small Business OwnersLearn how business term loans work, their benefits, and how to use them strategically to fuel sustainable growth without losing equity.How Inventory Financing Can Unlock Sales Opportunities and Cash FlowInventory financing allows you to use business inventory as collateral for a loan. Learn how this funding works and what your options are.Nothing But Net Terms: A Guide to Net Terms In Business FinancingDiscover net terms and B2B Buy Now, Pay Later options in the evolving marketplace. Learn how BackdPay revolutionizes B2B payments for financial flexibility. Read now!View All ResourcesTalk with a Backd SpecialistReach out and we'll be in touch within 24 hours or less.Inquire NowBackd HQ1949 S I-35 Frontage RdAustin, Texas 78741, USAB2B OverviewB2B MerchantsB2B BuyersPartnerBNPL PartnerCompanyAboutResourcesTechnologySupportContactCopyright \u00a9 2026 Austin Business Finance, LLC d/b/a BackdSitemapTerms of UsePrivacy Policy1A business installment loan is originated by FinWise Bank, a Utah-chartered bank, Member FDIC and serviced by Backd.2Decisions and funding may take additional time and not be same-day. Additional information may be required. Time to receive funds varies based upon your financial institution's receiving schedule and operating hours.3Your application, including the amount, cost, and approval, is subject to review and is not guaranteed.4Terms and conditions subject to change without prior disclosure or notice.",
       "logo_url": "public/assets/lenders/backd.png",
+      "product_criteria": [
+        { "product": "LOC", "loc_type": "revolving", "max_amount": 1000000, "max_term_months": null, "notes": "Draw anytime · flexible terms · soft pull" },
+        { "product": "Term", "loc_type": null, "max_amount": 250000, "max_term_months": 24, "notes": "Daily or weekly payments" }
+      ],
       "early_payment_discount": false,
       "preferred_industries": [],
       "max_funding_amount": 2000000,
@@ -3096,6 +3119,10 @@
       "source_url": "https://www.bluevine.com",
       "source_snippet": "Apply for a Bluevine Line of Credit up to $250,000, or a business term loan up to $500,000 through our partners\u2014all from one application. Apply in minutes without impacting your credit score. Banking Services provided by Coastal Community Bank, Member FDIC. \u201cBluevine\u201d and the Bluevine logo are registered trademarks of Bluevine Inc.  Ecommerce, Food & Beverage, Travel, Trucking business, Technology (from customer testimonials). Address: 30 Montgomery St, Suite 1400, Jersey City, NJ, 07302, US. Phone: (888) 216-9619. Logo URL: https://www.bluevine.com/images/logo.png.",
       "logo_url": "public/assets/lenders/bluevine.png",
+      "product_criteria": [
+        { "product": "LOC", "loc_type": "revolving", "max_amount": 250000, "max_term_months": null, "notes": "Up to $250K revolving" },
+        { "product": "Term", "loc_type": null, "max_amount": 500000, "max_term_months": null, "notes": "Through lending partners" }
+      ],
       "early_payment_discount": false,
       "preferred_industries": [
         "Ecommerce",
@@ -3690,7 +3717,7 @@
       "support_phone": "212-971-9244",
       "source_url": "https://www.foxbusinessfunding.com",
       "source_snippet": "",
-      "logo_url": "public/assets/lenders/foxbusinessfunding.png",
+      "logo_url": "public/assets/lenders/Fox Business Funding.png",
       "early_payment_discount": false,
       "preferred_industries": [],
       "max_funding_amount": 0,
@@ -4088,7 +4115,7 @@
       "support_phone": "201-935-0035",
       "source_url": "https://www.kalamatacapitalgroup.com",
       "source_snippet": "Kalamata Capital Group is a preferred ISO driven Merchant Cash Advance company with a focus on providing working capital to businesses across the United States. QUALIFYING INDUSTRIES: RETAIL, WHOLESALE & ECOMMERCE, MEDICAL, DENTAL & PHARMACEUTICAL, TRUCKING, CONSTRUCTION & LOGISTICS, RESTAURANT, HOTEL & FRANCHISES. We are not currently accepting new broker relationships at this time. Bethesda, Maryland 7200 Wisconsin Ave #500 Bethesda, MD 20814 (800) 200-4071",
-      "logo_url": "public/assets/lenders/kalamatacapitalgroup.png",
+      "logo_url": "public/assets/lenders/Kalamata.png",
       "early_payment_discount": false,
       "preferred_industries": [
         "Retail",
@@ -4158,7 +4185,7 @@
       "support_phone": "888-851-8859",
       "source_url": "https://www.legendfunding.com",
       "source_snippet": "Quick Access to Working Capital\nDirect funding. Transparent underwriting. Reliable execution.\n2-3hrs Approvals in\nAll 50 States Nation Wide Coverage\n0+ Years Supporting ISO Partners\nTrusted by thousands of small businesses across the U.S.\nAt Legend Advance Funding, we simplify the process so business owners and ISOs can close deals with confidence \u2014 without delays, confusion, or surprises.\nSimple Requirements\nFast Approvals\nIndustries We Serve\nWhether you\u2019re a growing or an established business, our funding solutions help bridge cashflow gaps, fuel expansion, and unlock opportunities.\nOur Solutions\nChoose from a range of funding options designed to meet your specific business needs and cash flow requirements.\nNo credit check required\nNo obligations\nTakes 30 seconds\nSimple Process\nFrom application to funding in under 24 hours, with a process designed to be clear, simple, and efficient\nAbout Legend Funding\nLegend Funding was built on the belief that small businesses deserve a faster, fairer, and more transparent path to capital. As a direct funder, we provide funding solutions tailored to real everyday business needs.\nOver a decade of underwriting experience\nThousands of businesses funded\nLegend Funding\u00ae is a top provider of business cash advances to small and medium sized businesses. A quick cash injection through a Merchant Cash Advance can be a powerful tool for any business. From growth initiatives to emergency funding, we provide immediate unsecured lines of credit to your business.\nFlorida - 800 Brickell Avenue Suite 904 Miami, FL 33131\nMaryland - 145 West Ostend Street, Suite 600 Baltimore, MD 21230\n888-851-8859\n786-685-3868\ninfo@legendfunding.com\nWhat if I already have an existing loan or MCA?",
-      "logo_url": "public/assets/lenders/legendfunding.png",
+      "logo_url": "public/assets/lenders/Legend Funding.png",
       "early_payment_discount": false,
       "preferred_industries": [],
       "max_funding_amount": 0,
@@ -4223,7 +4250,7 @@
       "support_phone": "203-717-0595",
       "source_url": "https://www.libertasfunding.com",
       "source_snippet": "Seize growth opportunities with $500K\u201310M* in short-term, revenue-based financing that moves at the speed of your business. *Can be as low as $100k. Business term loans issued by WebBank. For more information about Libertas Funding LLC, please contact us via our website https://libertasfunding.com/partner-with-us#partner-form or toll-free telephone number 8007048675. Libertas Funding, LLC\u2019s products and services are directed to business customers located in the United States.",
-      "logo_url": "public/assets/lenders/libertasfunding.png",
+      "logo_url": "public/assets/lenders/libertas_funding.jpg",
       "early_payment_discount": false,
       "preferred_industries": [],
       "max_funding_amount": 10000000,
@@ -5752,26 +5779,26 @@
     {
       "id": 1085,
       "name": "Square Financing",
-      "fico": 0,
-      "tib": 0,
-      "rev": 0,
+      "fico": 550,
+      "tib": 6,
+      "rev": 2000,
       "stacking": 1,
       "restrictions": [],
       "detailed_restrictions": [],
-      "products": [],
-      "updated_at": "2026-05-27",
+      "products": ["Term Loan"],
+      "updated_at": "2026-05-29",
       "submission_url": "",
       "soft_pull": false,
       "bank_verified": false,
       "bank_statements": null,
       "hard_collateral": false,
-      "hq_state": "",
+      "hq_state": "CA",
       "hq_address": "",
       "support_email": "",
       "support_phone": "",
-      "source_url": "",
+      "source_url": "https://squareup.com/us/en/loans",
       "source_snippet": "",
-      "logo_url": "public/assets/lenders/Square Financing.png",
+      "logo_url": "public/assets/lenders/Square Loans.png",
       "early_payment_discount": false,
       "preferred_industries": [],
       "max_funding_amount": 0,
@@ -5801,6 +5828,383 @@
       "source_url": "",
       "source_snippet": "",
       "logo_url": "public/assets/lenders/Shopify Lending.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1086,
+      "name": "Pearl Capital",
+      "fico": 0,
+      "tib": 3,
+      "rev": 0,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": [],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.pearlcapital.com",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/Pearl Capital.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1087,
+      "name": "TimePayment",
+      "fico": 550,
+      "tib": 0,
+      "rev": 0,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["Equipment Financing"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.timepayment.com",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/TimePayment.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1088,
+      "name": "SouthState Bank",
+      "fico": 600,
+      "tib": 0,
+      "rev": 0,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": [],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.southstatebank.com",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/SouthState Bank.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1090,
+      "name": "Stripe Capital",
+      "fico": 600,
+      "tib": 6,
+      "rev": 10000,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["MCA"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "CA",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://stripe.com/capital",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/Stripe Capital.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1091,
+      "name": "Celtic Bank",
+      "fico": 600,
+      "tib": 24,
+      "rev": 0,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["SBA", "Term Loan"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "UT",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.celticbank.com",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/Celtic Bank.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1092,
+      "name": "LendingClub Business (Line of Credit)",
+      "fico": 0,
+      "tib": 0,
+      "rev": 0,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["Line of Credit"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.lendingclub.com/business",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/LendingClub.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1096,
+      "name": "Ameris Bank Equipment Finance",
+      "fico": 620,
+      "tib": 24,
+      "rev": 10000,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["Equipment Financing"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.amerisbank.com/business/equipment-finance",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/Ameris Bank.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1097,
+      "name": "Triumph Business Capital",
+      "fico": 450,
+      "tib": 6,
+      "rev": 5000,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["Factoring", "Term Loan", "Supply Chain Finance"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "TX",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.triumph.io",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/Triumph Business Capital.png",
+      "early_payment_discount": false,
+      "preferred_industries": ["Transportation"],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1098,
+      "name": "Riviera Finance",
+      "fico": 500,
+      "tib": 0,
+      "rev": 5000,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["Factoring"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.rivierafinance.com",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/Riviera.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1099,
+      "name": "Nav",
+      "fico": 0,
+      "tib": 0,
+      "rev": 0,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["Line of Credit", "Business Credit Card"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.nav.com",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/Nav.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1102,
+      "name": "Fountainhead (SBA 7a)",
+      "fico": 0,
+      "tib": 0,
+      "rev": 0,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["SBA"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://fountainheadsba.com",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/Fountainhead SBA.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1103,
+      "name": "U.S. Bank",
+      "fico": 660,
+      "tib": 24,
+      "rev": 0,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["Term Loan", "Line of Credit", "SBA"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "MN",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.usbank.com/business-banking",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/US Bank.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": []
+    },
+    {
+      "id": 1104,
+      "name": "PNC Bank",
+      "fico": 600,
+      "tib": 36,
+      "rev": 8333,
+      "stacking": 1,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["Term Loan", "Line of Credit", "SBA"],
+      "updated_at": "2026-05-29",
+      "submission_url": "",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "PA",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.pnc.com/business-banking",
+      "source_snippet": "",
+      "logo_url": "public/assets/lenders/PNC Bank.png",
       "early_payment_discount": false,
       "preferred_industries": [],
       "max_funding_amount": 0,
@@ -5882,22 +6286,48 @@
     if (lender.hard_collateral) score -= 1;
     if (lender.bank_verified)   score -= 0.5;
 
+    // Build hover justification from the key factors
+    const parts = [];
+    if (fico === 0)       parts.push('No FICO check');
+    else if (fico < 550)  parts.push(`FICO ≥ ${fico} (subprime)`);
+    else if (fico < 650)  parts.push(`FICO ≥ ${fico}`);
+    else                  parts.push(`FICO ≥ ${fico} (prime)`);
+    if (tib === 0)        parts.push('no TIB req');
+    else                  parts.push(`TIB ≥ ${tib} mo`);
+    if (rev > 0)          parts.push(`rev ≥ $${rev >= 1000 ? (rev/1000).toFixed(0)+'k' : rev}/mo`);
+    if (mcaOnly)          parts.push('MCA only');
+    else if (hasMCA)      parts.push('includes MCA');
+    if (lender.hard_collateral) parts.push('collateral required');
+    if (lender.bank_verified)   parts.push('bank verified');
+    const reason = parts.join(' · ');
+
+    // MCA + Term combination: offering Term alongside MCA signals broader quality underwriting.
+    // Cap at Moderate-High — the Term product means they're not pure-distressed.
+    if (hasMCA && canon.includes('Term')) score = Math.min(score, 4.4);
+
     // Range buckets: lenders accepting higher-risk borrowers implicitly accept lower-risk ones too.
-    // score ≤ 1.5 → strict lender (low only); higher score = broader acceptance.
-    if (score <= 1.5) return { label: 'Low only',        dot: 'green',  code: 'low',     score, pillBg: '#EAF3DE', pillColor: '#27500A' };
-    if (score <= 3.5) return { label: 'Low–Moderate',   dot: 'green',  code: 'lowmod',  score, pillBg: '#EAF3DE', pillColor: '#27500A' };
-    if (score <= 5.5) return { label: 'Moderate–High',  dot: 'yellow', code: 'modhigh', score, pillBg: '#FAEEDA', pillColor: '#633806' };
-    return            { label: 'All risk tiers',  dot: 'red',    code: 'allrisk', score, pillBg: '#FAECE7', pillColor: '#712B13' };
+    if (score <= 1.5) return { label: 'Low only',       code: 'low',     score, riskColor: '#639922', reason };
+    if (score <= 2.5) return { label: 'Low–Moderate',   code: 'lowmod',  score, riskColor: '#639922', reason };
+    if (score <= 3.5) return { label: 'Moderate only',  code: 'mod',     score, riskColor: '#BA7517', reason };
+    if (score <= 4.5) return { label: 'Moderate–High',  code: 'modhigh', score, riskColor: '#BA7517', reason };
+    return            { label: 'High only',             code: 'high',    score, riskColor: '#993C1D', reason };
   };
 
-  // Wraps determineRisk; marketplace/broker lenders marked all_risk:true serve all borrower tiers
+  // Wraps determineRisk; ISO lenders (all_risk:true) route across all tiers — shown in blue
   const getLenderRisk = (lender) => {
-    if (lender.all_risk) return { label: 'All risk tiers', dot: 'red', code: 'allrisk', pillBg: '#FAECE7', pillColor: '#712B13' };
+    if (lender.all_risk) return { label: 'All', code: 'iso', score: 0, riskColor: '#185FA5', reason: 'ISO — routes across all borrower tiers' };
     return determineRisk(lender);
   };
 
-  const riskPillHTML = (risk) =>
-    `<span class="risk-pill" style="background:${risk.pillBg};color:${risk.pillColor};">${risk.label}</span>`;
+  const riskCellHTML = (risk) => {
+    const cls = risk.code === 'iso'                          ? 'risk-iso'
+      : (risk.code === 'low' || risk.code === 'lowmod')      ? 'risk-low'
+      : (risk.code === 'mod' || risk.code === 'modhigh')     ? 'risk-moderate'
+      : risk.code === 'high'                                 ? 'risk-high'
+      : 'risk-unknown';
+    const tip = risk.reason ? ` data-risk-tip="${risk.reason}"` : '';
+    return `<span class="risk-cell ${cls}"${tip}>${risk.label}</span>`;
+  };
 
   // Match score: measures how well a lender's minimums align with the borrower's profile.
   // Each active numeric slider contributes 0–1 (ratio of lender min to borrower value).
@@ -6046,7 +6476,11 @@
     'American Express': 'AmEx',
     'Accord Business Funding': 'Accord',
     'CFGMS': 'CFG',
-    'In Advance Capital': 'In Advance Capital',
+    'Cobalt Funding Solutions': 'COBALT',
+    'Expansion Capital': 'ECG',
+    'In Advance Capital': 'Advance',
+    'Fox Business Funding': 'Fox',
+    'Kalamata Capital Group': 'Kalamata',
     'National Business Capital': 'National Business Capital',
     'National Funding': 'National Funding',
     'PayPal Working Capital': 'PayPal',
@@ -6086,7 +6520,11 @@
       // Risk filter — hierarchical: "Low" shows lenders who accept low-risk borrowers (includes broader ones too)
       const risk = getLenderRisk(l);
       if (activeFilters.risk !== 'all') {
-        const accepts = { low: ['low','lowmod','allrisk'], mod: ['lowmod','modhigh','allrisk'], high: ['modhigh','allrisk'] };
+        const accepts = {
+          low:  ['low', 'lowmod', 'iso'],
+          mod:  ['lowmod', 'mod', 'modhigh', 'iso'],
+          high: ['modhigh', 'high', 'iso']
+        };
         if (!(accepts[activeFilters.risk] ?? []).includes(risk.code)) return false;
       }
 
@@ -6177,9 +6615,9 @@
           valA = a.stacking;
           valB = b.stacking;
         } else if (sortColumn === 'risk') {
-          const rankMap = { 'low': 1, 'lowmod': 2, 'modhigh': 3, 'allrisk': 4 };
-          valA = rankMap[getLenderRisk(a).code] ?? 1;
-          valB = rankMap[getLenderRisk(b).code] ?? 1;
+          const rankMap = { 'iso': 0, 'low': 1, 'lowmod': 2, 'mod': 3, 'modhigh': 4, 'high': 5 };
+          valA = rankMap[getLenderRisk(a).code] ?? 3;
+          valB = rankMap[getLenderRisk(b).code] ?? 3;
           // tiebreak alphabetically within same tier
           if (valA === valB) {
             return a.name.localeCompare(b.name) * (sortDirection === 'asc' ? 1 : -1);
@@ -6286,19 +6724,19 @@
       trMain.innerHTML = `
         <td class="lp-sticky-col">
           <div class="lp-lender-cell">
-            <span class="lp-cmp-check ${isCompared ? 'checked' : ''}" data-cmp="${lender.id}" role="checkbox" aria-checked="${isCompared}" aria-label="Add ${lender.name} to comparison" title="Add to comparison"></span>
+            <span class="lp-cmp-check ${isCompared ? 'checked' : ''}" data-cmp="${lender.id}" role="checkbox" aria-checked="${isCompared}" aria-label="Add ${lender.name} to comparison" data-label="Compare lenders side-by-side"></span>
             <span class="lp-row-chevron${isExpanded ? ' expanded' : ''}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </span>
             ${logoHtml}
             <div class="lp-lender-name-wrapper">
-              <span class="lp-lender-name">${displayName(lender.name)}</span>
+              <span class="lp-lender-name" data-lender-tip="${lender.name}">${displayName(lender.name)}${lender.all_risk ? '<span class="iso-badge">ISO</span>' : ''}</span>
               ${signalsRow}
             </div>
           </div>
         </td>
         <td><div style="display:flex; flex-wrap:wrap; gap:4px; max-width:180px;">${productsHtml}</div></td>
-        <td>${riskPillHTML(risk)}</td>
+        <td>${riskCellHTML(risk)}</td>
         <td class="num-col">${lender.fico === 0 ? '<span class="lp-tbd">—</span>' : lender.fico}</td>
         <td class="num-col">${lender.tib === 0 ? '<span class="lp-tbd">—</span>' : lender.tib}</td>
         <td class="num-col">${formatCurrency(lender.rev)}</td>
@@ -6340,6 +6778,33 @@
           ext:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>',
           clock:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 15 14"/></svg>',
         };
+
+        // Per-product breakdown — only shown when product_criteria data has been ingested
+        const pc = (lender.product_criteria || []).filter(p => p.max_amount || p.max_term_months || p.loc_type || p.notes);
+        let productBreakdownHtml = '';
+        if (pc.length > 0) {
+          const LOC_TYPE_BADGE = {
+            revolving:    '<span style="font-size:10px;background:#EFF6FF;color:#1D4ED8;border:0.5px solid #BFDBFE;border-radius:3px;padding:1px 5px;margin-left:5px;">Revolving</span>',
+            traditional:  '<span style="font-size:10px;background:#F5F3FF;color:#6D28D9;border:0.5px solid #DDD6FE;border-radius:3px;padding:1px 5px;margin-left:5px;">Traditional</span>',
+          };
+          const PRODUCT_DISPLAY = { LOC: 'Line of Credit', Term: 'Term Loan', MCA: 'MCA', SBA: 'SBA Loan', Finance: 'Equipment Finance', Factor: 'Factoring', CRE: 'CRE' };
+          const cards = pc.map(p => {
+            const typeBadge = p.loc_type ? (LOC_TYPE_BADGE[p.loc_type] || '') : '';
+            const parts = [];
+            if (p.max_amount) parts.push(`Up to ${formatCurrency(p.max_amount)}`);
+            if (p.max_term_months) parts.push(`${p.max_term_months} mo max`);
+            if (p.notes) parts.push(p.notes);
+            return `<div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:8px 10px;min-width:140px;flex:1;">
+              <div style="font-size:11px;font-weight:700;color:var(--color-text-primary);margin-bottom:4px;">${PRODUCT_DISPLAY[p.product] || p.product}${typeBadge}</div>
+              ${parts.map(t => `<div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">${t}</div>`).join('')}
+            </div>`;
+          }).join('');
+          productBreakdownHtml = `
+            <div style="margin-bottom:12px;">
+              <div style="font-size:10px;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Per-product</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">${cards}</div>
+            </div>`;
+        }
 
         // Build spec rows — ONLY include rows where we have a meaningful value
         // (sparse fields are hidden, not shown as "—")
@@ -6536,7 +7001,7 @@
                 <!-- Underwriting -->
                 <div>
                   <div class="lp-section-head">${ICON.shield} Underwriting Specs</div>
-                  <div class="lp-spec-list">${specRows.join('')}</div>
+                  ${productBreakdownHtml}<div class="lp-spec-list">${specRows.join('')}</div>
                 </div>
                 <!-- Contact (only if we have any) -->
                 ${hasContactData ? `
@@ -6964,12 +7429,16 @@
       { c: '#EAB308', label: 'Moderate — 600+ FICO w/ MCA, or 500+ non-MCA-only' },
       { c: '#DC2626', label: 'High — 500 FICO MCA-only' },
       { c: '#3B82F6', label: 'No FICO required — lender ignores credit score' },
-      { c: '#6B7280', label: 'All-risk — marketplace, serves every tier' },
+      { c: '#6B7280', label: 'All-risk — serves every tier' },
     ];
     legendRiskHost.innerHTML = RISK_KEY.map(r =>
       `<div class="lp-legend-item" style="grid-template-columns:8px 1fr;gap:10px;"><i style="width:6px;height:18px;border-radius:2px;background:${r.c};display:inline-block;"></i><span>${r.label}</span></div>`
     ).join('');
   }
+  // Show LOC type legend if any lender has product_criteria with loc_type
+  const hasLocTypeData = lenderData.some(l => (l.product_criteria || []).some(pc => pc.loc_type));
+  const locLegendEl = document.getElementById('legend-loc-types');
+  if (locLegendEl && hasLocTypeData) locLegendEl.style.display = 'block';
   if (legendBtn) {
     legendBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -7179,7 +7648,7 @@
           </tr>
         </thead>
         <tbody>
-          ${rowFor('Risk appetite', lenders.map(l => riskPillHTML(getLenderRisk(l))))}
+          ${rowFor('Risk appetite', lenders.map(l => riskCellHTML(getLenderRisk(l))))}
           ${rowFor('Min FICO', ficoVals.map(v => cellNum(v, bestFico)))}
           ${rowFor('Time in business', tibVals.map(v => cellNum(v, bestTib, x => x + ' mo')))}
           ${rowFor('Min monthly revenue', revVals.map(v => cellNum(v, bestRev, x => formatCurrency(x))))}
@@ -7280,18 +7749,13 @@
   updateSortIndicators();
   renderTable();
 
-  // Floating tooltip for .lp-signal — positioned fixed so it escapes overflow-x:auto table container
+  // Floating tooltip for .lp-signal and .risk-cell — positioned fixed to escape overflow-x:auto
   (function() {
     const tip = document.createElement('div');
     tip.style.cssText = 'position:fixed;background:#1F2937;color:#fff;padding:3px 7px;border-radius:4px;font-size:10.5px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:9999;';
     document.body.appendChild(tip);
-    document.addEventListener('mouseover', (e) => {
-      const el = e.target.closest('.lp-signal');
-      if (!el) return;
-      const label = el.dataset.label;
-      if (!label) return;
+    function showTip(el, label) {
       tip.textContent = label;
-      // Position off-screen first so offsetWidth reflects the new text before painting
       tip.style.left = '-9999px';
       tip.style.top = '-9999px';
       tip.style.opacity = '1';
@@ -7304,9 +7768,19 @@
       top = Math.max(4, top);
       tip.style.left = left + 'px';
       tip.style.top = top + 'px';
+    }
+    document.addEventListener('mouseover', (e) => {
+      const signal = e.target.closest('.lp-signal');
+      if (signal && signal.dataset.label) { showTip(signal, signal.dataset.label); return; }
+      const cmp = e.target.closest('.lp-cmp-check[data-label]');
+      if (cmp) { showTip(cmp, cmp.dataset.label); return; }
+      const risk = e.target.closest('.risk-cell[data-risk-tip]');
+      if (risk) { showTip(risk, risk.dataset.riskTip); return; }
+      const name = e.target.closest('.lp-lender-name[data-lender-tip]');
+      if (name) showTip(name, name.dataset.lenderTip);
     });
     document.addEventListener('mouseout', (e) => {
-      if (e.target.closest('.lp-signal')) tip.style.opacity = '0';
+      if (e.target.closest('.lp-signal') || e.target.closest('.lp-cmp-check') || e.target.closest('.risk-cell[data-risk-tip]') || e.target.closest('.lp-lender-name[data-lender-tip]')) tip.style.opacity = '0';
     });
   })();
 
