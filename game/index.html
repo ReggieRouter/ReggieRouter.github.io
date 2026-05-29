@@ -39,7 +39,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .start-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green);margin-bottom:10px;}
 .start-title{font-size:30px;font-weight:800;line-height:1.25;margin-bottom:8px;}
 .start-sub{font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.6;}
-.mode-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.mode-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
 .mode-card{border:2px solid var(--border);border-radius:var(--r);padding:20px 16px;cursor:pointer;transition:all .15s;text-align:center;background:var(--surf);}
 .mode-card:hover{border-color:var(--green);background:var(--green-s);transform:translateY(-2px);}
 .mode-card .mc-icon{font-size:28px;margin-bottom:10px;}
@@ -48,6 +48,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mode-card.accent-card{background:var(--green);border-color:var(--green);color:#fff;}
 .mode-card.accent-card .mc-name,.mode-card.accent-card .mc-desc{color:rgba(255,255,255,.85);}
 .mode-card.accent-card:hover{background:var(--green-h);}
+/* Quick Play hero */
+.mode-quick{display:flex;align-items:center;justify-content:space-between;text-align:left;padding:24px 28px;grid-column:span 2;}
+.mode-quick .mc-left{flex:1;}
+.mode-quick .mc-name{font-size:18px !important;}
+.mode-quick .mc-desc{font-size:13px !important;color:rgba(255,255,255,.82) !important;}
+.mc-cta-btn{flex-shrink:0;background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.32);border-radius:var(--r);padding:11px 22px;font-size:13px;font-weight:700;white-space:nowrap;margin-left:24px;transition:background .15s;}
+.mode-quick:hover .mc-cta-btn{background:rgba(255,255,255,.26);}
+/* Streak bar */
+.streak-bar{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#c2410c;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:20px;padding:4px 12px;margin-bottom:14px;}
+.streak-bar.hidden{display:none;}
+/* First-timer nudge */
+.first-timer-nudge{font-size:12px;color:var(--muted);margin-bottom:16px;font-weight:500;}
+/* Leaderboard mode card */
+.mode-lb{text-align:left;padding:18px 22px;grid-column:span 2;}
+.lb-tease-txt{font-size:11px;color:var(--muted);font-style:italic;margin-top:5px;line-height:1.5;}
 
 /* ── CATEGORY SCREEN ── */
 .cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
@@ -210,6 +225,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 @media(max-width:540px){
   .screen{padding:24px 18px;}
   .mode-cards{grid-template-columns:1fr;}
+  .mode-quick{flex-direction:column;align-items:flex-start;gap:12px;grid-column:span 1;}
+  .mc-cta-btn{align-self:stretch;text-align:center;margin-left:0;}
+  .mode-lb{grid-column:span 1;}
   .cat-grid{grid-template-columns:1fr;}
   .diff-cards{grid-template-columns:1fr;}
   .stats{flex-direction:column;}
@@ -239,16 +257,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="start-eyebrow">LendPaper Academy</div>
     <div class="start-title">Don't worry, this paper isn't graded.</div>
     <p class="start-sub">Glossary quiz, objection handling, and a live leaderboard. Pick your mode.</p>
+    <div id="streak-bar" class="streak-bar hidden">🔥 <span id="streak-count">3</span>-day streak</div>
+    <p class="first-timer-nudge">First time? Start with Quick Play.</p>
     <div class="mode-cards">
-      <div class="mode-card" onclick="startGame('all','all')">
-        <div class="mc-icon">🎲</div>
-        <div class="mc-name">Quick Play</div>
-        <div class="mc-desc">7 random glossary terms</div>
+      <div class="mode-card mode-quick accent-card" onclick="startGame('all','all')">
+        <div class="mc-left">
+          <div class="mc-icon">🎲</div>
+          <div class="mc-name">Quick Play</div>
+          <div class="mc-desc">7 random questions. No setup. Just go.</div>
+        </div>
+        <span class="mc-cta-btn">Play Now →</span>
       </div>
       <div class="mode-card" onclick="showScreen('s-category')">
-        <div class="mc-icon">📂</div>
+        <div class="mc-icon">📚</div>
         <div class="mc-name">By Category</div>
-        <div class="mc-desc">Tax, Underwriting, Credit…</div>
+        <div class="mc-desc">Core · Underwriting · Credit · Legal · CRE · Tax · More</div>
       </div>
       <div class="mode-card" onclick="showScreen('s-difficulty')">
         <div class="mc-icon">🎯</div>
@@ -260,10 +283,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="mc-name">Objection Handling</div>
         <div class="mc-desc">3 rounds · 7 scenarios each · Real closer situations</div>
       </div>
-      <div class="mode-card" onclick="showScreen('s-leaderboard')">
+      <div class="mode-card mode-lb" onclick="showScreen('s-leaderboard')">
         <div class="mc-icon">🏆</div>
         <div class="mc-name">Leaderboard</div>
         <div class="mc-desc">Live rankings</div>
+        <div class="lb-tease-txt" id="lb-tease"></div>
       </div>
     </div>
   </div>
@@ -1200,6 +1224,35 @@ if(CHALLENGE){
   const fn=modeMap[CHALLENGE.mode];
   if(fn) setTimeout(fn,400);
 }
+
+// ─── STREAK & HOME TEASE ───
+function initStreak(){
+  const today=new Date().toISOString().split('T')[0];
+  const last=localStorage.getItem('lp_last_play');
+  let n=parseInt(localStorage.getItem('lp_streak')||'0');
+  if(!last){localStorage.setItem('lp_last_play',today);localStorage.setItem('lp_streak','1');return;}
+  if(last===today){if(n>=2)showStreakBadge(n);return;}
+  const diff=Math.round((new Date(today)-new Date(last))/86400000);
+  n=diff===1?n+1:1;
+  localStorage.setItem('lp_streak',String(n));
+  localStorage.setItem('lp_last_play',today);
+  if(n>=2)showStreakBadge(n);
+}
+function showStreakBadge(n){
+  const bar=document.getElementById('streak-bar');
+  const ct=document.getElementById('streak-count');
+  if(bar&&ct){ct.textContent=n;bar.classList.remove('hidden');}
+}
+function updateLBTease(){
+  const entries=loadLB();
+  const glossary=entries.filter(e=>e.game==='glossary').sort((a,b)=>b.score-a.score);
+  const top=glossary[0];
+  const players=new Set(entries.map(e=>e.name)).size;
+  const el=document.getElementById('lb-tease');
+  if(el&&top)el.textContent=players+' reps on the board · '+top.name+' leads Glossary';
+}
+initStreak();
+updateLBTease();
 
 document.addEventListener('keydown',e=>{
   if(document.getElementById('s-quiz').classList.contains('active')){
