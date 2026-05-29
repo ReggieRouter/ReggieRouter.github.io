@@ -6765,11 +6765,13 @@
         nofico:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="5" y1="20" x2="19" y2="4"/></svg>',
       };
       let signalsHtml = '';
-      if (lender.fico === 0) signalsHtml += `<span class="lp-signal nofico" data-label="No FICO check — credit-score-blind">${SIG_ICONS.nofico}</span>`;
-      if (lender.soft_pull) signalsHtml += `<span class="lp-signal soft" data-label="Soft pull only">${SIG_ICONS.soft}</span>`;
-      if (lender.bank_verified) signalsHtml += `<span class="lp-signal bank" data-label="Bank statements required${lender.bank_statements ? ' · '+lender.bank_statements+' mo' : ''}">${SIG_ICONS.bank}</span>`;
-      if (lender.early_payment_discount) signalsHtml += `<span class="lp-signal payoff" data-label="Early-payoff discount">${SIG_ICONS.payoff}</span>`;
-      if (lender.hard_collateral) signalsHtml += `<span class="lp-signal collat" data-label="Hard collateral required">${SIG_ICONS.collat}</span>`;
+      if (lender.lender_type !== 'marketplace') {
+        if (lender.fico === 0) signalsHtml += `<span class="lp-signal nofico" data-label="No FICO check — credit-score-blind">${SIG_ICONS.nofico}</span>`;
+        if (lender.soft_pull) signalsHtml += `<span class="lp-signal soft" data-label="Soft pull only">${SIG_ICONS.soft}</span>`;
+        if (lender.bank_verified) signalsHtml += `<span class="lp-signal bank" data-label="Bank statements required${lender.bank_statements ? ' · '+lender.bank_statements+' mo' : ''}">${SIG_ICONS.bank}</span>`;
+        if (lender.early_payment_discount) signalsHtml += `<span class="lp-signal payoff" data-label="Early-payoff discount">${SIG_ICONS.payoff}</span>`;
+        if (lender.hard_collateral) signalsHtml += `<span class="lp-signal collat" data-label="Hard collateral required">${SIG_ICONS.collat}</span>`;
+      }
       if (lender.lender_type === 'direct_plus') signalsHtml += `<span class="lp-type-badge direct-plus" data-label="Primarily funds its own deals, but routes some applications through a partner lending network. Requirements may vary by product or deal size.">Direct+</span>`;
       if (lender.lender_type === 'marketplace') signalsHtml += `<span class="lp-type-badge marketplace" data-label="Matches deals across a network of funders. Requirements, rates, and terms are set by the matched funder at the time of submission.">Marketplace</span>`;
       const signalsRow = signalsHtml ? `<div class="lp-signal-row">${signalsHtml}</div>` : '';
@@ -7091,6 +7093,7 @@
                       <span style="font-size:11px;background:#E2E8F0;color:#475569;border-radius:4px;padding:2px 7px;font-weight:500;">All credit tiers</span>
                       <span style="font-size:11px;background:#E2E8F0;color:#475569;border-radius:4px;padding:2px 7px;font-weight:500;">Multiple product types</span>
                       <span style="font-size:11px;background:#E2E8F0;color:#475569;border-radius:4px;padding:2px 7px;font-weight:500;">Requirements confirmed post-submission</span>
+                      ${(lender.products || []).some(p => /sba/i.test(p)) ? `<span style="font-size:11px;background:#ECFDF5;color:#047857;border-radius:4px;padding:2px 7px;font-weight:500;">SBA programs available</span>` : ''}
                     </div>
                   </div>
                 </div>` : `
@@ -7876,7 +7879,7 @@
   // Floating tooltip for .lp-signal and .risk-cell — positioned fixed to escape overflow-x:auto
   (function() {
     const tip = document.createElement('div');
-    tip.style.cssText = 'position:fixed;background:#1F2937;color:#fff;padding:3px 7px;border-radius:4px;font-size:10.5px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:9999;';
+    tip.style.cssText = 'position:fixed;background:#1F2937;color:#fff;padding:4px 8px;border-radius:4px;font-size:10.5px;font-weight:500;white-space:normal;max-width:220px;line-height:1.45;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:9999;';
     document.body.appendChild(tip);
     function showTip(el, label) {
       tip.textContent = label;
@@ -7896,6 +7899,8 @@
     document.addEventListener('mouseover', (e) => {
       const signal = e.target.closest('.lp-signal');
       if (signal && signal.dataset.label) { showTip(signal, signal.dataset.label); return; }
+      const typeBadge = e.target.closest('.lp-type-badge[data-label]');
+      if (typeBadge) { showTip(typeBadge, typeBadge.dataset.label); return; }
       const cmp = e.target.closest('.lp-cmp-check[data-label]');
       if (cmp) { showTip(cmp, cmp.dataset.label); return; }
       const risk = e.target.closest('.risk-cell[data-risk-tip]');
@@ -7904,7 +7909,7 @@
       if (name) showTip(name, name.dataset.lenderTip);
     });
     document.addEventListener('mouseout', (e) => {
-      if (e.target.closest('.lp-signal') || e.target.closest('.lp-cmp-check') || e.target.closest('.risk-cell[data-risk-tip]') || e.target.closest('.lp-lender-name[data-lender-tip]')) tip.style.opacity = '0';
+      if (e.target.closest('.lp-signal') || e.target.closest('.lp-type-badge') || e.target.closest('.lp-cmp-check') || e.target.closest('.risk-cell[data-risk-tip]') || e.target.closest('.lp-lender-name[data-lender-tip]')) tip.style.opacity = '0';
     });
   })();
 
