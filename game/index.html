@@ -55,6 +55,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mode-quick .mc-desc{font-size:13px !important;color:rgba(255,255,255,.82) !important;}
 .mc-cta-btn{flex-shrink:0;background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.32);border-radius:var(--r);padding:11px 22px;font-size:13px;font-weight:700;white-space:nowrap;margin-left:24px;transition:background .15s;}
 .mode-quick:hover .mc-cta-btn{background:rgba(255,255,255,.26);}
+/* Mode-switch nudge */
+.mode-nudge{margin-top:28px;text-align:center;font-size:11px;color:var(--muted);line-height:1.8;}
+.mode-nudge .nudge-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px;}
+.nudge-chip{font-size:11px;font-weight:600;color:var(--green);background:var(--green-s);border:1px solid rgba(20,83,45,.15);border-radius:20px;padding:4px 12px;cursor:pointer;transition:background .15s;}
+.nudge-chip:hover{background:rgba(20,83,45,.18);}
 /* Streak bar */
 .streak-bar{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#c2410c;background:#fff7ed;border:1.5px solid #fed7aa;border-radius:20px;padding:4px 12px;margin-bottom:14px;}
 .streak-bar.hidden{display:none;}
@@ -361,6 +366,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="fb" id="fb"></div>
       <div class="streak" id="streak"></div>
     </div>
+    <div class="mode-nudge">
+      Too easy? Too hard?
+      <div class="nudge-chips">
+        <span class="nudge-chip" onclick="startGame('all',1)">🌱 Beginner</span>
+        <span class="nudge-chip" onclick="startGame('all',3)">🎓 Advanced</span>
+        <span class="nudge-chip" onclick="showScreen('s-category')">📚 By Category</span>
+        <span class="nudge-chip" onclick="showScreen('s-obj-select')">🎤 Objections</span>
+      </div>
+    </div>
   </div>
 
   <!-- OBJECTION QUIZ -->
@@ -380,6 +394,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="coach-note-text" id="coach-note"></div>
         <div class="calc-cta hidden" id="calc-cta">🔢 Run the real numbers — <a href="https://lendpaper.com/tools/payment-breakdown" target="_blank">LendPaper Payment Breakdown Calculator ↗</a></div>
         <button class="btn btn-sm" id="btn-obj-next" onclick="nextObj()">Next →</button>
+      </div>
+    </div>
+    <div class="mode-nudge">
+      Not your speed?
+      <div class="nudge-chips">
+        <span class="nudge-chip" onclick="startObjectionGame(1)">Round 1</span>
+        <span class="nudge-chip" onclick="startObjectionGame(2)">Round 2</span>
+        <span class="nudge-chip" onclick="startObjectionGame(3)">Round 3</span>
+        <span class="nudge-chip" onclick="startGame('all','all')">🎲 Glossary Quiz</span>
       </div>
     </div>
   </div>
