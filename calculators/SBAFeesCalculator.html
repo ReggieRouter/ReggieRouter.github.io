@@ -236,18 +236,21 @@ label {
 
 /* Tooltips */
 .tooltip-icon {
-    display: inline-block;
-    width: 11px;
-    height: 13px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 14'%3E%3Cpath d='M1 1L8 1L11 4L11 13L1 13Z' fill='none' stroke='%2394a3b8' stroke-width='1.5' stroke-linejoin='miter'/%3E%3Cpath d='M8 1L8 4L11 4' fill='none' stroke='%2394a3b8' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat;
-    font-size: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 800;
     cursor: help;
     margin-left: 6px;
-    vertical-align: middle;
+    font-style: normal;
 }
-.tooltip-icon:hover {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 14'%3E%3Cpath d='M1 1L8 1L11 4L11 13L1 13Z' fill='none' stroke='%2314532D' stroke-width='1.5' stroke-linejoin='miter'/%3E%3Cpath d='M8 1L8 4L11 4' fill='none' stroke='%2314532D' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat;
-}
+.tooltip-icon:hover { background: var(--lp-green); color: white; }
 
 #tt {
     position: fixed;
