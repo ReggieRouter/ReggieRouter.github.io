@@ -86,19 +86,6 @@ var TOOLS = [
     kw: "net funding wire origination fundability stacking risk positions"
   },
   {
-    id: "objections",
-    name: "Closer's Playbook",
-    desc: "35 real objection scenarios with best-response coaching — rate, stalls, fear, qualification, and product questions.",
-    status: "live",
-    group: "deal-math",
-    icon: "trendUp",
-    color: "green",
-    slug: "/tools/objections",
-    presentation: "page",
-    path: "/tools/objections/index.html",
-    kw: "objection handling closer playbook sales training mca factor rate stall fear qualification coaching script response"
-  },
-  {
     id: "sba-rates",
     name: "SBA rates & fees",
     desc: "Dynamic SBA 7(a) scenario builder with guarantee fee logic.",
