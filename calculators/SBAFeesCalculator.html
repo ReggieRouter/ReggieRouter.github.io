@@ -239,18 +239,14 @@ label {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #e5e7eb;
-    color: #94a3b8;
-    font-size: 9px;
-    font-weight: 800;
-    cursor: help;
+    font-size: 13px;
+    cursor: pointer;
     margin-left: 6px;
-    font-style: normal;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+    vertical-align: middle;
 }
-.tooltip-icon:hover { background: var(--lp-green); color: white; }
+.tooltip-icon:hover { opacity: 1; }
 
 #tt {
     position: fixed;
@@ -754,21 +750,21 @@ function addCard() {
                     </div>
                 </div>
                 <div class="lp-group">
-                    <label>Rate Spread <span class="tooltip-icon" data-tip="Added to WSJ Prime (Assumed 6.75%).">i</span></label>
+                    <label>Rate Spread <span class="tooltip-icon" data-tip="Added to WSJ Prime (Assumed 6.75%).">📎</span></label>
                     <div class="input-wrap">
                         <input type="number" id="rateSpread-${id}" class="input-field" value="2.75" step="0.1" oninput="calculate(${id})">
                         <div class="input-suffix">%</div>
                     </div>
                 </div>
                 <div class="lp-group">
-                    <label>Packaging Fee <span class="tooltip-icon" data-tip="Lender processing costs. Usually ranges from $500 to $3,000.">i</span></label>
+                    <label>Packaging Fee <span class="tooltip-icon" data-tip="Lender processing costs. Usually ranges from $500 to $3,000.">📎</span></label>
                     <div class="input-wrap">
                         <div class="input-prefix">$</div>
                         <input type="number" id="pkgFee-${id}" class="input-field" value="2500" oninput="calculate(${id})">
                     </div>
                 </div>
                 <div class="lp-group">
-                    <label>Search & Closing <span class="tooltip-icon" data-tip="Title, UCC, and legal counsel costs.">i</span></label>
+                    <label>Search & Closing <span class="tooltip-icon" data-tip="Title, UCC, and legal counsel costs.">📎</span></label>
                     <div class="input-wrap">
                         <div class="input-prefix">$</div>
                         <input type="number" id="closeFee-${id}" class="input-field" value="3000" oninput="calculate(${id})">
@@ -777,16 +773,16 @@ function addCard() {
             </div>
             <div class="lp-results">
                 <div class="hero-output">
-                    <div class="hero-label">Total Upfront Fees <span class="tooltip-icon" data-tip="Estimated out-of-pocket costs before funding.">i</span></div>
+                    <div class="hero-label">Total Upfront Fees <span class="tooltip-icon" data-tip="Estimated out-of-pocket costs before funding.">📎</span></div>
                     <div id="res-total-fees-${id}" class="hero-value">$0</div>
                 </div>
                 <div class="lp-result-grid">
                     <div class="lp-res-item">
-                        <div class="lp-res-label">EST. MONTHLY PAYMENT <span class="tooltip-icon" data-tip="Fully amortized principal + interest, excluding any servicing fees.">i</span></div>
+                        <div class="lp-res-label">EST. MONTHLY PAYMENT <span class="tooltip-icon" data-tip="Fully amortized principal + interest, excluding any servicing fees.">📎</span></div>
                         <div id="res-monthly-pmt-${id}" class="lp-res-val">$0</div>
                     </div>
                     <div class="lp-res-item">
-                        <div class="lp-res-label">TOTAL INTEREST COST <span class="tooltip-icon" data-tip="Total interest paid over the full loan term.">i</span></div>
+                        <div class="lp-res-label">TOTAL INTEREST COST <span class="tooltip-icon" data-tip="Total interest paid over the full loan term.">📎</span></div>
                         <div id="res-interest-cost-${id}" class="lp-res-val">$0</div>
                     </div>
                     <div class="lp-res-item">
