@@ -570,7 +570,7 @@
     background: #F9FAFB;
     color: var(--color-brand-mid);
     border: 1px dashed var(--color-brand-mid);
-    cursor: pointer;
+    cursor: help;
     display: inline-block;
   }
 
@@ -1104,19 +1104,27 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1px solid #D1D5DB;
     background: none;
-    border: none;
+    color: #9CA3AF;
+    font-size: 10px;
+    font-weight: 600;
+    font-style: normal;
+    font-family: var(--font-stack);
     cursor: pointer;
+    line-height: 1;
     padding: 0;
-    opacity: 0.55;
-    transition: opacity 0.15s;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
     flex-shrink: 0;
     vertical-align: middle;
-    line-height: 1;
   }
   .lp-info-btn:hover {
-    opacity: 1;
+    border-color: var(--color-brand-mid);
+    color: var(--color-brand-mid);
+    background: #F0FDF4;
   }
 
   .lp-info-wrap {
@@ -1188,7 +1196,7 @@
   .lp-info-icon {
     font-size: 11px;
     color: var(--color-text-muted);
-    cursor: pointer;
+    cursor: help;
     vertical-align: middle;
     margin-left: 2px;
   }
@@ -1218,7 +1226,7 @@
     color: #6B7280;
     background: #F3F4F6;
     border: 1px solid #E5E7EB;
-    cursor: pointer;
+    cursor: help;
     position: relative;
     transition: background 0.12s, color 0.12s, border-color 0.12s;
   }
@@ -1240,7 +1248,7 @@
     border-radius: 4px;
     padding: 1px 5px;
     line-height: 1.4;
-    cursor: pointer;
+    cursor: help;
     white-space: nowrap;
   }
   .lp-type-badge.direct-plus {
@@ -2207,7 +2215,7 @@
       <div class="lp-chip-row">
         <span class="lp-chip-label">
           <span class="lp-info-wrap">Risk appetite
-            <button class="lp-info-btn" data-modal="info-risk" aria-label="About Risk Appetite">📎</button>
+            <button class="lp-info-btn" data-modal="info-risk" aria-label="About Risk Appetite">i</button>
           </span>
         </span>
         <div class="lp-chip-group" id="risk-group">
@@ -2222,7 +2230,7 @@
       <div class="lp-chip-row">
         <span class="lp-chip-label">
           <span class="lp-info-wrap">Product
-            <button class="lp-info-btn" data-modal="info-product" aria-label="About Product Types">📎</button>
+            <button class="lp-info-btn" data-modal="info-product" aria-label="About Product Types">i</button>
           </span>
         </span>
         <div class="lp-chip-group" id="product-group">
@@ -2241,7 +2249,7 @@
       <div class="lp-chip-row">
         <span class="lp-chip-label">
           <span class="lp-info-wrap">Positions
-            <button class="lp-info-btn" data-modal="info-position" aria-label="About Positions">📎</button>
+            <button class="lp-info-btn" data-modal="info-position" aria-label="About Positions">i</button>
           </span>
         </span>
         <div class="lp-chip-group" id="pos-group">
@@ -2257,7 +2265,7 @@
       <div class="lp-chip-row">
         <span class="lp-chip-label">
           <span class="lp-info-wrap">Verification
-            <button class="lp-info-btn" data-modal="info-signals" aria-label="About Verification">📎</button>
+            <button class="lp-info-btn" data-modal="info-signals" aria-label="About Verification">i</button>
           </span>
         </span>
         <div class="lp-chip-group" id="signals-group">

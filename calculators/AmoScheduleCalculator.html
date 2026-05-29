@@ -76,7 +76,7 @@
         }
 
         /* Tooltip Component Standard */
-        .tooltip { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+        .tooltip { position: relative; display: inline-flex; align-items: center; cursor: help; }
         .tooltip .tooltiptext {
             visibility: hidden; 
             background-color: #FFFFFF; 
@@ -621,7 +621,7 @@
         .prepay-pct-sym { font-size: 13px; font-weight: 600; color: #6B7280; }
         .prepay-widget-hint { font-size: 11px; color: #9CA3AF; padding: 0 14px 10px; }
         /* Info tooltip */
-        .lp-info-btn { display: inline-flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; vertical-align: middle; margin-left: 5px; opacity: 0.6; transition: opacity 0.15s; flex-shrink: 0; }
+        .lp-info-btn { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #9CA3AF; color: #9CA3AF; font-size: 9px; font-weight: 800; cursor: help; vertical-align: middle; margin-left: 5px; line-height: 1; flex-shrink: 0; font-style: normal; }
         /* Amo toggle bar (mockup lp-toggle style) */
         .lp-amo-toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 24px; border-bottom: 0.5px solid #E5E7EB; }
         .lp-amo-tt { font-weight: 600; font-size: 14px; color: #111827; }
@@ -1239,7 +1239,7 @@
                                     <label class="flex items-end min-h-[32px]">
                                         Cost per Dollar Borrowed
                                         <span class="tooltip ml-1 no-print">
-                                            <span style="font-size:13px;opacity:0.6;transition:opacity 0.15s;">📎</span>
+                                            <span class="w-[14px] h-[14px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9px] font-bold italic transition-colors bg-white">i</span>
                                             <span class="tooltiptext">How many cents you pay per dollar funded. e.g. 25¢ means $1.25 repaid per $1 borrowed.</span>
                                         </span>
                                     </label>
