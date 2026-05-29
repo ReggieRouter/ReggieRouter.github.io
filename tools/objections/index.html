@@ -6,7 +6,7 @@
 <title>Closer's Playbook — LendPaper</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
 <meta property="og:title" content="Closer's Playbook — LendPaper" />
-<meta property="og:description" content="21 real objection scenarios with the best response and coaching notes. Free reference for MCA and alt-finance closers." />
+<meta property="og:description" content="35 real objection scenarios with best-response coaching and calculator links. Free reference for MCA and alt-finance closers." />
 <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
 <meta property="og:url" content="https://lendpaper.com/tools/objections" />
 <meta property="og:type" content="website" />
@@ -40,11 +40,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 /* ── ROUND TABS ── */
 .round-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-.round-tab{font-size:13px;font-weight:600;padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);cursor:pointer;background:var(--surf);color:var(--muted);transition:all .15s;white-space:nowrap;}
+.round-tab{font-size:12px;font-weight:600;padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);cursor:pointer;background:var(--surf);color:var(--muted);transition:all .15s;white-space:nowrap;line-height:1.3;}
 .round-tab:hover{border-color:var(--green);color:var(--green);}
 .round-tab.active{background:var(--green);color:#fff;border-color:var(--green);}
+.round-tab .rt-num{font-size:10px;opacity:.7;margin-right:3px;}
 
-/* ── SCENARIO COUNTER + DOTS ── */
+/* ── SCENARIO NAV ── */
 .scenario-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .scenario-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);}
 .scenario-dots{display:flex;gap:5px;}
@@ -53,7 +54,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sdot.seen{background:#86efac;}
 
 /* ── MAIN CARD ── */
-.card{background:var(--surf);border-radius:16px;box-shadow:var(--sh);overflow:hidden;border:1.5px solid var(--border);transition:all .2s;}
+.card{background:var(--surf);border-radius:16px;box-shadow:var(--sh);overflow:hidden;border:1.5px solid var(--border);}
 
 /* Merchant quote */
 .merchant-section{padding:28px 28px 22px;}
@@ -69,37 +70,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .reveal-btn:active{transform:translateY(0);}
 
 /* Response panel */
-.response-panel{display:none;padding:0 28px 24px;border-top:1.5px solid var(--border);margin-top:0;}
+.response-panel{display:none;padding:0 28px 24px;border-top:1.5px solid var(--border);}
 .response-panel.show{display:block;}
 
-.best-response{background:rgba(22,163,74,.07);border:1.5px solid rgba(22,163,74,.25);border-radius:var(--r);padding:16px 18px;margin:20px 0 12px;}
+.best-response{background:rgba(22,163,74,.07);border:1.5px solid rgba(22,163,74,.25);border-radius:var(--r);padding:16px 18px;margin:20px 0 0;}
 .best-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ok);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
 .best-text{font-size:14px;line-height:1.6;color:var(--text);font-weight:500;margin-bottom:10px;}
 .best-note{font-size:12px;color:#15803d;line-height:1.55;padding-top:10px;border-top:1px solid rgba(22,163,74,.2);}
 
-.calc-nudge{font-size:12px;color:#15803d;background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-.calc-nudge a{color:var(--green);font-weight:700;text-decoration:none;}
-.calc-nudge a:hover{text-decoration:underline;}
+/* Calculator links */
+.calc-links{margin:14px 0 0;}
+.calc-links-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.calc-pills{display:flex;flex-wrap:wrap;gap:7px;}
+.calc-pill{font-size:12px;font-weight:600;color:var(--green);background:var(--green-s);border:1.5px solid rgba(20,83,45,.2);border-radius:20px;padding:5px 13px;text-decoration:none;transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+.calc-pill:hover{background:rgba(20,83,45,.18);border-color:var(--green);}
+.calc-pill-icon{font-size:13px;}
 
-/* All tiers toggle */
-.all-tiers-toggle{font-size:12px;font-weight:700;color:var(--green);cursor:pointer;background:none;border:none;padding:0;display:flex;align-items:center;gap:5px;margin-bottom:0;}
+/* All tiers */
+.tiers-section{margin-top:14px;}
+.all-tiers-toggle{font-size:12px;font-weight:700;color:var(--green);cursor:pointer;background:none;border:none;padding:0;display:flex;align-items:center;gap:5px;}
 .all-tiers-toggle:hover{text-decoration:underline;}
-.all-tiers-toggle .chevron{transition:transform .2s;display:inline-block;}
+.chevron{transition:transform .2s;display:inline-block;font-style:normal;}
 .all-tiers-toggle.open .chevron{transform:rotate(180deg);}
 
-.all-tiers{display:none;margin-top:12px;display:flex;flex-direction:column;gap:8px;}
-.all-tiers.hidden{display:none;}
+.all-tiers{display:none;margin-top:12px;flex-direction:column;gap:8px;}
+.all-tiers.open{display:flex;}
 
 .tier-row{border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;}
-.tier-ok   {background:rgba(202,138,4,.07);border:1.5px solid rgba(202,138,4,.22);}
-.tier-wrong{background:rgba(234,88,12,.07);border:1.5px solid rgba(234,88,12,.22);}
-.tier-killer{background:rgba(220,38,38,.07);border:1.5px solid rgba(220,38,38,.22);}
+.tier-ok    {background:rgba(202,138,4,.07);  border:1.5px solid rgba(202,138,4,.22);}
+.tier-wrong {background:rgba(234,88,12,.07);  border:1.5px solid rgba(234,88,12,.22);}
+.tier-killer{background:rgba(220,38,38,.07);  border:1.5px solid rgba(220,38,38,.22);}
 .tier-label-pill{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;padding:2px 7px;white-space:nowrap;flex-shrink:0;margin-top:1px;}
-.pill-ok{background:#fef9c3;color:#854d0e;}
-.pill-wrong{background:#ffedd5;color:#c2410c;}
+.pill-ok    {background:#fef9c3;color:#854d0e;}
+.pill-wrong {background:#ffedd5;color:#c2410c;}
 .pill-killer{background:#fee2e2;color:#991b1b;}
-.tier-body{}
-.tier-text{font-size:13px;color:var(--text);line-height:1.5;margin-bottom:5px;}
+.tier-text{font-size:13px;color:var(--text);line-height:1.5;margin-bottom:4px;}
 .tier-note{font-size:11px;color:var(--muted);line-height:1.5;}
 
 /* ── CARD NAV ── */
@@ -113,11 +118,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 /* ── BOTTOM CTA ── */
 .bottom-cta{margin-top:28px;background:var(--green-s);border:1.5px solid rgba(20,83,45,.18);border-radius:var(--r);padding:18px 20px;display:flex;align-items:center;gap:14px;}
 .cta-icon{font-size:24px;flex-shrink:0;}
-.cta-body{}
-.cta-title{font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;}
-.cta-text{font-size:12px;color:var(--muted);line-height:1.5;}
-.cta-text a{color:var(--green);font-weight:600;text-decoration:none;}
-.cta-text a:hover{text-decoration:underline;}
+.cta-body .cta-title{font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px;}
+.cta-body .cta-text{font-size:12px;color:var(--muted);line-height:1.5;}
+.cta-body .cta-text a{color:var(--green);font-weight:600;text-decoration:none;}
+.cta-body .cta-text a:hover{text-decoration:underline;}
 
 /* ── RESPONSIVE ── */
 @media(max-width:520px){
@@ -126,7 +130,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .page-title{font-size:22px;}
   .merchant-section{padding:20px 18px 16px;}
   .reveal-section{padding:0 18px 18px;}
-  .merchant-bubble{font-size:16px;}
+  .merchant-bubble{font-size:15px;padding:14px 16px;}
   .response-panel{padding:0 18px 18px;}
   .card-nav{gap:8px;}
 }
@@ -146,228 +150,81 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="page">
   <div class="page-eyebrow">LendPaper Academy</div>
   <h1 class="page-title">Closer's Playbook</h1>
-  <p class="page-sub">21 real objections. See what the merchant says, think about your move, then reveal the ideal response. No score, no timer — just the playbook.</p>
+  <p class="page-sub">35 real objections across 5 situations. See the scenario, think through your move, then reveal the ideal response — with coaching notes and relevant calculators for when the merchant needs numbers.</p>
 
-  <!-- Round Tabs -->
-  <div class="round-tabs">
-    <button class="round-tab active" onclick="setRound(1,this)">Rate Conversation</button>
-    <button class="round-tab" onclick="setRound(2,this)">Stalls &amp; Delays</button>
-    <button class="round-tab" onclick="setRound(3,this)">Fear &amp; Doubt</button>
-  </div>
+  <div class="round-tabs" id="round-tabs"></div>
 
-  <!-- Scenario nav -->
   <div class="scenario-nav">
     <span class="scenario-label" id="scenario-label">Scenario 1 of 7</span>
     <div class="scenario-dots" id="scenario-dots"></div>
   </div>
 
-  <!-- Card -->
-  <div class="card" id="main-card">
+  <div class="card">
     <div class="merchant-section">
       <div class="merchant-eyebrow">
         The merchant says…
-        <span class="round-badge" id="round-badge">Rate</span>
+        <span class="round-badge" id="round-badge"></span>
       </div>
       <div class="merchant-bubble" id="merchant-quote"></div>
     </div>
 
     <div class="reveal-section" id="reveal-section">
-      <button class="reveal-btn" id="reveal-btn" onclick="reveal()">
-        ▶ &nbsp;Reveal best response
-      </button>
+      <button class="reveal-btn" onclick="reveal()">▶ &nbsp;Reveal best response</button>
     </div>
 
     <div class="response-panel" id="response-panel">
-      <div class="best-response" id="best-response">
+      <div class="best-response">
         <div class="best-label">🟢 Best move</div>
         <div class="best-text" id="best-text"></div>
         <div class="best-note" id="best-note"></div>
       </div>
-      <div class="calc-nudge hidden" id="calc-nudge">
-        🔢 Run the real numbers — <a href="https://lendpaper.com/tools/payment-breakdown" target="_blank">LendPaper Payment Breakdown Calculator ↗</a>
+
+      <div class="calc-links" id="calc-links" style="display:none;">
+        <div class="calc-links-label">🔢 Run the numbers</div>
+        <div class="calc-pills" id="calc-pills"></div>
       </div>
-      <button class="all-tiers-toggle" id="tiers-toggle" onclick="toggleAllTiers()">
-        <span id="toggle-label">Show all 4 responses</span> <span class="chevron">↓</span>
-      </button>
-      <div class="all-tiers hidden" id="all-tiers"></div>
+
+      <div class="tiers-section">
+        <button class="all-tiers-toggle" id="tiers-toggle" onclick="toggleTiers()">
+          <span id="toggle-label">Show all 4 responses</span>
+          <span class="chevron">↓</span>
+        </button>
+        <div class="all-tiers" id="all-tiers"></div>
+      </div>
     </div>
   </div>
 
-  <!-- Card Navigation -->
   <div class="card-nav">
     <button class="nav-btn" id="btn-prev" onclick="navigate(-1)">← Prev</button>
-    <button class="shuffle-btn" onclick="shuffle()">🔀 Shuffle</button>
+    <button class="shuffle-btn" onclick="doShuffle()">🔀 Shuffle</button>
     <button class="nav-btn" id="btn-next" onclick="navigate(1)">Next →</button>
   </div>
 
-  <!-- Bottom CTA -->
   <div class="bottom-cta">
     <div class="cta-icon">🎯</div>
     <div class="cta-body">
-      <div class="cta-title">Ready to test yourself?</div>
-      <div class="cta-text">Take the full scored quiz with a timer and leaderboard — <a href="https://lendpaper.com/game">Deal Desk Quiz ↗</a></div>
+      <div class="cta-title">Ready to test yourself under pressure?</div>
+      <div class="cta-text">The scored quiz adds a timer, a leaderboard, and 21 glossary terms — <a href="https://lendpaper.com/game">Deal Desk Quiz ↗</a></div>
     </div>
   </div>
 </div>
 
 <script>
-const ROUNDS = {
-  1: {label:'Rate', name:'Rate Conversation'},
-  2: {label:'Stalls', name:'Stalls & Delays'},
-  3: {label:'Fear', name:'Fear & Doubt'},
+// ── Calculator registry ──────────────────────────────────────────
+const CALCS = {
+  payment: {url:'https://lendpaper.com/tools/payment-breakdown', label:'Payment Breakdown', icon:'🔢'},
+  dscr:    {url:'https://lendpaper.com/tools/dscr',              label:'DSCR Calculator',   icon:'📊'},
+  fund:    {url:'https://lendpaper.com/tools/fundability',       label:'Fundability Check', icon:'✅'},
+  water:   {url:'https://lendpaper.com/waterfall',               label:'Lender Waterfall',  icon:'🌊'},
 };
 
-const OBJECTIONS = [
-// ── ROUND 1 ──────────────────────────────────────────────────────
-{round:1, calcLink:true, merchant:'"Your factor rate is way too expensive."',
- opts:[
-  {tier:'best',   text:"Let me show you what it looks like in daily dollars vs. your average deposits. Walk me through a typical month and we'll see if it actually registers.",   note:"Shifts from abstract cost to real daily impact. Gets the merchant talking instead of objecting."},
-  {tier:'ok',     text:"Depending on your statements, there may be room to move on the rate.",                                                                                    note:"Keeps the door open but makes it a price negotiation rather than a value conversation."},
-  {tier:'wrong',  text:"That rate is actually very competitive for your profile.",                                                                                                note:"Dismissive. Tells the merchant their concern is invalid — creates friction."},
-  {tier:'killer', text:"Yeah, that's the best I've got.",                                                                                                                        note:"You surrendered before trying anything. Conversation over."},
-]},
-{round:1, merchant:'"What\'s the APR? My accountant is going to ask."',
- opts:[
-  {tier:'best',   text:"Great — this is a purchase of future receivables, not a loan, so traditional APR doesn't apply the same way. Total cost is [X]. What's your accountant's email? I'll put together a one-pager.",  note:"Validates the question, explains the structure correctly, and advances the deal by looping the accountant in proactively."},
-  {tier:'ok',     text:"We can work up that calculation — it's structured differently than a loan.",                                                                              note:"Accurate but vague. Doesn't give the accountant anything concrete or advance the deal."},
-  {tier:'wrong',  text:"APR doesn't really apply to this product.",                                                                                                              note:"Sounds evasive. The merchant and their accountant will both be suspicious."},
-  {tier:'killer', text:"I honestly don't know the APR off the top of my head.",                                                                                                  note:"Kills credibility immediately. You either don't know your product or you're dodging — neither is good."},
-]},
-{round:1, merchant:'"Another funder offered me 1.29. Can you match it?"',
- opts:[
-  {tier:'best',   text:"Let's compare apples to apples — who's the funder, what's the term, daily ACH or split? A 1.29 over 4 months is different than over 8. Send me the offer and I'll be straight with you.",         note:"Reframes rate as one variable among several. Positions you as a consultant, not a competitor in a price war."},
-  {tier:'ok',     text:"Send me the offer and I'll see what I can do.",                                                                                                          note:"Reasonable, but you've accepted that price is the only variable that matters."},
-  {tier:'wrong',  text:"We can't match that, but we have advantages in other areas.",                                                                                            note:"Concedes the loss too quickly without knowing what the other offer actually looks like."},
-  {tier:'killer', text:"If they're at 1.29, you should probably just go with them.",                                                                                             note:"You just closed the deal for your competitor."},
-]},
-{round:1, merchant:'"Why can\'t I just get a bank loan? It\'s way cheaper."',
- opts:[
-  {tier:'best',   text:"You absolutely should if you qualify — let's figure that out right now. Banks want 2+ years TIB, 680+ FICO, and 3–6 months to close. If that's you, I'll point you there myself.",                 note:"Addresses the comparison head-on. Establishes credibility by being willing to lose the deal if the bank is genuinely the right move."},
-  {tier:'ok',     text:"Bank loans are cheaper but take a lot longer — we can fund in 24–48 hours.",                                                                             note:"True but one-dimensional. Speed alone doesn't always justify the premium."},
-  {tier:'wrong',  text:"Banks probably won't approve you.",                                                                                                                      note:"Presumptuous and insulting. If you're wrong, you just lost the merchant."},
-  {tier:'killer', text:"That's just not realistic for most small businesses.",                                                                                                   note:"Dismissive. The merchant now feels talked down to."},
-]},
-{round:1, calcLink:true, merchant:'"What\'s the total payback on this deal?"',
- opts:[
-  {tier:'best',   text:"On this deal it's [X]. That cost buys you capital today that would take months elsewhere — if you could get it at all. What are you planning to use it for? Let's make sure the ROI is there.",    note:"Gives the number directly, then immediately reframes cost as investment. The ROI question moves the merchant forward."},
-  {tier:'ok',     text:"Total payback is [X]. Let me pull that up for you right now.",                                                                                           note:"Accurate and transparent, but passive. You answered without advancing the close."},
-  {tier:'wrong',  text:"It depends on how fast you repay it.",                                                                                                                   note:"True for some products, but sounds evasive — especially on a factor-rate deal where it's fixed."},
-  {tier:'killer', text:"I'll have someone from the team send you a formal breakdown.",                                                                                            note:"Added a step, introduced delay, removed yourself from the relationship. Momentum killer."},
-]},
-{round:1, merchant:'"The daily payment is going to kill my cash flow."',
- opts:[
-  {tier:'best',   text:"That's the most important thing to get right. Tell me your average daily deposits and we'll build the advance around a number you won't feel. Most merchants forget it's coming out within a week.", note:"Validates the concern, then gets the merchant to help solve it. Keeps you in control of the structure."},
-  {tier:'ok',     text:"We can look at a smaller advance to bring the daily down.",                                                                                              note:"Practical, but reactive. You're letting the objection dictate the structure."},
-  {tier:'wrong',  text:"The payment adjusts automatically with your revenue.",                                                                                                   note:"May not be accurate depending on the product. If it's fixed ACH, you've just misstated the terms."},
-  {tier:'killer', text:"That's a fixed payment — it's how the product is structured.",                                                                                           note:"Confirms their worst fear without offering any solution. Deal is dead."},
-]},
-{round:1, merchant:'"I\'ve heard MCAs charge 80–90% APR. That sounds criminal."',
- opts:[
-  {tier:'best',   text:"When you convert any short-term product to APR it looks alarming — that math works on a 30-day loan too. The real question is: does the capital return more than it costs? Let's run that math.",  note:"Doesn't argue the rate — acknowledges it, reframes how to evaluate it. The ROI pivot is the standard close for cost objections."},
-  {tier:'ok',     text:"APR isn't really the right lens for this product since it's not a traditional loan.",                                                                    note:"Technically correct but sounds defensive. You need to offer an alternative framework, not just discredit theirs."},
-  {tier:'wrong',  text:"Our rates are very competitive for the market.",                                                                                                         note:"Doesn't address the concern at all. 'Competitive' next to '80–90% APR' is not reassuring."},
-  {tier:'killer', text:"That's just how alternative finance works. Banks aren't an option for most businesses.",                                                                  note:"Dismissive and slightly threatening. This ends the conversation and the relationship."},
-]},
-// ── ROUND 2 ──────────────────────────────────────────────────────
-{round:2, merchant:'"I need to think about it."',
- opts:[
-  {tier:'best',   text:"Of course — what specifically do you need to think through? I want to make sure you have the right information before you decide, not after.",                                                      note:"Never accept a 'think about it' at face value. This response surfaces the real objection hiding behind it — professionally, not pushily."},
-  {tier:'ok',     text:"Totally understand. I'll follow up tomorrow — when's a good time?",                                                                                     note:"Polite but you've lost control of the timeline. You're now at the mercy of their calendar."},
-  {tier:'wrong',  text:"Take your time — the offer's good for 30 days.",                                                                                                        note:"You've just told them there's no urgency. Offers don't stay open 30 days in this industry."},
-  {tier:'killer', text:"Ok — call me when you're ready.",                                                                                                                        note:"You fully surrendered the close. This deal is gone."},
-]},
-{round:2, merchant:'"I need to run this by my business partner first."',
- opts:[
-  {tier:'best',   text:"Absolutely — can we get them on a quick call right now? I find it's always faster to answer questions in real time than to play telephone. When are they usually free?",                           note:"Bringing the partner into the call is the gold standard. It removes a round-trip delay and lets you handle their questions directly."},
-  {tier:'ok',     text:"I can send over a one-pager that you both can review together.",                                                                                         note:"Reasonable, but you've introduced another step and lost direct access to the decision-maker."},
-  {tier:'wrong',  text:"Sure — just let me know what they say.",                                                                                                                 note:"You've handed the deal to someone you've never met. The partner will ask questions the merchant can't answer."},
-  {tier:'killer', text:"Tell them to reach out if they have any questions.",                                                                                                     note:"You're now three steps removed from the close. Almost no deal survives this path."},
-]},
-{round:2, merchant:'"My accountant told me not to do this."',
- opts:[
-  {tier:'best',   text:"I'd love to get on a call with them — not to sell them, but because they're probably looking at this as a loan on the P&L. Can we loop them in? I can walk them through the structure in 10 minutes.", note:"The accountant objection is almost always solvable if you treat it as an education opportunity. Inviting them in is always the right move."},
-  {tier:'ok',     text:"I can send documentation that shows the full structure for them to review.",                                                                              note:"Better than doing nothing, but it puts the accountant in a position to find reasons to say no without anyone to answer their questions."},
-  {tier:'wrong',  text:"Accountants sometimes don't fully understand how these products work.",                                                                                  note:"You're insulting their trusted advisor. Even if it's partially true, saying it ends the relationship."},
-  {tier:'killer', text:"They're being overly cautious — this product is extremely common.",                                                                                      note:"You just called their accountant paranoid. Conversation over."},
-]},
-{round:2, merchant:'"The timing just isn\'t right. Call me in 3 months."',
- opts:[
-  {tier:'best',   text:"Tell me what changes in 3 months. I want to understand what you're waiting for — sometimes the best time to fund is right before the peak, not after.",                                            note:"You need to know whether '3 months' means something real or is a polite dismissal. This question separates the two without being aggressive."},
-  {tier:'ok',     text:"I'll put a note in and reach out then. What's driving the timing?",                                                                                     note:"At least you asked the right follow-up — but you've surrendered the close for 90 days."},
-  {tier:'wrong',  text:"The offer expires, so we'd have to rerun your file in 3 months.",                                                                                       note:"True and worth mentioning, but leading with it sounds like a threat rather than helpful information."},
-  {tier:'killer', text:"Ok, I'll call you in 3 months.",                                                                                                                        note:"Deals die in 3 months. This one will too."},
-]},
-{round:2, merchant:'"I\'m waiting on a big invoice. I won\'t need capital once it comes in."',
- opts:[
-  {tier:'best',   text:"When's that invoice due? In my experience they always slip — and if it does, you don't want to be scrambling. And if it comes in on time, you can pay this off early for a discount. You're covered either way.", note:"The 'it always slips' reframe is realistic, not fear-mongering. The early payoff pivot turns the invoice into a reason to fund now, not wait."},
-  {tier:'ok',     text:"Would bridge capital help cover the gap while you wait?",                                                                                                note:"Smart redirect, but you're solving a different problem than what was presented."},
-  {tier:'wrong',  text:"Ok — call me when you know more about the invoice.",                                                                                                    note:"You just handed your entire pipeline to a receivable you have no control over."},
-  {tier:'killer', text:"If you're getting a big payment you definitely don't need us.",                                                                                          note:"You just closed the deal against yourself."},
-]},
-{round:2, merchant:'"I\'m too busy right now. I can\'t deal with paperwork."',
- opts:[
-  {tier:'best',   text:"That's exactly when my merchants usually call me — when the business is outpacing the capital. I can have you funded in 24 hours with 15 minutes of your time. What does tomorrow morning look like?", note:"Reframes 'too busy' as a signal the business is doing well. The 15-minute and specific time ask breaks the pattern."},
-  {tier:'ok',     text:"I handle everything on my end — all I need is a signature.",                                                                                             note:"Reduces friction, but doesn't create urgency or address why they're putting it off."},
-  {tier:'wrong',  text:"I understand — I'll try you again next week.",                                                                                                          note:"You've just given the deal a week to die."},
-  {tier:'killer', text:"Let me know when things slow down.",                                                                                                                     note:"Things never slow down. This is a soft goodbye."},
-]},
-{round:2, merchant:'"Just send me an email with all the details."',
- opts:[
-  {tier:'best',   text:"Sending it now — but quick question first: what's the one thing that would make this a yes? That way I know what to highlight instead of flooding your inbox.",                                    note:"Complies AND surfaces the hidden objection. One of the most useful tactics in the space."},
-  {tier:'ok',     text:"I'll send it over — what's the best email and should I copy anyone else?",                                                                              note:"Organized and compliant. Misses the chance to surface the real concern but at least keeps momentum."},
-  {tier:'wrong',  text:"Sure — I'll send everything over. Let me know if you have any questions.",                                                                               note:"Generic and passive. You're now waiting with no follow-up commitment."},
-  {tier:'killer', text:"Sure. Feel free to reach back out whenever you've had a chance to look.",                                                                                note:"You just put the next step entirely in their hands. This deal has a 10% chance of closing."},
-]},
-// ── ROUND 3 ──────────────────────────────────────────────────────
-{round:3, merchant:'"I\'ve heard MCAs target desperate businesses. It feels predatory."',
- opts:[
-  {tier:'best',   text:"That reputation exists and some players have earned it. I can only control how I show up — and if this deal doesn't make sense for your business, I'll tell you that directly. Let's look at your numbers together and you decide.", note:"The most credible answer is the honest one. Acknowledging the reputation without being defensive builds more trust than denying it."},
-  {tier:'ok',     text:"There are bad actors in every industry. We operate transparently — you'll know the full cost upfront.",                                                  note:"Reasonable but defensive. You're drawing a line between 'us' and 'them' without really earning that distinction yet."},
-  {tier:'wrong',  text:"That's a misconception — MCAs are legitimate financial products used by thousands of businesses.",                                                       note:"Sounds like PR speak. The merchant's guard will go up, not down."},
-  {tier:'killer', text:"I understand your concern. Call me if you change your mind.",                                                                                            note:"You accepted the objection without countering it. Deal over."},
-]},
-{round:3, merchant:'"What happens if revenue drops and I can\'t make the daily payment?"',
- opts:[
-  {tier:'best',   text:"That's the right question. If this is RBF, the daily pull is tied to your revenue — slow month, smaller payment. If it's ACH, let's right-size the advance so a slow month doesn't feel like a stretch. What does a bad month look like for you?", note:"Explains the product mechanics correctly, then immediately moves to right-sizing. The 'bad month' question pulls the merchant into solution mode."},
-  {tier:'ok',     text:"We can size the advance smaller so payments are more manageable in slow months.",                                                                        note:"Practical but doesn't address the underlying concern about what actually happens if they genuinely can't pay."},
-  {tier:'wrong',  text:"Default is serious — you'd really want to avoid that. Let's make sure you can handle the payment.",                                                     note:"You introduced the word 'default' unprompted. That's a fear anchor you don't want to plant."},
-  {tier:'killer', text:"If you can't pay, the funder would begin collections.",                                                                                                  note:"Technically accurate, maximally terrifying. This closes zero deals."},
-]},
-{round:3, merchant:'"I don\'t want to sign a personal guarantee."',
- opts:[
-  {tier:'best',   text:"Fair concern — not every product or funder requires one. Let me check what your options look like. And even where PGs are required, they're a last resort, not a first response. Let's find you the best structure.",                             note:"Acknowledges the concern, doesn't minimize it, and moves toward a solution without over-explaining."},
-  {tier:'ok',     text:"Some products don't require a PG — let me see what's available for your situation.",                                                                    note:"Straightforward and practical. Gets to the point without unnecessary context."},
-  {tier:'wrong',  text:"A personal guarantee is standard across the industry. Everyone signs one.",                                                                              note:"Dismissive of a real concern — and also not entirely accurate. Not all products require PGs."},
-  {tier:'killer', text:"Without a PG we can't move forward on any product.",                                                                                                    note:"False and deal-ending. Multiple funders and products don't require PGs."},
-]},
-{round:3, merchant:'"I got burned by a funder before. They took more than they were supposed to."',
- opts:[
-  {tier:'best',   text:"I'm sorry that happened. Every ACH on this deal comes through your bank statement with the exact amount from the contract. If anything ever looks off, you call me directly and I'm on the phone with the funding desk the same day.",              note:"Specific, personal accountability. You're not defending the industry — you're differentiating yourself with a concrete commitment."},
-  {tier:'ok',     text:"I want to make sure you have full visibility into every charge before we proceed. Tell me what happened.",                                               note:"Empathetic and thorough. Getting the full story also helps you prevent a repeat."},
-  {tier:'wrong',  text:"That funder was probably not reputable. We're different.",                                                                                               note:"Easy to say, hard to prove. The merchant has heard this before."},
-  {tier:'killer', text:"That's not something we would ever do. Our contracts are very clear.",                                                                                   note:"Every funder says this. Without a specific commitment, it's not reassuring."},
-]},
-{round:3, merchant:'"My lawyer said never sign a Confession of Judgement."',
- opts:[
-  {tier:'best',   text:"Your lawyer isn't wrong — COJs are significant. NY and Florida have heavily restricted them. Tell me what state you're in and I'll find funders who don't require one. There are solid options.",                                                  note:"Respecting the lawyer's advice immediately builds trust. Knowing the state-level COJ landscape shows real expertise."},
-  {tier:'ok',     text:"That's a legitimate concern — some funders don't require a COJ. Let me see what I can structure.",                                                      note:"Solid. Doesn't argue with the lawyer and offers a path forward."},
-  {tier:'wrong',  text:"COJs are standard in alternative lending. Your lawyer may not be familiar with how they work in practice.",                                              note:"You're contradicting their lawyer. Even if you're partially right, this will cost you the deal."},
-  {tier:'killer', text:"We can't move forward without a COJ.",                                                                                                                  note:"False and shortsighted. You've eliminated yourself when alternatives exist."},
-]},
-{round:3, merchant:'"I\'m going to shop around and compare some other offers."',
- opts:[
-  {tier:'best',   text:"You should — and let's do it right now while I'm on the phone. What matters most: lowest cost, fastest funding, or highest amount? I'll tell you honestly if someone else is a better fit.",                                                       note:"Disarming because it's collaborative rather than defensive. Shopping with the merchant is one of the most effective closing techniques in the space."},
-  {tier:'ok',     text:"Totally fair. I'll hold this offer 48 hours so you have something concrete to compare against.",                                                        note:"Reasonable. Creates a time boundary without pressure."},
-  {tier:'wrong',  text:"Multiple applications can hurt your credit score from the hard pulls.",                                                                                  note:"True, but leading with it sounds like a scare tactic rather than helpful information."},
-  {tier:'killer', text:"Go ahead and compare — call me when you're ready.",                                                                                                     note:"You've fully ceded control. Most merchants who shop never come back."},
-]},
-{round:3, merchant:'"Honestly, business is going really well. I don\'t need capital right now."',
- opts:[
-  {tier:'best',   text:"That's the best time to set it up. The merchants who struggle are the ones who didn't have a facility in place before they needed it. What would you do with capital if it showed up tomorrow — even hypothetically?",                             note:"Reframes capital from reactive to offensive. The hypothetical question is powerful — it gets the merchant to sell themselves on a use case."},
-  {tier:'ok',     text:"A lot of our best merchants use capital offensively — locking in inventory, taking on bigger contracts. Is there anything you've been waiting to pull the trigger on?",                            note:"Good pivot to offense. Less disarming than the best answer but still effective."},
-  {tier:'wrong',  text:"Cash flow can change fast — you might need it sooner than you think.",                                                                                  note:"Fear-based and presumptuous. You're essentially saying things will go wrong."},
-  {tier:'killer', text:"Ok — reach out if your situation changes.",                                                                                                              note:"The classic soft goodbye. This deal is over."},
-]},
+// ── Round metadata ───────────────────────────────────────────────
+const ROUNDS = [
+  {id:1, name:'Rate Conversation',   badge:'Rate'},
+  {id:2, name:'Stalls & Delays',     badge:'Stall'},
+  {id:3, name:'Fear & Doubt',        badge:'Fear'},
+  {id:4, name:'Qualification & Fit', badge:'Qualify'},
+  {id:5, name:'How It Works',        badge:'Product'},
 ];
 
 const TIER_META = {
@@ -376,101 +233,413 @@ const TIER_META = {
   killer: {label:'Deal killer', pillClass:'pill-killer', rowClass:'tier-killer'},
 };
 
-// ── State ──
-let activeRound = 1;
-let activeIdx = 0;
-let revealed = false;
-let tiersOpen = false;
-let seen = {};  // { "1-0": true, ... }
-let shuffledOrder = null; // null = sequential
+// ── Objection data — 35 scenarios ───────────────────────────────
+const OBJECTIONS = [
 
-function roundData() {
+// ══════════════════════════════════════════════════════════════
+// ROUND 1 — The Rate Conversation
+// ══════════════════════════════════════════════════════════════
+{round:1, calcs:['payment','dscr'],
+ merchant:'"Your factor rate is way too expensive."',
+ opts:[
+  {tier:'best',   text:"Let me show you what it looks like in daily dollars vs. your average deposits. Walk me through a typical month and we'll see if it actually registers.",   note:"Shifts from abstract cost to real daily impact. Gets the merchant talking instead of objecting."},
+  {tier:'ok',     text:"Depending on your statements, there may be room to move on the rate.",                                                                                    note:"Keeps the door open but makes it a price negotiation rather than a value conversation."},
+  {tier:'wrong',  text:"That rate is actually very competitive for your profile.",                                                                                                note:"Dismissive. Tells the merchant their concern is invalid — creates friction."},
+  {tier:'killer', text:"Yeah, that's the best I've got.",                                                                                                                        note:"You surrendered before trying anything. Conversation over."},
+]},
+{round:1, calcs:['payment'],
+ merchant:'"What\'s the APR? My accountant is going to ask."',
+ opts:[
+  {tier:'best',   text:"Great — this is a purchase of future receivables, not a loan, so traditional APR doesn't apply the same way. Total cost is [X]. What's your accountant's email? I'll put together a one-pager.",  note:"Validates the question, explains the structure correctly, and advances the deal by looping the accountant in proactively."},
+  {tier:'ok',     text:"We can work up that calculation — it's structured differently than a loan.",                                                                              note:"Accurate but vague. Doesn't give the accountant anything concrete or advance the deal."},
+  {tier:'wrong',  text:"APR doesn't really apply to this product.",                                                                                                              note:"Sounds evasive. The merchant and their accountant will both be suspicious."},
+  {tier:'killer', text:"I honestly don't know the APR off the top of my head.",                                                                                                  note:"Kills credibility immediately. You either don't know your product or you're dodging — neither is good."},
+]},
+{round:1, calcs:['payment'],
+ merchant:'"Another funder offered me 1.29. Can you match it?"',
+ opts:[
+  {tier:'best',   text:"Let's compare apples to apples — who's the funder, what's the term, daily ACH or split? A 1.29 over 4 months is different than over 8. Send me the offer and I'll be straight with you.",         note:"Reframes rate as one variable among several. Positions you as a consultant, not a competitor in a price war."},
+  {tier:'ok',     text:"Send me the offer and I'll see what I can do.",                                                                                                          note:"Reasonable, but you've accepted that price is the only variable that matters."},
+  {tier:'wrong',  text:"We can't match that, but we have advantages in other areas.",                                                                                            note:"Concedes the loss too quickly without knowing what the other offer actually looks like."},
+  {tier:'killer', text:"If they're at 1.29, you should probably just go with them.",                                                                                             note:"You just closed the deal for your competitor."},
+]},
+{round:1, calcs:['fund','dscr'],
+ merchant:'"Why can\'t I just get a bank loan? It\'s way cheaper."',
+ opts:[
+  {tier:'best',   text:"You absolutely should if you qualify — let's figure that out right now. Banks want 2+ years TIB, 680+ FICO, and 3–6 months to close. If that's you, I'll point you there myself.",                 note:"Addresses the comparison head-on. Establishes credibility by being willing to lose the deal if the bank is genuinely the right move."},
+  {tier:'ok',     text:"Bank loans are cheaper but take a lot longer — we can fund in 24–48 hours.",                                                                             note:"True but one-dimensional. Speed alone doesn't always justify the premium."},
+  {tier:'wrong',  text:"Banks probably won't approve you.",                                                                                                                      note:"Presumptuous and insulting. If you're wrong, you just lost the merchant."},
+  {tier:'killer', text:"That's just not realistic for most small businesses.",                                                                                                   note:"Dismissive. The merchant now feels talked down to."},
+]},
+{round:1, calcs:['payment'],
+ merchant:'"What\'s the total payback on this deal?"',
+ opts:[
+  {tier:'best',   text:"On this deal it's [X]. That cost buys you capital today that would take months elsewhere — if you could get it at all. What are you planning to use it for? Let's make sure the ROI is there.",    note:"Gives the number directly, then immediately reframes cost as investment. The ROI question moves the merchant forward."},
+  {tier:'ok',     text:"Total payback is [X]. Let me pull that up for you right now.",                                                                                           note:"Accurate and transparent, but passive. You answered without advancing the close."},
+  {tier:'wrong',  text:"It depends on how fast you repay it.",                                                                                                                   note:"True for some products, but sounds evasive — especially on a factor-rate deal where it's fixed."},
+  {tier:'killer', text:"I'll have someone from the team send you a formal breakdown.",                                                                                            note:"Added a step, introduced delay, removed yourself from the relationship. Momentum killer."},
+]},
+{round:1, calcs:['payment','dscr'],
+ merchant:'"The daily payment is going to kill my cash flow."',
+ opts:[
+  {tier:'best',   text:"That's the most important thing to get right. Tell me your average daily deposits and we'll build the advance around a number you won't feel. Most merchants forget it's coming out within a week.", note:"Validates the concern, then gets the merchant to help solve it. Keeps you in control of the structure."},
+  {tier:'ok',     text:"We can look at a smaller advance to bring the daily down.",                                                                                              note:"Practical, but reactive. You're letting the objection dictate the structure."},
+  {tier:'wrong',  text:"The payment adjusts automatically with your revenue.",                                                                                                   note:"May not be accurate depending on the product. If it's fixed ACH, you've just misstated the terms."},
+  {tier:'killer', text:"That's a fixed payment — it's how the product is structured.",                                                                                           note:"Confirms their worst fear without offering any solution. Deal is dead."},
+]},
+{round:1, calcs:['payment'],
+ merchant:'"I\'ve heard MCAs charge 80–90% APR. That sounds criminal."',
+ opts:[
+  {tier:'best',   text:"When you convert any short-term product to APR it looks alarming — that math works on a 30-day loan too. The real question is: does the capital return more than it costs? Let's run that math.",  note:"Doesn't argue the rate — acknowledges it, reframes how to evaluate it. The ROI pivot is the standard close for cost objections."},
+  {tier:'ok',     text:"APR isn't really the right lens for this product since it's not a traditional loan.",                                                                    note:"Technically correct but sounds defensive. You need to offer an alternative framework, not just discredit theirs."},
+  {tier:'wrong',  text:"Our rates are very competitive for the market.",                                                                                                         note:"Doesn't address the concern at all. 'Competitive' next to '80–90% APR' is not reassuring."},
+  {tier:'killer', text:"That's just how alternative finance works. Banks aren't an option for most businesses.",                                                                  note:"Dismissive and slightly threatening. This ends the conversation and the relationship."},
+]},
+
+// ══════════════════════════════════════════════════════════════
+// ROUND 2 — Stalls & Delays
+// ══════════════════════════════════════════════════════════════
+{round:2, calcs:[],
+ merchant:'"I need to think about it."',
+ opts:[
+  {tier:'best',   text:"Of course — what specifically do you need to think through? I want to make sure you have the right information before you decide, not after.",                                                      note:"Never accept a 'think about it' at face value. This response surfaces the real objection hiding behind it — professionally, not pushily."},
+  {tier:'ok',     text:"Totally understand. I'll follow up tomorrow — when's a good time?",                                                                                     note:"Polite but you've lost control of the timeline. You're now at the mercy of their calendar."},
+  {tier:'wrong',  text:"Take your time — the offer's good for 30 days.",                                                                                                        note:"You've just told them there's no urgency. Offers don't stay open 30 days in this industry."},
+  {tier:'killer', text:"Ok — call me when you're ready.",                                                                                                                        note:"You fully surrendered the close. This deal is gone."},
+]},
+{round:2, calcs:[],
+ merchant:'"I need to run this by my business partner first."',
+ opts:[
+  {tier:'best',   text:"Absolutely — can we get them on a quick call right now? I find it's always faster to answer questions in real time than to play telephone. When are they usually free?",                           note:"Bringing the partner into the call is the gold standard. It removes a round-trip delay and lets you handle their questions directly."},
+  {tier:'ok',     text:"I can send over a one-pager that you both can review together.",                                                                                         note:"Reasonable, but you've introduced another step and lost direct access to the decision-maker."},
+  {tier:'wrong',  text:"Sure — just let me know what they say.",                                                                                                                 note:"You've handed the deal to someone you've never met. The partner will ask questions the merchant can't answer."},
+  {tier:'killer', text:"Tell them to reach out if they have any questions.",                                                                                                     note:"You're now three steps removed from the close. Almost no deal survives this path."},
+]},
+{round:2, calcs:['dscr'],
+ merchant:'"My accountant told me not to do this."',
+ opts:[
+  {tier:'best',   text:"I'd love to get on a call with them — not to sell them, but because they're probably looking at this as a loan on the P&L. Can we loop them in? I can walk them through the structure in 10 minutes.", note:"The accountant objection is almost always solvable if you treat it as an education opportunity. Inviting them in is always the right move."},
+  {tier:'ok',     text:"I can send documentation that shows the full structure for them to review.",                                                                              note:"Better than doing nothing, but it puts the accountant in a position to find reasons to say no without anyone to answer their questions."},
+  {tier:'wrong',  text:"Accountants sometimes don't fully understand how these products work.",                                                                                  note:"You're insulting their trusted advisor. Even if it's partially true, saying it ends the relationship."},
+  {tier:'killer', text:"They're being overly cautious — this product is extremely common.",                                                                                      note:"You just called their accountant paranoid. Conversation over."},
+]},
+{round:2, calcs:['dscr'],
+ merchant:'"The timing just isn\'t right. Call me in 3 months."',
+ opts:[
+  {tier:'best',   text:"Tell me what changes in 3 months. I want to understand what you're waiting for — sometimes the best time to fund is right before the peak, not after.",                                            note:"You need to know whether '3 months' means something real or is a polite dismissal. This question separates the two without being aggressive."},
+  {tier:'ok',     text:"I'll put a note in and reach out then. What's driving the timing?",                                                                                     note:"At least you asked the right follow-up — but you've surrendered the close for 90 days."},
+  {tier:'wrong',  text:"The offer expires, so we'd have to rerun your file in 3 months.",                                                                                       note:"True and worth mentioning, but leading with it sounds like a threat rather than helpful information."},
+  {tier:'killer', text:"Ok, I'll call you in 3 months.",                                                                                                                        note:"Deals die in 3 months. This one will too."},
+]},
+{round:2, calcs:['payment'],
+ merchant:'"I\'m waiting on a big invoice. I won\'t need capital once it comes in."',
+ opts:[
+  {tier:'best',   text:"When's that invoice due? In my experience they always slip — and if it does, you don't want to be scrambling. And if it comes in on time, you can pay this off early for a discount. You're covered either way.", note:"The 'it always slips' reframe is realistic, not fear-mongering. The early payoff pivot turns the invoice into a reason to fund now, not wait."},
+  {tier:'ok',     text:"Would bridge capital help cover the gap while you wait?",                                                                                                note:"Smart redirect, but you're solving a different problem than what was presented."},
+  {tier:'wrong',  text:"Ok — call me when you know more about the invoice.",                                                                                                    note:"You just handed your entire pipeline to a receivable you have no control over."},
+  {tier:'killer', text:"If you're getting a big payment you definitely don't need us.",                                                                                          note:"You just closed the deal against yourself."},
+]},
+{round:2, calcs:[],
+ merchant:'"I\'m too busy right now. I can\'t deal with paperwork."',
+ opts:[
+  {tier:'best',   text:"That's exactly when my merchants usually call me — when the business is outpacing the capital. I can have you funded in 24 hours with 15 minutes of your time. What does tomorrow morning look like?", note:"Reframes 'too busy' as a signal the business is doing well. The 15-minute and specific time ask breaks the pattern."},
+  {tier:'ok',     text:"I handle everything on my end — all I need is a signature.",                                                                                             note:"Reduces friction, but doesn't create urgency or address why they're putting it off."},
+  {tier:'wrong',  text:"I understand — I'll try you again next week.",                                                                                                          note:"You've just given the deal a week to die."},
+  {tier:'killer', text:"Let me know when things slow down.",                                                                                                                     note:"Things never slow down. This is a soft goodbye."},
+]},
+{round:2, calcs:[],
+ merchant:'"Just send me an email with all the details."',
+ opts:[
+  {tier:'best',   text:"Sending it now — but quick question first: what's the one thing that would make this a yes? That way I know what to highlight instead of flooding your inbox.",                                    note:"Complies AND surfaces the hidden objection. One of the most useful tactics in the space."},
+  {tier:'ok',     text:"I'll send it over — what's the best email and should I copy anyone else?",                                                                              note:"Organized and compliant. Misses the chance to surface the real concern but at least keeps momentum."},
+  {tier:'wrong',  text:"Sure — I'll send everything over. Let me know if you have any questions.",                                                                               note:"Generic and passive. You're now waiting with no follow-up commitment."},
+  {tier:'killer', text:"Sure. Feel free to reach back out whenever you've had a chance to look.",                                                                                note:"You just put the next step entirely in their hands. This deal has a 10% chance of closing."},
+]},
+
+// ══════════════════════════════════════════════════════════════
+// ROUND 3 — Fear & Doubt
+// ══════════════════════════════════════════════════════════════
+{round:3, calcs:[],
+ merchant:'"I\'ve heard MCAs target desperate businesses. It feels predatory."',
+ opts:[
+  {tier:'best',   text:"That reputation exists and some players have earned it. I can only control how I show up — and if this deal doesn't make sense for your business, I'll tell you that directly. Let's look at your numbers together and you decide.", note:"The most credible answer is the honest one. Acknowledging the reputation without being defensive builds more trust than denying it."},
+  {tier:'ok',     text:"There are bad actors in every industry. We operate transparently — you'll know the full cost upfront.",                                                  note:"Reasonable but defensive. You're drawing a line between 'us' and 'them' without really earning that distinction yet."},
+  {tier:'wrong',  text:"That's a misconception — MCAs are legitimate financial products used by thousands of businesses.",                                                       note:"Sounds like PR speak. The merchant's guard will go up, not down."},
+  {tier:'killer', text:"I understand your concern. Call me if you change your mind.",                                                                                            note:"You accepted the objection without countering it. Deal over."},
+]},
+{round:3, calcs:['dscr','payment'],
+ merchant:'"What happens if revenue drops and I can\'t make the daily payment?"',
+ opts:[
+  {tier:'best',   text:"That's the right question. If this is RBF, the daily pull is tied to your revenue — slow month, smaller payment. If it's ACH, let's right-size the advance so a slow month doesn't feel like a stretch. What does a bad month look like for you?", note:"Explains the product mechanics correctly, then immediately moves to right-sizing. The 'bad month' question pulls the merchant into solution mode."},
+  {tier:'ok',     text:"We can size the advance smaller so payments are more manageable in slow months.",                                                                        note:"Practical but doesn't address the underlying concern about what actually happens if they genuinely can't pay."},
+  {tier:'wrong',  text:"Default is serious — you'd really want to avoid that. Let's make sure you can handle the payment.",                                                     note:"You introduced the word 'default' unprompted. That's a fear anchor you don't want to plant."},
+  {tier:'killer', text:"If you can't pay, the funder would begin collections.",                                                                                                  note:"Technically accurate, maximally terrifying. This closes zero deals."},
+]},
+{round:3, calcs:['water'],
+ merchant:'"I don\'t want to sign a personal guarantee."',
+ opts:[
+  {tier:'best',   text:"Fair concern — not every product or funder requires one. Let me check what your options look like. And even where PGs are required, they're a last resort, not a first response. Let's find you the best structure.",                             note:"Acknowledges the concern, doesn't minimize it, and moves toward a solution without over-explaining."},
+  {tier:'ok',     text:"Some products don't require a PG — let me see what's available for your situation.",                                                                    note:"Straightforward and practical. Gets to the point without unnecessary context."},
+  {tier:'wrong',  text:"A personal guarantee is standard across the industry. Everyone signs one.",                                                                              note:"Dismissive of a real concern — and also not entirely accurate. Not all products require PGs."},
+  {tier:'killer', text:"Without a PG we can't move forward on any product.",                                                                                                    note:"False and deal-ending. Multiple funders and products don't require PGs."},
+]},
+{round:3, calcs:[],
+ merchant:'"I got burned by a funder before. They took more than they were supposed to."',
+ opts:[
+  {tier:'best',   text:"I'm sorry that happened. Every ACH on this deal comes through your bank statement with the exact amount from the contract. If anything ever looks off, you call me directly and I'm on the phone with the funding desk the same day.",              note:"Specific, personal accountability. You're not defending the industry — you're differentiating yourself with a concrete commitment."},
+  {tier:'ok',     text:"I want to make sure you have full visibility into every charge before we proceed. Tell me what happened.",                                               note:"Empathetic and thorough. Getting the full story also helps you prevent a repeat."},
+  {tier:'wrong',  text:"That funder was probably not reputable. We're different.",                                                                                               note:"Easy to say, hard to prove. The merchant has heard this before."},
+  {tier:'killer', text:"That's not something we would ever do. Our contracts are very clear.",                                                                                   note:"Every funder says this. Without a specific commitment, it's not reassuring."},
+]},
+{round:3, calcs:['water'],
+ merchant:'"My lawyer said never sign a Confession of Judgement."',
+ opts:[
+  {tier:'best',   text:"Your lawyer isn't wrong — COJs are significant. NY and Florida have heavily restricted them. Tell me what state you're in and I'll find funders who don't require one. There are solid options.",                                                  note:"Respecting the lawyer's advice immediately builds trust. Knowing the state-level COJ landscape shows real expertise."},
+  {tier:'ok',     text:"That's a legitimate concern — some funders don't require a COJ. Let me see what I can structure.",                                                      note:"Solid. Doesn't argue with the lawyer and offers a path forward."},
+  {tier:'wrong',  text:"COJs are standard in alternative lending. Your lawyer may not be familiar with how they work in practice.",                                              note:"You're contradicting their lawyer. Even if you're partially right, this will cost you the deal."},
+  {tier:'killer', text:"We can't move forward without a COJ.",                                                                                                                  note:"False and shortsighted. You've eliminated yourself when alternatives exist."},
+]},
+{round:3, calcs:['water','fund'],
+ merchant:'"I\'m going to shop around and compare some other offers."',
+ opts:[
+  {tier:'best',   text:"You should — and let's do it right now while I'm on the phone. What matters most: lowest cost, fastest funding, or highest amount? I'll tell you honestly if someone else is a better fit.",                                                       note:"Disarming because it's collaborative rather than defensive. Shopping with the merchant is one of the most effective closing techniques in the space."},
+  {tier:'ok',     text:"Totally fair. I'll hold this offer 48 hours so you have something concrete to compare against.",                                                        note:"Reasonable. Creates a time boundary without pressure."},
+  {tier:'wrong',  text:"Multiple applications can hurt your credit score from the hard pulls.",                                                                                  note:"True, but leading with it sounds like a scare tactic rather than helpful information."},
+  {tier:'killer', text:"Go ahead and compare — call me when you're ready.",                                                                                                     note:"You've fully ceded control. Most merchants who shop never come back."},
+]},
+{round:3, calcs:['dscr'],
+ merchant:'"Honestly, business is going really well. I don\'t need capital right now."',
+ opts:[
+  {tier:'best',   text:"That's the best time to set it up. The merchants who struggle are the ones who didn't have a facility in place before they needed it. What would you do with capital if it showed up tomorrow — even hypothetically?",                             note:"Reframes capital from reactive to offensive. The hypothetical question is powerful — it gets the merchant to sell themselves on a use case."},
+  {tier:'ok',     text:"A lot of our best merchants use capital offensively — locking in inventory, taking on bigger contracts. Is there anything you've been waiting to pull the trigger on?",                            note:"Good pivot to offense. Less disarming than the best answer but still effective."},
+  {tier:'wrong',  text:"Cash flow can change fast — you might need it sooner than you think.",                                                                                  note:"Fear-based and presumptuous. You're essentially saying things will go wrong."},
+  {tier:'killer', text:"Ok — reach out if your situation changes.",                                                                                                              note:"The classic soft goodbye. This deal is over."},
+]},
+
+// ══════════════════════════════════════════════════════════════
+// ROUND 4 — Qualification & Fit
+// ══════════════════════════════════════════════════════════════
+{round:4, calcs:['fund'],
+ merchant:'"My credit score is bad. Will that kill the deal?"',
+ opts:[
+  {tier:'best',   text:"Credit is one signal, not the whole picture. MCA underwriting is primarily cash flow based — your last 3 months of deposits matter more than your FICO. Tell me roughly where your score is and I'll tell you honestly what products are open.",    note:"Sets realistic expectations without overpromising. Gets to a number so you can actually route the file correctly."},
+  {tier:'ok',     text:"Credit isn't the only factor — cash flow matters more in this space.",                                                                                  note:"True, but vague. Doesn't move toward a solution or give the merchant anything concrete."},
+  {tier:'wrong',  text:"A lot of our merchants have less-than-perfect credit. We work with everyone.",                                                                          note:"Overpromises. If you can't deliver, you've just lost trust on top of losing the deal."},
+  {tier:'killer', text:"If your credit is really bad, we might have a problem.",                                                                                                note:"You confirmed their worst fear before reviewing a single document."},
+]},
+{round:4, calcs:['fund'],
+ merchant:'"I filed for bankruptcy a couple years ago. Does that disqualify me?"',
+ opts:[
+  {tier:'best',   text:"Depends on when it was discharged and whether it was a 7 or 13. Most MCA funders want 12–24 months post-discharge. If you're past that window, there are solid options. When was it discharged?",                                                  note:"Shows real expertise on the nuances. Getting the discharge date is the key variable for routing — don't skip it."},
+  {tier:'ok',     text:"Some funders are more flexible on bankruptcy than others — let me see what the timing looks like.",                                                     note:"Reasonable, but gets you to the same question slower. Just ask for the date."},
+  {tier:'wrong',  text:"Bankruptcy is a red flag, but it's not always disqualifying.",                                                                                          note:"Technically true but doesn't actually help the merchant understand their position."},
+  {tier:'killer', text:"That's going to be a tough one. Most lenders won't touch a recent bankruptcy.",                                                                         note:"You guessed and guessed wrong about what 'recent' means for them. The deal may still have been workable."},
+]},
+{round:4, calcs:['fund'],
+ merchant:'"We\'ve only been in business 8 months. Do we even qualify?"',
+ opts:[
+  {tier:'best',   text:"MCA products typically start at 3–6 months TIB — you're well past that. The bigger question is your monthly deposit volume. What are you averaging? That's what's going to drive the offer size.",                                                  note:"Answers the qualification question immediately, then pivots to what actually determines deal size. Momentum stays forward."},
+  {tier:'ok',     text:"You should qualify — MCA requirements are shorter than banks. Let me pull an offer.",                                                                   note:"Gets the job done but misses the chance to anchor expectations around volume before the offer comes back."},
+  {tier:'wrong',  text:"Some of our lenders go as low as 3 months, so you might be okay.",                                                                                     note:"'Might' introduces unnecessary doubt. You know they qualify — just say so."},
+  {tier:'killer', text:"8 months is on the lower end. It's going to limit your options significantly.",                                                                         note:"You just talked them out of the deal before you even checked."},
+]},
+{round:4, calcs:['water'],
+ merchant:'"I have a judgment against my business."',
+ opts:[
+  {tier:'best',   text:"A judgment doesn't automatically kill the deal — it depends on the amount relative to revenue and whether it's in active collections. Some funders avoid them entirely, others work around them. What's the amount?",                               note:"Gets specific instead of generic. Knowing the dollar amount is the key variable for routing the file to the right funders."},
+  {tier:'ok',     text:"Judgments are handled differently by different funders — I'll need to run this through a few places.",                                                  note:"Honest and reasonable. Doesn't have the specificity to move fast, but at least it doesn't close the door."},
+  {tier:'wrong',  text:"A lot of businesses have judgments. It's more common than you'd think.",                                                                                note:"Normalizing it doesn't actually help — the merchant still doesn't know if they can get funded."},
+  {tier:'killer', text:"Judgments are a major problem — most funders won't approve that.",                                                                                      note:"Possibly false, and you've killed the deal without doing any work to route it correctly."},
+]},
+{round:4, calcs:['dscr','payment'],
+ merchant:'"We had a really rough month last month. Will that hurt us?"',
+ opts:[
+  {tier:'best',   text:"One bad month rarely kills a deal — underwriters look at the full 3-month picture. What caused the rough month? Seasonal dip, one-time hit, slow receivables? If it's not a pattern, I'll note the context in the file. It matters.",              note:"Normalizes the concern and starts building the narrative that will help in underwriting. Context in the file is a real differentiator."},
+  {tier:'ok',     text:"One month isn't usually the whole story — the 3-month average is what matters most.",                                                                   note:"True and calming, but doesn't get you any useful information or set up the underwriting narrative."},
+  {tier:'wrong',  text:"We'll see what the statements look like. It depends on how bad.",                                                                                       note:"Creates anxiety without offering any reassurance or path forward."},
+  {tier:'killer', text:"A bad month is going to drag your average down. That'll affect the offer.",                                                                              note:"You confirmed their fear before looking at a single document."},
+]},
+{round:4, calcs:['dscr','payment'],
+ merchant:'"I already have an advance outstanding. Can I get more?"',
+ opts:[
+  {tier:'best',   text:"Yes — and there are two paths. If you're past 50% paid on the current advance, a renewal is usually the cleanest move. If you need capital now and the balance is still large, I can look at second-position options. What's your current balance?", note:"Shows product knowledge on both paths and immediately asks the question that determines which route to take."},
+  {tier:'ok',     text:"Some funders will look at a second position — it depends on the balance and your current revenue.",                                                     note:"Honest and practical. Misses the chance to lead with the renewal option, which is usually cleaner."},
+  {tier:'wrong',  text:"We'd just need to make sure you can handle two payments.",                                                                                              note:"Dives into mechanics before establishing whether stacking is even the right approach."},
+  {tier:'killer', text:"That's going to make this complicated. Most funders won't touch a stacked file.",                                                                       note:"You killed a real opportunity before doing any analysis. Second position is a legitimate product."},
+]},
+{round:4, calcs:['payment','fund'],
+ merchant:'"Why did you come back with half of what I asked for?"',
+ opts:[
+  {tier:'best',   text:"The offer is built from your average monthly deposits — typically 10–20% of your 3-month average. If you need more, two paths: let the next 30–60 days of statements strengthen your position, or I can look at lenders who go higher on volume. What's driving the number?", note:"Explains the math without being defensive, offers a path to more, and asks the question that unlocks the right solution."},
+  {tier:'ok',     text:"The advance is tied to your cash flow — I can walk you through how that's calculated.",                                                                 note:"Transparent, but passive. Doesn't offer any path toward a larger amount."},
+  {tier:'wrong',  text:"That's the offer based on your statements. I can try a couple more lenders.",                                                                           note:"Puts all the work on the lender pipeline without explaining why the offer was low."},
+  {tier:'killer', text:"That's the max based on what came back. Not much I can do.",                                                                                            note:"You gave up on the merchant and the deal in a single sentence."},
+]},
+
+// ══════════════════════════════════════════════════════════════
+// ROUND 5 — How It Works
+// ══════════════════════════════════════════════════════════════
+{round:5, calcs:[],
+ merchant:'"How is an MCA actually different from a bank loan?"',
+ opts:[
+  {tier:'best',   text:"A bank loan is debt — fixed monthly payments, interest charges, tied to your credit profile, and 2–6 months to close. An MCA is a purchase of your future revenue: we give you cash today in exchange for a fixed amount of future sales. One fee set at the start, no compounding, no monthly payment schedule.",  note:"Clear and jargon-free. The credit/speed contrast sets up the value prop without overselling."},
+  {tier:'ok',     text:"It's structured as an advance on future receivables rather than a traditional loan — different repayment mechanics.",                                   note:"Accurate but too abstract. Most merchants need a concrete contrast to make it land."},
+  {tier:'wrong',  text:"It's basically the same idea but with more flexible underwriting.",                                                                                     note:"'Basically the same' is the worst possible framing — it invites an APR comparison you can't win."},
+  {tier:'killer', text:"It's hard to explain — there's a lot of fine print.",                                                                                                   note:"You just told the merchant the product is complex and opaque. They're going to hang up."},
+]},
+{round:5, calcs:['payment'],
+ merchant:'"What does \'factor rate\' actually mean in real dollars?"',
+ opts:[
+  {tier:'best',   text:"Simple math: factor rate × advance amount = total payback. A 1.35 on $50k means you pay back $67,500 total. Divide that by the number of business days in the term and that's your daily ACH. No compounding, no surprises. Want me to run your specific numbers right now?",  note:"A concrete example makes this stick. Always use a real number — abstract explanations lose merchants."},
+  {tier:'ok',     text:"The factor rate is a multiplier — multiply it by the advance and that's your total repayment.",                                                         note:"Technically correct. Misses the chance to anchor with a specific example that makes it memorable."},
+  {tier:'wrong',  text:"It's similar to an interest rate but applied differently.",                                                                                             note:"'Similar to an interest rate' is the exact comparison you want to avoid. It invites an APR conversation."},
+  {tier:'killer', text:"It gets complicated — let me have someone from our team walk you through the math.",                                                                    note:"You handed off a basic math question to someone else. Credibility gone."},
+]},
+{round:5, calcs:['payment'],
+ merchant:'"How does the daily ACH work? What if I have a bad day?"',
+ opts:[
+  {tier:'best',   text:"ACH pulls are fixed — same amount every business day regardless of your revenue. That's exactly why we right-size the advance upfront. Rule of thumb: the daily should be no more than 10–15% of your average daily deposits. Want to run those numbers right now?",  note:"Explains the mechanics clearly, sets the right sizing rule, and immediately offers to solve it with real numbers."},
+  {tier:'ok',     text:"The daily is fixed, but we can size it so a slow day doesn't hurt.",                                                                                    note:"Gets to the solution, just misses the chance to give the merchant a concrete framework."},
+  {tier:'wrong',  text:"If a payment bounces, we'll work with you — it happens.",                                                                                              note:"You made it sound like bouncing is expected. That's not reassuring — that's alarming."},
+  {tier:'killer', text:"The daily comes out no matter what. That's how the product works.",                                                                                     note:"Confirms their worst fear without offering any solution. Deal is dead."},
+]},
+{round:5, calcs:[],
+ merchant:'"My buddy said you\'ll control my bank account. Is that true?"',
+ opts:[
+  {tier:'best',   text:"No — we don't have access to your account. The ACH debit goes through your bank the same way any recurring vendor payment does. You can see every pull on your statement. We're authorized to debit a fixed amount on business days — that's the full extent of it.",  note:"Addresses the misconception directly and specifically. The vendor payment comparison makes it concrete and non-threatening."},
+  {tier:'ok',     text:"We initiate an ACH debit for the daily amount — similar to any other recurring bill. No login access, nothing unusual.",                                note:"Accurate and calm. Slightly less concrete than the best answer but still effective."},
+  {tier:'wrong',  text:"That's not how it works. It's just an ACH authorization, like a utility payment.",                                                                     note:"The dismissive 'that's not how it works' sounds defensive. Same information, worse delivery."},
+  {tier:'killer', text:"I mean, we do have an ACH authorization — that's standard in this space.",                                                                              note:"You confirmed the fear by leading with 'we do have authorization.' The explanation that follows won't matter."},
+]},
+{round:5, calcs:[],
+ merchant:'"What happens when the advance is paid off? Is there a balloon?"',
+ opts:[
+  {tier:'best',   text:"No balloon — the daily ACH stops automatically once the payback amount is hit. Most funders send a payoff confirmation and release the UCC within 30–60 days. I'll make sure you get that confirmation in writing so there's no ambiguity.",          note:"Removes a real fear cleanly. The UCC release mention shows full-cycle expertise. The written confirmation is a small trust builder that differentiates you."},
+  {tier:'ok',     text:"Once you hit the payback amount, the daily stops. It's self-completing.",                                                                               note:"Accurate and concise. Doesn't address the UCC release, which sometimes surprises merchants later."},
+  {tier:'wrong',  text:"There's no balloon — it just runs until it's paid off.",                                                                                                note:"Gets the fact right but misses the chance to address the UCC and payoff confirmation, which are real concerns."},
+  {tier:'killer', text:"It depends on the funder — some have a reconciliation at the end.",                                                                                     note:"Introduced new uncertainty right when the merchant was looking for reassurance."},
+]},
+{round:5, calcs:[],
+ merchant:'"I don\'t want this to show up on my personal credit report."',
+ opts:[
+  {tier:'best',   text:"MCA advances are not reported to consumer credit bureaus — they're structured as a purchase of future receivables, not a loan. What does show up is a UCC-1 filing, which is a public business lien. Your personal credit report won't reflect this advance.",  note:"Technically accurate and complete. The UCC disclosure is important — omit it now and it becomes a trust issue when they find out later."},
+  {tier:'ok',     text:"MCAs typically aren't reported to the credit bureaus the way traditional loans are.",                                                                   note:"'Typically' introduces doubt. This is a yes/no question — give them a direct answer."},
+  {tier:'wrong',  text:"This shouldn't impact your credit — we'll do a soft pull only.",                                                                                       note:"Conflates the credit pull with the reporting question. These are two different things."},
+  {tier:'killer', text:"I'm not sure exactly what gets reported — I'd have to check.",                                                                                          note:"You don't know a basic fact about your product. That's the last thing a merchant wants to hear."},
+]},
+{round:5, calcs:['payment'],
+ merchant:'"Can I pay this off early if I want to?"',
+ opts:[
+  {tier:'best',   text:"Yes — and most deals have an early payoff schedule: pay off in the first 30–60 days and you owe less than the full payback. The earlier you pay, the bigger the discount. I'll put the exact schedule in your offer sheet upfront so you know the numbers before you sign.",  note:"Turns early payoff into a feature, not just an option. The offer sheet commitment removes uncertainty and builds trust."},
+  {tier:'ok',     text:"Yes, early payoff is available and usually comes with a discount. I'll confirm the terms.",                                                             note:"Gets the point across. The 'I'll confirm' leaves a dangling item — close it by offering to put it in the offer sheet."},
+  {tier:'wrong',  text:"You can always pay it off, but the payback is fixed regardless.",                                                                                       note:"This is factually incorrect for most products. Factor-rate deals almost always have EPD provisions."},
+  {tier:'killer', text:"That's really up to the funder — most of them don't love early payoffs.",                                                                               note:"False, and you just implied the funder has adversarial interests. That's a trust killer."},
+]},
+
+];
+
+// ── State ───────────────────────────────────────────────────────
+let activeRound = 1;
+let activeIdx   = 0;
+let revealed    = false;
+let tiersOpen   = false;
+let seen        = {};
+let shuffledOrder = null;
+
+// ── Helpers ─────────────────────────────────────────────────────
+function roundScenarios() {
   return OBJECTIONS.filter(o => o.round === activeRound);
 }
-
 function currentScenario() {
-  const data = roundData();
-  const idx = shuffledOrder ? shuffledOrder[activeIdx] : activeIdx;
-  return data[idx];
+  const data = roundScenarios();
+  const idx  = shuffledOrder ? shuffledOrder[activeIdx] : activeIdx;
+  return data[Math.min(idx, data.length - 1)];
 }
-
 function seenKey() { return `${activeRound}-${activeIdx}`; }
 
+// ── Round tab init ───────────────────────────────────────────────
+function initTabs() {
+  const el = document.getElementById('round-tabs');
+  ROUNDS.forEach((r, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'round-tab' + (i === 0 ? ' active' : '');
+    btn.innerHTML = `<span class="rt-num">R${r.id}</span>${r.name}`;
+    btn.onclick = () => setRound(r.id, btn);
+    el.appendChild(btn);
+  });
+}
+
 function setRound(r, btn) {
-  activeRound = r;
-  activeIdx = 0;
+  activeRound   = r;
+  activeIdx     = 0;
   shuffledOrder = null;
-  revealed = false;
-  tiersOpen = false;
+  revealed      = false;
+  tiersOpen     = false;
   document.querySelectorAll('.round-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   render();
 }
 
+// ── Navigation ──────────────────────────────────────────────────
 function navigate(dir) {
-  const total = roundData().length;
-  activeIdx = Math.max(0, Math.min(total - 1, activeIdx + dir));
-  revealed = false;
-  tiersOpen = false;
+  const total = roundScenarios().length;
+  activeIdx   = Math.max(0, Math.min(total - 1, activeIdx + dir));
+  revealed    = false;
+  tiersOpen   = false;
   render();
 }
 
-function shuffle() {
-  const total = roundData().length;
-  const arr = Array.from({length: total}, (_, i) => i);
+function doShuffle() {
+  const total = roundScenarios().length;
+  const arr   = Array.from({length: total}, (_, i) => i);
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   shuffledOrder = arr;
-  activeIdx = 0;
-  revealed = false;
-  tiersOpen = false;
+  activeIdx     = 0;
+  revealed      = false;
+  tiersOpen     = false;
   render();
 }
 
+// ── Reveal ──────────────────────────────────────────────────────
 function reveal() {
-  revealed = true;
-  seen[seenKey()] = true;
+  revealed            = true;
+  seen[seenKey()]     = true;
   renderReveal();
   renderDots();
 }
 
-function toggleAllTiers() {
+function toggleTiers() {
   tiersOpen = !tiersOpen;
-  const el = document.getElementById('all-tiers');
-  const toggle = document.getElementById('tiers-toggle');
-  const label = document.getElementById('toggle-label');
-  if (tiersOpen) {
-    el.classList.remove('hidden');
-    toggle.classList.add('open');
-    label.textContent = 'Hide other responses';
-  } else {
-    el.classList.add('hidden');
-    toggle.classList.remove('open');
-    label.textContent = 'Show all 4 responses';
-  }
+  const tiersEl  = document.getElementById('all-tiers');
+  const toggle   = document.getElementById('tiers-toggle');
+  const label    = document.getElementById('toggle-label');
+  tiersEl.classList.toggle('open', tiersOpen);
+  toggle.classList.toggle('open', tiersOpen);
+  label.textContent = tiersOpen ? 'Hide other responses' : 'Show all 4 responses';
 }
 
+// ── Render ──────────────────────────────────────────────────────
 function render() {
-  const sc = currentScenario();
-  const data = roundData();
-  const total = data.length;
-  const roundNames = {1:'Rate', 2:'Stalls', 3:'Fear'};
+  const sc    = currentScenario();
+  const total = roundScenarios().length;
+  const round = ROUNDS.find(r => r.id === activeRound);
 
-  // Label + badge
   document.getElementById('scenario-label').textContent = `Scenario ${activeIdx + 1} of ${total}`;
-  document.getElementById('round-badge').textContent = roundNames[activeRound];
+  document.getElementById('round-badge').textContent     = round.badge;
 
-  // Merchant quote
+  // Merchant quote — strip surrounding quotes for the bubble, they're implied by the container
   document.getElementById('merchant-quote').textContent = sc.merchant.replace(/^"|"$/g, '');
-  document.getElementById('merchant-quote').style.setProperty('font-style', 'italic');
 
   // Reset panels
-  document.getElementById('reveal-section').style.display = 'block';
-  document.getElementById('reveal-btn').style.display = 'flex';
+  document.getElementById('reveal-section').style.display  = 'block';
   document.getElementById('response-panel').classList.remove('show');
-  document.getElementById('all-tiers').classList.add('hidden');
+
+  // Reset tiers state
+  tiersOpen = false;
+  document.getElementById('all-tiers').classList.remove('open');
   document.getElementById('tiers-toggle').classList.remove('open');
   document.getElementById('toggle-label').textContent = 'Show all 4 responses';
 
@@ -478,36 +647,49 @@ function render() {
   document.getElementById('btn-prev').disabled = (activeIdx === 0);
   document.getElementById('btn-next').disabled = (activeIdx === total - 1);
 
-  // Dots
   renderDots();
 }
 
 function renderReveal() {
-  const sc = currentScenario();
+  const sc   = currentScenario();
   const best = sc.opts.find(o => o.tier === 'best');
 
-  // Show response panel
   document.getElementById('reveal-section').style.display = 'none';
   document.getElementById('response-panel').classList.add('show');
 
-  // Best response
   document.getElementById('best-text').textContent = best.text;
   document.getElementById('best-note').textContent = best.note;
 
-  // Calc nudge
-  const calcEl = document.getElementById('calc-nudge');
-  if (sc.calcLink) calcEl.classList.remove('hidden');
-  else calcEl.classList.add('hidden');
+  // Calculator pills
+  const linksEl = document.getElementById('calc-links');
+  const pillsEl = document.getElementById('calc-pills');
+  pillsEl.innerHTML = '';
+  if (sc.calcs && sc.calcs.length > 0) {
+    sc.calcs.forEach(key => {
+      const c   = CALCS[key];
+      const a   = document.createElement('a');
+      a.href    = c.url;
+      a.target  = '_blank';
+      a.rel     = 'noopener';
+      a.className = 'calc-pill';
+      a.innerHTML = `<span class="calc-pill-icon">${c.icon}</span>${c.label} ↗`;
+      pillsEl.appendChild(a);
+    });
+    linksEl.style.display = 'block';
+  } else {
+    linksEl.style.display = 'none';
+  }
 
   // All tiers
   const tiersEl = document.getElementById('all-tiers');
   tiersEl.innerHTML = '';
   sc.opts.filter(o => o.tier !== 'best').forEach(o => {
-    const m = TIER_META[o.tier];
+    const m   = TIER_META[o.tier];
     const row = document.createElement('div');
     row.className = `tier-row ${m.rowClass}`;
-    row.innerHTML = `<span class="tier-label-pill ${m.pillClass}">${m.label}</span>
-      <div class="tier-body">
+    row.innerHTML = `
+      <span class="tier-label-pill ${m.pillClass}">${m.label}</span>
+      <div>
         <div class="tier-text">${o.text}</div>
         <div class="tier-note">${o.note}</div>
       </div>`;
@@ -516,25 +698,27 @@ function renderReveal() {
 }
 
 function renderDots() {
-  const total = roundData().length;
-  const dots = document.getElementById('scenario-dots');
-  dots.innerHTML = '';
+  const total  = roundScenarios().length;
+  const dotsEl = document.getElementById('scenario-dots');
+  dotsEl.innerHTML = '';
   for (let i = 0; i < total; i++) {
     const d = document.createElement('div');
     d.className = 'sdot';
     if (i === activeIdx) d.classList.add('active');
     else if (seen[`${activeRound}-${i}`]) d.classList.add('seen');
-    d.onclick = (function(idx) { return function() {
+    const idx = i;
+    d.onclick = () => {
       activeIdx = idx;
-      revealed = false;
+      revealed  = false;
       tiersOpen = false;
       render();
-    }; })(i);
-    dots.appendChild(d);
+    };
+    dotsEl.appendChild(d);
   }
 }
 
-// Init
+// ── Init ─────────────────────────────────────────────────────────
+initTabs();
 render();
 </script>
 </body>
