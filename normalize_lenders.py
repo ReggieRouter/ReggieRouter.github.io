@@ -105,6 +105,20 @@ PRODUCTS_OVERRIDES = {
     "Grasshopper Bank": ["SBA"],
 }
 
+# product_criteria — per-product breakdown data.
+# Format: list of {product, loc_type, max_amount, max_term_months, notes}
+# These are overlaid ONTO any existing product_criteria in the DB export.
+PRODUCT_CRITERIA_OVERRIDES = {
+    "Backd": [
+        {"product": "LOC", "loc_type": "revolving", "max_amount": 1000000, "max_term_months": None, "notes": "Draw anytime · flexible terms · soft pull"},
+        {"product": "Term", "loc_type": None, "max_amount": 250000, "max_term_months": 24, "notes": "Daily or weekly payments"},
+    ],
+    "Bluevine": [
+        {"product": "LOC", "loc_type": "revolving", "max_amount": 250000, "max_term_months": None, "notes": "Up to $250K revolving"},
+        {"product": "Term", "loc_type": None, "max_amount": 500000, "max_term_months": None, "notes": "Through lending partners"},
+    ],
+}
+
 # Fields whose source_snippet content is known to contain raw HTML or <script> tags.
 # When encountered, the source_snippet is sanitized — all HTML tags are stripped,
 # leaving only plain text.  This prevents the </script> injection bug.
@@ -189,6 +203,12 @@ def normalize(lenders: list) -> list:
         # 4b. Apply products override if defined
         if name in PRODUCTS_OVERRIDES:
             lender["products"] = PRODUCTS_OVERRIDES[name]
+
+        # 4c. Apply product_criteria override if defined; otherwise preserve existing
+        if name in PRODUCT_CRITERIA_OVERRIDES:
+            lender["product_criteria"] = PRODUCT_CRITERIA_OVERRIDES[name]
+        elif "product_criteria" not in lender:
+            lender["product_criteria"] = []
 
         # 5. Check critical fields
         missing = []
