@@ -72,13 +72,13 @@ var TOOLS = [
     path: "/waterfall.html",
     kw: "lender waterfall buy box fico tib revenue product type filter match"
   },
-  { 
-    id: "fundability", 
-    name: "Fundability", 
+  {
+    id: "fundability",
+    name: "Fundability",
     desc: "Combined net requirement and stacking risk assessment.",
-    status: "live", 
-    group: "deal-math", 
-    icon: "stack", 
+    status: "live",
+    group: "deal-math",
+    icon: "stack",
     color: "green",
     slug: "/tools/fundability",
     presentation: "page",

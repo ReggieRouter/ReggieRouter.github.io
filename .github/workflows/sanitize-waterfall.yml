@@ -25,7 +25,7 @@ jobs:
               content = f.read()
 
           try:
-              script_start = content.index("<script>")
+              script_start = content.rindex("<script>")
               script_end = content.rindex("</script>")
           except ValueError:
               print("No script block found — skipping")

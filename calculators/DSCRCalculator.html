@@ -243,19 +243,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--gray-200);
-    color: var(--gray-500);
-    font-size: 9px;
-    font-weight: 800;
-    cursor: help;
+    font-size: 13px;
+    cursor: pointer;
     margin-left: 4px;
-    font-family: 'Inter', sans-serif;
-    font-style: normal;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+    vertical-align: middle;
 }
-.tooltip-icon:hover { background: var(--lp-green); color: white; }
+.tooltip-icon:hover { opacity: 1; }
 
 #tt {
     position: fixed;
@@ -548,7 +543,7 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                             <div class="td-field">
                                 <label class="td-label">
                                     Expected SBA Submission
-                                    <span class="tooltip-icon" data-tip="The date the Bank Partner submits the file to the SBA, not your internal submission date.">i</span>
+                                    <span class="tooltip-icon" data-tip="The date the Bank Partner submits the file to the SBA, not your internal submission date.">📎</span>
                                 </label>
                                 <select class="td-select" id="tdScenario" onchange="updateTaxDocs()">
                                     <option value="today">Today</option>
@@ -587,7 +582,7 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                 <div class="sc-hd">
                     <span class="sc-num">2</span>
                     <span class="sc-title">EBIDA & financials
-                        <span class="tooltip-icon" data-tip="EBIDA = Earnings Before Interest, Depreciation & Amortization. Calculated as: Net Income + Interest + Depreciation + Amortization + Owner(s)' Comp.">i</span>
+                        <span class="tooltip-icon" data-tip="EBIDA = Earnings Before Interest, Depreciation & Amortization. Calculated as: Net Income + Interest + Depreciation + Amortization + Owner(s)' Comp.">📎</span>
                         <span class="sc-sub" id="ebidaFormHint"></span>
                     </span>
                     <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
