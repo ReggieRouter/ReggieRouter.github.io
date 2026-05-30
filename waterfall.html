@@ -401,10 +401,10 @@
     transition: background-color 0.12s ease;
   }
   .lp-row-interactive:hover td {
-    background-color: #EEF9F3 !important;
+    background-color: #ffffff !important;
   }
   .lp-row-interactive:hover td.lp-sticky-col {
-    background-color: #EEF9F3 !important;
+    background-color: #ffffff !important;
     box-shadow: inset 3px 0 0 var(--color-brand-mid), 2px 0 5px -2px rgba(0, 0, 0, 0.08);
   }
   .lp-row-interactive:hover .lp-row-chevron:not(.expanded) {
@@ -1237,6 +1237,30 @@
   .lp-signal.payoff { color: #B45309; background: #FFFBEB; border-color: #FDE68A; }
   .lp-signal.nofico { color: #1D4ED8; background: #EFF6FF; border-color: #BFDBFE; }
   /* tooltip rendered via JS floating div (see bottom of script) — escapes overflow-x:auto */
+
+  /* ----- ROW: lender type badges (inline with signal row) ----- */
+  .lp-type-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border-radius: 4px;
+    padding: 1px 5px;
+    line-height: 1.4;
+    cursor: help;
+    white-space: nowrap;
+  }
+  .lp-type-badge.direct-plus {
+    background: #F3F4F6;
+    color: #6B7280;
+    border: 1px solid #D1D5DB;
+  }
+  .lp-type-badge.marketplace {
+    background: transparent;
+    color: #475569;
+    border: 1px solid #94A3B8;
+  }
 
   /* ----- ROW: position dots for stacking ----- */
   .lp-pos-dots {
@@ -2289,6 +2313,14 @@
               </select>
             </div>
             <div class="lp-mf-section">
+              <h5>Lender Type</h5>
+              <div class="lp-mf-chips" id="lendertype-chips">
+                <button type="button" class="lp-mf-chip active" data-ltype="direct">Direct</button>
+                <button type="button" class="lp-mf-chip active" data-ltype="direct_plus">Direct+</button>
+                <button type="button" class="lp-mf-chip active" data-ltype="marketplace">Marketplace</button>
+              </div>
+            </div>
+            <div class="lp-mf-section">
               <h5>Other</h5>
               <div class="lp-mf-chips" id="other-chips">
                 <button type="button" class="lp-mf-chip" data-other="earlyPayoff">Early-payoff discount</button>
@@ -2325,6 +2357,10 @@
             <div id="legend-items"></div>
             <h6 style="margin-top:14px;">Risk appetite</h6>
             <div id="legend-risk"></div>
+            <div style="margin-top:14px;">
+              <h6 style="margin-bottom:6px;">Lender type</h6>
+              <div id="legend-lender-types"></div>
+            </div>
               <div id="legend-loc-types" style="display:none;margin-top:14px;">
                 <h6 style="margin-bottom:6px;">Line of Credit type</h6>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -2997,7 +3033,8 @@
       "preferred_industries": [],
       "max_funding_amount": 0,
       "max_term_months": 0,
-      "payment_frequencies": []
+      "payment_frequencies": [],
+      "lender_type": "marketplace"
     },
     {
       "id": 1,
@@ -4158,7 +4195,8 @@
       "preferred_industries": [],
       "max_funding_amount": 0,
       "max_term_months": 0,
-      "payment_frequencies": []
+      "payment_frequencies": [],
+      "lender_type": "direct_plus"
     },
     {
       "id": 87,
@@ -4497,7 +4535,8 @@
       "preferred_industries": [],
       "max_funding_amount": 0,
       "max_term_months": 0,
-      "payment_frequencies": []
+      "payment_frequencies": [],
+      "lender_type": "direct_plus"
     },
     {
       "id": 232,
@@ -4629,35 +4668,6 @@
       "source_url": "https://peacsolutions.com/",
       "source_snippet": "",
       "logo_url": "public/assets/lenders/PEAC.png",
-      "early_payment_discount": false,
-      "preferred_industries": [],
-      "max_funding_amount": 0,
-      "max_term_months": 0,
-      "payment_frequencies": []
-    },
-    {
-      "id": 155,
-      "name": "Principis Capital",
-      "fico": 0,
-      "tib": 0,
-      "rev": 0,
-      "stacking": 0,
-      "restrictions": [],
-      "detailed_restrictions": [],
-      "products": [],
-      "updated_at": "2026-05-27 19:14:34.620685",
-      "submission_url": "",
-      "soft_pull": false,
-      "bank_verified": false,
-      "bank_statements": null,
-      "hard_collateral": false,
-      "hq_state": "",
-      "hq_address": "",
-      "support_email": "",
-      "support_phone": "888-636-2190",
-      "source_url": "https://www.principiscapital.com",
-      "source_snippet": "Currently unavailable.",
-      "logo_url": "public/assets/lenders/principiscapital.png",
       "early_payment_discount": false,
       "preferred_industries": [],
       "max_funding_amount": 0,
@@ -5354,7 +5364,8 @@
       "preferred_industries": [],
       "max_funding_amount": 0,
       "max_term_months": 0,
-      "payment_frequencies": []
+      "payment_frequencies": [],
+      "lender_type": "marketplace"
     },
     {
       "id": 86,
@@ -5981,7 +5992,7 @@
     },
     {
       "id": 1092,
-      "name": "LendingClub Business (Line of Credit)",
+      "name": "LendingClub",
       "fico": 0,
       "tib": 0,
       "rev": 0,
@@ -6146,7 +6157,7 @@
       "support_phone": "",
       "source_url": "https://fountainheadsba.com",
       "source_snippet": "",
-      "logo_url": "public/assets/lenders/Fountainhead SBA.png",
+      "logo_url": "public/assets/lenders/Fountainhead.png",
       "early_payment_discount": false,
       "preferred_industries": [],
       "max_funding_amount": 0,
@@ -6210,6 +6221,66 @@
       "max_funding_amount": 0,
       "max_term_months": 0,
       "payment_frequencies": []
+    },
+    {
+      "id": 1200,
+      "name": "Lendio",
+      "fico": 0,
+      "tib": 0,
+      "rev": 0,
+      "stacking": 999,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["MCA", "Term Loan", "Line of Credit", "SBA", "Equipment", "Commercial Real Estate", "Factoring"],
+      "updated_at": "2026-05-29",
+      "submission_url": "https://www.lendio.com/apply",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "UT",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.lendio.com",
+      "source_snippet": "Lendio is a small business lending marketplace that connects borrowers with 75+ lenders. Requirements and terms are set by the matched funder at time of submission.",
+      "logo_url": "public/assets/lenders/lendio.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 5000000,
+      "max_term_months": 0,
+      "payment_frequencies": [],
+      "lender_type": "marketplace"
+    },
+    {
+      "id": 1201,
+      "name": "Fundera by NerdWallet",
+      "fico": 0,
+      "tib": 0,
+      "rev": 0,
+      "stacking": 999,
+      "restrictions": [],
+      "detailed_restrictions": [],
+      "products": ["MCA", "Term Loan", "Line of Credit", "SBA", "Equipment", "Commercial Real Estate", "Factoring"],
+      "updated_at": "2026-05-29",
+      "submission_url": "https://www.fundera.com/apply",
+      "soft_pull": false,
+      "bank_verified": false,
+      "bank_statements": null,
+      "hard_collateral": false,
+      "hq_state": "NY",
+      "hq_address": "",
+      "support_email": "",
+      "support_phone": "",
+      "source_url": "https://www.fundera.com",
+      "source_snippet": "Fundera by NerdWallet is a small business lending marketplace. Requirements, rates, and terms are set by the matched funder at time of submission.",
+      "logo_url": "public/assets/lenders/Fundera by Nerdwallet.png",
+      "early_payment_discount": false,
+      "preferred_industries": [],
+      "max_funding_amount": 0,
+      "max_term_months": 0,
+      "payment_frequencies": [],
+      "lender_type": "marketplace"
     }
   ];
 
@@ -6313,9 +6384,9 @@
     return            { label: 'High only',             code: 'high',    score, riskColor: '#993C1D', reason };
   };
 
-  // Wraps determineRisk; ISO lenders (all_risk:true) route across all tiers — shown in blue
+  // Wraps determineRisk; all_risk:true or marketplace lender_type = routes across all tiers
   const getLenderRisk = (lender) => {
-    if (lender.all_risk) return { label: 'All', code: 'iso', score: 0, riskColor: '#185FA5', reason: 'ISO — routes across all borrower tiers' };
+    if (lender.all_risk || lender.lender_type === 'marketplace') return { label: 'All', code: 'iso', score: 0, riskColor: '#6B7280', reason: 'Marketplace — matches deals across a network of funders' };
     return determineRisk(lender);
   };
 
@@ -6416,7 +6487,8 @@
     industry: '',         // preferred industry match
     earlyPayoff: false,
     directOnly: false,    // hide pure broker/marketplace aggregators
-    hasContact: false     // has support_phone OR support_email
+    hasContact: false,    // has support_phone OR support_email
+    lenderTypes: new Set(['direct', 'direct_plus', 'marketplace']) // all visible by default
   };
 
   let sortColumn = 'name'; // default: alphabetical A→Z
@@ -6487,6 +6559,7 @@
     'Square Financing': 'Square',
     'The Smarter Merchant': 'Smarter Merchant',
     'Redline Capital Inc': 'Redline',
+    'Triumph Business Capital': 'Triumph',
   };
   function displayName(name) {
     if (Object.prototype.hasOwnProperty.call(DISPLAY_NAME_OVERRIDES, name)) return DISPLAY_NAME_OVERRIDES[name];
@@ -6564,9 +6637,8 @@
       }
       if (activeFilters.earlyPayoff && !l.early_payment_discount) return false;
       if (activeFilters.directOnly) {
-        // Heuristic: direct lenders have at least one product specified and aren't pure marketplaces.
-        // Marker: marketplaces tend to be marked all_risk:true (we use this elsewhere as the "serves all tiers" flag).
-        if (l.all_risk) return false;
+        const lt = l.lender_type || (l.all_risk ? 'marketplace' : 'direct');
+        if (lt === 'marketplace') return false;
       }
       if (activeFilters.hasContact && !l.support_phone && !l.support_email) return false;
       if (activeFilters.minTerm > 0) {
@@ -6576,6 +6648,12 @@
         const ind = activeFilters.industry.toLowerCase();
         const list = (l.preferred_industries || []).map(s => s.toLowerCase());
         if (!list.some(x => x.includes(ind) || ind.includes(x))) return false;
+      }
+
+      // Lender type inclusion filter (all on by default; user unchecks to hide a type)
+      if (activeFilters.lenderTypes.size < 3) {
+        const lt = l.lender_type || 'direct';
+        if (!activeFilters.lenderTypes.has(lt)) return false;
       }
 
       return true;
@@ -6687,11 +6765,15 @@
         nofico:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="5" y1="20" x2="19" y2="4"/></svg>',
       };
       let signalsHtml = '';
-      if (lender.fico === 0) signalsHtml += `<span class="lp-signal nofico" data-label="No FICO check — credit-score-blind">${SIG_ICONS.nofico}</span>`;
-      if (lender.soft_pull) signalsHtml += `<span class="lp-signal soft" data-label="Soft pull only">${SIG_ICONS.soft}</span>`;
-      if (lender.bank_verified) signalsHtml += `<span class="lp-signal bank" data-label="Bank statements required${lender.bank_statements ? ' · '+lender.bank_statements+' mo' : ''}">${SIG_ICONS.bank}</span>`;
-      if (lender.early_payment_discount) signalsHtml += `<span class="lp-signal payoff" data-label="Early-payoff discount">${SIG_ICONS.payoff}</span>`;
-      if (lender.hard_collateral) signalsHtml += `<span class="lp-signal collat" data-label="Hard collateral required">${SIG_ICONS.collat}</span>`;
+      if (lender.lender_type !== 'marketplace') {
+        if (lender.fico === 0) signalsHtml += `<span class="lp-signal nofico" data-label="No FICO check — credit-score-blind">${SIG_ICONS.nofico}</span>`;
+        if (lender.soft_pull) signalsHtml += `<span class="lp-signal soft" data-label="Soft pull only">${SIG_ICONS.soft}</span>`;
+        if (lender.bank_verified) signalsHtml += `<span class="lp-signal bank" data-label="Bank statements required${lender.bank_statements ? ' · '+lender.bank_statements+' mo' : ''}">${SIG_ICONS.bank}</span>`;
+        if (lender.early_payment_discount) signalsHtml += `<span class="lp-signal payoff" data-label="Early-payoff discount">${SIG_ICONS.payoff}</span>`;
+        if (lender.hard_collateral) signalsHtml += `<span class="lp-signal collat" data-label="Hard collateral required">${SIG_ICONS.collat}</span>`;
+      }
+      if (lender.lender_type === 'direct_plus') signalsHtml += `<span class="lp-type-badge direct-plus" data-label="Primarily funds its own deals, but routes some applications through a partner lending network. Requirements may vary by product or deal size.">Direct+</span>`;
+      if (lender.lender_type === 'marketplace') signalsHtml += `<span class="lp-type-badge marketplace" data-label="Matches deals across a network of funders. Requirements, rates, and terms are set by the matched funder at the time of submission.">Marketplace</span>`;
       const signalsRow = signalsHtml ? `<div class="lp-signal-row">${signalsHtml}</div>` : '';
 
       // Get logo or fallback initials
@@ -6730,7 +6812,7 @@
             </span>
             ${logoHtml}
             <div class="lp-lender-name-wrapper">
-              <span class="lp-lender-name" data-lender-tip="${lender.name}">${displayName(lender.name)}${lender.all_risk ? '<span class="iso-badge">ISO</span>' : ''}</span>
+              <span class="lp-lender-name" data-lender-tip="${lender.name}">${displayName(lender.name)}${lender.all_risk && lender.lender_type !== 'marketplace' ? '<span class="iso-badge">ISO</span>' : ''}</span>
               ${signalsRow}
             </div>
           </div>
@@ -6998,11 +7080,27 @@
               </div>
 
               <div class="lp-drawer-grid">
-                <!-- Underwriting -->
+                <!-- Underwriting or Marketplace card -->
+                ${lender.lender_type === 'marketplace' ? `
+                <div>
+                  <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:8px;padding:16px 18px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                      <span style="font-size:13px;font-weight:700;color:#334155;">Marketplace Lender</span>
+                    </div>
+                    <p style="font-size:12px;color:#475569;line-height:1.6;margin:0 0 10px;">Matches deals across a network of funders. Requirements, rates, and terms are set by the matched funder at the time of submission — not by ${displayName(lender.name)}.</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                      <span style="font-size:11px;background:#E2E8F0;color:#475569;border-radius:4px;padding:2px 7px;font-weight:500;">All credit tiers</span>
+                      <span style="font-size:11px;background:#E2E8F0;color:#475569;border-radius:4px;padding:2px 7px;font-weight:500;">Multiple product types</span>
+                      <span style="font-size:11px;background:#E2E8F0;color:#475569;border-radius:4px;padding:2px 7px;font-weight:500;">Requirements confirmed post-submission</span>
+                      ${(lender.products || []).some(p => /sba/i.test(p)) ? `<span style="font-size:11px;background:#ECFDF5;color:#047857;border-radius:4px;padding:2px 7px;font-weight:500;">SBA programs available</span>` : ''}
+                    </div>
+                  </div>
+                </div>` : `
                 <div>
                   <div class="lp-section-head">${ICON.shield} Underwriting Specs</div>
                   ${productBreakdownHtml}<div class="lp-spec-list">${specRows.join('')}</div>
-                </div>
+                </div>`}
                 <!-- Contact (only if we have any) -->
                 ${hasContactData ? `
                 <div>
@@ -7110,6 +7208,7 @@
   const maxfundVal = document.getElementById('maxfund-val');
   const freqChips = document.querySelectorAll('#freq-chips .lp-mf-chip');
   const otherChips = document.querySelectorAll('#other-chips .lp-mf-chip');
+  const ltypeChips = document.querySelectorAll('#lendertype-chips .lp-mf-chip');
   const mfClear = document.getElementById('mf-clear');
 
   const fmtMoney = (v) => v === 0 ? 'Any' : (v >= 1000000 ? `$${(v/1000000).toFixed(v % 1000000 === 0 ? 0 : 1)}M+` : `$${(v/1000).toFixed(0)}k+`);
@@ -7123,6 +7222,7 @@
     if (activeFilters.earlyPayoff) n++;
     if (activeFilters.directOnly) n++;
     if (activeFilters.hasContact) n++;
+    if (activeFilters.lenderTypes.size < 3) n += (3 - activeFilters.lenderTypes.size);
     return n;
   };
   const syncMoreBtn = () => {
@@ -7182,6 +7282,18 @@
     });
   });
 
+  // Lender type chips (include/exclude — all active by default)
+  ltypeChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('active');
+      const lt = chip.dataset.ltype;
+      if (chip.classList.contains('active')) activeFilters.lenderTypes.add(lt);
+      else activeFilters.lenderTypes.delete(lt);
+      syncMoreBtn();
+      renderTable();
+    });
+  });
+
   // Min term slider
   const mintermSlider = document.getElementById('minterm-range');
   const mintermVal = document.getElementById('minterm-val');
@@ -7227,12 +7339,14 @@
     activeFilters.directOnly = false;
     activeFilters.hasContact = false;
     activeFilters.industry = '';
+    activeFilters.lenderTypes = new Set(['direct', 'direct_plus', 'marketplace']);
     maxfundSlider.value = 0;
     maxfundVal.textContent = 'Any';
     if (mintermSlider) { mintermSlider.value = 0; mintermVal.textContent = 'Any'; }
     if (industrySelect) industrySelect.value = '';
     freqChips.forEach(c => c.classList.remove('active'));
     otherChips.forEach(c => c.classList.remove('active'));
+    ltypeChips.forEach(c => c.classList.add('active'));
     syncMoreBtn();
     renderTable();
   });
@@ -7295,9 +7409,11 @@
     activeFilters.freqs = [];
     activeFilters.earlyPayoff = false;
     activeFilters.directOnly = false;
+    activeFilters.lenderTypes = new Set(['direct', 'direct_plus', 'marketplace']);
     if (maxfundSlider) { maxfundSlider.value = 0; maxfundVal.textContent = 'Any'; }
     freqChips.forEach(c => c.classList.remove('active'));
     otherChips.forEach(c => c.classList.remove('active'));
+    ltypeChips.forEach(c => c.classList.add('active'));
     syncMoreBtn();
 
     renderTable();
@@ -7435,6 +7551,17 @@
       `<div class="lp-legend-item" style="grid-template-columns:8px 1fr;gap:10px;"><i style="width:6px;height:18px;border-radius:2px;background:${r.c};display:inline-block;"></i><span>${r.label}</span></div>`
     ).join('');
   }
+  const lenderTypeLegendHost = document.getElementById('legend-lender-types');
+  if (lenderTypeLegendHost) {
+    const LTYPE_LEGEND = [
+      { badge: '<span class="lp-type-badge direct-plus" style="cursor:default;">Direct+</span>', label: 'Primarily funds its own deals, but routes some applications through a partner lending network. Requirements may vary by product or deal size.' },
+      { badge: '<span class="lp-type-badge marketplace" style="cursor:default;">Marketplace</span>', label: 'Matches deals across a network of funders.' },
+    ];
+    lenderTypeLegendHost.innerHTML = LTYPE_LEGEND.map(s =>
+      `<div class="lp-legend-item" style="align-items:flex-start;gap:8px;">${s.badge}<span style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">${s.label}</span></div>`
+    ).join('');
+  }
+
   // Show LOC type legend if any lender has product_criteria with loc_type
   const hasLocTypeData = lenderData.some(l => (l.product_criteria || []).some(pc => pc.loc_type));
   const locLegendEl = document.getElementById('legend-loc-types');
@@ -7752,7 +7879,7 @@
   // Floating tooltip for .lp-signal and .risk-cell — positioned fixed to escape overflow-x:auto
   (function() {
     const tip = document.createElement('div');
-    tip.style.cssText = 'position:fixed;background:#1F2937;color:#fff;padding:3px 7px;border-radius:4px;font-size:10.5px;font-weight:500;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:9999;';
+    tip.style.cssText = 'position:fixed;background:#1F2937;color:#fff;padding:4px 8px;border-radius:4px;font-size:10.5px;font-weight:500;white-space:normal;max-width:220px;line-height:1.45;pointer-events:none;opacity:0;transition:opacity 0.15s;z-index:9999;';
     document.body.appendChild(tip);
     function showTip(el, label) {
       tip.textContent = label;
@@ -7772,6 +7899,8 @@
     document.addEventListener('mouseover', (e) => {
       const signal = e.target.closest('.lp-signal');
       if (signal && signal.dataset.label) { showTip(signal, signal.dataset.label); return; }
+      const typeBadge = e.target.closest('.lp-type-badge[data-label]');
+      if (typeBadge) { showTip(typeBadge, typeBadge.dataset.label); return; }
       const cmp = e.target.closest('.lp-cmp-check[data-label]');
       if (cmp) { showTip(cmp, cmp.dataset.label); return; }
       const risk = e.target.closest('.risk-cell[data-risk-tip]');
@@ -7780,7 +7909,7 @@
       if (name) showTip(name, name.dataset.lenderTip);
     });
     document.addEventListener('mouseout', (e) => {
-      if (e.target.closest('.lp-signal') || e.target.closest('.lp-cmp-check') || e.target.closest('.risk-cell[data-risk-tip]') || e.target.closest('.lp-lender-name[data-lender-tip]')) tip.style.opacity = '0';
+      if (e.target.closest('.lp-signal') || e.target.closest('.lp-type-badge') || e.target.closest('.lp-cmp-check') || e.target.closest('.risk-cell[data-risk-tip]') || e.target.closest('.lp-lender-name[data-lender-tip]')) tip.style.opacity = '0';
     });
   })();
 
