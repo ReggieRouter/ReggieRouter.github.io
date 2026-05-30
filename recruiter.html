@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Recruiter Portal</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── Base ────────────────────────────────────────────────── */
+:root {
+  --color-brand-dark:   #1A3C2E;
+  --color-brand-mid:    #2D6A4F;
+  --color-brand-accent: #10B981;
+  --color-text-primary: #1F2937;
+  --color-text-secondary:#4B5563;
+  --color-text-muted:   #9CA3AF;
+  --color-border:       #E5E7EB;
+  --color-bg-main:      #F9FAFB;
+  --color-bg-card:      #FFFFFF;
+  --font-stack: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  background: var(--color-bg-main);
+  margin: 0; padding: 0;
+  font-family: var(--font-stack);
+  color: var(--color-text-primary);
+}
+
+/* ── Password Gate ───────────────────────────────────────── */
+#pw-gate {
+  position: fixed; inset: 0;
+  background: var(--color-brand-dark);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.pw-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 40px 36px;
+  width: 100%; max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.pw-logo {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.pw-wordmark { font-size: 20px; letter-spacing: -0.02em; }
+.pw-wordmark b { color: var(--color-brand-dark); }
+.pw-wordmark span { color: var(--color-brand-dark); font-weight: 400; }
+.pw-period { color: var(--color-brand-accent); font-weight: 700; }
+.pw-subtitle {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--color-text-muted);
+  margin-bottom: 28px;
+}
+.pw-label {
+  font-size: 12px; font-weight: 500; color: var(--color-text-secondary);
+  margin-bottom: 6px; display: block;
+}
+.pw-input {
+  width: 100%; padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px; font-size: 14px;
+  font-family: inherit; outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  margin-bottom: 10px;
+}
+.pw-input:focus {
+  border-color: var(--color-brand-mid);
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.12);
+}
+.pw-btn {
+  width: 100%; padding: 11px;
+  background: linear-gradient(135deg, var(--color-brand-mid), var(--color-brand-dark));
+  color: #fff; border: none; border-radius: 7px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: opacity 0.15s;
+}
+.pw-btn:hover { opacity: 0.9; }
+.pw-error {
+  display: none; font-size: 12px; color: #DC2626;
+  margin-bottom: 10px; padding: 7px 10px;
+  background: #FEE2E2; border-radius: 5px;
+}
+
+/* ── App Container ──────────────────────────────────────── */
+#main-app { display: none; }
+.rp-page { padding: 24px 16px 80px; min-height: 100vh; }
+.rp-container {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.lp-doc-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 16px;
+}
+.lp-wordmark {
+  font-size: 20px; letter-spacing: -0.02em;
+  display: flex; align-items: center;
+}
+.lp-glyph { color: var(--color-brand-dark); margin-right: 8px; display: flex; align-items: center; }
+.lp-text-bold { font-weight: 700; color: var(--color-brand-dark); }
+.lp-text-reg  { font-weight: 400; color: var(--color-brand-dark); }
+.lp-period    { color: var(--color-brand-accent); font-weight: 700; }
+.lp-tagline {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--color-text-secondary);
+}
+.rp-header-right { display: flex; align-items: center; gap: 16px; }
+.rp-logout-btn {
+  background: none; border: none; font-family: inherit;
+  font-size: 12px; color: var(--color-text-muted);
+  cursor: pointer; padding: 0;
+  transition: color 0.15s;
+}
+.rp-logout-btn:hover { color: var(--color-text-secondary); text-decoration: underline; }
+.lp-divider { border: 0; height: 1px; background: var(--color-border); margin: 0 0 20px 0; }
+
+/* ── Stats Row ──────────────────────────────────────────── */
+.rp-stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  margin-bottom: 20px;
+}
+@media (max-width: 640px) { .rp-stats-row { grid-template-columns: 1fr 1fr; } }
+.rp-stat-card {
+  background: var(--color-bg-main);
+  border: 1px solid var(--color-border);
+  border-radius: 8px; padding: 14px 16px;
+}
+.rp-stat-label {
+  font-size: 11px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--color-text-muted); margin-bottom: 4px;
+}
+.rp-stat-value {
+  font-size: 26px; font-weight: 700; color: var(--color-text-primary); line-height: 1;
+}
+.rp-stat-card.stat-new    .rp-stat-value { color: #1D4ED8; }
+.rp-stat-card.stat-review .rp-stat-value { color: #92400E; }
+.rp-stat-card.stat-contact .rp-stat-value { color: #065F46; }
+
+/* ── Filter Panel ───────────────────────────────────────── */
+.lp-filter-panel {
+  background: #fff; border: 1px solid var(--color-border);
+  border-radius: 10px; padding: 16px 20px; margin-bottom: 20px;
+}
+.lp-filter-search-row { margin-bottom: 14px; }
+.search-wrapper { position: relative; }
+.search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--color-text-muted); pointer-events: none;
+  display: flex; align-items: center;
+}
+.search-input {
+  width: 100%; box-sizing: border-box;
+  padding: 9px 12px 9px 36px;
+  border: 1px solid var(--color-border); border-radius: 6px;
+  font-size: 14px; font-family: inherit;
+  color: var(--color-text-primary); background: #F9FAFB;
+  transition: all 0.2s; outline: none;
+}
+.search-input:focus {
+  border-color: var(--color-brand-mid); background: #fff;
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+}
+.lp-chip-row {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap; margin-bottom: 8px;
+}
+.lp-chip-row:last-child { margin-bottom: 0; }
+.lp-chip-label {
+  font-size: 11px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--color-text-muted);
+  min-width: 70px; flex-shrink: 0;
+}
+.lp-chip-group { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+.chip-btn {
+  font-size: 12px; font-weight: 400; padding: 5px 11px;
+  border-radius: 999px; border: 0.5px solid var(--color-border);
+  background: #fff; color: var(--color-text-secondary);
+  cursor: pointer; font-family: inherit; white-space: nowrap;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.chip-btn:hover { border-color: var(--color-brand-mid); color: var(--color-brand-dark); }
+.chip-btn.active {
+  background: var(--color-brand-dark); border-color: var(--color-brand-dark);
+  color: #fff; font-weight: 500;
+}
+.lp-filter-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 10px; margin-top: 10px; border-top: 1px solid var(--color-border);
+}
+.rp-count-label { font-size: 12px; color: var(--color-text-muted); }
+.reset-btn {
+  background: none; border: none; color: var(--color-text-muted);
+  font-size: 12px; cursor: pointer; font-family: inherit;
+  padding: 0; transition: color 0.15s;
+}
+.reset-btn:hover { color: var(--color-brand-dark); text-decoration: underline; }
+
+/* ── Table ──────────────────────────────────────────────── */
+.lp-table-wrapper {
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--color-border); border-radius: 8px;
+  margin-bottom: 16px;
+}
+.lp-data-table {
+  width: 100%; min-width: 860px;
+  border-collapse: separate; border-spacing: 0;
+  font-size: 12.5px; text-align: left;
+}
+.lp-data-table th {
+  background: var(--color-brand-dark); color: #fff;
+  font-weight: 500; padding: 11px 12px;
+  white-space: nowrap; cursor: pointer;
+  user-select: none; transition: background 0.2s; font-size: 13px;
+}
+.lp-data-table th:hover { background: #11281E; }
+.lp-data-table th .sort-icon {
+  display: inline-flex; align-items: center; margin-left: 4px;
+  opacity: 0; transition: opacity 0.15s; vertical-align: middle;
+}
+.lp-data-table th:hover .sort-icon,
+.lp-data-table th.sort-asc .sort-icon,
+.lp-data-table th.sort-desc .sort-icon { opacity: 1; }
+.lp-data-table td {
+  padding: 14px 12px; border-bottom: 1px solid var(--color-border);
+  vertical-align: middle; background: #fff;
+}
+.lp-data-table tr:last-child td { border-bottom: none; }
+/* Sticky first col */
+.lp-data-table th:first-child,
+.lp-data-table td.rp-sticky-col {
+  position: sticky; left: 0; z-index: 10;
+  box-shadow: 2px 0 5px -2px rgba(0,0,0,0.08);
+  width: 210px; min-width: 180px; max-width: 210px;
+}
+.lp-data-table th:first-child { z-index: 11; background: var(--color-brand-dark) !important; }
+.lp-data-table td.rp-sticky-col { background: #fff; }
+
+/* Row interaction */
+.rp-row-interactive { cursor: pointer; transition: background 0.12s; }
+.rp-row-interactive:hover td { background: #F9FAFB !important; }
+.rp-row-interactive:hover td.rp-sticky-col {
+  background: #F9FAFB !important;
+  box-shadow: inset 3px 0 0 var(--color-brand-mid), 2px 0 5px -2px rgba(0,0,0,0.08);
+}
+.rp-row-interactive.rp-row-open td { background: #F0FDF4 !important; }
+.rp-row-interactive.rp-row-open td.rp-sticky-col {
+  background: #F0FDF4 !important;
+  box-shadow: inset 3px 0 0 var(--color-brand-accent), 2px 0 5px -2px rgba(0,0,0,0.08);
+}
+.rp-row-chevron {
+  display: flex; align-items: center; justify-content: center;
+  width: 18px; min-width: 18px; color: var(--color-text-muted);
+  transition: transform 0.2s, color 0.2s; flex-shrink: 0;
+}
+.rp-row-chevron.expanded { transform: rotate(90deg); color: var(--color-brand-mid); }
+.rp-company-cell { display: flex; align-items: center; gap: 8px; }
+.rp-company-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.rp-company-name {
+  font-weight: 600; color: var(--color-brand-dark); font-size: 13px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rp-title-name {
+  font-size: 11px; color: var(--color-text-secondary); font-weight: 400;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.num-col { text-align: right; }
+
+/* Detail drawer */
+.rp-detail-row { display: none; }
+.rp-detail-row.expanded { display: table-row; }
+.rp-detail-row td {
+  padding: 0 !important; background: transparent !important;
+  border-bottom: 1px solid var(--color-border);
+}
+.rp-detail-drawer {
+  padding: 20px 24px 24px;
+  margin: 10px 12px 18px;
+  background: #F0FDF4;
+  border: 1px solid rgba(45,106,79,0.12);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.8), 0 4px 12px rgba(0,0,0,0.03);
+  animation: slideDown 0.2s ease-out;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rp-detail-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+}
+@media (max-width: 700px) { .rp-detail-grid { grid-template-columns: 1fr; } }
+.detail-section {
+  background: #fff; border: 1px solid var(--color-border);
+  border-radius: 8px; padding: 14px 16px;
+}
+.detail-section.full-width { grid-column: 1 / -1; }
+.detail-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--color-brand-dark);
+  margin: 0 0 10px 0; padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex; align-items: center; gap: 5px;
+}
+.detail-item { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; font-size: 12.5px; }
+.detail-item:last-child { margin-bottom: 0; }
+.detail-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); }
+.detail-value { font-weight: 500; color: var(--color-text-primary); }
+.rp-link { color: var(--color-brand-mid); text-decoration: none; }
+.rp-link:hover { text-decoration: underline; }
+.rp-drawer-actions { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px; }
+
+/* Buttons */
+.rp-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 13px; border-radius: 6px; font-size: 12.5px;
+  font-weight: 500; font-family: inherit; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.15s; white-space: nowrap;
+}
+.rp-btn-secondary {
+  background: #fff; border-color: var(--color-border);
+  color: var(--color-text-secondary);
+}
+.rp-btn-secondary:hover { border-color: var(--color-brand-mid); color: var(--color-brand-dark); }
+.rp-btn-ghost {
+  background: #fff; border-color: var(--color-border);
+  color: var(--color-brand-mid);
+}
+.rp-btn-ghost:hover { background: #F0FDF4; border-color: var(--color-brand-accent); }
+.rp-btn-ghost:disabled { opacity: 0.45; cursor: not-allowed; }
+.rp-btn-danger {
+  background: #fff; border-color: #FECACA; color: #DC2626;
+}
+.rp-btn-danger:hover { background: #FEF2F2; border-color: #DC2626; }
+.rp-btn-primary {
+  background: linear-gradient(135deg, var(--color-brand-mid), var(--color-brand-dark));
+  color: #fff; border-color: transparent;
+}
+.rp-btn-primary:hover { opacity: 0.9; }
+.rp-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Badges ─────────────────────────────────────────────── */
+.rp-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: 4px; text-transform: uppercase;
+  white-space: nowrap; display: inline-block; border: 1px solid;
+}
+/* Status */
+.status-new       { background:#DBEAFE; color:#1D4ED8; border-color:#BFDBFE; }
+.status-reviewing { background:#FEF3C7; color:#92400E; border-color:#FDE68A; }
+.status-contacted { background:#D1FAE5; color:#065F46; border-color:#A7F3D0; }
+.status-passed    { background:#F3F4F6; color:#374151; border-color:#D1D5DB; }
+.status-closed    { background:#FEE2E2; color:#991B1B; border-color:#FECACA; }
+/* Type */
+.type-fulltime { background:#CCFBF1; color:#0D9488; border-color:#99F6E4; }
+.type-parttime { background:#F3E8FF; color:#7E22CE; border-color:#E9D5FF; }
+.type-contract { background:#FFEDD5; color:#C2410C; border-color:#FED7AA; }
+.type-remote   { background:#EEF2FF; color:#4338CA; border-color:#C7D2FE; }
+.type-hybrid   { background:#F1F5F9; color:#475569; border-color:#CBD5E1; }
+/* Platform */
+.plat-linkedin   { background:#DBEAFE; color:#1D4ED8; border-color:#BFDBFE; }
+.plat-indeed     { background:#E0E7FF; color:#3730A3; border-color:#C7D2FE; }
+.plat-zip        { background:#D1FAE5; color:#065F46; border-color:#A7F3D0; }
+.plat-glassdoor  { background:#ECFDF5; color:#059669; border-color:#A7F3D0; }
+.plat-direct     { background:#F9FAFB; color:#374151; border-color:#D1D5DB; }
+.plat-other      { background:#F3F4F6; color:#6B7280; border-color:#E5E7EB; }
+
+/* ── FAB ────────────────────────────────────────────────── */
+.lp-fab {
+  position: fixed; bottom: 28px; right: 28px;
+  background: linear-gradient(135deg, var(--color-brand-mid), var(--color-brand-dark));
+  color: #fff; border: none; border-radius: 999px;
+  padding: 12px 20px; font-size: 13.5px; font-weight: 600;
+  font-family: inherit; cursor: pointer; display: none;
+  align-items: center; gap: 6px;
+  box-shadow: 0 4px 16px rgba(26,60,46,0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 100;
+}
+.lp-fab:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,60,46,0.45); }
+
+/* ── Modals ─────────────────────────────────────────────── */
+.lp-modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 500;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.lp-modal-backdrop.open { display: flex; }
+.lp-modal {
+  background: #fff; border-radius: 12px;
+  width: 100%; max-width: 620px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  animation: modalIn 0.2s ease-out;
+}
+@keyframes modalIn {
+  from { opacity:0; transform: scale(0.97) translateY(-6px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+.rp-modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 24px 0;
+}
+.rp-modal-title { font-size: 16px; font-weight: 700; color: var(--color-brand-dark); margin: 0; }
+.rp-modal-close {
+  background: none; border: none; font-size: 20px;
+  cursor: pointer; color: var(--color-text-muted);
+  line-height: 1; padding: 4px; transition: color 0.15s;
+}
+.rp-modal-close:hover { color: var(--color-text-primary); }
+.rp-modal-body { padding: 16px 24px 24px; }
+.rp-form-section-title {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--color-text-muted);
+  margin: 16px 0 10px;
+}
+.rp-form-section-title:first-child { margin-top: 0; }
+.rp-form-row {
+  display: grid; gap: 10px; margin-bottom: 10px;
+}
+.rp-form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.rp-form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+@media (max-width: 540px) {
+  .rp-form-row.cols-2,
+  .rp-form-row.cols-3 { grid-template-columns: 1fr; }
+}
+.rp-field { display: flex; flex-direction: column; gap: 4px; }
+.rp-field label {
+  font-size: 12px; font-weight: 500; color: var(--color-text-secondary);
+}
+.rp-field label .req { color: #DC2626; margin-left: 2px; }
+.rp-field input,
+.rp-field select,
+.rp-field textarea {
+  padding: 8px 10px; border: 1px solid var(--color-border);
+  border-radius: 6px; font-size: 13px; font-family: inherit;
+  color: var(--color-text-primary); background: #fff;
+  outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.rp-field input:focus,
+.rp-field select:focus,
+.rp-field textarea:focus {
+  border-color: var(--color-brand-mid);
+  box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+}
+.rp-field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.rp-modal-footer {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 0 24px 20px;
+}
+
+/* Delete confirm modal */
+.lp-modal.rp-confirm-modal { max-width: 400px; }
+.rp-confirm-body { padding: 16px 24px 8px; }
+.rp-confirm-body p { font-size: 14px; color: var(--color-text-secondary); margin: 0 0 4px; }
+.rp-confirm-body strong { color: var(--color-text-primary); }
+
+/* ── Toast ──────────────────────────────────────────────── */
+#rp-toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: #1F2937; color: #fff; font-size: 13px; font-weight: 500;
+  padding: 10px 20px; border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s; z-index: 600; white-space: nowrap;
+}
+#rp-toast.visible { opacity: 1; }
+#rp-toast.toast-error { background: #DC2626; }
+
+/* ── Setup Banner ───────────────────────────────────────── */
+.rp-setup-banner {
+  background: #FEF3C7; border: 1px solid #FDE68A; border-radius: 8px;
+  padding: 12px 16px; margin-bottom: 16px; font-size: 13px;
+  color: #92400E; display: none;
+}
+.rp-setup-banner code {
+  background: rgba(0,0,0,0.08); padding: 1px 5px; border-radius: 3px;
+  font-family: monospace; font-size: 12px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ PASSWORD GATE ═══════════ -->
+<div id="pw-gate">
+  <div class="pw-card">
+    <div class="pw-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-dark)" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+        <path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/><path d="M9 9v6"/><path d="M9 15h4"/>
+      </svg>
+      <div class="pw-wordmark"><b>Lend</b><span>Paper</span><span class="pw-period">.</span></div>
+    </div>
+    <div class="pw-subtitle">Recruiter Portal</div>
+    <div id="pw-error" class="pw-error">Incorrect password. Try again.</div>
+    <label class="pw-label" for="pw-input">Password</label>
+    <input type="password" id="pw-input" class="pw-input" placeholder="Enter password" autocomplete="current-password">
+    <button class="pw-btn" id="pw-submit">Sign In</button>
+  </div>
+</div>
+
+<!-- ═══════════ MAIN APP ═══════════ -->
+<div id="main-app">
+  <div class="rp-page">
+    <div class="rp-container">
+
+      <!-- Header -->
+      <div class="lp-doc-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="lp-wordmark">
+            <span class="lp-glyph">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+                <path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/><path d="M9 9v6"/><path d="M9 15h4"/>
+              </svg>
+            </span>
+            <span class="lp-text-bold">Lend</span><span class="lp-text-reg">Paper</span><span class="lp-period">.</span>
+          </div>
+          <span class="lp-tagline">Recruiter Portal</span>
+        </div>
+        <div class="rp-header-right">
+          <button class="rp-logout-btn" id="logout-btn">Sign out</button>
+        </div>
+      </div>
+      <hr class="lp-divider">
+
+      <!-- Setup banner (shown if Supabase table missing) -->
+      <div class="rp-setup-banner" id="setup-banner">
+        <strong>Supabase setup needed.</strong> Run this in your Supabase SQL editor:
+        <br><br>
+        <code>CREATE TABLE job_postings (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, company text NOT NULL, title text NOT NULL, location text, earnings_min integer, earnings_max integer, earnings_note text, posted_date date, contact_name text, contact_phone text, contact_email text, source_url text, source_platform text DEFAULT 'Other', job_type text DEFAULT 'Full-time', status text DEFAULT 'New', summary text, notes text, created_at timestamptz DEFAULT now());</code>
+        <br><br>
+        <code>ALTER TABLE job_postings ENABLE ROW LEVEL SECURITY; CREATE POLICY "Public access" ON job_postings FOR ALL USING (true) WITH CHECK (true);</code>
+      </div>
+
+      <!-- Stats -->
+      <div class="rp-stats-row">
+        <div class="rp-stat-card">
+          <div class="rp-stat-label">Total</div>
+          <div class="rp-stat-value" id="stat-total">—</div>
+        </div>
+        <div class="rp-stat-card stat-new">
+          <div class="rp-stat-label">New</div>
+          <div class="rp-stat-value" id="stat-new">—</div>
+        </div>
+        <div class="rp-stat-card stat-review">
+          <div class="rp-stat-label">Reviewing</div>
+          <div class="rp-stat-value" id="stat-reviewing">—</div>
+        </div>
+        <div class="rp-stat-card stat-contact">
+          <div class="rp-stat-label">Contacted</div>
+          <div class="rp-stat-value" id="stat-contacted">—</div>
+        </div>
+      </div>
+
+      <!-- Filter Panel -->
+      <div class="lp-filter-panel">
+        <div class="lp-filter-search-row">
+          <div class="search-wrapper">
+            <span class="search-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
+            <input type="text" id="search-input" class="search-input" placeholder="Search company, title, location, contact…">
+          </div>
+        </div>
+        <div class="lp-chip-row">
+          <span class="lp-chip-label">Status</span>
+          <div class="lp-chip-group" id="status-chips">
+            <button class="chip-btn active" data-filter="status" data-val="All">All</button>
+            <button class="chip-btn" data-filter="status" data-val="New">New</button>
+            <button class="chip-btn" data-filter="status" data-val="Reviewing">Reviewing</button>
+            <button class="chip-btn" data-filter="status" data-val="Contacted">Contacted</button>
+            <button class="chip-btn" data-filter="status" data-val="Passed">Passed</button>
+            <button class="chip-btn" data-filter="status" data-val="Closed">Closed</button>
+          </div>
+        </div>
+        <div class="lp-chip-row">
+          <span class="lp-chip-label">Type</span>
+          <div class="lp-chip-group" id="type-chips">
+            <button class="chip-btn active" data-filter="type" data-val="All">All</button>
+            <button class="chip-btn" data-filter="type" data-val="Full-time">Full-time</button>
+            <button class="chip-btn" data-filter="type" data-val="Part-time">Part-time</button>
+            <button class="chip-btn" data-filter="type" data-val="Contract">Contract</button>
+            <button class="chip-btn" data-filter="type" data-val="Remote">Remote</button>
+            <button class="chip-btn" data-filter="type" data-val="Hybrid">Hybrid</button>
+          </div>
+        </div>
+        <div class="lp-chip-row">
+          <span class="lp-chip-label">Platform</span>
+          <div class="lp-chip-group" id="platform-chips">
+            <button class="chip-btn active" data-filter="platform" data-val="All">All</button>
+            <button class="chip-btn" data-filter="platform" data-val="LinkedIn">LinkedIn</button>
+            <button class="chip-btn" data-filter="platform" data-val="Indeed">Indeed</button>
+            <button class="chip-btn" data-filter="platform" data-val="ZipRecruiter">ZipRecruiter</button>
+            <button class="chip-btn" data-filter="platform" data-val="Glassdoor">Glassdoor</button>
+            <button class="chip-btn" data-filter="platform" data-val="Direct">Direct</button>
+            <button class="chip-btn" data-filter="platform" data-val="Other">Other</button>
+          </div>
+        </div>
+        <div class="lp-filter-footer">
+          <span class="rp-count-label" id="rp-count"></span>
+          <button class="reset-btn" id="reset-filters">Reset filters</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="lp-table-wrapper">
+        <table class="lp-data-table">
+          <thead>
+            <tr>
+              <th data-sort="company">Company / Title <span class="sort-icon">↕</span></th>
+              <th data-sort="location">Location <span class="sort-icon">↕</span></th>
+              <th data-sort="earnings_min" class="num-col">Earnings <span class="sort-icon">↕</span></th>
+              <th>Type</th>
+              <th>Platform</th>
+              <th data-sort="posted_date">Posted <span class="sort-icon">↕</span></th>
+              <th data-sort="contact_name">Contact <span class="sort-icon">↕</span></th>
+              <th data-sort="status">Status <span class="sort-icon">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="rp-tbody">
+            <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--color-text-muted);">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="font-size:11px;color:var(--color-text-muted);text-align:right;padding-bottom:4px;">
+        Private &amp; confidential — not indexed by search engines
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="lp-fab" id="fab-btn">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  Add Posting
+</button>
+
+<!-- ═══════════ ADD / EDIT MODAL ═══════════ -->
+<div class="lp-modal-backdrop" id="posting-modal-backdrop">
+  <div class="lp-modal">
+    <div class="rp-modal-header">
+      <h3 class="rp-modal-title" id="modal-title">Add Posting</h3>
+      <button class="rp-modal-close" id="posting-modal-close">&times;</button>
+    </div>
+    <div class="rp-modal-body">
+
+      <div class="rp-form-section-title">Basic Info</div>
+      <div class="rp-form-row">
+        <div class="rp-field">
+          <label for="f-company">Company <span class="req">*</span></label>
+          <input type="text" id="f-company" placeholder="e.g. Acme Corp">
+        </div>
+      </div>
+      <div class="rp-form-row">
+        <div class="rp-field">
+          <label for="f-title">Job Title <span class="req">*</span></label>
+          <input type="text" id="f-title" placeholder="e.g. Senior Account Executive">
+        </div>
+      </div>
+      <div class="rp-form-row cols-2">
+        <div class="rp-field">
+          <label for="f-location">Location</label>
+          <input type="text" id="f-location" placeholder="e.g. Austin, TX or Remote">
+        </div>
+        <div class="rp-field">
+          <label for="f-posted-date">Posted Date</label>
+          <input type="date" id="f-posted-date">
+        </div>
+      </div>
+
+      <div class="rp-form-section-title">Compensation</div>
+      <div class="rp-form-row cols-3">
+        <div class="rp-field">
+          <label for="f-earn-min">Min (annual $)</label>
+          <input type="number" id="f-earn-min" placeholder="60000" min="0">
+        </div>
+        <div class="rp-field">
+          <label for="f-earn-max">Max (annual $)</label>
+          <input type="number" id="f-earn-max" placeholder="90000" min="0">
+        </div>
+        <div class="rp-field">
+          <label for="f-earn-note">Note</label>
+          <input type="text" id="f-earn-note" placeholder="+ commission">
+        </div>
+      </div>
+
+      <div class="rp-form-section-title">Classification</div>
+      <div class="rp-form-row cols-3">
+        <div class="rp-field">
+          <label for="f-job-type">Job Type</label>
+          <select id="f-job-type">
+            <option>Full-time</option>
+            <option>Part-time</option>
+            <option>Contract</option>
+            <option>Remote</option>
+            <option>Hybrid</option>
+          </select>
+        </div>
+        <div class="rp-field">
+          <label for="f-platform">Platform</label>
+          <select id="f-platform">
+            <option>LinkedIn</option>
+            <option>Indeed</option>
+            <option>ZipRecruiter</option>
+            <option>Glassdoor</option>
+            <option>Direct</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="rp-field">
+          <label for="f-status">Status</label>
+          <select id="f-status">
+            <option>New</option>
+            <option>Reviewing</option>
+            <option>Contacted</option>
+            <option>Passed</option>
+            <option>Closed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="rp-form-section-title">Contact Info</div>
+      <div class="rp-form-row cols-3">
+        <div class="rp-field">
+          <label for="f-contact-name">Name</label>
+          <input type="text" id="f-contact-name" placeholder="Hiring manager">
+        </div>
+        <div class="rp-field">
+          <label for="f-contact-phone">Phone</label>
+          <input type="tel" id="f-contact-phone" placeholder="555-555-5555">
+        </div>
+        <div class="rp-field">
+          <label for="f-contact-email">Email</label>
+          <input type="email" id="f-contact-email" placeholder="name@company.com">
+        </div>
+      </div>
+      <div class="rp-form-row">
+        <div class="rp-field">
+          <label for="f-source-url">Source URL</label>
+          <input type="url" id="f-source-url" placeholder="https://linkedin.com/jobs/…">
+        </div>
+      </div>
+
+      <div class="rp-form-section-title">Details</div>
+      <div class="rp-form-row">
+        <div class="rp-field">
+          <label for="f-summary">Summary</label>
+          <textarea id="f-summary" placeholder="Key responsibilities, requirements, perks…"></textarea>
+        </div>
+      </div>
+      <div class="rp-form-row">
+        <div class="rp-field">
+          <label for="f-notes">Internal Notes</label>
+          <textarea id="f-notes" placeholder="Your private notes on this posting…"></textarea>
+        </div>
+      </div>
+
+    </div>
+    <div class="rp-modal-footer">
+      <button class="rp-btn rp-btn-secondary" id="posting-modal-cancel">Cancel</button>
+      <button class="rp-btn rp-btn-primary" id="posting-modal-save">Save Posting</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DELETE CONFIRM MODAL ═══════════ -->
+<div class="lp-modal-backdrop" id="delete-modal-backdrop">
+  <div class="lp-modal rp-confirm-modal">
+    <div class="rp-modal-header">
+      <h3 class="rp-modal-title">Delete posting?</h3>
+      <button class="rp-modal-close" id="delete-modal-close">&times;</button>
+    </div>
+    <div class="rp-confirm-body">
+      <p>This will permanently remove <strong id="delete-label"></strong> from the dashboard.</p>
+    </div>
+    <div class="rp-modal-footer">
+      <button class="rp-btn rp-btn-secondary" id="delete-cancel">Cancel</button>
+      <button class="rp-btn rp-btn-danger" id="delete-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="rp-toast"></div>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   CONFIG
+   To change the password:
+     1. Run: echo -n "yournewpassword" | shasum -a 256
+     2. Paste the hash into PASS_HASH below.
+   Default password: recruiter2025
+   ════════════════════════════════════════════════════════ */
+const PASS_HASH    = '271337b58d4d93f37d3668beb121535fed4867d44d5c80037549f4ed466c7632';
+const SUPABASE_URL = 'https://arpquyoucdsdmbetgftj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_R18l5zBtRQ1CkSGNBkgZkg_dVVBldlb';
+const TABLE        = 'job_postings';
+
+/* ──────────────────────────────────────────────────────
+   AUTH
+────────────────────────────────────────────────────── */
+async function hashPw(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function tryLogin() {
+  const input = document.getElementById('pw-input').value.trim();
+  if (!input) return;
+  const h = await hashPw(input);
+  if (h === PASS_HASH) {
+    sessionStorage.setItem('rp_auth','1');
+    showApp();
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function checkAuth() {
+  if (sessionStorage.getItem('rp_auth') === '1') showApp();
+}
+
+function showApp() {
+  document.getElementById('pw-gate').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('fab-btn').style.display = 'inline-flex';
+  loadPostings();
+}
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  sessionStorage.removeItem('rp_auth');
+  location.reload();
+});
+
+document.getElementById('pw-submit').addEventListener('click', tryLogin);
+document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+/* ──────────────────────────────────────────────────────
+   SUPABASE
+────────────────────────────────────────────────────── */
+async function sbFetch(method, path, body = null) {
+  const headers = {
+    'Content-Type':  'application/json',
+    'apikey':        SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+  };
+  if (method === 'POST' || method === 'PATCH') headers['Prefer'] = 'return=representation';
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, opts);
+  if (!r.ok) {
+    const txt = await r.text();
+    throw new Error(txt);
+  }
+  if (r.status === 204) return null;
+  return r.json();
+}
+
+async function loadPostings() {
+  try {
+    const data = await sbFetch('GET', `${TABLE}?select=*&order=created_at.desc`);
+    allPostings = data || [];
+    document.getElementById('setup-banner').style.display = 'none';
+    renderStats();
+    renderTable();
+  } catch(e) {
+    console.error(e);
+    const msg = e.message || '';
+    if (msg.includes('relation') || msg.includes('does not exist') || msg.includes('42P01')) {
+      document.getElementById('setup-banner').style.display = 'block';
+    }
+    document.getElementById('rp-tbody').innerHTML =
+      `<tr><td colspan="8" style="text-align:center;padding:40px;color:#DC2626;">
+        Could not load data. Check console for details.
+      </td></tr>`;
+  }
+}
+
+/* ──────────────────────────────────────────────────────
+   STATE
+────────────────────────────────────────────────────── */
+let allPostings = [];
+let filters = { search: '', status: 'All', type: 'All', platform: 'All' };
+let sortState = { col: 'created_at', dir: 'desc' };
+let expandedId = null;
+let deletePendingId = null;
+let editingId = null;
+
+/* ──────────────────────────────────────────────────────
+   BADGE / FORMAT HELPERS
+────────────────────────────────────────────────────── */
+const STATUS_MAP = {
+  'New':'status-new','Reviewing':'status-reviewing','Contacted':'status-contacted',
+  'Passed':'status-passed','Closed':'status-closed'
+};
+const TYPE_MAP = {
+  'Full-time':'type-fulltime','Part-time':'type-parttime','Contract':'type-contract',
+  'Remote':'type-remote','Hybrid':'type-hybrid'
+};
+const PLATFORM_MAP = {
+  'LinkedIn':'plat-linkedin','Indeed':'plat-indeed','ZipRecruiter':'plat-zip',
+  'Glassdoor':'plat-glassdoor','Direct':'plat-direct','Other':'plat-other'
+};
+
+function badge(map, val) {
+  const cls = map[val] || 'plat-other';
+  return `<span class="rp-badge ${cls}">${esc(val || '—')}</span>`;
+}
+
+function fmtEarnings(p) {
+  const fmt = n => n >= 1000 ? `$${Math.round(n/1000)}k` : `$${n}`;
+  if (p.earnings_min && p.earnings_max) return `${fmt(p.earnings_min)}–${fmt(p.earnings_max)}${p.earnings_note ? ' '+p.earnings_note : ''}`;
+  if (p.earnings_min) return `${fmt(p.earnings_min)}+${p.earnings_note ? ' '+p.earnings_note : ''}`;
+  if (p.earnings_max) return `Up to ${fmt(p.earnings_max)}${p.earnings_note ? ' '+p.earnings_note : ''}`;
+  if (p.earnings_note) return p.earnings_note;
+  return '—';
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'2-digit' });
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                  .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+/* ──────────────────────────────────────────────────────
+   STATS
+────────────────────────────────────────────────────── */
+function renderStats() {
+  const counts = {};
+  allPostings.forEach(p => counts[p.status] = (counts[p.status]||0)+1);
+  document.getElementById('stat-total').textContent     = allPostings.length;
+  document.getElementById('stat-new').textContent       = counts['New']       || 0;
+  document.getElementById('stat-reviewing').textContent = counts['Reviewing'] || 0;
+  document.getElementById('stat-contacted').textContent = counts['Contacted'] || 0;
+}
+
+/* ──────────────────────────────────────────────────────
+   FILTER + SORT
+────────────────────────────────────────────────────── */
+const STATUS_ORDER = ['New','Reviewing','Contacted','Passed','Closed'];
+
+function getFiltered() {
+  let d = [...allPostings];
+  const q = filters.search.toLowerCase();
+  if (q) d = d.filter(p =>
+    (p.company||'').toLowerCase().includes(q) ||
+    (p.title||'').toLowerCase().includes(q) ||
+    (p.location||'').toLowerCase().includes(q) ||
+    (p.contact_name||'').toLowerCase().includes(q)
+  );
+  if (filters.status   !== 'All') d = d.filter(p => p.status         === filters.status);
+  if (filters.type     !== 'All') d = d.filter(p => p.job_type       === filters.type);
+  if (filters.platform !== 'All') d = d.filter(p => p.source_platform=== filters.platform);
+
+  const { col, dir } = sortState;
+  d.sort((a, b) => {
+    let av = a[col], bv = b[col];
+    if (col === 'status') {
+      av = STATUS_ORDER.indexOf(av); bv = STATUS_ORDER.indexOf(bv);
+    } else {
+      av = av == null ? '' : av;
+      bv = bv == null ? '' : bv;
+      if (typeof av === 'string') av = av.toLowerCase();
+      if (typeof bv === 'string') bv = bv.toLowerCase();
+    }
+    if (av < bv) return dir === 'asc' ? -1 : 1;
+    if (av > bv) return dir === 'asc' ? 1  : -1;
+    return 0;
+  });
+  return d;
+}
+
+/* ──────────────────────────────────────────────────────
+   RENDER TABLE
+────────────────────────────────────────────────────── */
+function renderTable() {
+  const data = getFiltered();
+  const tbody = document.getElementById('rp-tbody');
+  document.getElementById('rp-count').textContent =
+    `${data.length} posting${data.length !== 1 ? 's' : ''}`;
+
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:48px 20px;color:var(--color-text-muted);">
+      No postings match your filters. <button class="reset-btn" onclick="resetFilters()" style="color:var(--color-brand-mid);">Clear filters</button> or add one with the + button.
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = data.map(p => {
+    const open = expandedId === p.id;
+    const hasContact = p.contact_name || p.contact_email || p.contact_phone;
+    return `
+<tr class="rp-row-interactive${open ? ' rp-row-open' : ''}" data-id="${esc(p.id)}">
+  <td class="rp-sticky-col">
+    <div class="rp-company-cell">
+      <span class="rp-row-chevron${open ? ' expanded' : ''}">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </span>
+      <div class="rp-company-info">
+        <div class="rp-company-name">${esc(p.company)}</div>
+        <div class="rp-title-name">${esc(p.title)}</div>
+      </div>
+    </div>
+  </td>
+  <td>${p.location ? esc(p.location) : '<span style="color:var(--color-text-muted)">—</span>'}</td>
+  <td class="num-col" style="white-space:nowrap;font-size:12px;">${fmtEarnings(p)}</td>
+  <td>${badge(TYPE_MAP, p.job_type)}</td>
+  <td>${badge(PLATFORM_MAP, p.source_platform)}</td>
+  <td style="white-space:nowrap;font-size:12px;">${fmtDate(p.posted_date)}</td>
+  <td style="font-size:12px;">${hasContact ? esc(p.contact_name || p.contact_email || '') : '<span style="color:var(--color-text-muted)">—</span>'}</td>
+  <td>${badge(STATUS_MAP, p.status)}</td>
+</tr>
+<tr class="rp-detail-row${open ? ' expanded' : ''}" data-detail="${esc(p.id)}">
+  <td colspan="8">${open ? drawerHtml(p) : ''}</td>
+</tr>`;
+  }).join('');
+
+  // update sort icons
+  document.querySelectorAll('.lp-data-table th[data-sort]').forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+    if (th.dataset.sort === sortState.col) {
+      th.classList.add(sortState.dir === 'asc' ? 'sort-asc' : 'sort-desc');
+      const icon = th.querySelector('.sort-icon');
+      if (icon) icon.textContent = sortState.dir === 'asc' ? '↑' : '↓';
+    }
+  });
+}
+
+function drawerHtml(p) {
+  const hasContact = p.contact_name || p.contact_phone || p.contact_email;
+  return `
+<div class="rp-detail-drawer">
+  <div class="rp-detail-grid">
+
+    <div class="detail-section">
+      <div class="detail-title">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Job Details
+      </div>
+      <div class="detail-item"><span class="detail-label">Location</span><span class="detail-value">${esc(p.location||'—')}</span></div>
+      <div class="detail-item"><span class="detail-label">Earnings</span><span class="detail-value">${fmtEarnings(p)}</span></div>
+      <div class="detail-item"><span class="detail-label">Type</span><span class="detail-value">${badge(TYPE_MAP, p.job_type)}</span></div>
+      <div class="detail-item"><span class="detail-label">Platform</span><span class="detail-value">${badge(PLATFORM_MAP, p.source_platform)}</span></div>
+      <div class="detail-item"><span class="detail-label">Posted</span><span class="detail-value">${fmtDate(p.posted_date)}</span></div>
+      ${p.source_url ? `<div class="detail-item"><span class="detail-label">Source</span><span class="detail-value"><a href="${esc(p.source_url)}" target="_blank" rel="noopener noreferrer" class="rp-link">View posting ↗</a></span></div>` : ''}
+      <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value">${badge(STATUS_MAP, p.status)}</span></div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-title">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Contact
+      </div>
+      ${hasContact ? `
+        ${p.contact_name  ? `<div class="detail-item"><span class="detail-label">Name</span><span class="detail-value">${esc(p.contact_name)}</span></div>` : ''}
+        ${p.contact_phone ? `<div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value"><a href="tel:${esc(p.contact_phone)}" class="rp-link">${esc(p.contact_phone)}</a></span></div>` : ''}
+        ${p.contact_email ? `<div class="detail-item"><span class="detail-label">Email</span><span class="detail-value"><a href="mailto:${esc(p.contact_email)}" class="rp-link">${esc(p.contact_email)}</a></span></div>` : ''}
+      ` : '<div style="font-size:12px;color:var(--color-text-muted);font-style:italic;">No contact info added.</div>'}
+
+      <div class="detail-title" style="margin-top:16px;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Summary
+      </div>
+      ${p.summary
+        ? `<div style="font-size:12.5px;color:var(--color-text-secondary);line-height:1.6;">${esc(p.summary)}</div>`
+        : `<div style="font-size:12px;color:var(--color-text-muted);font-style:italic;">No summary added.</div>`}
+    </div>
+
+    <div class="detail-section full-width">
+      <div class="detail-title">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Internal Notes
+      </div>
+      ${p.notes
+        ? `<div style="font-size:12.5px;color:var(--color-text-secondary);line-height:1.6;white-space:pre-wrap;">${esc(p.notes)}</div>`
+        : `<div style="font-size:12px;color:var(--color-text-muted);font-style:italic;">No notes. Edit to add.</div>`}
+    </div>
+
+  </div>
+  <div class="rp-drawer-actions">
+    <button class="rp-btn rp-btn-ghost" data-action="contacted" data-id="${esc(p.id)}" ${p.status==='Contacted'?'disabled':''}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 12 19.79 19.79 0 0 1 1.14 3.4 2 2 0 0 1 3.11 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      Mark Contacted
+    </button>
+    <button class="rp-btn rp-btn-secondary" data-action="edit" data-id="${esc(p.id)}">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Edit
+    </button>
+    <button class="rp-btn rp-btn-danger" data-action="delete" data-id="${esc(p.id)}" data-label="${esc(p.company)} — ${esc(p.title)}">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      Delete
+    </button>
+  </div>
+</div>`;
+}
+
+/* ──────────────────────────────────────────────────────
+   TABLE INTERACTIONS
+────────────────────────────────────────────────────── */
+document.getElementById('rp-tbody').addEventListener('click', function(e) {
+  // Button actions inside drawer
+  const btn = e.target.closest('[data-action]');
+  if (btn) {
+    e.stopPropagation();
+    const { action, id, label } = btn.dataset;
+    if (action === 'edit')      openEditModal(id);
+    if (action === 'delete')    openDeleteModal(id, label);
+    if (action === 'contacted') quickStatus(id, 'Contacted');
+    return;
+  }
+  // Row click = expand/collapse
+  const row = e.target.closest('.rp-row-interactive');
+  if (row) toggleRow(row.dataset.id);
+});
+
+function toggleRow(id) {
+  expandedId = expandedId === id ? null : id;
+  renderTable();
+}
+
+// Sort headers
+document.querySelectorAll('.lp-data-table th[data-sort]').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.sort;
+    if (sortState.col === col) {
+      sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortState.col = col;
+      sortState.dir = 'asc';
+    }
+    renderTable();
+  });
+});
+
+/* ──────────────────────────────────────────────────────
+   FILTERS
+────────────────────────────────────────────────────── */
+document.getElementById('search-input').addEventListener('input', function() {
+  filters.search = this.value;
+  renderTable();
+});
+
+document.querySelectorAll('.chip-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const group = this.dataset.filter;
+    const val   = this.dataset.val;
+    filters[group] = val;
+    // update active state in that group
+    document.querySelectorAll(`.chip-btn[data-filter="${group}"]`).forEach(b => {
+      b.classList.toggle('active', b.dataset.val === val);
+    });
+    renderTable();
+  });
+});
+
+function resetFilters() {
+  filters = { search: '', status: 'All', type: 'All', platform: 'All' };
+  document.getElementById('search-input').value = '';
+  document.querySelectorAll('.chip-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.val === 'All');
+  });
+  renderTable();
+}
+document.getElementById('reset-filters').addEventListener('click', resetFilters);
+
+/* ──────────────────────────────────────────────────────
+   ADD / EDIT MODAL
+────────────────────────────────────────────────────── */
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Add Posting';
+  document.getElementById('posting-modal-save').textContent = 'Save Posting';
+  clearForm();
+  document.getElementById('posting-modal-backdrop').classList.add('open');
+}
+
+function openEditModal(id) {
+  const p = allPostings.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = 'Edit Posting';
+  document.getElementById('posting-modal-save').textContent = 'Save Changes';
+  fillForm(p);
+  document.getElementById('posting-modal-backdrop').classList.add('open');
+}
+
+function closePostingModal() {
+  document.getElementById('posting-modal-backdrop').classList.remove('open');
+  editingId = null;
+}
+
+function clearForm() {
+  ['f-company','f-title','f-location','f-earn-min','f-earn-max',
+   'f-earn-note','f-contact-name','f-contact-phone','f-contact-email',
+   'f-source-url','f-summary','f-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-posted-date').value = '';
+  document.getElementById('f-job-type').value  = 'Full-time';
+  document.getElementById('f-platform').value  = 'LinkedIn';
+  document.getElementById('f-status').value    = 'New';
+}
+
+function fillForm(p) {
+  document.getElementById('f-company').value      = p.company || '';
+  document.getElementById('f-title').value        = p.title || '';
+  document.getElementById('f-location').value     = p.location || '';
+  document.getElementById('f-posted-date').value  = p.posted_date || '';
+  document.getElementById('f-earn-min').value     = p.earnings_min || '';
+  document.getElementById('f-earn-max').value     = p.earnings_max || '';
+  document.getElementById('f-earn-note').value    = p.earnings_note || '';
+  document.getElementById('f-job-type').value     = p.job_type || 'Full-time';
+  document.getElementById('f-platform').value     = p.source_platform || 'LinkedIn';
+  document.getElementById('f-status').value       = p.status || 'New';
+  document.getElementById('f-contact-name').value = p.contact_name || '';
+  document.getElementById('f-contact-phone').value= p.contact_phone || '';
+  document.getElementById('f-contact-email').value= p.contact_email || '';
+  document.getElementById('f-source-url').value   = p.source_url || '';
+  document.getElementById('f-summary').value      = p.summary || '';
+  document.getElementById('f-notes').value        = p.notes || '';
+}
+
+function readForm() {
+  const g = id => document.getElementById(id).value.trim();
+  return {
+    company:         g('f-company'),
+    title:           g('f-title'),
+    location:        g('f-location') || null,
+    posted_date:     g('f-posted-date') || null,
+    earnings_min:    g('f-earn-min') ? parseInt(g('f-earn-min')) : null,
+    earnings_max:    g('f-earn-max') ? parseInt(g('f-earn-max')) : null,
+    earnings_note:   g('f-earn-note') || null,
+    job_type:        g('f-job-type'),
+    source_platform: g('f-platform'),
+    status:          g('f-status'),
+    contact_name:    g('f-contact-name') || null,
+    contact_phone:   g('f-contact-phone') || null,
+    contact_email:   g('f-contact-email') || null,
+    source_url:      g('f-source-url') || null,
+    summary:         g('f-summary') || null,
+    notes:           g('f-notes') || null,
+  };
+}
+
+document.getElementById('fab-btn').addEventListener('click', openAddModal);
+document.getElementById('posting-modal-close').addEventListener('click', closePostingModal);
+document.getElementById('posting-modal-cancel').addEventListener('click', closePostingModal);
+document.getElementById('posting-modal-backdrop').addEventListener('click', function(e) {
+  if (e.target === this) closePostingModal();
+});
+
+document.getElementById('posting-modal-save').addEventListener('click', async function() {
+  const data = readForm();
+  if (!data.company) { toast('Company is required.', true); document.getElementById('f-company').focus(); return; }
+  if (!data.title)   { toast('Job title is required.', true); document.getElementById('f-title').focus(); return; }
+
+  this.disabled = true;
+  this.textContent = 'Saving…';
+  try {
+    if (editingId) {
+      const { id: _, created_at: __, ...fields } = data;
+      await sbFetch('PATCH', `${TABLE}?id=eq.${editingId}`, fields);
+      toast('Posting updated.');
+    } else {
+      await sbFetch('POST', TABLE, data);
+      toast('Posting added.');
+    }
+    closePostingModal();
+    await loadPostings();
+  } catch(e) {
+    console.error(e);
+    toast('Save failed. Check console.', true);
+  } finally {
+    this.disabled = false;
+    this.textContent = editingId ? 'Save Changes' : 'Save Posting';
+  }
+});
+
+/* ──────────────────────────────────────────────────────
+   DELETE MODAL
+────────────────────────────────────────────────────── */
+function openDeleteModal(id, label) {
+  deletePendingId = id;
+  document.getElementById('delete-label').textContent = label;
+  document.getElementById('delete-modal-backdrop').classList.add('open');
+}
+
+function closeDeleteModal() {
+  deletePendingId = null;
+  document.getElementById('delete-modal-backdrop').classList.remove('open');
+}
+
+document.getElementById('delete-modal-close').addEventListener('click', closeDeleteModal);
+document.getElementById('delete-cancel').addEventListener('click', closeDeleteModal);
+document.getElementById('delete-modal-backdrop').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+document.getElementById('delete-confirm').addEventListener('click', async function() {
+  if (!deletePendingId) return;
+  this.disabled = true;
+  this.textContent = 'Deleting…';
+  try {
+    await sbFetch('DELETE', `${TABLE}?id=eq.${deletePendingId}`);
+    expandedId = null;
+    closeDeleteModal();
+    await loadPostings();
+    toast('Posting deleted.');
+  } catch(e) {
+    console.error(e);
+    toast('Delete failed. Check console.', true);
+  } finally {
+    this.disabled = false;
+    this.textContent = 'Delete';
+  }
+});
+
+/* ──────────────────────────────────────────────────────
+   QUICK STATUS
+────────────────────────────────────────────────────── */
+async function quickStatus(id, status) {
+  try {
+    await sbFetch('PATCH', `${TABLE}?id=eq.${id}`, { status });
+    await loadPostings();
+    toast(`Marked as ${status}.`);
+  } catch(e) {
+    toast('Update failed.', true);
+  }
+}
+
+/* ──────────────────────────────────────────────────────
+   TOAST
+────────────────────────────────────────────────────── */
+let toastTimer;
+function toast(msg, isError = false) {
+  const el = document.getElementById('rp-toast');
+  el.textContent = msg;
+  el.classList.toggle('toast-error', isError);
+  el.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('visible'), 2800);
+}
+
+/* ──────────────────────────────────────────────────────
+   KEYBOARD
+────────────────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('posting-modal-backdrop').classList.contains('open')) closePostingModal();
+    if (document.getElementById('delete-modal-backdrop').classList.contains('open')) closeDeleteModal();
+  }
+});
+
+/* ──────────────────────────────────────────────────────
+   INIT
+────────────────────────────────────────────────────── */
+checkAuth();
+</script>
+</body>
+</html>
