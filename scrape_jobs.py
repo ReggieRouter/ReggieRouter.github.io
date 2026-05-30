@@ -9,7 +9,7 @@ Cron (weekly, Mondays 6:30am):
     30 6 * * 1 cd ~/Desktop/LendPaper && python3 scrape_jobs.py >> logs/jobs.log 2>&1
 
 Requirements:
-    pip install anthropic requests
+    pip install anthropic requests psycopg2-binary
     export ANTHROPIC_API_KEY=...
     export GMAIL_APP_PASSWORD=...
 """
@@ -39,6 +39,12 @@ except ImportError:
     print("ERROR: pip install requests", file=sys.stderr)
     sys.exit(1)
 
+try:
+    import psycopg2
+except ImportError:
+    print("ERROR: pip install psycopg2-binary", file=sys.stderr)
+    sys.exit(1)
+
 # ── Config ─────────────────────────────────────────────────────────────────────
 
 SUPABASE_URL       = "https://arpquyoucdsdmbetgftj.supabase.co"
@@ -50,7 +56,7 @@ SENDER_EMAIL       = "stephengowa@gmail.com"
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
 ANTHROPIC_API_KEY  = os.environ.get("ANTHROPIC_API_KEY", "")
 
-WATERFALL_HTML     = Path(__file__).parent / "waterfall.html"
+PG_DSN             = "host=localhost dbname=lendpaper_local user=stevegowa"
 LOG_DIR            = Path(__file__).parent / "logs"
 
 FETCH_TIMEOUT      = 14
@@ -234,11 +240,19 @@ def insert_posting(row: dict) -> bool:
 # ── Lender data ────────────────────────────────────────────────────────────────
 
 def load_lenders() -> list:
-    text = WATERFALL_HTML.read_text(encoding="utf-8")
-    m = re.search(r'const lenderData\s*=\s*(\[.*?\]);', text, re.DOTALL)
-    if not m:
-        raise ValueError("Could not find lenderData in waterfall.html")
-    return json.loads(m.group(1))
+    """Read lender names and URLs from underwriting_rules in local Postgres."""
+    conn = psycopg2.connect(PG_DSN)
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT lender_name, source_url
+                FROM underwriting_rules
+                WHERE source_url IS NOT NULL AND source_url != ''
+                ORDER BY lender_name
+            """)
+            return [{"name": row[0], "source_url": row[1]} for row in cur.fetchall()]
+    finally:
+        conn.close()
 
 
 # ── Email ──────────────────────────────────────────────────────────────────────
