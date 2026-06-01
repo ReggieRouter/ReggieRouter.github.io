@@ -2361,14 +2361,6 @@
               <h6 style="margin-bottom:6px;">Lender type</h6>
               <div id="legend-lender-types"></div>
             </div>
-              <div id="legend-loc-types" style="display:none;margin-top:14px;">
-                <h6 style="margin-bottom:6px;">Line of Credit type</h6>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                  <span style="font-size:11px;background:#EFF6FF;color:#1D4ED8;border:0.5px solid #BFDBFE;border-radius:3px;padding:2px 7px;">Revolving</span>
-                  <span style="font-size:11px;background:#F5F3FF;color:#6D28D9;border:0.5px solid #DDD6FE;border-radius:3px;padding:2px 7px;">Traditional</span>
-                  <span style="font-size:11px;color:var(--color-text-muted);">— shown in expanded row</span>
-                </div>
-              </div>
           </div>
         </span>
         <span class="lp-risk-key" aria-hidden="true" style="display:none;">
@@ -6866,7 +6858,7 @@
         let productBreakdownHtml = '';
         if (pc.length > 0) {
           const LOC_TYPE_BADGE = {
-            revolving:    '<span style="font-size:10px;background:#EFF6FF;color:#1D4ED8;border:0.5px solid #BFDBFE;border-radius:3px;padding:1px 5px;margin-left:5px;">Revolving</span>',
+            revolving:    '<span style="font-size:10px;background:#EFF6FF;color:#1D4ED8;border:0.5px solid #BFDBFE;border-radius:3px;padding:1px 5px;margin-left:5px;">Flex</span>',
             traditional:  '<span style="font-size:10px;background:#F5F3FF;color:#6D28D9;border:0.5px solid #DDD6FE;border-radius:3px;padding:1px 5px;margin-left:5px;">Traditional</span>',
           };
           const PRODUCT_DISPLAY = { LOC: 'Line of Credit', Term: 'Term Loan', MCA: 'MCA', SBA: 'SBA Loan', Finance: 'Equipment Finance', Factor: 'Factoring', CRE: 'CRE' };
@@ -7558,14 +7550,10 @@
       { badge: '<span class="lp-type-badge marketplace" style="cursor:default;">Marketplace</span>', label: 'Matches deals across a network of funders.' },
     ];
     lenderTypeLegendHost.innerHTML = LTYPE_LEGEND.map(s =>
-      `<div class="lp-legend-item" style="grid-template-columns:auto 1fr;align-items:flex-start;gap:8px;">${s.badge}<span style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">${s.label}</span></div>`
+      `<div class="lp-legend-item" style="grid-template-columns:76px 1fr;align-items:flex-start;gap:8px;">${s.badge}<span style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">${s.label}</span></div>`
     ).join('');
   }
 
-  // Show LOC type legend if any lender has product_criteria with loc_type
-  const hasLocTypeData = lenderData.some(l => (l.product_criteria || []).some(pc => pc.loc_type));
-  const locLegendEl = document.getElementById('legend-loc-types');
-  if (locLegendEl && hasLocTypeData) locLegendEl.style.display = 'block';
   if (legendBtn) {
     legendBtn.addEventListener('click', (e) => {
       e.stopPropagation();
