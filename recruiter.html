@@ -312,6 +312,32 @@ body { background: var(--color-bg-main); margin: 0; padding: 0; font-family: var
 .rp-row-deal-lost td.rp-sticky-col { background: #FFFAFA !important; }
 .rp-row-deal-lost:hover td { opacity: 1; background: #FEF2F2 !important; }
 .rp-row-deal-lost:hover td.rp-sticky-col { background: #FEF2F2 !important; }
+
+/* Pipeline stepper */
+.rp-stepper { display:flex; align-items:center; background:#fff; border:1px solid var(--color-border); border-radius:8px; padding:10px 16px; margin-bottom:14px; overflow-x:auto; }
+.rp-stepper-step { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:4px 8px; border-radius:6px; min-width:72px; transition:background 0.15s; flex-shrink:0; }
+.rp-stepper-step:hover { background:#F9FAFB; }
+.rp-stepper-dot { width:10px; height:10px; border-radius:50%; border:2px solid var(--color-border); background:#fff; transition:all 0.2s; }
+.rp-stepper-step.past .rp-stepper-dot { background:var(--color-brand-mid); border-color:var(--color-brand-mid); }
+.rp-stepper-step.active .rp-stepper-dot { background:var(--color-brand-accent); border-color:var(--color-brand-accent); box-shadow:0 0 0 3px rgba(16,185,129,0.2); }
+.rp-stepper-label { font-size:10px; font-weight:500; color:var(--color-text-muted); white-space:nowrap; }
+.rp-stepper-step.past .rp-stepper-label { color:var(--color-text-secondary); }
+.rp-stepper-step.active .rp-stepper-label { color:var(--color-brand-dark); font-weight:700; }
+.rp-stepper-line { flex:1; height:2px; background:var(--color-border); min-width:12px; margin-top:9px; align-self:flex-start; }
+.rp-stepper-line.past { background:var(--color-brand-mid); }
+/* Salary pill */
+.rp-salary-pill { font-size:10px; font-weight:600; padding:1px 6px; border-radius:4px; margin-left:5px; }
+.rp-salary-pill.below { background:#FEF3C7; color:#92400E; border:1px solid #FDE68A; }
+.rp-salary-pill.near  { background:#F3F4F6; color:#6B7280; border:1px solid #D1D5DB; }
+/* Outreach controls */
+.rp-outreach-controls { display:flex; flex-direction:column; gap:5px; margin:7px 0 10px; }
+.rp-outreach-row { display:flex; align-items:center; gap:8px; }
+.rp-outreach-row-label { font-size:11px; color:var(--color-text-secondary); font-weight:500; min-width:52px; }
+/* Notes confirm */
+.rp-notes-confirm { font-size:11px; color:var(--color-text-muted); margin-top:4px; min-height:15px; }
+/* Mark Contacted CTA */
+.rp-contacted-cta { width:100%; padding:8px 12px; background:linear-gradient(135deg,var(--color-brand-mid),var(--color-brand-dark)); color:#fff; border:none; border-radius:7px; font-size:12.5px; font-weight:600; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:opacity 0.15s; margin-bottom:10px; }
+.rp-contacted-cta:hover { opacity:0.88; }
 </style>
 </head>
 <body>
@@ -960,7 +986,7 @@ function buildOutreachDraft(p, medium = 'email', warmth = 'cold') {
   const firstName = p.contact_name ? p.contact_name.split(' ')[0] : null;
   const greeting = firstName ? `Hi ${firstName},` : 'Hi there,';
   if (medium === 'email' && warmth === 'cold') {
-    return `Subject: Re: ${p.title} at ${p.company}\n\n${greeting}\n\nI came across the ${p.title} role at ${p.company} and wanted to reach out directly to learn more.\n\nWe specialize in placing top talent in financial services and lending — happy to connect if there's a fit.\n\nBest regards,\n[Your Name]\nLendPaper`;
+    return `Subject: ${p.title} at ${p.company}\n\n${greeting}\n\nI came across the ${p.title} role at ${p.company} and wanted to reach out directly to learn more.\n\nWe specialize in placing top talent in financial services and lending — happy to connect if there's a fit.\n\nBest regards,\n[Your Name]\nLendPaper`;
   }
   if (medium === 'email' && warmth === 'warm') {
     return `Subject: Re: ${p.title} at ${p.company}\n\n${greeting}\n\nGreat to connect — wanted to follow up on the ${p.title} opening at ${p.company}. Based on our conversation, I think we can find a strong fit quickly.\n\nHappy to put some candidates in front of you whenever you're ready.\n\nBest,\n[Your Name]\nLendPaper`;
@@ -972,6 +998,9 @@ function buildOutreachDraft(p, medium = 'email', warmth = 'cold') {
 }
 
 /* ── DRAWER HTML ── */
+const PIPELINE_STAGES = ['Saved', 'Applied', 'Contacted', 'Interviewing', 'Offer'];
+const SALARY_TARGET = 160000;
+
 function drawerHtml(p) {
   const id = esc(p.id);
   const hasContact = p.contact_name || p.contact_phone || p.contact_email;
@@ -986,31 +1015,36 @@ function drawerHtml(p) {
     : '';
 
   const hiringVal = p.hiring_status || '';
-  const hiringSel = hiringVal === 'Hired by Craft' ? 'hired' : hiringVal.startsWith('Deal lost') ? 'lost' : hiringVal ? 'other' : '';
+  const hiringSel = hiringVal === 'Filled by Craft' ? 'hired' : hiringVal.startsWith('Deal lost') ? 'lost' : hiringVal === 'Other — see notes' ? 'other' : '';
   const state = getOutreachState(p.id);
   const draft = buildOutreachDraft(p, state.medium, state.warmth);
   const newsUrl = `https://news.google.com/search?q=${encodeURIComponent(p.company)}`;
 
+  const currentStageIdx = PIPELINE_STAGES.indexOf(hiringVal);
+  const stepperHtml = PIPELINE_STAGES.map((stage, i) => {
+    const cls = i < currentStageIdx ? 'past' : i === currentStageIdx ? 'active' : '';
+    const lineClass = i < currentStageIdx ? 'past' : '';
+    const line = i < PIPELINE_STAGES.length - 1 ? `<div class="rp-stepper-line ${lineClass}"></div>` : '';
+    return `<div class="rp-stepper-step ${cls}" onclick="savePipelineStage('${id}','${stage}')"><div class="rp-stepper-dot"></div><div class="rp-stepper-label">${stage}</div></div>${line}`;
+  }).join('');
+
+  const salaryPill = p.earnings_max
+    ? p.earnings_max < SALARY_TARGET
+      ? '<span class="rp-salary-pill below">⚠ Below target</span>'
+      : p.earnings_max < SALARY_TARGET * 1.1
+      ? '<span class="rp-salary-pill near">Near target</span>'
+      : ''
+    : '';
+
   return `
 <div class="rp-detail-drawer">
+  <!-- Pipeline Stepper -->
+  <div class="rp-stepper">${stepperHtml}</div>
+
   <div class="rp-drawer-layout">
 
     <!-- Left sidebar: actions -->
     <div class="rp-drawer-sidebar">
-      <button class="rp-btn rp-btn-ghost" data-action="log-contact" data-id="${id}">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 12 19.79 19.79 0 0 1 1.14 3.4 2 2 0 0 1 3.11 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        Mark Contacted
-      </button>
-      <select class="rp-hiring-select${hiringSel ? ' '+hiringSel : ''}"
-        data-action="hiring-status" data-id="${id}"
-        onchange="saveHiringStatus('${id}', this)">
-        <option value="" ${!hiringVal?'selected':''}>Hiring Status</option>
-        <option value="Hired by Craft" ${hiringVal==='Hired by Craft'?'selected':''}>Hired by Craft</option>
-        <option value="Deal lost — role filled" ${hiringVal==='Deal lost — role filled'?'selected':''}>Deal lost — role filled</option>
-        <option value="Deal lost — post removed" ${hiringVal==='Deal lost — post removed'?'selected':''}>Deal lost — post removed</option>
-        <option value="Other — See Notes" ${hiringVal==='Other — See Notes'?'selected':''}>Other — See Notes</option>
-      </select>
-      <hr class="rp-sidebar-divider">
       <button class="rp-btn rp-btn-secondary" data-action="edit" data-id="${id}">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Edit
@@ -1036,10 +1070,29 @@ function drawerHtml(p) {
             Job Details
           </div>
           <div class="detail-item"><span class="detail-label">Location</span><span class="detail-value">${esc(p.location||'—')}</span></div>
-          <div class="detail-item"><span class="detail-label">Earnings</span><span class="detail-value">${fmtEarnings(p)}</span></div>
+          <div class="detail-item"><span class="detail-label">Earnings</span><span class="detail-value">${fmtEarnings(p)}${salaryPill}</span></div>
           <div class="detail-item"><span class="detail-label">Type</span><span class="detail-value">${badge(TYPE_MAP, p.job_type)}</span></div>
           <div class="detail-item"><span class="detail-label">Posted</span><span class="detail-value">${fmtDate(p.posted_date)}</span></div>
           <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value">${badge(STATUS_MAP, p.status)}</span></div>
+          <div class="detail-item">
+            <span class="detail-label">Your Status</span>
+            <span class="detail-value">
+              <select class="rp-hiring-select${hiringSel ? ' '+hiringSel : ''}" style="font-size:12px;padding:4px 8px;"
+                data-action="hiring-status" data-id="${id}"
+                onchange="saveHiringStatus('${id}', this)">
+                <option value="" ${!hiringVal?'selected':''}>—</option>
+                <option value="Saved" ${hiringVal==='Saved'?'selected':''}>Saved</option>
+                <option value="Applied" ${hiringVal==='Applied'?'selected':''}>Applied</option>
+                <option value="Contacted" ${hiringVal==='Contacted'?'selected':''}>Contacted</option>
+                <option value="Interviewing" ${hiringVal==='Interviewing'?'selected':''}>Interviewing</option>
+                <option value="Offer" ${hiringVal==='Offer'?'selected':''}>Offer</option>
+                <option value="Filled by Craft" ${hiringVal==='Filled by Craft'?'selected':''}>Filled by Craft</option>
+                <option value="Deal lost — role filled" ${hiringVal==='Deal lost — role filled'?'selected':''}>Deal lost — role filled</option>
+                <option value="Deal lost — post removed" ${hiringVal==='Deal lost — post removed'?'selected':''}>Deal lost — post removed</option>
+                <option value="Other — see notes" ${hiringVal==='Other — see notes'?'selected':''}>Other — see notes</option>
+              </select>
+            </span>
+          </div>
           ${p.source_url ? `
           <div class="detail-item" style="margin-top:8px;">
             <a href="${esc(p.source_url)}" target="_blank" rel="noopener noreferrer" class="rp-post-link-btn">
@@ -1050,6 +1103,11 @@ function drawerHtml(p) {
         </div>
 
         <div class="detail-section">
+          <!-- Mark Contacted primary CTA -->
+          <button class="rp-contacted-cta" data-action="log-contact" data-id="${id}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 12 19.79 19.79 0 0 1 1.14 3.4 2 2 0 0 1 3.11 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Mark Contacted
+          </button>
           <div class="detail-title">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             Contact
@@ -1065,16 +1123,24 @@ function drawerHtml(p) {
           ` : '<div style="font-size:12px;color:var(--color-text-muted);font-style:italic;margin-bottom:6px;">No contact added.</div>'}
           ${contactLogHtml}
 
-          <div class="detail-title" style="margin-top:14px;flex-wrap:wrap;gap:6px;">
+          <div class="detail-title" style="margin-top:14px;">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             Outreach Draft
-            <div class="rp-toggle-group" style="margin-left:4px;">
-              <button class="rp-toggle-btn${state.medium==='email'?' active':''}" data-toggle-medium="email" data-toggle-id="${id}" onclick="setOutreachMedium('${id}','email')">Email</button>
-              <button class="rp-toggle-btn${state.medium==='text'?' active':''}" data-toggle-medium="text" data-toggle-id="${id}" onclick="setOutreachMedium('${id}','text')">Text</button>
+          </div>
+          <div class="rp-outreach-controls">
+            <div class="rp-outreach-row">
+              <span class="rp-outreach-row-label">Channel</span>
+              <div class="rp-toggle-group">
+                <button class="rp-toggle-btn${state.medium==='email'?' active':''}" data-toggle-medium="email" data-toggle-id="${id}" onclick="setOutreachMedium('${id}','email')">Email</button>
+                <button class="rp-toggle-btn${state.medium==='text'?' active':''}" data-toggle-medium="text" data-toggle-id="${id}" onclick="setOutreachMedium('${id}','text')">Text</button>
+              </div>
             </div>
-            <div class="rp-toggle-group">
-              <button class="rp-toggle-btn${state.warmth==='cold'?' active':''}" data-toggle-warmth="cold" data-toggle-id="${id}" onclick="setOutreachWarmth('${id}','cold')">Cold</button>
-              <button class="rp-toggle-btn${state.warmth==='warm'?' active':''}" data-toggle-warmth="warm" data-toggle-id="${id}" onclick="setOutreachWarmth('${id}','warm')">Warm</button>
+            <div class="rp-outreach-row">
+              <span class="rp-outreach-row-label">Tone</span>
+              <div class="rp-toggle-group">
+                <button class="rp-toggle-btn${state.warmth==='cold'?' active':''}" data-toggle-warmth="cold" data-toggle-id="${id}" onclick="setOutreachWarmth('${id}','cold')">Cold</button>
+                <button class="rp-toggle-btn${state.warmth==='warm'?' active':''}" data-toggle-warmth="warm" data-toggle-id="${id}" onclick="setOutreachWarmth('${id}','warm')">Warm</button>
+              </div>
             </div>
           </div>
           <div class="rp-email-draft">
@@ -1094,6 +1160,7 @@ function drawerHtml(p) {
           ${p.summary
             ? `<div style="font-size:12.5px;color:var(--color-text-secondary);line-height:1.6;">${esc(p.summary)}</div>`
             : `<div style="font-size:12px;color:var(--color-text-muted);font-style:italic;">No summary added.</div>`}
+          <button class="rp-btn rp-btn-ghost" style="margin-top:8px;" onclick="matchToResume('${id}')">✦ Match to my resume</button>
         </div>
 
         <div class="detail-section full-width">
@@ -1106,6 +1173,7 @@ function drawerHtml(p) {
             id="notes-display-${id}"
             onclick="editNotesInline('${id}')"
           >${p.notes ? esc(p.notes) : 'Click to add notes…'}</div>
+          <div class="rp-notes-confirm" id="notes-confirm-${id}"></div>
         </div>
 
       </div>
@@ -1146,6 +1214,12 @@ function editNotesInline(id) {
       newDisplay.onclick = () => editNotesInline(id);
       newDisplay.textContent = val || 'Click to add notes…';
       ta.replaceWith(newDisplay);
+      const confirm = document.getElementById(`notes-confirm-${id}`);
+      if (confirm) {
+        confirm.textContent = 'Saved just now';
+        clearTimeout(confirm._timer);
+        confirm._timer = setTimeout(() => { confirm.textContent = ''; }, 3000);
+      }
       toast('Notes saved.');
     } catch(e) { toast('Save failed.', true); }
   }
@@ -1160,7 +1234,7 @@ async function saveHiringStatus(id, sel) {
     await sbFetch('PATCH', `${TABLE}?id=eq.${id}`, { hiring_status: val || null });
     const p = allPostings.find(x => x.id === id);
     if (p) p.hiring_status = val || null;
-    sel.className = 'rp-hiring-select' + (val === 'Hired by Craft' ? ' hired' : val.startsWith('Deal lost') ? ' lost' : val ? ' other' : '');
+    sel.className = 'rp-hiring-select' + (val === 'Filled by Craft' ? ' hired' : val.startsWith('Deal lost') ? ' lost' : val === 'Other — see notes' ? ' other' : '');
     toast(val ? `Status: ${val}` : 'Hiring status cleared.');
     renderStats();
     renderTable();
@@ -1501,6 +1575,22 @@ document.getElementById('delete-confirm').addEventListener('click', async functi
   } catch(e) { console.error(e); toast('Delete failed.', true); }
   finally { this.disabled = false; this.textContent = 'Delete'; }
 });
+
+/* ── PIPELINE STAGE ── */
+async function savePipelineStage(id, stage) {
+  try {
+    await sbFetch('PATCH', `${TABLE}?id=eq.${id}`, { hiring_status: stage });
+    const p = allPostings.find(x => x.id === id);
+    if (p) p.hiring_status = stage;
+    renderStats();
+    renderTable();
+    toast(`Stage: ${stage}`);
+  } catch(e) { toast('Save failed.', true); }
+}
+
+function matchToResume(id) {
+  toast('Coming soon — resume matching not yet wired up.');
+}
 
 /* ── TOAST ── */
 let toastTimer;
