@@ -101,8 +101,10 @@ LOGO_OVERRIDES = {
 
 # Products overrides — set canonical product list for specific lenders.
 PRODUCTS_OVERRIDES = {
-    "CapFront":         ["Term Loan", "Equipment"],
-    "Grasshopper Bank": ["SBA"],
+    "CapFront":           ["Term Loan", "Equipment"],
+    "Grasshopper Bank":   ["SBA"],
+    "1st Alliance Group": ["MCA"],
+    "Accord":             ["MCA"],
 }
 
 # product_criteria — per-product breakdown data.
@@ -117,6 +119,19 @@ PRODUCT_CRITERIA_OVERRIDES = {
         {"product": "LOC", "loc_type": "revolving", "max_amount": 250000, "max_term_months": None, "notes": "Up to $250K revolving"},
         {"product": "Term", "loc_type": None, "max_amount": 500000, "max_term_months": None, "notes": "Through lending partners"},
     ],
+    "Accord": [
+        {"product": "MCA", "loc_type": None, "max_amount": 150000, "max_term_months": None, "notes": "$5K min · soft pull only"},
+    ],
+}
+
+# Field overrides — force specific field values regardless of what the DB export contains.
+# Use for manually-verified data the scraper doesn't reliably capture.
+# Format: { "canonical lender name": { "field": value, ... } }
+FIELD_OVERRIDES = {
+    "Accord": {
+        "soft_pull":          True,
+        "max_funding_amount": 150000,
+    },
 }
 
 # Fields whose source_snippet content is known to contain raw HTML or <script> tags.
@@ -209,6 +224,11 @@ def normalize(lenders: list) -> list:
             lender["product_criteria"] = PRODUCT_CRITERIA_OVERRIDES[name]
         elif "product_criteria" not in lender:
             lender["product_criteria"] = []
+
+        # 4d. Apply field overrides (manually-verified data the scraper misses)
+        if name in FIELD_OVERRIDES:
+            for field, val in FIELD_OVERRIDES[name].items():
+                lender[field] = val
 
         # 5. Check critical fields
         missing = []

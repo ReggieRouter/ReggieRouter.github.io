@@ -2360,6 +2360,7 @@
             <div style="margin-top:14px;">
               <h6 style="margin-bottom:6px;">Lender type</h6>
               <div id="legend-lender-types"></div>
+              <p style="font-size:10.5px;color:var(--color-text-muted);margin:6px 0 0;line-height:1.4;">No badge — direct lender (best available data).</p>
             </div>
           </div>
         </span>
@@ -2679,7 +2680,7 @@
       "stacking": 1,
       "restrictions": [],
       "detailed_restrictions": [],
-      "products": [],
+      "products": ["MCA"],
       "updated_at": "2026-05-27 19:03:51.429008",
       "submission_url": "",
       "soft_pull": false,
@@ -2755,10 +2756,10 @@
       "stacking": 2,
       "restrictions": [],
       "detailed_restrictions": [],
-      "products": [],
+      "products": ["MCA"],
       "updated_at": "2026-05-27 19:03:59.009270",
       "submission_url": "",
-      "soft_pull": false,
+      "soft_pull": true,
       "bank_verified": true,
       "bank_statements": 3,
       "hard_collateral": false,
@@ -2771,9 +2772,12 @@
       "logo_url": "public/assets/lenders/accordbusinessfunding.png",
       "early_payment_discount": false,
       "preferred_industries": [],
-      "max_funding_amount": 0,
+      "max_funding_amount": 150000,
       "max_term_months": 0,
-      "payment_frequencies": []
+      "payment_frequencies": [],
+      "product_criteria": [
+        { "product": "MCA", "loc_type": null, "max_amount": 150000, "max_term_months": null, "notes": "$5K min · soft pull only" }
+      ]
     },
     {
       "id": 213,
@@ -7550,7 +7554,7 @@
       { badge: '<span class="lp-type-badge marketplace" style="cursor:default;">Marketplace</span>', label: 'Matches deals across a network of funders.' },
     ];
     lenderTypeLegendHost.innerHTML = LTYPE_LEGEND.map(s =>
-      `<div class="lp-legend-item" style="grid-template-columns:76px 1fr;align-items:flex-start;gap:8px;">${s.badge}<span style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">${s.label}</span></div>`
+      `<div style="display:flex;align-items:flex-start;gap:8px;padding:4px 0;">${s.badge}<span style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">${s.label}</span></div>`
     ).join('');
   }
 
