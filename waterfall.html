@@ -7558,7 +7558,7 @@
       { badge: '<span class="lp-type-badge marketplace" style="cursor:default;">Marketplace</span>', label: 'Matches deals across a network of funders.' },
     ];
     lenderTypeLegendHost.innerHTML = LTYPE_LEGEND.map(s =>
-      `<div class="lp-legend-item" style="align-items:flex-start;gap:8px;">${s.badge}<span style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">${s.label}</span></div>`
+      `<div class="lp-legend-item" style="grid-template-columns:auto 1fr;align-items:flex-start;gap:8px;">${s.badge}<span style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;">${s.label}</span></div>`
     ).join('');
   }
 
