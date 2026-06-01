@@ -7551,10 +7551,11 @@
     const LTYPE_LEGEND = [
       { badge: '<span class="lp-type-badge marketplace" style="cursor:default;">Marketplace</span>', label: 'Matches deals across a network of funders.' },
       { badge: '<span class="lp-type-badge direct-plus" style="cursor:default;">Direct+</span>', label: 'Primarily self-funded. Some deals may be routed to partner lenders.' },
+      { badge: '<span style="display:inline-flex;align-items:center;font-size:9.5px;font-weight:500;font-style:italic;letter-spacing:0.02em;border-radius:4px;padding:1px 5px;line-height:1.4;white-space:nowrap;color:#9CA3AF;border:1px dashed #D1D5DB;cursor:default;">No badge</span>', label: 'If there\'s no Marketplace or Direct+ badge, then it\'s a direct lender.' },
     ];
     lenderTypeLegendHost.innerHTML = LTYPE_LEGEND.map(s =>
       `<div style="margin-bottom:8px;">${s.badge}<div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;margin-top:3px;">${s.label}</div></div>`
-    ).join('') + `<div style="font-size:11px;color:var(--color-text-muted);margin-top:2px;"><em>No lender type badge</em> — direct lender (best available data).</div>`;
+    ).join('');
   }
 
   if (legendBtn) {
