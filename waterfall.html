@@ -6859,7 +6859,7 @@
         // Per-product breakdown — only shown when product_criteria data has been ingested
         const pc = (lender.product_criteria || []).filter(p => p.max_amount || p.max_term_months || p.loc_type || p.notes);
         let productBreakdownHtml = '';
-        if (pc.length > 0) {
+        if (pc.length > 1) {
           const LOC_TYPE_BADGE = {
             revolving:    '<span style="font-size:10px;background:#EFF6FF;color:#1D4ED8;border:0.5px solid #BFDBFE;border-radius:3px;padding:1px 5px;margin-left:5px;">Flex</span>',
             traditional:  '<span style="font-size:10px;background:#F5F3FF;color:#6D28D9;border:0.5px solid #DDD6FE;border-radius:3px;padding:1px 5px;margin-left:5px;">Traditional</span>',
