@@ -290,6 +290,28 @@ body { background: var(--color-bg-main); margin: 0; padding: 0; font-family: var
 /* News section */
 .rp-news-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--color-brand-mid); text-decoration: none; padding: 6px 10px; border: 1px solid var(--color-border); border-radius: 6px; background: #fff; transition: all 0.15s; }
 .rp-news-link:hover { border-color: var(--color-brand-accent); background: #F0FDF4; color: var(--color-brand-dark); text-decoration: none; }
+
+/* Drawer sidebar layout */
+.rp-drawer-layout { display: flex; gap: 16px; align-items: flex-start; }
+.rp-drawer-sidebar { width: 158px; flex-shrink: 0; display: flex; flex-direction: column; gap: 7px; }
+.rp-drawer-sidebar .rp-btn { width: 100%; justify-content: center; }
+.rp-drawer-sidebar .rp-hiring-select { width: 100%; font-size: 12px; }
+.rp-drawer-main { flex: 1; min-width: 0; }
+.rp-sidebar-divider { border: 0; border-top: 1px solid var(--color-border); margin: 2px 0; }
+.rp-sidebar-spacer { flex: 1; min-height: 12px; }
+
+/* Outreach toggles */
+.rp-toggle-group { display: inline-flex; border: 1px solid var(--color-border); border-radius: 5px; overflow: hidden; }
+.rp-toggle-btn { padding: 3px 9px; font-size: 11px; font-weight: 500; border: none; background: #fff; color: var(--color-text-secondary); cursor: pointer; font-family: inherit; transition: all 0.12s; line-height: 1.5; }
+.rp-toggle-btn.active { background: var(--color-brand-dark); color: #fff; }
+.rp-toggle-btn:not(:last-child) { border-right: 1px solid var(--color-border); }
+
+/* Deal lost section separator in table */
+.rp-lost-section-row td { background: #FEF2F2 !important; padding: 7px 12px !important; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #991B1B; border-top: 2px solid #FECACA; border-bottom: 1px solid #FECACA; }
+.rp-row-deal-lost td { opacity: 0.7; background: #FFFAFA !important; }
+.rp-row-deal-lost td.rp-sticky-col { background: #FFFAFA !important; }
+.rp-row-deal-lost:hover td { opacity: 1; background: #FEF2F2 !important; }
+.rp-row-deal-lost:hover td.rp-sticky-col { background: #FEF2F2 !important; }
 </style>
 </head>
 <body>
@@ -798,10 +820,13 @@ function logoHtml(p) {
 }
 
 /* ── STATS ── */
+function isLost(p) { return p.hiring_status && p.hiring_status.startsWith('Deal lost'); }
+
 function renderStats() {
+  const live = allPostings.filter(p => !isLost(p));
   const counts = {};
-  allPostings.forEach(p => counts[p.status] = (counts[p.status]||0)+1);
-  document.getElementById('stat-total').textContent     = allPostings.length;
+  live.forEach(p => counts[p.status] = (counts[p.status]||0)+1);
+  document.getElementById('stat-total').textContent     = live.length;
   document.getElementById('stat-new').textContent       = counts['New']       || 0;
   document.getElementById('stat-reviewing').textContent = counts['Reviewing'] || 0;
   document.getElementById('stat-contacted').textContent = counts['Contacted'] || 0;
@@ -838,32 +863,21 @@ function getFiltered() {
 }
 
 /* ── RENDER TABLE ── */
-function renderTable() {
-  const data = getFiltered();
-  const tbody = document.getElementById('rp-tbody');
-  document.getElementById('rp-count').textContent = `${data.length} posting${data.length !== 1 ? 's' : ''}`;
-
-  if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 20px;color:var(--color-text-muted);">
-      No postings match your filters. <button class="reset-btn" onclick="resetFilters()" style="color:var(--color-brand-mid);">Clear filters</button> or add one with the + button.
-    </td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = data.map(p => {
-    const open = expandedId === p.id;
-    const hasContact = p.contact_name || p.contact_email || p.contact_phone;
-    const contactDisplay = hasContact
-      ? `<span style="font-size:12px;">${esc(p.contact_name || p.contact_email || '')}</span>
-         <button class="rp-contact-edit-btn" data-action="contact-edit" data-id="${esc(p.id)}" title="Edit contact">
-           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-         </button>`
-      : `<button class="rp-contact-edit-btn" data-action="contact-edit" data-id="${esc(p.id)}" style="opacity:1;" title="Add contact">
-           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-           <span style="font-size:11px;color:var(--color-text-muted);">Add</span>
-         </button>`;
-    return `
-<tr class="rp-row-interactive${open ? ' rp-row-open' : ''}" data-id="${esc(p.id)}">
+function buildRow(p) {
+  const open = expandedId === p.id;
+  const lost = isLost(p);
+  const hasContact = p.contact_name || p.contact_email || p.contact_phone;
+  const contactDisplay = hasContact
+    ? `<span style="font-size:12px;">${esc(p.contact_name || p.contact_email || '')}</span>
+       <button class="rp-contact-edit-btn" data-action="contact-edit" data-id="${esc(p.id)}" title="Edit contact">
+         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+       </button>`
+    : `<button class="rp-contact-edit-btn" data-action="contact-edit" data-id="${esc(p.id)}" style="opacity:1;" title="Add contact">
+         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+         <span style="font-size:11px;color:var(--color-text-muted);">Add</span>
+       </button>`;
+  return `
+<tr class="rp-row-interactive${open ? ' rp-row-open' : ''}${lost ? ' rp-row-deal-lost' : ''}" data-id="${esc(p.id)}">
   <td class="rp-sticky-col">
     <div class="rp-company-cell">
       <span class="rp-row-chevron${open ? ' expanded' : ''}">
@@ -886,7 +900,29 @@ function renderTable() {
 <tr class="rp-detail-row${open ? ' expanded' : ''}" data-detail="${esc(p.id)}">
   <td colspan="7">${open ? drawerHtml(p) : ''}</td>
 </tr>`;
-  }).join('');
+}
+
+function renderTable() {
+  const data = getFiltered();
+  const liveData = data.filter(p => !isLost(p));
+  const lostData = data.filter(p =>  isLost(p));
+  const tbody = document.getElementById('rp-tbody');
+  const lostLabel = lostData.length ? ` · ${lostData.length} deal lost` : '';
+  document.getElementById('rp-count').textContent = `${liveData.length} posting${liveData.length !== 1 ? 's' : ''}${lostLabel}`;
+
+  if (!liveData.length && !lostData.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 20px;color:var(--color-text-muted);">
+      No postings match your filters. <button class="reset-btn" onclick="resetFilters()" style="color:var(--color-brand-mid);">Clear filters</button> or add one with the + button.
+    </td></tr>`;
+    return;
+  }
+
+  let html = liveData.map(buildRow).join('');
+  if (lostData.length) {
+    html += `<tr class="rp-lost-section-row"><td colspan="7">Deal Lost</td></tr>`;
+    html += lostData.map(buildRow).join('');
+  }
+  tbody.innerHTML = html;
 
   document.querySelectorAll('.lp-data-table th[data-sort]').forEach(th => {
     th.classList.remove('sort-asc','sort-desc');
@@ -898,8 +934,46 @@ function renderTable() {
   });
 }
 
+/* ── OUTREACH STATE ── */
+const outreachState = {};
+function getOutreachState(id) {
+  if (!outreachState[id]) outreachState[id] = { medium: 'email', warmth: 'cold' };
+  return outreachState[id];
+}
+function setOutreachMedium(id, medium) {
+  getOutreachState(id).medium = medium;
+  document.querySelectorAll(`[data-toggle-medium][data-toggle-id="${id}"]`).forEach(b =>
+    b.classList.toggle('active', b.dataset.toggleMedium === medium));
+  const p = allPostings.find(x => x.id === id);
+  const ta = document.getElementById(`email-draft-${id}`);
+  if (p && ta) ta.value = buildOutreachDraft(p, medium, getOutreachState(id).warmth);
+}
+function setOutreachWarmth(id, warmth) {
+  getOutreachState(id).warmth = warmth;
+  document.querySelectorAll(`[data-toggle-warmth][data-toggle-id="${id}"]`).forEach(b =>
+    b.classList.toggle('active', b.dataset.toggleWarmth === warmth));
+  const p = allPostings.find(x => x.id === id);
+  const ta = document.getElementById(`email-draft-${id}`);
+  if (p && ta) ta.value = buildOutreachDraft(p, getOutreachState(id).medium, warmth);
+}
+function buildOutreachDraft(p, medium = 'email', warmth = 'cold') {
+  const firstName = p.contact_name ? p.contact_name.split(' ')[0] : null;
+  const greeting = firstName ? `Hi ${firstName},` : 'Hi there,';
+  if (medium === 'email' && warmth === 'cold') {
+    return `Subject: Re: ${p.title} at ${p.company}\n\n${greeting}\n\nI came across the ${p.title} role at ${p.company} and wanted to reach out directly to learn more.\n\nWe specialize in placing top talent in financial services and lending — happy to connect if there's a fit.\n\nBest regards,\n[Your Name]\nLendPaper`;
+  }
+  if (medium === 'email' && warmth === 'warm') {
+    return `Subject: Re: ${p.title} at ${p.company}\n\n${greeting}\n\nGreat to connect — wanted to follow up on the ${p.title} opening at ${p.company}. Based on our conversation, I think we can find a strong fit quickly.\n\nHappy to put some candidates in front of you whenever you're ready.\n\nBest,\n[Your Name]\nLendPaper`;
+  }
+  if (medium === 'text' && warmth === 'cold') {
+    return `Hi — I noticed the ${p.title} opening at ${p.company}. We place lending & fintech talent and thought we'd be a good fit to connect. Any interest in a quick call? — [Your Name], LendPaper`;
+  }
+  return `${greeting} Following up on the ${p.title} role at ${p.company} — I've got a few strong candidates I'd love to put in front of you. Worth a quick call this week?`;
+}
+
 /* ── DRAWER HTML ── */
 function drawerHtml(p) {
+  const id = esc(p.id);
   const hasContact = p.contact_name || p.contact_phone || p.contact_email;
   const methodCls = { Called:'method-called', Texted:'method-texted', Emailed:'method-emailed', Met:'method-met' };
   const contactLogHtml = (p.contact_method && p.contact_date)
@@ -912,125 +986,132 @@ function drawerHtml(p) {
     : '';
 
   const hiringVal = p.hiring_status || '';
-  const hiringSel = hiringVal === 'Hired by Craft' ? 'hired' : hiringVal === 'Deal Lost' ? 'lost' : hiringVal ? 'other' : '';
-
-  const emailDraft = buildEmailDraft(p);
-
+  const hiringSel = hiringVal === 'Hired by Craft' ? 'hired' : hiringVal.startsWith('Deal lost') ? 'lost' : hiringVal ? 'other' : '';
+  const state = getOutreachState(p.id);
+  const draft = buildOutreachDraft(p, state.medium, state.warmth);
   const newsUrl = `https://news.google.com/search?q=${encodeURIComponent(p.company)}`;
 
   return `
 <div class="rp-detail-drawer">
-  <div class="rp-detail-grid">
+  <div class="rp-drawer-layout">
 
-    <div class="detail-section">
-      <div class="detail-title">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-        Job Details
-      </div>
-      <div class="detail-item"><span class="detail-label">Location</span><span class="detail-value">${esc(p.location||'—')}</span></div>
-      <div class="detail-item"><span class="detail-label">Earnings</span><span class="detail-value">${fmtEarnings(p)}</span></div>
-      <div class="detail-item"><span class="detail-label">Type</span><span class="detail-value">${badge(TYPE_MAP, p.job_type)}</span></div>
-      <div class="detail-item"><span class="detail-label">Posted</span><span class="detail-value">${fmtDate(p.posted_date)}</span></div>
-      <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value">${badge(STATUS_MAP, p.status)}</span></div>
-      ${p.source_url ? `
-      <div class="detail-item" style="margin-top:8px;">
-        <a href="${esc(p.source_url)}" target="_blank" rel="noopener noreferrer" class="rp-post-link-btn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          View Live Posting
-        </a>
-      </div>` : ''}
-    </div>
-
-    <div class="detail-section">
-      <div class="detail-title">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Contact
-      </div>
-      ${hasContact ? `
-        ${p.contact_name  ? `<div class="detail-item"><span class="detail-label">Name</span><span class="detail-value">${esc(p.contact_name)}</span></div>` : ''}
-        ${p.contact_phone ? `<div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value"><a href="tel:${esc(p.contact_phone)}" class="rp-link">${esc(p.contact_phone)}</a></span></div>` : ''}
-        ${p.contact_email ? `<div class="detail-item"><span class="detail-label">Email</span><span class="detail-value"><a href="mailto:${esc(p.contact_email)}" class="rp-link">${esc(p.contact_email)}</a></span></div>` : ''}
-      ` : '<div style="font-size:12px;color:var(--color-text-muted);font-style:italic;">No contact added.</div>'}
-      ${contactLogHtml}
-
-      <div class="detail-title" style="margin-top:14px;">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Draft Email
-      </div>
-      <div class="rp-email-draft">
-        <textarea class="rp-email-textarea" id="email-draft-${esc(p.id)}" rows="6">${esc(emailDraft)}</textarea>
-        <button class="rp-copy-btn" onclick="copyEmail('${esc(p.id)}')">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy to clipboard
-        </button>
-      </div>
-    </div>
-
-    <div class="detail-section full-width">
-      <div class="detail-title">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Summary
-      </div>
-      ${p.summary
-        ? `<div style="font-size:12.5px;color:var(--color-text-secondary);line-height:1.6;">${esc(p.summary)}</div>`
-        : `<div style="font-size:12px;color:var(--color-text-muted);font-style:italic;">No summary added.</div>`}
-    </div>
-
-    <div class="detail-section full-width">
-      <div class="detail-title">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Internal Notes
-        <span style="font-size:10px;font-weight:400;color:var(--color-text-muted);margin-left:4px;font-style:italic;">(click to edit)</span>
-      </div>
-      <div class="rp-notes-display${p.notes ? '' : ' empty'}"
-        id="notes-display-${esc(p.id)}"
-        onclick="editNotesInline('${esc(p.id)}')"
-      >${p.notes ? esc(p.notes) : 'Click to add notes…'}</div>
-    </div>
-
-    <div class="detail-section full-width">
-      <div class="detail-title">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        Recent News
-      </div>
-      <a href="${esc(newsUrl)}" target="_blank" rel="noopener noreferrer" class="rp-news-link">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        Search news for ${esc(p.company)} ↗
+    <!-- Left sidebar: actions -->
+    <div class="rp-drawer-sidebar">
+      <button class="rp-btn rp-btn-ghost" data-action="log-contact" data-id="${id}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 12 19.79 19.79 0 0 1 1.14 3.4 2 2 0 0 1 3.11 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Mark Contacted
+      </button>
+      <select class="rp-hiring-select${hiringSel ? ' '+hiringSel : ''}"
+        data-action="hiring-status" data-id="${id}"
+        onchange="saveHiringStatus('${id}', this)">
+        <option value="" ${!hiringVal?'selected':''}>Hiring Status</option>
+        <option value="Hired by Craft" ${hiringVal==='Hired by Craft'?'selected':''}>Hired by Craft</option>
+        <option value="Deal lost — role filled" ${hiringVal==='Deal lost — role filled'?'selected':''}>Deal lost — role filled</option>
+        <option value="Deal lost — post removed" ${hiringVal==='Deal lost — post removed'?'selected':''}>Deal lost — post removed</option>
+        <option value="Other — See Notes" ${hiringVal==='Other — See Notes'?'selected':''}>Other — See Notes</option>
+      </select>
+      <hr class="rp-sidebar-divider">
+      <button class="rp-btn rp-btn-secondary" data-action="edit" data-id="${id}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit
+      </button>
+      <button class="rp-btn rp-btn-danger" data-action="delete" data-id="${id}" data-label="${esc(p.company)} — ${esc(p.title)}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Delete
+      </button>
+      <div class="rp-sidebar-spacer"></div>
+      <a href="${esc(newsUrl)}" target="_blank" rel="noopener noreferrer" class="rp-news-link" style="justify-content:center;text-align:center;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        Recent News ↗
       </a>
     </div>
 
-  </div>
+    <!-- Main content -->
+    <div class="rp-drawer-main">
+      <div class="rp-detail-grid">
 
-  <div class="rp-drawer-actions">
-    <button class="rp-btn rp-btn-ghost" data-action="log-contact" data-id="${esc(p.id)}">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 12 19.79 19.79 0 0 1 1.14 3.4 2 2 0 0 1 3.11 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      Mark Contacted
-    </button>
+        <div class="detail-section">
+          <div class="detail-title">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Job Details
+          </div>
+          <div class="detail-item"><span class="detail-label">Location</span><span class="detail-value">${esc(p.location||'—')}</span></div>
+          <div class="detail-item"><span class="detail-label">Earnings</span><span class="detail-value">${fmtEarnings(p)}</span></div>
+          <div class="detail-item"><span class="detail-label">Type</span><span class="detail-value">${badge(TYPE_MAP, p.job_type)}</span></div>
+          <div class="detail-item"><span class="detail-label">Posted</span><span class="detail-value">${fmtDate(p.posted_date)}</span></div>
+          <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value">${badge(STATUS_MAP, p.status)}</span></div>
+          ${p.source_url ? `
+          <div class="detail-item" style="margin-top:8px;">
+            <a href="${esc(p.source_url)}" target="_blank" rel="noopener noreferrer" class="rp-post-link-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              View Live Posting
+            </a>
+          </div>` : ''}
+        </div>
 
-    <select class="rp-hiring-select${hiringSel ? ' '+hiringSel : ''}"
-      data-action="hiring-status" data-id="${esc(p.id)}"
-      onchange="saveHiringStatus('${esc(p.id)}', this)">
-      <option value="" ${!hiringVal?'selected':''}>Hiring Status</option>
-      <option value="Hired by Craft" ${hiringVal==='Hired by Craft'?'selected':''}>Hired by Craft</option>
-      <option value="Deal Lost" ${hiringVal==='Deal Lost'?'selected':''}>Deal Lost</option>
-      <option value="Other - See Notes" ${hiringVal==='Other - See Notes'?'selected':''}>Other — See Notes</option>
-    </select>
+        <div class="detail-section">
+          <div class="detail-title">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Contact
+            <button class="rp-btn rp-btn-secondary" data-action="contact-edit" data-id="${id}"
+              style="margin-left:auto;padding:2px 9px;font-size:11px;font-weight:600;">
+              ${hasContact ? 'Edit' : '+ Add Contact'}
+            </button>
+          </div>
+          ${hasContact ? `
+            ${p.contact_name  ? `<div class="detail-item"><span class="detail-label">Name</span><span class="detail-value">${esc(p.contact_name)}</span></div>` : ''}
+            ${p.contact_phone ? `<div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value"><a href="tel:${esc(p.contact_phone)}" class="rp-link">${esc(p.contact_phone)}</a></span></div>` : ''}
+            ${p.contact_email ? `<div class="detail-item"><span class="detail-label">Email</span><span class="detail-value"><a href="mailto:${esc(p.contact_email)}" class="rp-link">${esc(p.contact_email)}</a></span></div>` : ''}
+          ` : '<div style="font-size:12px;color:var(--color-text-muted);font-style:italic;margin-bottom:6px;">No contact added.</div>'}
+          ${contactLogHtml}
 
-    <button class="rp-btn rp-btn-secondary" data-action="edit" data-id="${esc(p.id)}">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      Edit
-    </button>
-    <button class="rp-btn rp-btn-danger" data-action="delete" data-id="${esc(p.id)}" data-label="${esc(p.company)} — ${esc(p.title)}">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-      Delete
-    </button>
+          <div class="detail-title" style="margin-top:14px;flex-wrap:wrap;gap:6px;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Outreach Draft
+            <div class="rp-toggle-group" style="margin-left:4px;">
+              <button class="rp-toggle-btn${state.medium==='email'?' active':''}" data-toggle-medium="email" data-toggle-id="${id}" onclick="setOutreachMedium('${id}','email')">Email</button>
+              <button class="rp-toggle-btn${state.medium==='text'?' active':''}" data-toggle-medium="text" data-toggle-id="${id}" onclick="setOutreachMedium('${id}','text')">Text</button>
+            </div>
+            <div class="rp-toggle-group">
+              <button class="rp-toggle-btn${state.warmth==='cold'?' active':''}" data-toggle-warmth="cold" data-toggle-id="${id}" onclick="setOutreachWarmth('${id}','cold')">Cold</button>
+              <button class="rp-toggle-btn${state.warmth==='warm'?' active':''}" data-toggle-warmth="warm" data-toggle-id="${id}" onclick="setOutreachWarmth('${id}','warm')">Warm</button>
+            </div>
+          </div>
+          <div class="rp-email-draft">
+            <textarea class="rp-email-textarea" id="email-draft-${id}" rows="6">${esc(draft)}</textarea>
+            <button class="rp-copy-btn" onclick="copyEmail('${id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy to clipboard
+            </button>
+          </div>
+        </div>
+
+        <div class="detail-section full-width">
+          <div class="detail-title">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Role Summary
+          </div>
+          ${p.summary
+            ? `<div style="font-size:12.5px;color:var(--color-text-secondary);line-height:1.6;">${esc(p.summary)}</div>`
+            : `<div style="font-size:12px;color:var(--color-text-muted);font-style:italic;">No summary added.</div>`}
+        </div>
+
+        <div class="detail-section full-width">
+          <div class="detail-title">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Internal Notes
+            <span style="font-size:10px;font-weight:400;color:var(--color-text-muted);margin-left:4px;font-style:italic;">(click to edit)</span>
+          </div>
+          <div class="rp-notes-display${p.notes ? '' : ' empty'}"
+            id="notes-display-${id}"
+            onclick="editNotesInline('${id}')"
+          >${p.notes ? esc(p.notes) : 'Click to add notes…'}</div>
+        </div>
+
+      </div>
+    </div>
   </div>
 </div>`;
-}
-
-function buildEmailDraft(p) {
-  const contact = p.contact_name ? `Hi ${p.contact_name.split(' ')[0]},` : 'Hi there,';
-  return `Subject: Re: ${p.title} at ${p.company}\n\n${contact}\n\nI came across the ${p.title} role at ${p.company} and wanted to reach out directly to learn more.\n\nWe specialize in placing top talent in financial services and lending — happy to connect if there's a fit.\n\nBest regards,\n[Your Name]\nLendPaper`;
 }
 
 function copyEmail(id) {
@@ -1079,8 +1160,10 @@ async function saveHiringStatus(id, sel) {
     await sbFetch('PATCH', `${TABLE}?id=eq.${id}`, { hiring_status: val || null });
     const p = allPostings.find(x => x.id === id);
     if (p) p.hiring_status = val || null;
-    sel.className = 'rp-hiring-select' + (val === 'Hired by Craft' ? ' hired' : val === 'Deal Lost' ? ' lost' : val ? ' other' : '');
-    toast(val ? `Hiring status: ${val}` : 'Hiring status cleared.');
+    sel.className = 'rp-hiring-select' + (val === 'Hired by Craft' ? ' hired' : val.startsWith('Deal lost') ? ' lost' : val ? ' other' : '');
+    toast(val ? `Status: ${val}` : 'Hiring status cleared.');
+    renderStats();
+    renderTable();
   } catch(e) { toast('Save failed.', true); }
 }
 
