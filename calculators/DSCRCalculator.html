@@ -125,7 +125,7 @@
   border: 1px solid #DDD6FE;
   border-left: 4px solid #6B21A8;
 }
-.td-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; flex-wrap: wrap; }
+.td-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-end; flex-wrap: wrap; }
 .td-field { display: flex; flex-direction: column; gap: 6px; }
 .td-label { font-size: 11px; font-weight: 700; color: inherit; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.025em; }
 .td-select { padding: 8px 12px; border: 1px solid var(--lp-border); border-radius: 8px; font-size: 12px; font-family: inherit; outline: none; background: #fff; font-weight: 600; color: var(--lp-dark); }
@@ -543,7 +543,7 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                             <div class="td-field">
                                 <label class="td-label">
                                     Expected SBA Submission
-                                    <span class="tooltip-icon" data-tip="The date the Bank Partner submits the file to the SBA, not your internal submission date.">📎</span>
+                                    <span class="tooltip-icon" data-tip="The date the Bank Partner submits the file to the SBA, not your internal submission date."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
                                 </label>
                                 <select class="td-select" id="tdScenario" onchange="updateTaxDocs()">
                                     <option value="today">Today</option>
@@ -582,7 +582,7 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                 <div class="sc-hd">
                     <span class="sc-num">2</span>
                     <span class="sc-title">EBIDA & financials
-                        <span class="tooltip-icon" data-tip="EBIDA = Earnings Before Interest, Depreciation & Amortization. Calculated as: Net Income + Interest + Depreciation + Amortization + Owner(s)' Comp.">📎</span>
+                        <span class="tooltip-icon" data-tip="EBIDA = Earnings Before Interest, Depreciation & Amortization. Calculated as: Net Income + Interest + Depreciation + Amortization + Owner(s)' Comp."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
                         <span class="sc-sub" id="ebidaFormHint"></span>
                     </span>
                     <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>

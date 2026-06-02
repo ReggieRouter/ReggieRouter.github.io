@@ -127,7 +127,7 @@ window.PDF_HELPER = {
             : '';
 
         headerHTML += `
-            <div style="text-align: center !important; margin-top: 8px !important; margin-bottom: 16px !important;">
+            <div style="text-align: center !important; margin-top: 4px !important; margin-bottom: 8px !important;">
                 <h1 class="pdf-document-title" style="display: block !important; font-size: 20px !important; font-weight: 800 !important; color: #111827 !important; margin: 0 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">${title}</h1>
                 ${quoteStampHtml}
             </div>
@@ -402,25 +402,36 @@ window.PDF_HELPER = {
         // Let the browser apply the print-mode reflow before opening the dialog
         await new Promise(r => setTimeout(r, 250));
 
-        // STEP 6 — Inject visible per-page quote stamp (fixed bottom-right, shows on every page).
-        // Subtle gray text — unobtrusive on screen but present in every PDF printout.
-        var _stampDiv = document.createElement('div');
-        _stampDiv.id = 'lp-quote-stamp';
-        _stampDiv.setAttribute('aria-label', 'document reference');
-        _stampDiv.style.cssText = [
-            'position:fixed',
-            'bottom:6mm',
-            'right:8mm',
-            'font-size:6pt',
-            'color:#C4C9D4',
-            'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,monospace',
-            'letter-spacing:0.04em',
-            'z-index:99998',
-            'pointer-events:none',
-            'user-select:none'
-        ].join(';');
-        _stampDiv.textContent = _quoteId + '  ·  lendpaper.com';
-        document.body.appendChild(_stampDiv);
+        // STEP 6 — Inject quote ID into @page @bottom-right via a style tag.
+        // This renders in the page MARGIN on every page — never overlaps content.
+        // Overrides any existing @bottom-right rule via cascade (injected last).
+        var _pageStyle = document.createElement('style');
+        _pageStyle.id = 'lp-quote-page-style';
+        _pageStyle.textContent = [
+            // Quote ID + ESTIMATE ONLY in every page's bottom-right margin box
+            '@page { @bottom-right { content: "'
+                + _quoteId + '  \B7  ESTIMATE ONLY  \B7  Page " counter(page) " of " counter(pages);'
+                + 'font-size: 6pt; color: #B0B8C4;'
+                + 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;'
+                + 'vertical-align: top; padding-top: 6pt; border-top: 0.5pt solid #E5E7EB; } }',
+            // Diagonal page watermark — centered on every page, behind content
+            'body.pdf-export-mode::before {'
+                + 'content: "ESTIMATE ONLY";'
+                + 'position: fixed;'
+                + 'top: 50%; left: 50%;'
+                + 'transform: translate(-50%, -50%) rotate(-42deg);'
+                + 'font-size: 18pt;'
+                + 'font-weight: 900;'
+                + 'color: rgba(0, 0, 0, 0.055);'
+                + 'letter-spacing: 0.08em;'
+                + 'white-space: nowrap;'
+                + 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;'
+                + 'pointer-events: none;'
+                + 'z-index: 0;'
+                + '-webkit-print-color-adjust: exact;'
+                + 'print-color-adjust: exact; }'
+        ].join('\n');
+        document.head.appendChild(_pageStyle);
 
         // STEP 7 — Inject hidden forensic fingerprint (white text, invisible visually but
         // extractable via PDF text tools or Select All+Copy — links back to same quoteId).
@@ -449,13 +460,13 @@ window.PDF_HELPER = {
             // Restore document title
             document.title = origDocTitle;
 
-            // Remove print-mode classes, stamp, and fingerprint after dialog clears
+            // Remove print-mode classes, injected page style, and fingerprint after dialog clears
             setTimeout(() => {
                 document.documentElement.classList.remove('pdf-export-mode');
                 document.body.classList.remove('pdf-export-mode');
                 document.body.classList.remove('multi-scenario');
-                var stamp = document.getElementById('lp-quote-stamp');
-                if (stamp) stamp.parentNode.removeChild(stamp);
+                var ps = document.getElementById('lp-quote-page-style');
+                if (ps) ps.parentNode.removeChild(ps);
                 var fp = document.getElementById('lp-doc-fingerprint');
                 if (fp) fp.parentNode.removeChild(fp);
             }, 1500);

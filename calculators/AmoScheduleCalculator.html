@@ -325,21 +325,35 @@
         .print-header-content { display: none; }
         .print-footer-legal, .print-watermark { display: none; }
 
-        /* Native print: @page rules control the actual PDF page geometry */
+        /* Native print: @page rules control the actual PDF page geometry.
+           Using @page margin boxes (not position:fixed) guarantees footer
+           renders in the margin and never overlaps content. */
         @page {
             size: letter portrait;
-            margin: 0.45in 0.55in 1.15in 0.55in;
+            margin: 0.45in 0.55in 1.3in 0.55in;
         }
         @page :first {
             margin-top: 0.35in;
         }
         @page {
+            @bottom-left {
+                content: "Generated via LendPaper  \B7  lendpaper.com  \B7  White-label & custom branding: hello@lendpaper.com\A ESTIMATES ONLY \2014 NOT FINANCIAL ADVICE. LendPaper is a software provider only \2014 not a lender, broker, or advisor. Actual terms subject to lender approval. Full terms: lendpaper.com/legal/estimates";
+                white-space: pre-line;
+                font-size: 5.5pt;
+                color: #6B7280;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                vertical-align: top;
+                padding-top: 6pt;
+                border-top: 0.5pt solid #E5E7EB;
+            }
             @bottom-right {
                 content: "Page " counter(page) " of " counter(pages);
                 font-size: 7pt;
                 color: #9CA3AF;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                padding-bottom: 0.15in;
+                vertical-align: top;
+                padding-top: 6pt;
+                border-top: 0.5pt solid #E5E7EB;
             }
         }
 
@@ -354,11 +368,12 @@
             body { min-height: 0 !important; height: auto !important; }
             main { min-height: 0 !important; height: auto !important; }
             .no-print, header, .action-buttons, .tooltiptext, .lp-howto, .remove-card-btn { display: none !important; }
-            .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
+            .print-header-content { display: block !important; text-align: center; margin-bottom: 16px; padding-top: 0; }
             .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
             .print-header-content h1 { font-size: 22px; font-weight: 800; color: var(--brand-primary); margin: 0; text-transform: uppercase; }
             .modal-shell { box-shadow: none !important; border: none !important; max-width: 100% !important; margin: 0 auto !important; break-inside: auto !important; }
-            body.pdf-export-mode > *:not(main):not(.lp-print-footer):not(#lp-print-modal-overlay) { display: none !important; }
+            body.pdf-export-mode > *:not(main):not(#lp-print-modal-overlay) { display: none !important; }
+            body.pdf-export-mode .lp-print-footer { display: none !important; }
             body.pdf-export-mode tr { page-break-inside: avoid !important; break-inside: avoid !important; }
             body.pdf-export-mode .pdf-hero-block,
             body.pdf-export-mode .pdf-stats-grid,
