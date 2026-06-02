@@ -306,6 +306,31 @@ body { background: var(--color-bg-main); margin: 0; padding: 0; font-family: var
 .rp-toggle-btn.active { background: var(--color-brand-dark); color: #fff; }
 .rp-toggle-btn:not(:last-child) { border-right: 1px solid var(--color-border); }
 
+/* Column config panel */
+.col-config-wrap { position:relative; display:flex; justify-content:flex-end; margin-bottom:6px; }
+.col-config-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; background:#fff; border:1px solid var(--color-border); border-radius:6px; font-size:12px; font-weight:500; color:var(--color-text-secondary); cursor:pointer; font-family:inherit; transition:all 0.15s; }
+.col-config-btn:hover, .col-config-btn.open { border-color:var(--color-brand-mid); color:var(--color-brand-dark); background:#F0FDF4; }
+.col-config-panel { display:none; position:absolute; top:calc(100% + 4px); right:0; background:#fff; border:1px solid var(--color-border); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.12); width:215px; z-index:200; padding:8px 0; }
+.col-config-panel.open { display:block; }
+.col-config-panel-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--color-text-muted); padding:4px 14px 8px; border-bottom:1px solid var(--color-border); margin-bottom:4px; }
+.col-config-item { display:flex; align-items:center; gap:8px; padding:5px 10px; user-select:none; }
+.col-config-item.drag-over { border-top:2px solid var(--color-brand-accent); }
+.col-drag-handle { color:#CBD5E1; cursor:grab; flex-shrink:0; font-size:14px; line-height:1; }
+.col-drag-handle:active { cursor:grabbing; }
+.col-config-item input[type=checkbox] { width:14px; height:14px; cursor:pointer; accent-color:var(--color-brand-dark); flex-shrink:0; }
+.col-config-item label { font-size:12.5px; color:var(--color-text-primary); cursor:pointer; flex:1; }
+.col-config-item.locked label { color:var(--color-text-muted); font-style:italic; }
+/* Beta banner */
+.beta-banner { display:flex; align-items:center; gap:8px; background:#D1FAE5; border:1px solid #A7F3D0; border-radius:7px; padding:9px 14px; margin-top:10px; font-size:12.5px; color:#065F46; }
+.beta-banner span { flex:1; }
+.beta-banner-close { background:none; border:none; font-size:19px; line-height:1; cursor:pointer; color:#065F46; padding:0 2px; opacity:0.55; transition:opacity 0.15s; font-family:inherit; }
+.beta-banner-close:hover { opacity:1; }
+/* Trends teaser */
+.rp-trends-teaser { background:#F0FDF4; border:1px solid #A7F3D0; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; color:var(--color-text-secondary); line-height:1.6; }
+.rp-trends-teaser strong { color:var(--color-brand-dark); }
+/* Status cell prominence */
+.status-cell .rp-badge { font-size:11px; padding:3px 8px; }
+
 /* Deal lost section separator in table */
 .rp-lost-section-row td { background: #FEF2F2 !important; padding: 7px 12px !important; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #991B1B; border-top: 2px solid #FECACA; border-bottom: 1px solid #FECACA; }
 .rp-row-deal-lost td { opacity: 0.7; background: #FFFAFA !important; }
@@ -439,12 +464,17 @@ body { background: var(--color-bg-main); margin: 0; padding: 0; font-family: var
             </div>
           </div>
           <div class="lp-chip-row">
-            <span class="lp-chip-label">Type</span>
+            <span class="lp-chip-label">Employment</span>
             <div class="lp-chip-group" id="type-chips">
               <button class="chip-btn active" data-filter="type" data-val="All">All</button>
               <button class="chip-btn" data-filter="type" data-val="Full-time">Full-time</button>
               <button class="chip-btn" data-filter="type" data-val="Part-time">Part-time</button>
               <button class="chip-btn" data-filter="type" data-val="Contract">Contract</button>
+            </div>
+          </div>
+          <div class="lp-chip-row" style="margin-top:-2px;">
+            <span class="lp-chip-label">Work Mode</span>
+            <div class="lp-chip-group">
               <button class="chip-btn" data-filter="type" data-val="Remote">Remote</button>
               <button class="chip-btn" data-filter="type" data-val="Hybrid">Hybrid</button>
             </div>
@@ -455,31 +485,38 @@ body { background: var(--color-bg-main); margin: 0; padding: 0; font-family: var
           </div>
         </div>
 
-        <!-- Table -->
+        <!-- Column config + Table -->
+        <div class="col-config-wrap">
+          <button class="col-config-btn" id="col-config-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Columns
+          </button>
+          <div class="col-config-panel" id="col-config-panel">
+            <div class="col-config-panel-title">Customize Columns</div>
+            <div id="col-config-list"></div>
+          </div>
+        </div>
         <div class="lp-table-wrapper">
           <table class="lp-data-table">
-            <thead>
-              <tr>
-                <th data-sort="company">Company / Title <span class="sort-icon">↕</span></th>
-                <th data-sort="location">Location <span class="sort-icon">↕</span></th>
-                <th data-sort="earnings_min" class="num-col">Earnings <span class="sort-icon">↕</span></th>
-                <th>Type</th>
-                <th data-sort="posted_date">Posted <span class="sort-icon">↕</span></th>
-                <th data-sort="contact_name">Contact <span class="sort-icon">↕</span></th>
-                <th data-sort="status">Status <span class="sort-icon">↕</span></th>
-              </tr>
-            </thead>
+            <thead><tr id="rp-thead-row"></tr></thead>
             <tbody id="rp-tbody">
-              <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--color-text-muted);">Loading…</td></tr>
+              <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--color-text-muted);">Loading…</td></tr>
             </tbody>
           </table>
+        </div>
+        <div id="beta-banner" class="beta-banner">
+          <span>Beta — working with a limited data set.</span>
+          <button class="beta-banner-close" onclick="dismissBeta()" title="Dismiss">&times;</button>
         </div>
       </div>
 
       <!-- Trends view -->
       <div id="trends-view">
+        <div class="rp-trends-teaser">
+          <strong>Coming soon: Trends.</strong> This view will surface <strong>overall market patterns</strong> — how posting volume is shifting week over week — alongside <strong>company-level trends</strong> showing which employers are ramping up hiring and which are going quiet. Spot momentum before it's obvious.
+        </div>
         <div class="rp-trends-section">
-          <div class="rp-trends-title">Postings by Company — Monthly Trends</div>
+          <div class="rp-trends-title">Postings by Company — Monthly Snapshot</div>
           <div id="trends-content">
             <div style="text-align:center;padding:40px;color:var(--color-text-muted);">Load postings to see trends.</div>
           </div>
@@ -779,7 +816,7 @@ async function loadPostings() {
       document.getElementById('setup-banner').style.display = 'block';
     }
     document.getElementById('rp-tbody').innerHTML =
-      `<tr><td colspan="7" style="text-align:center;padding:40px;color:#DC2626;">Could not load data. Check console for details.</td></tr>`;
+      `<tr><td colspan="${activeCols.length}" style="text-align:center;padding:40px;color:#DC2626;">Could not load data. Check console for details.</td></tr>`;
   }
 }
 
@@ -799,6 +836,29 @@ let currentView = 'postings';
 const STATUS_MAP = { 'New':'status-new','Reviewing':'status-reviewing','Contacted':'status-contacted','Passed':'status-passed','Closed':'status-closed' };
 const TYPE_MAP   = { 'Full-time':'type-fulltime','Part-time':'type-parttime','Contract':'type-contract','Remote':'type-remote','Hybrid':'type-hybrid' };
 
+/* ── COLUMN SYSTEM ── */
+const ALL_COLS = {
+  company:  { label: 'Company / Title', required: true, sort: 'company' },
+  status:   { label: 'Status', sort: 'status' },
+  location: { label: 'Location', sort: 'location' },
+  earnings: { label: 'Earnings', sort: 'earnings_min', numCol: true },
+  type:     { label: 'Type' },
+  posted:   { label: 'Posted', sort: 'posted_date' },
+  days_old: { label: 'Days Old' },
+  contact:  { label: 'Contact', sort: 'contact_name' },
+};
+const DEFAULT_COLS = ['company', 'status', 'location', 'earnings', 'type', 'posted', 'contact'];
+
+function loadColPrefs() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('rp_cols'));
+    if (Array.isArray(saved) && saved.length && saved.every(k => k in ALL_COLS)) return saved;
+  } catch(e) {}
+  return [...DEFAULT_COLS];
+}
+let activeCols = loadColPrefs();
+function saveColPrefs() { localStorage.setItem('rp_cols', JSON.stringify(activeCols)); }
+
 function badge(map, val) {
   const cls = map[val] || 'plat-other';
   return `<span class="rp-badge ${cls}">${esc(val || '—')}</span>`;
@@ -817,6 +877,21 @@ function fmtDate(d) {
   if (!d) return '—';
   const dt = new Date(d + 'T12:00:00');
   return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'2-digit' });
+}
+
+function fmtDateShort(d) {
+  if (!d) return '—';
+  const dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+}
+
+function daysOld(d) {
+  if (!d) return '—';
+  const posted = new Date(d + 'T12:00:00');
+  const days = Math.floor((new Date() - posted) / (1000 * 60 * 60 * 24));
+  if (days < 0) return '—';
+  if (days === 0) return 'Today';
+  return `${days}d`;
 }
 
 function esc(s) {
@@ -889,9 +964,7 @@ function getFiltered() {
 }
 
 /* ── RENDER TABLE ── */
-function buildRow(p) {
-  const open = expandedId === p.id;
-  const lost = isLost(p);
+function buildRowCell(col, p) {
   const hasContact = p.contact_name || p.contact_email || p.contact_phone;
   const contactDisplay = hasContact
     ? `<span style="font-size:12px;">${esc(p.contact_name || p.contact_email || '')}</span>
@@ -902,29 +975,47 @@ function buildRow(p) {
          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
          <span style="font-size:11px;color:var(--color-text-muted);">Add</span>
        </button>`;
+  const open = expandedId === p.id;
+  switch(col) {
+    case 'company':
+      return `<td class="rp-sticky-col"><div class="rp-company-cell">
+        <span class="rp-row-chevron${open ? ' expanded' : ''}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+        ${logoHtml(p)}
+        <div class="rp-company-info">
+          <div class="rp-company-name">${esc(p.company)}</div>
+          <div class="rp-title-name">${esc(p.title)}</div>
+        </div>
+      </div></td>`;
+    case 'status':
+      return `<td class="status-cell">${badge(STATUS_MAP, p.status)}</td>`;
+    case 'location':
+      return `<td>${p.location ? esc(p.location) : '<span style="color:var(--color-text-muted)">—</span>'}</td>`;
+    case 'earnings':
+      return `<td class="num-col" style="white-space:nowrap;font-size:12px;">${fmtEarnings(p)}</td>`;
+    case 'type':
+      return `<td>${badge(TYPE_MAP, p.job_type)}</td>`;
+    case 'posted':
+      return `<td style="white-space:nowrap;font-size:12px;">${fmtDateShort(p.posted_date)}</td>`;
+    case 'days_old':
+      return `<td style="white-space:nowrap;font-size:12px;color:var(--color-text-secondary);">${daysOld(p.posted_date)}</td>`;
+    case 'contact':
+      return `<td><div class="rp-contact-cell">${contactDisplay}</div></td>`;
+    default: return '<td>—</td>';
+  }
+}
+
+function buildRow(p) {
+  const open = expandedId === p.id;
+  const lost = isLost(p);
+  const cells = activeCols.map(col => buildRowCell(col, p)).join('');
   return `
 <tr class="rp-row-interactive${open ? ' rp-row-open' : ''}${lost ? ' rp-row-deal-lost' : ''}" data-id="${esc(p.id)}">
-  <td class="rp-sticky-col">
-    <div class="rp-company-cell">
-      <span class="rp-row-chevron${open ? ' expanded' : ''}">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </span>
-      ${logoHtml(p)}
-      <div class="rp-company-info">
-        <div class="rp-company-name">${esc(p.company)}</div>
-        <div class="rp-title-name">${esc(p.title)}</div>
-      </div>
-    </div>
-  </td>
-  <td>${p.location ? esc(p.location) : '<span style="color:var(--color-text-muted)">—</span>'}</td>
-  <td class="num-col" style="white-space:nowrap;font-size:12px;">${fmtEarnings(p)}</td>
-  <td>${badge(TYPE_MAP, p.job_type)}</td>
-  <td style="white-space:nowrap;font-size:12px;">${fmtDate(p.posted_date)}</td>
-  <td><div class="rp-contact-cell">${contactDisplay}</div></td>
-  <td>${badge(STATUS_MAP, p.status)}</td>
+  ${cells}
 </tr>
 <tr class="rp-detail-row${open ? ' expanded' : ''}" data-detail="${esc(p.id)}">
-  <td colspan="7">${open ? drawerHtml(p) : ''}</td>
+  <td colspan="${activeCols.length}">${open ? drawerHtml(p) : ''}</td>
 </tr>`;
 }
 
@@ -933,11 +1024,12 @@ function renderTable() {
   const liveData = data.filter(p => !isLost(p));
   const lostData = data.filter(p =>  isLost(p));
   const tbody = document.getElementById('rp-tbody');
+  const n = activeCols.length;
   const lostLabel = lostData.length ? ` · ${lostData.length} deal lost` : '';
   document.getElementById('rp-count').textContent = `${liveData.length} posting${liveData.length !== 1 ? 's' : ''}${lostLabel}`;
 
   if (!liveData.length && !lostData.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:48px 20px;color:var(--color-text-muted);">
+    tbody.innerHTML = `<tr><td colspan="${n}" style="text-align:center;padding:48px 20px;color:var(--color-text-muted);">
       No postings match your filters. <button class="reset-btn" onclick="resetFilters()" style="color:var(--color-brand-mid);">Clear filters</button> or add one with the + button.
     </td></tr>`;
     return;
@@ -945,7 +1037,7 @@ function renderTable() {
 
   let html = liveData.map(buildRow).join('');
   if (lostData.length) {
-    html += `<tr class="rp-lost-section-row"><td colspan="7">Deal Lost</td></tr>`;
+    html += `<tr class="rp-lost-section-row"><td colspan="${n}">Deal Lost</td></tr>`;
     html += lostData.map(buildRow).join('');
   }
   tbody.innerHTML = html;
@@ -957,6 +1049,26 @@ function renderTable() {
       const icon = th.querySelector('.sort-icon');
       if (icon) icon.textContent = sortState.dir === 'asc' ? '↑' : '↓';
     }
+  });
+}
+
+function renderTableHeader() {
+  const tr = document.getElementById('rp-thead-row');
+  if (!tr) return;
+  tr.innerHTML = activeCols.map(col => {
+    const c = ALL_COLS[col];
+    const sortAttr = c.sort ? ` data-sort="${c.sort}"` : '';
+    const sortIcon = c.sort ? ' <span class="sort-icon">↕</span>' : '';
+    const numClass = c.numCol ? ' class="num-col"' : '';
+    return `<th${sortAttr}${numClass}>${c.label}${sortIcon}</th>`;
+  }).join('');
+  document.querySelectorAll('.lp-data-table th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.sort;
+      if (sortState.col === col) sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+      else { sortState.col = col; sortState.dir = 'asc'; }
+      renderTable();
+    });
   });
 }
 
@@ -1261,15 +1373,6 @@ function toggleRow(id) {
   expandedId = expandedId === id ? null : id;
   renderTable();
 }
-
-document.querySelectorAll('.lp-data-table th[data-sort]').forEach(th => {
-  th.addEventListener('click', () => {
-    const col = th.dataset.sort;
-    if (sortState.col === col) sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
-    else { sortState.col = col; sortState.dir = 'asc'; }
-    renderTable();
-  });
-});
 
 /* ── FILTERS ── */
 document.getElementById('search-input').addEventListener('input', function() {
@@ -1592,6 +1695,94 @@ function matchToResume(id) {
   toast('Coming soon — resume matching not yet wired up.');
 }
 
+/* ── COLUMN CONFIG PANEL ── */
+function renderColConfigPanel() {
+  const list = document.getElementById('col-config-list');
+  if (!list) return;
+  list.innerHTML = activeCols.map((col, i) => {
+    const c = ALL_COLS[col];
+    const locked = c.required;
+    return `<div class="col-config-item${locked ? ' locked' : ''}" draggable="${!locked}" data-col="${col}" data-idx="${i}"
+      ondragstart="colDragStart(event,${i})" ondragover="colDragOver(event,${i})" ondrop="colDrop(event,${i})" ondragleave="colDragLeave(event)">
+      <span class="col-drag-handle">${locked ? '' : '⠿'}</span>
+      <input type="checkbox" id="col-chk-${col}" ${locked ? 'disabled checked' : activeCols.includes(col) ? 'checked' : ''} onchange="toggleCol('${col}',this.checked)">
+      <label for="col-chk-${col}">${c.label}</label>
+    </div>`;
+  }).join('');
+  const inactiveCols = Object.keys(ALL_COLS).filter(k => !activeCols.includes(k));
+  if (inactiveCols.length) {
+    list.innerHTML += `<div style="border-top:1px solid var(--color-border);margin:4px 0 2px;"></div>` +
+      inactiveCols.map(col => {
+        const c = ALL_COLS[col];
+        return `<div class="col-config-item" data-col="${col}">
+          <span class="col-drag-handle"></span>
+          <input type="checkbox" id="col-chk-${col}" onchange="toggleCol('${col}',this.checked)">
+          <label for="col-chk-${col}">${c.label}</label>
+        </div>`;
+      }).join('');
+  }
+}
+
+let colDragIdx = null;
+function colDragStart(e, i) { colDragIdx = i; e.currentTarget.style.opacity = '0.4'; }
+function colDragOver(e, i) {
+  e.preventDefault();
+  document.querySelectorAll('.col-config-item').forEach(el => el.classList.remove('drag-over'));
+  if (colDragIdx !== null && colDragIdx !== i) e.currentTarget.classList.add('drag-over');
+}
+function colDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function colDrop(e, i) {
+  e.preventDefault();
+  document.querySelectorAll('.col-config-item').forEach(el => { el.classList.remove('drag-over'); el.style.opacity = ''; });
+  if (colDragIdx === null || colDragIdx === i) { colDragIdx = null; return; }
+  const moved = activeCols.splice(colDragIdx, 1)[0];
+  activeCols.splice(i, 0, moved);
+  colDragIdx = null;
+  saveColPrefs();
+  renderTableHeader();
+  renderTable();
+  renderColConfigPanel();
+}
+function toggleCol(col, on) {
+  if (on) {
+    if (!activeCols.includes(col)) activeCols.push(col);
+  } else {
+    if (ALL_COLS[col].required) return;
+    activeCols = activeCols.filter(k => k !== col);
+  }
+  saveColPrefs();
+  renderTableHeader();
+  renderTable();
+  renderColConfigPanel();
+}
+
+const colBtn = document.getElementById('col-config-btn');
+const colPanel = document.getElementById('col-config-panel');
+colBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const open = colPanel.classList.toggle('open');
+  colBtn.classList.toggle('open', open);
+  if (open) renderColConfigPanel();
+});
+document.addEventListener('click', () => {
+  colPanel.classList.remove('open');
+  colBtn.classList.remove('open');
+});
+colPanel.addEventListener('click', e => e.stopPropagation());
+
+/* ── BETA BANNER ── */
+function dismissBeta() {
+  const el = document.getElementById('beta-banner');
+  if (el) { el.style.transition = 'opacity 0.3s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }
+  localStorage.setItem('rp_beta_dismissed', '1');
+}
+function initBetaBanner() {
+  if (localStorage.getItem('rp_beta_dismissed')) {
+    const el = document.getElementById('beta-banner');
+    if (el) el.remove();
+  }
+}
+
 /* ── TOAST ── */
 let toastTimer;
 function toast(msg, isError = false) {
@@ -1614,6 +1805,8 @@ document.addEventListener('keydown', e => {
 });
 
 /* ── INIT ── */
+renderTableHeader();
+initBetaBanner();
 checkAuth();
 </script>
 </body>
