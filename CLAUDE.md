@@ -40,6 +40,57 @@ Do this for every new tool added to `tools.js` with `presentation: "page"`.
 - Lender display names have permanent overrides — never strip or revert them
 - See `DISPLAY_NAME_OVERRIDES` in `waterfall.html`
 
+### CRITICAL — waterfall.html JSON safety rules
+The lender data lives inside a `<script>` block as a JS array literal. Two classes of bug have blanked the entire waterfall before. Both must be prevented every time `waterfall.html` is written.
+
+**Rule 1 — Never embed literal newlines in JSON strings.**
+The `source_snippet` field is scraped web text and often contains newlines. JSON strings cannot contain literal `\n` characters — they must be escaped as `\\n`. If this rule is violated `JSON.parse` throws silently and the entire lenderData array comes back empty.
+
+Any code that writes lenderData into the file (e.g. `publish.py`) must sanitize source_snippet:
+```python
+snippet = (snippet or '').replace('\r', '').replace('\n', '\\n')
+```
+
+**Rule 2 — Never embed `</script>` in a string inside a `<script>` block.**
+If `source_snippet` contains the text `</script>` (which happens when the scraper captures raw HTML), the browser's HTML parser terminates the `<script>` block at that point. Everything after — including most of the lenderData — is silently dropped. The page renders blank.
+
+Any code that writes lenderData must escape closing script tags:
+```python
+snippet = snippet.replace('</script>', '<\\/script>')
+```
+
+**Rule 3 — When editing waterfall.html directly, never re-serialize lenderData through `json.dumps`.**
+Python's `json.dumps` re-orders nothing but subtly changes float precision, strips trailing zeros, and re-encodes Unicode. It also does not escape forward slashes, reintroducing the `</script>` bug. If you must touch the JSON block, make targeted string replacements only — do not load-and-dump the entire array.
+
+**Rule 4 — After any edit to waterfall.html, verify with:**
+```bash
+node -e "
+const h = require('fs').readFileSync('waterfall.html','utf8');
+const s = h.indexOf('const lenderData = [');
+const e = h.indexOf('</script>', s);
+new Function(h.slice(h.lastIndexOf('<script',s)+8, e));
+console.log('JS OK');
+"
+```
+If that prints anything other than `JS OK`, do not push.
+
+## lp-panel.html — Supabase SELECT column safety
+**Rule: Never add a column to the `.select()` call in `loadLenders()` before that column exists in Supabase.**
+
+If a column is in the SELECT but not in the table, Supabase returns a 400 error and the entire lender list fails to load — the panel shows "Error loading lenders" and nothing renders.
+
+Workflow for new columns:
+1. Run the `ALTER TABLE` SQL in Supabase first
+2. Verify it appears in Supabase → Table Editor
+3. Then add it to the `.select()` string in lp-panel.html
+
+Pending column additions (run these in Supabase before re-enabling):
+```sql
+-- CAPTCHA flag (for scraper awareness + admin display)
+ALTER TABLE public.lender_data ADD COLUMN IF NOT EXISTS has_captcha boolean DEFAULT false;
+```
+Once run, add `has_captcha` back to the `.select()` on line ~803 of lp-panel.html.
+
 ## PDF exports (amortization)
 - `html2canvas` config must include `scrollX: 0, scrollY: 0` — dropping these causes left-side content clipping
 
