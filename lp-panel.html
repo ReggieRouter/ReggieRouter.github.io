@@ -433,6 +433,37 @@ header {
 .btn-proceed { background: var(--green); color: var(--white); border: none; border-radius: 7px; padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer; }
 .btn-proceed:hover { background: var(--green-mid); }
 .btn-proceed:disabled { background: #94A3B8; cursor: not-allowed; }
+
+/* ── CAPTCHA BADGE */
+.captcha-badge { display:inline-flex;align-items:center;gap:3px;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;border-radius:999px;padding:2px 7px;font-size:11px;font-weight:700;flex-shrink:0; }
+
+/* ── SUSPICIOUS CHANGE */
+.suspicious-row { background:#FFF7ED; }
+.suspicious-row td { background:#FFF7ED !important; }
+.suspicious-badge { display:inline-block;background:#FFF7ED;color:#C2410C;border:1px solid #FDBA74;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:700;margin-left:4px;vertical-align:middle; }
+
+/* ── REPORT TAB */
+.report-section { margin-bottom:24px; }
+.report-section-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+.report-score { font-size:12px;font-weight:700;color:var(--text);text-transform:none;letter-spacing:0; }
+.report-field-row { display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border); }
+.report-field-row:last-child { border-bottom:none; }
+.report-field-status { font-size:14px;flex-shrink:0;width:20px;text-align:center; }
+.report-field-name { font-size:12px;font-weight:600;color:var(--muted);width:200px;flex-shrink:0; }
+.report-field-val { font-size:13px;color:var(--text);flex:1; }
+.report-field-tag { font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;flex-shrink:0; }
+.tag-locked { background:var(--amber-light);color:var(--amber);border:1px solid #FCD34D; }
+.tag-pending { background:var(--amber-light);color:var(--amber);border:1px solid #FCD34D; }
+.tag-empty { background:var(--red-light);color:var(--red);border:1px solid #FECACA; }
+
+/* ── PUBLISH RULES */
+.rule-item { display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border); }
+.rule-item:last-child { border-bottom:none; }
+.rule-dot { width:8px;height:8px;border-radius:50%;background:var(--green-mid);flex-shrink:0;margin-top:5px; }
+.rule-dot.warn { background:var(--amber); }
+.rule-body { flex:1; }
+.rule-title { font-size:13px;font-weight:600;margin-bottom:2px; }
+.rule-desc { font-size:12px;color:var(--muted);line-height:1.4; }
 </style>
 </head>
 <body>
@@ -457,6 +488,7 @@ header {
     <div class="header-right">
       <span id="user-email"></span>
       <button class="btn-ghost" onclick="showMainView('dashboard')">Dashboard</button>
+      <button class="btn-ghost" onclick="openOverridesReport()">Overrides</button>
       <button class="btn-ghost" onclick="toggleFAQ()">? Help</button>
       <button class="btn-ghost" onclick="doLogout()">Sign out</button>
     </div>
@@ -495,6 +527,7 @@ header {
         <div class="detail-header">
           <div>
             <h1 id="detail-name"></h1>
+            <span id="detail-captcha" class="captcha-badge" style="display:none;margin-top:6px">🤖 CAPTCHA</span>
             <div class="display-name-row">
               <span>Display name:</span>
               <input type="text" id="display-name-input" placeholder="Same as lender name" />
@@ -514,6 +547,7 @@ header {
           </button>
           <button class="tab" id="tab-btn-fields" onclick="showTab('fields')">Edit Fields</button>
           <button class="tab" id="tab-btn-history" onclick="showTab('history')">Change History</button>
+          <button class="tab" id="tab-btn-report" onclick="showTab('report')">Report</button>
         </div>
 
         <!-- LIVE PREVIEW TAB -->
@@ -535,6 +569,11 @@ header {
             <small>Approved and rejected scrape changes will appear here.</small>
           </div>
           <div id="history-list"></div>
+        </div>
+
+        <!-- REPORT TAB -->
+        <div id="tab-report" class="tab-content" style="display:none">
+          <div id="report-content"></div>
         </div>
 
       </div>
@@ -603,6 +642,57 @@ header {
       <div class="faq-q">How do I train the scraper to avoid future data misses?</div>
       <div class="faq-a">Each lender has a <strong>Scraper Notes</strong> field in the Live Preview tab. Use it to leave notes like: <em>"Min FICO is on the /qualifications page, not the homepage"</em> or <em>"Rate shown is factor rate, not APR."</em> These notes are stored in localStorage and exported via <strong>Export Scraper Notes</strong> in the Dashboard. Share the exported JSON with the scraper developer or drop it in <code>~/lendpaper-engine/hints/</code> so the scraper reads them before each run.</div>
     </div>
+    <hr class="faq-divider">
+    <h3 style="margin-bottom:14px">Active Publish Rules</h3>
+    <div class="rule-item">
+      <div class="rule-dot"></div>
+      <div class="rule-body">
+        <div class="rule-title">Pending Changes Threshold</div>
+        <div class="rule-desc">If more than 5 changes are unreviewed, publishing is blocked. Work through the queue first.</div>
+      </div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-dot"></div>
+      <div class="rule-body">
+        <div class="rule-title">Required Fields Gate</div>
+        <div class="rule-desc">Before publishing, all approved lenders must have min_fico, min_tib_months, min_monthly_revenue, and product_types filled. You'll be warned with a list of offenders.</div>
+      </div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-dot warn"></div>
+      <div class="rule-body">
+        <div class="rule-title">Stale Lender Warning</div>
+        <div class="rule-desc">If more than 20% of approved lenders haven't been updated in 90+ days, you'll see a warning before publishing. Not a hard block.</div>
+      </div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-dot"></div>
+      <div class="rule-body">
+        <div class="rule-title">Spot Check (Mandatory)</div>
+        <div class="rule-desc">Before each publish you must visit a random sample of lender sites (√N formula, min 3, max 8) to verify live accuracy.</div>
+      </div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-dot"></div>
+      <div class="rule-body">
+        <div class="rule-title">Suspicious Zero / Blank Changes</div>
+        <div class="rule-desc">Any scrape that sets a numeric field to 0 or empties a filled array is flagged ⚠ in the queue and sorted to the bottom. Approving one requires manual confirmation.</div>
+      </div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-dot warn"></div>
+      <div class="rule-body">
+        <div class="rule-title">Source URL Required (Soft)</div>
+        <div class="rule-desc">Approving a change for a lender with no source URL triggers a confirmation. Prevents approving data you can't verify against a live site.</div>
+      </div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-dot"></div>
+      <div class="rule-body">
+        <div class="rule-title">Lock on Reject</div>
+        <div class="rule-desc">After rejecting a scraped value, a toast offers to lock that field. Locked fields are skipped by future scrapes.</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -631,9 +721,20 @@ header {
     <div class="sc-footer">
       <span class="sc-progress-txt" id="sc-progress-txt"></span>
       <div style="display:flex;gap:10px">
-        <button class="btn-cancel" onclick="closeSpotCheckModal()">Skip Check</button>
         <button id="sc-proceed-btn" class="btn-proceed" onclick="proceedAfterSpotCheck()" disabled>Looks Good — Publish →</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- OVERRIDES MODAL -->
+<div class="modal-overlay" id="overrides-modal" style="display:none" onclick="if(event.target===this) closeOverridesModal()">
+  <div class="modal-box" style="max-width:680px;width:100%;max-height:80vh;overflow-y:auto">
+    <h3 style="margin-bottom:8px">Manually Overridden Fields</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">These fields are locked — future scrapes will not overwrite them. Click ✕ next to any field to unlock it.</p>
+    <div id="overrides-modal-content"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-cancel" onclick="closeOverridesModal()">Close</button>
     </div>
   </div>
 </div>
@@ -656,6 +757,10 @@ let allPendingChanges = [];
 let scSample = [];
 let scVisited = new Set();
 const SPOTCHECK_REQUIRED = 1;
+const PENDING_REVIEW_MAX = 5;
+const STALE_WARN_THRESHOLD = 0.20;
+const REQUIRED_FIELDS = ['min_fico','min_tib_months','min_monthly_revenue','product_types'];
+const HOMEPAGE_FIELDS = ['min_fico','min_tib_months','min_monthly_revenue','max_funding_amount','max_term_months','product_types','max_position_stacking'];
 
 // ── Auth ─────────────────────────────────────────────────
 async function doLogin() {
@@ -695,7 +800,7 @@ async function loadAll() {
 async function loadLenders() {
   const { data, error } = await sb
     .from('lender_data')
-    .select('id, lender_name, display_name, lender_type, review_status, min_fico, min_tib_months, min_monthly_revenue, max_position_stacking, soft_pull_only, requires_bank_verification, min_bank_statements_months, requires_hard_collateral, early_payment_discount, requires_personal_guarantee, has_flex_line_of_credit, product_types, payment_frequencies, preferred_industries, restricted_industries, restricted_states, max_funding_amount, max_term_months, application_submission_url, source_url, lender_logo_url, hq_state, hq_address, broker_support_email, broker_support_phone, manually_overridden_fields, updated_at, previous_data')
+    .select('id, lender_name, display_name, lender_type, review_status, min_fico, min_tib_months, min_monthly_revenue, max_position_stacking, soft_pull_only, requires_bank_verification, min_bank_statements_months, requires_hard_collateral, early_payment_discount, requires_personal_guarantee, has_flex_line_of_credit, product_types, payment_frequencies, preferred_industries, restricted_industries, restricted_states, max_funding_amount, max_term_months, application_submission_url, source_url, lender_logo_url, hq_state, hq_address, broker_support_email, broker_support_phone, manually_overridden_fields, updated_at, previous_data, has_captcha')
     .order('lender_name', { ascending: true });
 
   if (error) {
@@ -827,6 +932,9 @@ async function approveChange(changeId, fieldName, newValue) {
     currentLender.review_status = 'approved';
   } else {
     // new mode: apply new_value to lender_data
+    if (isSuspiciousChange(change)) {
+      if (!confirm(`⚠ This sets ${fieldName} to zero or blank (was: ${formatValue(change.old_value)}). Apply anyway?`)) return;
+    }
     const parsedVal = tryParse(newValue);
     await sb.from('lender_data').update({ [fieldName]: parsedVal }).eq('id', currentLender.id);
     await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', changeId);
@@ -860,7 +968,7 @@ async function rejectChange(changeId, fieldName, oldValue) {
   renderDetail();
   renderLenderList(filterLendersArr());
   updatePublishBar();
-  toast('Change rejected');
+  toast('Reverted', 'Lock field?', () => lockFieldOnLender(currentLender.id, fieldName));
 }
 
 async function approveAll() {
@@ -960,11 +1068,19 @@ async function unlockField(field) {
 async function approvePendingById(changeId) {
   const change = allPendingChanges.find(c => c.id === changeId);
   if (!change) return;
+  const lender = allLenders.find(l => l.id === change.lender_id);
+
+  if (!lender?.source_url && !lender?.application_submission_url) {
+    if (!confirm(`${lender?.lender_name || 'This lender'} has no source URL on file. Approve this change anyway?`)) return;
+  }
+  if (isSuspiciousChange(change)) {
+    if (!confirm(`⚠ This sets ${change.field_name} to zero or blank (was: ${formatValue(change.old_value)}). Apply anyway?`)) return;
+  }
+
   const parsedVal = tryParse(change.new_value);
   await sb.from('lender_data').update({ [change.field_name]: parsedVal }).eq('id', change.lender_id);
   await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', changeId);
   allPendingChanges = allPendingChanges.filter(c => c.id !== changeId);
-  const lender = allLenders.find(l => l.id === change.lender_id);
   if (lender) {
     lender[change.field_name] = parsedVal;
     lender._pendingCount = Math.max(0, (lender._pendingCount || 1) - 1);
@@ -980,8 +1096,8 @@ async function approvePendingById(changeId) {
 }
 
 async function rejectPendingById(changeId) {
-  await sb.from('pending_changes').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', changeId);
   const change = allPendingChanges.find(c => c.id === changeId);
+  await sb.from('pending_changes').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', changeId);
   allPendingChanges = allPendingChanges.filter(c => c.id !== changeId);
   if (change) {
     const lender = allLenders.find(l => l.id === change.lender_id);
@@ -995,26 +1111,111 @@ async function rejectPendingById(changeId) {
   renderLenderList(filterLendersArr());
   renderDashboard();
   updatePublishBar();
-  toast('Change rejected');
+  if (change) {
+    toast('Reverted', 'Lock field?', () => lockFieldOnLender(change.lender_id, change.field_name));
+  } else {
+    toast('Change rejected');
+  }
 }
 
 async function approveAllPending() {
   if (!allPendingChanges.length) return;
-  for (const change of allPendingChanges) {
+  const suspicious = allPendingChanges.filter(isSuspiciousChange);
+  const safe = allPendingChanges.filter(c => !isSuspiciousChange(c));
+  let toApprove = allPendingChanges;
+  if (suspicious.length > 0) {
+    const skip = confirm(`${suspicious.length} change${suspicious.length!==1?'s':''} set fields to zero or blank. Click OK to skip them and approve only the ${safe.length} clean changes. Cancel to approve everything.`);
+    if (skip) toApprove = safe;
+  }
+  if (!toApprove.length) { toast('Nothing to approve'); return; }
+  for (const change of toApprove) {
     const parsedVal = tryParse(change.new_value);
     await sb.from('lender_data').update({ [change.field_name]: parsedVal }).eq('id', change.lender_id);
     const lender = allLenders.find(l => l.id === change.lender_id);
     if (lender) lender[change.field_name] = parsedVal;
   }
-  const ids = allPendingChanges.map(c => c.id);
+  const ids = toApprove.map(c => c.id);
   await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).in('id', ids);
-  allPendingChanges = [];
-  allLenders.forEach(l => { l._pendingCount = 0; });
-  if (currentLender) currentPending = [];
+  allPendingChanges = allPendingChanges.filter(c => !ids.includes(c.id));
+  allLenders.forEach(l => { l._pendingCount = allPendingChanges.filter(c => c.lender_id === l.id).length; });
+  if (currentLender) currentPending = currentPending.filter(c => !ids.includes(c.id));
   renderLenderList(filterLendersArr());
   renderDashboard();
   updatePublishBar();
   toast(`${ids.length} changes approved`);
+}
+
+function isSuspiciousChange(change) {
+  const NUMERIC = ['min_fico','min_tib_months','min_monthly_revenue','max_funding_amount','max_term_months','max_position_stacking','min_bank_statements_months'];
+  const nv = tryParse(change.new_value);
+  const ov = tryParse(change.old_value);
+  if (NUMERIC.includes(change.field_name)) {
+    if ((nv === 0 || nv === null) && ov && Number(ov) > 0) return true;
+  }
+  if (Array.isArray(nv) && nv.length === 0 && Array.isArray(ov) && ov.length > 0) return true;
+  if ((nv === null || nv === '') && ov !== null && ov !== '' && ov !== undefined) return true;
+  return false;
+}
+
+function toast(msg, actionLabel, actionFn) {
+  const el = document.getElementById('toast');
+  if (actionLabel && actionFn) {
+    window._toastAction = actionFn;
+    el.innerHTML = msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') +
+      ` <button onclick="window._toastAction()" style="margin-left:10px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:white;border-radius:4px;padding:2px 8px;font-size:12px;cursor:pointer">${actionLabel}</button>`;
+  } else {
+    el.textContent = msg;
+  }
+  el.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => el.classList.remove('show'), actionLabel ? 5000 : 2200);
+}
+
+async function lockFieldOnLender(lenderId, fieldName) {
+  const lender = allLenders.find(l => l.id === lenderId);
+  if (!lender) return;
+  const overrides = [...new Set([...(lender.manually_overridden_fields || []), fieldName])];
+  await sb.from('lender_data').update({ manually_overridden_fields: overrides }).eq('id', lenderId);
+  lender.manually_overridden_fields = overrides;
+  if (currentLender && currentLender.id === lenderId) currentLender.manually_overridden_fields = overrides;
+  toast(`${fieldName} locked — future scrapes won't overwrite it`);
+}
+
+function openOverridesReport() {
+  const lenders = allLenders
+    .filter(l => l.manually_overridden_fields && l.manually_overridden_fields.length > 0)
+    .sort((a,b) => b.manually_overridden_fields.length - a.manually_overridden_fields.length);
+  const content = document.getElementById('overrides-modal-content');
+  if (!lenders.length) {
+    content.innerHTML = '<div class="empty-state-sm"><p>No fields are manually locked.</p></div>';
+  } else {
+    content.innerHTML = `<table class="overrides-table" style="width:100%">
+      <thead><tr><th>Lender</th><th>#</th><th>Locked Fields</th></tr></thead>
+      <tbody>${lenders.map(l => `<tr>
+        <td style="cursor:pointer;color:var(--green);font-weight:500" onclick="closeOverridesModal();selectLender(${l.id})">${esc(l.display_name||l.lender_name)}</td>
+        <td><span class="override-count-badge">${l.manually_overridden_fields.length}</span></td>
+        <td>${l.manually_overridden_fields.map(f =>
+          `<span class="override-chip">${esc(f)}</span> <button onclick="unlockFieldGlobal(${l.id},'${f}')" style="font-size:10px;color:var(--red);background:none;border:none;cursor:pointer;padding:0 2px" title="Unlock">✕</button>`
+        ).join(' ')}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  }
+  document.getElementById('overrides-modal').style.display = 'flex';
+}
+
+function closeOverridesModal() {
+  document.getElementById('overrides-modal').style.display = 'none';
+}
+
+async function unlockFieldGlobal(lenderId, fieldName) {
+  const lender = allLenders.find(l => l.id === lenderId);
+  if (!lender) return;
+  const overrides = (lender.manually_overridden_fields || []).filter(f => f !== fieldName);
+  await sb.from('lender_data').update({ manually_overridden_fields: overrides }).eq('id', lenderId);
+  lender.manually_overridden_fields = overrides;
+  if (currentLender && currentLender.id === lenderId) currentLender.manually_overridden_fields = overrides;
+  openOverridesReport();
+  toast(`${fieldName} unlocked`);
 }
 
 // ── Render ───────────────────────────────────────────────
@@ -1031,6 +1232,7 @@ function renderLenderList(lenders) {
         <div class="lender-row-name">${esc(name)}</div>
         ${sub ? `<div class="lender-row-sub">${esc(sub)}</div>` : ''}
       </div>
+      ${l.has_captcha ? `<span class="captcha-badge" title="CAPTCHA detected">🤖</span>` : ''}
       ${cnt > 0 ? `<span class="badge badge-pending">${cnt}</span>` :
         l.review_status === 'approved' ? `<span class="badge badge-approved">✓</span>` : ''}
     </div>`;
@@ -1047,6 +1249,9 @@ function renderDetail() {
   const badge = document.getElementById('detail-status-badge');
   badge.textContent = l.review_status;
   badge.className = 'badge badge-' + (l.review_status === 'approved' ? 'approved' : l.review_status === 'rejected' ? 'rejected' : 'pending');
+
+  const captchaEl = document.getElementById('detail-captcha');
+  if (captchaEl) captchaEl.style.display = l.has_captcha ? 'inline-flex' : 'none';
 
   const visitBtn = document.getElementById('visit-lender-btn');
   const siteUrl = l.source_url || l.application_submission_url;
@@ -1217,6 +1422,7 @@ function renderFieldsTab() {
 
   const groups = [
     { title: 'Identity', fields: [
+      { key: 'has_captcha', label: 'Has CAPTCHA (scraper must handle)', type: 'bool' },
       { key: 'lender_type', label: 'Lender Type', type: 'text' },
       { key: 'lender_logo_url', label: 'Logo URL', type: 'text' },
       { key: 'source_url', label: 'Source URL', type: 'text' },
@@ -1289,14 +1495,93 @@ function renderFieldsTab() {
   `;
 }
 
+function renderReportTab() {
+  if (!currentLender) return;
+  const l = currentLender;
+  const locked = new Set(l.manually_overridden_fields || []);
+  const pmap = {};
+  currentPending.forEach(c => { pmap[c.field_name] = c; });
+
+  const FIELD_NAMES = {
+    min_fico:'Min FICO', min_tib_months:'Min TIB (months)', min_monthly_revenue:'Min Monthly Revenue',
+    max_funding_amount:'Max Funding Amount', max_term_months:'Max Term (months)',
+    max_position_stacking:'Max Position Stacking', product_types:'Product Types',
+    payment_frequencies:'Payment Frequencies', early_payment_discount:'Early Payment Discount',
+    has_flex_line_of_credit:'Flex LOC', soft_pull_only:'Soft Pull Only',
+    requires_bank_verification:'Bank Verification', min_bank_statements_months:'Min Bank Statements',
+    requires_hard_collateral:'Hard Collateral', requires_personal_guarantee:'Personal Guarantee',
+    restricted_industries:'Restricted Industries', restricted_states:'Restricted States',
+    preferred_industries:'Preferred Industries', broker_support_email:'Broker Email',
+    broker_support_phone:'Broker Phone', hq_state:'HQ State', hq_address:'HQ Address',
+    source_url:'Source URL', application_submission_url:'Application URL', lender_logo_url:'Logo URL',
+    has_captcha:'Has CAPTCHA',
+  };
+
+  const reportGroups = [
+    { title: 'Underwriting', fields: ['min_fico','min_tib_months','min_monthly_revenue','max_position_stacking','max_funding_amount','max_term_months'] },
+    { title: 'Products & Payments', fields: ['product_types','payment_frequencies','early_payment_discount','has_flex_line_of_credit'] },
+    { title: 'Credit & Verification', fields: ['soft_pull_only','requires_bank_verification','min_bank_statements_months','requires_hard_collateral','requires_personal_guarantee'] },
+    { title: 'Restrictions', fields: ['restricted_industries','restricted_states','preferred_industries'] },
+    { title: 'Contact & Location', fields: ['broker_support_email','broker_support_phone','hq_state','hq_address'] },
+    { title: 'Online Presence', fields: ['source_url','application_submission_url','lender_logo_url'] },
+  ];
+
+  function fieldRow(field) {
+    const val = l[field];
+    const isEmpty = val===null||val===undefined||val===''||(Array.isArray(val)&&!val.length);
+    const isLocked = locked.has(field);
+    const hasPending = !!pmap[field];
+    let status, statusColor;
+    if (isEmpty) { status = '○'; statusColor = 'color:var(--red)'; }
+    else if (hasPending) { status = '⚡'; statusColor = 'color:var(--amber)'; }
+    else { status = '✓'; statusColor = 'color:var(--green-mid)'; }
+
+    let displayVal = '';
+    if (!isEmpty) {
+      if (Array.isArray(val)) displayVal = val.join(', ');
+      else if (typeof val === 'boolean') displayVal = val ? 'Yes' : 'No';
+      else displayVal = String(val);
+    }
+
+    const tags = [
+      isLocked ? '<span class="report-field-tag tag-locked">🔒 Locked</span>' : '',
+      hasPending ? '<span class="report-field-tag tag-pending">⚡ Pending</span>' : '',
+      isEmpty ? '<span class="report-field-tag tag-empty">Empty</span>' : '',
+    ].filter(Boolean).join(' ');
+
+    return `<div class="report-field-row">
+      <span class="report-field-status" style="${statusColor}">${status}</span>
+      <span class="report-field-name">${esc(FIELD_NAMES[field] || field)}</span>
+      <span class="report-field-val">${isEmpty ? '<span style="color:var(--muted)">—</span>' : esc(displayVal)}</span>
+      ${tags}
+    </div>`;
+  }
+
+  const html = reportGroups.map(g => {
+    const filled = g.fields.filter(f => {
+      const v = l[f]; return v!==null&&v!==undefined&&v!==''&&!(Array.isArray(v)&&!v.length);
+    }).length;
+    return `<div class="report-section">
+      <div class="report-section-title">
+        <span>${g.title}</span>
+        <span class="report-score">${filled}/${g.fields.length} filled</span>
+      </div>
+      ${g.fields.map(fieldRow).join('')}
+    </div>`;
+  }).join('');
+
+  document.getElementById('report-content').innerHTML = `<div class="tab-content">${html}</div>`;
+}
+
 // ── Tabs ─────────────────────────────────────────────────
 function showTab(name) {
-  ['preview','fields','history'].forEach(t => {
+  ['preview','fields','history','report'].forEach(t => {
     document.getElementById('tab-'+t).style.display = name===t ? 'block' : 'none';
     document.getElementById('tab-btn-'+t).className = 'tab' + (name===t ? ' active' : '');
   });
   if (name === 'fields') renderFieldsTab();
   if (name === 'history') loadLenderHistory();
+  if (name === 'report') renderReportTab();
 }
 
 async function loadLenderHistory() {
@@ -1360,6 +1645,12 @@ function updatePublishBar() {
   const spotcheck = document.getElementById('spotcheck-text');
   const btn = document.getElementById('publish-btn');
 
+  if (allPendingChanges.length > PENDING_REVIEW_MAX) {
+    summary.innerHTML = `<strong style="color:var(--red)">${allPendingChanges.length} unreviewed changes</strong> — resolve to ${PENDING_REVIEW_MAX} or fewer first`;
+    spotcheck.textContent = '';
+    btn.disabled = true;
+    return;
+  }
   if (totalPending > 0) {
     summary.innerHTML = `<strong>${totalPending}</strong> lender${totalPending !== 1 ? 's' : ''} with pending changes`;
   } else {
@@ -1377,6 +1668,23 @@ function updatePublishBar() {
 
 // ── Publish Modal (with spot check) ──────────────────────
 function openPublishModal() {
+  // Gate: required fields on approved lenders
+  const approvedLenders = allLenders.filter(l => l.review_status === 'approved');
+  const missingRequired = approvedLenders.filter(l =>
+    REQUIRED_FIELDS.some(f => { const v = l[f]; return v===null||v===undefined||v===''||(Array.isArray(v)&&!v.length); })
+  );
+  if (missingRequired.length > 0) {
+    const names = missingRequired.slice(0,5).map(l => l.display_name||l.lender_name).join(', ');
+    if (!confirm(`${missingRequired.length} approved lender${missingRequired.length!==1?'s':''} are missing required fields (min_fico, min_tib, revenue, products):\n${names}${missingRequired.length>5?'\n…and more':''}\n\nPublish anyway?`)) return;
+  }
+  // Warning: stale lenders
+  const now = new Date();
+  const cutoff = new Date(now - 90*24*60*60*1000);
+  const staleApproved = approvedLenders.filter(l => !l.updated_at || new Date(l.updated_at) < cutoff);
+  if (staleApproved.length / Math.max(approvedLenders.length, 1) > STALE_WARN_THRESHOLD) {
+    if (!confirm(`${staleApproved.length} of your approved lenders haven't been updated in 90+ days (${Math.round(staleApproved.length/approvedLenders.length*100)}%). Publish anyway?`)) return;
+  }
+
   const changed = allLenders.filter(l => l._pendingCount>0 || (l.review_status==='pending'&&l.previous_data));
   const pool = changed.length >= 3 ? changed : [...allLenders].sort(()=>Math.random()-0.5);
   const n = Math.max(3, Math.min(8, Math.ceil(Math.sqrt(Math.max(pool.length, 1)))));
@@ -1484,13 +1792,6 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2200);
-}
-
 // ── Scraper Notes ─────────────────────────────────────────
 function saveScraperNote() {
   if (!currentLender) return;
@@ -1533,7 +1834,6 @@ function renderDashboard() {
   const totalPending = allLenders.reduce((n,l) =>
     n + (l._pendingCount || (l.review_status==='pending'&&l.previous_data?1:0)), 0);
 
-  const homepageFields = ['min_fico','min_tib_months','min_monthly_revenue','max_funding_amount','max_term_months','product_types','max_position_stacking'];
   const detailFields   = ['payment_frequencies','preferred_industries','restricted_industries','restricted_states','soft_pull_only','early_payment_discount','requires_hard_collateral','requires_bank_verification','min_bank_statements_months','requires_personal_guarantee','has_flex_line_of_credit','application_submission_url','lender_logo_url','hq_state','broker_support_email','broker_support_phone'];
 
   const emptyCount = f => allLenders.filter(l => {
@@ -1541,7 +1841,7 @@ function renderDashboard() {
     return v===null||v===undefined||v===''||(Array.isArray(v)&&!v.length);
   }).length;
 
-  const allTrackedFields = [...homepageFields,...detailFields];
+  const allTrackedFields = [...HOMEPAGE_FIELDS,...detailFields];
   const totalEmpty = allTrackedFields.reduce((s,f) => s+emptyCount(f), 0);
   const fillPct = Math.round((1 - totalEmpty/(allTrackedFields.length*allLenders.length))*100);
 
@@ -1553,24 +1853,68 @@ function renderDashboard() {
   // Lenders with scraper notes
   const notesCount = allLenders.filter(l => localStorage.getItem('lp_notes_' + l.id)).length;
 
+  const totalAllFields = allTrackedFields.length;
+  const mainFieldsCount = HOMEPAGE_FIELDS.length;
+
+  const isComplete = l => allTrackedFields.every(f => {
+    const v = l[f]; return v!==null&&v!==undefined&&v!==''&&!(Array.isArray(v)&&!v.length);
+  });
+  const hasMainComplete = l => HOMEPAGE_FIELDS.every(f => {
+    const v = l[f]; return v!==null&&v!==undefined&&v!==''&&!(Array.isArray(v)&&!v.length);
+  });
+  const completionPct = l => {
+    const filled = allTrackedFields.filter(f => {
+      const v = l[f]; return v!==null&&v!==undefined&&v!==''&&!(Array.isArray(v)&&!v.length);
+    }).length;
+    return filled / totalAllFields;
+  };
+
+  const totalLenders = allLenders.length;
+  const fullyComplete = allLenders.filter(isComplete).length;
+  const mainComplete = allLenders.filter(hasMainComplete).length;
+  const ninetyPlus = allLenders.filter(l => completionPct(l) >= 0.9).length;
+
+  // Empty field breakdown
+  const mainEmptyCount = HOMEPAGE_FIELDS.reduce((s,f) => s + emptyCount(f), 0);
+  const otherEmptyCount = detailFields.reduce((s,f) => s + emptyCount(f), 0);
+
   const cards = `<div class="dash-cards">
-    <div class="dash-card ${staleLenders.length===0?'good':staleLenders.length<=5?'warn':'bad'}">
-      <div class="dash-card-num">${staleLenders.length}</div>
-      <div class="dash-card-label">Stale (90+ days)</div>
+  <div class="dash-card" style="grid-column:span 2">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div>
+        <div class="dash-card-num">${totalLenders}</div>
+        <div class="dash-card-label">Total Lenders</div>
+      </div>
+      <div>
+        <div class="dash-card-num" style="color:${mainComplete===totalLenders?'var(--green-mid)':mainComplete>=totalLenders*.8?'var(--amber)':'var(--red)'}">${mainComplete}</div>
+        <div class="dash-card-label">Main Fields Complete</div>
+      </div>
+      <div>
+        <div class="dash-card-num" style="color:${ninetyPlus===totalLenders?'var(--green-mid)':ninetyPlus>=totalLenders*.8?'var(--amber)':'var(--red)'}">${ninetyPlus}</div>
+        <div class="dash-card-label">90%+ All Fields</div>
+      </div>
     </div>
-    <div class="dash-card ${totalPending===0?'good':totalPending<=10?'warn':'bad'}">
-      <div class="dash-card-num">${totalPending}</div>
-      <div class="dash-card-label">Pending changes</div>
+  </div>
+  <div class="dash-card ${staleLenders.length===0?'good':staleLenders.length<=5?'warn':'bad'}">
+    <div class="dash-card-num">${staleLenders.length}</div>
+    <div class="dash-card-label">Stale (90+ days)</div>
+  </div>
+  <div class="dash-card ${totalPending===0?'good':totalPending<=10?'warn':'bad'}">
+    <div class="dash-card-num">${totalPending}</div>
+    <div class="dash-card-label">Pending changes</div>
+  </div>
+  <div class="dash-card ${totalEmpty===0?'good':totalEmpty<=30?'warn':'bad'}">
+    <div class="dash-card-num">${totalEmpty}</div>
+    <div class="dash-card-label">Total empty fields</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">
+      Main table: <strong>${mainEmptyCount}</strong><br>Other fields: <strong>${otherEmptyCount}</strong>
     </div>
-    <div class="dash-card ${totalEmpty===0?'good':totalEmpty<=30?'warn':'bad'}">
-      <div class="dash-card-num">${totalEmpty}</div>
-      <div class="dash-card-label">Total empty fields</div>
-    </div>
-    <div class="dash-card ${fillPct>=90?'good':fillPct>=70?'warn':'bad'}">
-      <div class="dash-card-num">${fillPct}%</div>
-      <div class="dash-card-label">Data completeness</div>
-    </div>
-  </div>`;
+  </div>
+  <div class="dash-card ${fillPct>=90?'good':fillPct>=70?'warn':'bad'}">
+    <div class="dash-card-num">${fillPct}%</div>
+    <div class="dash-card-label">Data completeness</div>
+  </div>
+</div>`;
 
   const staleRows = staleLenders.slice(0,25).map(l => {
     const d = l.updated_at ? new Date(l.updated_at) : null;
@@ -1642,7 +1986,12 @@ function renderDashboard() {
   if (allPendingChanges.length === 0) {
     pendingSection = `<div class="empty-state-sm"><p style="color:var(--green-mid);font-weight:600">✓ No pending changes</p><small>All scraped data has been reviewed.</small></div>`;
   } else {
-    const pendingRows = allPendingChanges.map(c => {
+    const sortedChanges = [...allPendingChanges].sort((a,b) => {
+      const as = isSuspiciousChange(a) ? 1 : 0;
+      const bs = isSuspiciousChange(b) ? 1 : 0;
+      return as - bs;
+    });
+    const pendingRows = sortedChanges.map(c => {
       const lender = allLenders.find(l => l.id === c.lender_id);
       const lenderName = lender ? esc(lender.display_name || lender.lender_name) : 'Unknown';
       const srcUrl = lender ? (lender.source_url || lender.application_submission_url) : null;
@@ -1651,9 +2000,10 @@ function renderDashboard() {
       const newFmt = esc(formatValue(c.new_value));
       const d = new Date(c.created_at);
       const dateStr = d.toLocaleDateString([], {month:'short',day:'numeric'});
-      return `<tr>
+      const susp = isSuspiciousChange(c);
+      return `<tr class="${susp ? 'suspicious-row' : ''}">
         <td style="cursor:pointer;color:var(--green);font-weight:500;white-space:nowrap" onclick="selectLender(${c.lender_id})">${lenderName}</td>
-        <td><span class="field-label">${esc(fieldLabel)}</span></td>
+        <td><span class="field-label">${esc(fieldLabel)}</span>${susp ? '<span class="suspicious-badge">⚠ ZERO/BLANK</span>' : ''}</td>
         <td><span class="val-old">${oldFmt || '—'}</span></td>
         <td><span class="val-new">${newFmt || '—'}</span></td>
         <td style="white-space:nowrap">
@@ -1715,7 +2065,7 @@ function renderDashboard() {
     <div class="dash-section">
       <div class="dash-section-title">Homepage Table — Empty fields</div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Fields visible in the main lender comparison table on lendpaper.com</div>
-      ${homepageFields.map(fieldBar).join('')}
+      ${HOMEPAGE_FIELDS.map(fieldBar).join('')}
     </div>
     <div class="dash-section">
       <div class="dash-section-title">Lender Detail View — Empty fields</div>
