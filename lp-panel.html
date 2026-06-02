@@ -652,6 +652,7 @@ let currentLender = null;
 let currentPending = [];
 let reviewedThisSession = new Set();
 let allScrapeRuns = [];
+let allPendingChanges = [];
 let scSample = [];
 let scVisited = new Set();
 const SPOTCHECK_REQUIRED = 1;
@@ -704,14 +705,16 @@ async function loadLenders() {
   }
   allLenders = data || [];
 
-  // Get pending change counts
+  // Get all pending changes (full records for dashboard list)
   const { data: counts } = await sb
     .from('pending_changes')
-    .select('lender_id')
-    .eq('status', 'pending');
+    .select('id, lender_id, field_name, old_value, new_value, created_at')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
 
+  allPendingChanges = counts || [];
   const pendingMap = {};
-  (counts || []).forEach(r => {
+  allPendingChanges.forEach(r => {
     pendingMap[r.lender_id] = (pendingMap[r.lender_id] || 0) + 1;
   });
   allLenders.forEach(l => { l._pendingCount = pendingMap[l.id] || 0; });
@@ -951,6 +954,67 @@ async function unlockField(field) {
   currentLender.manually_overridden_fields = overrides;
   renderFieldsTab();
   toast(`${field} unlocked`);
+}
+
+// ── Global pending approve/reject (dashboard list) ────────
+async function approvePendingById(changeId) {
+  const change = allPendingChanges.find(c => c.id === changeId);
+  if (!change) return;
+  const parsedVal = tryParse(change.new_value);
+  await sb.from('lender_data').update({ [change.field_name]: parsedVal }).eq('id', change.lender_id);
+  await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', changeId);
+  allPendingChanges = allPendingChanges.filter(c => c.id !== changeId);
+  const lender = allLenders.find(l => l.id === change.lender_id);
+  if (lender) {
+    lender[change.field_name] = parsedVal;
+    lender._pendingCount = Math.max(0, (lender._pendingCount || 1) - 1);
+    if (currentLender && currentLender.id === lender.id) {
+      currentPending = currentPending.filter(c => c.id !== changeId);
+      currentLender[change.field_name] = parsedVal;
+    }
+  }
+  renderLenderList(filterLendersArr());
+  renderDashboard();
+  updatePublishBar();
+  toast('Change approved');
+}
+
+async function rejectPendingById(changeId) {
+  await sb.from('pending_changes').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', changeId);
+  const change = allPendingChanges.find(c => c.id === changeId);
+  allPendingChanges = allPendingChanges.filter(c => c.id !== changeId);
+  if (change) {
+    const lender = allLenders.find(l => l.id === change.lender_id);
+    if (lender) {
+      lender._pendingCount = Math.max(0, (lender._pendingCount || 1) - 1);
+      if (currentLender && currentLender.id === lender.id) {
+        currentPending = currentPending.filter(c => c.id !== changeId);
+      }
+    }
+  }
+  renderLenderList(filterLendersArr());
+  renderDashboard();
+  updatePublishBar();
+  toast('Change rejected');
+}
+
+async function approveAllPending() {
+  if (!allPendingChanges.length) return;
+  for (const change of allPendingChanges) {
+    const parsedVal = tryParse(change.new_value);
+    await sb.from('lender_data').update({ [change.field_name]: parsedVal }).eq('id', change.lender_id);
+    const lender = allLenders.find(l => l.id === change.lender_id);
+    if (lender) lender[change.field_name] = parsedVal;
+  }
+  const ids = allPendingChanges.map(c => c.id);
+  await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).in('id', ids);
+  allPendingChanges = [];
+  allLenders.forEach(l => { l._pendingCount = 0; });
+  if (currentLender) currentPending = [];
+  renderLenderList(filterLendersArr());
+  renderDashboard();
+  updatePublishBar();
+  toast(`${ids.length} changes approved`);
 }
 
 // ── Render ───────────────────────────────────────────────
@@ -1559,6 +1623,67 @@ function renderDashboard() {
     </div>`;
   }).join('') || `<div style="color:var(--muted);font-size:13px;padding:10px 0">No scrape runs recorded yet.</div>`;
 
+  // Build pending changes section
+  const FIELD_LABELS = {
+    min_fico:'Min FICO', min_tib_months:'Min TIB', min_monthly_revenue:'Min Revenue',
+    max_funding_amount:'Max Funding', max_term_months:'Max Term',
+    max_position_stacking:'Max Position', product_types:'Products',
+    payment_frequencies:'Payment Freq.', preferred_industries:'Preferred Ind.',
+    restricted_industries:'Restricted Ind.', restricted_states:'Restricted States',
+    soft_pull_only:'Soft Pull', requires_hard_collateral:'Hard Collateral',
+    requires_bank_verification:'Bank Verification', min_bank_statements_months:'Bank Statements',
+    requires_personal_guarantee:'Personal Guarantee', early_payment_discount:'Early Pay Disc.',
+    has_flex_line_of_credit:'Flex LOC', hq_state:'HQ State', hq_address:'HQ Address',
+    broker_support_email:'Broker Email', broker_support_phone:'Broker Phone',
+    source_url:'Source URL', application_submission_url:'App URL', lender_logo_url:'Logo URL',
+  };
+
+  let pendingSection = '';
+  if (allPendingChanges.length === 0) {
+    pendingSection = `<div class="empty-state-sm"><p style="color:var(--green-mid);font-weight:600">✓ No pending changes</p><small>All scraped data has been reviewed.</small></div>`;
+  } else {
+    const pendingRows = allPendingChanges.map(c => {
+      const lender = allLenders.find(l => l.id === c.lender_id);
+      const lenderName = lender ? esc(lender.display_name || lender.lender_name) : 'Unknown';
+      const srcUrl = lender ? (lender.source_url || lender.application_submission_url) : null;
+      const fieldLabel = FIELD_LABELS[c.field_name] || c.field_name;
+      const oldFmt = esc(formatValue(c.old_value));
+      const newFmt = esc(formatValue(c.new_value));
+      const d = new Date(c.created_at);
+      const dateStr = d.toLocaleDateString([], {month:'short',day:'numeric'});
+      return `<tr>
+        <td style="cursor:pointer;color:var(--green);font-weight:500;white-space:nowrap" onclick="selectLender(${c.lender_id})">${lenderName}</td>
+        <td><span class="field-label">${esc(fieldLabel)}</span></td>
+        <td><span class="val-old">${oldFmt || '—'}</span></td>
+        <td><span class="val-new">${newFmt || '—'}</span></td>
+        <td style="white-space:nowrap">
+          ${srcUrl ? `<a href="${esc(srcUrl)}" target="_blank" style="color:var(--green);font-size:12px;text-decoration:none" title="${esc(srcUrl)}">↗ Source</a>` : '<span style="color:var(--muted);font-size:12px">—</span>'}
+        </td>
+        <td style="font-size:11px;color:var(--muted);white-space:nowrap">${dateStr}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn-approve" onclick="approvePendingById('${c.id}')">Keep</button>
+            <button class="btn-reject"  onclick="rejectPendingById('${c.id}')">Revert</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    pendingSection = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:12px;color:var(--muted)">${allPendingChanges.length} change${allPendingChanges.length!==1?'s':''} across ${[...new Set(allPendingChanges.map(c=>c.lender_id))].length} lenders</span>
+        <button class="btn-bulk-approve" onclick="approveAllPending()">Approve All ${allPendingChanges.length}</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="pending-table">
+          <thead><tr>
+            <th>Lender</th><th>Field</th><th>Was</th><th>Now</th><th>Source</th><th>Date</th><th>Actions</th>
+          </tr></thead>
+          <tbody>${pendingRows}</tbody>
+        </table>
+      </div>`;
+  }
+
   el.innerHTML = `
     <div class="dash-header">
       <div>
@@ -1569,6 +1694,10 @@ function renderDashboard() {
         ${notesCount > 0 ? `<button class="btn-ghost" style="background:var(--amber);color:white" onclick="exportScraperNotes()">Export ${notesCount} Scraper Note${notesCount!==1?'s':''}</button>` : ''}
         <button class="btn-ghost" style="background:var(--green);color:white" onclick="renderDashboard()">↻ Refresh</button>
       </div>
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-title">Pending Changes — Review Queue</div>
+      ${pendingSection}
     </div>
     <div class="dash-section">
       <div class="dash-section-title">Overview</div>
