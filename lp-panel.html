@@ -800,7 +800,7 @@ async function loadAll() {
 async function loadLenders() {
   const { data, error } = await sb
     .from('lender_data')
-    .select('id, lender_name, display_name, lender_type, review_status, min_fico, min_tib_months, min_monthly_revenue, max_position_stacking, soft_pull_only, requires_bank_verification, min_bank_statements_months, requires_hard_collateral, early_payment_discount, requires_personal_guarantee, has_flex_line_of_credit, product_types, payment_frequencies, preferred_industries, restricted_industries, restricted_states, max_funding_amount, max_term_months, application_submission_url, source_url, lender_logo_url, hq_state, hq_address, broker_support_email, broker_support_phone, manually_overridden_fields, updated_at, previous_data, has_captcha')
+    .select('id, lender_name, display_name, lender_type, review_status, min_fico, min_tib_months, min_monthly_revenue, max_position_stacking, soft_pull_only, requires_bank_verification, min_bank_statements_months, requires_hard_collateral, early_payment_discount, requires_personal_guarantee, has_flex_line_of_credit, product_types, payment_frequencies, preferred_industries, restricted_industries, restricted_states, max_funding_amount, max_term_months, application_submission_url, source_url, lender_logo_url, hq_state, hq_address, broker_support_email, broker_support_phone, manually_overridden_fields, updated_at, previous_data')
     .order('lender_name', { ascending: true });
 
   if (error) {
