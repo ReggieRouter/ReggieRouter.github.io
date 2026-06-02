@@ -359,6 +359,14 @@ header {
 .lp-pending-note { font-size: 11px; color: var(--amber); font-weight: 600; }
 .btn-inline-approve { background: var(--green-light); color: var(--green); border: 1px solid #86EFAC; border-radius: 5px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
 .btn-inline-reject  { background: var(--red-light); color: var(--red); border: 1px solid #FECACA; border-radius: 5px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.btn-field-edit { background: none; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 11px; color: var(--muted); padding: 1px 5px; margin-left: 4px; opacity: 0; transition: opacity 0.15s; vertical-align: middle; }
+.lp-detail-row:hover .btn-field-edit,
+.lp-metric:hover .btn-field-edit { opacity: 1; }
+.diff-was { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--amber); margin-right: 3px; }
+.diff-now { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--green-mid); margin-right: 3px; }
+.lp-inline-edit-form { display: flex; flex-direction: column; gap: 6px; }
+.lp-inline-edit-input { border: 1px solid var(--green-mid); border-radius: 6px; padding: 5px 8px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box; font-family: inherit; }
+.lp-inline-edit-actions { display: flex; gap: 6px; }
 .lp-bulk-bar { display: flex; gap: 10px; padding: 12px 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
 .lp-no-changes { text-align: center; padding: 20px; background: var(--green-pale); border-radius: 10px; color: var(--green-mid); font-size: 13px; font-weight: 600; margin-bottom: 20px; }
 .lp-notes-section { margin-top: 8px; padding: 16px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
@@ -1276,6 +1284,62 @@ function renderDetail() {
   if (activeTabId === 'fields') renderFieldsTab();
 }
 
+const FIELD_TYPE_MAP = {
+  soft_pull_only:'bool', requires_hard_collateral:'bool', requires_bank_verification:'bool',
+  requires_personal_guarantee:'bool', early_payment_discount:'bool', has_flex_line_of_credit:'bool', has_captcha:'bool',
+  min_fico:'number', min_tib_months:'number', min_monthly_revenue:'number',
+  max_position_stacking:'number', max_funding_amount:'number', max_term_months:'number', min_bank_statements_months:'number',
+  product_types:'array', payment_frequencies:'array', restricted_industries:'array', restricted_states:'array', preferred_industries:'array',
+};
+
+function openFieldEdit(field) {
+  const type = FIELD_TYPE_MAP[field] || 'text';
+  const val = currentLender[field];
+  const valDiv = document.querySelector(`.lp-detail-val[data-field="${field}"], .lp-metric-val[data-field="${field}"]`);
+  if (!valDiv) return;
+  let inputHtml;
+  if (type === 'bool') {
+    inputHtml = `<select id="ile-input" class="lp-inline-edit-input">
+      <option value="true" ${val ? 'selected' : ''}>Yes</option>
+      <option value="false" ${!val ? 'selected' : ''}>No</option>
+    </select>`;
+  } else if (type === 'array') {
+    inputHtml = `<input id="ile-input" type="text" class="lp-inline-edit-input" value="${esc(Array.isArray(val) ? val.join(', ') : '')}" placeholder="comma-separated" />`;
+  } else if (type === 'number') {
+    inputHtml = `<input id="ile-input" type="number" class="lp-inline-edit-input" value="${val ?? ''}" />`;
+  } else {
+    inputHtml = `<input id="ile-input" type="text" class="lp-inline-edit-input" value="${esc(val || '')}" />`;
+  }
+  valDiv.innerHTML = `<div class="lp-inline-edit-form">${inputHtml}<div class="lp-inline-edit-actions">
+    <button class="btn-inline-approve" onclick="confirmFieldEdit('${field}','${type}')">Save</button>
+    <button class="btn-inline-reject" onclick="renderLivePreview()">Cancel</button>
+  </div></div>`;
+  document.getElementById('ile-input').focus();
+}
+
+async function confirmFieldEdit(field, type) {
+  const input = document.getElementById('ile-input');
+  if (!input) return;
+  let parsedVal;
+  if (type === 'bool') parsedVal = input.value === 'true';
+  else if (type === 'number') parsedVal = input.value === '' ? null : Number(input.value);
+  else if (type === 'array') parsedVal = input.value.split(',').map(s => s.trim()).filter(Boolean);
+  else parsedVal = input.value.trim() || null;
+  const overrides = [...new Set([...(currentLender.manually_overridden_fields || []), field])];
+  const pending = currentPending.find(p => p.field_name === field);
+  if (pending) {
+    await sb.from('pending_changes').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', pending.id);
+    currentPending = currentPending.filter(p => p.field_name !== field);
+  }
+  const updates = { [field]: parsedVal, manually_overridden_fields: overrides };
+  const { error } = await sb.from('lender_data').update(updates).eq('id', currentLender.id);
+  if (error) { toast('Save failed: ' + error.message); return; }
+  Object.assign(currentLender, updates);
+  Object.assign(allLenders.find(l => l.id === currentLender.id), updates);
+  renderLivePreview();
+  toast(`${field} updated & locked 🔒`);
+}
+
 function renderLivePreview() {
   if (!currentLender) return;
   const l = currentLender;
@@ -1290,19 +1354,20 @@ function renderLivePreview() {
     const rawCurrent = l[field];
     const currentFmt = formatter ? formatter(rawCurrent) : fmtVal(rawCurrent);
     const lockIcon = locked.has(field) ? ' <span title="Manually overridden" style="font-size:11px">🔒</span>' : '';
+    const editBtn = `<button class="btn-field-edit" onclick="openFieldEdit('${field}')" title="Edit this field">✏ edit</button>`;
     if (p) {
-      const oldFmt = formatter ? formatter(tryParse(p.old_value)) : formatValue(p.old_value);
-      const newFmt = formatter ? formatter(tryParse(p.new_value)) : formatValue(p.new_value);
-      const appArgs = JSON.stringify(p.new_value).replace(/"/g,'&quot;');
-      const rejArgs = JSON.stringify(p.old_value).replace(/"/g,'&quot;');
-      return `<span class="lp-old">${esc(oldFmt)}</span><span class="lp-new">${esc(newFmt)}</span>
+      // formatters return HTML — don't esc() their output; plain formatValue() returns text — do esc() it
+      const oldFmt = formatter ? formatter(tryParse(p.old_value)) : esc(formatValue(p.old_value));
+      const newFmt = formatter ? formatter(tryParse(p.new_value)) : esc(formatValue(p.new_value));
+      return `<span class="lp-old"><span class="diff-was">was</span>${oldFmt}</span><span class="lp-new"><span class="diff-now">→</span>${newFmt}</span>
               <div class="lp-pending-inline">
                 <span class="lp-pending-note">Scraped change</span>
                 <button class="btn-inline-approve" onclick="approveChange('${p.id}','${field}',${JSON.stringify(p.new_value)})">Keep New</button>
                 <button class="btn-inline-reject" onclick="rejectChange('${p.id}','${field}',${JSON.stringify(p.old_value)})">Revert</button>
+                ${editBtn}
               </div>`;
     }
-    return `${currentFmt || '<span style="color:var(--muted)">—</span>'}${lockIcon}`;
+    return `${currentFmt || '<span style="color:var(--muted)">—</span>'}${lockIcon}${editBtn}`;
   }
 
   function fmtVal(v) {
@@ -1331,13 +1396,13 @@ function renderLivePreview() {
 
   // Key metrics
   const metrics = [
-    { label: 'Min FICO',    val: fval('min_fico', fmtFico) },
-    { label: 'Min TIB',     val: fval('min_tib_months', v => v ? v+' mo' : '') },
-    { label: 'Min Revenue', val: fval('min_monthly_revenue', v => v ? '$'+Number(v).toLocaleString()+'/mo' : '') },
-    { label: 'Max Funding', val: fval('max_funding_amount', fmtMoney) },
-    { label: 'Max Term',    val: fval('max_term_months', fmtMonths) },
-    { label: 'Max Position',val: fval('max_position_stacking', v => v ? '#'+v : '') },
-  ].map(m => `<div class="lp-metric"><div class="lp-metric-label">${m.label}</div><div class="lp-metric-val">${m.val}</div></div>`).join('');
+    { label: 'Min FICO',    field: 'min_fico',              val: fval('min_fico', fmtFico) },
+    { label: 'Min TIB',     field: 'min_tib_months',        val: fval('min_tib_months', v => v ? v+' mo' : '') },
+    { label: 'Min Revenue', field: 'min_monthly_revenue',   val: fval('min_monthly_revenue', v => v ? '$'+Number(v).toLocaleString()+'/mo' : '') },
+    { label: 'Max Funding', field: 'max_funding_amount',    val: fval('max_funding_amount', fmtMoney) },
+    { label: 'Max Term',    field: 'max_term_months',       val: fval('max_term_months', fmtMonths) },
+    { label: 'Max Position',field: 'max_position_stacking', val: fval('max_position_stacking', v => v ? '#'+v : '') },
+  ].map(m => `<div class="lp-metric"><div class="lp-metric-label">${m.label}</div><div class="lp-metric-val" data-field="${m.field}">${m.val}</div></div>`).join('');
 
   // Products chips (handle pending on arrays)
   function chipsHtml(field) {
@@ -1367,24 +1432,24 @@ function renderLivePreview() {
 
   // Detail rows
   const detailRows = [
-    { label: 'Soft Pull Only',        val: fval('soft_pull_only', fmtBool) },
-    { label: 'Hard Collateral',       val: fval('requires_hard_collateral', fmtBool) },
-    { label: 'Bank Verification',     val: fval('requires_bank_verification', fmtBool) },
-    { label: 'Min Bank Statements',   val: fval('min_bank_statements_months', fmtMonths) },
-    { label: 'Personal Guarantee',    val: fval('requires_personal_guarantee', fmtBool) },
-    { label: 'Early Payment Disc.',   val: fval('early_payment_discount', fmtBool) },
-    { label: 'Flex LOC',              val: fval('has_flex_line_of_credit', fmtBool) },
-    { label: 'Payment Frequencies',   val: fval('payment_frequencies') },
-    { label: 'Preferred Industries',  val: fval('preferred_industries') },
-    { label: 'Restricted Industries', val: fval('restricted_industries') },
-    { label: 'Restricted States',     val: fval('restricted_states') },
-    { label: 'HQ State',              val: fval('hq_state') },
-    { label: 'HQ Address',            val: fval('hq_address') },
-    { label: 'Broker Email',          val: fval('broker_support_email') },
-    { label: 'Broker Phone',          val: fval('broker_support_phone') },
+    { label: 'Soft Pull Only',        field: 'soft_pull_only',              val: fval('soft_pull_only', fmtBool) },
+    { label: 'Hard Collateral',       field: 'requires_hard_collateral',    val: fval('requires_hard_collateral', fmtBool) },
+    { label: 'Bank Verification',     field: 'requires_bank_verification',  val: fval('requires_bank_verification', fmtBool) },
+    { label: 'Min Bank Statements',   field: 'min_bank_statements_months',  val: fval('min_bank_statements_months', fmtMonths) },
+    { label: 'Personal Guarantee',    field: 'requires_personal_guarantee', val: fval('requires_personal_guarantee', fmtBool) },
+    { label: 'Early Payment Disc.',   field: 'early_payment_discount',      val: fval('early_payment_discount', fmtBool) },
+    { label: 'Flex LOC',              field: 'has_flex_line_of_credit',     val: fval('has_flex_line_of_credit', fmtBool) },
+    { label: 'Payment Frequencies',   field: 'payment_frequencies',         val: fval('payment_frequencies') },
+    { label: 'Preferred Industries',  field: 'preferred_industries',        val: fval('preferred_industries') },
+    { label: 'Restricted Industries', field: 'restricted_industries',       val: fval('restricted_industries') },
+    { label: 'Restricted States',     field: 'restricted_states',           val: fval('restricted_states') },
+    { label: 'HQ State',              field: 'hq_state',                    val: fval('hq_state') },
+    { label: 'HQ Address',            field: 'hq_address',                  val: fval('hq_address') },
+    { label: 'Broker Email',          field: 'broker_support_email',        val: fval('broker_support_email') },
+    { label: 'Broker Phone',          field: 'broker_support_phone',        val: fval('broker_support_phone') },
   ].map(r => `<div class="lp-detail-row">
     <div class="lp-detail-label">${r.label}</div>
-    <div class="lp-detail-val">${r.val}</div>
+    <div class="lp-detail-val" data-field="${r.field}">${r.val}</div>
   </div>`).join('');
 
   // Scraper notes (stored in localStorage)
