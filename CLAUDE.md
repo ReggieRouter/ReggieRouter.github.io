@@ -42,3 +42,14 @@ Do this for every new tool added to `tools.js` with `presentation: "page"`.
 
 ## PDF exports (amortization)
 - `html2canvas` config must include `scrollX: 0, scrollY: 0` — dropping these causes left-side content clipping
+
+## PDF anti-fraud watermarks — NEVER remove or weaken these
+Every PDF exported via `PDF_HELPER.generatePDF()` must carry three layers of document authentication:
+
+1. **Visible quote ID in header** — `Doc #LP-YYYYMMDD-XXXXXX · [date]` rendered in small gray text below the document title. Injected by `initPrintLayout(title, quoteId)`.
+2. **Visible per-page stamp** — `LP-YYYYMMDD-XXXXXX · lendpaper.com` fixed bottom-right of every page, 6pt gray. Injected as `#lp-quote-stamp` div with `position:fixed` so it repeats on all printed pages.
+3. **Invisible forensic fingerprint** — white text div (`#lp-doc-fingerprint`) containing the same Quote ID plus timestamp, origin URL, user agent, screen size, and timezone. Invisible on screen; extractable by any PDF text tool or Select All+Copy.
+
+All three use the **same Quote ID** (generated once per export via `generateQuoteId()`), so they cross-reference each other.
+
+**Do not remove, comment out, or override these layers.** They exist to prevent fraud and limit legal exposure from falsified or disputed quotes. If adding a new calculator or PDF export path, always route through `PDF_HELPER.generatePDF()` — never call `window.print()` directly.

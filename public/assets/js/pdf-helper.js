@@ -7,6 +7,19 @@ window.PDF_HELPER = {
     getTier: function() {
         return new URLSearchParams(window.location.search).get('tier') || localStorage.getItem('lp_tier') || 'free';
     },
+
+    generateQuoteId: function() {
+        const now = new Date();
+        const ymd = now.getFullYear().toString()
+            + String(now.getMonth() + 1).padStart(2, '0')
+            + String(now.getDate()).padStart(2, '0');
+        const rand = Math.random().toString(36).substr(2, 6).toUpperCase();
+        return 'LP-' + ymd + '-' + rand;
+    },
+
+    formatQuoteDate: function() {
+        return new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    },
     
     showToast: function(message, isError = false) {
         let toast = document.getElementById('toast');
@@ -33,7 +46,7 @@ window.PDF_HELPER = {
         }, 3000);
     },
     
-    initPrintLayout: function(title) {
+    initPrintLayout: function(title, quoteId) {
         // Set dynamic favicon for artifact mode
         let link = document.querySelector("link[rel~='icon']");
         if (!link) {
@@ -109,9 +122,14 @@ window.PDF_HELPER = {
             `;
         }
         
+        const quoteStampHtml = quoteId
+            ? `<div style="font-size: 8px !important; color: #9CA3AF !important; margin-top: 4px !important; letter-spacing: 0.03em !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">Doc #${quoteId} &nbsp;·&nbsp; ${this.formatQuoteDate()}</div>`
+            : '';
+
         headerHTML += `
             <div style="text-align: center !important; margin-top: 8px !important; margin-bottom: 16px !important;">
                 <h1 class="pdf-document-title" style="display: block !important; font-size: 20px !important; font-weight: 800 !important; color: #111827 !important; margin: 0 !important; text-transform: uppercase !important; letter-spacing: 0.05em !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">${title}</h1>
+                ${quoteStampHtml}
             </div>
         `;
         
@@ -371,21 +389,43 @@ window.PDF_HELPER = {
             document.body.classList.add('multi-scenario');
         }
 
-        // STEP 3 — Build the print header dynamically per tier
-        this.initPrintLayout(title);
+        // STEP 3 — Generate a human-readable Quote ID for this document
+        var _quoteId = this.generateQuoteId();
 
-        // STEP 4 — Set document title; browsers use this as the suggested PDF filename
+        // STEP 4 — Build the print header dynamically per tier (includes Doc # + date)
+        this.initPrintLayout(title, _quoteId);
+
+        // STEP 5 — Set document title; browsers use this as the suggested PDF filename
         const origDocTitle = document.title;
         document.title = filename.replace(/\.pdf$/i, '');
 
         // Let the browser apply the print-mode reflow before opening the dialog
         await new Promise(r => setTimeout(r, 250));
 
-        // Inject hidden forensic fingerprint before printing.
-        // White text: invisible to eye, extractable by any PDF text tool or Select All+Copy.
-        var _fpId = 'LP-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        // STEP 6 — Inject visible per-page quote stamp (fixed bottom-right, shows on every page).
+        // Subtle gray text — unobtrusive on screen but present in every PDF printout.
+        var _stampDiv = document.createElement('div');
+        _stampDiv.id = 'lp-quote-stamp';
+        _stampDiv.setAttribute('aria-label', 'document reference');
+        _stampDiv.style.cssText = [
+            'position:fixed',
+            'bottom:6mm',
+            'right:8mm',
+            'font-size:6pt',
+            'color:#C4C9D4',
+            'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,monospace',
+            'letter-spacing:0.04em',
+            'z-index:99998',
+            'pointer-events:none',
+            'user-select:none'
+        ].join(';');
+        _stampDiv.textContent = _quoteId + '  ·  lendpaper.com';
+        document.body.appendChild(_stampDiv);
+
+        // STEP 7 — Inject hidden forensic fingerprint (white text, invisible visually but
+        // extractable via PDF text tools or Select All+Copy — links back to same quoteId).
         var _fpPayload = [
-            'LENDPAPER-DOC-ID:' + _fpId,
+            'LENDPAPER-DOC-ID:' + _quoteId,
             'TS:' + new Date().toISOString(),
             'ORIGIN:' + window.location.href,
             'REF:' + (document.referrer || 'direct'),
@@ -409,11 +449,13 @@ window.PDF_HELPER = {
             // Restore document title
             document.title = origDocTitle;
 
-            // Remove print-mode classes and fingerprint after dialog clears
+            // Remove print-mode classes, stamp, and fingerprint after dialog clears
             setTimeout(() => {
                 document.documentElement.classList.remove('pdf-export-mode');
                 document.body.classList.remove('pdf-export-mode');
                 document.body.classList.remove('multi-scenario');
+                var stamp = document.getElementById('lp-quote-stamp');
+                if (stamp) stamp.parentNode.removeChild(stamp);
                 var fp = document.getElementById('lp-doc-fingerprint');
                 if (fp) fp.parentNode.removeChild(fp);
             }, 1500);
