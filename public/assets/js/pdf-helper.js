@@ -451,6 +451,8 @@ window.PDF_HELPER = {
         _fpDiv.textContent = _fpPayload;
         document.body.appendChild(_fpDiv);
 
+        window.addEventListener('afterprint', () => self._handlePdfSaveSuccess(), { once: true });
+
         try {
             window.print();
         } catch (e) {
@@ -478,81 +480,298 @@ window.PDF_HELPER = {
         }
     },
 
+    _handlePdfSaveSuccess: function() {
+        const n = parseInt(localStorage.getItem('lp_pdf_save_count') || '0', 10) + 1;
+        localStorage.setItem('lp_pdf_save_count', n);
+    },
+
     showPrintEducationModal: function() {
         return new Promise((resolve) => {
-            // If user has previously opted out, skip the modal
-            if (localStorage.getItem('lp_print_modal_dismissed') === 'true') {
+            const LOOP_MS          = 5400;
+            const RESET_AFTER_DAYS = 30;
+            const DSA_AFTER_SAVES  = 2;
+            const KEY_SAVE_COUNT   = 'lp_pdf_save_count';
+            const KEY_LAST_ACTIVE  = 'lp_pdf_last_active';
+            const KEY_DSA          = 'lp_pdf_dsa';
+
+            // 30-day inactivity reset
+            const last = localStorage.getItem(KEY_LAST_ACTIVE);
+            if (last) {
+                const daysSince = (Date.now() - new Date(last).getTime()) / 86400000;
+                if (daysSince >= RESET_AFTER_DAYS) {
+                    localStorage.removeItem(KEY_SAVE_COUNT);
+                    localStorage.removeItem(KEY_DSA);
+                }
+            }
+            localStorage.setItem(KEY_LAST_ACTIVE, new Date().toISOString());
+
+            // Only DSA permanently suppresses; modal shows every time otherwise
+            if (localStorage.getItem(KEY_DSA) === '1') {
                 resolve(true);
                 return;
             }
 
-            // Build modal — white card with a visual mini-mockup of the print dialog
+            // Scoped CSS — removed when modal is dismissed
+            const style = document.createElement('style');
+            style.id = 'lpm-style';
+            style.textContent = [
+                '#lp-print-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.52);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;}',
+                '#lp-print-modal-overlay .lpm-modal{background:#fff;border-radius:16px;width:520px;box-shadow:0 32px 80px rgba(0,0,0,0.36);overflow:hidden;animation:lpmPopIn 0.22s cubic-bezier(0.34,1.56,0.64,1) forwards;}',
+                '@keyframes lpmPopIn{from{opacity:0;transform:scale(0.91);}to{opacity:1;transform:scale(1);}}',
+                '#lp-print-modal-overlay .lpm-hed{padding:26px 36px 18px;text-align:center;}',
+                '#lp-print-modal-overlay .lpm-hed h1{font-size:26px;font-weight:700;color:#111;letter-spacing:-0.025em;margin:0;}',
+                '#lp-print-modal-overlay .lpm-stage{position:relative;height:360px;background:#eaeceb;border-top:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;overflow:hidden;}',
+                '#lp-print-modal-overlay .lpm-step-ind{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:11.5px;font-weight:600;letter-spacing:0.045em;color:#777;text-transform:uppercase;transition:opacity 0.25s;z-index:50;pointer-events:none;}',
+                '#lp-print-modal-overlay .lpm-sprog{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(0,0,0,0.08);z-index:60;}',
+                '#lp-print-modal-overlay .lpm-sprog-fill{height:100%;background:#2d6a2d;width:0%;}',
+                '#lp-print-modal-overlay .lpm-dialog{position:absolute;background:#fff;border-radius:9px;box-shadow:0 6px 28px rgba(0,0,0,0.17);width:348px;top:30px;left:50%;transform:translateX(-50%);overflow:visible;}',
+                '#lp-print-modal-overlay .lpm-d-title{font-size:15px;font-weight:500;color:#202124;padding:14px 18px 11px;border-bottom:1px solid #eee;}',
+                '#lp-print-modal-overlay .lpm-d-field{display:flex;align-items:center;padding:11px 18px;border-bottom:1px solid #f0f0f0;position:relative;transition:background 0.35s;}',
+                '#lp-print-modal-overlay .lpm-d-field.lpm-glow-green{background:#e8f5e9;}',
+                '#lp-print-modal-overlay .lpm-d-label{font-size:12px;color:#5f6368;width:100px;flex-shrink:0;}',
+                '#lp-print-modal-overlay .lpm-d-sel{flex:1;display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #dadce0;border-radius:4px;padding:6px 10px;font-size:12px;color:#202124;transition:border-color 0.2s,box-shadow 0.2s;}',
+                '#lp-print-modal-overlay .lpm-d-sel.lpm-focused{border-color:#1a73e8;box-shadow:0 0 0 2.5px rgba(26,115,232,0.2);}',
+                '#lp-print-modal-overlay .lpm-d-chev{transition:transform 0.18s;width:14px;height:14px;}',
+                '#lp-print-modal-overlay .lpm-d-chev.lpm-open{transform:rotate(180deg);}',
+                '#lp-print-modal-overlay .lpm-d-dd{position:absolute;top:calc(100% + 2px);left:100px;right:0;background:#fff;border-radius:5px;box-shadow:0 4px 16px rgba(0,0,0,0.18);overflow:hidden;z-index:80;opacity:0;transform:scaleY(0.82);transform-origin:top;transition:opacity 0.14s,transform 0.14s;pointer-events:none;}',
+                '#lp-print-modal-overlay .lpm-d-dd.lpm-open{opacity:1;transform:scaleY(1);}',
+                '#lp-print-modal-overlay .lpm-dd-row{padding:10px 12px;font-size:12px;color:#202124;display:flex;align-items:center;gap:8px;}',
+                '#lp-print-modal-overlay .lpm-dd-row.lpm-hi{background:#f1f3f4;}',
+                '#lp-print-modal-overlay .lpm-dd-row.lpm-sel{background:#e8f0fe;color:#1a73e8;}',
+                '#lp-print-modal-overlay .lpm-ck{width:13px;height:13px;flex-shrink:0;visibility:hidden;}',
+                '#lp-print-modal-overlay .lpm-dd-row.lpm-sel .lpm-ck{visibility:visible;}',
+                '#lp-print-modal-overlay .lpm-d-check{display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid #f0f0f0;transition:background 0.35s;}',
+                '#lp-print-modal-overlay .lpm-d-check.lpm-glow-amber{background:#fff8e1;}',
+                '#lp-print-modal-overlay .lpm-cbox{width:15px;height:15px;border-radius:2px;border:1.5px solid #5f6368;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s;}',
+                '#lp-print-modal-overlay .lpm-cbox.lpm-on{background:#1a73e8;border-color:#1a73e8;}',
+                '#lp-print-modal-overlay .lpm-cbox.lpm-on::after{content:"";display:block;width:8px;height:5px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translateY(-1px);}',
+                '#lp-print-modal-overlay .lpm-cbox-lbl{font-size:12px;color:#202124;transition:color 0.25s;}',
+                '#lp-print-modal-overlay .lpm-cbox-lbl.lpm-dim{color:#c0c0c0;text-decoration:line-through;}',
+                '#lp-print-modal-overlay .lpm-d-actions{display:flex;justify-content:flex-end;gap:7px;padding:11px 18px 14px;}',
+                '#lp-print-modal-overlay .lpm-d-cancel{font-size:12px;color:#1a73e8;background:transparent;border:none;padding:6px 12px;border-radius:20px;font-family:inherit;opacity:0.14;}',
+                '#lp-print-modal-overlay .lpm-d-save{font-size:12px;font-weight:500;color:#fff;padding:7px 20px;border-radius:20px;border:none;font-family:inherit;background:#1a73e8;transition:background 0.3s,transform 0.1s;}',
+                '#lp-print-modal-overlay .lpm-d-save.lpm-press{background:#1558b0;transform:scale(0.93);}',
+                '#lp-print-modal-overlay #lpm-cur{position:absolute;width:22px;height:22px;pointer-events:none;z-index:200;transition:none;}',
+                '#lp-print-modal-overlay #lpm-cur svg{filter:drop-shadow(1px 2px 3px rgba(0,0,0,0.4));}',
+                '#lp-print-modal-overlay #lpm-cring{position:absolute;width:44px;height:44px;border-radius:50%;border:3px solid rgba(26,115,232,0.9);pointer-events:none;z-index:199;opacity:0;transform:scale(0.2);}',
+                '#lp-print-modal-overlay #lpm-cring.lpm-pop{animation:lpmRingPop 0.46s ease-out forwards;}',
+                '@keyframes lpmRingPop{0%{opacity:1;transform:scale(0.25);}100%{opacity:0;transform:scale(2);}}',
+                '#lp-print-modal-overlay .lpm-foot{display:flex;align-items:center;padding:15px 22px 20px;gap:10px;}',
+                '#lp-print-modal-overlay .lpm-dsa-wrap{display:flex;align-items:center;gap:7px;opacity:0;pointer-events:none;transition:opacity 0.4s;flex:1;}',
+                '#lp-print-modal-overlay .lpm-dsa-wrap.lpm-visible{opacity:1;pointer-events:auto;}',
+                '#lp-print-modal-overlay .lpm-dsa-wrap input{width:13px;height:13px;cursor:pointer;accent-color:#2d6a2d;}',
+                '#lp-print-modal-overlay .lpm-dsa-wrap label{font-size:11px;color:#888;text-transform:uppercase;font-weight:600;letter-spacing:0.04em;line-height:1.3;cursor:pointer;}',
+                '#lp-print-modal-overlay .lpm-btn-cancel{font-size:12.5px;color:#aaa;background:transparent;border:0.5px solid #e0e0e0;padding:9px 18px;border-radius:7px;cursor:pointer;font-family:inherit;}',
+                '#lp-print-modal-overlay .lpm-btn-proceed{font-size:13px;font-weight:700;padding:11px 22px;border-radius:8px;border:none;font-family:inherit;cursor:pointer;color:#fff;background:#2d6a2d;white-space:nowrap;transition:background 0.2s;}',
+                '#lp-print-modal-overlay .lpm-btn-proceed.lpm-locked{background:#c4c4c4;cursor:not-allowed;}',
+                '#lp-print-modal-overlay .lpm-btn-proceed.lpm-unlocking{animation:lpmBtnPulse 0.55s ease-out;}',
+                '@keyframes lpmBtnPulse{0%{transform:scale(1);}40%{transform:scale(1.08);background:#3c8c3c;}100%{transform:scale(1);}}',
+                '#lp-print-modal-overlay .lpm-btn-proceed:not(.lpm-locked):not(.lpm-unlocking):hover{background:#245524;}'
+            ].join('');
+            document.head.appendChild(style);
+
             const overlay = document.createElement('div');
             overlay.id = 'lp-print-modal-overlay';
-            overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(17,24,39,0.45);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:20px;';
-
-            // Two visual rows showing what to do:
-            // 1) Destination = Save as PDF (the field they want)
-            // 2) Headers and footers = unchecked (the field they need to turn OFF)
-            // Plus a primary "Got it, continue" button.
             overlay.innerHTML =
-                '<div style="background:white;border-radius:14px;max-width:420px;width:100%;padding:28px 28px 22px;box-shadow:0 20px 60px rgba(0,0,0,0.18);">'
-
-                // Header
-                + '<div style="text-align:center;margin-bottom:6px;">'
-                + '<div style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:#F0FDF4;margin-bottom:10px;">'
-                + '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/></svg>'
+                '<div class="lpm-modal">'
+                + '<div class="lpm-hed"><h1>Don\'t print, save.</h1></div>'
+                + '<div class="lpm-stage" id="lpm-stage">'
+                +   '<div id="lpm-cur"><svg width="22" height="22" viewBox="0 0 20 20" fill="none"><path d="M4 2L4 16L7.5 12.5L10.5 18L12.5 17L9.5 11L14 11L4 2Z" fill="white" stroke="#1a1a1a" stroke-width="0.9"/></svg></div>'
+                +   '<div id="lpm-cring"></div>'
+                +   '<div class="lpm-dialog">'
+                +     '<div class="lpm-d-title">Print</div>'
+                +     '<div class="lpm-d-field" id="lpm-dest-row">'
+                +       '<span class="lpm-d-label">Destination</span>'
+                +       '<div style="position:relative;flex:1;">'
+                +         '<div class="lpm-d-sel" id="lpm-dsel">'
+                +           '<span id="lpm-dsel-val">Your Printer</span>'
+                +           '<svg class="lpm-d-chev" id="lpm-dchev" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>'
+                +         '</div>'
+                +         '<div class="lpm-d-dd" id="lpm-ddd">'
+                +           '<div class="lpm-dd-row lpm-sel" id="lpm-ddo-p"><svg class="lpm-ck" viewBox="0 0 13 13" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"><polyline points="1.5,6.5 4.5,9.5 11,3"/></svg>Your Printer</div>'
+                +           '<div class="lpm-dd-row" id="lpm-ddo-pdf"><svg class="lpm-ck" viewBox="0 0 13 13" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"><polyline points="1.5,6.5 4.5,9.5 11,3"/></svg>Save as PDF</div>'
+                +         '</div>'
+                +       '</div>'
+                +     '</div>'
+                +     '<div class="lpm-d-check" id="lpm-hf-row">'
+                +       '<div class="lpm-cbox lpm-on" id="lpm-hfcb"></div>'
+                +       '<span class="lpm-cbox-lbl" id="lpm-hflbl">Headers and footers</span>'
+                +     '</div>'
+                +     '<div class="lpm-d-actions"><button class="lpm-d-cancel">Cancel</button><button class="lpm-d-save" id="lpm-dsave">Print</button></div>'
+                +   '</div>'
+                +   '<div class="lpm-step-ind" id="lpm-step-ind">Step 1 of 2 — change Destination</div>'
+                +   '<div class="lpm-sprog"><div class="lpm-sprog-fill" id="lpm-spfill"></div></div>'
                 + '</div>'
-                + '<h3 style="margin:0 0 4px;font-size:18px;font-weight:700;color:#111827;">One quick step</h3>'
-                + '<p style="margin:0;font-size:13px;color:#6B7280;line-height:1.5;">In the print dialog that opens next:</p>'
+                + '<div class="lpm-foot">'
+                +   '<div class="lpm-dsa-wrap" id="lpm-dsa-wrap"><input type="checkbox" id="lpm-dsa-cb"/><label for="lpm-dsa-cb">Don\'t show again</label></div>'
+                +   '<button class="lpm-btn-cancel" id="lpm-cancel-btn">Cancel</button>'
+                +   '<button class="lpm-btn-proceed lpm-locked" id="lpm-proceed-btn">Open print menu →</button>'
                 + '</div>'
-
-                // Visual mockup card 1: Destination = Save as PDF
-                + '<div style="margin-top:18px;padding:12px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#FAFAFA;display:flex;align-items:center;justify-content:space-between;gap:12px;">'
-                + '<div style="font-size:12px;color:#6B7280;font-weight:500;">Destination</div>'
-                + '<div style="display:flex;align-items:center;gap:8px;padding:5px 10px;background:white;border:1.5px solid #14532D;border-radius:6px;font-size:13px;font-weight:600;color:#14532D;">'
-                + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
-                + 'Save as PDF</div>'
-                + '</div>'
-
-                // Visual mockup card 2: Uncheck Headers and footers
-                + '<div style="margin-top:8px;padding:12px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#FAFAFA;display:flex;align-items:center;justify-content:space-between;gap:12px;">'
-                + '<div style="font-size:12px;color:#6B7280;font-weight:500;">Headers and footers</div>'
-                + '<div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#991B1B;">'
-                + '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1.5px solid #991B1B;border-radius:4px;background:white;"></span>'
-                + 'Uncheck</div>'
-                + '</div>'
-
-                // Then click Save
-                + '<p style="margin:14px 0 0;font-size:13px;color:#374151;text-align:center;line-height:1.5;">Then click <strong>Save</strong>.</p>'
-
-                // Footer: don't-show-again + Continue
-                + '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:18px;margin-top:18px;border-top:1px solid #F3F4F6;">'
-                + '<label style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B7280;cursor:pointer;user-select:none;">'
-                + '<input type="checkbox" id="lp-print-dont-show-again" style="cursor:pointer;width:14px;height:14px;">Don\'t show again</label>'
-                + '<div style="display:flex;gap:8px;">'
-                + '<button id="lp-print-cancel" style="padding:8px 14px;border:1px solid #D1D5DB;background:white;color:#374151;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;">Cancel</button>'
-                + '<button id="lp-print-continue" style="padding:8px 18px;border:none;background:#14532D;color:white;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">Got it, continue</button>'
-                + '</div></div>'
-
                 + '</div>';
-
             document.body.appendChild(overlay);
 
-            const cleanup = (result) => {
-                const dontShow = document.getElementById('lp-print-dont-show-again');
-                if (dontShow && dontShow.checked && result) {
-                    localStorage.setItem('lp_print_modal_dismissed', 'true');
-                }
-                overlay.remove();
-                resolve(result);
-            };
+            // Show DSA checkbox if user has earned it
+            const saveCount = parseInt(localStorage.getItem(KEY_SAVE_COUNT) || '0', 10);
+            if (saveCount >= DSA_AFTER_SAVES) {
+                document.getElementById('lpm-dsa-wrap').classList.add('lpm-visible');
+            }
 
-            document.getElementById('lp-print-continue').addEventListener('click', () => cleanup(true));
-            document.getElementById('lp-print-cancel').addEventListener('click', () => cleanup(false));
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) cleanup(false);
+            function dismiss(result) {
+                const dsaCb = document.getElementById('lpm-dsa-cb');
+                if (dsaCb && dsaCb.checked && result) {
+                    localStorage.setItem(KEY_DSA, '1');
+                }
+                animRunning = false;
+                overlay.remove();
+                const st = document.getElementById('lpm-style');
+                if (st) st.remove();
+                resolve(result);
+            }
+
+            // Animation helpers
+            const stage = document.getElementById('lpm-stage');
+            const cur   = document.getElementById('lpm-cur');
+            const cring = document.getElementById('lpm-cring');
+
+            function sc(el) {
+                const sr = stage.getBoundingClientRect(), er = el.getBoundingClientRect();
+                return { x: er.left - sr.left + er.width / 2, y: er.top - sr.top + er.height / 2 };
+            }
+            function moveTo(el, dur) {
+                return new Promise(r => {
+                    const { x, y } = sc(el);
+                    cur.style.transition = 'left ' + dur + 'ms cubic-bezier(0.42,0,0.18,1),top ' + dur + 'ms cubic-bezier(0.42,0,0.18,1)';
+                    cur.style.left = (x - 3) + 'px';
+                    cur.style.top  = (y - 3) + 'px';
+                    setTimeout(r, dur);
+                });
+            }
+            function doClick(el, color) {
+                return new Promise(r => {
+                    const { x, y } = sc(el);
+                    cring.style.left = (x - 12) + 'px';
+                    cring.style.top  = (y - 12) + 'px';
+                    cring.style.borderColor = color || 'rgba(26,115,232,0.9)';
+                    cring.className = '';
+                    void cring.offsetWidth;
+                    cring.className = 'lpm-pop';
+                    setTimeout(r, 320);
+                });
+            }
+            function flash(el, cls, dur) { el.classList.add(cls); setTimeout(() => el.classList.remove(cls), dur || 650); }
+            function setStep(txt) {
+                const el = document.getElementById('lpm-step-ind');
+                el.style.opacity = '0';
+                setTimeout(() => { el.textContent = txt; el.style.opacity = '1'; }, 210);
+            }
+            function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+            let ptimer = null, elapsed = 0;
+            function startProg() {
+                const f = document.getElementById('lpm-spfill');
+                f.style.transition = 'none'; f.style.width = '0%';
+                elapsed = 0; clearInterval(ptimer); void f.offsetWidth;
+                f.style.transition = 'width 0.08s linear';
+                ptimer = setInterval(() => {
+                    elapsed += 80;
+                    f.style.width = Math.min(100, (elapsed / LOOP_MS) * 100) + '%';
+                    if (elapsed >= LOOP_MS) clearInterval(ptimer);
+                }, 80);
+            }
+
+            function resetDialog() {
+                document.getElementById('lpm-dsel-val').textContent = 'Your Printer';
+                document.getElementById('lpm-dsel').classList.remove('lpm-focused');
+                document.getElementById('lpm-dchev').classList.remove('lpm-open');
+                document.getElementById('lpm-ddd').classList.remove('lpm-open');
+                document.getElementById('lpm-ddo-p').className = 'lpm-dd-row lpm-sel';
+                document.getElementById('lpm-ddo-pdf').className = 'lpm-dd-row';
+                document.getElementById('lpm-dest-row').classList.remove('lpm-glow-green');
+                document.getElementById('lpm-hf-row').classList.remove('lpm-glow-amber');
+                document.getElementById('lpm-hfcb').className = 'lpm-cbox lpm-on';
+                document.getElementById('lpm-hflbl').className = 'lpm-cbox-lbl';
+                const s = document.getElementById('lpm-dsave');
+                s.className = 'lpm-d-save'; s.textContent = 'Print';
+                cur.style.transition = 'none'; cur.style.left = '24px'; cur.style.top = '90px';
+                setStep('Step 1 of 2 — change Destination');
+            }
+
+            let unlocked = false;
+            let animRunning = true;
+
+            async function animate() {
+                if (!animRunning) return;
+                try {
+                    resetDialog(); startProg();
+                    await wait(380); if (!animRunning) return;
+
+                    // Step 1 — change Destination
+                    await moveTo(document.getElementById('lpm-dsel'), 580);
+                    await wait(180); if (!animRunning) return;
+                    document.getElementById('lpm-dsel').classList.add('lpm-focused');
+                    await doClick(document.getElementById('lpm-dsel'));
+                    await wait(60); if (!animRunning) return;
+                    document.getElementById('lpm-dchev').classList.add('lpm-open');
+                    document.getElementById('lpm-ddd').classList.add('lpm-open');
+                    await wait(420); if (!animRunning) return;
+                    const pdfOpt = document.getElementById('lpm-ddo-pdf');
+                    await moveTo(pdfOpt, 330);
+                    pdfOpt.classList.add('lpm-hi');
+                    await wait(240); if (!animRunning) return;
+                    await doClick(pdfOpt, 'rgba(26,115,232,0.9)');
+                    pdfOpt.classList.remove('lpm-hi'); pdfOpt.classList.add('lpm-sel');
+                    document.getElementById('lpm-ddo-p').classList.remove('lpm-sel');
+                    await wait(90); if (!animRunning) return;
+                    document.getElementById('lpm-ddd').classList.remove('lpm-open');
+                    document.getElementById('lpm-dchev').classList.remove('lpm-open');
+                    document.getElementById('lpm-dsel').classList.remove('lpm-focused');
+                    document.getElementById('lpm-dsel-val').textContent = 'Save as PDF';
+                    flash(document.getElementById('lpm-dest-row'), 'lpm-glow-green', 720);
+                    await wait(110); if (!animRunning) return;
+                    document.getElementById('lpm-dsave').textContent = 'Save';
+                    await wait(430); if (!animRunning) return;
+
+                    // Step 2 — uncheck Headers and footers
+                    setStep('Step 2 of 2 — uncheck Headers and footers');
+                    await moveTo(document.getElementById('lpm-hf-row'), 490);
+                    await wait(220); if (!animRunning) return;
+                    await doClick(document.getElementById('lpm-hf-row'), 'rgba(175,115,0,0.88)');
+                    document.getElementById('lpm-hfcb').className = 'lpm-cbox';
+                    document.getElementById('lpm-hflbl').className = 'lpm-cbox-lbl lpm-dim';
+                    flash(document.getElementById('lpm-hf-row'), 'lpm-glow-amber', 700);
+                    await wait(500); if (!animRunning) return;
+
+                    // Step 3 — click Save
+                    setStep('Click Save');
+                    const sv = document.getElementById('lpm-dsave');
+                    await moveTo(sv, 440);
+                    await wait(210); if (!animRunning) return;
+                    await doClick(sv, 'rgba(26,115,232,0.9)');
+                    sv.className = 'lpm-d-save lpm-press';
+                    await wait(160); if (!animRunning) return;
+                    sv.className = 'lpm-d-save';
+                    await wait(720); if (!animRunning) return;
+
+                    // Unlock CTA after first complete loop
+                    if (!unlocked) {
+                        unlocked = true;
+                        const btn = document.getElementById('lpm-proceed-btn');
+                        btn.classList.remove('lpm-locked');
+                        btn.classList.add('lpm-unlocking');
+                        setTimeout(() => btn.classList.remove('lpm-unlocking'), 560);
+                    }
+                } catch (e) { return; }
+                animate();
+            }
+
+            resetDialog();
+            setTimeout(animate, 300);
+
+            document.getElementById('lpm-proceed-btn').addEventListener('click', function() {
+                if (this.classList.contains('lpm-locked')) return;
+                dismiss(true);
             });
+            document.getElementById('lpm-cancel-btn').addEventListener('click', () => dismiss(false));
         });
     }
 };
