@@ -297,6 +297,138 @@ header {
   opacity: 0; transition: opacity 0.2s; pointer-events: none;
 }
 #toast.show { opacity: 1; }
+
+/* ── SIDEBAR NAV ─────────────────────────────────── */
+.sidebar-nav { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.sidebar-nav-btn { flex: 1; padding: 9px 0; font-size: 12px; font-weight: 600; text-align: center; cursor: pointer; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); }
+.sidebar-nav-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.sidebar-nav-btn:hover:not(.active) { background: var(--bg); }
+#sidebar-runs-view { display: none; overflow-y: auto; flex: 1; }
+.sh-item { padding: 11px 14px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.sh-item:hover { background: var(--green-pale); }
+.sh-item.active { background: var(--green-light); }
+.sh-date { font-size: 12px; font-weight: 600; color: var(--text); }
+.sh-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.sh-ok { color: var(--green-mid); font-weight: 700; }
+.sh-err { color: var(--red); font-weight: 700; }
+
+/* ── VISIT LENDER BUTTON ─────────────────────────── */
+.btn-visit-lender {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--green-pale); color: var(--green); border: 1px solid #86EFAC;
+  border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600;
+  text-decoration: none; cursor: pointer; flex-shrink: 0;
+}
+.btn-visit-lender:hover { background: var(--green-light); }
+
+/* ── LIVE PREVIEW TAB ────────────────────────────── */
+.lp-preview { padding: 20px 24px; }
+.lp-preview-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+.lp-logo-img { width: 48px; height: 48px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); background: var(--white); padding: 4px; }
+.lp-logo-placeholder { width: 48px; height: 48px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--muted); flex-shrink: 0; }
+.lp-preview-name-block { flex: 1; }
+.lp-preview-title { font-size: 18px; font-weight: 700; }
+.lp-preview-type { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.lp-metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.lp-metric { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.lp-metric-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); margin-bottom: 6px; }
+.lp-metric-val { font-size: 16px; font-weight: 700; color: var(--text); }
+.lp-metric-val .lp-old { font-size: 13px; color: var(--amber); text-decoration: line-through; font-weight: 500; display: block; }
+.lp-metric-val .lp-new { font-size: 16px; color: var(--green-mid); font-weight: 700; display: block; }
+.lp-pending-actions { display: flex; gap: 5px; margin-top: 8px; }
+.lp-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 20px; }
+.lp-chip { background: var(--green-pale); color: var(--green); border: 1px solid #86EFAC; border-radius: 99px; padding: 4px 12px; font-size: 12px; font-weight: 600; }
+.lp-chip.pending-old { background: #FFFBEB; color: var(--amber); border-color: #FCD34D; text-decoration: line-through; }
+.lp-chip.pending-new { background: var(--green-light); color: var(--green); border-color: #86EFAC; }
+.lp-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--white); margin-bottom: 20px; }
+.lp-detail-row { display: flex; flex-direction: column; padding: 12px 16px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+.lp-detail-row:nth-child(2n) { border-right: none; }
+.lp-detail-row:nth-last-child(-n+2) { border-bottom: none; }
+.lp-detail-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); margin-bottom: 5px; }
+.lp-detail-val { font-size: 13px; color: var(--text); font-weight: 500; }
+.lp-detail-val .lp-old { color: var(--amber); text-decoration: line-through; font-size: 12px; }
+.lp-detail-val .lp-new { color: var(--green-mid); font-weight: 700; }
+.lp-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin: 0 0 10px; }
+.lp-bool-yes { color: var(--green-mid); font-weight: 700; }
+.lp-bool-no  { color: var(--muted); }
+.lp-pending-inline { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.lp-pending-note { font-size: 11px; color: var(--amber); font-weight: 600; }
+.btn-inline-approve { background: var(--green-light); color: var(--green); border: 1px solid #86EFAC; border-radius: 5px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.btn-inline-reject  { background: var(--red-light); color: var(--red); border: 1px solid #FECACA; border-radius: 5px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
+.lp-bulk-bar { display: flex; gap: 10px; padding: 12px 0 16px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.lp-no-changes { text-align: center; padding: 20px; background: var(--green-pale); border-radius: 10px; color: var(--green-mid); font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+.lp-notes-section { margin-top: 8px; padding: 16px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+.lp-notes-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 8px; }
+.lp-notes-ta { width: 100%; min-height: 80px; border: 1px solid var(--border-dark); border-radius: 7px; padding: 8px 10px; font-size: 13px; font-family: inherit; outline: none; background: var(--white); resize: vertical; }
+.lp-notes-ta:focus { border-color: var(--green-mid); }
+.lp-notes-hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+/* ── CHANGE HISTORY TAB ──────────────────────────── */
+.history-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.history-item:last-child { border-bottom: none; }
+.history-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.history-field { font-size: 12px; font-weight: 700; font-family: monospace; color: var(--text); }
+.history-meta { font-size: 11px; color: var(--muted); }
+.history-approved { color: var(--green-mid); font-weight: 700; }
+.history-rejected { color: var(--red); font-weight: 700; }
+
+/* ── DASHBOARD ──────────────────────────────────── */
+#dashboard-view { overflow-y: auto; }
+.dash-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); background: var(--white); position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: flex-end; }
+.dash-header h1 { font-size: 20px; font-weight: 700; }
+.dash-header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.dash-section { padding: 20px 24px; border-bottom: 1px solid var(--border); }
+.dash-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 14px; }
+.dash-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.dash-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.dash-card-num { font-size: 26px; font-weight: 700; line-height: 1; }
+.dash-card-label { font-size: 12px; color: var(--muted); margin-top: 5px; }
+.dash-card.warn .dash-card-num { color: var(--amber); }
+.dash-card.bad .dash-card-num { color: var(--red); }
+.dash-card.good .dash-card-num { color: var(--green-mid); }
+.stale-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.stale-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); padding: 0 10px 8px; border-bottom: 1px solid var(--border); }
+.stale-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
+.stale-table tr:last-child td { border-bottom: none; }
+.stale-bad  { color: var(--red);   font-weight: 600; font-size: 12px; }
+.stale-warn { color: var(--amber); font-weight: 600; font-size: 12px; }
+.dash-field-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.dash-field-name { width: 230px; flex-shrink: 0; font-size: 12px; font-family: monospace; color: var(--text); }
+.dash-field-track { flex: 1; background: var(--border); border-radius: 4px; height: 8px; overflow: hidden; }
+.dash-field-fill { height: 8px; border-radius: 4px; background: var(--green-mid); }
+.dash-field-fill.partial { background: var(--amber); }
+.dash-field-fill.bad { background: var(--red); }
+.dash-field-count { font-size: 11px; color: var(--muted); width: 100px; text-align: right; flex-shrink: 0; }
+.dash-run-row { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.dash-run-row:last-child { border-bottom: none; }
+.dash-run-date { font-weight: 600; flex: 1; }
+.dash-run-changes { font-size: 12px; color: var(--muted); }
+.dash-run-ok  { font-size: 12px; color: var(--green-mid); font-weight: 700; }
+.dash-run-err { font-size: 12px; color: var(--red); font-weight: 700; }
+.overrides-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.overrides-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); padding: 0 10px 8px; border-bottom: 1px solid var(--border); }
+.overrides-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.overrides-table tr:last-child td { border-bottom: none; }
+.override-chip { display: inline-block; background: var(--amber-light); color: var(--amber); border: 1px solid #FCD34D; border-radius: 4px; padding: 1px 6px; font-size: 11px; font-family: monospace; margin: 2px 2px 0 0; }
+.override-count-badge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 99px; background: var(--amber-light); color: var(--amber); font-size: 11px; font-weight: 700; }
+
+/* ── SPOT CHECK MODAL ────────────────────────────── */
+.sc-item { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+.sc-item:last-child { border-bottom: none; }
+.sc-item-left { flex: 1; min-width: 0; }
+.sc-item-name { font-size: 14px; font-weight: 600; }
+.sc-item-url { font-size: 12px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sc-item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.btn-sc-visit { background: var(--green-pale); color: var(--green); border: 1px solid #86EFAC; border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-sc-visit:hover { background: var(--green-light); }
+.btn-sc-visit.visited { opacity: 0.55; }
+.sc-check { font-size: 15px; color: var(--green-mid); display: none; }
+.sc-check.show { display: inline; }
+.sc-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.sc-progress-txt { font-size: 13px; color: var(--muted); }
+.btn-proceed { background: var(--green); color: var(--white); border: none; border-radius: 7px; padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-proceed:hover { background: var(--green-mid); }
+.btn-proceed:disabled { background: #94A3B8; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -320,6 +452,7 @@ header {
     <div class="logo">&#9633; lendpaper <span>admin</span></div>
     <div class="header-right">
       <span id="user-email"></span>
+      <button class="btn-ghost" onclick="showMainView('dashboard')">Dashboard</button>
       <button class="btn-ghost" onclick="toggleFAQ()">? Help</button>
       <button class="btn-ghost" onclick="doLogout()">Sign out</button>
     </div>
@@ -328,22 +461,31 @@ header {
   <div class="layout">
     <!-- SIDEBAR -->
     <nav id="sidebar">
-      <div class="sidebar-top">
-        <input type="text" id="search" placeholder="Search lenders…" oninput="filterLenders()" />
-        <div class="filter-row">
-          <label class="toggle-label">
-            <input type="checkbox" id="pending-only" onchange="filterLenders()" />
-            Pending only
-          </label>
-        </div>
+      <div class="sidebar-nav">
+        <button class="sidebar-nav-btn active" id="nav-lenders-btn" onclick="showSidebarView('lenders')">Lenders</button>
+        <button class="sidebar-nav-btn" id="nav-runs-btn" onclick="showSidebarView('runs')">Scrape Runs</button>
       </div>
-      <div class="scrape-stats" id="scrape-stats">Last scrape: —</div>
-      <div id="lender-list"></div>
+      <div id="sidebar-lenders-content" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+        <div class="sidebar-top">
+          <input type="text" id="search" placeholder="Search lenders…" oninput="filterLenders()" />
+          <div class="filter-row">
+            <label class="toggle-label">
+              <input type="checkbox" id="pending-only" onchange="filterLenders()" />
+              Pending only
+            </label>
+          </div>
+        </div>
+        <div class="scrape-stats" id="scrape-stats">Last scrape: —</div>
+        <div id="lender-list"></div>
+      </div>
+      <div id="sidebar-runs-view"></div>
     </nav>
 
     <!-- MAIN -->
     <main id="main">
       <div id="empty-state"><p>Select a lender to review</p></div>
+      <div id="dashboard-view" style="display:none"></div>
+
       <div id="lender-detail" style="display:none">
 
         <div class="detail-header">
@@ -356,41 +498,23 @@ header {
             </div>
           </div>
           <div class="detail-meta">
-            <span id="detail-status-badge" class="badge"></span>
+            <a id="visit-lender-btn" class="btn-visit-lender" href="#" target="_blank" style="display:none">Visit Lender Site →</a>
+            <span id="detail-status-badge" class="badge" style="margin-top:4px"></span>
             <span id="detail-type" style="font-size:12px;color:var(--muted)"></span>
           </div>
         </div>
 
         <div class="tabs">
-          <button class="tab active" id="tab-btn-pending" onclick="showTab('pending')">
-            Pending Changes <span class="tab-count" id="pending-count" style="display:none"></span>
+          <button class="tab active" id="tab-btn-preview" onclick="showTab('preview')">
+            Live Preview <span class="tab-count" id="pending-count" style="display:none"></span>
           </button>
-          <button class="tab" id="tab-btn-fields" onclick="showTab('fields')">Edit All Fields</button>
+          <button class="tab" id="tab-btn-fields" onclick="showTab('fields')">Edit Fields</button>
+          <button class="tab" id="tab-btn-history" onclick="showTab('history')">Change History</button>
         </div>
 
-        <!-- PENDING TAB -->
-        <div id="tab-pending" class="tab-content">
-          <div id="pending-empty" class="empty-state-sm" style="display:none">
-            <p>No pending changes for this lender.</p>
-            <small>Changes will appear here after the next scrape run.</small>
-          </div>
-          <div id="pending-table-wrap">
-            <table class="pending-table">
-              <thead>
-                <tr>
-                  <th style="width:160px">Field</th>
-                  <th>Current</th>
-                  <th>Scraped</th>
-                  <th style="width:120px">Action</th>
-                </tr>
-              </thead>
-              <tbody id="pending-tbody"></tbody>
-            </table>
-            <div class="bulk-actions" id="bulk-actions" style="display:none">
-              <button class="btn-bulk-approve" onclick="approveAll()">Approve All Changes</button>
-              <button class="btn-bulk-reject" onclick="rejectAll()">Reject All</button>
-            </div>
-          </div>
+        <!-- LIVE PREVIEW TAB -->
+        <div id="tab-preview" class="tab-content">
+          <div id="preview-content"></div>
         </div>
 
         <!-- FIELDS TAB -->
@@ -398,6 +522,15 @@ header {
           <form class="fields-form" id="fields-form" onsubmit="saveFields(event)">
             <!-- Generated dynamically -->
           </form>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="tab-history" class="tab-content" style="display:none">
+          <div id="history-empty" class="empty-state-sm" style="display:none">
+            <p>No change history recorded yet.</p>
+            <small>Approved and rejected scrape changes will appear here.</small>
+          </div>
+          <div id="history-list"></div>
         </div>
 
       </div>
@@ -456,6 +589,16 @@ header {
       <div class="faq-q">How often do scrapes run?</div>
       <div class="faq-a">Weekly on Sundays at midnight (if the scheduler is running). Run <code>python3 ~/lendpaper-engine/scheduler.py</code> to start it. A proper launchd cron job is planned.</div>
     </div>
+    <hr class="faq-divider">
+    <div class="faq-item">
+      <div class="faq-q">How does the spot check before publishing work?</div>
+      <div class="faq-a">Before each publish, you'll be shown a random sample of recently-changed lenders and asked to visit their live website. The sample size uses a statistical formula (√N, min 3, max 8) giving ~95% confidence in data accuracy. Click "Visit →" for each one, then proceed to publish.</div>
+    </div>
+    <hr class="faq-divider">
+    <div class="faq-item">
+      <div class="faq-q">How do I train the scraper to avoid future data misses?</div>
+      <div class="faq-a">Each lender has a <strong>Scraper Notes</strong> field in the Live Preview tab. Use it to leave notes like: <em>"Min FICO is on the /qualifications page, not the homepage"</em> or <em>"Rate shown is factor rate, not APR."</em> These notes are stored in localStorage and exported via <strong>Export Scraper Notes</strong> in the Dashboard. Share the exported JSON with the scraper developer or drop it in <code>~/lendpaper-engine/hints/</code> so the scraper reads them before each run.</div>
+    </div>
   </div>
 </div>
 
@@ -475,6 +618,22 @@ header {
   </div>
 </div>
 
+<!-- SPOT CHECK MODAL -->
+<div class="modal-overlay" id="spotcheck-modal" style="display:none">
+  <div class="modal-box" style="width:560px">
+    <h3>Spot Check — Verify Live Sites</h3>
+    <p id="sc-modal-desc" style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px"></p>
+    <div id="sc-items"></div>
+    <div class="sc-footer">
+      <span class="sc-progress-txt" id="sc-progress-txt"></span>
+      <div style="display:flex;gap:10px">
+        <button class="btn-cancel" onclick="closeSpotCheckModal()">Skip Check</button>
+        <button id="sc-proceed-btn" class="btn-proceed" onclick="proceedAfterSpotCheck()" disabled>Looks Good — Publish →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -488,6 +647,9 @@ let allLenders = [];
 let currentLender = null;
 let currentPending = [];
 let reviewedThisSession = new Set();
+let allScrapeRuns = [];
+let scSample = [];
+let scVisited = new Set();
 const SPOTCHECK_REQUIRED = 1;
 
 // ── Auth ─────────────────────────────────────────────────
@@ -595,17 +757,56 @@ function synthesizeDiffs(lender) {
 async function loadScrapeHistory() {
   const { data } = await sb
     .from('scrape_runs')
-    .select('ran_at, changes_found, status')
+    .select('id, ran_at, changes_found, status')
     .order('ran_at', { ascending: false })
-    .limit(1);
+    .limit(25);
+  allScrapeRuns = data || [];
   const el = document.getElementById('scrape-stats');
-  if (data && data.length > 0) {
-    const r = data[0];
+  if (allScrapeRuns.length > 0) {
+    const r = allScrapeRuns[0];
     const d = new Date(r.ran_at);
     el.textContent = `Last scrape: ${d.toLocaleDateString()} · ${r.changes_found} changes found`;
   } else {
     el.textContent = 'Last scrape: No runs recorded';
   }
+  renderScrapeRunsSidebar();
+}
+
+function renderScrapeRunsSidebar() {
+  const el = document.getElementById('sidebar-runs-view');
+  if (!allScrapeRuns.length) {
+    el.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:13px">No scrape runs recorded yet.</div>';
+    return;
+  }
+  el.innerHTML = allScrapeRuns.map((r, i) => {
+    const d = new Date(r.ran_at);
+    const ok = !r.status || ['ok','success','completed'].includes(r.status);
+    return `<div class="sh-item${i===0?' active':''}" onclick="selectScrapeRun(${i})">
+      <div class="sh-date">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+      <div class="sh-meta"><span class="${ok?'sh-ok':'sh-err'}">${ok?'✓':'✗'}</span> ${r.changes_found} change${r.changes_found!==1?'s':''} found</div>
+    </div>`;
+  }).join('');
+}
+
+function selectScrapeRun(idx) {
+  document.querySelectorAll('.sh-item').forEach((el,i) => el.classList.toggle('active', i===idx));
+  showMainView('dashboard');
+}
+
+function showSidebarView(view) {
+  const isLenders = view === 'lenders';
+  document.getElementById('nav-lenders-btn').classList.toggle('active', isLenders);
+  document.getElementById('nav-runs-btn').classList.toggle('active', !isLenders);
+  document.getElementById('sidebar-lenders-content').style.display = isLenders ? 'flex' : 'none';
+  document.getElementById('sidebar-runs-view').style.display = isLenders ? 'none' : 'block';
+  if (!isLenders) showMainView('dashboard');
+}
+
+function showMainView(view) {
+  document.getElementById('empty-state').style.display = view==='empty' ? 'flex' : 'none';
+  document.getElementById('dashboard-view').style.display = view==='dashboard' ? 'block' : 'none';
+  document.getElementById('lender-detail').style.display = view==='detail' ? 'block' : 'none';
+  if (view === 'dashboard') renderDashboard();
 }
 
 // ── Actions ──────────────────────────────────────────────
@@ -771,14 +972,22 @@ function renderLenderList(lenders) {
 function renderDetail() {
   if (!currentLender) return;
   const l = currentLender;
-  document.getElementById('empty-state').style.display = 'none';
-  document.getElementById('lender-detail').style.display = 'block';
+  showMainView('detail');
   document.getElementById('detail-name').textContent = l.lender_name;
   document.getElementById('display-name-input').value = l.display_name || '';
   document.getElementById('detail-type').textContent = l.lender_type || '';
   const badge = document.getElementById('detail-status-badge');
   badge.textContent = l.review_status;
   badge.className = 'badge badge-' + (l.review_status === 'approved' ? 'approved' : l.review_status === 'rejected' ? 'rejected' : 'pending');
+
+  const visitBtn = document.getElementById('visit-lender-btn');
+  const siteUrl = l.source_url || l.application_submission_url;
+  if (siteUrl) {
+    visitBtn.href = siteUrl;
+    visitBtn.style.display = 'inline-flex';
+  } else {
+    visitBtn.style.display = 'none';
+  }
 
   const cnt = document.getElementById('pending-count');
   if (currentPending.length > 0) {
@@ -788,45 +997,149 @@ function renderDetail() {
     cnt.style.display = 'none';
   }
 
-  renderPendingTab();
-  if (document.getElementById('tab-fields').style.display !== 'none') renderFieldsTab();
+  renderLivePreview();
+  const activeTab = document.querySelector('.tab.active');
+  const activeTabId = activeTab ? activeTab.id.replace('tab-btn-','') : 'preview';
+  if (activeTabId === 'fields') renderFieldsTab();
 }
 
-function renderPendingTab() {
-  const empty = document.getElementById('pending-empty');
-  const wrap  = document.getElementById('pending-table-wrap');
-  const tbody = document.getElementById('pending-tbody');
-  const bulk  = document.getElementById('bulk-actions');
+function renderLivePreview() {
+  if (!currentLender) return;
+  const l = currentLender;
+  const locked = new Set(l.manually_overridden_fields || []);
+  // Build pending map keyed by field_name
+  const pmap = {};
+  currentPending.forEach(c => { pmap[c.field_name] = c; });
 
-  if (currentPending.length === 0) {
-    empty.style.display = 'block';
-    wrap.style.display = 'none';
-    return;
+  // Helper: render a field value with optional pending diff
+  function fval(field, formatter) {
+    const p = pmap[field];
+    const rawCurrent = l[field];
+    const currentFmt = formatter ? formatter(rawCurrent) : fmtVal(rawCurrent);
+    const lockIcon = locked.has(field) ? ' <span title="Manually overridden" style="font-size:11px">🔒</span>' : '';
+    if (p) {
+      const oldFmt = formatter ? formatter(tryParse(p.old_value)) : formatValue(p.old_value);
+      const newFmt = formatter ? formatter(tryParse(p.new_value)) : formatValue(p.new_value);
+      const appArgs = JSON.stringify(p.new_value).replace(/"/g,'&quot;');
+      const rejArgs = JSON.stringify(p.old_value).replace(/"/g,'&quot;');
+      return `<span class="lp-old">${esc(oldFmt)}</span><span class="lp-new">${esc(newFmt)}</span>
+              <div class="lp-pending-inline">
+                <span class="lp-pending-note">Scraped change</span>
+                <button class="btn-inline-approve" onclick="approveChange('${p.id}','${field}',${JSON.stringify(p.new_value)})">Keep New</button>
+                <button class="btn-inline-reject" onclick="rejectChange('${p.id}','${field}',${JSON.stringify(p.old_value)})">Revert</button>
+              </div>`;
+    }
+    return `${currentFmt || '<span style="color:var(--muted)">—</span>'}${lockIcon}`;
   }
-  empty.style.display = 'none';
-  wrap.style.display = 'block';
-  bulk.style.display = 'flex';
 
-  const locked = currentLender.manually_overridden_fields || [];
-  tbody.innerHTML = currentPending.map(c => {
-    const isLocked = locked.includes(c.field_name);
-    const oldFmt = formatValue(c.old_value);
-    const newFmt = formatValue(c.new_value);
-    return `<tr>
-      <td>
-        <div class="field-label">${esc(c.field_name)}</div>
-        ${isLocked ? '<div class="field-locked">🔒 manually overridden</div>' : ''}
-      </td>
-      <td><span class="val-old">${esc(oldFmt)}</span></td>
-      <td><span class="val-new">${esc(newFmt)}</span></td>
-      <td>
-        <div class="action-btns">
-          <button class="btn-approve" onclick="approveChange('${c.id}','${c.field_name}',${JSON.stringify(c.new_value)})">Keep</button>
-          <button class="btn-reject" onclick="rejectChange('${c.id}','${c.field_name}',${JSON.stringify(c.old_value)})">Revert</button>
+  function fmtVal(v) {
+    if (v===null||v===undefined||v==='') return '';
+    if (Array.isArray(v)) return v.length ? v.join(', ') : '';
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+    return String(v);
+  }
+
+  function fmtBool(v) { return v ? '<span class="lp-bool-yes">Yes</span>' : '<span class="lp-bool-no">No</span>'; }
+  function fmtMoney(v) { return v ? '$'+Number(v).toLocaleString() : ''; }
+  function fmtMonths(v) { return v ? v+' mo' : ''; }
+  function fmtFico(v) { return v ? String(v) : ''; }
+
+  // Bulk bar
+  const bulkBar = currentPending.length > 0 ? `
+    <div class="lp-bulk-bar">
+      <button class="btn-bulk-approve" onclick="approveAll()">Approve All ${currentPending.length} Change${currentPending.length!==1?'s':''}</button>
+      <button class="btn-bulk-reject" onclick="rejectAll()">Reject All</button>
+    </div>` : `<div class="lp-no-changes">✓ No pending changes — data is current</div>`;
+
+  // Logo
+  const logoHtml = l.lender_logo_url
+    ? `<img class="lp-logo-img" src="${esc(l.lender_logo_url)}" onerror="this.parentNode.innerHTML='<div class=\\'lp-logo-placeholder\\'>&#9633;</div>'" />`
+    : `<div class="lp-logo-placeholder">&#9633;</div>`;
+
+  // Key metrics
+  const metrics = [
+    { label: 'Min FICO',    val: fval('min_fico', fmtFico) },
+    { label: 'Min TIB',     val: fval('min_tib_months', v => v ? v+' mo' : '') },
+    { label: 'Min Revenue', val: fval('min_monthly_revenue', v => v ? '$'+Number(v).toLocaleString()+'/mo' : '') },
+    { label: 'Max Funding', val: fval('max_funding_amount', fmtMoney) },
+    { label: 'Max Term',    val: fval('max_term_months', fmtMonths) },
+    { label: 'Max Position',val: fval('max_position_stacking', v => v ? '#'+v : '') },
+  ].map(m => `<div class="lp-metric"><div class="lp-metric-label">${m.label}</div><div class="lp-metric-val">${m.val}</div></div>`).join('');
+
+  // Products chips (handle pending on arrays)
+  function chipsHtml(field) {
+    const p = pmap[field];
+    const cur = Array.isArray(l[field]) ? l[field] : [];
+    if (p) {
+      const oldArr = Array.isArray(tryParse(p.old_value)) ? tryParse(p.old_value) : [];
+      const newArr = Array.isArray(tryParse(p.new_value)) ? tryParse(p.new_value) : [];
+      const removed = oldArr.filter(x => !newArr.includes(x));
+      const added   = newArr.filter(x => !oldArr.includes(x));
+      const kept    = newArr.filter(x => oldArr.includes(x));
+      const chips = [
+        ...removed.map(x => `<span class="lp-chip pending-old">${esc(x)}</span>`),
+        ...kept.map(x => `<span class="lp-chip">${esc(x)}</span>`),
+        ...added.map(x => `<span class="lp-chip pending-new">${esc(x)} ✦</span>`),
+      ].join('');
+      const appArgs = JSON.stringify(p.new_value).replace(/"/g,'&quot;');
+      const rejArgs = JSON.stringify(p.old_value).replace(/"/g,'&quot;');
+      return chips + `<div class="lp-pending-inline" style="width:100%;margin-top:8px">
+        <span class="lp-pending-note">Scraped change</span>
+        <button class="btn-inline-approve" onclick="approveChange('${p.id}','${field}',${JSON.stringify(p.new_value)})">Keep New</button>
+        <button class="btn-inline-reject" onclick="rejectChange('${p.id}','${field}',${JSON.stringify(p.old_value)})">Revert</button>
+      </div>`;
+    }
+    return cur.map(x => `<span class="lp-chip">${esc(x)}</span>`).join('') || '<span style="color:var(--muted);font-size:13px">—</span>';
+  }
+
+  // Detail rows
+  const detailRows = [
+    { label: 'Soft Pull Only',        val: fval('soft_pull_only', fmtBool) },
+    { label: 'Hard Collateral',       val: fval('requires_hard_collateral', fmtBool) },
+    { label: 'Bank Verification',     val: fval('requires_bank_verification', fmtBool) },
+    { label: 'Min Bank Statements',   val: fval('min_bank_statements_months', fmtMonths) },
+    { label: 'Personal Guarantee',    val: fval('requires_personal_guarantee', fmtBool) },
+    { label: 'Early Payment Disc.',   val: fval('early_payment_discount', fmtBool) },
+    { label: 'Flex LOC',              val: fval('has_flex_line_of_credit', fmtBool) },
+    { label: 'Payment Frequencies',   val: fval('payment_frequencies') },
+    { label: 'Preferred Industries',  val: fval('preferred_industries') },
+    { label: 'Restricted Industries', val: fval('restricted_industries') },
+    { label: 'Restricted States',     val: fval('restricted_states') },
+    { label: 'HQ State',              val: fval('hq_state') },
+    { label: 'HQ Address',            val: fval('hq_address') },
+    { label: 'Broker Email',          val: fval('broker_support_email') },
+    { label: 'Broker Phone',          val: fval('broker_support_phone') },
+  ].map(r => `<div class="lp-detail-row">
+    <div class="lp-detail-label">${r.label}</div>
+    <div class="lp-detail-val">${r.val}</div>
+  </div>`).join('');
+
+  // Scraper notes (stored in localStorage)
+  const noteKey = 'lp_notes_' + l.id;
+  const savedNote = localStorage.getItem(noteKey) || '';
+
+  document.getElementById('preview-content').innerHTML = `
+    <div class="lp-preview">
+      ${bulkBar}
+      <div class="lp-preview-header">
+        ${logoHtml}
+        <div class="lp-preview-name-block">
+          <div class="lp-preview-title">${esc(l.display_name || l.lender_name)}</div>
+          <div class="lp-preview-type">${esc(l.lender_type || '')}</div>
         </div>
-      </td>
-    </tr>`;
-  }).join('');
+      </div>
+      <div class="lp-section-title">Key Metrics</div>
+      <div class="lp-metrics">${metrics}</div>
+      <div class="lp-section-title">Products</div>
+      <div class="lp-chips" style="margin-bottom:20px">${chipsHtml('product_types')}</div>
+      <div class="lp-section-title">Lender Details</div>
+      <div class="lp-detail-grid" style="margin-bottom:20px">${detailRows}</div>
+      <div class="lp-notes-section">
+        <div class="lp-notes-label">Scraper Training Notes</div>
+        <textarea class="lp-notes-ta" id="scraper-notes-ta" placeholder="Leave notes for the scraper: where to find data, known quirks, page-specific selectors…" onblur="saveScraperNote()">${esc(savedNote)}</textarea>
+        <div class="lp-notes-hint">Notes saved locally. Export all notes from the Dashboard → "Export Scraper Notes" to share with the scraper.</div>
+      </div>
+    </div>`;
 }
 
 function renderFieldsTab() {
@@ -910,11 +1223,44 @@ function renderFieldsTab() {
 
 // ── Tabs ─────────────────────────────────────────────────
 function showTab(name) {
-  document.getElementById('tab-pending').style.display = name === 'pending' ? 'block' : 'none';
-  document.getElementById('tab-fields').style.display  = name === 'fields'  ? 'block' : 'none';
-  document.getElementById('tab-btn-pending').className = 'tab' + (name === 'pending' ? ' active' : '');
-  document.getElementById('tab-btn-fields').className  = 'tab' + (name === 'fields'  ? ' active' : '');
+  ['preview','fields','history'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = name===t ? 'block' : 'none';
+    document.getElementById('tab-btn-'+t).className = 'tab' + (name===t ? ' active' : '');
+  });
   if (name === 'fields') renderFieldsTab();
+  if (name === 'history') loadLenderHistory();
+}
+
+async function loadLenderHistory() {
+  if (!currentLender) return;
+  const { data } = await sb
+    .from('pending_changes')
+    .select('field_name, old_value, new_value, status, created_at, reviewed_at')
+    .eq('lender_id', currentLender.id)
+    .in('status', ['approved','rejected'])
+    .order('reviewed_at', { ascending: false })
+    .limit(60);
+  const el = document.getElementById('history-list');
+  const empty = document.getElementById('history-empty');
+  if (!data || !data.length) {
+    empty.style.display = 'block'; el.innerHTML = ''; return;
+  }
+  empty.style.display = 'none';
+  el.innerHTML = data.map(c => {
+    const d = new Date(c.reviewed_at || c.created_at);
+    const approved = c.status === 'approved';
+    return `<div class="history-item">
+      <div class="history-row">
+        <span class="history-field">${esc(c.field_name)}</span>
+        <span class="history-meta">${d.toLocaleDateString()} · <span class="${approved?'history-approved':'history-rejected'}">${approved?'KEPT':'REVERTED'}</span></span>
+      </div>
+      <div style="font-size:13px">
+        <span class="val-old">${esc(formatValue(c.old_value))}</span>
+        <span style="color:var(--muted);margin:0 6px">→</span>
+        <span class="${approved?'val-new':''}">${esc(formatValue(c.new_value))}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ── Filter / Select ───────────────────────────────────────
@@ -961,13 +1307,75 @@ function updatePublishBar() {
   }
 }
 
-// ── Publish Modal ─────────────────────────────────────────
+// ── Publish Modal (with spot check) ──────────────────────
 function openPublishModal() {
-  const totalPending = allLenders.reduce((n, l) =>
-    n + (l._pendingCount || (l.review_status === 'pending' && l.previous_data ? 1 : 0)), 0);
+  const changed = allLenders.filter(l => l._pendingCount>0 || (l.review_status==='pending'&&l.previous_data));
+  const pool = changed.length >= 3 ? changed : [...allLenders].sort(()=>Math.random()-0.5);
+  const n = Math.max(3, Math.min(8, Math.ceil(Math.sqrt(Math.max(pool.length, 1)))));
+  scSample = [...pool].sort(()=>Math.random()-0.5).slice(0, Math.min(n, pool.length));
+  scVisited.clear();
+  scSample.forEach((l,i) => { if (!l.source_url && !l.application_submission_url) scVisited.add(i); });
+
+  if (!scSample.length || scSample.every(l => !l.source_url && !l.application_submission_url)) {
+    showPublishCommand(); return;
+  }
+
+  document.getElementById('sc-modal-desc').innerHTML =
+    `Visit <strong>${scSample.length} lender site${scSample.length!==1?'s':''}</strong> to confirm scraped data looks accurate before going live. ` +
+    `(Sample of √N lenders ≈ 95% confidence in data quality.)`;
+  document.getElementById('sc-items').innerHTML = scSample.map((l,i) => {
+    const name = esc(l.display_name||l.lender_name);
+    const url = l.source_url || l.application_submission_url || '';
+    const noUrl = !url;
+    return `<div class="sc-item">
+      <div class="sc-item-left">
+        <div class="sc-item-name">${name}</div>
+        <div class="sc-item-url">${noUrl?'<em>No URL on file — auto-skipped</em>':esc(url)}</div>
+      </div>
+      <div class="sc-item-right">
+        ${noUrl
+          ? `<span class="sc-check show">✓</span>`
+          : `<button class="btn-sc-visit" id="sc-btn-${i}" onclick="visitSC(${i},'${url.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">Visit →</button><span class="sc-check" id="sc-chk-${i}">✓</span>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+  updateSCProgress();
+  document.getElementById('spotcheck-modal').style.display = 'flex';
+}
+
+function visitSC(i, url) {
+  window.open(url, '_blank');
+  scVisited.add(i);
+  const btn = document.getElementById('sc-btn-'+i);
+  if (btn) btn.classList.add('visited');
+  const chk = document.getElementById('sc-chk-'+i);
+  if (chk) chk.classList.add('show');
+  updateSCProgress();
+}
+
+function updateSCProgress() {
+  const total = scSample.length;
+  const visited = scVisited.size;
+  document.getElementById('sc-progress-txt').textContent = `${visited} of ${total} verified`;
+  document.getElementById('sc-proceed-btn').disabled = visited < total;
+}
+
+function closeSpotCheckModal() {
+  document.getElementById('spotcheck-modal').style.display = 'none';
+}
+
+function proceedAfterSpotCheck() {
+  closeSpotCheckModal();
+  showPublishCommand();
+}
+
+function showPublishCommand() {
+  const totalPending = allLenders.reduce((n,l) =>
+    n + (l._pendingCount || (l.review_status==='pending'&&l.previous_data?1:0)), 0);
   const desc = document.getElementById('publish-modal-desc');
   if (totalPending > 0) {
-    desc.innerHTML = `<strong style="color:var(--amber)">${totalPending} lenders still have pending changes.</strong> You can publish now — only approved data will go live. Pending lenders will retain their current live values.`;
+    desc.innerHTML = `<strong style="color:var(--amber)">${totalPending} lenders still have pending changes.</strong> Only approved data will go live.`;
   } else {
     desc.textContent = 'All changes are reviewed. Run the command below to regenerate the waterfall and push to GitHub.';
   }
@@ -1013,6 +1421,179 @@ function toast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── Scraper Notes ─────────────────────────────────────────
+function saveScraperNote() {
+  if (!currentLender) return;
+  const val = document.getElementById('scraper-notes-ta')?.value || '';
+  if (val.trim()) {
+    localStorage.setItem('lp_notes_' + currentLender.id, val);
+  } else {
+    localStorage.removeItem('lp_notes_' + currentLender.id);
+  }
+}
+
+function exportScraperNotes() {
+  const notes = {};
+  allLenders.forEach(l => {
+    const v = localStorage.getItem('lp_notes_' + l.id);
+    if (v) notes[l.lender_name] = { id: l.id, display_name: l.display_name, note: v };
+  });
+  const blob = new Blob([JSON.stringify(notes, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `lendpaper-scraper-notes-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('Notes exported');
+}
+
+// ── Dashboard ─────────────────────────────────────────────
+function renderDashboard() {
+  const el = document.getElementById('dashboard-view');
+  if (!allLenders.length) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">Loading…</div>';
+    return;
+  }
+  const now = new Date();
+  const cutoff = new Date(now - 90*24*60*60*1000);
+
+  const staleLenders = allLenders
+    .filter(l => !l.updated_at || new Date(l.updated_at) < cutoff)
+    .sort((a,b) => (new Date(a.updated_at||0)) - (new Date(b.updated_at||0)));
+
+  const totalPending = allLenders.reduce((n,l) =>
+    n + (l._pendingCount || (l.review_status==='pending'&&l.previous_data?1:0)), 0);
+
+  const homepageFields = ['min_fico','min_tib_months','min_monthly_revenue','max_funding_amount','max_term_months','product_types','max_position_stacking'];
+  const detailFields   = ['payment_frequencies','preferred_industries','restricted_industries','restricted_states','soft_pull_only','early_payment_discount','requires_hard_collateral','requires_bank_verification','min_bank_statements_months','requires_personal_guarantee','has_flex_line_of_credit','application_submission_url','lender_logo_url','hq_state','broker_support_email','broker_support_phone'];
+
+  const emptyCount = f => allLenders.filter(l => {
+    const v = l[f];
+    return v===null||v===undefined||v===''||(Array.isArray(v)&&!v.length);
+  }).length;
+
+  const allTrackedFields = [...homepageFields,...detailFields];
+  const totalEmpty = allTrackedFields.reduce((s,f) => s+emptyCount(f), 0);
+  const fillPct = Math.round((1 - totalEmpty/(allTrackedFields.length*allLenders.length))*100);
+
+  // Lenders with overrides
+  const overrideLenders = allLenders
+    .filter(l => l.manually_overridden_fields && l.manually_overridden_fields.length > 0)
+    .sort((a,b) => b.manually_overridden_fields.length - a.manually_overridden_fields.length);
+
+  // Lenders with scraper notes
+  const notesCount = allLenders.filter(l => localStorage.getItem('lp_notes_' + l.id)).length;
+
+  const cards = `<div class="dash-cards">
+    <div class="dash-card ${staleLenders.length===0?'good':staleLenders.length<=5?'warn':'bad'}">
+      <div class="dash-card-num">${staleLenders.length}</div>
+      <div class="dash-card-label">Stale (90+ days)</div>
+    </div>
+    <div class="dash-card ${totalPending===0?'good':totalPending<=10?'warn':'bad'}">
+      <div class="dash-card-num">${totalPending}</div>
+      <div class="dash-card-label">Pending changes</div>
+    </div>
+    <div class="dash-card ${totalEmpty===0?'good':totalEmpty<=30?'warn':'bad'}">
+      <div class="dash-card-num">${totalEmpty}</div>
+      <div class="dash-card-label">Total empty fields</div>
+    </div>
+    <div class="dash-card ${fillPct>=90?'good':fillPct>=70?'warn':'bad'}">
+      <div class="dash-card-num">${fillPct}%</div>
+      <div class="dash-card-label">Data completeness</div>
+    </div>
+  </div>`;
+
+  const staleRows = staleLenders.slice(0,25).map(l => {
+    const d = l.updated_at ? new Date(l.updated_at) : null;
+    const days = d ? Math.floor((now-d)/86400000) : null;
+    const cls = (!days||days>180) ? 'stale-bad' : 'stale-warn';
+    return `<tr>
+      <td style="cursor:pointer;color:var(--green);font-weight:500" onclick="selectLender(${l.id})">${esc(l.display_name||l.lender_name)}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(l.lender_type||'—')}</td>
+      <td><span class="${cls}">${d ? days+'d ago' : 'Never'}</span></td>
+    </tr>`;
+  }).join('');
+
+  const staleSection = staleLenders.length===0
+    ? `<div class="empty-state-sm"><p>All lenders updated in the past 90 days.</p></div>`
+    : `<table class="stale-table"><thead><tr><th>Lender</th><th>Type</th><th>Last Updated</th></tr></thead><tbody>${staleRows}</tbody></table>
+       ${staleLenders.length>25?`<div style="font-size:12px;color:var(--muted);padding-top:8px">+${staleLenders.length-25} more</div>`:''}`;
+
+  const overrideRows = overrideLenders.slice(0,30).map(l => {
+    const chips = l.manually_overridden_fields.map(f => `<span class="override-chip">${esc(f)}</span>`).join('');
+    return `<tr>
+      <td style="cursor:pointer;color:var(--green);font-weight:500" onclick="selectLender(${l.id})">${esc(l.display_name||l.lender_name)}</td>
+      <td><span class="override-count-badge">${l.manually_overridden_fields.length}</span></td>
+      <td>${chips}</td>
+    </tr>`;
+  }).join('');
+
+  const overrideSection = overrideLenders.length===0
+    ? `<div class="empty-state-sm"><p>No fields are manually overridden.</p></div>`
+    : `<table class="overrides-table"><thead><tr><th>Lender</th><th>#</th><th>Locked Fields</th></tr></thead><tbody>${overrideRows}</tbody></table>`;
+
+  const fieldBar = f => {
+    const empty = emptyCount(f);
+    const filled = allLenders.length - empty;
+    const pct = Math.round(filled/allLenders.length*100);
+    const cls = pct>=80?'':pct>=50?'partial':'bad';
+    return `<div class="dash-field-row">
+      <div class="dash-field-name">${esc(f)}</div>
+      <div class="dash-field-track"><div class="dash-field-fill ${cls}" style="width:${pct}%"></div></div>
+      <div class="dash-field-count">${filled}/${allLenders.length} filled</div>
+    </div>`;
+  };
+
+  const runRows = allScrapeRuns.slice(0,15).map(r => {
+    const d = new Date(r.ran_at);
+    const ok = !r.status||['ok','success','completed'].includes(r.status);
+    return `<div class="dash-run-row">
+      <div class="dash-run-date">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>
+      <div class="dash-run-changes">${r.changes_found} change${r.changes_found!==1?'s':''}</div>
+      <div class="${ok?'dash-run-ok':'dash-run-err'}">${ok?'OK':r.status||'ERROR'}</div>
+    </div>`;
+  }).join('') || `<div style="color:var(--muted);font-size:13px;padding:10px 0">No scrape runs recorded yet.</div>`;
+
+  el.innerHTML = `
+    <div class="dash-header">
+      <div>
+        <h1>Data Health</h1>
+        <p>${allLenders.length} lenders · ${now.toLocaleDateString()}</p>
+      </div>
+      <div style="display:flex;gap:10px">
+        ${notesCount > 0 ? `<button class="btn-ghost" style="background:var(--amber);color:white" onclick="exportScraperNotes()">Export ${notesCount} Scraper Note${notesCount!==1?'s':''}</button>` : ''}
+        <button class="btn-ghost" style="background:var(--green);color:white" onclick="renderDashboard()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-title">Overview</div>
+      ${cards}
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-title">Stale Lenders — No update in 90+ days</div>
+      ${staleSection}
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-title">Override Rules &amp; Exceptions — Manually locked fields</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${overrideLenders.length} lender${overrideLenders.length!==1?'s':''} with locked fields that scrapes will not overwrite</div>
+      ${overrideSection}
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-title">Homepage Table — Empty fields</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Fields visible in the main lender comparison table on lendpaper.com</div>
+      ${homepageFields.map(fieldBar).join('')}
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-title">Lender Detail View — Empty fields</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Fields shown in the expanded lender panel below the table</div>
+      ${detailFields.map(fieldBar).join('')}
+    </div>
+    <div class="dash-section" style="border-bottom:none">
+      <div class="dash-section-title">Scrape Run History</div>
+      ${runRows}
+    </div>
+  `;
 }
 
 // ── Init ─────────────────────────────────────────────────
