@@ -434,7 +434,7 @@ header {
     <hr class="faq-divider">
     <div class="faq-item">
       <div class="faq-q">How do I add a new data field to all lenders?</div>
-      <div class="faq-a">Go to <strong>supabase.com → your project → Table Editor → underwriting_rules → Add Column</strong>. The admin dashboard picks it up automatically after you add it here.</div>
+      <div class="faq-a">Go to <strong>supabase.com → your project → Table Editor → lender_data → Add Column</strong>. The admin dashboard picks it up automatically after you add it here.</div>
     </div>
     <hr class="faq-divider">
     <div class="faq-item">
@@ -527,11 +527,15 @@ async function loadAll() {
 
 async function loadLenders() {
   const { data, error } = await sb
-    .from('underwriting_rules')
+    .from('lender_data')
     .select('id, lender_name, display_name, lender_type, review_status, min_fico, min_tib_months, min_monthly_revenue, max_position_stacking, soft_pull_only, requires_bank_verification, min_bank_statements_months, requires_hard_collateral, early_payment_discount, requires_personal_guarantee, has_flex_line_of_credit, product_types, payment_frequencies, preferred_industries, restricted_industries, restricted_states, max_funding_amount, max_term_months, application_submission_url, source_url, lender_logo_url, hq_state, hq_address, broker_support_email, broker_support_phone, manually_overridden_fields, updated_at, previous_data')
     .order('lender_name', { ascending: true });
 
-  if (error) { console.error('loadLenders:', error); return; }
+  if (error) {
+    console.error('loadLenders:', error);
+    document.getElementById('lender-list').innerHTML = `<div style="padding:16px;color:var(--red);font-size:13px"><strong>Error loading lenders:</strong><br>${error.message || JSON.stringify(error)}</div>`;
+    return;
+  }
   allLenders = data || [];
 
   // Get pending change counts
@@ -611,12 +615,12 @@ async function approveChange(changeId, fieldName, newValue) {
 
   if (change._legacy) {
     // legacy mode: apply value already in DB (it IS the new value), just clear pending
-    await sb.from('underwriting_rules').update({ review_status: 'approved' }).eq('id', currentLender.id);
+    await sb.from('lender_data').update({ review_status: 'approved' }).eq('id', currentLender.id);
     currentLender.review_status = 'approved';
   } else {
-    // new mode: apply new_value to underwriting_rules
+    // new mode: apply new_value to lender_data
     const parsedVal = tryParse(newValue);
-    await sb.from('underwriting_rules').update({ [fieldName]: parsedVal }).eq('id', currentLender.id);
+    await sb.from('lender_data').update({ [fieldName]: parsedVal }).eq('id', currentLender.id);
     await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', changeId);
     currentLender[fieldName] = parsedVal;
   }
@@ -636,7 +640,7 @@ async function rejectChange(changeId, fieldName, oldValue) {
   if (change._legacy) {
     const parsedVal = tryParse(oldValue);
     const updates = { review_status: 'approved', previous_data: null, [fieldName]: parsedVal };
-    await sb.from('underwriting_rules').update(updates).eq('id', currentLender.id);
+    await sb.from('lender_data').update(updates).eq('id', currentLender.id);
     currentLender.review_status = 'approved';
     currentLender.previous_data = null;
   } else {
@@ -655,7 +659,7 @@ async function approveAll() {
   if (currentPending.length === 0) return;
   const isLegacy = currentPending.some(c => c._legacy);
   if (isLegacy) {
-    await sb.from('underwriting_rules').update({ review_status: 'approved', previous_data: null }).eq('id', currentLender.id);
+    await sb.from('lender_data').update({ review_status: 'approved', previous_data: null }).eq('id', currentLender.id);
     currentLender.review_status = 'approved';
     currentLender.previous_data = null;
   } else {
@@ -663,7 +667,7 @@ async function approveAll() {
     const updates = currentPending.reduce((acc, c) => {
       acc[c.field_name] = tryParse(c.new_value); return acc;
     }, { review_status: 'approved' });
-    await sb.from('underwriting_rules').update(updates).eq('id', currentLender.id);
+    await sb.from('lender_data').update(updates).eq('id', currentLender.id);
     await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).in('id', ids);
     Object.assign(currentLender, updates);
   }
@@ -681,7 +685,7 @@ async function rejectAll() {
   if (isLegacy) {
     const restoreUpdates = { review_status: 'approved', previous_data: null };
     currentPending.forEach(c => { restoreUpdates[c.field_name] = tryParse(c.old_value); });
-    await sb.from('underwriting_rules').update(restoreUpdates).eq('id', currentLender.id);
+    await sb.from('lender_data').update(restoreUpdates).eq('id', currentLender.id);
     Object.assign(currentLender, restoreUpdates);
   } else {
     const ids = currentPending.map(c => c.id);
@@ -697,7 +701,7 @@ async function rejectAll() {
 
 async function saveDisplayName() {
   const val = document.getElementById('display-name-input').value.trim();
-  await sb.from('underwriting_rules').update({ display_name: val || null }).eq('id', currentLender.id);
+  await sb.from('lender_data').update({ display_name: val || null }).eq('id', currentLender.id);
   currentLender.display_name = val || null;
   allLenders.find(l => l.id === currentLender.id).display_name = val || null;
   renderLenderList(filterLendersArr());
@@ -728,7 +732,7 @@ async function saveFields(e) {
   });
 
   updates.manually_overridden_fields = newOverrides;
-  const { error } = await sb.from('underwriting_rules').update(updates).eq('id', currentLender.id);
+  const { error } = await sb.from('lender_data').update(updates).eq('id', currentLender.id);
   if (error) { toast('Save failed: ' + error.message); return; }
   Object.assign(currentLender, updates);
   allLenders.find(l => l.id === currentLender.id);
@@ -738,7 +742,7 @@ async function saveFields(e) {
 
 async function unlockField(field) {
   const overrides = (currentLender.manually_overridden_fields || []).filter(f => f !== field);
-  await sb.from('underwriting_rules').update({ manually_overridden_fields: overrides }).eq('id', currentLender.id);
+  await sb.from('lender_data').update({ manually_overridden_fields: overrides }).eq('id', currentLender.id);
   currentLender.manually_overridden_fields = overrides;
   renderFieldsTab();
   toast(`${field} unlocked`);
