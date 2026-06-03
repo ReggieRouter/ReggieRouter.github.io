@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Underwriting Guide by Product — LendPaper</title>
+  <meta name="description" content="General underwriting guidelines for MCA, term loans, lines of credit, SBA loans, equipment financing, factoring, and commercial real estate.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
+  <meta property="og:title" content="Underwriting Guide by Product — LendPaper" />
+  <meta property="og:description" content="General underwriting guidelines for small business lending products: MCA, term loans, lines of credit, SBA, equipment financing, factoring, and CRE." />
+  <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+  <meta property="og:url" content="https://lendpaper.com/underwriting-guide.html" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #14532D;
+      --green-mid: #16A34A;
+      --green-light: #DCFCE7;
+      --green-border: #BBF7D0;
+      --text: #111827;
+      --text-secondary: #374151;
+      --muted: #6B7280;
+      --surface: #F9FAFB;
+      --border: #E5E7EB;
+      font-size: 16px;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #fff; color: var(--text); line-height: 1.6; }
+
+    header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 14px; position: sticky; top: 0; z-index: 100; }
+    .lp-wordmark { display: flex; align-items: center; gap: 6px; text-decoration: none; }
+    .lp-wordmark svg { flex-shrink: 0; }
+    .lp-wordmark span { font-size: 16px; font-weight: 700; color: var(--green); letter-spacing: -0.3px; }
+    .lp-wordmark .reg { font-weight: 400; color: #374151; }
+    .lp-sep { color: #D1D5DB; }
+    .lp-page-title { font-size: 13px; color: var(--muted); }
+    header nav { margin-left: auto; display: flex; gap: 20px; }
+    header nav a { font-size: 13px; color: var(--muted); text-decoration: none; font-weight: 500; }
+    header nav a:hover { color: var(--green); }
+
+    .hero { background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border-bottom: 1px solid var(--green-border); padding: 56px 24px; text-align: center; }
+    .hero h1 { font-size: 28px; font-weight: 800; color: var(--green); margin-bottom: 10px; letter-spacing: -0.5px; }
+    .hero p { font-size: 15px; color: #374151; max-width: 580px; margin: 0 auto 0; line-height: 1.65; }
+    .hero .disclaimer { margin-top: 14px; font-size: 12px; color: var(--muted); max-width: 520px; margin-left: auto; margin-right: auto; }
+
+    .toc { background: #F8FAFC; border: 1px solid var(--border); border-radius: 10px; padding: 18px 24px; max-width: 800px; margin: 32px auto 0; }
+    .toc-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 12px; }
+    .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; }
+    .toc-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; text-decoration: none; color: var(--text-secondary); font-size: 13px; font-weight: 500; border: 1px solid var(--border); background: #fff; transition: background 0.1s; }
+    .toc-item:hover { background: var(--green-light); border-color: var(--green-border); }
+    .toc-badge { font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; }
+
+    main { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+    .product-section { margin-bottom: 48px; scroll-margin-top: 80px; }
+    .product-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+    .product-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 5px; }
+    .product-name { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+    .product-tagline { font-size: 13px; color: var(--muted); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+    .spec-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .spec-box .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+    .spec-box .val { font-size: 14px; font-weight: 600; color: var(--text); }
+    .spec-box .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .prose { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+    .prose p { margin-bottom: 10px; }
+    .prose ul { padding-left: 18px; margin-bottom: 10px; }
+    .prose li { margin-bottom: 4px; }
+    .prose strong { color: var(--text); font-weight: 600; }
+
+    .callout { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; line-height: 1.6; }
+    .callout.green { background: #F0FDF4; border: 1px solid #A7F3D0; color: #166534; }
+    .callout.yellow { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+    .callout.red { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+    .callout.blue { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; }
+
+    .divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 24px; text-align: center; font-size: 12px; color: var(--muted); }
+    footer a { color: var(--green); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="lp-wordmark" href="waterfall.html">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/><path d="M9 9v6"/><path d="M9 15h4"/></svg>
+    <span><span>lend</span><span class="reg">paper</span></span>
+  </a>
+  <span class="lp-sep">/</span>
+  <span class="lp-page-title">Underwriting Guide</span>
+  <nav>
+    <a href="waterfall.html">← Back to Waterfall</a>
+    <a href="mailto:hello@lendpaper.com">Contact</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <h1>Underwriting Guide by Product</h1>
+  <p>General qualification thresholds, structures, and considerations for each small business lending product. Use this as a baseline — individual lender requirements will vary.</p>
+  <p class="disclaimer">These are market-wide generalizations, not guarantees. Requirements vary by lender, deal structure, industry, and borrower profile. Always confirm with the lender before submitting.</p>
+</div>
+
+<div style="max-width:800px;margin:0 auto;padding:0 24px;">
+  <div class="toc" style="margin-top:28px;">
+    <div class="toc-title">Jump to product</div>
+    <div class="toc-grid">
+      <a class="toc-item" href="#mca"><span class="toc-badge" style="background:#E0F2FE;color:#0369A1;">MCA</span>Merchant Cash Advance</a>
+      <a class="toc-item" href="#term"><span class="toc-badge" style="background:#E6FFFA;color:#0D9488;">Term</span>Term Loan</a>
+      <a class="toc-item" href="#loc"><span class="toc-badge" style="background:#F3E8FF;color:#7E22CE;">LOC</span>Line of Credit</a>
+      <a class="toc-item" href="#sba"><span class="toc-badge" style="background:#FEF9C3;color:#A16207;">SBA</span>SBA Loan</a>
+      <a class="toc-item" href="#equipment"><span class="toc-badge" style="background:#FFEDD5;color:#C2410C;">Equip</span>Equipment Finance</a>
+      <a class="toc-item" href="#factoring"><span class="toc-badge" style="background:#ECFDF5;color:#047857;">Factor</span>Invoice Factoring</a>
+      <a class="toc-item" href="#cre"><span class="toc-badge" style="background:#EFF6FF;color:#1D4ED8;">CRE</span>Commercial Real Estate</a>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- MCA -->
+  <div class="product-section" id="mca">
+    <div class="product-header">
+      <span class="product-badge" style="background:#E0F2FE;color:#0369A1;">MCA</span>
+      <div>
+        <div class="product-name">Merchant Cash Advance</div>
+        <div class="product-tagline">Revenue-based advance — not a loan</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="spec-box"><div class="lbl">FICO Minimum</div><div class="val">500+</div><div class="sub">Some lenders go as low as 450 or no credit check</div></div>
+      <div class="spec-box"><div class="lbl">Time in Business</div><div class="val">4–6 months</div><div class="sub">Most require 6 months; some accept 3–4 mo with strong rev</div></div>
+      <div class="spec-box"><div class="lbl">Monthly Revenue</div><div class="val">$10,000+</div><div class="sub">Typically $10k–$15k minimum; higher volume = better offers</div></div>
+      <div class="spec-box"><div class="lbl">Typical Amount</div><div class="val">$5k–$500k</div><div class="sub">Advance size usually 50–150% of monthly revenue</div></div>
+      <div class="spec-box"><div class="lbl">Cost of Capital</div><div class="val">Factor rate 1.15–1.50+</div><div class="sub">Equivalent APR often 40–200%+</div></div>
+      <div class="spec-box"><div class="lbl">Repayment</div><div class="val">Daily or weekly debit</div><div class="sub">Flat split of bank deposits; no fixed term</div></div>
+    </div>
+    <div class="prose">
+      <p>An MCA is a <strong>purchase of future receivables</strong>, not a loan — so there is no APR, no fixed term, and it is not reported to credit bureaus. The total payback is fixed at a factor rate (e.g., 1.30 = you repay $1.30 for every $1.00 advanced). Repayment is a daily or weekly ACH debit based on a fixed percent of deposits or a fixed flat amount.</p>
+      <ul>
+        <li><strong>Stacking risk:</strong> MCAs are frequently stacked. Most lenders cap at 2nd or 3rd position. Declaring all existing advances upfront is critical — hiding positions is a decline or fraud trigger.</li>
+        <li><strong>Renewals:</strong> Once ~70% repaid, many MCA lenders will offer a renewal. Renewals typically carry the same or higher factor rate.</li>
+        <li><strong>Industries:</strong> Restaurants, retail, medical, and seasonal businesses are common. High-churn industries (trucking, construction, cannabis) face tighter terms or declines at many lenders.</li>
+      </ul>
+    </div>
+    <div class="callout yellow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>MCA offers the broadest access to capital but the highest cost. It's appropriate for short-cycle businesses or borrowers who can't qualify elsewhere. Use it as a last resort, not a first call.</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Term Loan -->
+  <div class="product-section" id="term">
+    <div class="product-header">
+      <span class="product-badge" style="background:#E6FFFA;color:#0D9488;">Term</span>
+      <div>
+        <div class="product-name">Business Term Loan</div>
+        <div class="product-tagline">Fixed repayment schedule, set term</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="spec-box"><div class="lbl">FICO Minimum</div><div class="val">580–620+</div><div class="sub">600+ preferred; some alt lenders accept 550+</div></div>
+      <div class="spec-box"><div class="lbl">Time in Business</div><div class="val">12 months</div><div class="sub">Most require 1 year; some alt lenders accept 6 months</div></div>
+      <div class="spec-box"><div class="lbl">Monthly Revenue</div><div class="val">$12,000–$15,000+</div><div class="sub">Varies widely — some banks require $50k+/mo</div></div>
+      <div class="spec-box"><div class="lbl">Typical Amount</div><div class="val">$10k–$500k</div><div class="sub">Bank terms can go to $2M+</div></div>
+      <div class="spec-box"><div class="lbl">Cost of Capital</div><div class="val">18–50% APR (alt)<br>8–20% APR (bank)</div><div class="sub">Interest rate, origination fee, or factor rate depending on lender</div></div>
+      <div class="spec-box"><div class="lbl">Repayment</div><div class="val">Daily, weekly, or monthly ACH</div><div class="sub">Fixed schedule for life of loan; 3–60 months typical</div></div>
+    </div>
+    <div class="prose">
+      <p>Term loans are the most familiar product. A fixed lump sum is disbursed and repaid on a set schedule. Alt lenders typically use daily or weekly ACH; banks use monthly payments. Compared to MCAs, term loans usually have lower cost, longer terms, and stricter qualification.</p>
+      <ul>
+        <li><strong>Bank statements:</strong> Most alt lenders require 3–6 months. Banks require up to 24 months plus tax returns.</li>
+        <li><strong>Collateral:</strong> Most alt term loans are unsecured (UCC blanket lien only). Bank term loans may require hard collateral.</li>
+        <li><strong>Stacking:</strong> Many term lenders will accept a 2nd or 3rd position but factor rate and terms worsen. Transparent disclosure matters here.</li>
+      </ul>
+    </div>
+    <div class="callout green">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+      <span>Term loans hit the sweet spot for most alt-finance borrowers: predictable repayment, moderate qualification, and competitive rates. Start here for any borrower with 1+ year TIB and 600+ FICO.</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Line of Credit -->
+  <div class="product-section" id="loc">
+    <div class="product-header">
+      <span class="product-badge" style="background:#F3E8FF;color:#7E22CE;">LOC</span>
+      <div>
+        <div class="product-name">Business Line of Credit</div>
+        <div class="product-tagline">Revolving facility — draw, repay, draw again</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="spec-box"><div class="lbl">FICO Minimum</div><div class="val">600–640+</div><div class="sub">Bank LOCs typically require 680+; alt LOCs 600+</div></div>
+      <div class="spec-box"><div class="lbl">Time in Business</div><div class="val">12–24 months</div><div class="sub">Most lenders require 1 year; banks often 2 years</div></div>
+      <div class="spec-box"><div class="lbl">Monthly Revenue</div><div class="val">$15,000+</div><div class="sub">Bank LOCs typically require $20k–$50k+/mo</div></div>
+      <div class="spec-box"><div class="lbl">Typical Limit</div><div class="val">$10k–$250k</div><div class="sub">Bank-backed LOCs can extend to $1M+</div></div>
+      <div class="spec-box"><div class="lbl">Cost of Capital</div><div class="val">Interest on drawn balance only</div><div class="sub">Prime + spread for banks; flat weekly fee for some alt lenders</div></div>
+      <div class="spec-box"><div class="lbl">Structure</div><div class="val">Revolving or traditional</div><div class="sub">Revolving: draw/repay freely. Traditional: one draw, repay, then requalify.</div></div>
+    </div>
+    <div class="prose">
+      <p>A line of credit provides access to a credit limit the borrower can draw from as needed. Unlike a term loan, there's no fixed repayment on the full amount — only on what's actually drawn. This makes it ideal for managing cash flow gaps rather than one-time purchases.</p>
+      <ul>
+        <li><strong>Revolving vs. traditional:</strong> A revolving LOC lets the borrower draw, repay, and draw again within the limit. A traditional LOC requires requalification after paying down the balance.</li>
+        <li><strong>Draw fees:</strong> Many alt LOCs charge a flat fee per draw (e.g., 1–3% of drawn amount) rather than ongoing interest.</li>
+        <li><strong>Higher credit bar:</strong> LOCs typically require stronger credit than term loans from the same lender — lenders are committing ongoing availability, not just one advance.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SBA -->
+  <div class="product-section" id="sba">
+    <div class="product-header">
+      <span class="product-badge" style="background:#FEF9C3;color:#A16207;">SBA</span>
+      <div>
+        <div class="product-name">SBA Loan</div>
+        <div class="product-tagline">Government-backed, best rates, strictest qualification</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="spec-box"><div class="lbl">FICO Minimum</div><div class="val">650+</div><div class="sub">650 is the floor; most SBA-preferred lenders want 680+</div></div>
+      <div class="spec-box"><div class="lbl">Time in Business</div><div class="val">2+ years</div><div class="sub">Startup SBA loans exist (SBA 7(a) startup) but rare and restrictive</div></div>
+      <div class="spec-box"><div class="lbl">Monthly Revenue</div><div class="val">Sufficient to cover debt service</div><div class="sub">DSCR typically must be ≥ 1.25x</div></div>
+      <div class="spec-box"><div class="lbl">Typical Amount</div><div class="val">$50k–$5M</div><div class="sub">SBA 7(a) max is $5M; SBA Express max is $500k</div></div>
+      <div class="spec-box"><div class="lbl">Cost of Capital</div><div class="val">Prime + 2.75% (typical)</div><div class="sub">Lowest rates of any alt product; variable or fixed depending on lender</div></div>
+      <div class="spec-box"><div class="lbl">Approval Time</div><div class="val">30–90 days</div><div class="sub">SBA Express can close in 2–3 weeks; full 7(a) takes 60–90 days</div></div>
+    </div>
+    <div class="prose">
+      <p>SBA loans are partially guaranteed by the Small Business Administration, allowing lenders to offer longer terms (up to 25 years for real estate; 10 years for working capital) and lower interest rates than any other small business product. The tradeoff is documentation intensity and slow approval.</p>
+      <ul>
+        <li><strong>Programs:</strong> SBA 7(a) is the most common. SBA 504 is for fixed assets (real estate, equipment). SBA Express is faster and simpler but capped at $500k.</li>
+        <li><strong>Clean credit required:</strong> No recent bankruptcies, no delinquent federal debt, no open tax liens. These are automatic declines.</li>
+        <li><strong>Personal guarantee:</strong> Any owner with 20%+ ownership must personally guarantee.</li>
+        <li><strong>Documentation:</strong> 2 years business tax returns, 2 years personal tax returns, YTD P&L, business plan (in some cases), business license, and more.</li>
+      </ul>
+    </div>
+    <div class="callout blue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>SBA is the gold standard if the borrower qualifies and can wait. If the deal is time-sensitive or credit is imperfect, route to term or bridge first — then refinance into SBA later.</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Equipment Finance -->
+  <div class="product-section" id="equipment">
+    <div class="product-header">
+      <span class="product-badge" style="background:#FFEDD5;color:#C2410C;">Equip</span>
+      <div>
+        <div class="product-name">Equipment Financing</div>
+        <div class="product-tagline">Asset-secured — the equipment is the collateral</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="spec-box"><div class="lbl">FICO Minimum</div><div class="val">575–620+</div><div class="sub">Equipment as collateral softens FICO requirement</div></div>
+      <div class="spec-box"><div class="lbl">Time in Business</div><div class="val">12–24 months</div><div class="sub">Some lenders accept as low as 6 months for newer equipment</div></div>
+      <div class="spec-box"><div class="lbl">Down Payment</div><div class="val">0–20%</div><div class="sub">Many programs offer 100% financing; soft costs may require down</div></div>
+      <div class="spec-box"><div class="lbl">Typical Amount</div><div class="val">$5k–$5M+</div><div class="sub">Large-ticket equipment (aircraft, CNC, medical) can exceed $10M</div></div>
+      <div class="spec-box"><div class="lbl">Cost of Capital</div><div class="val">5–25% APR</div><div class="sub">Asset quality and lender type drive rate; banks are cheapest</div></div>
+      <div class="spec-box"><div class="lbl">Term</div><div class="val">24–84 months</div><div class="sub">Tied to useful life of equipment; max is typically 60–84 months</div></div>
+    </div>
+    <div class="prose">
+      <p>Equipment financing uses the purchased equipment as collateral. Because the lender can repossess and resell the asset, qualification is easier than unsecured products — even borrowers with credit challenges can qualify if the equipment has strong resale value.</p>
+      <ul>
+        <li><strong>Loan vs. lease:</strong> A loan gives the borrower ownership from day one. A lease (FMV or $1 buyout) may offer lower payments with an option to purchase at end of term.</li>
+        <li><strong>New vs. used:</strong> Most lenders prefer new or late-model equipment. Older or specialized equipment (>10 years) may require more equity or a higher rate.</li>
+        <li><strong>Soft costs:</strong> Installation, shipping, and training may be included in the financed amount — or may require a down payment. Confirm with the lender.</li>
+        <li><strong>Section 179:</strong> Borrowers should consult a CPA — equipment financed through the loan/lease may be immediately deductible under Section 179.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Factoring -->
+  <div class="product-section" id="factoring">
+    <div class="product-header">
+      <span class="product-badge" style="background:#ECFDF5;color:#047857;">Factor</span>
+      <div>
+        <div class="product-name">Invoice Factoring / Receivables Financing</div>
+        <div class="product-tagline">Sell outstanding invoices for immediate cash</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="spec-box"><div class="lbl">FICO (Borrower)</div><div class="val">Secondary factor</div><div class="sub">Borrower's credit matters less; customer creditworthiness is primary</div></div>
+      <div class="spec-box"><div class="lbl">Time in Business</div><div class="val">3–6 months</div><div class="sub">Some factoring companies accept newer businesses with strong customers</div></div>
+      <div class="spec-box"><div class="lbl">Revenue Requirement</div><div class="val">B2B invoices only</div><div class="sub">Must have commercial (not consumer) customers with net payment terms</div></div>
+      <div class="spec-box"><div class="lbl">Advance Rate</div><div class="val">70–92% of invoice</div><div class="sub">Remainder (reserve) released when customer pays, minus fees</div></div>
+      <div class="spec-box"><div class="lbl">Cost of Capital</div><div class="val">1–5% per 30 days</div><div class="sub">Flat factoring fee; lower for large invoices, strong customers</div></div>
+      <div class="spec-box"><div class="lbl">Recourse vs. Non-recourse</div><div class="val">Recourse is more common</div><div class="sub">Non-recourse protects borrower if customer doesn't pay; higher fee</div></div>
+    </div>
+    <div class="prose">
+      <p>Factoring is not a loan — it's the sale of outstanding invoices at a discount. The factor advances most of the invoice value immediately, then collects from the borrower's customer and remits the reserve (minus fees) when payment is received. This makes it ideal for B2B businesses with slow-paying customers.</p>
+      <ul>
+        <li><strong>Notification vs. non-notification:</strong> In traditional factoring, the factor notifies the borrower's customers to pay the factor directly. Non-notification (or "confidential") factoring keeps the factor hidden — the borrower collects and remits.</li>
+        <li><strong>Spot factoring:</strong> Some lenders let you factor individual invoices on demand rather than signing a long-term agreement. Higher per-invoice cost but maximum flexibility.</li>
+        <li><strong>Ideal use case:</strong> Construction firms, staffing agencies, trucking companies, and healthcare providers with net-30/60/90 payment terms.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- CRE -->
+  <div class="product-section" id="cre">
+    <div class="product-header">
+      <span class="product-badge" style="background:#EFF6FF;color:#1D4ED8;">CRE</span>
+      <div>
+        <div class="product-name">Commercial Real Estate</div>
+        <div class="product-tagline">Property-secured financing for commercial assets</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="spec-box"><div class="lbl">FICO Minimum</div><div class="val">660–680+</div><div class="sub">Property quality also weighs heavily; strong LTV can offset FICO</div></div>
+      <div class="spec-box"><div class="lbl">Time in Business</div><div class="val">2+ years</div><div class="sub">Some bridge lenders accept 1 year; banks typically require 2+ years</div></div>
+      <div class="spec-box"><div class="lbl">Down Payment / Equity</div><div class="val">20–35%</div><div class="sub">LTV typically 65–80%; higher LTV available with strong DSCR</div></div>
+      <div class="spec-box"><div class="lbl">Typical Amount</div><div class="val">$250k–$20M+</div><div class="sub">Hard money/bridge loans can close faster at 60–65% LTV</div></div>
+      <div class="spec-box"><div class="lbl">Cost of Capital</div><div class="val">6–12% (bank/CMBS)<br>9–15% (bridge)</div><div class="sub">Hard money/bridge rates can exceed 15% for fast close</div></div>
+      <div class="spec-box"><div class="lbl">Closing Timeline</div><div class="val">45–90 days (bank)<br>10–21 days (bridge)</div><div class="sub">Appraisal, title, environmental inspection add time</div></div>
+    </div>
+    <div class="prose">
+      <p>CRE financing is secured by commercial property — office, retail, industrial, multifamily, or mixed-use. It's a distinct underwriting process from any other small business product, with property appraisal and DSCR (Debt Service Coverage Ratio) as primary underwriting factors.</p>
+      <ul>
+        <li><strong>DSCR:</strong> Most lenders require DSCR ≥ 1.25x — the property's net operating income must cover debt service at 125% or better. Properties with high vacancies or low NOI will struggle.</li>
+        <li><strong>Bridge loans:</strong> Short-term (6–24 month) CRE financing for value-add or transitional properties. Higher rate, faster close. Designed to be refinanced into permanent financing.</li>
+        <li><strong>Owner-occupied vs. investment:</strong> Owner-occupied CRE (business occupies 51%+) typically qualifies for SBA 504. Pure investment CRE goes through conventional commercial routes.</li>
+        <li><strong>Recourse vs. non-recourse:</strong> Many CMBS and life company loans are non-recourse — limited to the property. Bank and bridge loans typically require a personal guarantee.</li>
+      </ul>
+    </div>
+    <div class="callout red">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>CRE deals need specialist brokers in most cases. Do not attempt to originate CRE without a clear referral path — appraisal, title, and regulatory requirements are outside the scope of standard alt-finance.</span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div style="background:#F0FDF4;border:1px solid #A7F3D0;border-radius:10px;padding:20px 24px;text-align:center;">
+    <p style="font-size:14px;font-weight:600;color:#14532D;margin-bottom:6px;">Questions about a specific deal?</p>
+    <p style="font-size:13px;color:#374151;margin-bottom:14px;">The LendPaper waterfall shows which lenders accept which product types — with FICO, TIB, and revenue requirements pre-filtered.</p>
+    <a href="waterfall.html" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#14532D;color:#fff;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none;">
+      Open Lender Waterfall →
+    </a>
+  </div>
+
+</main>
+
+<footer>
+  <p>General guidelines only — not financial, legal, or regulatory advice. Lender requirements vary. Always confirm underwriting criteria directly with the lender before submitting.</p>
+  <p style="margin-top:8px;"><a href="waterfall.html">Waterfall</a> · <a href="mailto:hello@lendpaper.com">hello@lendpaper.com</a> · <a href="privacy.html">Privacy</a></p>
+</footer>
+
+</body>
+</html>

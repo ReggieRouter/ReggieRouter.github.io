@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Health — LendPaper</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #14532D;
+      --green-light: #DCFCE7;
+      --green-border: #BBF7D0;
+      --text: #111827;
+      --muted: #6B7280;
+      --surface: #F9FAFB;
+      --border: #E5E7EB;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #F3F4F6; color: var(--text); min-height: 100vh; }
+    header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+    header a { text-decoration: none; color: var(--green); font-weight: 700; font-size: 15px; }
+    header .sep { color: var(--muted); }
+    header .page-title { font-size: 13px; color: var(--muted); }
+    .container { max-width: 900px; margin: 32px auto; padding: 0 24px; }
+    h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+    /* Stat chips */
+    .stats-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
+    .stat-chip { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px 18px; display: flex; flex-direction: column; gap: 2px; min-width: 130px; }
+    .stat-chip .val { font-size: 24px; font-weight: 700; line-height: 1; }
+    .stat-chip .lbl { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-chip.warn .val { color: #b45309; }
+    .stat-chip.danger .val { color: #dc2626; }
+    .stat-chip.purple .val { color: #6d28d9; }
+    .stat-chip.blue .val { color: #0369a1; }
+    .stat-chip.gray .val { color: #9ca3af; }
+
+    /* Spot check game */
+    .sc-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .sc-card-header { background: #F0FDF4; border-bottom: 1px solid var(--green-border); padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
+    .sc-card-header .title { font-weight: 700; font-size: 15px; color: var(--green); }
+    .sc-card-header .progress { margin-left: auto; font-size: 12px; color: var(--muted); }
+    .sc-actions { display: flex; gap: 8px; align-items: center; }
+    .sc-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; }
+    .sc-btn.primary { background: var(--green); color: #fff; }
+    .sc-btn.secondary { background: #fff; border: 1px solid var(--border); color: var(--text); }
+    .sc-body { display: grid; grid-template-columns: 1fr 1fr; min-height: 480px; }
+    .sc-left { padding: 20px; overflow-y: auto; border-right: 1px solid var(--border); }
+    .sc-left-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 10px; }
+    .sc-field { margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
+    .sc-field strong { color: var(--muted); font-weight: 500; }
+    .sc-verdict { margin-top: 16px; display: flex; gap: 8px; }
+    .sc-verdict button { flex: 1; padding: 9px; border-radius: 6px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; }
+    .sc-ok { background: #d1fae5; color: #065f46; }
+    .sc-flag { background: #fee2e2; color: #991b1b; }
+    .sc-flags-log { margin-top: 12px; font-size: 11px; color: var(--muted); }
+    .sc-right { display: flex; flex-direction: column; }
+    .sc-right-bar { padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .sc-right-bar .src-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+    .sc-right-bar a { font-size: 11px; color: #0369a1; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .sc-right-bar .open-btn { padding: 4px 10px; background: #0369a1; color: #fff; border-radius: 5px; font-size: 11px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+    .sc-iframe-wrap { flex: 1; }
+    .sc-iframe-wrap iframe { width: 100%; height: 100%; border: none; min-height: 440px; }
+    .sc-blocked { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 12px; padding: 30px; text-align: center; color: var(--muted); font-size: 13px; }
+
+    /* Empty / loading */
+    .loading { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 14px; }
+    .empty-sc { text-align: center; padding: 60px 24px; color: var(--muted); }
+    .start-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--green); color: #fff; border-radius: 8px; font-size: 14px; font-weight: 600; border: none; font-family: inherit; cursor: pointer; margin-top: 12px; }
+
+    /* Stale list */
+    .stale-section { margin-top: 32px; background: #fff; border: 1px solid var(--border); border-radius: 12px; }
+    .stale-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .stale-header h2 { font-size: 14px; font-weight: 700; }
+    .stale-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .stale-table th { padding: 8px 14px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .stale-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+    .stale-table tr:last-child td { border-bottom: none; }
+    .badge-danger { background: #FEE2E2; color: #991B1B; border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 700; }
+    .badge-warn { background: #FEF3C7; color: #92400E; border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="waterfall.html">← Waterfall</a>
+  <span class="sep">/</span>
+  <span class="page-title">Data Health</span>
+</header>
+
+<div class="container">
+  <h1>Data Health</h1>
+  <p class="subtitle">Internal view — not public. Loads live from waterfall.html on every visit.</p>
+
+  <div id="stats-row" class="stats-row">
+    <div class="loading">Loading lender data…</div>
+  </div>
+
+  <div id="sc-section">
+    <div class="sc-card">
+      <div class="empty-sc">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <p style="margin-top:10px;">Loading spot check queue…</p>
+        <button class="start-btn" id="start-btn" style="display:none;" onclick="beginSpotCheck()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start Spot Check
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="stale-section" class="stale-section" style="display:none;">
+    <div class="stale-header">
+      <h2 id="stale-title">Stale Lenders (90+ days)</h2>
+    </div>
+    <table class="stale-table">
+      <thead><tr><th>Lender</th><th>Last Scraped</th><th>Days Stale</th><th>Status</th></tr></thead>
+      <tbody id="stale-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  let lenderData = [];
+  let scQueue = [], scIdx = 0, scFlags = {};
+
+  async function loadData() {
+    const res = await fetch('waterfall.html');
+    const html = await res.text();
+    const m = html.match(/const lenderData\s*=\s*(\[[\s\S]*?\]);\s*\/\/ END_LENDER_DATA/);
+    // fallback: find the array between const lenderData = [ ... ];
+    let json;
+    if (m) {
+      json = m[1];
+    } else {
+      const start = html.indexOf('const lenderData = [');
+      if (start === -1) throw new Error('lenderData not found');
+      let depth = 0, i = start + 'const lenderData = '.length;
+      const mark = i;
+      while (i < html.length) {
+        if (html[i] === '[' || html[i] === '{') depth++;
+        else if (html[i] === ']' || html[i] === '}') { depth--; if (depth === 0) break; }
+        i++;
+      }
+      json = html.slice(mark, i + 1);
+    }
+    return JSON.parse(json);
+  }
+
+  function formatDate(s) {
+    if (!s) return null;
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function chip(label, val, cls) {
+    return `<div class="stat-chip ${cls}"><div class="val">${val}</div><div class="lbl">${label}</div></div>`;
+  }
+
+  function renderStats(data) {
+    const total = data.length;
+    const active = data.filter(l => l.scrape_status !== 'inactive').length;
+    const withProducts = data.filter(l => l.products && l.products.length && l.scrape_status !== 'inactive').length;
+    const missingMax = data.filter(l => l.products && l.products.length && !l.max_funding_amount && l.scrape_status !== 'inactive').length;
+    const neverScraped = data.filter(l => !l.scraped_at && l.scrape_status !== 'inactive').length;
+    const failed = data.filter(l => l.scrape_status === 'failed').length;
+    const inactive = data.filter(l => l.scrape_status === 'inactive').length;
+    const today = new Date();
+    const stale90 = data.filter(l => {
+      if (!l.scraped_at || l.scrape_status === 'inactive') return false;
+      return (today - new Date(l.scraped_at)) / 86400000 >= 90;
+    }).length;
+
+    document.getElementById('stats-row').innerHTML =
+      chip('Total Lenders', total, '') +
+      chip('In Waterfall', withProducts, '') +
+      chip('Inactive / Pulled', inactive, 'gray') +
+      chip('Missing Max $', missingMax, 'warn') +
+      chip('Never Scraped', neverScraped, 'purple') +
+      chip('Scrape Failed', failed, 'danger') +
+      chip('Stale (90d+)', stale90, 'blue') +
+      `<div class="stat-chip"><div class="val" style="font-size:12px;color:#6b7280;">Last loaded</div><div class="lbl">${new Date().toLocaleDateString()}</div></div>`;
+
+    // Build stale table
+    const staleList = data.filter(l => {
+      if (!l.scraped_at || l.scrape_status === 'inactive') return false;
+      return (today - new Date(l.scraped_at)) / 86400000 >= 90;
+    }).sort((a, b) => new Date(a.scraped_at) - new Date(b.scraped_at));
+    if (staleList.length > 0) {
+      document.getElementById('stale-section').style.display = '';
+      document.getElementById('stale-title').textContent = `Stale Lenders (90+ days) — ${staleList.length}`;
+      document.getElementById('stale-tbody').innerHTML = staleList.map(l => {
+        const days = Math.floor((today - new Date(l.scraped_at)) / 86400000);
+        const badge = days > 180 ? `<span class="badge-danger">${days}d</span>` : `<span class="badge-warn">${days}d</span>`;
+        return `<tr>
+          <td>${l.name}</td>
+          <td>${formatDate(l.scraped_at) || '—'}</td>
+          <td>${badge}</td>
+          <td style="color:#6b7280;font-size:11px;">${l.scrape_status || 'ok'}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+
+  function beginSpotCheck() {
+    scFlags = JSON.parse(localStorage.getItem('lp_sc_flags') || '{}');
+    const candidates = lenderData.filter(l =>
+      (l.source_url || l.submission_url) &&
+      l.scrape_status !== 'inactive' &&
+      l.products && l.products.length
+    ).sort(() => Math.random() - 0.5);
+    scQueue = candidates;
+    scIdx = 0;
+    renderSpotCheck();
+  }
+
+  function renderSpotCheck() {
+    const l = scQueue[scIdx];
+    if (!l) return;
+    const flagged = Object.values(scFlags).filter(f => f.verdict === 'flag').length;
+    const checked = Object.keys(scFlags).length;
+    const src = l.source_url || l.submission_url;
+    const flagData = scFlags[l.name];
+    const flagBadge = flagData
+      ? `<span style="font-size:11px;background:${flagData.verdict === 'flag' ? '#fee2e2' : '#d1fae5'};color:${flagData.verdict === 'flag' ? '#991b1b' : '#065f46'};border-radius:4px;padding:1px 7px;">${flagData.verdict === 'flag' ? '⚑ Flagged' : '✓ OK'}</span>`
+      : '';
+
+    document.getElementById('sc-section').innerHTML = `
+      <div class="sc-card">
+        <div class="sc-card-header">
+          <span class="title">Spot Check</span>
+          <span style="font-size:13px;color:#374151;font-weight:500;">${l.name}</span>
+          ${flagBadge}
+          <span class="progress">${scIdx + 1} / ${scQueue.length} · ${flagged} flagged · ${checked} checked</span>
+          <div class="sc-actions">
+            <button class="sc-btn primary" onclick="nextCard()">Next →</button>
+            <button class="sc-btn secondary" onclick="document.getElementById('sc-section').innerHTML='<div class=\\'sc-card\\'><div class=\\'empty-sc\\'><p>Session ended. <strong>${checked} checked, ${flagged} flagged.</strong></p></div></div>'">Done</button>
+          </div>
+        </div>
+        <div class="sc-body">
+          <div class="sc-left">
+            <div class="sc-left-label">Our Data</div>
+            <div class="sc-field"><strong>FICO min:</strong> ${l.fico || '—'}</div>
+            <div class="sc-field"><strong>TIB (mo):</strong> ${l.tib || '—'}</div>
+            <div class="sc-field"><strong>Rev/mo:</strong> ${l.rev ? '$' + l.rev.toLocaleString() : '—'}</div>
+            <div class="sc-field"><strong>Products:</strong> ${(l.products || []).join(', ') || '—'}</div>
+            <div class="sc-field"><strong>Max funding:</strong> ${l.max_funding_amount ? '$' + l.max_funding_amount.toLocaleString() : '—'}</div>
+            <div class="sc-field"><strong>Max term:</strong> ${l.max_term_months ? l.max_term_months + ' mo' : '—'}</div>
+            <div class="sc-field"><strong>Soft pull:</strong> ${l.soft_pull ? 'Yes' : 'No'}</div>
+            <div class="sc-field"><strong>Restrictions:</strong> ${(l.restrictions || []).length ? l.restrictions.slice(0,4).join(', ') + (l.restrictions.length > 4 ? ` +${l.restrictions.length - 4}` : '') : 'None'}</div>
+            ${l.scraped_at ? `<div class="sc-field" style="margin-top:8px;font-size:11px;color:#9ca3af;">Last scraped: ${formatDate(l.scraped_at)}</div>` : `<div class="sc-field" style="margin-top:8px;font-size:11px;color:#dc2626;">Never scraped</div>`}
+            <div class="sc-verdict">
+              <button class="sc-ok" onclick="markCard('ok')">✓ Looks correct</button>
+              <button class="sc-flag" onclick="markCard('flag')">⚑ Flag for review</button>
+            </div>
+            <div class="sc-flags-log" id="sc-log"></div>
+          </div>
+          <div class="sc-right">
+            <div class="sc-right-bar">
+              <span class="src-label">Source</span>
+              <a href="${src}" target="_blank" rel="noopener">${src}</a>
+              <a class="open-btn" href="${src}" target="_blank" rel="noopener">Open ↗</a>
+            </div>
+            <div class="sc-iframe-wrap" id="sc-iframe-wrap">
+              <iframe id="sc-iframe" src="${src}" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+            <div class="sc-blocked" id="sc-blocked">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              This site blocks embedding.<br><a href="${src}" target="_blank" rel="noopener" style="color:#0369a1;font-weight:600;margin-top:6px;display:inline-block;">Open in new tab →</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    // Detect blocked iframes
+    setTimeout(() => {
+      try {
+        const iframe = document.getElementById('sc-iframe');
+        const blocked = document.getElementById('sc-blocked');
+        const wrap = document.getElementById('sc-iframe-wrap');
+        if (!iframe) return;
+        iframe.addEventListener('error', () => {
+          blocked.style.display = 'flex';
+          wrap.style.display = 'none';
+        });
+        setTimeout(() => {
+          try { iframe.contentWindow.document; }
+          catch(e) {
+            blocked.style.display = 'flex';
+            wrap.style.display = 'none';
+          }
+        }, 3000);
+      } catch(e) {}
+    }, 100);
+
+    updateFlagsLog();
+  }
+
+  function nextCard() {
+    scIdx = (scIdx + 1) % scQueue.length;
+    renderSpotCheck();
+  }
+
+  function markCard(verdict) {
+    const l = scQueue[scIdx];
+    if (!l) return;
+    scFlags[l.name] = { verdict, ts: new Date().toISOString() };
+    localStorage.setItem('lp_sc_flags', JSON.stringify(scFlags));
+    updateFlagsLog();
+    // Auto-advance after marking
+    setTimeout(() => nextCard(), 400);
+  }
+
+  function updateFlagsLog() {
+    const el = document.getElementById('sc-log');
+    if (!el) return;
+    const flagged = Object.entries(scFlags).filter(([,v]) => v.verdict === 'flag');
+    if (flagged.length === 0) { el.textContent = ''; return; }
+    el.innerHTML = `<strong style="color:#991b1b;">Flagged this session:</strong><br>` +
+      flagged.map(([n]) => `<span style="color:#dc2626;">${n}</span>`).join(', ');
+  }
+
+  // Boot
+  loadData().then(data => {
+    lenderData = data;
+    renderStats(data);
+    // Show start button
+    document.getElementById('sc-section').innerHTML = `
+      <div class="sc-card" style="text-align:center;padding:48px 24px;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <p style="font-size:14px;font-weight:600;margin-bottom:4px;">${data.filter(l => l.scrape_status !== 'inactive' && l.products && l.products.length).length} lenders ready to spot check</p>
+        <p style="font-size:13px;color:#6b7280;margin-bottom:20px;">Randomly queued. Compare our data against each lender's live source page. Flag anything that looks off.</p>
+        <button class="start-btn" onclick="beginSpotCheck()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start Spot Check
+        </button>
+      </div>`;
+  }).catch(err => {
+    document.getElementById('stats-row').innerHTML = `<div style="color:#dc2626;font-size:13px;">Failed to load lender data: ${err.message}. Make sure you're serving this file locally.</div>`;
+  });
+</script>
+</body>
+</html>
