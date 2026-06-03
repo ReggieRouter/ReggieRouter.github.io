@@ -354,6 +354,14 @@ body { background: var(--color-bg-main); margin: 0; padding: 0; font-family: var
 .rp-salary-pill { font-size:10px; font-weight:600; padding:1px 6px; border-radius:4px; margin-left:5px; }
 .rp-salary-pill.below { background:#FEF3C7; color:#92400E; border:1px solid #FDE68A; }
 .rp-salary-pill.near  { background:#F3F4F6; color:#6B7280; border:1px solid #D1D5DB; }
+/* Work mode icon badges */
+.wm-badge { display:inline-flex; align-items:center; margin-left:5px; vertical-align:middle; }
+.wm-icon { width:20px; height:20px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; cursor:default; flex-shrink:0; }
+.wm-icon-remote { background:#EEF2FF; color:#4338CA; border:1px solid #C7D2FE; }
+.wm-icon-hybrid { background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; }
+/* Estimated salary tag */
+.est-tag { display:inline-block; font-size:9px; font-weight:700; padding:1px 4px; border-radius:3px; background:#FEF3C7; color:#92400E; border:1px solid #FDE68A; margin-left:3px; vertical-align:middle; letter-spacing:0.02em; }
+.est-salary { color:#B45309; }
 /* Outreach controls */
 .rp-outreach-controls { display:flex; flex-direction:column; gap:5px; margin:7px 0 10px; }
 .rp-outreach-row { display:flex; align-items:center; gap:8px; }
@@ -880,6 +888,42 @@ function fmtEarnings(p) {
   return '—';
 }
 
+function estimateSalary(p) {
+  if (p.earnings_min || p.earnings_max || p.earnings_note) return null;
+  const title = (p.title || '').toLowerCase();
+  const loc   = (p.location || '').toLowerCase();
+  const type  = (p.job_type || '').toLowerCase();
+  let lo = 60000, hi = 95000;
+  if (/\b(svp|senior vice president|chief|ceo|coo|cfo|cto)\b/.test(title))  { lo=180000; hi=280000; }
+  else if (/\bvp\b|vice president/.test(title))                             { lo=140000; hi=210000; }
+  else if (/\bmanaging director\b/.test(title))                             { lo=150000; hi=220000; }
+  else if (/\bdirector\b/.test(title))                                      { lo=115000; hi=175000; }
+  else if (/\bsenior manager\b/.test(title))                                { lo=95000;  hi=140000; }
+  else if (/\bmanager\b/.test(title))                                       { lo=80000;  hi=120000; }
+  else if (/\b(senior|sr\.?|lead)\b/.test(title))                          { lo=90000;  hi=135000; }
+  else if (/\b(junior|jr\.?|entry|associate)\b/.test(title))               { lo=45000;  hi=70000;  }
+  else if (/\bunderwriter\b/.test(title))                                   { lo=70000;  hi=100000; }
+  else if (/\bprocessor\b/.test(title))                                     { lo=48000;  hi=68000;  }
+  else if (/\bloan officer\b/.test(title))                                  { lo=65000;  hi=110000; }
+  else if (/\b(account executive|account manager)\b/.test(title))          { lo=75000;  hi=120000; }
+  else if (/\banalyst\b/.test(title))                                       { lo=65000;  hi=95000;  }
+  else if (/\b(engineer|developer|engineering)\b/.test(title))             { lo=110000; hi=160000; }
+  else if (/\b(compliance|risk)\b/.test(title))                            { lo=80000;  hi=125000; }
+  else if (/\boperations\b/.test(title))                                    { lo=65000;  hi=100000; }
+  let mult = 1.0;
+  if (/new york|nyc|manhattan/.test(loc) || /san francisco|sf bay/.test(loc) || /\bboston\b/.test(loc)) mult = 1.3;
+  else if (/\b(chicago|seattle|austin|los angeles|atlanta)\b/.test(loc)) mult = 1.15;
+  if (type === 'contract') { lo *= 1.25; hi *= 1.25; }
+  const rnd = n => Math.round(n / 5000) * 5000;
+  return { min: rnd(lo * mult), max: rnd(hi * mult) };
+}
+
+function workModeBadgeHtml(p) {
+  if (p.job_type === 'Remote') return `<span class="wm-badge"><span class="wm-icon wm-icon-remote" data-wm-tip="Remote — work from home"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span></span>`;
+  if (p.job_type === 'Hybrid') return `<span class="wm-badge"><span class="wm-icon wm-icon-hybrid" data-wm-tip="Hybrid — mix of in-office and remote"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span></span>`;
+  return '';
+}
+
 function fmtDate(d) {
   if (!d) return '—';
   const dt = new Date(d + 'T12:00:00');
@@ -999,17 +1043,17 @@ function buildRowCell(col, p) {
     case 'status':
       return `<td class="status-cell">${badge(STATUS_MAP, p.status)}</td>`;
     case 'location': {
-      const isRemote = p.job_type === 'Remote';
       const locText = p.location ? esc(p.location) : '<span style="color:var(--color-text-muted)">—</span>';
-      const remoteTag = isRemote
-        ? ` <span class="rp-badge type-remote" style="padding:1px 5px;font-size:9px;vertical-align:middle;margin-left:4px;" title="Remote">
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </span>`
-        : '';
-      return `<td style="white-space:nowrap;">${locText}${remoteTag}</td>`;
+      return `<td style="white-space:nowrap;">${locText}${workModeBadgeHtml(p)}</td>`;
     }
-    case 'earnings':
+    case 'earnings': {
+      const est = estimateSalary(p);
+      if (est) {
+        const f = n => '$' + Math.round(n/1000) + 'k';
+        return `<td class="num-col" style="white-space:nowrap;font-size:12px;"><span class="est-salary">${f(est.min)}–${f(est.max)}</span><span class="est-tag">Est.</span></td>`;
+      }
       return `<td class="num-col" style="white-space:nowrap;font-size:12px;">${fmtEarnings(p)}</td>`;
+    }
     case 'type': {
       const t = p.job_type;
       if (!t || t === 'Full-time' || t === 'Remote') return `<td><span style="color:var(--color-text-muted)">—</span></td>`;
@@ -1174,6 +1218,10 @@ function drawerHtml(p) {
       ? '<span class="rp-salary-pill near">Near target</span>'
       : ''
     : '';
+  const salaryEst = estimateSalary(p);
+  const earningsDisplay = salaryEst
+    ? `<span class="est-salary">$${Math.round(salaryEst.min/1000)}k–$${Math.round(salaryEst.max/1000)}k</span><span class="est-tag">Est.</span>`
+    : fmtEarnings(p) + salaryPill;
 
   return `
 <div class="rp-detail-drawer">
@@ -1209,7 +1257,7 @@ function drawerHtml(p) {
             Job Details
           </div>
           <div class="detail-item"><span class="detail-label">Location</span><span class="detail-value">${esc(p.location||'—')}</span></div>
-          <div class="detail-item"><span class="detail-label">Earnings</span><span class="detail-value">${fmtEarnings(p)}${salaryPill}</span></div>
+          <div class="detail-item"><span class="detail-label">Earnings</span><span class="detail-value">${earningsDisplay}</span></div>
           <div class="detail-item"><span class="detail-label">Type</span><span class="detail-value">${badge(TYPE_MAP, p.job_type)}</span></div>
           <div class="detail-item"><span class="detail-label">Posted</span><span class="detail-value">${fmtDate(p.posted_date)}</span></div>
           <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value">${badge(STATUS_MAP, p.status)}</span></div>
@@ -1830,6 +1878,28 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('log-contact-backdrop').classList.contains('open')) closeLogContactModal();
   }
 });
+
+/* ── WORK MODE TOOLTIP ── */
+(function() {
+  const tip = document.createElement('div');
+  tip.style.cssText = 'position:fixed;background:#1F2937;color:#fff;font-size:10.5px;font-weight:500;padding:4px 9px;border-radius:5px;white-space:nowrap;pointer-events:none;z-index:9000;display:none;box-shadow:0 2px 8px rgba(0,0,0,0.2);';
+  document.body.appendChild(tip);
+  document.addEventListener('mouseover', e => {
+    const el = e.target.closest('[data-wm-tip]');
+    if (!el) return;
+    tip.textContent = el.dataset.wmTip;
+    tip.style.display = 'block';
+  });
+  document.addEventListener('mousemove', e => {
+    if (tip.style.display !== 'none') {
+      tip.style.left = (e.clientX + 12) + 'px';
+      tip.style.top  = (e.clientY - 34) + 'px';
+    }
+  });
+  document.addEventListener('mouseout', e => {
+    if (!e.target.closest('[data-wm-tip]')) tip.style.display = 'none';
+  });
+})();
 
 /* ── INIT ── */
 renderTableHeader();
