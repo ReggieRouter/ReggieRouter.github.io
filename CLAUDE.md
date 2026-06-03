@@ -40,6 +40,15 @@ Do this for every new tool added to `tools.js` with `presentation: "page"`.
 - Lender display names have permanent overrides — never strip or revert them
 - See `DISPLAY_NAME_OVERRIDES` in `waterfall.html`
 
+## Adding new lenders
+Whenever new lenders are added to Supabase (`lender_data`), immediately run `ingest_rest.py` in `~/lendpaper-engine/` to scrape and populate their fields. Do not add lenders without scraping them in the same session.
+
+```bash
+cd ~/lendpaper-engine && source venv/bin/activate && PYTHONUNBUFFERED=1 python3 ingest_rest.py
+```
+
+To add lenders: update the `NEW_LENDERS` list in `ingest_rest.py` with `{"name": "...", "url": "..."}` entries, then run it. Each lender is scraped with Playwright + Gemini and inserted directly to Supabase with `review_status=approved`.
+
 ### `lender_type` field — valid values and when to use each
 
 There are exactly three valid string values. Do not invent others.

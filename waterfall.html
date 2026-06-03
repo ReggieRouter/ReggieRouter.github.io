@@ -8054,6 +8054,12 @@
                 <span><strong>LendingClub is rebranding to Happen.</strong> The lender will begin operating under the Happen name during 2026. Requirements and products remain the same during the transition.</span>
               </div>` : ''}
 
+              ${lender.name === 'AltLINE' ? `
+              <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:10px 16px;margin:0 0 14px;font-size:13px;color:#166534;line-height:1.5;display:flex;align-items:center;gap:10px;">
+                <span style="font-size:16px;flex-shrink:0;">🏦</span>
+                <span>AltLINE is a division of <strong>The Southern Bank Company</strong> — a community bank chartered in 1934. Bank-backed invoice factoring with FDIC-insured stability.</span>
+              </div>` : ''}
+
               <div class="lp-drawer-grid">
                 <!-- Underwriting or Marketplace card -->
                 ${lender.lender_type === 'marketplace' ? `
