@@ -9,336 +9,546 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --green: #14532D;
-      --green-light: #DCFCE7;
-      --green-border: #BBF7D0;
-      --text: #111827;
-      --muted: #6B7280;
-      --surface: #F9FAFB;
-      --border: #E5E7EB;
+      --green: #14532D; --green-mid: #16A34A; --green-light: #DCFCE7; --green-border: #BBF7D0;
+      --text: #111827; --text2: #374151; --muted: #6B7280; --surface: #F9FAFB; --border: #E5E7EB;
+      --ok: #065f46; --ok-bg: #d1fae5; --ok-border: #a7f3d0;
+      --flag: #991b1b; --flag-bg: #fee2e2; --flag-border: #fecaca;
+      --xp: #7C3AED;
     }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #F3F4F6; color: var(--text); min-height: 100vh; }
-    header { background: #fff; border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
-    header a { text-decoration: none; color: var(--green); font-weight: 700; font-size: 15px; }
-    header .sep { color: var(--muted); }
-    header .page-title { font-size: 13px; color: var(--muted); }
-    .container { max-width: 900px; margin: 32px auto; padding: 0 24px; }
-    h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
 
-    /* Stat chips */
-    .stats-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
-    .stat-chip { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px 18px; display: flex; flex-direction: column; gap: 2px; min-width: 130px; }
-    .stat-chip .val { font-size: 24px; font-weight: 700; line-height: 1; }
-    .stat-chip .lbl { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
-    .stat-chip.warn .val { color: #b45309; }
-    .stat-chip.danger .val { color: #dc2626; }
-    .stat-chip.purple .val { color: #6d28d9; }
-    .stat-chip.blue .val { color: #0369a1; }
-    .stat-chip.gray .val { color: #9ca3af; }
+    /* ── Header ── */
+    header { background: #fff; border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+    header a { text-decoration: none; color: var(--green); font-weight: 700; font-size: 14px; }
+    .hdr-sep { color: #D1D5DB; }
+    .hdr-title { font-size: 13px; color: var(--muted); }
+    .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 16px; font-size: 12px; color: var(--muted); }
+    .hdr-alltime { display: flex; gap: 12px; }
+    .hdr-stat { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+    .hdr-stat .n { font-size: 16px; font-weight: 800; color: var(--text); line-height: 1; }
+    .hdr-stat .l { font-size: 9px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+    .hdr-stat.xp .n { color: var(--xp); }
+    .hdr-stat.streak .n { color: #D97706; }
 
-    /* Spot check game */
-    .sc-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-    .sc-card-header { background: #F0FDF4; border-bottom: 1px solid var(--green-border); padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
-    .sc-card-header .title { font-weight: 700; font-size: 15px; color: var(--green); }
-    .sc-card-header .progress { margin-left: auto; font-size: 12px; color: var(--muted); }
-    .sc-actions { display: flex; gap: 8px; align-items: center; }
-    .sc-btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; }
-    .sc-btn.primary { background: var(--green); color: #fff; }
-    .sc-btn.secondary { background: #fff; border: 1px solid var(--border); color: var(--text); }
-    .sc-body { display: grid; grid-template-columns: 1fr 1fr; min-height: 480px; }
-    .sc-left { padding: 20px; overflow-y: auto; border-right: 1px solid var(--border); }
-    .sc-left-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 10px; }
-    .sc-field { margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
-    .sc-field strong { color: var(--muted); font-weight: 500; }
-    .sc-verdict { margin-top: 16px; display: flex; gap: 8px; }
-    .sc-verdict button { flex: 1; padding: 9px; border-radius: 6px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; }
-    .sc-ok { background: #d1fae5; color: #065f46; }
-    .sc-flag { background: #fee2e2; color: #991b1b; }
-    .sc-flags-log { margin-top: 12px; font-size: 11px; color: var(--muted); }
-    .sc-right { display: flex; flex-direction: column; }
-    .sc-right-bar { padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
-    .sc-right-bar .src-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-    .sc-right-bar a { font-size: 11px; color: #0369a1; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-    .sc-right-bar .open-btn { padding: 4px 10px; background: #0369a1; color: #fff; border-radius: 5px; font-size: 11px; font-weight: 600; text-decoration: none; white-space: nowrap; }
-    .sc-iframe-wrap { flex: 1; }
-    .sc-iframe-wrap iframe { width: 100%; height: 100%; border: none; min-height: 440px; }
-    .sc-blocked { display: none; flex: 1; align-items: center; justify-content: center; flex-direction: column; gap: 12px; padding: 30px; text-align: center; color: var(--muted); font-size: 13px; }
+    /* ── Coverage chips ── */
+    .container { max-width: 960px; margin: 24px auto; padding: 0 24px; }
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 10px; }
+    .chips-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .chip { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 110px; }
+    .chip .v { font-size: 22px; font-weight: 800; line-height: 1; }
+    .chip .l { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+    .chip.warn .v { color: #B45309; }
+    .chip.danger .v { color: #DC2626; }
+    .chip.purple .v { color: #6D28D9; }
+    .chip.blue .v { color: #0369A1; }
+    .chip.gray .v { color: #9CA3AF; }
 
-    /* Empty / loading */
-    .loading { text-align: center; padding: 60px 24px; color: var(--muted); font-size: 14px; }
-    .empty-sc { text-align: center; padding: 60px 24px; color: var(--muted); }
-    .start-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--green); color: #fff; border-radius: 8px; font-size: 14px; font-weight: 600; border: none; font-family: inherit; cursor: pointer; margin-top: 12px; }
+    /* ── Game area ── */
+    .game-wrap { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
 
-    /* Stale list */
-    .stale-section { margin-top: 32px; background: #fff; border: 1px solid var(--border); border-radius: 12px; }
-    .stale-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-    .stale-header h2 { font-size: 14px; font-weight: 700; }
+    /* Session bar */
+    .session-bar { background: #F8FAFC; border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; align-items: center; gap: 20px; }
+    .sbar-stat { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+    .sbar-stat .n { font-size: 15px; font-weight: 800; color: var(--text); }
+    .sbar-stat.ok-stat .n { color: var(--green-mid); }
+    .sbar-stat.flag-stat .n { color: #DC2626; }
+    .sbar-stat.streak-stat .n { color: #D97706; }
+    .sbar-divider { width: 1px; height: 20px; background: var(--border); }
+    .progress-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+    .progress-bar { width: 120px; height: 6px; background: #E5E7EB; border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.3s; }
+
+    /* Game card header */
+    .game-header { background: var(--green); padding: 13px 20px; display: flex; align-items: center; gap: 10px; }
+    .game-header .lender-name { font-weight: 700; font-size: 15px; color: #fff; }
+    .game-header .prev-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+    .game-header .nav-btns { margin-left: auto; display: flex; gap: 8px; }
+    .game-header button { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; }
+    .btn-next { background: rgba(255,255,255,0.2); color: #fff; }
+    .btn-next:hover { background: rgba(255,255,255,0.3); }
+    .btn-end { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+
+    /* Two-col body */
+    .game-body { display: grid; grid-template-columns: 280px 1fr; min-height: 460px; }
+    .data-col { padding: 18px; overflow-y: auto; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 0; }
+    .col-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 12px; }
+    .field { display: flex; flex-direction: column; gap: 1px; padding: 6px 0; border-bottom: 1px solid #F3F4F6; }
+    .field:last-of-type { border-bottom: none; }
+    .field-key { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .field-val { font-size: 13px; font-weight: 500; color: var(--text); }
+    .field-val.tbd { color: #D1D5DB; font-style: italic; }
+    .field-val.never { color: #DC2626; font-size: 11px; }
+    .verdict-btns { margin-top: auto; padding-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .btn-ok, .btn-flag { width: 100%; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; border: none; transition: transform 0.1s, opacity 0.1s; display: flex; align-items: center; justify-content: center; gap: 7px; }
+    .btn-ok { background: var(--ok-bg); color: var(--ok); border: 1.5px solid var(--ok-border); }
+    .btn-flag { background: var(--flag-bg); color: var(--flag); border: 1.5px solid var(--flag-border); }
+    .btn-ok:hover { background: #A7F3D0; }
+    .btn-flag:hover { background: #FECACA; }
+    .btn-ok:active, .btn-flag:active { transform: scale(0.97); }
+    .kbd-hint { text-align: center; font-size: 10px; color: #D1D5DB; margin-top: 6px; }
+    kbd { background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 3px; padding: 1px 4px; font-family: inherit; }
+
+    .source-col { display: flex; flex-direction: column; }
+    .source-bar { padding: 9px 14px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+    .source-bar .src-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); flex-shrink: 0; }
+    .source-bar a.src-url { font-size: 11px; color: #0369A1; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .source-bar a.open-btn { padding: 3px 9px; background: #0369A1; color: #fff; border-radius: 4px; font-size: 11px; font-weight: 600; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
+    .iframe-wrap { flex: 1; position: relative; }
+    .iframe-wrap iframe { width: 100%; height: 100%; border: none; min-height: 420px; display: block; }
+    .blocked-msg { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; flex-direction: column; gap: 10px; background: var(--surface); text-align: center; font-size: 13px; color: var(--muted); }
+
+    /* Toast */
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: #1F2937; color: #fff; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.25s; pointer-events: none; z-index: 9999; white-space: nowrap; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Start screen */
+    .start-screen { text-align: center; padding: 56px 24px; }
+    .start-screen h2 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+    .start-screen p { font-size: 13px; color: var(--muted); margin-bottom: 24px; max-width: 380px; margin-left: auto; margin-right: auto; }
+    .start-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; background: var(--green); color: #fff; border-radius: 8px; font-size: 14px; font-weight: 700; border: none; font-family: inherit; cursor: pointer; }
+    .start-btn:hover { background: #166534; }
+
+    /* End screen */
+    .end-screen { text-align: center; padding: 56px 24px; }
+    .end-screen h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+    .end-screen .final-stats { display: flex; justify-content: center; gap: 32px; margin: 20px 0; }
+    .end-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .end-stat .n { font-size: 32px; font-weight: 800; line-height: 1; }
+    .end-stat .l { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+
+    /* Flagged list */
+    .flagged-section { background: #fff; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+    .flagged-header { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+    .flagged-header h3 { font-size: 13px; font-weight: 700; }
+    .flagged-count { font-size: 11px; background: var(--flag-bg); color: var(--flag); border-radius: 4px; padding: 1px 7px; font-weight: 700; }
+    .flagged-body { padding: 0; }
+    .flagged-row { display: flex; align-items: center; gap: 12px; padding: 9px 20px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .flagged-row:last-child { border-bottom: none; }
+    .flagged-row .fname { font-weight: 600; flex: 1; }
+    .flagged-row .ftime { font-size: 11px; color: var(--muted); }
+    .flagged-row .unflag-btn { font-size: 11px; color: var(--muted); background: none; border: none; cursor: pointer; font-family: inherit; padding: 2px 6px; border-radius: 4px; }
+    .flagged-row .unflag-btn:hover { background: var(--surface); color: var(--text); }
+
+    /* Stale table */
+    .stale-section { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .stale-header { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .stale-header h3 { font-size: 13px; font-weight: 700; }
     .stale-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-    .stale-table th { padding: 8px 14px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--border); }
-    .stale-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); }
+    .stale-table th { padding: 7px 14px; text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--border); }
+    .stale-table td { padding: 8px 14px; border-bottom: 1px solid var(--border); }
     .stale-table tr:last-child td { border-bottom: none; }
-    .badge-danger { background: #FEE2E2; color: #991B1B; border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 700; }
-    .badge-warn { background: #FEF3C7; color: #92400E; border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 700; }
+    .badge-danger { background: #FEE2E2; color: #991B1B; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 700; }
+    .badge-warn { background: #FEF3C7; color: #92400E; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 700; }
   </style>
 </head>
 <body>
 
 <header>
   <a href="waterfall.html">← Waterfall</a>
-  <span class="sep">/</span>
-  <span class="page-title">Data Health</span>
+  <span class="hdr-sep">/</span>
+  <span class="hdr-title">Data Health</span>
+  <div class="hdr-right">
+    <div class="hdr-alltime" id="hdr-stats">
+      <div class="hdr-stat"><span class="n" id="at-checked">—</span><span class="l">Reviewed</span></div>
+      <div class="hdr-stat"><span class="n" id="at-flagged" style="color:#DC2626;">—</span><span class="l">Flagged</span></div>
+      <div class="hdr-stat streak"><span class="n" id="at-streak">—</span><span class="l">Best streak</span></div>
+      <div class="hdr-stat xp"><span class="n" id="at-xp">—</span><span class="l">XP</span></div>
+    </div>
+    <button onclick="if(confirm('Reset all spot-check history?')){localStorage.removeItem('lp_sc_flags');localStorage.removeItem('lp_sc_alltime');location.reload();}" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:inherit;padding:2px 6px;border-radius:4px;" title="Reset all history">Reset</button>
+  </div>
 </header>
 
-<div class="container">
-  <h1>Data Health</h1>
-  <p class="subtitle">Internal view — not public. Loads live from waterfall.html on every visit.</p>
+<div id="toast"></div>
 
-  <div id="stats-row" class="stats-row">
-    <div class="loading">Loading lender data…</div>
+<div class="container">
+
+  <!-- Coverage -->
+  <div class="section-label">Data Coverage</div>
+  <div id="chips-row" class="chips-row">
+    <div class="chip"><div class="v" style="color:#9CA3AF;">…</div><div class="l">Loading</div></div>
   </div>
 
-  <div id="sc-section">
-    <div class="sc-card">
-      <div class="empty-sc">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <p style="margin-top:10px;">Loading spot check queue…</p>
-        <button class="start-btn" id="start-btn" style="display:none;" onclick="beginSpotCheck()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Start Spot Check
-        </button>
-      </div>
+  <!-- Spot Check Game -->
+  <div class="section-label">Spot Check</div>
+  <div class="game-wrap" id="game-wrap">
+    <div class="start-screen">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px;display:block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <h2 id="start-title">Loading…</h2>
+      <p id="start-desc">Fetching lender data.</p>
     </div>
   </div>
 
-  <div id="stale-section" class="stale-section" style="display:none;">
+  <!-- Flagged list -->
+  <div class="flagged-section" id="flagged-section" style="display:none;">
+    <div class="flagged-header" onclick="toggleFlagged()">
+      <h3>Flagged for Review</h3>
+      <span class="flagged-count" id="flagged-count">0</span>
+      <svg id="flagged-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto;transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="flagged-body" id="flagged-body"></div>
+  </div>
+
+  <!-- Stale -->
+  <div class="stale-section" id="stale-section" style="display:none;">
     <div class="stale-header">
-      <h2 id="stale-title">Stale Lenders (90+ days)</h2>
+      <h3 id="stale-title">Stale (90+ days)</h3>
     </div>
     <table class="stale-table">
-      <thead><tr><th>Lender</th><th>Last Scraped</th><th>Days Stale</th><th>Status</th></tr></thead>
+      <thead><tr><th>Lender</th><th>Last Scraped</th><th>Days</th><th>Status</th></tr></thead>
       <tbody id="stale-tbody"></tbody>
     </table>
   </div>
+
 </div>
 
 <script>
+  // ── State ──────────────────────────────────────────────────────────────
   let lenderData = [];
-  let scQueue = [], scIdx = 0, scFlags = {};
+  let scQueue = [], scIdx = 0;
 
+  // Persisted flags: { name: { verdict: 'ok'|'flag', ts: ISO } }
+  let flags = JSON.parse(localStorage.getItem('lp_sc_flags') || '{}');
+  // Persisted all-time stats: { checked, flagged, bestStreak, xp }
+  let alltime = JSON.parse(localStorage.getItem('lp_sc_alltime') || '{"checked":0,"flagged":0,"bestStreak":0,"xp":0}');
+  // Session stats (reset each page load)
+  let session = { checked: 0, flagged: 0, streak: 0 };
+  let gameActive = false;
+
+  // ── Persistence helpers ───────────────────────────────────────────────
+  function saveFlags() { localStorage.setItem('lp_sc_flags', JSON.stringify(flags)); }
+  function saveAlltime() { localStorage.setItem('lp_sc_alltime', JSON.stringify(alltime)); }
+
+  // ── Header all-time stats ─────────────────────────────────────────────
+  function renderHeaderStats() {
+    document.getElementById('at-checked').textContent = alltime.checked;
+    document.getElementById('at-flagged').textContent = alltime.flagged;
+    document.getElementById('at-streak').textContent = alltime.bestStreak;
+    document.getElementById('at-xp').textContent = alltime.xp;
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────────
+  let toastTimer;
+  function toast(msg, dur = 1800) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), dur);
+  }
+
+  // ── Data load ─────────────────────────────────────────────────────────
   async function loadData() {
     const res = await fetch('waterfall.html');
     const html = await res.text();
-    const m = html.match(/const lenderData\s*=\s*(\[[\s\S]*?\]);\s*\/\/ END_LENDER_DATA/);
-    // fallback: find the array between const lenderData = [ ... ];
-    let json;
-    if (m) {
-      json = m[1];
-    } else {
-      const start = html.indexOf('const lenderData = [');
-      if (start === -1) throw new Error('lenderData not found');
-      let depth = 0, i = start + 'const lenderData = '.length;
-      const mark = i;
-      while (i < html.length) {
-        if (html[i] === '[' || html[i] === '{') depth++;
-        else if (html[i] === ']' || html[i] === '}') { depth--; if (depth === 0) break; }
-        i++;
-      }
-      json = html.slice(mark, i + 1);
+    const start = html.indexOf('const lenderData = [');
+    if (start === -1) throw new Error('lenderData not found in waterfall.html');
+    let depth = 0, i = start + 'const lenderData = '.length, mark = i;
+    while (i < html.length) {
+      if (html[i] === '[' || html[i] === '{') depth++;
+      else if (html[i] === ']' || html[i] === '}') { depth--; if (depth === 0) break; }
+      i++;
     }
-    return JSON.parse(json);
+    return JSON.parse(html.slice(mark, i + 1));
   }
 
-  function formatDate(s) {
+  function fmt(s) {
     if (!s) return null;
     const d = new Date(s);
-    return isNaN(d.getTime()) ? null : d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    return isNaN(d.getTime()) ? null : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  function chip(label, val, cls) {
-    return `<div class="stat-chip ${cls}"><div class="val">${val}</div><div class="lbl">${label}</div></div>`;
-  }
-
-  function renderStats(data) {
-    const total = data.length;
-    const active = data.filter(l => l.scrape_status !== 'inactive').length;
-    const withProducts = data.filter(l => l.products && l.products.length && l.scrape_status !== 'inactive').length;
-    const missingMax = data.filter(l => l.products && l.products.length && !l.max_funding_amount && l.scrape_status !== 'inactive').length;
-    const neverScraped = data.filter(l => !l.scraped_at && l.scrape_status !== 'inactive').length;
-    const failed = data.filter(l => l.scrape_status === 'failed').length;
-    const inactive = data.filter(l => l.scrape_status === 'inactive').length;
+  // ── Coverage chips ────────────────────────────────────────────────────
+  function renderCoverage(data) {
     const today = new Date();
-    const stale90 = data.filter(l => {
-      if (!l.scraped_at || l.scrape_status === 'inactive') return false;
-      return (today - new Date(l.scraped_at)) / 86400000 >= 90;
-    }).length;
+    const active = data.filter(l => l.scrape_status !== 'inactive');
+    const total  = data.length;
+    const inWf   = active.filter(l => l.products && l.products.length).length;
+    const inact  = data.filter(l => l.scrape_status === 'inactive').length;
+    const miss$  = active.filter(l => l.products && l.products.length && !l.max_funding_amount).length;
+    const never  = active.filter(l => !l.scraped_at).length;
+    const failed = data.filter(l => l.scrape_status === 'failed').length;
+    const stale  = active.filter(l => l.scraped_at && (today - new Date(l.scraped_at)) / 86400000 >= 90).length;
+    const c = (v, l, cls='') => `<div class="chip ${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
+    document.getElementById('chips-row').innerHTML =
+      c(total, 'Total') + c(inWf, 'In Waterfall') + c(inact, 'Inactive', 'gray') +
+      c(miss$, 'Missing Max $', 'warn') + c(never, 'Never Scraped', 'purple') +
+      c(failed, 'Scrape Failed', 'danger') + c(stale, 'Stale 90d+', 'blue');
 
-    document.getElementById('stats-row').innerHTML =
-      chip('Total Lenders', total, '') +
-      chip('In Waterfall', withProducts, '') +
-      chip('Inactive / Pulled', inactive, 'gray') +
-      chip('Missing Max $', missingMax, 'warn') +
-      chip('Never Scraped', neverScraped, 'purple') +
-      chip('Scrape Failed', failed, 'danger') +
-      chip('Stale (90d+)', stale90, 'blue') +
-      `<div class="stat-chip"><div class="val" style="font-size:12px;color:#6b7280;">Last loaded</div><div class="lbl">${new Date().toLocaleDateString()}</div></div>`;
-
-    // Build stale table
-    const staleList = data.filter(l => {
-      if (!l.scraped_at || l.scrape_status === 'inactive') return false;
-      return (today - new Date(l.scraped_at)) / 86400000 >= 90;
-    }).sort((a, b) => new Date(a.scraped_at) - new Date(b.scraped_at));
-    if (staleList.length > 0) {
+    // Stale table
+    const staleList = active.filter(l => l.scraped_at && (today - new Date(l.scraped_at)) / 86400000 >= 90)
+      .sort((a,b) => new Date(a.scraped_at) - new Date(b.scraped_at));
+    if (staleList.length) {
       document.getElementById('stale-section').style.display = '';
-      document.getElementById('stale-title').textContent = `Stale Lenders (90+ days) — ${staleList.length}`;
+      document.getElementById('stale-title').textContent = `Stale (90+ days) — ${staleList.length}`;
       document.getElementById('stale-tbody').innerHTML = staleList.map(l => {
         const days = Math.floor((today - new Date(l.scraped_at)) / 86400000);
         const badge = days > 180 ? `<span class="badge-danger">${days}d</span>` : `<span class="badge-warn">${days}d</span>`;
-        return `<tr>
-          <td>${l.name}</td>
-          <td>${formatDate(l.scraped_at) || '—'}</td>
-          <td>${badge}</td>
-          <td style="color:#6b7280;font-size:11px;">${l.scrape_status || 'ok'}</td>
-        </tr>`;
+        return `<tr><td>${l.name}</td><td>${fmt(l.scraped_at)||'—'}</td><td>${badge}</td><td style="color:var(--muted);font-size:11px;">${l.scrape_status||'ok'}</td></tr>`;
       }).join('');
     }
   }
 
-  function beginSpotCheck() {
-    scFlags = JSON.parse(localStorage.getItem('lp_sc_flags') || '{}');
-    const candidates = lenderData.filter(l =>
-      (l.source_url || l.submission_url) &&
-      l.scrape_status !== 'inactive' &&
-      l.products && l.products.length
-    ).sort(() => Math.random() - 0.5);
-    scQueue = candidates;
-    scIdx = 0;
-    renderSpotCheck();
+  // ── Flagged list ──────────────────────────────────────────────────────
+  function renderFlagged() {
+    const flagged = Object.entries(flags).filter(([,v]) => v.verdict === 'flag')
+      .sort((a,b) => new Date(b[1].ts) - new Date(a[1].ts));
+    const sec = document.getElementById('flagged-section');
+    const body = document.getElementById('flagged-body');
+    const cnt = document.getElementById('flagged-count');
+    if (flagged.length === 0) { sec.style.display = 'none'; return; }
+    sec.style.display = '';
+    cnt.textContent = flagged.length;
+    body.innerHTML = flagged.map(([name, data]) =>
+      `<div class="flagged-row">
+        <span style="width:10px;height:10px;background:#DC2626;border-radius:50%;flex-shrink:0;"></span>
+        <span class="fname">${name}</span>
+        <span class="ftime">${fmt(data.ts)||''}</span>
+        <button class="unflag-btn" onclick="clearFlag('${name.replace(/'/g,"\\'")}')">Clear ✕</button>
+      </div>`
+    ).join('');
   }
 
-  function renderSpotCheck() {
+  function clearFlag(name) {
+    if (flags[name]) { flags[name] = { verdict: 'ok', ts: new Date().toISOString() }; saveFlags(); renderFlagged(); }
+  }
+
+  function toggleFlagged() {
+    const body = document.getElementById('flagged-body');
+    const chev = document.getElementById('flagged-chevron');
+    const hidden = body.style.display === 'none';
+    body.style.display = hidden ? '' : 'none';
+    chev.style.transform = hidden ? 'rotate(180deg)' : '';
+  }
+
+  // ── Session bar ───────────────────────────────────────────────────────
+  function renderSessionBar() {
+    const done = scIdx;
+    const total = scQueue.length;
+    const pct = total > 0 ? Math.round(done / total * 100) : 0;
+    return `
+      <div class="session-bar">
+        <div class="sbar-stat ok-stat"><span class="n">${session.checked}</span> reviewed this session</div>
+        <div class="sbar-divider"></div>
+        <div class="sbar-stat flag-stat"><span class="n">${session.flagged}</span> flagged</div>
+        <div class="sbar-divider"></div>
+        <div class="sbar-stat streak-stat">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span class="n">${session.streak}</span> streak
+        </div>
+        <div class="progress-wrap">
+          <span>${done} / ${total}</span>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <span>${pct}%</span>
+        </div>
+      </div>`;
+  }
+
+  // ── Main game render ──────────────────────────────────────────────────
+  function renderGame() {
     const l = scQueue[scIdx];
-    if (!l) return;
-    const flagged = Object.values(scFlags).filter(f => f.verdict === 'flag').length;
-    const checked = Object.keys(scFlags).length;
-    const src = l.source_url || l.submission_url;
-    const flagData = scFlags[l.name];
-    const flagBadge = flagData
-      ? `<span style="font-size:11px;background:${flagData.verdict === 'flag' ? '#fee2e2' : '#d1fae5'};color:${flagData.verdict === 'flag' ? '#991b1b' : '#065f46'};border-radius:4px;padding:1px 7px;">${flagData.verdict === 'flag' ? '⚑ Flagged' : '✓ OK'}</span>`
+    if (!l) { renderEndScreen(); return; }
+    const src = l.source_url || l.submission_url || '';
+    const prev = flags[l.name];
+    const prevBadge = prev
+      ? `<span class="prev-badge" style="background:${prev.verdict==='flag'?'rgba(220,38,38,.25)':'rgba(255,255,255,.2)'};color:${prev.verdict==='flag'?'#FCA5A5':'#A7F3D0'};">${prev.verdict==='flag'?'⚑ Previously flagged':'✓ Previously OK'}</span>`
       : '';
 
-    document.getElementById('sc-section').innerHTML = `
-      <div class="sc-card">
-        <div class="sc-card-header">
-          <span class="title">Spot Check</span>
-          <span style="font-size:13px;color:#374151;font-weight:500;">${l.name}</span>
-          ${flagBadge}
-          <span class="progress">${scIdx + 1} / ${scQueue.length} · ${flagged} flagged · ${checked} checked</span>
-          <div class="sc-actions">
-            <button class="sc-btn primary" onclick="nextCard()">Next →</button>
-            <button class="sc-btn secondary" onclick="document.getElementById('sc-section').innerHTML='<div class=\\'sc-card\\'><div class=\\'empty-sc\\'><p>Session ended. <strong>${checked} checked, ${flagged} flagged.</strong></p></div></div>'">Done</button>
+    const val = (v, fallback='—') => v ? String(v) : fallback;
+    const money = v => v ? '$' + Number(v).toLocaleString() : null;
+
+    document.getElementById('game-wrap').innerHTML =
+      renderSessionBar() +
+      `<div class="game-header">
+        <span class="lender-name">${l.name}</span>
+        ${prevBadge}
+        <div class="nav-btns">
+          <button class="btn-next" onclick="skipCard()">Skip →</button>
+          <button class="btn-end" onclick="endSession()">End session</button>
+        </div>
+      </div>
+      <div class="game-body">
+        <div class="data-col">
+          <div class="col-label">Our Data</div>
+          ${field('FICO min', val(l.fico||null))}
+          ${field('TIB', l.tib ? l.tib + ' mo' : null)}
+          ${field('Rev / mo', money(l.rev))}
+          ${field('Products', (l.products||[]).join(', ')||null)}
+          ${field('Max funding', money(l.max_funding_amount))}
+          ${field('Max term', l.max_term_months ? l.max_term_months + ' mo' : null)}
+          ${field('Soft pull', l.soft_pull ? 'Yes' : 'No')}
+          ${field('Bank stmts', l.bank_verified ? (l.bank_statements ? l.bank_statements + ' mo required' : 'Required') : 'Not required')}
+          ${field('Collateral', l.hard_collateral ? 'Required' : 'Unsecured')}
+          ${field('HQ', l.hq_state || null)}
+          ${l.scraped_at
+            ? `<div class="field"><div class="field-key">Last scraped</div><div class="field-val" style="font-size:11px;color:var(--muted);">${fmt(l.scraped_at)}</div></div>`
+            : `<div class="field"><div class="field-key">Last scraped</div><div class="field-val never">Never scraped</div></div>`}
+          <div class="verdict-btns">
+            <button class="btn-ok" onclick="markCard('ok')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+              Looks correct
+            </button>
+            <button class="btn-flag" onclick="markCard('flag')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+              Flag for review
+            </button>
+            <div class="kbd-hint"><kbd>O</kbd> OK &nbsp;·&nbsp; <kbd>F</kbd> Flag &nbsp;·&nbsp; <kbd>→</kbd> Skip</div>
           </div>
         </div>
-        <div class="sc-body">
-          <div class="sc-left">
-            <div class="sc-left-label">Our Data</div>
-            <div class="sc-field"><strong>FICO min:</strong> ${l.fico || '—'}</div>
-            <div class="sc-field"><strong>TIB (mo):</strong> ${l.tib || '—'}</div>
-            <div class="sc-field"><strong>Rev/mo:</strong> ${l.rev ? '$' + l.rev.toLocaleString() : '—'}</div>
-            <div class="sc-field"><strong>Products:</strong> ${(l.products || []).join(', ') || '—'}</div>
-            <div class="sc-field"><strong>Max funding:</strong> ${l.max_funding_amount ? '$' + l.max_funding_amount.toLocaleString() : '—'}</div>
-            <div class="sc-field"><strong>Max term:</strong> ${l.max_term_months ? l.max_term_months + ' mo' : '—'}</div>
-            <div class="sc-field"><strong>Soft pull:</strong> ${l.soft_pull ? 'Yes' : 'No'}</div>
-            <div class="sc-field"><strong>Restrictions:</strong> ${(l.restrictions || []).length ? l.restrictions.slice(0,4).join(', ') + (l.restrictions.length > 4 ? ` +${l.restrictions.length - 4}` : '') : 'None'}</div>
-            ${l.scraped_at ? `<div class="sc-field" style="margin-top:8px;font-size:11px;color:#9ca3af;">Last scraped: ${formatDate(l.scraped_at)}</div>` : `<div class="sc-field" style="margin-top:8px;font-size:11px;color:#dc2626;">Never scraped</div>`}
-            <div class="sc-verdict">
-              <button class="sc-ok" onclick="markCard('ok')">✓ Looks correct</button>
-              <button class="sc-flag" onclick="markCard('flag')">⚑ Flag for review</button>
-            </div>
-            <div class="sc-flags-log" id="sc-log"></div>
+        <div class="source-col">
+          <div class="source-bar">
+            <span class="src-lbl">Source</span>
+            <a class="src-url" href="${src}" target="_blank" rel="noopener">${src}</a>
+            <a class="open-btn" href="${src}" target="_blank" rel="noopener">Open ↗</a>
           </div>
-          <div class="sc-right">
-            <div class="sc-right-bar">
-              <span class="src-label">Source</span>
-              <a href="${src}" target="_blank" rel="noopener">${src}</a>
-              <a class="open-btn" href="${src}" target="_blank" rel="noopener">Open ↗</a>
-            </div>
-            <div class="sc-iframe-wrap" id="sc-iframe-wrap">
-              <iframe id="sc-iframe" src="${src}" sandbox="allow-scripts allow-same-origin"></iframe>
-            </div>
-            <div class="sc-blocked" id="sc-blocked">
+          <div class="iframe-wrap" id="iframe-wrap">
+            <iframe id="sc-iframe" src="${src}" sandbox="allow-scripts allow-same-origin allow-popups" style="min-height:420px;"></iframe>
+            <div class="blocked-msg" id="blocked-msg" style="display:none;">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              This site blocks embedding.<br><a href="${src}" target="_blank" rel="noopener" style="color:#0369a1;font-weight:600;margin-top:6px;display:inline-block;">Open in new tab →</a>
+              <span>This site blocks embedding.</span>
+              <a href="${src}" target="_blank" rel="noopener" style="color:#0369A1;font-weight:600;">Open in new tab →</a>
             </div>
           </div>
         </div>
       </div>`;
 
-    // Detect blocked iframes
+    // Detect X-Frame-Options block
     setTimeout(() => {
-      try {
-        const iframe = document.getElementById('sc-iframe');
-        const blocked = document.getElementById('sc-blocked');
-        const wrap = document.getElementById('sc-iframe-wrap');
-        if (!iframe) return;
-        iframe.addEventListener('error', () => {
-          blocked.style.display = 'flex';
-          wrap.style.display = 'none';
-        });
-        setTimeout(() => {
-          try { iframe.contentWindow.document; }
-          catch(e) {
-            blocked.style.display = 'flex';
-            wrap.style.display = 'none';
-          }
-        }, 3000);
-      } catch(e) {}
-    }, 100);
-
-    updateFlagsLog();
+      const iframe = document.getElementById('sc-iframe');
+      const blocked = document.getElementById('blocked-msg');
+      const wrap = document.getElementById('iframe-wrap');
+      if (!iframe) return;
+      const showBlocked = () => { iframe.style.display = 'none'; blocked.style.display = 'flex'; };
+      iframe.onerror = showBlocked;
+      setTimeout(() => {
+        try { const _ = iframe.contentWindow.document; }
+        catch(e) { showBlocked(); }
+      }, 3000);
+    }, 150);
   }
 
-  function nextCard() {
-    scIdx = (scIdx + 1) % scQueue.length;
-    renderSpotCheck();
+  function field(key, val) {
+    return `<div class="field">
+      <div class="field-key">${key}</div>
+      <div class="field-val${!val || val==='—' ? ' tbd' : ''}">${val||'—'}</div>
+    </div>`;
   }
+
+  // ── Game actions ──────────────────────────────────────────────────────
+  const MILESTONES = [10, 25, 50, 100, 250, 500];
+  const MILESTONE_MSG = { 10:'10 reviewed! On a roll.', 25:'25 down!', 50:'50 checked. Halfway hero.', 100:'100 reviews. Legend.', 250:'250. Absolute unit.', 500:'500. You win the internet.' };
 
   function markCard(verdict) {
     const l = scQueue[scIdx];
     if (!l) return;
-    scFlags[l.name] = { verdict, ts: new Date().toISOString() };
-    localStorage.setItem('lp_sc_flags', JSON.stringify(scFlags));
-    updateFlagsLog();
-    // Auto-advance after marking
-    setTimeout(() => nextCard(), 400);
+    flags[l.name] = { verdict, ts: new Date().toISOString() };
+    saveFlags();
+
+    // Session stats
+    session.checked++;
+    if (verdict === 'flag') { session.flagged++; session.streak = 0; }
+    else { session.streak++; }
+
+    // All-time stats
+    alltime.checked++;
+    if (verdict === 'flag') alltime.flagged++;
+    if (session.streak > alltime.bestStreak) alltime.bestStreak = session.streak;
+    const xpEarned = 10 + (verdict === 'flag' ? 5 : 0);
+    alltime.xp += xpEarned;
+    saveAlltime();
+    renderHeaderStats();
+    renderFlagged();
+
+    // Toast
+    if (verdict === 'flag') {
+      toast(`⚑ Flagged — ${l.name}`);
+    } else if (session.streak > 0 && session.streak % 5 === 0) {
+      toast(`🔥 ${session.streak} streak!`);
+    } else if (MILESTONES.includes(alltime.checked)) {
+      toast(MILESTONE_MSG[alltime.checked], 3000);
+    } else {
+      toast(`+${xpEarned} XP`);
+    }
+
+    // Advance
+    scIdx++;
+    setTimeout(() => renderGame(), 300);
   }
 
-  function updateFlagsLog() {
-    const el = document.getElementById('sc-log');
-    if (!el) return;
-    const flagged = Object.entries(scFlags).filter(([,v]) => v.verdict === 'flag');
-    if (flagged.length === 0) { el.textContent = ''; return; }
-    el.innerHTML = `<strong style="color:#991b1b;">Flagged this session:</strong><br>` +
-      flagged.map(([n]) => `<span style="color:#dc2626;">${n}</span>`).join(', ');
+  function skipCard() {
+    scIdx = (scIdx + 1) % scQueue.length;
+    renderGame();
   }
 
-  // Boot
+  function endSession() {
+    renderEndScreen();
+  }
+
+  function renderEndScreen() {
+    const accuracy = session.checked > 0
+      ? Math.round((1 - session.flagged / session.checked) * 100) : 100;
+    document.getElementById('game-wrap').innerHTML = `
+      <div class="end-screen">
+        <h2>Session Complete</h2>
+        <p style="color:var(--muted);font-size:13px;">Nice work. ${session.flagged > 0 ? `${session.flagged} lender${session.flagged>1?'s':''} flagged for follow-up.` : 'All lenders looked clean.'}</p>
+        <div class="final-stats">
+          <div class="end-stat"><span class="n" style="color:var(--green-mid);">${session.checked}</span><span class="l">Reviewed</span></div>
+          <div class="end-stat"><span class="n" style="color:#DC2626;">${session.flagged}</span><span class="l">Flagged</span></div>
+          <div class="end-stat"><span class="n" style="color:#D97706;">${alltime.bestStreak}</span><span class="l">Best streak</span></div>
+          <div class="end-stat"><span class="n" style="color:var(--xp);">${alltime.xp}</span><span class="l">Total XP</span></div>
+        </div>
+        <button class="start-btn" onclick="restartSession()" style="margin-top:8px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Play again
+        </button>
+      </div>`;
+  }
+
+  function restartSession() {
+    session = { checked: 0, flagged: 0, streak: 0 };
+    scQueue = lenderData.filter(l =>
+      (l.source_url || l.submission_url) &&
+      l.scrape_status !== 'inactive' &&
+      l.products && l.products.length
+    ).sort(() => Math.random() - 0.5);
+    scIdx = 0;
+    gameActive = true;
+    renderGame();
+  }
+
+  // ── Keyboard shortcuts ────────────────────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if (!gameActive) return;
+    if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+    if (e.key === 'o' || e.key === 'O') markCard('ok');
+    else if (e.key === 'f' || e.key === 'F') markCard('flag');
+    else if (e.key === 'ArrowRight') skipCard();
+  });
+
+  // ── Boot ──────────────────────────────────────────────────────────────
+  renderHeaderStats();
+
   loadData().then(data => {
     lenderData = data;
-    renderStats(data);
-    // Show start button
-    document.getElementById('sc-section').innerHTML = `
-      <div class="sc-card" style="text-align:center;padding:48px 24px;">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <p style="font-size:14px;font-weight:600;margin-bottom:4px;">${data.filter(l => l.scrape_status !== 'inactive' && l.products && l.products.length).length} lenders ready to spot check</p>
-        <p style="font-size:13px;color:#6b7280;margin-bottom:20px;">Randomly queued. Compare our data against each lender's live source page. Flag anything that looks off.</p>
-        <button class="start-btn" onclick="beginSpotCheck()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Start Spot Check
+    renderCoverage(data);
+    renderFlagged();
+
+    const queue = data.filter(l =>
+      (l.source_url || l.submission_url) &&
+      l.scrape_status !== 'inactive' &&
+      l.products && l.products.length
+    );
+    document.getElementById('game-wrap').innerHTML = `
+      <div class="start-screen">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px;display:block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <h2>${queue.length} lenders in queue</h2>
+        <p>Randomly shuffled. Compare our data against each lender's live source page.<br>Mark OK or flag anything that looks off. Use <kbd style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:3px;padding:1px 5px;font-family:inherit;">O</kbd> / <kbd style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:3px;padding:1px 5px;font-family:inherit;">F</kbd> / <kbd style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:3px;padding:1px 5px;font-family:inherit;">→</kbd> for speed.</p>
+        <button class="start-btn" onclick="restartSession()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start
         </button>
       </div>`;
   }).catch(err => {
-    document.getElementById('stats-row').innerHTML = `<div style="color:#dc2626;font-size:13px;">Failed to load lender data: ${err.message}. Make sure you're serving this file locally.</div>`;
+    document.getElementById('chips-row').innerHTML = `<div style="color:#DC2626;font-size:13px;">Failed to load: ${err.message}</div>`;
   });
 </script>
 </body>
