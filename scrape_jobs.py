@@ -47,9 +47,10 @@ except ImportError:
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-SUPABASE_URL       = "https://arpquyoucdsdmbetgftj.supabase.co"
-SUPABASE_KEY       = "sb_publishable_R18l5zBtRQ1CkSGNBkgZkg_dVVBldlb"
-TABLE              = "job_postings"
+SUPABASE_URL         = "https://arpquyoucdsdmbetgftj.supabase.co"
+SUPABASE_ANON_KEY    = "sb_publishable_R18l5zBtRQ1CkSGNBkgZkg_dVVBldlb"
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
+TABLE                = "job_postings"
 
 RECIPIENT_EMAIL    = "stephengowa@gmail.com"
 SENDER_EMAIL       = "stephengowa@gmail.com"
@@ -200,10 +201,11 @@ def extract_jobs_via_claude(client, name: str, url: str, content: str) -> list:
 # ── Supabase ───────────────────────────────────────────────────────────────────
 
 def sb_fetch(method: str, path: str, body=None):
+    key = SUPABASE_SERVICE_KEY or SUPABASE_ANON_KEY
     headers = {
         "Content-Type":  "application/json",
-        "apikey":        SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "apikey":        key,
+        "Authorization": f"Bearer {key}",
     }
     if method in ("POST", "PATCH"):
         headers["Prefer"] = "return=representation"

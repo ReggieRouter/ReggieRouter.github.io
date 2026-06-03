@@ -1,9 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<base href="/">
+<!-- Google tag (gtag.js) -->
+<script>
+  const hostname = window.location.hostname;
+  const isProduction = hostname === 'lendpaper.com' || hostname === 'www.lendpaper.com';
+  if (!isProduction) {
+    window['ga-disable-G-S3YBZV6RF9'] = true;
+    console.log('[GA4] Local development detected. Production tracking disabled.');
+  }
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S3YBZV6RF9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-S3YBZV6RF9');
+</script>
 <meta charset="UTF-8">
+<base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="version" content="2026.05.30.0001">
+<script type="text/javascript">
+  window.CURRENT_VERSION = "2026.05.30.0001";
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (var i = 0; i < registrations.length; i++) {
+        registrations[i].unregister().then(function(success) {
+          if (success) console.log('Stale service worker removed.');
+        });
+      }
+    });
+  }
+  function checkForUpdates() {
+    var lastAttempt = sessionStorage.getItem('lp_update_attempt');
+    var nowTime = Date.now();
+    if (lastAttempt && (nowTime - parseInt(lastAttempt, 10) < 15000)) { return; }
+    fetch('/?_cb=' + nowTime, { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }, cache: 'no-store' })
+    .then(function(res) { if (!res.ok) return; return res.text(); })
+    .then(function(htmlText) {
+      if (!htmlText) return;
+      var match = htmlText.match(/<meta\s+name=["']version["']\s+content=["'](.*?)["']/i);
+      if (match && match[1] && match[1] !== window.CURRENT_VERSION) {
+        console.warn('New LendPaper update detected: ' + match[1] + '. Refreshing...');
+        sessionStorage.setItem('lp_update_attempt', Date.now());
+        if ('caches' in window) { caches.keys().then(function(keys) { keys.forEach(function(key) { caches.delete(key); }); }); }
+        window.location.reload(true);
+      }
+    })
+    .catch(function(err) { console.warn('Update check failed:', err); });
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', checkForUpdates); } else { checkForUpdates(); }
+  document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'visible') { checkForUpdates(); } });
+  setInterval(checkForUpdates, 5 * 60 * 1000);
+</script>
+<script type="text/javascript">
+  // Single Page Apps for GitHub Pages
+  // MIT License
+  // https://github.com/rafgraph/spa-github-pages
+  (function(l) {
+    if (l.search[1] === 'p') {
+      var decoded = l.search.slice(1).split('&').map(function(s) {
+        return s.replace(/~and~/g, '&')
+      }).filter(function(s) {
+        return s.slice(0, 2) === 'p='
+      })[0];
+      if (decoded) {
+        window.history.replaceState(null, null,
+          l.pathname.slice(0, -1) + '/' + (decoded.slice(2) || '') + (l.hash || '')
+        );
+      }
+    }
+  }(window.location))
+</script>
 <title>Industry Intelligence — LendPaper</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
 <meta property="og:title" content="Industry Intelligence — LendPaper" />
@@ -13,204 +82,259 @@
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --green-dark: #1A3C2E;
-  --green-mid: #2D6A4F;
-  --green-accent: #10B981;
-  --green-light: rgba(209,250,229,0.4);
-  --text-primary: #1F2937;
-  --text-secondary: #4B5563;
-  --text-muted: #9CA3AF;
-  --border: #E5E7EB;
-  --bg: #F9FAFB;
+  --sb: #0D1117;
+  --sb-hover: #161B22;
+  --sb-border: rgba(255,255,255,0.07);
+  --sb-text: rgba(255,255,255,0.88);
+  --sb-muted: rgba(255,255,255,0.38);
+  --green: #10B981;
+  --green-dk: #059669;
+  --green-xl: #D1FAE5;
+  --green-2: rgba(16,185,129,0.12);
+  --bg: #F1F5F9;
   --card: #FFFFFF;
-  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --bd: #E2E8F0;
+  --bd-str: #CBD5E1;
+  --t1: #0F172A; --t2: #334155; --t3: #64748B; --t4: #94A3B8;
+  --t1bg:#F0FDF4;--t1tx:#15803D;--t1bd:#BBF7D0;--t1dt:#22C55E;
+  --t2bg:#EFF6FF;--t2tx:#1D4ED8;--t2bd:#BFDBFE;--t2dt:#3B82F6;
+  --t3bg:#FFFBEB;--t3tx:#B45309;--t3bd:#FDE68A;--t3dt:#EAB308;
+  --t4bg:#FFF1F2;--t4tx:#BE123C;--t4bd:#FECDD3;--t4dt:#F43F5E;
+  --flbg:#FEFCE8;--flbd:#FEF08A;--fltx:#854D0E;
+  --rsbg:#FFF1F2;--rsbd:#FECDD3;--rstx:#BE123C;
+  --fd: 'Syne', sans-serif;
+  --fb: 'DM Sans', sans-serif;
+  --fm: 'JetBrains Mono', monospace;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font);background:var(--bg);color:var(--text-primary);min-height:100vh}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);display:flex;flex-direction:column;overflow:hidden}
 
-/* ── Header ── */
-.lp-header{background:var(--green-dark);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
-.lp-wordmark{display:flex;align-items:center;gap:8px;text-decoration:none}
-.lp-wordmark svg{flex-shrink:0}
-.lp-wm-text{font-size:19px;font-weight:700;color:#fff;letter-spacing:-0.02em}
-.lp-wm-text span{color:var(--green-accent)}
-.lp-tool-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.5);border-left:1px solid rgba(255,255,255,0.15);padding-left:12px;margin-left:4px}
-.lp-nav-links{display:flex;gap:16px;align-items:center}
-.lp-nav-links a{font-size:12px;font-weight:500;color:rgba(255,255,255,0.6);text-decoration:none;transition:color .15s}
-.lp-nav-links a:hover{color:#fff}
+/* HEADER */
+.lp-header{background:var(--sb);padding:0 22px;height:50px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--sb-border);z-index:100}
+.lp-wordmark{display:flex;align-items:center;gap:9px;text-decoration:none}
+.lp-wm-text{font-family:var(--fd);font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.02em}
+.lp-wm-text span{color:var(--green)}
+.lp-tool-label{font-family:var(--fd);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--sb-muted);border-left:1px solid var(--sb-border);padding-left:11px;margin-left:4px}
+.lp-nav{display:flex;gap:18px;align-items:center}
+.lp-nav a{font-size:12px;font-weight:500;color:var(--sb-muted);text-decoration:none;transition:color .15s;letter-spacing:.02em}
+.lp-nav a:hover{color:#fff}
 
-/* ── Page ── */
-.page{max-width:840px;margin:0 auto;padding:28px 20px 60px}
+/* SHELL */
+.app-shell{display:flex;flex:1;overflow:hidden;height:calc(100vh - 50px)}
 
-/* ── UW Filter Panel ── */
-.uw-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
-.uw-toggle{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;cursor:pointer;user-select:none;transition:background .15s}
-.uw-toggle:hover{background:#f9fafb}
-.uw-toggle-left{display:flex;align-items:center;gap:8px}
-.uw-toggle-label{font-size:13px;font-weight:700;color:var(--green-dark)}
-.uw-toggle-sub{font-size:12px;color:var(--text-muted)}
-.uw-toggle-badge{font-size:11px;font-weight:700;color:var(--green-mid);background:var(--green-light);border:1px solid rgba(16,185,129,.2);padding:2px 8px;border-radius:20px;display:none}
-.uw-toggle-badge.active{display:inline-block}
-.uw-arrow{font-size:11px;color:var(--text-muted);transition:transform .2s}
-.uw-body{display:none;padding:16px 18px;border-top:1px solid var(--border);background:#fafafa}
-.uw-body.open{display:block}
-.uw-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-@media(max-width:600px){.uw-grid{grid-template-columns:1fr 1fr}}
-.uw-field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:5px}
-.uw-field input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:var(--font);color:var(--text-primary);background:var(--card);outline:none;transition:all .2s}
-.uw-field input:focus{border-color:var(--green-mid);box-shadow:0 0 0 3px rgba(45,106,79,.1)}
-.uw-field input::placeholder{color:var(--text-muted)}
-.uw-hint{margin-top:10px;font-size:12px;color:var(--text-muted)}
-.uw-clear-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:var(--font);transition:all .15s;margin-top:2px}
-.uw-clear-btn:hover{background:var(--bg);color:var(--text-primary)}
+/* SIDEBAR */
+.sidebar{width:306px;flex-shrink:0;background:var(--sb);display:flex;flex-direction:column;overflow-y:auto;border-right:1px solid var(--sb-border)}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
 
-/* ── Search Card ── */
-.search-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:20px}
-.search-head{padding:16px 20px 0}
-.search-head h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--green-mid);margin-bottom:4px}
-.search-head p{font-size:13px;color:var(--text-muted)}
-.search-wrap{padding:12px 16px}
-.search-row{display:flex;gap:10px;align-items:center}
-.search-icon-wrap{position:relative;flex:1}
-.search-icon-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
-.search-input{width:100%;padding:13px 12px 13px 38px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:var(--font);color:var(--text-primary);background:#f9fafb;outline:none;transition:all .2s}
-.search-input:focus{border-color:var(--green-mid);background:#fff;box-shadow:0 0 0 3px rgba(45,106,79,.1)}
-.search-input::placeholder{color:var(--text-muted)}
-.clear-search{background:none;border:none;cursor:pointer;padding:6px 10px;font-size:18px;color:var(--text-muted);border-radius:6px;transition:color .15s;display:none}
-.clear-search:hover{color:var(--text-primary)}
+.sb-sec{padding:16px 16px;border-bottom:1px solid var(--sb-border)}
+.sb-sec-label{font-family:var(--fd);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--sb-muted);margin-bottom:10px}
+
+/* Mode tabs */
+.mode-tabs{display:flex;background:rgba(255,255,255,.05);border-radius:7px;padding:3px;margin-bottom:10px}
+.mode-tab{flex:1;padding:6px;font-family:var(--fd);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;border:none;border-radius:5px;cursor:pointer;transition:all .18s;background:none;color:var(--sb-muted)}
+.mode-tab.active{background:var(--green);color:#fff}
+.mode-tab:hover:not(.active){color:var(--sb-text)}
+
+/* Search input */
+.search-wrap{position:relative}
+.si-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--sb-muted);pointer-events:none;width:14px;height:14px}
+.search-input{width:100%;padding:10px 32px 10px 30px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;font-family:var(--fb);font-size:13px;color:var(--sb-text);outline:none;transition:all .2s}
+.search-input::placeholder{color:var(--sb-muted)}
+.search-input:focus{background:rgba(255,255,255,.1);border-color:var(--green);box-shadow:0 0 0 2px rgba(16,185,129,.15)}
+.sb-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--sb-muted);font-size:13px;padding:3px;display:none;transition:color .15s;line-height:1}
+.sb-clear:hover{color:var(--sb-text)}
+.ai-btn{width:100%;margin-top:8px;padding:9px;background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.28);border-radius:7px;font-family:var(--fd);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--green);cursor:pointer;transition:all .18s;display:none}
+.ai-btn:hover:not(:disabled){background:rgba(16,185,129,.24)}
+.ai-btn:disabled{opacity:.45;cursor:not-allowed}
+.ai-status{font-size:11px;color:var(--sb-muted);margin-top:5px;min-height:14px;line-height:1.4}
+
+/* UW Filter — always visible */
+.uw-filter{padding:14px 16px;border-bottom:1px solid var(--sb-border)}
+.uw-filter-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.uw-filter-title{font-family:var(--fd);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--sb-muted)}
+.uw-badge{font-size:9px;font-weight:700;color:var(--green);background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.2);padding:1px 6px;border-radius:20px;display:none}
+.uw-badge.active{display:inline-block}
+.uw-sub{font-size:11px;color:var(--sb-muted);margin-bottom:10px;line-height:1.45}
+.uw-fields{display:flex;flex-direction:column;gap:7px}
+.uw-field label{display:block;font-family:var(--fd);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sb-muted);margin-bottom:3px}
+.uw-field input{width:100%;padding:8px 10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;font-family:var(--fb);font-size:13px;color:var(--sb-text);outline:none;transition:all .18s}
+.uw-field input:focus{border-color:var(--green);background:rgba(255,255,255,.09)}
+.uw-field input::placeholder{color:var(--sb-muted)}
+.uw-clear{margin-top:8px;background:none;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:5px 10px;font-family:var(--fd);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sb-muted);cursor:pointer;transition:all .15s}
+.uw-clear:hover{color:var(--sb-text);border-color:rgba(255,255,255,.2)}
 
 /* Tier legend */
-.tier-legend{display:flex;border-top:1px solid #f1f5f9}
-.tl-item{flex:1;padding:8px 12px;text-align:center;font-size:11px;font-weight:700;border-right:1px solid #f1f5f9}
-.tl-item:last-child{border-right:none}
-.tl-1{background:#f0fdf4;color:#15803d}
-.tl-2{background:#eff6ff;color:#1d4ed8}
-.tl-3{background:#fefce8;color:#a16207}
-.tl-4{background:#fff1f2;color:#be123c}
+.tier-legend{padding:14px 16px}
+.tl-title{font-family:var(--fd);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--sb-muted);margin-bottom:9px}
+.tl-item{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:11px;font-weight:600}
+.tl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tl-1{color:#4ADE80}.tl-1 .tl-dot{background:#22C55E}
+.tl-2{color:#60A5FA}.tl-2 .tl-dot{background:#3B82F6}
+.tl-3{color:#FBBF24}.tl-3 .tl-dot{background:#EAB308}
+.tl-4{color:#FB7185}.tl-4 .tl-dot{background:#F43F5E}
 
-.helper-msg{padding:32px 20px;text-align:center;color:var(--text-muted)}
-.helper-msg strong{display:block;font-size:18px;font-weight:700;color:var(--text-secondary);margin-bottom:4px}
-.no-match{padding:20px 24px;font-size:14px;color:var(--text-secondary);display:none;line-height:1.7}
-.no-match a{color:var(--green-mid)}
+/* MAIN */
+.main-content{flex:1;overflow-y:auto;background:var(--bg);padding:20px 22px 60px}
+.main-content::-webkit-scrollbar{width:5px}
+.main-content::-webkit-scrollbar-thumb{background:var(--bd-str);border-radius:3px}
 
-/* ── Result Rows ── */
-.results-wrap{padding:0 8px 12px}
-.result-item{border-radius:10px;padding:16px 12px;transition:background .15s;margin-bottom:2px}
-.result-item:hover{background:#f8fafc}
-.result-top{display:flex;align-items:flex-start;gap:12px}
-.result-code{font-family:ui-monospace,Menlo,Monaco,monospace;font-size:12px;font-weight:700;color:var(--green-mid);background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:4px 8px;flex-shrink:0;white-space:nowrap;margin-top:2px}
-.result-body{flex:1;min-width:0}
-.result-name{font-size:15px;font-weight:600;color:var(--text-primary);line-height:1.3}
-.result-ex{font-size:12px;color:var(--text-muted);font-style:italic;margin-top:2px}
-.copy-btn{flex-shrink:0;font-size:11px;font-weight:600;color:var(--text-secondary);background:#f1f5f9;border:1px solid var(--border);border-radius:6px;padding:6px 12px;cursor:pointer;font-family:var(--font);transition:all .2s;white-space:nowrap}
-.copy-btn:hover{background:#e5e7eb}
-.copy-btn.ok{background:#dcfce7!important;border-color:#86efac!important;color:#166534!important}
+/* HELPER STATE */
+.helper-state{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:70px 30px}
+.helper-icon{font-size:36px;margin-bottom:14px}
+.helper-title{font-family:var(--fd);font-size:19px;font-weight:700;color:var(--t2);margin-bottom:8px}
+.helper-sub{font-size:13px;color:var(--t3);line-height:1.65;max-width:360px}
+.hint-chips{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+.hint-chip{font-size:12px;font-weight:500;padding:5px 11px;background:var(--card);border:1px solid var(--bd);border-radius:20px;color:var(--t3);cursor:pointer;transition:all .15s}
+.hint-chip:hover{border-color:var(--green);color:var(--green-dk)}
 
-/* Tier badge */
-.tier-badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:9px;border:1px solid transparent}
-.tier-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.tb-1{background:#f0fdf4;color:#15803d;border-color:#bbf7d0}.tb-1 .tier-dot{background:#22c55e}
-.tb-2{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}.tb-2 .tier-dot{background:#3b82f6}
-.tb-3{background:#fefce8;color:#a16207;border-color:#fde68a}.tb-3 .tier-dot{background:#eab308}
-.tb-4{background:#fff1f2;color:#be123c;border-color:#fecdd3}.tb-4 .tier-dot{background:#f43f5e}
+/* NO MATCH */
+.no-match-state{display:none;padding:30px 10px}
+.no-match-title{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--t2);margin-bottom:7px}
+.no-match-sub{font-size:13px;color:var(--t3);line-height:1.6;margin-bottom:20px}
+.no-match-sub a{color:var(--green-dk)}
+.sector-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.sector-card{background:var(--card);border:1px solid var(--bd);border-radius:9px;padding:12px 13px;cursor:pointer;transition:all .15s}
+.sector-card:hover{border-color:var(--green);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.06)}
+.sc-icon{font-size:18px;margin-bottom:5px}
+.sc-name{font-family:var(--fd);font-size:11px;font-weight:700;color:var(--t2)}
+.sc-count{font-size:10px;color:var(--t4);margin-top:1px}
 
-/* Product chips */
-.prod-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
-.prod-chip{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid transparent;white-space:nowrap}
-.pc-sba{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd}
-.pc-term{background:#e0f2fe;color:#0369a1;border-color:#bae6fd}
-.pc-loc{background:#f0fdf4;color:#166534;border-color:#bbf7d0}
-.pc-mca{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
-.pc-equip{background:#faf5ff;color:#6b21a8;border-color:#e9d5ff}
-.pc-factor{background:#fef2f2;color:#991b1b;border-color:#fecaca}
-.pc-cre{background:#f0f9ff;color:#0c4a6e;border-color:#bae6fd}
-.pc-bridge{background:#fdf4ff;color:#86198f;border-color:#f0abfc}
-.pc-rbf{background:#fff7ed;color:#7c2d12;border-color:#fed7aa}
+/* RESULT COUNT */
+.result-count{font-family:var(--fd);font-size:10px;font-weight:700;color:var(--t4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
 
-/* UW Factors section */
-.section-toggle{display:flex;align-items:center;justify-content:space-between;margin-top:12px;cursor:pointer;padding:8px 10px;border-radius:8px;transition:background .15s}
-.section-toggle:hover{background:#f1f5f9}
-.section-toggle-label{font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
-.section-arrow{font-size:11px;color:var(--text-muted);transition:transform .2s}
-.section-body{display:none;margin-top:6px;padding:12px 14px;background:#f8fafc;border-radius:8px;border:1px solid var(--border)}
-.section-body.open{display:block}
+/* RESULT CARD */
+.result-card{background:var(--card);border:1px solid var(--bd);border-radius:12px;margin-bottom:10px;overflow:hidden;transition:box-shadow .18s}
+.result-card:hover{box-shadow:0 3px 14px rgba(0,0,0,.07)}
+.result-card.is-t4{border-color:var(--t4bd)}
 
-.uw-grid-factors{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-@media(max-width:500px){.uw-grid-factors{grid-template-columns:1fr}}
-.uw-factor-item{background:#fff;border:1px solid var(--border);border-radius:8px;padding:10px 12px}
-.uw-factor-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:3px}
-.uw-factor-val{font-size:13px;color:var(--text-primary);font-weight:500}
-.uw-docs-list{margin-top:8px}
-.uw-docs-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:5px}
-.uw-doc-tag{display:inline-block;font-size:11.5px;color:var(--text-secondary);background:#fff;border:1px solid var(--border);border-radius:5px;padding:2px 8px;margin:2px 3px 2px 0}
-.uw-flags{margin-top:8px}
-.uw-flag{font-size:12px;color:#92400e;background:#fef3c7;border:1px solid #fde68a;border-radius:5px;padding:3px 8px;display:inline-block;margin:2px 3px 2px 0}
+/* Card head */
+.card-head{padding:15px 16px 10px;display:flex;align-items:flex-start;gap:11px}
+.card-code{font-family:var(--fm);font-size:10.5px;font-weight:600;color:var(--green-dk);background:var(--green-xl);border:1px solid rgba(16,185,129,.22);border-radius:5px;padding:3px 7px;flex-shrink:0;margin-top:3px;letter-spacing:.06em}
+.card-body{flex:1;min-width:0}
+.card-name{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--t1);line-height:1.3}
+.card-name mark{background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px;font-family:inherit}
+.card-ex{font-size:11.5px;color:var(--t4);font-style:italic;margin-top:3px}
+.tier-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--fd);font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:3px 9px;border-radius:20px;margin-top:7px;border:1px solid transparent}
+.tb-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.tb-1{background:var(--t1bg);color:var(--t1tx);border-color:var(--t1bd)}.tb-1 .tb-dot{background:var(--t1dt)}
+.tb-2{background:var(--t2bg);color:var(--t2tx);border-color:var(--t2bd)}.tb-2 .tb-dot{background:var(--t2dt)}
+.tb-3{background:var(--t3bg);color:var(--t3tx);border-color:var(--t3bd)}.tb-3 .tb-dot{background:var(--t3dt)}
+.tb-4{background:var(--t4bg);color:var(--t4tx);border-color:var(--t4bd)}.tb-4 .tb-dot{background:var(--t4dt)}
 
-/* Lenders section */
-.lenders-header{display:flex;align-items:center;justify-content:space-between;margin-top:12px;cursor:pointer;padding:8px 10px;border-radius:8px;transition:background .15s}
-.lenders-header:hover{background:#f1f5f9}
-.lenders-header-left{display:flex;align-items:center;gap:8px}
-.lenders-header-label{font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
-.lenders-count-badge{font-size:11px;font-weight:700;color:var(--green-mid);background:var(--green-light);border:1px solid rgba(16,185,129,.2);padding:1px 7px;border-radius:20px}
-.lenders-count-badge.warn{color:#9a3412;background:#fff7ed;border-color:#fed7aa}
-.lenders-body{display:none;margin-top:6px}
-.lenders-body.open{display:block}
+/* FLAGS — always visible, never hidden */
+.flag-row{display:flex;flex-wrap:wrap;gap:4px;padding:0 16px 10px}
+.flag-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;background:var(--flbg);color:var(--fltx);border:1px solid var(--flbd);line-height:1.3}
 
-.specialty-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--green-mid);margin-bottom:6px;display:flex;align-items:center;gap:5px}
-.product-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin:10px 0 6px;display:flex;align-items:center;gap:5px}
-.restricted-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#be123c;margin:10px 0 6px;display:flex;align-items:center;gap:5px}
+/* TIER 4 REDIRECT — always visible */
+.t4-redirect{margin:0 16px 12px;padding:12px 14px;background:var(--rsbg);border:1px solid var(--rsbd);border-radius:8px}
+.t4-redirect-title{font-family:var(--fd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--rstx);display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.t4-redirect-sub{font-size:12px;color:#9F1239;line-height:1.5;margin-bottom:9px}
+.t4-alts{display:flex;flex-wrap:wrap;gap:5px}
 
-.lender-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--card);margin-bottom:5px;transition:all .15s}
-.lender-row:hover{border-color:#d1d5db;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.lender-row.specialty{border-color:#bbf7d0;background:#f0fdf4}
-.lender-row.restricted-row{opacity:.5;background:#fff1f2;border-color:#fecdd3}
-.lender-row.below-min{opacity:.45;background:#f9fafb}
-.lender-name{font-size:13px;font-weight:600;color:var(--text-primary);min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lender-row.specialty .lender-name{color:var(--green-dark)}
-.lender-products{display:flex;flex-wrap:wrap;gap:3px;flex:1}
-.lp-chip{font-size:10px;font-weight:600;padding:2px 6px;border-radius:12px;white-space:nowrap}
-.lp-sba{background:#ede9fe;color:#5b21b6}
-.lp-term{background:#e0f2fe;color:#0369a1}
-.lp-loc{background:#f0fdf4;color:#166534}
-.lp-mca{background:#fff7ed;color:#9a3412}
-.lp-equip{background:#faf5ff;color:#6b21a8}
-.lp-factor{background:#fef2f2;color:#991b1b}
-.lp-cre{background:#f0f9ff;color:#0c4a6e}
-.lender-reqs{font-size:11px;color:var(--text-muted);flex-shrink:0;white-space:nowrap}
-.lender-link{font-size:11px;font-weight:600;color:var(--green-mid);text-decoration:none;flex-shrink:0;padding:3px 8px;border:1px solid #bbf7d0;border-radius:5px;background:#f0fdf4;transition:all .15s}
-.lender-link:hover{background:#dcfce7;border-color:#86efac}
-.lender-restricted-note{font-size:11px;color:#be123c;font-weight:500}
+/* PRODUCT CHIPS */
+.prod-row{display:flex;flex-wrap:wrap;gap:5px;padding:0 16px 11px}
+.prod-chip{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid transparent;white-space:nowrap;font-family:var(--fd);letter-spacing:.02em}
+.pc-sba{background:#EDE9FE;color:#5B21B6;border-color:#C4B5FD}
+.pc-term{background:#E0F2FE;color:#0369A1;border-color:#BAE6FD}
+.pc-loc{background:#F0FDF4;color:#166534;border-color:#BBF7D0}
+.pc-mca{background:#FFF7ED;color:#9A3412;border-color:#FED7AA}
+.pc-equip{background:#FAF5FF;color:#6B21A8;border-color:#E9D5FF}
+.pc-factor{background:#FEF2F2;color:#991B1B;border-color:#FECACA}
+.pc-cre{background:#F0F9FF;color:#0C4A6E;border-color:#BAE6FD}
+.pc-bridge{background:#FDF4FF;color:#86198F;border-color:#F0ABFC}
+.pc-rbf{background:#FFF7ED;color:#7C2D12;border-color:#FED7AA}
 
-.waterfall-link-row{margin-top:10px;text-align:right}
-.waterfall-link{font-size:12px;font-weight:600;color:var(--green-mid);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border:1px solid #bbf7d0;border-radius:6px;background:#f0fdf4;transition:all .15s}
-.waterfall-link:hover{background:#dcfce7;border-color:#86efac}
+/* DEAL INTEL — surfaced, not in accordion */
+.deal-intel{margin:0 16px 11px;padding:11px 13px;background:#F0FDF4;border-left:3px solid var(--green);border-radius:0 7px 7px 0}
+.di-label{font-family:var(--fd);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--green-dk);display:flex;align-items:center;gap:4px;margin-bottom:5px}
+.di-text{font-size:12.5px;color:var(--t2);line-height:1.65}
 
-/* Deal Intel */
-.deal-intel{margin-top:12px;padding:12px 14px;background:#f0fdf4;border-left:3px solid var(--green-accent);border-radius:0 8px 8px 0}
-.deal-intel-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--green-mid);margin-bottom:5px}
-.deal-intel-text{font-size:13px;color:#1f2937;line-height:1.6}
+/* ACCORDION TOGGLES */
+.card-accordions{display:flex;gap:6px;padding:0 16px 8px;flex-wrap:wrap}
+.acc-toggle{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border:1px solid var(--bd);border-radius:6px;cursor:pointer;background:var(--bg);font-family:var(--fd);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);transition:all .15s;user-select:none}
+.acc-toggle:hover{border-color:var(--bd-str);color:var(--t2)}
+.acc-toggle.open{border-color:var(--green);color:var(--green-dk);background:var(--green-xl)}
+.acc-toggle .arr{font-size:8px;transition:transform .18s}
+.acc-toggle.open .arr{transform:rotate(90deg)}
+.lenders-count{font-size:9px;font-weight:700;color:var(--green-dk);background:rgba(16,185,129,.14);border:1px solid rgba(16,185,129,.2);padding:1px 5px;border-radius:10px}
+.lenders-count.warn{color:#9A3412;background:#FFF7ED;border-color:#FED7AA}
 
-/* Franchise */
-.fran-row{margin-top:10px}
-.fran-btn{background:none;border:none;cursor:pointer;font-size:12px;color:var(--text-muted);border-bottom:1px dotted var(--text-muted);padding:0;font-family:var(--font);transition:color .15s}
-.fran-btn:hover{color:var(--green-mid)}
-.fran-detail{display:none;margin-top:8px;padding:10px 12px;background:#eff6ff;border-radius:8px;font-size:12.5px;color:#1e3a5f;line-height:1.6}
-.fran-detail ul{margin:5px 0 0 16px}
+/* SECTION BODIES */
+.sec-body{display:none;margin:0 16px 10px;padding:13px;background:var(--bg);border-radius:8px;border:1px solid var(--bd)}
+.sec-body.open{display:block}
+
+/* UW FACTOR GRID */
+.uw-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.uw-fact{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:9px 11px}
+.uw-fact-label{font-family:var(--fd);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t4);margin-bottom:3px}
+.uw-fact-val{font-size:12.5px;font-weight:600;color:var(--t1);line-height:1.35}
+.uw-docs-label{font-family:var(--fd);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t4);margin-bottom:5px}
+.doc-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:10px}
+.doc-tag{font-size:11px;color:var(--t2);background:var(--card);border:1px solid var(--bd);border-radius:4px;padding:2px 7px}
+.uw-flags-note{font-family:var(--fd);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t4);margin-bottom:5px}
+.uw-flag-detail{font-size:11px;color:#92400E;background:#FEFCE8;border:1px solid #FEF08A;border-radius:4px;padding:2px 7px;display:inline-block;margin:2px 3px 2px 0}
+
+/* LENDERS */
+.specialty-label{font-family:var(--fd);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--green-dk);margin-bottom:5px}
+.product-label{font-family:var(--fd);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--t4);margin:8px 0 5px}
+.restricted-label{font-family:var(--fd);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--rstx);margin:8px 0 5px}
+.lender-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:6px;border:1px solid var(--bd);background:var(--card);margin-bottom:4px;transition:all .15s}
+.lender-row:hover{border-color:var(--bd-str);box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.lender-row.specialty{border-color:var(--t1bd);background:var(--t1bg)}
+.lender-row.restricted-row{opacity:.5;background:var(--rsbg);border-color:var(--rsbd)}
+.lender-row.below-min{opacity:.42}
+.lender-name{font-size:12.5px;font-weight:600;color:var(--t1);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lender-row.specialty .lender-name{color:var(--green-dk)}
+.lender-products{display:flex;flex-wrap:wrap;gap:2px;flex:1}
+.lp-chip{font-size:9.5px;font-weight:600;padding:2px 5px;border-radius:10px;white-space:nowrap}
+.lp-sba{background:#EDE9FE;color:#5B21B6}.lp-term{background:#E0F2FE;color:#0369A1}
+.lp-loc{background:#F0FDF4;color:#166534}.lp-mca{background:#FFF7ED;color:#9A3412}
+.lp-equip{background:#FAF5FF;color:#6B21A8}.lp-factor{background:#FEF2F2;color:#991B1B}
+.lp-cre{background:#F0F9FF;color:#0C4A6E}
+.lender-reqs{font-size:10px;color:var(--t4);flex-shrink:0;white-space:nowrap}
+.lender-link{font-size:10px;font-weight:600;color:var(--green-dk);text-decoration:none;flex-shrink:0;padding:2px 7px;border:1px solid var(--t1bd);border-radius:4px;background:var(--t1bg);transition:all .15s}
+.lender-link:hover{background:#DCFCE7}
+.lender-restricted-note{font-size:10px;color:var(--rstx);font-weight:500}
+.waterfall-link-row{margin-top:8px;text-align:right}
+.waterfall-link{font-size:11px;font-weight:600;color:var(--green-dk);text-decoration:none;display:inline-flex;align-items:center;gap:3px;padding:5px 10px;border:1px solid var(--t1bd);border-radius:5px;background:var(--t1bg);transition:all .15s}
+.waterfall-link:hover{background:#DCFCE7}
+
+/* CARD FOOTER */
+.card-footer{padding:10px 16px 14px;display:flex;gap:6px}
+.copy-btn{font-family:var(--fd);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);background:var(--bg);border:1px solid var(--bd);border-radius:5px;padding:5px 10px;cursor:pointer;transition:all .18s}
+.copy-btn:hover{background:var(--bd);color:var(--t2)}
+.copy-btn.ok{background:var(--t1bg)!important;border-color:var(--t1bd)!important;color:var(--t1tx)!important}
+.memo-btn{font-family:var(--fd);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--green-dk);background:var(--t1bg);border:1px solid var(--t1bd);border-radius:5px;padding:5px 10px;cursor:pointer;transition:all .18s}
+.memo-btn:hover{background:#DCFCE7}
+.memo-btn.ok{background:#DCFCE7!important}
+
+/* FRANCHISE */
+.fran-row{padding:0 16px 12px}
+.fran-btn{background:none;border:none;cursor:pointer;font-size:11.5px;color:var(--t4);border-bottom:1px dotted var(--t4);padding:0;font-family:var(--fb);transition:color .15s}
+.fran-btn:hover{color:var(--green-dk)}
+.fran-detail{display:none;margin-top:7px;padding:9px 11px;background:#EFF6FF;border-radius:7px;font-size:12px;color:#1E3A5F;line-height:1.6}
+.fran-detail ul{margin:4px 0 0 14px}
 .fran-detail li{margin-bottom:3px}
 
-mark{background:#fef08a;color:#854d0e;padding:0 2px;border-radius:2px}
+mark{background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px}
 
-.tier4-banner{margin-top:10px;padding:12px 14px;background:#fff1f2;border:1px solid #fecdd3;border-radius:8px;font-size:13px;color:#9f1239;line-height:1.6}
-.tier4-banner strong{display:block;margin-bottom:4px}
-
-@media(max-width:600px){
-  .lp-nav-links{display:none}
-  .tier-legend .tl-item{font-size:10px;padding:7px 6px}
-  .uw-grid{grid-template-columns:1fr 1fr}
-  .result-top{gap:8px}
+/* RESPONSIVE */
+@media(max-width:800px){
+  .app-shell{flex-direction:column;height:auto;overflow:visible}
+  .sidebar{width:100%;height:auto;overflow:visible}
+  .main-content{padding:14px 16px 40px}
+  body{overflow:auto}
+  .uw-fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .lp-nav{display:none}
+}
+@media(max-width:480px){
+  .uw-fields{grid-template-columns:1fr}
+  .card-accordions{flex-direction:column}
 }
 </style>
 </head>
@@ -218,7 +342,7 @@ mark{background:#fef08a;color:#854d0e;padding:0 2px;border-radius:2px}
 
 <header class="lp-header">
   <a href="/" class="lp-wordmark">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width="24" height="24" rx="5" fill="#14532D"/>
       <path d="M4 4v16h11l5-5V4H4z" stroke="white" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
       <path d="M15 20v-5h5" stroke="white" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
@@ -228,84 +352,113 @@ mark{background:#fef08a;color:#854d0e;padding:0 2px;border-radius:2px}
     <span class="lp-wm-text">Lend<span>Paper</span></span>
     <span class="lp-tool-label">Industry Intelligence</span>
   </a>
-  <nav class="lp-nav-links">
+  <nav class="lp-nav">
     <a href="/waterfall">Waterfall</a>
-    <a href="/calculators/DSCRCalculator.html">DSCR</a>
-    <a href="/">Tools</a>
+    <a href="/dscr">DSCR Calc</a>
+    <a href="mailto:hello@lendpaper.com">Contact</a>
   </nav>
 </header>
 
-<div class="page">
+<div class="app-shell">
 
-  <!-- UW Quick Filter -->
-  <div class="uw-panel">
-    <div class="uw-toggle" onclick="toggleUW()">
-      <div class="uw-toggle-left">
-        <div>
-          <div class="uw-toggle-label">UW Quick Filter</div>
-          <div class="uw-toggle-sub">Enter borrower profile to filter qualifying lenders</div>
-        </div>
-        <span class="uw-toggle-badge" id="uwBadge"></span>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- Search -->
+    <div class="sb-sec">
+      <div class="sb-sec-label">Search Industry</div>
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="text" onclick="setMode('text')">Keyword</button>
+        <button class="mode-tab" data-mode="ai" onclick="setMode('ai')">AI Match</button>
       </div>
-      <span class="uw-arrow" id="uwArrow">▼</span>
+      <div class="search-wrap">
+        <svg class="si-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/></svg>
+        <input id="q" class="search-input" type="text" autocomplete="off" spellcheck="false"
+               placeholder="e.g. restaurant, trucking, 722511..."
+               oninput="onInput(this.value)">
+        <button class="sb-clear" id="clearBtn" onclick="clearSearch()">✕</button>
+      </div>
+      <button class="ai-btn" id="aiBtn" onclick="aiSearch()">AI Match →</button>
+      <div class="ai-status" id="aiStatus"></div>
     </div>
-    <div class="uw-body" id="uwBody">
-      <div class="uw-grid">
+
+    <!-- UW Filter — PERSISTENT, always visible -->
+    <div class="uw-filter">
+      <div class="uw-filter-hdr">
+        <span class="uw-filter-title">UW Quick Filter</span>
+        <span class="uw-badge" id="uwBadge">Active</span>
+      </div>
+      <div class="uw-sub">Filters lender matches in real time</div>
+      <div class="uw-fields">
         <div class="uw-field">
           <label>FICO Score</label>
-          <input type="number" id="uwFico" min="300" max="850" placeholder="e.g. 640" oninput="onUWChange()">
+          <input id="uwFico" type="number" placeholder="e.g. 650" oninput="onFilterChange()">
         </div>
         <div class="uw-field">
-          <label>Time in Business (months)</label>
-          <input type="number" id="uwTib" min="0" placeholder="e.g. 24" oninput="onUWChange()">
+          <label>Time in Biz (mo.)</label>
+          <input id="uwTib" type="number" placeholder="e.g. 18" oninput="onFilterChange()">
         </div>
         <div class="uw-field">
-          <label>Monthly Revenue ($)</label>
-          <input type="number" id="uwRev" min="0" placeholder="e.g. 50000" oninput="onUWChange()">
+          <label>Monthly Revenue</label>
+          <input id="uwRev" type="number" placeholder="e.g. 50000" oninput="onFilterChange()">
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:2px">
-        <div class="uw-hint">Active filters highlight qualifying lenders in search results.</div>
-        <button class="uw-clear-btn" onclick="clearUW()">Clear</button>
-      </div>
+      <button class="uw-clear" onclick="clearFilter()">Clear Filters</button>
     </div>
-  </div>
 
-  <!-- Search -->
-  <div class="search-card">
-    <div class="search-head">
-      <h2>Industry Lookup</h2>
-      <p>Search by 4–6 digit NAICS code or keyword — see risk tier, product stack, and matched lenders.</p>
-    </div>
-    <div class="search-wrap">
-      <div class="search-row">
-        <div class="search-icon-wrap">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-          </svg>
-          <input type="text" id="q" class="search-input" placeholder="722511, restaurant, trucking, staffing..." oninput="handleSearch(this.value)" autocomplete="off">
-        </div>
-        <button class="clear-search" id="clearBtn" onclick="clearSearch()" title="Clear">×</button>
-      </div>
-    </div>
+    <!-- Tier Legend -->
     <div class="tier-legend">
-      <div class="tl-item tl-1">Tier 1 · Prime</div>
-      <div class="tl-item tl-2">Tier 2 · Alt-Lending</div>
-      <div class="tl-item tl-3">Tier 3 · High Scrutiny</div>
-      <div class="tl-item tl-4">Tier 4 · Restricted</div>
+      <div class="tl-title">Risk Tiers</div>
+      <div class="tl-item tl-1"><span class="tl-dot"></span>Tier 1 — Prime · Full Stack</div>
+      <div class="tl-item tl-2"><span class="tl-dot"></span>Tier 2 — Alt-Lending Focus</div>
+      <div class="tl-item tl-3"><span class="tl-dot"></span>Tier 3 — High Scrutiny</div>
+      <div class="tl-item tl-4"><span class="tl-dot"></span>Tier 4 — Restricted</div>
     </div>
-    <div id="helper" class="helper-msg"><strong>Search above to start</strong>See risk tier, product stack, and which lenders will fund this industry</div>
-    <div id="results" class="results-wrap"></div>
-    <div id="noMatch" class="no-match">No matches found. Try a shorter keyword or search by 6-digit code. Full directory at <a href="https://www.census.gov/naics/" target="_blank">census.gov/naics</a>.</div>
-  </div>
 
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- Helper state -->
+    <div class="helper-state" id="helper">
+      <div class="helper-icon">🏦</div>
+      <div class="helper-title">Industry Intelligence</div>
+      <div class="helper-sub">Search by NAICS code, keyword, or business type. Get risk tier, UW factors, product stacks, and matched lenders instantly.</div>
+      <div class="hint-chips">
+        <span class="hint-chip" onclick="setHint('restaurant')">Restaurant</span>
+        <span class="hint-chip" onclick="setHint('trucking')">Trucking</span>
+        <span class="hint-chip" onclick="setHint('dental')">Dental</span>
+        <span class="hint-chip" onclick="setHint('construction')">Construction</span>
+        <span class="hint-chip" onclick="setHint('staffing')">Staffing</span>
+        <span class="hint-chip" onclick="setHint('722511')">722511</span>
+      </div>
+    </div>
+
+    <!-- No match state -->
+    <div class="no-match-state" id="noMatch">
+      <div class="no-match-title">No matching industries found</div>
+      <div class="no-match-sub">Try different keywords, a partial code, or browse by sector below. You can also check the full NAICS directory at <a href="https://www.census.gov/naics" target="_blank">census.gov/naics</a>.</div>
+      <div class="sector-grid">
+        <div class="sector-card" onclick="setHint('restaurant')"><div class="sc-icon">🍽️</div><div class="sc-name">Food &amp; Beverage</div><div class="sc-count">NAICS 72</div></div>
+        <div class="sector-card" onclick="setHint('trucking')"><div class="sc-icon">🚚</div><div class="sc-name">Transportation</div><div class="sc-count">NAICS 48–49</div></div>
+        <div class="sector-card" onclick="setHint('construction')"><div class="sc-icon">🏗️</div><div class="sc-name">Construction</div><div class="sc-count">NAICS 23</div></div>
+        <div class="sector-card" onclick="setHint('medical')"><div class="sc-icon">🏥</div><div class="sc-name">Healthcare</div><div class="sc-count">NAICS 62</div></div>
+        <div class="sector-card" onclick="setHint('retail')"><div class="sc-icon">🛍️</div><div class="sc-name">Retail</div><div class="sc-count">NAICS 44–45</div></div>
+        <div class="sector-card" onclick="setHint('professional')"><div class="sc-icon">💼</div><div class="sc-name">Professional Svcs</div><div class="sc-count">NAICS 54</div></div>
+        <div class="sector-card" onclick="setHint('real estate')"><div class="sc-icon">🏢</div><div class="sc-name">Real Estate</div><div class="sc-count">NAICS 53</div></div>
+        <div class="sector-card" onclick="setHint('salon')"><div class="sc-icon">✂️</div><div class="sc-name">Personal Services</div><div class="sc-count">NAICS 81</div></div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results"></div>
+
+  </main>
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-// DATA
-// ─────────────────────────────────────────────
-
+// ─── DATA ─────────────────────────────────────
 const NAICS_DB = [
   {c:'236115',d:'New Single-Family Housing Construction'},{c:'236116',d:'New Multifamily Housing Construction'},{c:'236118',d:'Residential Remodelers'},{c:'236220',d:'Commercial and Institutional Building Construction'},
   {c:'238110',d:'Poured Concrete Foundation Contractors'},{c:'238130',d:'Framing Contractors'},{c:'238140',d:'Masonry Contractors'},{c:'238160',d:'Roofing Contractors'},{c:'238210',d:'Electrical Contractors'},{c:'238220',d:'Plumbing, Heating, and Air-Conditioning Contractors'},{c:'238310',d:'Drywall and Insulation Contractors'},{c:'238320',d:'Painting and Wall Covering Contractors'},{c:'238330',d:'Flooring Contractors'},{c:'238910',d:'Site Preparation Contractors'},{c:'238990',d:'All Other Specialty Trade Contractors'},
@@ -703,43 +856,46 @@ function lenderOffersRelevantProduct(lender, prodSet) {
   });
 }
 
-// ─────────────────────────────────────────────
-// UW FILTER STATE
-// ─────────────────────────────────────────────
+// ─── FILTER STATE ─────────────────────────────
 let uwFico = null, uwTib = null, uwRev = null;
-let uwOpen = false;
+let currentMode = 'text';
 
-function toggleUW() {
-  uwOpen = !uwOpen;
-  document.getElementById('uwBody').classList.toggle('open', uwOpen);
-  document.getElementById('uwArrow').style.transform = uwOpen ? 'rotate(180deg)' : '';
+function setMode(m) {
+  currentMode = m;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+  const aiBtn = document.getElementById('aiBtn');
+  aiBtn.style.display = m === 'ai' ? 'block' : 'none';
+  document.getElementById('q').placeholder = m === 'ai'
+    ? 'Describe the business in plain English...'
+    : 'e.g. restaurant, trucking, 722511...';
+  document.getElementById('aiStatus').textContent = '';
+  if (m === 'text') { const q = document.getElementById('q').value; if (q.trim()) handleSearch(q); }
 }
 
-function onUWChange() {
+function onInput(v) {
+  const clearBtn = document.getElementById('clearBtn');
+  clearBtn.style.display = v ? 'block' : 'none';
+  if (currentMode === 'text') handleSearch(v);
+}
+
+function onFilterChange() {
   uwFico = parseInt(document.getElementById('uwFico').value) || null;
   uwTib  = parseInt(document.getElementById('uwTib').value)  || null;
   uwRev  = parseInt(document.getElementById('uwRev').value)  || null;
   const active = uwFico || uwTib || uwRev;
   const badge = document.getElementById('uwBadge');
-  if (active) {
-    const parts = [];
-    if (uwFico) parts.push(`FICO ${uwFico}`);
-    if (uwTib)  parts.push(`${uwTib}mo TIB`);
-    if (uwRev)  parts.push(`$${uwRev.toLocaleString()}/mo rev`);
-    badge.textContent = parts.join(' · ');
-    badge.classList.add('active');
-  } else {
-    badge.classList.remove('active');
-  }
-  // Re-render current search if any
+  const parts = [];
+  if (uwFico) parts.push('FICO ' + uwFico);
+  if (uwTib)  parts.push(uwTib + 'mo');
+  if (uwRev)  parts.push('$' + uwRev.toLocaleString());
+  badge.textContent = parts.join(' · ') || 'Active';
+  badge.classList.toggle('active', !!active);
   const q = document.getElementById('q').value;
   if (q.trim()) handleSearch(q);
 }
 
-function clearUW() {
-  document.getElementById('uwFico').value = '';
-  document.getElementById('uwTib').value = '';
-  document.getElementById('uwRev').value = '';
+function clearFilter() {
+  ['uwFico','uwTib','uwRev'].forEach(id => document.getElementById(id).value = '');
   uwFico = uwTib = uwRev = null;
   document.getElementById('uwBadge').classList.remove('active');
   const q = document.getElementById('q').value;
@@ -748,69 +904,104 @@ function clearUW() {
 
 function lenderQualifies(l) {
   if (l.fico > 0 && uwFico && l.fico > uwFico) return false;
-  if (l.tib > 0 && uwTib && l.tib > uwTib) return false;
-  if (l.rev > 0 && uwRev && l.rev > uwRev) return false;
+  if (l.tib > 0 && uwTib  && l.tib  > uwTib)  return false;
   return true;
 }
 
-// ─────────────────────────────────────────────
-// RENDER
-// ─────────────────────────────────────────────
+function setHint(v) {
+  document.getElementById('q').value = v;
+  document.getElementById('clearBtn').style.display = 'block';
+  if (currentMode === 'ai') setMode('text');
+  handleSearch(v);
+}
+
+// ─── AI SEARCH ────────────────────────────────
+async function aiSearch() {
+  const desc = document.getElementById('q').value.trim();
+  if (!desc) { document.getElementById('aiStatus').textContent = 'Enter a business description first.'; return; }
+  const btn = document.getElementById('aiBtn');
+  const status = document.getElementById('aiStatus');
+  btn.disabled = true; btn.textContent = 'Matching…';
+  status.textContent = 'Analyzing with AI…';
+  document.getElementById('helper').style.display = 'none';
+  document.getElementById('noMatch').style.display = 'none';
+  document.getElementById('results').innerHTML = '<div style="padding:40px 20px;text-align:center;color:#64748B;font-family:var(--fd);font-size:13px;font-weight:600">Asking AI…</div>';
+  try {
+    const codeList = NAICS_DB.map(n => n.c + ': ' + n.d).join('\n');
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content:
+          'You are a NAICS code expert for commercial lending. Match the business description to codes from this list ONLY:\n\n' + codeList +
+          '\n\nBusiness: "' + desc.replace(/"/g, '') + '"\n\nReturn JSON only — no other text: {"matches":[{"code":"XXXXXX","confidence":"high|medium|low","reason":"max 12 words"}]}. 1-3 matches max, only from the list above.'
+        }]
+      })
+    });
+    const data = await res.json();
+    const txt = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    const clean = txt.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    const matches = (parsed.matches || []).map(m => NAICS_DB.find(n => n.c === m.code)).filter(Boolean);
+    if (matches.length) {
+      renderResults(matches);
+      status.textContent = 'AI matched ' + matches.length + (matches.length === 1 ? ' industry' : ' industries') + ' · ' + parsed.matches[0]?.reason;
+    } else {
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('noMatch').style.display = 'block';
+      status.textContent = 'No confident match — try keyword search';
+    }
+  } catch(e) {
+    document.getElementById('results').innerHTML = '';
+    status.textContent = 'AI match failed — try keyword search';
+  } finally {
+    btn.disabled = false; btn.textContent = 'AI Match →';
+  }
+}
+
+// ─── LENDER MATCHING ──────────────────────────
 function matchLenders(code, tier) {
   const naicsTags = getTagsForCode(code);
   const prodSet = codeToProductSet(code, tier);
-
   const specialty = [], productMatch = [], restricted = [];
-
   LENDERS.forEach(l => {
     if (isRestricted(l, naicsTags)) { restricted.push(l); return; }
-    if (!l.products || l.products.length === 0) return; // skip lenders with no known products
+    if (!l.products || !l.products.length) return;
     const lTags = getLenderTags(l);
-    const isSpecialty = lTags.some(t => naicsTags.includes(t));
+    const isSpec = lTags.some(t => naicsTags.includes(t));
     const hasProd = lenderOffersRelevantProduct(l, prodSet);
-    if (isSpecialty) specialty.push(l);
+    if (isSpec) specialty.push(l);
     else if (hasProd) productMatch.push(l);
   });
-
-  // Sort: specialty/product-match — qualified lenders first
-  const sort = arr => arr.sort((a,b) => {
-    const aq = lenderQualifies(a) ? 0 : 1;
-    const bq = lenderQualifies(b) ? 0 : 1;
-    return aq - bq;
-  });
-
+  const sort = arr => arr.sort((a, b) => (lenderQualifies(a) ? 0 : 1) - (lenderQualifies(b) ? 0 : 1));
   return { specialty: sort(specialty), productMatch: sort(productMatch), restricted };
 }
 
-function renderLenderRow(l, isSpecialty, isRestr) {
+function renderLenderRow(l, isSpec, isRestr) {
   const qualifies = lenderQualifies(l);
   let cls = 'lender-row';
-  if (isSpecialty) cls += ' specialty';
+  if (isSpec)  cls += ' specialty';
   if (isRestr) cls += ' restricted-row';
   if (!qualifies && !isRestr) cls += ' below-min';
-
-  const prods = [...new Set((l.products||[]).map(normProd))].slice(0,4);
-  const chips = prods.map(p => `<span class="lp-chip ${PROD_CHIP_CLASS[p]||'lp-term'}">${p}</span>`).join('');
-
+  const prods = [...new Set((l.products || []).map(normProd))].slice(0, 4);
+  const chips = prods.map(p => '<span class="lp-chip ' + (PROD_CHIP_CLASS[p] || 'lp-term') + '">' + p + '</span>').join('');
   let reqs = '';
-  if (l.fico > 0) reqs += `FICO ${l.fico}+`;
-  if (l.tib > 0) reqs += (reqs ? ' · ' : '') + `${l.tib}mo+`;
-
+  if (l.fico > 0) reqs += 'FICO ' + l.fico + '+';
+  if (l.tib  > 0) reqs += (reqs ? ' · ' : '') + l.tib + 'mo+';
   const url = l.submission_url || l.source_url || '#';
-  const linkText = l.submission_url ? 'Apply →' : 'View →';
-
-  const notQualNote = !qualifies && !isRestr
-    ? `<span class="lender-restricted-note" style="font-size:10px;margin-left:auto">Below filter min</span>` : '';
-
-  return `<div class="${cls}">
-    <div class="lender-name">${isSpecialty ? '★ ' : ''}${l.name}</div>
-    <div class="lender-products">${chips}</div>
-    ${reqs ? `<div class="lender-reqs">${reqs}</div>` : ''}
-    ${notQualNote}
-    ${url !== '#' ? `<a href="${url}" target="_blank" class="lender-link">${linkText}</a>` : ''}
-  </div>`;
+  const notQual = !qualifies && !isRestr ? '<span class="lender-restricted-note" style="font-size:9.5px;margin-left:auto">Below filter</span>' : '';
+  return '<div class="' + cls + '">' +
+    '<div class="lender-name">' + (isSpec ? '★ ' : '') + l.name + '</div>' +
+    '<div class="lender-products">' + chips + '</div>' +
+    (reqs ? '<div class="lender-reqs">' + reqs + '</div>' : '') +
+    notQual +
+    (url !== '#' ? '<a href="' + url + '" target="_blank" class="lender-link">' + (l.submission_url ? 'Apply →' : 'View →') + '</a>' : '') +
+    '</div>';
 }
 
+// ─── RENDER RESULT ────────────────────────────
 function renderResult(entry, idx) {
   const code = entry.c;
   const tier = TIER[code];
@@ -825,168 +1016,182 @@ function renderResult(entry, idx) {
   const qualifiedCount = [...specialty, ...productMatch].filter(lenderQualifies).length;
 
   // Product chips
-  const prodChips = prods.map(([label,cls]) =>
-    `<span class="prod-chip ${cls}">${label}</span>`
-  ).join('');
+  const prodChips = prods.map(([label, cls]) => '<span class="prod-chip ' + cls + '">' + label + '</span>').join('');
 
-  // UW Factors section
-  let uwSection = '';
+  // FLAGS — always visible
+  const flags = uw ? uw.flags : [];
+  const flagsHtml = flags.length ? '<div class="flag-row">' +
+    flags.map(f => '<span class="flag-chip"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor" style="flex-shrink:0"><path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/></svg>' + f + '</span>').join('') +
+    '</div>' : '';
+
+  // TIER 4 REDIRECT — always visible
+  const t4Html = (tier === 'n') ? '<div class="t4-redirect">' +
+    '<div class="t4-redirect-title"><svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>Restricted — SBA &amp; Most Banks Decline</div>' +
+    '<div class="t4-redirect-sub">This industry is restricted across most bank, SBA, and conventional programs. Consider these alternatives for your borrower:</div>' +
+    '<div class="t4-alts"><span class="prod-chip pc-mca">MCA</span><span class="prod-chip pc-loc">Line of Credit</span><span class="prod-chip pc-equip">Equipment Financing</span></div>' +
+    '</div>' : '';
+
+  // DEAL INTEL — surfaced (not buried)
+  const dealHtml = tip ? '<div class="deal-intel"><div class="di-label"><svg width="9" height="9" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg>Deal Intelligence</div><div class="di-text">' + tip + '</div></div>' : '';
+
+  // UW section (accordion, but flags already shown above)
+  let uwSectionHtml = '';
   if (uw) {
-    const docTags = uw.docs.map(d => `<span class="uw-doc-tag">${d}</span>`).join('');
-    const flagTags = uw.flags.map(f => `<span class="uw-flag">⚠ ${f}</span>`).join('');
-    uwSection = `
-      <div class="section-toggle" onclick="toggleSection('uw-${idx}')">
-        <span class="section-toggle-label">UW Key Factors</span>
-        <span class="section-arrow" id="uw-arrow-${idx}">▶</span>
-      </div>
-      <div class="section-body" id="uw-${idx}">
-        <div class="uw-grid-factors">
-          <div class="uw-factor-item">
-            <div class="uw-factor-label">DSCR</div>
-            <div class="uw-factor-val">${uw.dscr}</div>
-          </div>
-          <div class="uw-factor-item">
-            <div class="uw-factor-label">Min TIB — Bank / Alt</div>
-            <div class="uw-factor-val">${uw.tib_bank} months / ${uw.tib_alt} months</div>
-          </div>
-        </div>
-        <div class="uw-docs-list">
-          <div class="uw-docs-label">Key Documents</div>
-          ${docTags}
-        </div>
-        ${uw.flags.length ? `<div class="uw-flags" style="margin-top:8px"><div class="uw-docs-label" style="margin-bottom:5px">Watch For</div>${flagTags}</div>` : ''}
-      </div>`;
+    const docTags = uw.docs.map(d => '<span class="doc-tag">' + d + '</span>').join('');
+    const flagDetails = uw.flags.map(f => '<span class="uw-flag-detail">⚠ ' + f + '</span>').join('');
+    uwSectionHtml = '<div class="sec-body" id="uw-' + idx + '">' +
+      '<div class="uw-grid">' +
+      '<div class="uw-fact"><div class="uw-fact-label">DSCR Req.</div><div class="uw-fact-val">' + uw.dscr + '</div></div>' +
+      '<div class="uw-fact"><div class="uw-fact-label">Min TIB · Bank</div><div class="uw-fact-val">' + uw.tib_bank + ' months</div></div>' +
+      '<div class="uw-fact"><div class="uw-fact-label">Min TIB · Alt</div><div class="uw-fact-val">' + uw.tib_alt + ' months</div></div>' +
+      '</div>' +
+      '<div class="uw-docs-label">Required Docs</div>' +
+      '<div class="doc-tags">' + docTags + '</div>' +
+      '<div class="uw-flags-note">Watch For</div>' +
+      '<div>' + flagDetails + '</div>' +
+      '</div>';
   }
 
-  // Lender match section
-  let lenderSection = '';
+  // Lenders section
+  let lenderBodyHtml = '';
   if (tier === 'n') {
-    lenderSection = `<div class="tier4-banner"><strong>Tier 4 — Most Lenders Decline</strong>This industry is restricted or prohibited across the majority of bank, SBA, and alt-lending programs. Verify the exact NAICS before declining — a slightly different code sometimes changes the picture.</div>`;
+    lenderBodyHtml = '<div style="font-size:12px;color:var(--rstx);line-height:1.55;padding:6px 0">This industry is restricted or prohibited across the majority of bank, SBA, and alt-lending programs. Verify the exact NAICS before declining — a slightly different code may change eligibility.</div>';
   } else {
     const badgeCls = qualifiedCount > 0 ? '' : ' warn';
-    const badgeText = uwFico || uwTib || uwRev
-      ? `${qualifiedCount} qualify · ${totalLenders} total`
-      : `${totalLenders} matched`;
+    const badgeText = (uwFico || uwTib || uwRev) ? qualifiedCount + ' qualify · ' + totalLenders + ' total' : totalLenders + ' matched';
+    const specHtml = specialty.length ? '<div class="specialty-label">★ Industry Specialty Match</div>' + specialty.map(l => renderLenderRow(l, true, false)).join('') : '';
+    const prodHtml = productMatch.length ? '<div class="product-label">Product Match</div>' + productMatch.slice(0, 8).map(l => renderLenderRow(l, false, false)).join('') + (productMatch.length > 8 ? '<div style="font-size:11px;color:var(--t4);margin-top:5px">+' + (productMatch.length - 8) + ' more in the waterfall</div>' : '') : '';
+    const restHtml = restricted.length ? '<div class="restricted-label">✗ Restricted by These Lenders</div>' + restricted.map(l => renderLenderRow(l, false, true)).join('') : '';
+    lenderBodyHtml = specHtml + prodHtml + restHtml + '<div class="waterfall-link-row"><a href="/waterfall" class="waterfall-link">View full waterfall →</a></div>';
+    const badgeSpan = '<span class="lenders-count' + badgeCls + '">' + badgeText + '</span>';
 
-    const specHtml = specialty.length ? `
-      <div class="specialty-label">★ Industry Specialty Match</div>
-      ${specialty.map(l => renderLenderRow(l, true, false)).join('')}
-    ` : '';
-
-    const prodHtml = productMatch.length ? `
-      <div class="product-label">Product Match</div>
-      ${productMatch.slice(0,8).map(l => renderLenderRow(l, false, false)).join('')}
-      ${productMatch.length > 8 ? `<div style="font-size:12px;color:var(--text-muted);margin-top:6px">+${productMatch.length-8} more in the waterfall</div>` : ''}
-    ` : '';
-
-    const restHtml = restricted.length ? `
-      <div class="restricted-label">✗ Restricted by These Lenders</div>
-      ${restricted.map(l => renderLenderRow(l, false, true)).join('')}
-    ` : '';
-
-    lenderSection = `
-      <div class="lenders-header" onclick="toggleSection('lend-${idx}')">
-        <div class="lenders-header-left">
-          <span class="lenders-header-label">Matched Lenders</span>
-          <span class="lenders-count-badge${badgeCls}">${badgeText}</span>
-        </div>
-        <span class="section-arrow" id="lend-arrow-${idx}">▶</span>
-      </div>
-      <div class="lenders-body" id="lend-${idx}">
-        ${specHtml}${prodHtml}${restHtml}
-        <div class="waterfall-link-row">
-          <a href="/waterfall" class="waterfall-link">View full waterfall →</a>
-        </div>
-      </div>`;
+    // Rebuild accordion toggle with badge
+    const lendBtnId = 'lend-toggle-' + idx;
+    const lendBodyId = 'lend-' + idx;
   }
 
-  // Deal Intel
-  const intelSection = tip ? `
-    <div class="deal-intel">
-      <div class="deal-intel-label">Deal Intelligence</div>
-      <div class="deal-intel-text">${tip}</div>
-    </div>` : '';
+  // Accordion buttons
+  const uwToggle = uw ? '<button class="acc-toggle" id="uwt-' + idx + '" onclick="toggleAcc(\'uw-' + idx + '\',\'uwt-' + idx + '\')">UW Key Factors <span class="arr">▶</span></button>' : '';
+
+  const lendersBadgeText = (tier !== 'n') ? ((uwFico || uwTib || uwRev) ? qualifiedCount + ' qualify · ' + totalLenders + ' total' : totalLenders + ' matched') : 'Restricted';
+  const lendersBadgeCls = (tier === 'n' || qualifiedCount === 0 && (uwFico || uwTib || uwRev)) ? ' warn' : '';
+  const lendToggle = '<button class="acc-toggle" id="lt-' + idx + '" onclick="toggleAcc(\'lend-' + idx + '\',\'lt-' + idx + '\')">' +
+    'Matched Lenders <span class="lenders-count' + lendersBadgeCls + '">' + lendersBadgeText + '</span> <span class="arr">▶</span></button>';
 
   // Franchise
-  let franSection = '';
-  if (FC.has(code)) {
-    franSection = `<div class="fran-row">
-      <button class="fran-btn" onclick="toggleFran('fran-${idx}')">Franchise considerations?</button>
-      <div class="fran-detail" id="fran-${idx}">
-        <strong>If this is a franchise:</strong>
-        <ul>
-          <li>Verify the brand is on the <a href="https://www.sba.gov/business-guide/launch-your-business/buy-franchise" target="_blank" style="color:var(--green-mid)">SBA Franchise Directory</a> — listed brands skip lengthy eligibility reviews.</li>
-          <li>If the franchise agreement restricts UCC-1 blanket liens, unsecured MCA is often the only viable fallback.</li>
-        </ul>
-      </div>
-    </div>`;
-  }
+  const franHtml = FC.has(code) ? '<div class="fran-row"><button class="fran-btn" onclick="toggleFran(\'fran-' + idx + '\')">Franchise considerations?</button>' +
+    '<div class="fran-detail" id="fran-' + idx + '"><strong>If this is a franchise:</strong><ul>' +
+    '<li>Verify the brand is on the <a href="https://www.sba.gov/business-guide/launch-your-business/buy-franchise" target="_blank" style="color:var(--green-dk)">SBA Franchise Directory</a> — listed brands skip lengthy eligibility reviews.</li>' +
+    '<li>If the franchise agreement restricts UCC-1 blanket liens, unsecured MCA is often the only viable fallback.</li>' +
+    '</ul></div></div>' : '';
 
-  return `<div class="result-item">
-    <div class="result-top">
-      <span class="result-code">${code}</span>
-      <div class="result-body">
-        <div class="result-name" id="name-${idx}"></div>
-        ${ex ? `<div class="result-ex">${ex}</div>` : ''}
-        ${tier ? `<div class="tier-badge ${tierCls}"><span class="tier-dot"></span>${tierLabel}</div>` : ''}
-        <div class="prod-row">${prodChips}</div>
-        ${uwSection}
-        ${lenderSection}
-        ${intelSection}
-        ${franSection}
-      </div>
-      <button class="copy-btn" onclick="copyCode('${code}','${entry.d.replace(/'/g,"\\'")}',this)">Copy</button>
-    </div>
-  </div>`;
+  // Copy to Credit Memo data (stored as data attribute for the button)
+  const memoData = uw ? JSON.stringify({code, name: entry.d, tier: tierLabel, dscr: uw.dscr, tib_bank: uw.tib_bank, tib_alt: uw.tib_alt, docs: uw.docs, flags: uw.flags, prods: prods.map(([l]) => l)}).replace(/"/g, '&quot;') : '';
+
+  return '<div class="result-card' + (tier === 'n' ? ' is-t4' : '') + '">' +
+    '<div class="card-head">' +
+    '<span class="card-code">' + code + '</span>' +
+    '<div class="card-body">' +
+    '<div class="card-name" id="name-' + idx + '"></div>' +
+    (ex ? '<div class="card-ex">' + ex + '</div>' : '') +
+    (tier ? '<div class="tier-badge ' + tierCls + '"><span class="tb-dot"></span>' + tierLabel + '</div>' : '') +
+    '</div>' +
+    '</div>' +
+    flagsHtml +
+    t4Html +
+    '<div class="prod-row">' + prodChips + '</div>' +
+    dealHtml +
+    '<div class="card-accordions">' + uwToggle + lendToggle + '</div>' +
+    (uw ? uwSectionHtml : '') +
+    '<div class="sec-body" id="lend-' + idx + '">' + lenderBodyHtml + '</div>' +
+    franHtml +
+    '<div class="card-footer">' +
+    '<button class="copy-btn" onclick="copyCode(\'' + code + '\',\'' + entry.d.replace(/'/g, "\\'") + '\',this)">Copy Code</button>' +
+    (uw ? '<button class="memo-btn" data-memo="' + memoData + '" onclick="copyMemo(this)">Copy Credit Memo</button>' : '') +
+    '</div>' +
+    '</div>';
 }
 
-function toggleSection(id) {
-  const body = document.getElementById(id);
-  if (!body) return;
-  const isOpen = body.classList.contains('open');
-  body.classList.toggle('open', !isOpen);
-  // find associated arrow
-  const arrowId = id.startsWith('uw-') ? 'uw-arrow-'+id.slice(3) :
-                  id.startsWith('lend-') ? 'lend-arrow-'+id.slice(5) : null;
-  if (arrowId) {
-    const arrow = document.getElementById(arrowId);
-    if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(90deg)';
-  }
+// ─── ACCORDION ────────────────────────────────
+function toggleAcc(bodyId, btnId) {
+  const body = document.getElementById(bodyId);
+  const btn  = document.getElementById(btnId);
+  if (!body || !btn) return;
+  const open = body.classList.toggle('open');
+  btn.classList.toggle('open', open);
 }
-
 function toggleFran(id) {
   const el = document.getElementById(id);
   if (el) el.style.display = el.style.display === 'block' ? 'none' : 'block';
 }
 
+// ─── COPY FUNCTIONS ───────────────────────────
 function copyCode(code, desc, btn) {
-  navigator.clipboard.writeText(`${code} - ${desc}`).then(() => {
+  navigator.clipboard.writeText(code + ' - ' + desc).then(() => {
     btn.textContent = 'Copied!'; btn.classList.add('ok');
-    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 2000);
+    setTimeout(() => { btn.textContent = 'Copy Code'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+function copyMemo(btn) {
+  const d = JSON.parse(btn.getAttribute('data-memo').replace(/&quot;/g, '"'));
+  const lines = [
+    'INDUSTRY CLASSIFICATION',
+    'NAICS ' + d.code + ' — ' + d.name,
+    d.tier,
+    '',
+    'UNDERWRITING PROFILE',
+    'DSCR Requirement: ' + d.dscr,
+    'Min. Time in Business (Bank): ' + d.tib_bank + ' months',
+    'Min. Time in Business (Alt Lender): ' + d.tib_alt + ' months',
+    '',
+    'REQUIRED DOCUMENTS',
+    d.docs.map(doc => '• ' + doc).join('\n'),
+    '',
+    'WATCH FLAGS',
+    d.flags.map(f => '⚠ ' + f).join('\n'),
+    '',
+    'RECOMMENDED PRODUCTS',
+    d.prods.join(' · '),
+  ];
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copy Credit Memo'; btn.classList.remove('ok'); }, 2500);
   });
 }
 
-// ─────────────────────────────────────────────
-// SEARCH
-// ─────────────────────────────────────────────
+// ─── SEARCH ───────────────────────────────────
+function renderResults(matches) {
+  const results = document.getElementById('results');
+  document.getElementById('helper').style.display = 'none';
+  document.getElementById('noMatch').style.display = 'none';
+  results.innerHTML = '<div class="result-count">' + matches.length + ' result' + (matches.length !== 1 ? 's' : '') + '</div>' +
+    matches.map((m, i) => renderResult(m, i)).join('');
+  matches.forEach((m, i) => {
+    const el = document.getElementById('name-' + i);
+    if (!el) return;
+    const q = document.getElementById('q').value.trim().toLowerCase();
+    if (!q || /^\d/.test(q)) { el.textContent = m.d; return; }
+    const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    el.innerHTML = m.d.replace(re, '<mark>$1</mark>');
+  });
+}
+
 function handleSearch(v) {
   const q = v.trim().toLowerCase();
-  const helper = document.getElementById('helper');
-  const results = document.getElementById('results');
+  const helper  = document.getElementById('helper');
   const noMatch = document.getElementById('noMatch');
-  const clearBtn = document.getElementById('clearBtn');
+  const results = document.getElementById('results');
 
-  clearBtn.style.display = q ? 'block' : 'none';
-  helper.style.display = q ? 'none' : 'flex';
-  noMatch.style.display = 'none';
-  results.innerHTML = '';
-
-  if (!q) return;
+  if (!q) {
+    document.getElementById('clearBtn').style.display = 'none';
+    helper.style.display = 'flex';
+    noMatch.style.display = 'none';
+    results.innerHTML = '';
+    return;
+  }
 
   const isCode = /^\d/.test(q);
-  let matches = NAICS_DB.filter(n =>
-    isCode ? n.c.startsWith(q) : n.d.toLowerCase().includes(q)
-  );
+  let matches = NAICS_DB.filter(n => isCode ? n.c.startsWith(q) : n.d.toLowerCase().includes(q));
 
   if (!isCode) {
     matches.sort((a, b) => {
@@ -1001,25 +1206,18 @@ function handleSearch(v) {
   }
 
   matches = matches.slice(0, 12);
-  if (!matches.length) { noMatch.style.display = 'block'; return; }
-
-  results.innerHTML = matches.map((m, i) => renderResult(m, i)).join('');
-
-  // Inject highlighted names (avoid innerHTML XSS via textContent + mark)
-  matches.forEach((m, i) => {
-    const el = document.getElementById('name-'+i);
-    if (!el) return;
-    if (isCode) {
-      el.textContent = m.d;
-    } else {
-      const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
-      el.innerHTML = m.d.replace(re,'<mark>$1</mark>');
-    }
-  });
+  if (!matches.length) {
+    helper.style.display = 'none';
+    noMatch.style.display = 'block';
+    results.innerHTML = '';
+    return;
+  }
+  renderResults(matches);
 }
 
 function clearSearch() {
   document.getElementById('q').value = '';
+  document.getElementById('aiStatus').textContent = '';
   handleSearch('');
   document.getElementById('q').focus();
 }
