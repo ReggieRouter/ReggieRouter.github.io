@@ -1252,9 +1252,9 @@
     white-space: nowrap;
   }
   .lp-type-badge.direct-plus {
-    background: #F3F4F6;
-    color: #6B7280;
-    border: 1px solid #D1D5DB;
+    background: #F0FDF4;
+    color: #86EFAC;
+    border: 1px solid #BBF7D0;
   }
   .lp-type-badge.marketplace {
     background: transparent;
@@ -6687,6 +6687,10 @@
     if (l.stacking === 1) l.stacking = 0;
     // Enforce 300 as minimum displayable FICO floor
     if (l.fico > 0 && l.fico < 300) l.fico = 300;
+    // Normalize lender_type to internal tokens
+    if (l.lender_type === 'Direct+')        l.lender_type = 'direct_plus';
+    if (l.lender_type === 'Direct Lender')  l.lender_type = 'direct';
+    if (l.lender_type === 'Marketplace')    l.lender_type = 'marketplace';
   });
   // De-dup guard: keep the entry with the most populated fields when names collide.
   // Prevents duplicate rows if future data imports add a same-named lender twice.
@@ -7167,7 +7171,7 @@
         if (lender.early_payment_discount) signalsHtml += `<span class="lp-signal payoff" data-label="Early-payoff discount">${SIG_ICONS.payoff}</span>`;
         if (lender.hard_collateral) signalsHtml += `<span class="lp-signal collat" data-label="Hard collateral required">${SIG_ICONS.collat}</span>`;
       }
-      if (lender.lender_type === 'direct_plus') signalsHtml += `<span class="lp-type-badge direct-plus" data-label="Primarily funds its own deals, but routes some applications through a partner lending network. Requirements may vary by product or deal size.">Direct+</span>`;
+      if (lender.lender_type === 'direct_plus') signalsHtml += `<span class="lp-type-badge direct-plus" data-label="Self funds and is marketplace — primarily funds its own deals and also matches through a partner network. Requirements may vary by product or deal size.">Direct+</span>`;
       if (lender.lender_type === 'marketplace') signalsHtml += `<span class="lp-type-badge marketplace" data-label="Matches deals across a network of funders. Requirements, rates, and terms are set by the matched funder at the time of submission.">Marketplace</span>`;
       const signalsRow = signalsHtml ? `<div class="lp-signal-row">${signalsHtml}</div>` : '';
 
