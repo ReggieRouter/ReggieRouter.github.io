@@ -1252,9 +1252,9 @@
     white-space: nowrap;
   }
   .lp-type-badge.direct-plus {
-    background: #F0FDF4;
-    color: #86EFAC;
-    border: 1px solid #BBF7D0;
+    background: transparent;
+    color: #1E293B;
+    border: 1px solid #94A3B8;
   }
   .lp-type-badge.marketplace {
     background: transparent;
@@ -6587,12 +6587,16 @@
         }
 ]
 
-  // Normalize placeholder sentinel values (1 = data not yet sourced)
+  // Normalize placeholder sentinel values (1 = data not yet sourced; negatives = blank)
   lenderData.forEach(l => {
     if (l.fico === 1) l.fico = 300;
     if (l.tib === 1) l.tib = 0;
     if (l.rev === 1) l.rev = 0;
     if (l.stacking === 1) l.stacking = 0;
+    if (l.fico < 0) l.fico = null;
+    if (l.tib < 0) l.tib = null;
+    if (l.rev < 0) l.rev = null;
+    if (l.stacking < 0) l.stacking = null;
     // Enforce 300 as minimum displayable FICO floor
     if (l.fico > 0 && l.fico < 300) l.fico = 300;
     // Normalize lender_type to internal tokens
@@ -6870,7 +6874,7 @@
   };
   function displayName(name) {
     if (Object.prototype.hasOwnProperty.call(DISPLAY_NAME_OVERRIDES, name)) return DISPLAY_NAME_OVERRIDES[name];
-    return name.replace(/\s+(Capital|Funding|Advance|Solutions|Finance|Financial)(\s*,?\s*LLC)?$/i, '').trim();
+    return name.replace(/\s+(Capital|Funding|Advance|Solutions|Finance|Financial)(\s*,?\s*LLC)?$/i, '').replace(/\s*,?\s*LLC\.?$/i, '').trim();
   }
 
   // Render Engine
