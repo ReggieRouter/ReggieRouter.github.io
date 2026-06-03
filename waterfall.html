@@ -2316,7 +2316,6 @@
               <h5>Lender Type</h5>
               <div class="lp-mf-chips" id="lendertype-chips">
                 <button type="button" class="lp-mf-chip active" data-ltype="direct">Direct</button>
-                <button type="button" class="lp-mf-chip active" data-ltype="direct_plus">Direct+</button>
                 <button type="button" class="lp-mf-chip active" data-ltype="marketplace">Marketplace</button>
               </div>
             </div>
@@ -7229,7 +7228,6 @@
         if (lender.early_payment_discount) signalsHtml += `<span class="lp-signal payoff" data-label="Early-payoff discount">${SIG_ICONS.payoff}</span>`;
         if (lender.hard_collateral) signalsHtml += `<span class="lp-signal collat" data-label="Hard collateral required">${SIG_ICONS.collat}</span>`;
       }
-      if (lender.lender_type === 'direct_plus') signalsHtml += `<span class="lp-type-badge direct-plus" data-label="Self funds and is marketplace — primarily funds its own deals and also matches through a partner network. Requirements may vary by product or deal size.">Direct+</span>`;
       if (lender.lender_type === 'marketplace') signalsHtml += `<span class="lp-type-badge marketplace" data-label="Matches deals across a network of funders. Requirements, rates, and terms are set by the matched funder at the time of submission.">Marketplace</span>`;
       const signalsRow = signalsHtml ? `<div class="lp-signal-row">${signalsHtml}</div>` : '';
 
@@ -8027,8 +8025,7 @@
   if (lenderTypeLegendHost) {
     const LTYPE_LEGEND = [
       { badge: '<span class="lp-type-badge marketplace" style="cursor:default;">Marketplace</span>', label: 'Matches deals across a network of funders.' },
-      { badge: '<span class="lp-type-badge direct-plus" style="cursor:default;">Direct+</span>', label: 'Primarily self-funded. Some deals may be routed to partner lenders.' },
-      { badge: '<span style="display:inline-flex;align-items:center;font-size:9.5px;font-weight:500;font-style:italic;letter-spacing:0.02em;border-radius:4px;padding:1px 5px;line-height:1.4;white-space:nowrap;color:#9CA3AF;border:1px dashed #D1D5DB;cursor:default;">No badge</span>', label: 'If there\'s no Marketplace or Direct+ badge, then it\'s a direct lender.' },
+      { badge: '<span style="display:inline-flex;align-items:center;font-size:9.5px;font-weight:500;font-style:italic;letter-spacing:0.02em;border-radius:4px;padding:1px 5px;line-height:1.4;white-space:nowrap;color:#9CA3AF;border:1px dashed #D1D5DB;cursor:default;">No badge</span>', label: 'If there\'s no Marketplace badge, then it\'s a direct lender.' },
     ];
     lenderTypeLegendHost.innerHTML = LTYPE_LEGEND.map(s =>
       `<div style="margin-bottom:8px;">${s.badge}<div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;margin-top:3px;">${s.label}</div></div>`
