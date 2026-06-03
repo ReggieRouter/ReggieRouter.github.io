@@ -52,6 +52,19 @@
     Permissions-Policy        = "geolocation=(), microphone=(), camera=()"
     X-Permitted-Cross-Domain-Policies = "none"
 
+# ── Protected portal rewrites (serve .html file at clean path) ──────────────
+[[redirects]]
+  from   = "/lp-hire"
+  to     = "/lp-hire.html"
+  status = 200
+  force  = true
+
+[[redirects]]
+  from   = "/lp-panel"
+  to     = "/lp-panel.html"
+  status = 200
+  force  = true
+
 # ── Dead-end redirects for old URLs (404 — reveals nothing) ─────────────────
 [[redirects]]
   from   = "/admin"
