@@ -2177,11 +2177,61 @@ function renderDashboard() {
       <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Fields shown in the expanded lender panel below the table</div>
       ${detailFields.map(fieldBar).join('')}
     </div>
+    <div class="dash-section">
+      <div class="dash-section-title" style="display:flex;justify-content:space-between">
+        <span>Recruiter — Job Postings</span>
+        <button class="btn-ghost" style="font-size:11px;padding:3px 10px" onclick="showMainView('recruiter')">View all →</button>
+      </div>
+      <div id="dash-recruiter-content" style="color:var(--muted);font-size:13px">Loading…</div>
+    </div>
     <div class="dash-section" style="border-bottom:none">
       <div class="dash-section-title">Scrape Run History</div>
       ${runRows}
     </div>
   `;
+  loadDashboardRecruiter();
+}
+
+async function loadDashboardRecruiter() {
+  const el = document.getElementById('dash-recruiter-content');
+  if (!el) return;
+  const { data: jobs, error } = await sb.from('job_postings')
+    .select('id,company,title,location,hiring_status,created_at,source_url')
+    .order('created_at', { ascending: false })
+    .limit(300);
+  if (error || !jobs) {
+    el.innerHTML = `<span style="color:var(--red)">Error: ${esc((error||{}).message||'could not load job_postings')}</span>`;
+    return;
+  }
+  if (jobs.length === 0) {
+    el.innerHTML = `<span style="color:var(--muted)">No postings yet. Run <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:11px">python3 ~/lendpaper-engine/scrape_jobs_v2.py</code> to populate.</span>`;
+    return;
+  }
+  const oneWeekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+  const weekNew = jobs.filter(j => j.created_at >= oneWeekAgo).length;
+  const companies = [...new Set(jobs.map(j => j.company))].length;
+  const notStarted = jobs.filter(j => !j.hiring_status || j.hiring_status === 'New' || j.hiring_status === 'Not started').length;
+  const recentRows = jobs.slice(0, 8).map(j => {
+    const hs = j.hiring_status || 'New';
+    const cls = hs === 'Filled by Craft' ? 'filled' : hs.toLowerCase().includes('contact') ? 'contacted' : 'new';
+    return `<tr>
+      <td style="font-weight:500">${esc(j.company)}</td>
+      <td style="color:var(--text)">${esc(j.title)}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(j.location || '—')}</td>
+      <td><span class="rec-badge ${cls}">${esc(hs)}</span></td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="dash-cards" style="margin-bottom:16px">
+      <div class="dash-card"><div class="dash-card-num">${jobs.length}</div><div class="dash-card-label">Total postings</div></div>
+      <div class="dash-card warn"><div class="dash-card-num">${notStarted}</div><div class="dash-card-label">Not started</div></div>
+      <div class="dash-card ${weekNew>0?'warn':'good'}"><div class="dash-card-num">${weekNew}</div><div class="dash-card-label">Added this week</div></div>
+      <div class="dash-card"><div class="dash-card-num">${companies}</div><div class="dash-card-label">Lenders with postings</div></div>
+    </div>
+    <table class="rec-job-table">
+      <thead><tr><th>Company</th><th>Title</th><th>Location</th><th>Status</th></tr></thead>
+      <tbody>${recentRows}</tbody>
+    </table>`;
 }
 
 // ── Recruiter Panel ──────────────────────────────────────
