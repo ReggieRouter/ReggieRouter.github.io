@@ -31,7 +31,7 @@ LOGO_DIR = Path(__file__).parent / "public" / "assets" / "lenders"
 
 # Words stripped from the END of a lender's display name in the waterfall table.
 # This list mirrors the JS `displayName()` function — keep in sync.
-STRIP_SUFFIXES = ["Capital", "Funding", "Advance", "Solutions", "Finance", "Financial"]
+STRIP_SUFFIXES = ["Capital", "Funding", "Advance", "Solutions", "Finance", "Financial", "LLC"]
 
 # Names that must NEVER have their suffix stripped, even if it matches STRIP_SUFFIXES.
 # Add new exceptions here — this is the canonical list.
@@ -54,6 +54,14 @@ LENDER_RENAMES = {
     "Accord Business Funding": "Accord",
     "Square Loans":            "Square Financing",
     "Fox Business Funding":    "Fox",
+    # Synced from waterfall.html DISPLAY_NAME_OVERRIDES
+    "In Advance Capital":      "Advance",
+    "Kalamata Capital Group":  "Kalamata",
+    "PayPal Working Capital":  "PayPal",
+    "Square Financing":        "Square",
+    "The Smarter Merchant":    "Smarter Merchant",
+    "Redline Capital Inc":     "Redline",
+    "Triumph Business Capital":"Triumph",
 }
 
 # Lenders to exclude entirely (removed from product/market).
