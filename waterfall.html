@@ -2162,7 +2162,51 @@
       </div>
     </a>
     <div class="lp-tagline">Scenario Modeling Engine</div>
+    <button onclick="startSpotCheck()" style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:7px 14px;background:#fff;border:1px solid #d1fae5;border-radius:7px;font-size:12px;font-weight:600;color:#14532D;cursor:pointer;font-family:inherit;transition:all 0.15s;" title="Spot-check a random lender against their source page">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Spot Check
+    </button>
   </header>
+
+  <!-- Spot Check Modal -->
+  <div id="spotcheck-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:10000;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;width:min(900px,96vw);max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #e5e7eb;background:#f0fdf4;">
+        <span style="font-weight:700;font-size:14px;color:#14532D;">Spot Check</span>
+        <span id="sc-lender-name" style="font-size:13px;color:#374151;font-weight:500;"></span>
+        <span id="sc-progress" style="margin-left:auto;font-size:11px;color:#6b7280;"></span>
+        <button onclick="nextSpotCheck()" style="padding:5px 12px;background:#14532D;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Next →</button>
+        <button onclick="closeSpotCheck()" style="padding:5px 10px;background:#fff;border:1px solid #d1d5db;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;color:#374151;">Close</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;min-height:0;">
+        <!-- Left: our data -->
+        <div style="padding:20px;overflow-y:auto;border-right:1px solid #e5e7eb;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:12px;">Our Data</div>
+          <div id="sc-our-data" style="font-size:13px;line-height:1.8;"></div>
+          <div style="margin-top:16px;display:flex;gap:8px;">
+            <button onclick="markSpotCheck('ok')" style="flex:1;padding:8px;background:#d1fae5;border:1px solid #a7f3d0;border-radius:6px;font-size:12px;font-weight:600;color:#065f46;cursor:pointer;font-family:inherit;">✓ Looks correct</button>
+            <button onclick="markSpotCheck('flag')" style="flex:1;padding:8px;background:#fee2e2;border:1px solid #fecaca;border-radius:6px;font-size:12px;font-weight:600;color:#991b1b;cursor:pointer;font-family:inherit;">⚑ Flag for review</button>
+          </div>
+          <div id="sc-flags" style="margin-top:12px;font-size:11px;color:#6b7280;"></div>
+        </div>
+        <!-- Right: source page -->
+        <div style="display:flex;flex-direction:column;overflow:hidden;">
+          <div style="padding:10px 16px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:8px;">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;">Source</div>
+            <a id="sc-source-link" href="#" target="_blank" style="font-size:11px;color:#0369a1;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;" rel="noopener"></a>
+            <a id="sc-open-btn" href="#" target="_blank" rel="noopener" style="padding:4px 10px;background:#0369a1;color:#fff;border-radius:5px;font-size:11px;font-weight:600;text-decoration:none;white-space:nowrap;">Open ↗</a>
+          </div>
+          <div id="sc-iframe-wrap" style="flex:1;overflow:hidden;">
+            <iframe id="sc-iframe" style="width:100%;height:100%;border:none;" sandbox="allow-scripts allow-same-origin"></iframe>
+          </div>
+          <div id="sc-iframe-blocked" style="display:none;flex:1;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:30px;text-align:center;color:#6b7280;font-size:13px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            This site blocks embedding. <a id="sc-fallback-link" href="#" target="_blank" rel="noopener" style="color:#0369a1;font-weight:600;">Open in new tab →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <hr class="lp-divider" />
 
@@ -8800,6 +8844,91 @@
   renderFooterCount();
   updateSortIndicators();
   renderTable();
+
+  // ── Spot Check System ──────────────────────────────────────────────────
+  let scQueue = [], scIdx = 0, scFlags = {};
+  function startSpotCheck() {
+    const candidates = lenderData.filter(l =>
+      (l.source_url || l.submission_url) &&
+      l.scrape_status !== 'inactive' &&
+      (l.products && l.products.length)
+    );
+    scQueue = candidates.sort(() => Math.random() - 0.5);
+    scIdx = 0;
+    scFlags = JSON.parse(localStorage.getItem('lp_sc_flags') || '{}');
+    showSpotCheckCard();
+    document.getElementById('spotcheck-overlay').style.display = 'flex';
+  }
+  function closeSpotCheck() {
+    document.getElementById('spotcheck-overlay').style.display = 'none';
+    const iframe = document.getElementById('sc-iframe');
+    iframe.src = 'about:blank';
+  }
+  function nextSpotCheck() { scIdx = (scIdx + 1) % scQueue.length; showSpotCheckCard(); }
+  function markSpotCheck(verdict) {
+    const l = scQueue[scIdx];
+    if (!l) return;
+    scFlags[l.name] = { verdict, ts: new Date().toISOString() };
+    localStorage.setItem('lp_sc_flags', JSON.stringify(scFlags));
+    renderScFlags();
+    nextSpotCheck();
+  }
+  function renderScFlags() {
+    const flagged = Object.entries(scFlags).filter(([,v]) => v.verdict === 'flag');
+    const el = document.getElementById('sc-flags');
+    el.textContent = flagged.length
+      ? `${flagged.length} flagged: ${flagged.map(([n]) => n).join(', ')}`
+      : '';
+  }
+  function showSpotCheckCard() {
+    const l = scQueue[scIdx];
+    if (!l) return;
+    document.getElementById('sc-lender-name').textContent = l.name;
+    document.getElementById('sc-progress').textContent = `${scIdx + 1} / ${scQueue.length}`;
+    const url = l.source_url || l.submission_url;
+    document.getElementById('sc-source-link').href = url;
+    document.getElementById('sc-source-link').textContent = url;
+    document.getElementById('sc-open-btn').href = url;
+    document.getElementById('sc-fallback-link').href = url;
+    // Our data panel
+    const fmtVal = (v) => v == null ? '<span style="color:#dc2626">missing</span>' : `<b>${v}</b>`;
+    const fmtMoney = (v) => v == null ? '<span style="color:#dc2626">missing</span>' : `<b>$${v.toLocaleString()}</b>`;
+    const flag = scFlags[l.name];
+    document.getElementById('sc-our-data').innerHTML = `
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr><td style="padding:4px 0;color:#6b7280;width:130px;">Products</td><td>${l.products && l.products.length ? l.products.join(', ') : '<span style="color:#dc2626">none</span>'}</td></tr>
+        <tr><td style="padding:4px 0;color:#6b7280;">Min FICO</td><td>${l.fico === 0 ? 'No FICO req.' : fmtVal(l.fico)}</td></tr>
+        <tr><td style="padding:4px 0;color:#6b7280;">Time in Biz</td><td>${l.tib === 0 ? 'None req.' : (l.tib ? fmtVal(l.tib) + ' mo.' : fmtVal(null))}</td></tr>
+        <tr><td style="padding:4px 0;color:#6b7280;">Monthly Rev</td><td>${l.rev === 0 ? 'None req.' : fmtMoney(l.rev ? l.rev : null)}</td></tr>
+        <tr><td style="padding:4px 0;color:#6b7280;">Max Amount</td><td>${fmtMoney(l.max_funding_amount || null)}</td></tr>
+        <tr><td style="padding:4px 0;color:#6b7280;">Stacking</td><td>${l.stacking != null ? fmtVal(l.stacking) + ' pos.' : fmtVal(null)}</td></tr>
+        <tr><td style="padding:4px 0;color:#6b7280;">Last Scraped</td><td>${l.scraped_at || '<span style="color:#6b7280;font-style:italic">never</span>'} ${l.scrape_status ? '· '+l.scrape_status : ''}</td></tr>
+      </table>
+      ${flag ? `<div style="margin-top:10px;padding:6px 10px;background:${flag.verdict==='ok'?'#d1fae5':'#fee2e2'};border-radius:6px;font-size:11px;font-weight:600;color:${flag.verdict==='ok'?'#065f46':'#991b1b'}">${flag.verdict==='ok'?'✓ Marked correct':'⚑ Flagged for review'} · ${new Date(flag.ts).toLocaleDateString()}</div>` : ''}
+    `;
+    renderScFlags();
+    // Load iframe
+    const iframe = document.getElementById('sc-iframe');
+    const blocked = document.getElementById('sc-iframe-blocked');
+    const wrap = document.getElementById('sc-iframe-wrap');
+    iframe.style.display = 'block'; blocked.style.display = 'none';
+    wrap.style.display = 'block';
+    iframe.onerror = () => { iframe.style.display='none'; blocked.style.display='flex'; wrap.style.display='none'; };
+    iframe.src = url;
+    // Detect X-Frame-Options block after short timeout
+    setTimeout(() => {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc || doc.URL === 'about:blank' || doc.body.innerHTML === '') {
+          iframe.style.display = 'none';
+          blocked.style.display = 'flex';
+          wrap.style.display = 'none';
+        }
+      } catch(e) {
+        // Cross-origin means it loaded (blocked from reading, not from loading)
+      }
+    }, 3000);
+  }
 
   // ── Data Coverage Bar ──────────────────────────────────────────────────
   (function() {
