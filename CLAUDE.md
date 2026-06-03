@@ -40,6 +40,20 @@ Do this for every new tool added to `tools.js` with `presentation: "page"`.
 - Lender display names have permanent overrides — never strip or revert them
 - See `DISPLAY_NAME_OVERRIDES` in `waterfall.html`
 
+### `lender_type` field — valid values and when to use each
+
+There are exactly three valid string values. Do not invent others.
+
+| Value | Badge shown | When to use |
+|---|---|---|
+| `"Direct Lender"` | None | Lender originates and funds its own deals exclusively. **Default for any standard direct lender.** |
+| `"Direct+"` | "Direct+" badge | Lender primarily funds its own deals but explicitly also routes some deals to partner lenders. Only set this if there is clear evidence of partner-network routing — not just because the lender has multiple products. |
+| `"Marketplace"` | "Marketplace" badge | Lender matches borrowers to multiple third-party lenders. Does not directly fund deals. |
+
+`null` is valid when the type is genuinely unknown.
+
+**Common mistake:** Setting `"Direct+"` for any prominent or multi-product lender. Most lenders should be `"Direct Lender"`. `"Direct+"` is the exception, not the rule — only use it when the lender's own materials explicitly describe a partner/marketplace component.
+
 ### CRITICAL — waterfall.html JSON safety rules
 The lender data lives inside a `<script>` block as a JS array literal. Two classes of bug have blanked the entire waterfall before. Both must be prevented every time `waterfall.html` is written.
 
