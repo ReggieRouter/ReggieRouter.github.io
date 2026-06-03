@@ -358,7 +358,7 @@ body { background: var(--color-bg-main); margin: 0; padding: 0; font-family: var
 .wm-badge { display:inline-flex; align-items:center; margin-left:5px; vertical-align:middle; }
 .wm-icon { width:20px; height:20px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; cursor:default; flex-shrink:0; }
 .wm-icon-remote { background:#EEF2FF; color:#4338CA; border:1px solid #C7D2FE; }
-.wm-icon-hybrid { background:#F1F5F9; color:#475569; border:1px solid #CBD5E1; }
+.wm-icon-hybrid { background:#EDE9FE; color:#6D28D9; border:1px solid #C4B5FD; }
 /* Estimated salary tag */
 .est-tag { display:inline-block; font-size:9px; font-weight:700; padding:1px 4px; border-radius:3px; background:#FEF3C7; color:#92400E; border:1px solid #FDE68A; margin-left:3px; vertical-align:middle; letter-spacing:0.02em; }
 .est-salary { color:#B45309; }
@@ -851,22 +851,24 @@ const ALL_COLS = {
   status:   { label: 'Status', sort: 'status' },
   location: { label: 'Location', sort: 'location' },
   earnings: { label: 'Earnings', sort: 'earnings_min', numCol: true },
-  type:     { label: 'Type' },
   posted:   { label: 'Posted', sort: 'posted_date' },
   days_old: { label: 'Days Old' },
   contact:  { label: 'Contact', sort: 'contact_name' },
 };
-const DEFAULT_COLS = ['company', 'title', 'status', 'location', 'earnings', 'type', 'posted', 'contact'];
+const DEFAULT_COLS = ['company', 'title', 'status', 'location', 'earnings', 'posted', 'contact'];
 
 function loadColPrefs() {
   try {
     const saved = JSON.parse(localStorage.getItem('rp_cols'));
-    if (Array.isArray(saved) && saved.length && saved.every(k => k in ALL_COLS)) {
-      if (!saved.includes('title')) {
-        const idx = saved.indexOf('company');
-        saved.splice(idx + 1, 0, 'title');
+    if (Array.isArray(saved) && saved.length) {
+      const valid = saved.filter(k => k in ALL_COLS);
+      if (valid.length) {
+        if (!valid.includes('title')) {
+          const idx = valid.indexOf('company');
+          valid.splice(idx + 1, 0, 'title');
+        }
+        return valid;
       }
-      return saved;
     }
   } catch(e) {}
   return [...DEFAULT_COLS];
@@ -1053,11 +1055,6 @@ function buildRowCell(col, p) {
         return `<td class="num-col" style="white-space:nowrap;font-size:12px;"><span class="est-salary">${f(est.min)}–${f(est.max)}</span><span class="est-tag">Est.</span></td>`;
       }
       return `<td class="num-col" style="white-space:nowrap;font-size:12px;">${fmtEarnings(p)}</td>`;
-    }
-    case 'type': {
-      const t = p.job_type;
-      if (!t || t === 'Full-time' || t === 'Remote') return `<td><span style="color:var(--color-text-muted)">—</span></td>`;
-      return `<td>${badge(TYPE_MAP, t)}</td>`;
     }
     case 'posted': {
       if (p.posted_date) {
