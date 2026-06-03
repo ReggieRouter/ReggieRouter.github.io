@@ -449,6 +449,39 @@ header {
 .suspicious-row td { background:#FFF7ED !important; }
 .suspicious-badge { display:inline-block;background:#FFF7ED;color:#C2410C;border:1px solid #FDBA74;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:700;margin-left:4px;vertical-align:middle; }
 
+/* ── RECRUITER PANEL */
+#recruiter-view { overflow-y: auto; }
+.rec-job-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rec-job-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); padding: 0 10px 8px; border-bottom: 1px solid var(--border); }
+.rec-job-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.rec-job-table tr:last-child td { border-bottom: none; }
+.rec-badge { display:inline-block; border-radius:4px; padding:1px 7px; font-size:11px; font-weight:600; }
+.rec-badge.new { background:#DBEAFE; color:#1D4ED8; }
+.rec-badge.contacted { background:#FEF3C7; color:#92400E; }
+.rec-badge.filled { background:var(--green-light); color:var(--green); }
+.rec-badge.other { background:var(--bg); color:var(--muted); }
+
+/* ── REGISTRY PANEL */
+#registry-view { overflow-y: auto; }
+.rr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; padding: 20px 24px; }
+.rr-state-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.rr-state-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.rr-abbr { font-size: 14px; font-weight: 800; width: 28px; flex-shrink: 0; font-family: monospace; }
+.rr-name { font-size: 13px; font-weight: 600; flex: 1; }
+.rr-status-badge { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; flex-shrink: 0; }
+.rr-status-badge.ok { background: var(--green-light); color: var(--green); }
+.rr-status-badge.error { background: var(--red-light); color: var(--red); }
+.rr-status-badge.flagged { background: #FFF7ED; color: #C2410C; border: 1px solid #FDBA74; }
+.rr-status-badge.checking { background: #DBEAFE; color: #1D4ED8; }
+.rr-status-badge.unchecked { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.rr-url { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 8px; }
+.rr-actions { display: flex; gap: 6px; }
+.rr-btn { font-size: 11px; padding: 2px 9px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--text); }
+.rr-btn:hover { background: var(--bg); }
+.rr-btn.flag { border-color: #FECACA; color: var(--red); }
+.rr-btn.flag:hover { background: var(--red-light); }
+.rr-check-summary { padding: 12px 24px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px; }
+
 /* ── REPORT TAB */
 .report-section { margin-bottom:24px; }
 .report-section-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
@@ -495,6 +528,8 @@ header {
     <div class="header-right">
       <span id="user-email"></span>
       <button class="btn-ghost" onclick="showMainView('dashboard')">Dashboard</button>
+      <button class="btn-ghost" onclick="showMainView('recruiter')">Recruiter</button>
+      <button class="btn-ghost" onclick="showMainView('registry')">Registry</button>
       <button class="btn-ghost" onclick="openOverridesReport()">Overrides</button>
       <button class="btn-ghost" onclick="toggleFAQ()">? Help</button>
       <button class="btn-ghost" onclick="doLogout()">Sign out</button>
@@ -528,6 +563,8 @@ header {
     <main id="main">
       <div id="empty-state"><p>Select a lender to review</p></div>
       <div id="dashboard-view" style="display:none"></div>
+      <div id="recruiter-view" style="display:none"></div>
+      <div id="registry-view" style="display:none"></div>
 
       <div id="lender-detail" style="display:none">
 
@@ -925,7 +962,11 @@ function showMainView(view) {
   document.getElementById('empty-state').style.display = view==='empty' ? 'flex' : 'none';
   document.getElementById('dashboard-view').style.display = view==='dashboard' ? 'block' : 'none';
   document.getElementById('lender-detail').style.display = view==='detail' ? 'block' : 'none';
+  document.getElementById('recruiter-view').style.display = view==='recruiter' ? 'block' : 'none';
+  document.getElementById('registry-view').style.display = view==='registry' ? 'block' : 'none';
   if (view === 'dashboard') renderDashboard();
+  if (view === 'recruiter') renderRecruiterPanel();
+  if (view === 'registry') renderRegistryPanel();
 }
 
 // ── Actions ──────────────────────────────────────────────
@@ -2141,6 +2182,239 @@ function renderDashboard() {
       ${runRows}
     </div>
   `;
+}
+
+// ── Recruiter Panel ──────────────────────────────────────
+async function renderRecruiterPanel() {
+  const view = document.getElementById('recruiter-view');
+  view.innerHTML = `
+    <div class="dash-header">
+      <div><h1>Recruiter Feed</h1><p>Job postings from lender career pages</p></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <a href="lp-hire.html" target="_blank" class="btn-ghost" style="text-decoration:none;line-height:1">Open lp-hire →</a>
+        <button class="btn-ghost" onclick="renderRecruiterPanel()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="dash-section" id="rec-stats-section"><div style="color:var(--muted);font-size:13px">Loading…</div></div>
+    <div class="dash-section">
+      <div class="dash-section-title">Recent Postings</div>
+      <div id="rec-jobs-content" style="color:var(--muted);font-size:13px">Loading…</div>
+    </div>`;
+
+  const { data: jobs, error } = await sb.from('job_postings')
+    .select('id,company,title,location,job_type,hiring_status,posted_date,source_url,created_at')
+    .order('created_at', { ascending: false })
+    .limit(300);
+
+  if (error) {
+    document.getElementById('rec-stats-section').innerHTML = `<span style="color:var(--red)">Error loading job_postings: ${esc(error.message)}</span>`;
+    return;
+  }
+
+  const total = jobs.length;
+  const newCount = jobs.filter(j => !j.hiring_status || j.hiring_status === 'New' || j.hiring_status === 'Not started').length;
+  const contactedCount = jobs.filter(j => (j.hiring_status || '').toLowerCase().includes('contact')).length;
+  const filledCount = jobs.filter(j => j.hiring_status === 'Filled by Craft').length;
+
+  document.getElementById('rec-stats-section').innerHTML = `
+    <div class="dash-section-title">Overview</div>
+    <div class="dash-cards">
+      <div class="dash-card"><div class="dash-card-num">${total}</div><div class="dash-card-label">Total postings</div></div>
+      <div class="dash-card warn"><div class="dash-card-num">${newCount}</div><div class="dash-card-label">New / not started</div></div>
+      <div class="dash-card"><div class="dash-card-num">${contactedCount}</div><div class="dash-card-label">Contacted</div></div>
+      <div class="dash-card good"><div class="dash-card-num">${filledCount}</div><div class="dash-card-label">Filled by Craft</div></div>
+    </div>
+    <div style="margin-top:14px;font-size:12px;color:var(--muted)">
+      To scrape new postings: <code style="background:var(--bg);padding:2px 6px;border-radius:4px;border:1px solid var(--border)">cd ~/Desktop/LendPaper && python3 scrape_jobs.py</code>
+    </div>`;
+
+  const rows = jobs.slice(0, 100).map(j => {
+    const hs = j.hiring_status || 'New';
+    const cls = hs === 'Filled by Craft' ? 'filled' : hs.toLowerCase().includes('contact') ? 'contacted' : 'new';
+    const date = (j.posted_date || j.created_at || '').slice(0,10);
+    return `<tr>
+      <td style="font-weight:600">${esc(j.company)}</td>
+      <td>${esc(j.title)}</td>
+      <td style="color:var(--muted)">${esc(j.location || '—')}</td>
+      <td><span class="rec-badge ${cls}">${esc(hs)}</span></td>
+      <td style="color:var(--muted)">${date}</td>
+      <td>${j.source_url ? `<a href="${esc(j.source_url)}" target="_blank" style="font-size:11px;color:var(--green-mid)">View →</a>` : '—'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('rec-jobs-content').outerHTML = rows
+    ? `<table class="rec-job-table" id="rec-jobs-content">
+        <thead><tr><th>Company</th><th>Title</th><th>Location</th><th>Status</th><th>Date</th><th>Link</th></tr></thead>
+        <tbody>${rows}</tbody>
+       </table>`
+    : `<p id="rec-jobs-content" style="color:var(--muted);font-size:13px">No job postings found. Run <code>python3 scrape_jobs.py</code> to populate.</p>`;
+}
+
+// ── Registry Route Panel ──────────────────────────────────
+const RR_STATES = {
+  AK:{name:"Alaska",url:"https://www.commerce.alaska.gov/cbp/main/search/entities"},
+  AL:{name:"Alabama",url:"https://arc-sos.state.al.us/CGI/corpname.mbr/input"},
+  AR:{name:"Arkansas",url:"https://www.sos.arkansas.gov/corps/search_all.php"},
+  AZ:{name:"Arizona",url:"https://apps.azsos.gov/apps/tntp/se.html"},
+  CA:{name:"California",url:"https://bizfileonline.sos.ca.gov/search/business"},
+  CO:{name:"Colorado",url:"https://www.sos.state.co.us/biz/BusinessEntityCriteriaExt.do"},
+  CT:{name:"Connecticut",url:"https://service.ct.gov/business/s/onlinebusinesssearch?language=en_US"},
+  DC:{name:"Dist. of Columbia",url:"https://corponline.dlcp.dc.gov/homepage/business-search"},
+  DE:{name:"Delaware",url:"https://icis.corp.delaware.gov/ecorp/entitysearch/namesearch.aspx"},
+  FL:{name:"Florida",url:"https://dos.myflorida.com/sunbiz/search/"},
+  GA:{name:"Georgia",url:"https://ecorp.sos.ga.gov/businesssearch"},
+  HI:{name:"Hawaii",url:"https://hbe.ehawaii.gov/documents/search.html"},
+  IA:{name:"Iowa",url:"https://sos.iowa.gov/search/business/search.aspx"},
+  ID:{name:"Idaho",url:"https://sosbiz.idaho.gov/search/business"},
+  IL:{name:"Illinois",url:"https://www.ilsos.gov/corporatellc/"},
+  IN:{name:"Indiana",url:"https://bsd.sos.in.gov/publicbusinesssearch"},
+  KS:{name:"Kansas",url:"https://www.sos.ks.gov/eforms/BusinessEntity/Search.aspx"},
+  KY:{name:"Kentucky",url:"https://sosbes.sos.ky.gov/BusSearchNProfile/search.aspx"},
+  LA:{name:"Louisiana",url:"https://coraweb.sos.la.gov/CommercialSearch/CommercialSearch.aspx"},
+  MA:{name:"Massachusetts",url:"https://corp.sec.state.ma.us/CorpWeb/CorpSearch/CorpSearch.aspx"},
+  MD:{name:"Maryland",url:"https://egov.maryland.gov/businessexpress/entitysearch"},
+  ME:{name:"Maine",url:"https://apps3.web.maine.gov/nei-sos-icrs/ICRS?MainPage=x"},
+  MI:{name:"Michigan",url:"https://mibusinessregistry.lara.state.mi.us/search/business"},
+  MN:{name:"Minnesota",url:"https://mblsportal.sos.state.mn.us/Business/Search"},
+  MO:{name:"Missouri",url:"https://www.sos.mo.gov/BusinessEntity/soskb/csearch.asp"},
+  MS:{name:"Mississippi",url:"https://corp.sos.ms.gov/corp/portal/c/page/corpBusinessIdSearch/portal.aspx"},
+  MT:{name:"Montana",url:"https://biz.sosmt.gov/search"},
+  NC:{name:"North Carolina",url:"https://www.sosnc.gov/online_services/search/by_title/_Business_Registration"},
+  ND:{name:"North Dakota",url:"https://firststop.sos.nd.gov/search/business"},
+  NE:{name:"Nebraska",url:"https://www.nebraska.gov/sos/corp/corpsearch.cgi"},
+  NH:{name:"New Hampshire",url:"https://quickstart.sos.nh.gov/online/BusinessInquire"},
+  NJ:{name:"New Jersey",url:"https://www.njportal.com/DOR/BusinessNameSearch"},
+  NM:{name:"New Mexico",url:"https://secretaryofstate.com/new-mexico/"},
+  NV:{name:"Nevada",url:"https://esos.nv.gov/EntitySearch/OnlineEntitySearch"},
+  NY:{name:"New York",url:"https://apps.dos.ny.gov/publicInquiry/"},
+  OH:{name:"Ohio",url:"https://businesssearch.ohiosos.gov"},
+  OK:{name:"Oklahoma",url:"https://www.sos.ok.gov/corp/corpInquiryFind.aspx"},
+  OR:{name:"Oregon",url:"https://sos.oregon.gov/business/pages/find.aspx"},
+  PA:{name:"Pennsylvania",url:"https://file.dos.pa.gov/search/business"},
+  RI:{name:"Rhode Island",url:"https://business.sos.ri.gov/CorpWeb/CorpSearch/CorpSearch.aspx"},
+  SC:{name:"South Carolina",url:"https://businessfilings.sc.gov/businessfiling/entity/search"},
+  SD:{name:"South Dakota",url:"https://sosenterprise.sd.gov/BusinessServices/Business/FilingSearch.aspx"},
+  TN:{name:"Tennessee",url:"https://tncab.tnsos.gov/business-entity-search"},
+  TX:{name:"Texas",url:"https://comptroller.texas.gov/taxes/franchise/account-status/search"},
+  UT:{name:"Utah",url:"https://businessregistration.utah.gov/EntitySearch/OnlineEntitySearch"},
+  VA:{name:"Virginia",url:"https://cis.scc.virginia.gov"},
+  VT:{name:"Vermont",url:"https://bizfilings.vermont.gov/business/businesssearch"},
+  WA:{name:"Washington",url:"https://www.sos.wa.gov/corps/search.aspx"},
+  WI:{name:"Wisconsin",url:"https://apps.dfi.wi.gov/apps/corpsearch/Advanced.aspx"},
+  WV:{name:"West Virginia",url:"https://apps.wv.gov/sos/businessentitysearch/"},
+  WY:{name:"Wyoming",url:"https://wyobiz.wyo.gov/Business/FilingSearch.aspx"}
+};
+
+const RR_STORAGE_KEY = 'lp_rr_checks';
+
+function rrLoadChecks() {
+  try { return JSON.parse(localStorage.getItem(RR_STORAGE_KEY) || '{}'); } catch { return {}; }
+}
+function rrSaveChecks(checks) {
+  localStorage.setItem(RR_STORAGE_KEY, JSON.stringify(checks));
+}
+
+function rrStatusBadge(status) {
+  if (status === 'ok')       return '<span class="rr-status-badge ok">✓ OK</span>';
+  if (status === 'error')    return '<span class="rr-status-badge error">✗ Error</span>';
+  if (status === 'flagged')  return '<span class="rr-status-badge flagged">⚑ Flagged</span>';
+  if (status === 'checking') return '<span class="rr-status-badge checking">… Checking</span>';
+  return '<span class="rr-status-badge unchecked">? Unchecked</span>';
+}
+
+function renderRegistryPanel() {
+  const checks = rrLoadChecks();
+  const abbrs = Object.keys(RR_STATES);
+  const okCount = abbrs.filter(a => checks[a]?.status === 'ok').length;
+  const errorCount = abbrs.filter(a => checks[a]?.status === 'error').length;
+  const flaggedCount = abbrs.filter(a => checks[a]?.status === 'flagged').length;
+  const uncheckedCount = abbrs.filter(a => !checks[a]).length;
+  const lastRun = Object.values(checks).map(c => c.checked_at).filter(Boolean).sort().pop();
+
+  const cards = abbrs.map(abbr => {
+    const s = RR_STATES[abbr];
+    const c = checks[abbr] || {};
+    const statusHtml = rrStatusBadge(c.status || 'unchecked');
+    const checkedLine = c.checked_at ? `<div style="font-size:10px;color:var(--muted);margin-bottom:6px">Checked ${c.checked_at.slice(0,16).replace('T',' ')}</div>` : '';
+    const flagBtn = c.status !== 'flagged'
+      ? `<button class="rr-btn flag" onclick="rrFlag('${abbr}')">⚑ Flag broken</button>`
+      : `<button class="rr-btn" onclick="rrUnflag('${abbr}')">↩ Unflag</button>`;
+    return `<div class="rr-state-card" id="rr-card-${abbr}">
+      <div class="rr-state-header">
+        <span class="rr-abbr">${abbr}</span>
+        <span class="rr-name">${esc(s.name)}</span>
+        ${statusHtml}
+      </div>
+      <div class="rr-url" title="${esc(s.url)}">${esc(s.url)}</div>
+      ${checkedLine}
+      <div class="rr-actions">
+        <a class="rr-btn" href="${esc(s.url)}" target="_blank">Open →</a>
+        <button class="rr-btn" onclick="rrCheckOne('${abbr}')">Check</button>
+        ${flagBtn}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('registry-view').innerHTML = `
+    <div class="dash-header">
+      <div>
+        <h1>Registry Route Monitor</h1>
+        <p>SOS entity search landing pages — ${okCount} OK · ${errorCount} error · ${flaggedCount} flagged · ${uncheckedCount} unchecked${lastRun ? ' · Last run ' + lastRun.slice(0,10) : ''}</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn-ghost" onclick="rrCheckAll()">Check All</button>
+        <button class="btn-ghost" onclick="renderRegistryPanel()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="rr-grid">${cards}</div>`;
+}
+
+function rrFlag(abbr) {
+  const checks = rrLoadChecks();
+  checks[abbr] = { ...(checks[abbr] || {}), status: 'flagged', checked_at: new Date().toISOString() };
+  rrSaveChecks(checks);
+  renderRegistryPanel();
+}
+
+function rrUnflag(abbr) {
+  const checks = rrLoadChecks();
+  delete checks[abbr];
+  rrSaveChecks(checks);
+  renderRegistryPanel();
+}
+
+async function rrCheckOne(abbr) {
+  const s = RR_STATES[abbr];
+  const card = document.getElementById(`rr-card-${abbr}`);
+  if (card) card.querySelector('.rr-status-badge').outerHTML = rrStatusBadge('checking');
+  let status = 'error';
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 8000);
+    await fetch(s.url, { mode: 'no-cors', signal: ctrl.signal });
+    clearTimeout(tid);
+    status = 'ok';
+  } catch(e) {
+    status = e.name === 'AbortError' ? 'error' : 'error';
+  }
+  const checks = rrLoadChecks();
+  checks[abbr] = { status, checked_at: new Date().toISOString() };
+  rrSaveChecks(checks);
+  // Re-render just this card's badge
+  if (card) {
+    card.querySelector('.rr-status-badge').outerHTML = rrStatusBadge(status);
+  }
+}
+
+async function rrCheckAll() {
+  const abbrs = Object.keys(RR_STATES);
+  toast(`Checking ${abbrs.length} state URLs…`);
+  // Check in batches of 8 to avoid overwhelming
+  for (let i = 0; i < abbrs.length; i += 8) {
+    await Promise.all(abbrs.slice(i, i + 8).map(a => rrCheckOne(a)));
+  }
+  renderRegistryPanel();
+  toast('Registry check complete');
 }
 
 // ── Init ─────────────────────────────────────────────────
