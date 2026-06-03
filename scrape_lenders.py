@@ -91,10 +91,29 @@ Rules:
 def extract_lender_data_from_html(html_path: Path) -> list:
     """Parse lenderData array from the waterfall HTML file."""
     text = html_path.read_text(encoding="utf-8")
-    m = re.search(r'const lenderData\s*=\s*(\[.*?\]);', text, re.DOTALL)
-    if not m:
+    marker = "const lenderData = "
+    start = text.find(marker)
+    if start == -1:
         raise ValueError(f"Could not find lenderData in {html_path}")
-    return json.loads(m.group(1))
+    start += len(marker)
+    depth = 0; in_str = False; escape = False; i = start
+    while i < len(text):
+        c = text[i]
+        if escape:
+            escape = False
+        elif c == '\\' and in_str:
+            escape = True
+        elif c == '"' and not escape:
+            in_str = not in_str
+        elif not in_str:
+            if c == '[':
+                depth += 1
+            elif c == ']':
+                depth -= 1
+                if depth == 0:
+                    break
+        i += 1
+    return json.loads(text[start:i+1])
 
 
 def fetch_page(url: str) -> str:
