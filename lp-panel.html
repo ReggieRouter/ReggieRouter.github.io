@@ -2272,7 +2272,7 @@ async function loadDashboardRecruiter() {
   const el = document.getElementById('dash-recruiter-content');
   if (!el) return;
   const { data: jobs, error } = await sb.from('job_postings')
-    .select('id,company,title,location,created_at,source_url')
+    .select('id,company,title,location,hiring_status,created_at,source_url')
     .order('created_at', { ascending: false })
     .limit(300);
   if (error || !jobs) {
@@ -2328,7 +2328,7 @@ async function renderRecruiterPanel() {
     </div>`;
 
   const { data: jobs, error } = await sb.from('job_postings')
-    .select('id,company,title,location,job_type,posted_date,source_url,created_at')
+    .select('id,company,title,location,job_type,hiring_status,posted_date,source_url,created_at')
     .order('created_at', { ascending: false })
     .limit(300);
 
