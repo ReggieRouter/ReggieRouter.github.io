@@ -1166,6 +1166,66 @@ async function rejectPendingById(changeId) {
   }
 }
 
+function openPendingEdit(changeId, fieldName, lenderId, currentNewVal) {
+  const nowCell = document.getElementById(`pnow-${changeId}`);
+  const actCell = document.getElementById(`pact-${changeId}`);
+  if (!nowCell || !actCell) return;
+
+  const type = FIELD_TYPE_MAP[fieldName] || 'text';
+  let currentStr;
+  if (type === 'bool') currentStr = currentNewVal ? 'true' : 'false';
+  else if (type === 'array') currentStr = Array.isArray(currentNewVal) ? currentNewVal.join(', ') : (currentNewVal || '');
+  else currentStr = currentNewVal == null ? '' : String(currentNewVal);
+
+  let inputHtml;
+  if (type === 'bool') {
+    inputHtml = `<select id="pedit-${changeId}" class="lp-inline-edit-input" style="width:80px">
+      <option value="true" ${currentNewVal ? 'selected' : ''}>Yes</option>
+      <option value="false" ${!currentNewVal ? 'selected' : ''}>No</option>
+    </select>`;
+  } else if (type === 'number') {
+    inputHtml = `<input id="pedit-${changeId}" type="number" class="lp-inline-edit-input" style="width:100px" value="${esc(currentStr)}" />`;
+  } else {
+    inputHtml = `<input id="pedit-${changeId}" type="text" class="lp-inline-edit-input" style="min-width:160px" value="${esc(currentStr)}" />`;
+  }
+
+  nowCell.innerHTML = inputHtml;
+  actCell.innerHTML = `<div class="action-btns">
+    <button class="btn-approve" onclick="keepPendingEdit('${changeId}','${fieldName}','${lenderId}','${type}')">Keep</button>
+    <button class="btn-reject"  onclick="renderDashboard()">Cancel</button>
+  </div>`;
+  document.getElementById(`pedit-${changeId}`)?.focus();
+}
+
+async function keepPendingEdit(changeId, fieldName, lenderId, type) {
+  const input = document.getElementById(`pedit-${changeId}`);
+  if (!input) return;
+  let parsedVal;
+  if (type === 'bool') parsedVal = input.value === 'true';
+  else if (type === 'number') parsedVal = input.value === '' ? null : Number(input.value);
+  else if (type === 'array') parsedVal = input.value.split(',').map(s => s.trim()).filter(Boolean);
+  else parsedVal = input.value.trim() || null;
+
+  // Save to lender_data + lock field
+  const overrides = [...new Set([...(allLenders.find(l=>l.id==lenderId)?.manually_overridden_fields||[]), fieldName])];
+  const { error } = await sb.from('lender_data').update({ [fieldName]: parsedVal, manually_overridden_fields: overrides }).eq('id', lenderId);
+  if (error) { toast('Save failed: ' + error.message); return; }
+
+  // Mark the pending change approved
+  await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', changeId);
+
+  // Update local state
+  const lender = allLenders.find(l => l.id == lenderId);
+  if (lender) { lender[fieldName] = parsedVal; lender.manually_overridden_fields = overrides; }
+  allPendingChanges = allPendingChanges.filter(c => c.id !== changeId);
+  if (currentLender?.id == lenderId) { currentLender[fieldName] = parsedVal; currentLender.manually_overridden_fields = overrides; currentPending = currentPending.filter(c => c.id !== changeId); }
+
+  renderDashboard();
+  renderLenderList(filterLendersArr());
+  updatePublishBar();
+  toast(`${fieldName} set to custom value & locked 🔒`);
+}
+
 async function approveAllPending() {
   if (!allPendingChanges.length) return;
   const suspicious = allPendingChanges.filter(isSuspiciousChange);
@@ -2106,19 +2166,21 @@ function renderDashboard() {
       const d = new Date(c.created_at);
       const dateStr = d.toLocaleDateString([], {month:'short',day:'numeric'});
       const susp = isSuspiciousChange(c);
-      return `<tr class="${susp ? 'suspicious-row' : ''}">
+      const newValJson = JSON.stringify(c.new_value).replace(/"/g,'&quot;');
+      return `<tr class="${susp ? 'suspicious-row' : ''}" id="prow-${c.id}">
         <td style="cursor:pointer;color:var(--green);font-weight:500;white-space:nowrap" onclick="selectLender(${c.lender_id})">${lenderName}</td>
         <td><span class="field-label">${esc(fieldLabel)}</span>${susp ? '<span class="suspicious-badge">⚠ ZERO/BLANK</span>' : ''}</td>
         <td><span class="val-old">${oldFmt || '—'}</span></td>
-        <td><span class="val-new">${newFmt || '—'}</span></td>
+        <td id="pnow-${c.id}"><span class="val-new">${newFmt || '—'}</span></td>
         <td style="white-space:nowrap">
           ${srcUrl ? `<a href="${esc(srcUrl)}" target="_blank" style="color:var(--green);font-size:12px;text-decoration:none" title="${esc(srcUrl)}">↗ Source</a>` : '<span style="color:var(--muted);font-size:12px">—</span>'}
         </td>
         <td style="font-size:11px;color:var(--muted);white-space:nowrap">${dateStr}</td>
-        <td>
+        <td id="pact-${c.id}">
           <div class="action-btns">
             <button class="btn-approve" onclick="approvePendingById('${c.id}')">Keep</button>
             <button class="btn-reject"  onclick="rejectPendingById('${c.id}')">Revert</button>
+            <button class="btn-field-edit" onclick="openPendingEdit('${c.id}','${c.field_name}','${c.lender_id}',${newValJson})">✏ edit</button>
           </div>
         </td>
       </tr>`;
