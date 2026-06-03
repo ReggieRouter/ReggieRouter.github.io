@@ -1178,7 +1178,10 @@ function openPendingEdit(changeId, fieldName, lenderId, currentNewVal) {
   else currentStr = currentNewVal == null ? '' : String(currentNewVal);
 
   let inputHtml;
-  if (type === 'bool') {
+  if (type === 'enum') {
+    const opts = (FIELD_ENUM_OPTIONS[fieldName] || []).map(o => `<option${currentStr===o?' selected':''}>${esc(o)}</option>`).join('');
+    inputHtml = `<select id="pedit-${changeId}" class="lp-inline-edit-input">${opts}</select>`;
+  } else if (type === 'bool') {
     inputHtml = `<select id="pedit-${changeId}" class="lp-inline-edit-input" style="width:80px">
       <option value="true" ${currentNewVal ? 'selected' : ''}>Yes</option>
       <option value="false" ${!currentNewVal ? 'selected' : ''}>No</option>
@@ -1390,6 +1393,11 @@ const FIELD_TYPE_MAP = {
   min_fico:'number', min_tib_months:'number', min_monthly_revenue:'number',
   max_position_stacking:'number', max_funding_amount:'number', max_term_months:'number', min_bank_statements_months:'number',
   product_types:'array', payment_frequencies:'array', restricted_industries:'array', restricted_states:'array', preferred_industries:'array',
+  lender_type:'enum',
+};
+
+const FIELD_ENUM_OPTIONS = {
+  lender_type: ['Direct Lender', 'Direct+', 'Marketplace'],
 };
 
 function openFieldEdit(field) {
@@ -1398,7 +1406,10 @@ function openFieldEdit(field) {
   const valDiv = document.querySelector(`.lp-detail-val[data-field="${field}"], .lp-metric-val[data-field="${field}"]`);
   if (!valDiv) return;
   let inputHtml;
-  if (type === 'bool') {
+  if (type === 'enum') {
+    const opts = (FIELD_ENUM_OPTIONS[field] || []).map(o => `<option${val===o?' selected':''}>${esc(o)}</option>`).join('');
+    inputHtml = `<select id="ile-input" class="lp-inline-edit-input">${opts}</select>`;
+  } else if (type === 'bool') {
     inputHtml = `<select id="ile-input" class="lp-inline-edit-input">
       <option value="true" ${val ? 'selected' : ''}>Yes</option>
       <option value="false" ${!val ? 'selected' : ''}>No</option>
@@ -1588,7 +1599,7 @@ function renderFieldsTab() {
   const groups = [
     { title: 'Identity', fields: [
       { key: 'has_captcha', label: 'Has CAPTCHA (scraper must handle)', type: 'bool' },
-      { key: 'lender_type', label: 'Lender Type', type: 'text' },
+      { key: 'lender_type', label: 'Lender Type', type: 'enum', options: ['Direct Lender', 'Direct+', 'Marketplace'] },
       { key: 'lender_logo_url', label: 'Logo URL', type: 'text' },
       { key: 'source_url', label: 'Source URL', type: 'text' },
       { key: 'application_submission_url', label: 'Application URL', type: 'text' },
@@ -1636,7 +1647,10 @@ function renderFieldsTab() {
           const isLocked = locked.has(f.key);
           const lockLabel = isLocked ? ` <span class="locked-icon" title="Manually overridden — won't be scraped">🔒</span> <button type="button" style="font-size:11px;color:var(--amber);background:none;border:none;cursor:pointer;padding:0" onclick="unlockField('${f.key}')">unlock</button>` : '';
           let input = '';
-          if (f.type === 'bool') {
+          if (f.type === 'enum') {
+            const opts = ['', ...(f.options||[])].map(o => `<option${val===o?' selected':''}>${esc(o)}</option>`).join('');
+            input = `<select data-field="${f.key}" data-override="${isLocked}" class="${isLocked ? 'is-overridden' : ''}">${opts}</select>`;
+          } else if (f.type === 'bool') {
             input = `<div class="bool-row"><input type="checkbox" data-field="${f.key}" data-override="${isLocked}" ${val ? 'checked' : ''} /><span>${val ? 'Yes' : 'No'}</span></div>`;
           } else if (f.type === 'array') {
             const arrVal = Array.isArray(val) ? val.join(', ') : (val || '');
