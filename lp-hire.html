@@ -838,7 +838,8 @@ const TYPE_MAP   = { 'Full-time':'type-fulltime','Part-time':'type-parttime','Co
 
 /* ── COLUMN SYSTEM ── */
 const ALL_COLS = {
-  company:  { label: 'Company / Title', required: true, sort: 'company' },
+  company:  { label: 'Company', required: true, sort: 'company' },
+  title:    { label: 'Title', sort: 'title' },
   status:   { label: 'Status', sort: 'status' },
   location: { label: 'Location', sort: 'location' },
   earnings: { label: 'Earnings', sort: 'earnings_min', numCol: true },
@@ -847,12 +848,18 @@ const ALL_COLS = {
   days_old: { label: 'Days Old' },
   contact:  { label: 'Contact', sort: 'contact_name' },
 };
-const DEFAULT_COLS = ['company', 'status', 'location', 'earnings', 'type', 'posted', 'contact'];
+const DEFAULT_COLS = ['company', 'title', 'status', 'location', 'earnings', 'type', 'posted', 'contact'];
 
 function loadColPrefs() {
   try {
     const saved = JSON.parse(localStorage.getItem('rp_cols'));
-    if (Array.isArray(saved) && saved.length && saved.every(k => k in ALL_COLS)) return saved;
+    if (Array.isArray(saved) && saved.length && saved.every(k => k in ALL_COLS)) {
+      if (!saved.includes('title')) {
+        const idx = saved.indexOf('company');
+        saved.splice(idx + 1, 0, 'title');
+      }
+      return saved;
+    }
   } catch(e) {}
   return [...DEFAULT_COLS];
 }
@@ -985,19 +992,39 @@ function buildRowCell(col, p) {
         ${logoHtml(p)}
         <div class="rp-company-info">
           <div class="rp-company-name">${esc(p.company)}</div>
-          <div class="rp-title-name">${esc(p.title)}</div>
         </div>
       </div></td>`;
+    case 'title':
+      return `<td style="font-size:12.5px;color:var(--color-text-secondary);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.title || '—')}</td>`;
     case 'status':
       return `<td class="status-cell">${badge(STATUS_MAP, p.status)}</td>`;
-    case 'location':
-      return `<td>${p.location ? esc(p.location) : '<span style="color:var(--color-text-muted)">—</span>'}</td>`;
+    case 'location': {
+      const isRemote = p.job_type === 'Remote';
+      const locText = p.location ? esc(p.location) : '<span style="color:var(--color-text-muted)">—</span>';
+      const remoteTag = isRemote
+        ? ` <span class="rp-badge type-remote" style="padding:1px 5px;font-size:9px;vertical-align:middle;margin-left:4px;" title="Remote">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>`
+        : '';
+      return `<td style="white-space:nowrap;">${locText}${remoteTag}</td>`;
+    }
     case 'earnings':
       return `<td class="num-col" style="white-space:nowrap;font-size:12px;">${fmtEarnings(p)}</td>`;
-    case 'type':
-      return `<td>${badge(TYPE_MAP, p.job_type)}</td>`;
-    case 'posted':
-      return `<td style="white-space:nowrap;font-size:12px;">${fmtDateShort(p.posted_date)}</td>`;
+    case 'type': {
+      const t = p.job_type;
+      if (!t || t === 'Full-time' || t === 'Remote') return `<td><span style="color:var(--color-text-muted)">—</span></td>`;
+      return `<td>${badge(TYPE_MAP, t)}</td>`;
+    }
+    case 'posted': {
+      if (p.posted_date) {
+        return `<td style="white-space:nowrap;font-size:12px;">${fmtDateShort(p.posted_date)}</td>`;
+      }
+      if (p.created_at) {
+        const d = p.created_at.substring(0, 10);
+        return `<td style="white-space:nowrap;font-size:12px;color:var(--color-text-muted);" title="Date added (posted date unknown)">${fmtDateShort(d)}<span style="font-size:9px;margin-left:1px;">~</span></td>`;
+      }
+      return `<td style="white-space:nowrap;font-size:12px;color:var(--color-text-muted);">—</td>`;
+    }
     case 'days_old':
       return `<td style="white-space:nowrap;font-size:12px;color:var(--color-text-secondary);">${daysOld(p.posted_date)}</td>`;
     case 'contact':
