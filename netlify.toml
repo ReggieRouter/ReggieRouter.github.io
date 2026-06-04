@@ -1,3 +1,22 @@
+# ── Block internal folders from public access ───────────────────────────────
+[[redirects]]
+  from   = "/archive/*"
+  to     = "/404.html"
+  status = 404
+  force  = true
+
+[[redirects]]
+  from   = "/markdowns/*"
+  to     = "/404.html"
+  status = 404
+  force  = true
+
+[[redirects]]
+  from   = "/scrapers/*"
+  to     = "/404.html"
+  status = 404
+  force  = true
+
 # ── Cache headers (all HTML pages) ─────────────────────────────────────────
 [[headers]]
   for = "/*.html"

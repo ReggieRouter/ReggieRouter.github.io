@@ -3,7 +3,7 @@ node_modules/
 .git/
 *.zip
 *.bak
-scratch/
+workspace/
 *v1.5md.txt
 dist/
 build/

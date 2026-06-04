@@ -48,7 +48,7 @@ except ImportError:
 ROOT_DIR      = Path(__file__).parent.parent
 GITHUB_COPY   = ROOT_DIR / "waterfall.html"
 DESKTOP_COPY  = Path.home() / "Desktop/LendPaper/waterfall.html"
-SCRATCH_DIR   = ROOT_DIR / "scratch"
+SCRATCH_DIR   = ROOT_DIR / "workspace"
 LOG_DIR       = ROOT_DIR / "logs"
 PATCH_FILE    = SCRATCH_DIR / "targeted_patches.json"
 

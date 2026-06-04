@@ -1,5 +1,5 @@
 PORT := 8765
-PREVIEW := scratch/waterfall_preview.html
+PREVIEW := workspace/waterfall_preview.html
 
 .PHONY: preview apply stop
 

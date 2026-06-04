@@ -7,7 +7,7 @@ fetches each lender's source_url, extracts product criteria via Claude API,
 writes a patch file, and emails a summary to stephengowa@gmail.com.
 
 Usage:
-    python3 scrape_lenders.py [--html scratch/waterfall_preview.html] [--dry-run]
+    python3 scrape_lenders.py [--html workspace/waterfall_preview.html] [--dry-run]
 
 Designed to run weekly via cron:
     0 6 * * 1 cd ~/Desktop/LendPaper && python3 scrape_lenders.py >> logs/scrape.log 2>&1
@@ -180,7 +180,7 @@ def send_email(subject: str, body: str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--html", default="scratch/waterfall_preview.html")
+    parser.add_argument("--html", default="workspace/waterfall_preview.html")
     parser.add_argument("--dry-run", action="store_true", help="Fetch pages but skip Claude + email")
     parser.add_argument("--lender", help="Scrape only this lender name (for testing)")
     args = parser.parse_args()

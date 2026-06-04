@@ -4,10 +4,10 @@
 
 | File | Read when... |
 |---|---|
-| `docs/CALCULATORS.md` | Building or editing any calculator, tool, or financial UI |
-| `docs/PDF.md` | Touching any PDF export, print stylesheet, html2canvas config, or watermark |
-| `docs/BRANDING.md` | Any visual, layout, color, or typography decision |
-| `docs/LEGAL.md` | Any copy, disclaimer, legal page, or entity reference |
+| `markdowns/CALCULATORS.md` | Building or editing any calculator, tool, or financial UI |
+| `markdowns/PDF.md` | Touching any PDF export, print stylesheet, html2canvas config, or watermark |
+| `markdowns/BRANDING.md` | Any visual, layout, color, or typography decision |
+| `markdowns/LEGAL.md` | Any copy, disclaimer, legal page, or entity reference |
 
 ---
 
@@ -74,7 +74,7 @@ Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules,
 **Critical summary:**
 - `html2canvas` config must always include `scrollX: 0, scrollY: 0` — dropping these causes left-side content clipping
 - Never call `window.print()` directly — always route through `PDF_HELPER.generatePDF()`
-- Never remove or weaken the 3-layer anti-fraud watermark system (see `docs/PDF.md §1`)
+- Never remove or weaken the 3-layer anti-fraud watermark system (see `markdowns/PDF.md §1`)
 
 ## Supabase & Infrastructure
 
@@ -86,7 +86,7 @@ Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules,
   ```python
   snippet = (snippet or '').replace('\n', '\\n').replace('\r', '').replace('</script>', '<\\/script>')
   ```
-- **Job scraper:** `scripts/scrape_jobs.py` — pending change: switch lender source from waterfall.html parsing to Postgres query (`SELECT lender_name, source_url FROM underwriting_rules WHERE source_url IS NOT NULL`)
+- **Job scraper:** `scrapers/scrape_jobs.py` — pending change: switch lender source from waterfall.html parsing to Postgres query (`SELECT lender_name, source_url FROM underwriting_rules WHERE source_url IS NOT NULL`)
 
 ## File Integrity Rule
 

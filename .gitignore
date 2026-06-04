@@ -4,8 +4,9 @@ node_modules/
 *.log
 .gemini/
 files.zip
-scratch/
+workspace/
 *.bak
 .netlify/
 client_secret*.json
 *.zip
+archive/
