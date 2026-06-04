@@ -4,96 +4,421 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Complete Your Profile — LendPaper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
   <script src="js/config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --bg: #0a0d14; --surface: #111520; --border: #1e2535;
-      --gold: #e8b84b; --text: #e2e8f0; --muted: #64748b;
+      --bg: #0a0d14;
+      --surface: #111520;
+      --border: #1e2535;
+      --gold: #e8b84b;
+      --gold-dim: rgba(232, 184, 75, 0.12);
+      --text: #e2e8f0;
+      --muted: #64748b;
     }
+
     body {
-      background: var(--bg); color: var(--text);
+      background: var(--bg);
+      color: var(--text);
       font-family: 'DM Sans', sans-serif;
-      min-height: 100vh; display: flex;
-      align-items: center; justify-content: center; padding: 24px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
     }
+
     body::before {
-      content: ''; position: fixed; inset: 0;
-      background-image: linear-gradient(rgba(232,184,75,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(232,184,75,0.03) 1px, transparent 1px);
-      background-size: 48px 48px; pointer-events: none;
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(232,184,75,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,184,75,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
     }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(232,184,75,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
     .card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; padding: 48px; width: 100%; max-width: 440px;
-      position: relative; z-index: 1; animation: fadeUp 0.4s ease;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px;
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.4s ease;
+      overflow: hidden;
     }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-    .logo { display:flex; align-items:center; gap:10px; margin-bottom:36px; }
-    .logo-mark { width:36px; height:36px; background:var(--gold); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:16px; color:var(--bg); }
-    .logo-text { font-family:'Syne',sans-serif; font-weight:700; font-size:20px; letter-spacing:-0.02em; }
-    .step-label { font-size:11px; text-transform:uppercase; letter-spacing:0.12em; color:var(--gold); font-weight:500; margin-bottom:12px; }
-    h1 { font-family:'Syne',sans-serif; font-weight:700; font-size:24px; letter-spacing:-0.03em; margin-bottom:8px; }
-    .subtitle { font-size:14px; color:var(--muted); margin-bottom:32px; line-height:1.5; }
-    .field { margin-bottom:20px; }
-    label { display:block; font-size:12px; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
-    input, select {
-      width:100%; padding:13px 16px; background:var(--bg);
-      border:1px solid var(--border); border-radius:10px;
-      color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px;
-      outline:none; transition:border-color 0.2s; appearance:none;
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    input:focus, select:focus { border-color:var(--gold); }
-    input::placeholder { color:var(--muted); }
-    select option { background:var(--surface); }
-    .select-wrap { position:relative; }
-    .select-wrap::after { content:'↓'; position:absolute; right:16px; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; font-size:13px; }
-    .btn {
-      width:100%; padding:14px; background:var(--gold); color:var(--bg);
-      border:none; border-radius:10px; font-family:'DM Sans',sans-serif;
-      font-weight:500; font-size:15px; cursor:pointer;
-      transition:opacity 0.2s, transform 0.1s; margin-top:8px;
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
     }
-    .btn:hover { opacity:0.9; transform:translateY(-1px); }
-    .btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-    .message { padding:12px 16px; border-radius:8px; font-size:13px; margin-bottom:16px; display:none; }
-    .message.error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#f87171; display:block; }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      background: var(--gold);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--bg);
+    }
+
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .progress {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 32px;
+    }
+
+    .dot {
+      height: 6px;
+      width: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      transition: width 0.3s ease, background 0.3s ease, opacity 0.3s ease;
+    }
+
+    .dot.active {
+      width: 22px;
+      background: var(--gold);
+    }
+
+    .dot.done {
+      background: var(--gold);
+      opacity: 0.35;
+    }
+
+    .steps-viewport {
+      overflow: hidden;
+    }
+
+    .steps-track {
+      display: flex;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .step {
+      min-width: 100%;
+      flex-shrink: 0;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 20px;
+      transition: color 0.2s;
+    }
+
+    .btn-back:hover { color: var(--text); }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 14px;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]:focus { border-color: var(--gold); }
+    input[type="text"]::placeholder { color: var(--muted); }
+
+    .btn-next {
+      width: 100%;
+      padding: 14px;
+      background: var(--gold);
+      color: var(--bg);
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-next:active { transform: translateY(0); }
+
+    .role-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .role-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+      outline: none;
+    }
+
+    .role-card:hover, .role-card:focus-visible {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+      transform: translateY(-2px);
+    }
+
+    .role-card.selected {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+    }
+
+    .role-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(232, 184, 75, 0.08);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .role-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--gold);
+      stroke-width: 1.75;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .role-label {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .role-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    .message {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+      display: block;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: var(--surface);
+      border-radius: 16px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      z-index: 10;
+    }
+
+    .loading-overlay.visible { display: flex; }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .loading-sub { font-size: 13px; color: var(--muted); }
   </style>
 </head>
 <body>
   <div class="card">
+
     <div class="logo">
       <div class="logo-mark">LP</div>
       <span class="logo-text">LendPaper</span>
     </div>
-    <div class="step-label">Step 1 of 1</div>
-    <h1>Complete your profile</h1>
-    <p class="subtitle">Tell us a bit about yourself so we can get you set up.</p>
+
+    <div class="progress">
+      <div class="dot active" id="dot-0"></div>
+      <div class="dot" id="dot-1"></div>
+      <div class="dot" id="dot-2"></div>
+    </div>
 
     <div id="message" class="message"></div>
 
-    <div class="field">
-      <label>Full Name</label>
-      <input type="text" id="fullName" placeholder="Jane Smith" />
-    </div>
-    <div class="field">
-      <label>Company</label>
-      <input type="text" id="company" placeholder="Acme Capital LLC" />
-    </div>
-    <div class="field">
-      <label>Your Role</label>
-      <div class="select-wrap">
-        <select id="role">
-          <option value="" disabled selected>Select your role...</option>
-          <option value="broker">Commercial Broker</option>
-          <option value="iso">ISO</option>
-          <option value="lender">Lender</option>
-          <option value="other">Other</option>
-        </select>
+    <div class="steps-viewport">
+      <div class="steps-track" id="track">
+
+        <!-- Step 1: Name -->
+        <div class="step" id="step-0">
+          <h1>What's your name?</h1>
+          <p class="subtitle">Just your first and last — we'll use this on your account.</p>
+          <input type="text" id="inputName" placeholder="Jane Smith" autocomplete="name" />
+          <button class="btn-next" id="nextFromName">Continue →</button>
+        </div>
+
+        <!-- Step 2: Company -->
+        <div class="step" id="step-1">
+          <button class="btn-back" id="backToName">← Back</button>
+          <h1>Where do you work?</h1>
+          <p class="subtitle">Your company or brokerage name.</p>
+          <input type="text" id="inputCompany" placeholder="Acme Capital LLC" autocomplete="organization" />
+          <button class="btn-next" id="nextFromCompany">Continue →</button>
+        </div>
+
+        <!-- Step 3: Role -->
+        <div class="step" id="step-2">
+          <button class="btn-back" id="backToCompany">← Back</button>
+          <h1>What best describes your role?</h1>
+          <p class="subtitle">We'll tailor your experience from here.</p>
+          <div class="role-grid">
+            <div class="role-card" data-role="broker" tabindex="0">
+              <div class="role-icon">
+                <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+              </div>
+              <div>
+                <div class="role-label">Broker</div>
+                <div class="role-desc">Commercial loan originator</div>
+              </div>
+            </div>
+            <div class="role-card" data-role="iso" tabindex="0">
+              <div class="role-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="19.5" cy="18.5" r="2.5"/><circle cx="4.5" cy="18.5" r="2.5"/><line x1="12" y1="7.5" x2="12" y2="13"/><line x1="12" y1="13" x2="19.5" y2="16"/><line x1="12" y1="13" x2="4.5" y2="16"/></svg>
+              </div>
+              <div>
+                <div class="role-label">ISO</div>
+                <div class="role-desc">Independent sales org</div>
+              </div>
+            </div>
+            <div class="role-card" data-role="lender" tabindex="0">
+              <div class="role-icon">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div>
+                <div class="role-label">Lender</div>
+                <div class="role-desc">Direct funder or MCA</div>
+              </div>
+            </div>
+            <div class="role-card" data-role="other" tabindex="0">
+              <div class="role-icon">
+                <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+              </div>
+              <div>
+                <div class="role-label">Other</div>
+                <div class="role-desc">Advisor, ops, or explorer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <button class="btn" id="submitBtn">Complete Setup →</button>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+      <div class="loading-text">Setting up your account</div>
+      <div class="loading-sub">Just a moment...</div>
+    </div>
+
   </div>
 
   <script type="importmap">
@@ -106,44 +431,90 @@
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { window.location.href = '/login.html'; }
 
-    // If profile already exists, skip onboarding
     const { data: existing } = await supabase.from('profiles').select('id').eq('id', session.user.id).single();
     if (existing) { window.location.href = '/pending.html'; }
 
-    document.getElementById('submitBtn').addEventListener('click', async () => {
-      const fullName = document.getElementById('fullName').value.trim();
-      const company = document.getElementById('company').value.trim();
-      const role = document.getElementById('role').value;
-      const msg = document.getElementById('message');
-      const btn = document.getElementById('submitBtn');
+    const track = document.getElementById('track');
+    const dots = [0, 1, 2].map(i => document.getElementById(`dot-${i}`));
+    const msg = document.getElementById('message');
+    let currentStep = 0;
 
-      if (!fullName || !company || !role) {
-        msg.textContent = 'Please fill out all fields.';
-        msg.className = 'message error';
-        return;
-      }
+    setTimeout(() => document.getElementById('inputName').focus(), 100);
 
-      btn.disabled = true;
-      btn.textContent = 'Saving...';
+    function goToStep(n) {
+      currentStep = n;
+      const w = track.parentElement.offsetWidth;
+      track.style.transform = `translateX(${-n * w}px)`;
+      dots.forEach((d, i) => {
+        d.className = 'dot' + (i < n ? ' done' : i === n ? ' active' : '');
+      });
+      msg.className = 'message';
+      if (n === 0) setTimeout(() => document.getElementById('inputName').focus(), 380);
+      if (n === 1) setTimeout(() => document.getElementById('inputCompany').focus(), 380);
+    }
+
+    window.addEventListener('resize', () => {
+      const w = track.parentElement.offsetWidth;
+      track.style.transition = 'none';
+      track.style.transform = `translateX(${-currentStep * w}px)`;
+      requestAnimationFrame(() => { track.style.transition = ''; });
+    });
+
+    function advanceName() {
+      const v = document.getElementById('inputName').value.trim();
+      if (!v) { showError('Please enter your name.'); return; }
+      goToStep(1);
+    }
+
+    function advanceCompany() {
+      const v = document.getElementById('inputCompany').value.trim();
+      if (!v) { showError('Please enter your company name.'); return; }
+      goToStep(2);
+    }
+
+    document.getElementById('nextFromName').addEventListener('click', advanceName);
+    document.getElementById('nextFromCompany').addEventListener('click', advanceCompany);
+    document.getElementById('backToName').addEventListener('click', () => goToStep(0));
+    document.getElementById('backToCompany').addEventListener('click', () => goToStep(1));
+
+    document.getElementById('inputName').addEventListener('keydown', e => { if (e.key === 'Enter') advanceName(); });
+    document.getElementById('inputCompany').addEventListener('keydown', e => { if (e.key === 'Enter') advanceCompany(); });
+
+    document.querySelectorAll('.role-card').forEach(card => {
+      const activate = () => selectRole(card.dataset.role, card);
+      card.addEventListener('click', activate);
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
+    });
+
+    async function selectRole(role, card) {
+      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+
+      await new Promise(r => setTimeout(r, 280));
+      document.getElementById('loadingOverlay').classList.add('visible');
 
       const { error } = await supabase.from('profiles').insert({
         id: session.user.id,
         email: session.user.email,
-        full_name: fullName,
-        company,
+        full_name: document.getElementById('inputName').value.trim(),
+        company: document.getElementById('inputCompany').value.trim(),
         role,
         status: 'pending'
       });
 
       if (error) {
-        msg.textContent = error.message;
-        msg.className = 'message error';
-        btn.disabled = false;
-        btn.textContent = 'Complete Setup →';
+        document.getElementById('loadingOverlay').classList.remove('visible');
+        card.classList.remove('selected');
+        showError(error.message);
       } else {
         window.location.href = '/pending.html';
       }
-    });
+    }
+
+    function showError(text) {
+      msg.textContent = text;
+      msg.className = 'message error';
+    }
   </script>
 </body>
 </html>
