@@ -5,26 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign In — LendPaper</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg">
   <script src="js/config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0d14;
-      --surface: #111520;
-      --border: #1e2535;
-      --gold: #e8b84b;
-      --gold-dim: rgba(232, 184, 75, 0.12);
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --danger: #ef4444;
+      --bg: #1c1c26;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.10);
+      --brand: #1A3C2E;
+      --brand-mid: #2D6A4F;
+      --gold: #D4A017;
+      --gold-dim: rgba(212,160,23,0.10);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.50);
+      --muted2: rgba(255,255,255,0.78);
     }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -34,19 +37,17 @@
       overflow: hidden;
     }
 
-    /* Background grid texture */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(232,184,75,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(232,184,75,0.03) 1px, transparent 1px);
+        linear-gradient(rgba(74,222,128,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,222,128,0.04) 1px, transparent 1px);
       background-size: 48px 48px;
       pointer-events: none;
     }
 
-    /* Ambient glow */
     body::after {
       content: '';
       position: fixed;
@@ -55,13 +56,13 @@
       transform: translateX(-50%);
       width: 600px;
       height: 400px;
-      background: radial-gradient(ellipse, rgba(232,184,75,0.06) 0%, transparent 70%);
+      background: radial-gradient(ellipse, rgba(45,106,79,0.12) 0%, transparent 70%);
       pointer-events: none;
     }
 
     .card {
       background: var(--surface);
-      border: 1px solid var(--border);
+      border: 0.5px solid var(--border);
       border-radius: 16px;
       padding: 48px;
       width: 100%;
@@ -76,41 +77,13 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 36px;
-    }
-
-    .logo-mark {
-      width: 36px;
-      height: 36px;
-      background: var(--gold);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 16px;
-      color: var(--bg);
-    }
-
-    .logo-text {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 20px;
-      color: var(--text);
-      letter-spacing: -0.02em;
-    }
+    .logo { margin-bottom: 36px; }
+    .logo img { display: block; height: 28px; width: auto; }
 
     h1 {
-      font-family: 'Syne', sans-serif;
+      font-size: 22px;
       font-weight: 700;
-      font-size: 24px;
-      letter-spacing: -0.03em;
-      color: var(--text);
+      letter-spacing: -0.02em;
       margin-bottom: 8px;
     }
 
@@ -118,31 +91,31 @@
       font-size: 14px;
       color: var(--muted);
       margin-bottom: 32px;
-      line-height: 1.5;
+      line-height: 1.6;
+      font-weight: 400;
     }
 
     .btn-google {
       width: 100%;
-      padding: 14px 20px;
-      background: var(--gold);
-      color: var(--bg);
-      border: none;
+      padding: 13px 20px;
+      background: var(--brand);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       font-weight: 500;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      transition: opacity 0.2s, transform 0.1s;
+      transition: background 0.2s, transform 0.1s;
       margin-bottom: 20px;
     }
 
-    .btn-google:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-google:hover { background: var(--brand-mid); transform: translateY(-1px); }
     .btn-google:active { transform: translateY(0); }
-
     .btn-google svg { width: 18px; height: 18px; flex-shrink: 0; }
 
     .divider {
@@ -160,7 +133,7 @@
     }
 
     .divider span {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -174,12 +147,12 @@
 
     input[type="email"] {
       flex: 1;
-      padding: 12px 16px;
-      background: var(--bg);
-      border: 1px solid var(--border);
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
       border-radius: 10px;
       color: var(--text);
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       font-size: 14px;
       outline: none;
       transition: border-color 0.2s;
@@ -189,20 +162,20 @@
     input[type="email"]::placeholder { color: var(--muted); }
 
     .btn-magic {
-      padding: 12px 18px;
+      padding: 12px 16px;
       background: transparent;
-      border: 1px solid var(--border);
+      border: 0.5px solid var(--border);
       border-radius: 10px;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
+      color: var(--muted2);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
       white-space: nowrap;
       transition: border-color 0.2s, color 0.2s;
     }
 
-    .btn-magic:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-magic:hover { border-color: var(--gold); color: var(--text); }
 
     .hint {
       font-size: 12px;
@@ -211,7 +184,7 @@
     }
 
     .message {
-      padding: 12px 16px;
+      padding: 12px 14px;
       border-radius: 8px;
       font-size: 13px;
       margin-bottom: 16px;
@@ -219,15 +192,15 @@
     }
 
     .message.success {
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      background: rgba(74,222,128,0.08);
+      border: 0.5px solid rgba(74,222,128,0.3);
       color: #4ade80;
       display: block;
     }
 
     .message.error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: rgba(239,68,68,0.08);
+      border: 0.5px solid rgba(239,68,68,0.3);
       color: #f87171;
       display: block;
     }
@@ -237,16 +210,12 @@
       font-size: 13px;
       color: var(--muted);
       padding-top: 24px;
-      border-top: 1px solid var(--border);
+      border-top: 0.5px solid var(--border);
       margin-top: 4px;
     }
 
-    .footer-link a {
-      color: var(--gold);
-      text-decoration: none;
-    }
-
-    .footer-link a:hover { text-decoration: underline; }
+    .footer-link a { color: var(--muted2); text-decoration: none; }
+    .footer-link a:hover { color: var(--text); }
 
     .loading { opacity: 0.6; pointer-events: none; }
   </style>
@@ -254,21 +223,20 @@
 <body>
   <div class="card">
     <div class="logo">
-      <div class="logo-mark">LP</div>
-      <span class="logo-text">LendPaper</span>
+      <img src="/public/assets/brand/logo-lockup-dark.svg" alt="LendPaper" height="28">
     </div>
 
     <h1>Sign in</h1>
-    <p class="subtitle">Early access members only. Use the button below to sign in with your Google account.</p>
+    <p class="subtitle">Early access members only. Sign in with your Google account to continue.</p>
 
     <div id="message" class="message"></div>
 
     <button class="btn-google" id="googleBtn">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#1a1a2e"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#1a1a2e"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#1a1a2e"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#1a1a2e"/>
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="rgba(255,255,255,0.7)"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="rgba(255,255,255,0.7)"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="rgba(255,255,255,0.7)"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="rgba(255,255,255,0.7)"/>
       </svg>
       Continue with Google
     </button>
@@ -300,7 +268,6 @@
       msg.className = `message ${type}`;
     }
 
-    // Google OAuth
     document.getElementById('googleBtn').addEventListener('click', async () => {
       const btn = document.getElementById('googleBtn');
       btn.classList.add('loading');
@@ -312,11 +279,10 @@
       if (error) {
         showMessage(error.message, 'error');
         btn.classList.remove('loading');
-        btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18">...</svg> Continue with Google`;
+        btn.textContent = 'Continue with Google';
       }
     });
 
-    // Magic link
     document.getElementById('magicBtn').addEventListener('click', async () => {
       const email = document.getElementById('emailInput').value.trim();
       if (!email) { showMessage('Please enter your email address.', 'error'); return; }
@@ -336,7 +302,6 @@
       btn.classList.remove('loading');
     });
 
-    // If already logged in, redirect
     const { data: { session } } = await supabase.auth.getSession();
     if (session) window.location.href = '/auth-callback.html';
   </script>

@@ -4,15 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Signing you in — LendPaper</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Syne:wght@700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg">
   <script src="js/config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --bg: #0a0d14; --gold: #e8b84b; --text: #e2e8f0; --muted: #64748b; }
+    :root { --bg: #1c1c26; --text: #ffffff; --muted: rgba(255,255,255,0.50); }
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -21,9 +23,9 @@
       gap: 20px;
     }
     .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid rgba(232,184,75,0.2);
-      border-top-color: var(--gold);
+      width: 36px; height: 36px;
+      border: 2px solid rgba(255,255,255,0.08);
+      border-top-color: #4ADE80;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }

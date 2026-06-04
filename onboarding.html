@@ -5,26 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Complete Your Profile — LendPaper</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg">
   <script src="js/config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0d14;
-      --surface: #111520;
-      --border: #1e2535;
-      --gold: #e8b84b;
-      --gold-dim: rgba(232, 184, 75, 0.12);
-      --text: #e2e8f0;
-      --muted: #64748b;
+      --bg: #1c1c26;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.10);
+      --brand: #1A3C2E;
+      --brand-mid: #2D6A4F;
+      --gold: #D4A017;
+      --gold-dim: rgba(212,160,23,0.10);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.50);
+      --muted2: rgba(255,255,255,0.78);
     }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -39,8 +42,8 @@
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(232,184,75,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(232,184,75,0.03) 1px, transparent 1px);
+        linear-gradient(rgba(74,222,128,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,222,128,0.04) 1px, transparent 1px);
       background-size: 48px 48px;
       pointer-events: none;
     }
@@ -53,13 +56,13 @@
       transform: translateX(-50%);
       width: 600px;
       height: 400px;
-      background: radial-gradient(ellipse, rgba(232,184,75,0.06) 0%, transparent 70%);
+      background: radial-gradient(ellipse, rgba(45,106,79,0.12) 0%, transparent 70%);
       pointer-events: none;
     }
 
     .card {
       background: var(--surface);
-      border: 1px solid var(--border);
+      border: 0.5px solid var(--border);
       border-radius: 16px;
       padding: 48px;
       width: 100%;
@@ -75,34 +78,8 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 32px;
-    }
-
-    .logo-mark {
-      width: 36px;
-      height: 36px;
-      background: var(--gold);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 16px;
-      color: var(--bg);
-    }
-
-    .logo-text {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 20px;
-      color: var(--text);
-      letter-spacing: -0.02em;
-    }
+    .logo { margin-bottom: 32px; }
+    .logo img { display: block; height: 28px; width: auto; }
 
     .progress {
       display: flex;
@@ -112,26 +89,24 @@
     }
 
     .dot {
-      height: 6px;
-      width: 6px;
+      height: 5px;
+      width: 5px;
       border-radius: 3px;
-      background: var(--border);
+      background: rgba(255,255,255,0.15);
       transition: width 0.3s ease, background 0.3s ease, opacity 0.3s ease;
     }
 
     .dot.active {
-      width: 22px;
-      background: var(--gold);
+      width: 20px;
+      background: var(--brand-mid);
     }
 
     .dot.done {
-      background: var(--gold);
-      opacity: 0.35;
+      background: var(--brand-mid);
+      opacity: 0.4;
     }
 
-    .steps-viewport {
-      overflow: hidden;
-    }
+    .steps-viewport { overflow: hidden; }
 
     .steps-track {
       display: flex;
@@ -139,10 +114,7 @@
       will-change: transform;
     }
 
-    .step {
-      min-width: 100%;
-      flex-shrink: 0;
-    }
+    .step { min-width: 100%; flex-shrink: 0; }
 
     .btn-back {
       display: inline-flex;
@@ -151,7 +123,7 @@
       background: none;
       border: none;
       color: var(--muted);
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       font-size: 13px;
       cursor: pointer;
       padding: 0;
@@ -162,10 +134,9 @@
     .btn-back:hover { color: var(--text); }
 
     h1 {
-      font-family: 'Syne', sans-serif;
+      font-size: 24px;
       font-weight: 700;
-      font-size: 26px;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.02em;
       line-height: 1.2;
       margin-bottom: 8px;
     }
@@ -174,18 +145,19 @@
       font-size: 14px;
       color: var(--muted);
       margin-bottom: 24px;
-      line-height: 1.5;
+      line-height: 1.6;
+      font-weight: 400;
     }
 
     input[type="text"] {
       width: 100%;
-      padding: 14px 16px;
-      background: var(--bg);
-      border: 1px solid var(--border);
+      padding: 13px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
       border-radius: 10px;
       color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 16px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
       outline: none;
       transition: border-color 0.2s;
       margin-bottom: 14px;
@@ -197,19 +169,19 @@
 
     .btn-next {
       width: 100%;
-      padding: 14px;
-      background: var(--gold);
-      color: var(--bg);
-      border: none;
+      padding: 13px;
+      background: var(--brand);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       font-weight: 500;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
+      transition: background 0.2s, transform 0.1s;
     }
 
-    .btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-next:hover { background: var(--brand-mid); transform: translateY(-1px); }
     .btn-next:active { transform: translateY(0); }
 
     .role-grid {
@@ -219,8 +191,8 @@
     }
 
     .role-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      border: 0.5px solid var(--border);
       border-radius: 12px;
       padding: 18px 14px;
       cursor: pointer;
@@ -234,20 +206,20 @@
     }
 
     .role-card:hover, .role-card:focus-visible {
-      border-color: var(--gold);
-      background: var(--gold-dim);
+      border-color: rgba(45,106,79,0.6);
+      background: rgba(45,106,79,0.08);
       transform: translateY(-2px);
     }
 
     .role-card.selected {
-      border-color: var(--gold);
-      background: var(--gold-dim);
+      border-color: var(--brand-mid);
+      background: rgba(45,106,79,0.12);
     }
 
     .role-icon {
       width: 40px;
       height: 40px;
-      background: rgba(232, 184, 75, 0.08);
+      background: rgba(45,106,79,0.12);
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -258,7 +230,7 @@
     .role-icon svg {
       width: 20px;
       height: 20px;
-      stroke: var(--gold);
+      stroke: #4ADE80;
       stroke-width: 1.75;
       fill: none;
       stroke-linecap: round;
@@ -266,10 +238,10 @@
     }
 
     .role-label {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
+      font-weight: 600;
+      font-size: 13px;
       color: var(--text);
+      letter-spacing: -0.01em;
     }
 
     .role-desc {
@@ -280,7 +252,7 @@
     }
 
     .message {
-      padding: 12px 16px;
+      padding: 12px 14px;
       border-radius: 8px;
       font-size: 13px;
       margin-bottom: 16px;
@@ -288,8 +260,8 @@
     }
 
     .message.error {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: rgba(239,68,68,0.08);
+      border: 0.5px solid rgba(239,68,68,0.3);
       color: #f87171;
       display: block;
     }
@@ -298,7 +270,7 @@
       display: none;
       position: absolute;
       inset: 0;
-      background: var(--surface);
+      background: rgba(28,28,38,0.95);
       border-radius: 16px;
       flex-direction: column;
       align-items: center;
@@ -310,22 +282,17 @@
     .loading-overlay.visible { display: flex; }
 
     .spinner {
-      width: 32px;
-      height: 32px;
-      border: 2px solid var(--border);
-      border-top-color: var(--gold);
+      width: 28px;
+      height: 28px;
+      border: 2px solid rgba(255,255,255,0.10);
+      border-top-color: #4ADE80;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .loading-text {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 16px;
-    }
-
+    .loading-text { font-weight: 600; font-size: 15px; }
     .loading-sub { font-size: 13px; color: var(--muted); }
   </style>
 </head>
@@ -333,8 +300,7 @@
   <div class="card">
 
     <div class="logo">
-      <div class="logo-mark">LP</div>
-      <span class="logo-text">LendPaper</span>
+      <img src="/public/assets/brand/logo-lockup-dark.svg" alt="LendPaper" height="28">
     </div>
 
     <div class="progress">

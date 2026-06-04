@@ -4,54 +4,76 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>You're on the list — LendPaper</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg">
   <script src="js/config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --bg:#0a0d14; --surface:#111520; --border:#1e2535; --gold:#e8b84b; --text:#e2e8f0; --muted:#64748b; }
+    :root {
+      --bg: #1c1c26;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.10);
+      --brand: #1A3C2E;
+      --brand-mid: #2D6A4F;
+      --gold: #D4A017;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.50);
+    }
     body {
-      background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif;
-      min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+      position: relative; overflow: hidden;
     }
     body::before {
-      content:''; position:fixed; inset:0;
-      background-image:linear-gradient(rgba(232,184,75,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(232,184,75,0.03) 1px, transparent 1px);
-      background-size:48px 48px; pointer-events:none;
+      content: ''; position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(74,222,128,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,222,128,0.04) 1px, transparent 1px);
+      background-size: 48px 48px; pointer-events: none;
+    }
+    body::after {
+      content: ''; position: fixed; top: -20%; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(45,106,79,0.12) 0%, transparent 70%);
+      pointer-events: none;
     }
     .card {
-      background:var(--surface); border:1px solid var(--border);
-      border-radius:16px; padding:56px 48px; width:100%; max-width:480px;
-      position:relative; z-index:1; text-align:center; animation:fadeUp 0.4s ease;
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: 16px; padding: 56px 48px; width: 100%; max-width: 480px;
+      position: relative; z-index: 1; text-align: center; animation: fadeUp 0.4s ease;
     }
     @keyframes fadeUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+    .logo { margin-bottom: 40px; display: flex; justify-content: center; }
+    .logo img { height: 28px; width: auto; }
     .icon {
-      width:64px; height:64px; background:rgba(232,184,75,0.12);
-      border:1px solid rgba(232,184,75,0.3); border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      margin:0 auto 28px; font-size:28px;
+      width: 64px; height: 64px;
+      background: rgba(45,106,79,0.15); border: 0.5px solid rgba(74,222,128,0.2);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 28px; font-size: 28px;
     }
-    h1 { font-family:'Syne',sans-serif; font-weight:700; font-size:26px; letter-spacing:-0.03em; margin-bottom:16px; }
-    p { font-size:15px; color:var(--muted); line-height:1.7; margin-bottom:12px; }
-    .contact { font-size:13px; color:var(--muted); margin-top:32px; padding-top:24px; border-top:1px solid var(--border); }
-    .contact a { color:var(--gold); text-decoration:none; }
-    .contact a:hover { text-decoration:underline; }
-    .logo { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:40px; }
-    .logo-mark { width:32px; height:32px; background:var(--gold); border-radius:7px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:14px; color:var(--bg); }
-    .logo-text { font-family:'Syne',sans-serif; font-weight:700; font-size:18px; letter-spacing:-0.02em; }
+    h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px; }
+    p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 12px; font-weight: 400; }
+    .contact {
+      font-size: 13px; color: var(--muted); margin-top: 32px; padding-top: 24px;
+      border-top: 0.5px solid var(--border);
+    }
+    .contact a { color: rgba(255,255,255,0.78); text-decoration: none; }
+    .contact a:hover { color: var(--text); }
   </style>
 </head>
 <body>
   <div class="card">
     <div class="logo">
-      <div class="logo-mark">LP</div>
-      <span class="logo-text">LendPaper</span>
+      <img src="/public/assets/brand/logo-lockup-dark.svg" alt="LendPaper" height="28">
     </div>
     <div class="icon">⏳</div>
     <h1>You're on the list.</h1>
     <p>We manually review each application to keep LendPaper's early access community tight and valuable.</p>
     <p>You'll hear from us shortly — usually within 24 hours.</p>
     <div class="contact">
-      Questions? <a href="mailto:steve@lendpaper.com">steve@lendpaper.com</a>
+      Questions? <a href="mailto:hello@lendpaper.com">hello@lendpaper.com</a>
     </div>
   </div>
 
@@ -61,7 +83,6 @@
   <script type="module">
     import { createClient } from '@supabase/supabase-js';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    // Poll every 30s — if approved, redirect automatically
     setInterval(async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
