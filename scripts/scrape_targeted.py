@@ -45,10 +45,11 @@ except ImportError:
 
 # ── Config ─────────────────────────────────────────────────────────────────────
 
-GITHUB_COPY   = Path(__file__).parent / "waterfall.html"
+ROOT_DIR      = Path(__file__).parent.parent
+GITHUB_COPY   = ROOT_DIR / "waterfall.html"
 DESKTOP_COPY  = Path.home() / "Desktop/LendPaper/waterfall.html"
-SCRATCH_DIR   = Path(__file__).parent / "scratch"
-LOG_DIR       = Path(__file__).parent / "logs"
+SCRATCH_DIR   = ROOT_DIR / "scratch"
+LOG_DIR       = ROOT_DIR / "logs"
 PATCH_FILE    = SCRATCH_DIR / "targeted_patches.json"
 
 RECIPIENT_EMAIL    = "stephengowa@gmail.com"

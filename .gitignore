@@ -7,3 +7,5 @@ files.zip
 scratch/
 *.bak
 .netlify/
+client_secret*.json
+*.zip

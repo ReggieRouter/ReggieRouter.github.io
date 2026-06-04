@@ -243,7 +243,31 @@ required field is null, zero, or holds its default/placeholder value.
 
 ---
 
-## 9. DSCR Risk Band Colors
+## 9. Dark Surface Tokens (Registry / Utility Features)
+
+Some features (e.g. state registry modals) use a dark surface distinct from the main light design system. Use these tokens exactly — do not substitute light-theme defaults.
+
+| Token | Value | Usage |
+|---|---|---|
+| Dark surface bg | `#1c1c26` | Modal container background |
+| Dark border | `rgba(255,255,255,0.10)` | Modal container border (0.5px) |
+| Dark card bg | `rgba(255,255,255,0.04)` | Inner card / steps card |
+| Dark card border | `rgba(255,255,255,0.08)` | Inner card border (0.5px) |
+| Dark text primary | `#ffffff` | Titles |
+| Dark text body | `rgba(255,255,255,0.50)` | Value prop paragraphs |
+| Dark text secondary | `rgba(255,255,255,0.78)` | Step item text |
+| Dark label | `rgba(255,255,255,0.28)` | Section labels (uppercase, 10.5px) |
+| Dark icon | `rgba(255,255,255,0.30)` | Close button, subtle icons |
+| Dark step bubble | `rgba(255,255,255,0.06)` bg, `rgba(255,255,255,0.40)` text | Step number circles |
+| Status — urgent | `rgba(220,80,80,0.15)` bg, `#e08080` text | Timeline/warning badges |
+| Status — available | `rgba(30,160,100,0.15)` bg, `#4ecb8f` text | Online/available badges |
+
+Modal container: `border-radius: 16px`, `padding: 1.75rem 1.75rem 1.5rem`, `max-width: 460px`.
+Badge pills: `border-radius: 5px`, `padding: 4px 10px`, `font-size: 11px`, `font-weight: 600`, `letter-spacing: 0.5px`.
+
+---
+
+## 10. DSCR Risk Band Colors
 
 These are fixed and must match exactly across the document and any UI representations.
 
@@ -253,3 +277,26 @@ These are fixed and must match exactly across the document and any UI representa
 | Moderate | Tighten terms | 10–20% | `#D97706` (orange dot) |
 | High | Likely overextended | 20–30% | `#EA580C` (dark orange dot) |
 | Severe | Decline / restructure | > 30% | `#DC2626` (red dot) |
+
+---
+
+## 11. Design References (Screenshots)
+
+**Open and visually inspect the image — do not rely on a textual description of it. The image is ground truth and wins over all prose descriptions.**
+
+### Primary reference — use this first for any layout, spacing, color, or component decision:
+
+`~/Desktop/Payment breakdown calculator screenshots/Payment Breakdown Screenshot (long image).png`
+
+This shows the full calculator: two-column layout, input panel, hero payment, stats grid, savings callout, talk track, Copy/Save PDF buttons, amortization table with early-payoff highlighted row and expanded savings drawer, and legal footer.
+
+### Supplemental — use only when the specific state is relevant:
+
+| Use when... | Screenshot |
+|---|---|
+| Verifying live recalculation behavior | `Payment breakdown calc 1.png` + `Payment breakdown calc 2 (it updates live as numbers are plugged in).png` |
+| Building or styling a dropdown/select input | `Payment Breakdown dropdown.png` |
+| Building or styling a tooltip | `Payment breakdown hover.png` |
+| Verifying print layout or PDF output | `Payment Breakdown Save as PDF page.png` |
+
+All files are in: `~/Desktop/Payment breakdown calculator screenshots/`

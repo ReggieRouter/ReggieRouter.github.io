@@ -1,5 +1,16 @@
 # LendPaper — Claude Instructions
 
+## File Index — Read Before Starting Any Task
+
+| File | Read when... |
+|---|---|
+| `docs/CALCULATORS.md` | Building or editing any calculator, tool, or financial UI |
+| `docs/PDF.md` | Touching any PDF export, print stylesheet, html2canvas config, or watermark |
+| `docs/BRANDING.md` | Any visual, layout, color, or typography decision |
+| `docs/LEGAL.md` | Any copy, disclaimer, legal page, or entity reference |
+
+---
+
 ## Deployment
 - Repo: `github.com:ReggieRouter/lendpaper.git` (Netlify auto-deploys on push to `main`)
 - Working directory: `~/Desktop/LendPaper`
@@ -36,6 +47,14 @@ The site uses client-side routing (spa-github-pages pattern). `/tools/*` slugs h
 This gives crawlers the OG tags they need, and users land in the SPA with the right tool open.
 Do this for every new tool added to `tools.js` with `presentation: "page"`.
 
+## Branding Rules
+
+- **Logo naming convention:** Assets ending in `-dark.svg` contain white/light text — place on dark backgrounds only. Assets ending in `-light.svg` contain dark text — place on light backgrounds only. Always verify contrast before finalizing.
+- **NEVER use the word "Lendio"** or any Lendio-branded assets in any content, code, or metadata. LendPaper is the exclusive project identity.
+- **Never append "Inc.", "LLC.", or any corporate suffix** to LendPaper until incorporation is confirmed. See `LEGAL.md`.
+
+---
+
 ## Waterfall dashboard (`waterfall.html`)
 - Lender display names have permanent overrides — never strip or revert them
 - See `DISPLAY_NAME_OVERRIDES` in `waterfall.html`
@@ -49,16 +68,26 @@ cd ~/lendpaper-engine && source venv/bin/activate && PYTHONUNBUFFERED=1 python3 
 
 To add lenders: update the `NEW_LENDERS` list in `ingest_rest.py` with `{"name": "...", "url": "..."}` entries, then run it. Each lender is scraped with Playwright + Gemini and inserted directly to Supabase with `review_status=approved`.
 
-## PDF exports (amortization)
-- `html2canvas` config must include `scrollX: 0, scrollY: 0` — dropping these causes left-side content clipping
+## PDF exports
+Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules, and known failure modes are in `PDF.md`.
 
-## PDF anti-fraud watermarks — NEVER remove or weaken these
-Every PDF exported via `PDF_HELPER.generatePDF()` must carry three layers of document authentication:
+**Critical summary:**
+- `html2canvas` config must always include `scrollX: 0, scrollY: 0` — dropping these causes left-side content clipping
+- Never call `window.print()` directly — always route through `PDF_HELPER.generatePDF()`
+- Never remove or weaken the 3-layer anti-fraud watermark system (see `docs/PDF.md §1`)
 
-1. **Visible quote ID in header** — `Doc #LP-YYYYMMDD-XXXXXX · [date]` rendered in small gray text below the document title. Injected by `initPrintLayout(title, quoteId)`.
-2. **Visible per-page stamp** — `LP-YYYYMMDD-XXXXXX · lendpaper.com` fixed bottom-right of every page, 6pt gray. Injected as `#lp-quote-stamp` div with `position:fixed` so it repeats on all printed pages.
-3. **Invisible forensic fingerprint** — white text div (`#lp-doc-fingerprint`) containing the same Quote ID plus timestamp, origin URL, user agent, screen size, and timezone. Invisible on screen; extractable by any PDF text tool or Select All+Copy.
+## Supabase & Infrastructure
 
-All three use the **same Quote ID** (generated once per export via `generateQuoteId()`), so they cross-reference each other.
+- **Supabase URL:** `https://arpquyoucdsdmbetgftj.supabase.co`
+- **Tables:** `lender_data`, `state_registries`, `pending_changes`, `scrape_runs`
+- **Admin panel:** `lp-panel.html` — manages pending changes, scrape diffs, lender data
+- **Scraper (current):** `~/lendpaper-engine/scrape_blanks_v2.py` — writes diffs to `pending_changes` table. Use this. Do NOT use `fill_blanks.py` (deprecated — writes directly to DB).
+- **Publisher:** `~/lendpaper-engine/publish.py` — regenerates `waterfall.html` from Supabase. **Pending fix needed:** must escape source_snippets before writing to waterfall.html:
+  ```python
+  snippet = (snippet or '').replace('\n', '\\n').replace('\r', '').replace('</script>', '<\\/script>')
+  ```
+- **Job scraper:** `scripts/scrape_jobs.py` — pending change: switch lender source from waterfall.html parsing to Postgres query (`SELECT lender_name, source_url FROM underwriting_rules WHERE source_url IS NOT NULL`)
 
-**Do not remove, comment out, or override these layers.** They exist to prevent fraud and limit legal exposure from falsified or disputed quotes. If adding a new calculator or PDF export path, always route through `PDF_HELPER.generatePDF()` — never call `window.print()` directly.
+## File Integrity Rule
+
+After every HTML file edit, verify the file ends exactly at `</html>`. Never leave stray characters, duplicated blocks, or garbage text after the logical end of a file. Run `tail -5 filename.html` to confirm.
