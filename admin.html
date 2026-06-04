@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — LendPaper</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="js/config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --bg:#0a0d14; --surface:#111520; --surface2:#161b27;
+      --border:#1e2535; --gold:#e8b84b; --gold-dim:rgba(232,184,75,0.1);
+      --text:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+      --green:#22c55e; --red:#ef4444; --amber:#f59e0b;
+    }
+    body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+    /* TOP NAV */
+    nav {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 32px; border-bottom:1px solid var(--border);
+      background:var(--surface); position:sticky; top:0; z-index:100;
+    }
+    .logo { display:flex; align-items:center; gap:10px; }
+    .logo-mark { width:30px; height:30px; background:var(--gold); border-radius:7px; display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:13px; color:var(--bg); }
+    .logo-text { font-family:'Syne',sans-serif; font-weight:700; font-size:17px; letter-spacing:-0.02em; }
+    .admin-badge { background:var(--gold-dim); border:1px solid rgba(232,184,75,0.3); color:var(--gold); font-size:11px; font-weight:500; padding:3px 10px; border-radius:100px; text-transform:uppercase; letter-spacing:0.08em; }
+    .btn-signout { font-size:13px; color:var(--muted); background:none; border:1px solid var(--border); padding:7px 14px; border-radius:8px; cursor:pointer; transition:color 0.2s,border-color 0.2s; font-family:'DM Sans',sans-serif; }
+    .btn-signout:hover { color:var(--text); border-color:var(--muted); }
+
+    /* LAYOUT */
+    .page { max-width:1400px; margin:0 auto; padding:32px; }
+    .page-header { margin-bottom:32px; }
+    .page-header h1 { font-family:'Syne',sans-serif; font-weight:700; font-size:26px; letter-spacing:-0.03em; margin-bottom:4px; }
+    .page-header p { font-size:14px; color:var(--muted); }
+
+    /* STATS ROW */
+    .stats { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:32px; }
+    .stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; }
+    .stat-label { font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:8px; }
+    .stat-value { font-family:'Syne',sans-serif; font-weight:700; font-size:28px; letter-spacing:-0.02em; color:var(--text); }
+    .stat-value.gold { color:var(--gold); }
+
+    /* SECTIONS */
+    .section { margin-bottom:40px; }
+    .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .section-header h2 { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; letter-spacing:-0.01em; }
+    .section-header p { font-size:13px; color:var(--muted); }
+
+    /* TABLES */
+    .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    table { width:100%; border-collapse:collapse; }
+    thead th { padding:12px 16px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); font-weight:500; border-bottom:1px solid var(--border); background:var(--surface2); }
+    tbody td { padding:13px 16px; font-size:13px; border-bottom:1px solid var(--border); }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:var(--surface2); }
+
+    /* DOMAIN CLUSTER HIGHLIGHT */
+    .cluster-row { background:rgba(245,158,11,0.05) !important; }
+    .cluster-row:hover { background:rgba(245,158,11,0.1) !important; }
+    .cluster-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.4); color:var(--amber); font-size:11px; font-weight:500; padding:2px 8px; border-radius:100px; margin-left:8px; }
+
+    /* STATUS BADGES */
+    .badge { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:500; padding:3px 10px; border-radius:100px; }
+    .badge.approved { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:var(--green); }
+    .badge.pending { background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); color:var(--amber); }
+    .badge.denied { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:var(--red); }
+
+    /* ACTION BUTTONS */
+    .btn-approve { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:var(--green); font-size:12px; padding:4px 12px; border-radius:6px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.2s; }
+    .btn-approve:hover { background:rgba(34,197,94,0.2); }
+    .btn-deny { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:var(--red); font-size:12px; padding:4px 12px; border-radius:6px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.2s; }
+    .btn-deny:hover { background:rgba(239,68,68,0.2); }
+    .btn-invite-send { background:var(--gold-dim); border:1px solid rgba(232,184,75,0.3); color:var(--gold); font-size:12px; padding:4px 12px; border-radius:6px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.2s; }
+    .btn-invite-send:hover { background:rgba(232,184,75,0.2); }
+    .btn-dismiss { background:rgba(100,116,139,0.1); border:1px solid rgba(100,116,139,0.3); color:var(--muted); font-size:12px; padding:4px 12px; border-radius:6px; cursor:pointer; font-family:'DM Sans',sans-serif; }
+
+    .mono { font-family:'DM Mono',monospace; font-size:12px; color:var(--muted2); }
+
+    /* INVITE TOOL */
+    .invite-tool { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; }
+    .invite-tool h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:15px; margin-bottom:16px; }
+    .invite-row { display:flex; gap:10px; }
+    .invite-row input { flex:1; padding:11px 14px; background:var(--bg); border:1px solid var(--border); border-radius:9px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; outline:none; }
+    .invite-row input:focus { border-color:var(--gold); }
+    .btn-gen { padding:11px 20px; background:var(--gold); color:var(--bg); border:none; border-radius:9px; font-family:'DM Sans',sans-serif; font-weight:500; font-size:14px; cursor:pointer; white-space:nowrap; transition:opacity 0.2s; }
+    .btn-gen:hover { opacity:0.9; }
+    .invite-result { margin-top:14px; display:none; }
+    .invite-result .link-box { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; font-family:'DM Mono',monospace; font-size:12px; color:var(--muted2); word-break:break-all; }
+    .btn-copy { margin-top:8px; font-size:12px; color:var(--gold); background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; padding:0; }
+
+    .empty-state { text-align:center; padding:48px; color:var(--muted); font-size:14px; }
+
+    .loading-spinner { display:flex; align-items:center; justify-content:center; padding:48px; }
+    .spinner { width:28px; height:28px; border:2px solid rgba(232,184,75,0.2); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg);} }
+
+    @media(max-width:1024px) { .stats{grid-template-columns:repeat(3,1fr);} }
+    @media(max-width:640px) { .stats{grid-template-columns:1fr 1fr;} .page{padding:20px;} }
+  </style>
+</head>
+<body>
+  <nav>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="logo"><div class="logo-mark">LP</div><span class="logo-text">LendPaper</span></div>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <button class="btn-signout" id="signoutBtn">Sign out</button>
+  </nav>
+
+  <div class="page">
+    <div id="gateCheck" style="display:flex;align-items:center;justify-content:center;min-height:60vh;">
+      <div class="spinner"></div>
+    </div>
+    <div id="adminContent" style="display:none;">
+      <div class="page-header">
+        <h1>Command Center</h1>
+        <p>User management, adoption tracking, and outbound intelligence.</p>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats" id="statsRow">
+        <div class="stat"><div class="stat-label">Total Users</div><div class="stat-value gold" id="statTotal">—</div></div>
+        <div class="stat"><div class="stat-label">Approved</div><div class="stat-value" id="statApproved">—</div></div>
+        <div class="stat"><div class="stat-label">Pending</div><div class="stat-value" id="statPending">—</div></div>
+        <div class="stat"><div class="stat-label">Amo Views (7d)</div><div class="stat-value" id="statAmo">—</div></div>
+        <div class="stat"><div class="stat-label">Waterfall Views (7d)</div><div class="stat-value" id="statWaterfall">—</div></div>
+      </div>
+
+      <!-- USERS TABLE -->
+      <div class="section">
+        <div class="section-header">
+          <div><h2>Users</h2><p style="margin-top:4px;font-size:13px;color:var(--muted);">🔥 = 3+ users from same company domain. Call them.</p></div>
+        </div>
+        <div class="table-wrap">
+          <div id="usersLoading" class="loading-spinner"><div class="spinner"></div></div>
+          <table id="usersTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Name</th><th>Company</th><th>Role</th><th>Domain</th>
+                <th>Status</th><th>Signed Up</th><th>Last Seen</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+          <div id="usersEmpty" class="empty-state" style="display:none;">No users yet.</div>
+        </div>
+      </div>
+
+      <!-- COMPANY ADOPTION TRACKER -->
+      <div class="section">
+        <div class="section-header">
+          <div><h2>Company Adoption Tracker</h2><p style="margin-top:4px;font-size:13px;color:var(--muted);">Your outbound hit list. Sort by user count, call the ones with 3+.</p></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Domain</th><th>Users</th><th>Roles</th><th>Last Active</th><th>Flag</th></tr>
+            </thead>
+            <tbody id="domainBody"></tbody>
+          </table>
+          <div id="domainEmpty" class="empty-state" style="display:none;">No domain data yet.</div>
+        </div>
+      </div>
+
+      <!-- WAITLIST -->
+      <div class="section">
+        <div class="section-header">
+          <div><h2>Waitlist Queue</h2></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Company</th><th>Role</th><th>Date</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="waitlistBody"></tbody>
+          </table>
+          <div id="waitlistEmpty" class="empty-state" style="display:none;">No pending waitlist requests.</div>
+        </div>
+      </div>
+
+      <!-- SEND INVITE -->
+      <div class="section">
+        <div class="section-header"><div><h2>Send Manual Invite</h2></div></div>
+        <div class="invite-tool">
+          <h3>Generate an invite link</h3>
+          <div class="invite-row">
+            <input type="email" id="inviteEmail" placeholder="broker@company.com" />
+            <button class="btn-gen" id="genInviteBtn">Generate Link</button>
+          </div>
+          <div class="invite-result" id="inviteResult">
+            <div class="link-box" id="inviteLink"></div>
+            <button class="btn-copy" id="copyBtn">Copy link</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">
+    { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+  </script>
+  <script type="module">
+    import { createClient } from '@supabase/supabase-js';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // GATE: admin only
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session || session.user.email !== ADMIN_EMAIL) {
+      window.location.href = '/index.html';
+    }
+
+    document.getElementById('gateCheck').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+
+    document.getElementById('signoutBtn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/index.html';
+    });
+
+    // ——— LOAD DATA ———
+
+    async function loadUsers() {
+      const { data: users, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      document.getElementById('usersLoading').style.display = 'none';
+
+      if (!users || users.length === 0) {
+        document.getElementById('usersEmpty').style.display = 'block';
+        return [];
+      }
+
+      document.getElementById('usersTable').style.display = 'table';
+
+      // Count domains for clustering
+      const domainCount = {};
+      users.forEach(u => {
+        const d = u.email_domain || u.email?.split('@')[1] || '';
+        domainCount[d] = (domainCount[d] || 0) + 1;
+      });
+
+      // Stats
+      document.getElementById('statTotal').textContent = users.length;
+      document.getElementById('statApproved').textContent = users.filter(u => u.status === 'approved').length;
+      document.getElementById('statPending').textContent = users.filter(u => u.status === 'pending').length;
+
+      const tbody = document.getElementById('usersBody');
+      tbody.innerHTML = '';
+      users.forEach(u => {
+        const domain = u.email_domain || u.email?.split('@')[1] || '—';
+        const isCluster = domainCount[domain] >= 3;
+        const tr = document.createElement('tr');
+        if (isCluster) tr.classList.add('cluster-row');
+        tr.innerHTML = `
+          <td>${u.full_name || '—'}</td>
+          <td>${u.company || '—'}${isCluster ? `<span class="cluster-badge">🔥 ${domainCount[domain]} users</span>` : ''}</td>
+          <td style="text-transform:capitalize;">${u.role || '—'}</td>
+          <td class="mono">${domain}</td>
+          <td><span class="badge ${u.status}">${u.status}</span></td>
+          <td class="mono">${u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
+          <td class="mono">${u.last_seen ? new Date(u.last_seen).toLocaleDateString() : '—'}</td>
+          <td style="display:flex;gap:6px;flex-wrap:wrap;">
+            ${u.status !== 'approved' ? `<button class="btn-approve" onclick="updateStatus('${u.id}','approved')">Approve</button>` : ''}
+            ${u.status !== 'denied' ? `<button class="btn-deny" onclick="updateStatus('${u.id}','denied')">Deny</button>` : ''}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      return { users, domainCount };
+    }
+
+    async function loadDomains(users) {
+      if (!users) return;
+      const domainMap = {};
+      users.forEach(u => {
+        const d = u.email_domain || u.email?.split('@')[1] || 'unknown';
+        if (!domainMap[d]) domainMap[d] = { count: 0, roles: new Set(), lastSeen: null };
+        domainMap[d].count++;
+        if (u.role) domainMap[d].roles.add(u.role);
+        if (u.last_seen && (!domainMap[d].lastSeen || u.last_seen > domainMap[d].lastSeen)) {
+          domainMap[d].lastSeen = u.last_seen;
+        }
+      });
+
+      const sorted = Object.entries(domainMap).sort((a,b) => b[1].count - a[1].count);
+      const tbody = document.getElementById('domainBody');
+      tbody.innerHTML = '';
+
+      if (sorted.length === 0) {
+        document.getElementById('domainEmpty').style.display = 'block';
+        return;
+      }
+
+      sorted.forEach(([domain, data]) => {
+        const tr = document.createElement('tr');
+        if (data.count >= 3) tr.classList.add('cluster-row');
+        tr.innerHTML = `
+          <td class="mono">${domain}</td>
+          <td><strong>${data.count}</strong></td>
+          <td style="text-transform:capitalize;">${[...data.roles].join(', ') || '—'}</td>
+          <td class="mono">${data.lastSeen ? new Date(data.lastSeen).toLocaleDateString() : '—'}</td>
+          <td>${data.count >= 3 ? '<span class="cluster-badge">🔥 Call this company</span>' : '—'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadWaitlist() {
+      const { data: waitlist } = await supabase
+        .from('waitlist')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+
+      const tbody = document.getElementById('waitlistBody');
+      tbody.innerHTML = '';
+
+      if (!waitlist || waitlist.length === 0) {
+        document.getElementById('waitlistEmpty').style.display = 'block';
+        return;
+      }
+
+      waitlist.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${w.full_name || '—'}</td>
+          <td class="mono">${w.email}</td>
+          <td>${w.company || '—'}</td>
+          <td style="text-transform:capitalize;">${w.role || '—'}</td>
+          <td class="mono">${new Date(w.created_at).toLocaleDateString()}</td>
+          <td style="display:flex;gap:6px;">
+            <button class="btn-invite-send" onclick="sendInviteToWaitlist('${w.email}','${w.id}')">Send Invite</button>
+            <button class="btn-dismiss" onclick="dismissWaitlist('${w.id}')">Dismiss</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadUsageStats() {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: amoData } = await supabase.from('usage_events').select('id').eq('tool','amortization').gte('created_at', sevenDaysAgo);
+      const { data: waterfallData } = await supabase.from('usage_events').select('id').eq('tool','waterfall').gte('created_at', sevenDaysAgo);
+      document.getElementById('statAmo').textContent = amoData?.length || 0;
+      document.getElementById('statWaterfall').textContent = waterfallData?.length || 0;
+    }
+
+    // Load everything
+    const result = await loadUsers();
+    if (result?.users) await loadDomains(result.users);
+    await loadWaitlist();
+    await loadUsageStats();
+
+    // ——— ACTIONS ———
+
+    window.updateStatus = async (userId, status) => {
+      const { error } = await supabase.from('profiles').update({ status }).eq('id', userId);
+      if (!error) location.reload();
+      else alert('Error: ' + error.message);
+    };
+
+    window.dismissWaitlist = async (id) => {
+      await supabase.from('waitlist').update({ status: 'dismissed' }).eq('id', id);
+      location.reload();
+    };
+
+    window.sendInviteToWaitlist = async (email, waitlistId) => {
+      // Generate invite token
+      const { data, error } = await supabase.from('invites').insert({ email, created_by: session.user.id }).select().single();
+      if (error) { alert('Error generating invite: ' + error.message); return; }
+
+      // Mark waitlist as invited
+      await supabase.from('waitlist').update({ status: 'invited' }).eq('id', waitlistId);
+
+      const inviteUrl = `${window.location.origin}/login.html?invite=${data.token}`;
+      const subject = encodeURIComponent('Your LendPaper Early Access');
+      const body = encodeURIComponent(`Hi,\n\nYou're in. Here's your LendPaper early access link:\n\n${inviteUrl}\n\nThis link expires in 7 days.\n\n— Steve\nLendPaper`);
+      window.open(`mailto:${email}?subject=${subject}&body=${body}`);
+      location.reload();
+    };
+
+    // Manual invite generator
+    document.getElementById('genInviteBtn').addEventListener('click', async () => {
+      const email = document.getElementById('inviteEmail').value.trim();
+      const { data, error } = await supabase.from('invites').insert({ email: email || null, created_by: session.user.id }).select().single();
+      if (error) { alert('Error: ' + error.message); return; }
+      const url = `${window.location.origin}/login.html?invite=${data.token}`;
+      document.getElementById('inviteLink').textContent = url;
+      document.getElementById('inviteResult').style.display = 'block';
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const link = document.getElementById('inviteLink').textContent;
+      navigator.clipboard.writeText(link).then(() => {
+        document.getElementById('copyBtn').textContent = 'Copied ✓';
+        setTimeout(() => document.getElementById('copyBtn').textContent = 'Copy link', 2000);
+      });
+    });
+  </script>
+</body>
+</html>

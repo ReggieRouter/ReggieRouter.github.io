@@ -2151,6 +2151,16 @@
   }
   .lp-cmp-muted { color: var(--color-text-muted); font-weight: 400; }
 </style>
+<script src="js/config.js"></script>
+<script type="importmap">
+  { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+</script>
+<script type="module">
+  import { requireApprovedUser, logUsage } from './js/auth.js';
+  const profile = await requireApprovedUser();
+  if (!profile) return;
+  logUsage('waterfall', 'view');
+</script>
 </head>
 <body>
 
@@ -8159,6 +8169,7 @@
   searchInput.addEventListener('input', (e) => {
     activeFilters.search = e.target.value;
     renderTable();
+    if (!window._lpShareShown) { window._lpShareShown = true; document.getElementById('sharePrompt').style.display = 'block'; }
   });
 
   // Risk chips (exclusive)
@@ -8932,6 +8943,19 @@
   })();
 
   // v2026-05-28
+</script>
+
+<div id="sharePrompt" style="display:none; position:fixed; bottom:24px; right:24px; background:#111520; border:1px solid #1e2535; border-radius:12px; padding:16px 20px; font-family:'Inter',sans-serif; font-size:14px; color:#e2e8f0; z-index:999; max-width:300px; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+  Your team would love this.
+  <a href="#" id="shareLink" style="color:#e8b84b; display:block; margin-top:6px; text-decoration:none;" onclick="shareWithTeam()">Invite them →</a>
+  <button onclick="document.getElementById('sharePrompt').style.display='none'" style="position:absolute;top:8px;right:12px;background:none;border:none;color:#64748b;cursor:pointer;font-size:16px;">×</button>
+</div>
+<script>
+function shareWithTeam() {
+  const subject = encodeURIComponent('Check out LendPaper');
+  const body = encodeURIComponent("I've been using LendPaper for deal analysis — the lender waterfall alone is worth it. Request access here: https://lendpaper.com/early-access.html");
+  window.open('mailto:?subject=' + subject + '&body=' + body);
+}
 </script>
 </body>
 </html>

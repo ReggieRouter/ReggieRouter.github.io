@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signing you in — LendPaper</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Syne:wght@700&display=swap" rel="stylesheet" />
+  <script src="js/config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #0a0d14; --gold: #e8b84b; --text: #e2e8f0; --muted: #64748b; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(232,184,75,0.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    p { color: var(--muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <p>Signing you in...</p>
+
+  <script type="importmap">
+    { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+  </script>
+  <script type="module">
+    import { createClient } from '@supabase/supabase-js';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Give Supabase a moment to process the token from the URL
+    await new Promise(r => setTimeout(r, 500));
+
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    if (!session || error) {
+      window.location.href = '/login.html';
+    } else {
+      // Check if profile exists
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, status')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!profile) {
+        // New user — send to onboarding
+        window.location.href = '/onboarding.html';
+      } else if (profile.status === 'pending') {
+        window.location.href = '/pending.html';
+      } else if (profile.status === 'denied') {
+        window.location.href = '/denied.html';
+      } else if (profile.status === 'approved') {
+        const next = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
+        sessionStorage.removeItem('redirectAfterLogin');
+        window.location.href = next;
+      } else {
+        window.location.href = '/pending.html';
+      }
+    }
+  </script>
+</body>
+</html>

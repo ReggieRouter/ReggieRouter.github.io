@@ -804,6 +804,16 @@
         body.pdf-export-mode .table-scroll-container table th:nth-child(6),
         body.pdf-export-mode .table-scroll-container table td:nth-child(6) { width: 26% !important; }
     </style>
+<script src="../js/config.js"></script>
+<script type="importmap">
+  { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+</script>
+<script type="module">
+  import { requireApprovedUser, logUsage } from '../js/auth.js';
+  const profile = await requireApprovedUser();
+  if (!profile) return;
+  logUsage('amortization', 'view');
+</script>
 </head>
 <body>
 
@@ -1664,6 +1674,7 @@
             const discPct = cleanNumericInput(document.getElementById(`discPct-${id}`).value) || 0;
 
             if(!amt || !factor || !term) return;
+            if (!window._lpShareShown) { window._lpShareShown = true; document.getElementById('sharePrompt').style.display = 'block'; }
 
             let termMonths = term;
             if (termUnit === 'wks') {
@@ -1846,5 +1857,18 @@
             Full terms: <a href="https://lendpaper.com/legal/estimates">lendpaper.com/legal/estimates</a>
         </div>
     </div>
+
+<div id="sharePrompt" style="display:none; position:fixed; bottom:24px; right:24px; background:#111520; border:1px solid #1e2535; border-radius:12px; padding:16px 20px; font-family:'Inter',sans-serif; font-size:14px; color:#e2e8f0; z-index:999; max-width:300px; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+  Your team would love this.
+  <a href="#" id="shareLink" style="color:#e8b84b; display:block; margin-top:6px; text-decoration:none;" onclick="shareWithTeam()">Invite them →</a>
+  <button onclick="document.getElementById('sharePrompt').style.display='none'" style="position:absolute;top:8px;right:12px;background:none;border:none;color:#64748b;cursor:pointer;font-size:16px;">×</button>
+</div>
+<script>
+function shareWithTeam() {
+  const subject = encodeURIComponent('Check out LendPaper');
+  const body = encodeURIComponent("I've been using LendPaper for deal analysis — the amortization calculator alone is worth it. Request access here: https://lendpaper.com/early-access.html");
+  window.open('mailto:?subject=' + subject + '&body=' + body);
+}
+</script>
 </body>
 </html>
