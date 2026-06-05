@@ -51,7 +51,21 @@
       setTimeout(() => finish(null), 6000);
     });
     if (!session) {
-      showError('No session was established after sign-in. Please try again.');
+      // Diagnose: did the provider redirect even deliver credentials?
+      const code = qs.get('code');
+      const hasToken = hs.get('access_token');
+      if (code) {
+        const { error: xerr } = await supabase.auth.exchangeCodeForSession(code);
+        if (xerr) {
+          showError('Code exchange failed: ' + xerr.message);
+        } else {
+          window.location.replace('/auth-callback.html'); // session stored — re-run routing clean
+        }
+      } else if (hasToken) {
+        showError('Token arrived but the session could not be stored. Please try again.');
+      } else {
+        showError('Arrived without credentials — the sign-in redirect dropped them (no code or access_token in URL).');
+      }
     } else {
       const { data: profile } = await supabase.from('profiles').select('id, status, is_admin').eq('id', session.user.id).single();
       if (!profile) {
