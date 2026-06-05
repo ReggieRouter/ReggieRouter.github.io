@@ -3,92 +3,139 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>You're on the list — LendPaper</title>
+  <title>You're on the List — LendPaper</title>
+  <meta property="og:title" content="You're on the List — LendPaper" />
+  <meta property="og:description" content="Your LendPaper application is under review. Questions? Email hello@lendpaper.com" />
+  <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+  <meta property="og:url" content="https://lendpaper.com/pending" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+  <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg">
-  <script src="js/config.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #1c1c26;
-      --surface: rgba(255,255,255,0.04);
-      --border: rgba(255,255,255,0.10);
-      --brand: #1A3C2E;
-      --brand-mid: #2D6A4F;
-      --gold: #D4A017;
-      --text: #ffffff;
-      --muted: rgba(255,255,255,0.50);
+      --bg: #F8FAF7; --card: #FFFFFF; --border: rgba(0,0,0,0.08); --border-mid: rgba(0,0,0,0.12);
+      --brand: #1A3C2E; --brand-mid: #2D6A4F; --brand-light: #34A878; --brand-vivid: #4ADE80;
+      --gold: #B8870A; --gold-bg: rgba(184,135,10,0.07); --gold-bd: rgba(184,135,10,0.2);
+      --text: #0D1A10; --muted: #6B7C70; --muted2: #3D5445;
     }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
-      position: relative; overflow: hidden;
-    }
-    body::before {
-      content: ''; position: fixed; inset: 0;
-      background-image:
-        linear-gradient(rgba(74,222,128,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(74,222,128,0.04) 1px, transparent 1px);
-      background-size: 48px 48px; pointer-events: none;
-    }
-    body::after {
-      content: ''; position: fixed; top: -20%; left: 50%; transform: translateX(-50%);
-      width: 600px; height: 400px;
-      background: radial-gradient(ellipse, rgba(45,106,79,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .card {
-      background: var(--surface); border: 0.5px solid var(--border);
-      border-radius: 16px; padding: 56px 48px; width: 100%; max-width: 480px;
-      position: relative; z-index: 1; text-align: center; animation: fadeUp 0.4s ease;
-    }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
-    .logo { margin-bottom: 40px; display: flex; justify-content: center; }
-    .logo img { height: 28px; width: auto; }
-    .icon {
-      width: 64px; height: 64px;
-      background: rgba(45,106,79,0.15); border: 0.5px solid rgba(74,222,128,0.2);
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 28px; font-size: 28px;
-    }
-    h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px; }
-    p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 12px; font-weight: 400; }
-    .contact {
-      font-size: 13px; color: var(--muted); margin-top: 32px; padding-top: 24px;
-      border-top: 0.5px solid var(--border);
-    }
-    .contact a { color: rgba(255,255,255,0.78); text-decoration: none; }
-    .contact a:hover { color: var(--text); }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: linear-gradient(rgba(26,60,46,0.032) 1px, transparent 1px), linear-gradient(90deg, rgba(26,60,46,0.032) 1px, transparent 1px); background-size: 52px 52px; }
+    #waveBg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .glow { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); width: 600px; height: 320px; background: radial-gradient(ellipse, rgba(52,168,120,0.065) 0%, transparent 68%); pointer-events: none; z-index: 0; animation: breathe 7s ease-in-out infinite; }
+    @keyframes breathe { 0%,100%{opacity:.6;transform:translateX(-50%) scale(1)} 50%{opacity:1;transform:translateX(-50%) scale(1.06)} }
+    .page { position: relative; z-index: 1; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .card { width: 100%; max-width: 420px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 4px 32px rgba(0,0,0,0.055); animation: riseIn .42s cubic-bezier(.22,1,.36,1) both; }
+    @keyframes riseIn { from{opacity:0;transform:translateY(16px) scale(.99)} to{opacity:1;transform:none} }
+    .logo { display: flex; align-items: center; justify-content: center; gap: 9px; margin-bottom: 26px; }
+    .logo-mark { width: 28px; height: 28px; border-radius: 7px; overflow: hidden; }
+    .logo-word { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 16px; color: var(--text); letter-spacing: -0.02em; }
+    .logo-word span { color: var(--brand-mid); }
+    .clock-wrap { width: 60px; height: 60px; background: rgba(52,168,120,0.08); border: 1px solid rgba(52,168,120,0.18); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .clock-svg { width: 34px; height: 34px; }
+    .clock-face { stroke: rgba(52,168,120,0.45); fill: none; }
+    .clock-tick { stroke: rgba(52,168,120,0.3); }
+    .clock-hour { stroke: var(--text); stroke-linecap: round; transform-origin: 18px 18px; transform: rotate(-60deg); opacity: .7; }
+    .clock-minute { stroke: var(--brand-light); stroke-linecap: round; transform-origin: 18px 18px; animation: tickMin 8s linear infinite; }
+    .clock-center { fill: var(--brand-light); }
+    @keyframes tickMin { to { transform: rotate(360deg); } }
+    h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px; letter-spacing: -0.025em; color: var(--text); margin-bottom: 8px; }
+    .body-text { font-size: 14px; color: var(--muted2); line-height: 1.65; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+    .divider { height: 1px; background: var(--border); margin: 0 0 22px; }
+    .share-label { font-size: 12.5px; color: var(--muted); margin-bottom: 13px; line-height: 1.55; }
+    .share-label strong { color: var(--muted2); font-weight: 500; }
+    .share-row { display: flex; gap: 8px; }
+    .btn-copy { flex: 1; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border-mid); border-radius: 9px; color: var(--muted2); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: background .18s, border-color .18s, color .18s; }
+    .btn-copy:hover { background: #EFF1EE; border-color: rgba(0,0,0,0.18); color: var(--text); }
+    .btn-copy.done { color: var(--brand-mid); border-color: rgba(45,106,79,0.3); background: rgba(45,106,79,0.05); }
+    .btn-slack { padding: 10px 14px; background: rgba(74,36,122,0.06); border: 1px solid rgba(74,36,122,0.18); border-radius: 9px; color: #6B3FA0; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 7px; white-space: nowrap; transition: background .18s; }
+    .btn-slack:hover { background: rgba(74,36,122,0.1); }
+    .slack-msg { display: none; margin-top: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 12px; text-align: left; }
+    .slack-msg.visible { display: block; }
+    .slack-msg p { font-size: 12.5px; color: var(--muted2); line-height: 1.6; margin-bottom: 10px; font-style: italic; }
+    .btn-copy-slack { font-size: 11.5px; font-weight: 600; color: var(--brand-mid); background: none; border: none; cursor: pointer; padding: 0; font-family: 'Inter', sans-serif; transition: opacity .18s; }
+    .btn-copy-slack:hover { opacity: .7; }
+    .card-footer { border-top: 1px solid var(--border); margin-top: 22px; padding-top: 18px; }
+    .card-footer a { font-size: 12.5px; color: var(--muted); text-decoration: none; transition: color .18s; }
+    .card-footer a:hover { color: var(--text); }
+    .card-footer a span { color: var(--brand-mid); }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo">
-      <img src="/public/assets/brand/logo-lockup-dark.svg" alt="LendPaper" height="28">
-    </div>
-    <div class="icon">⏳</div>
-    <h1>You're on the list.</h1>
-    <p>We manually review each application to keep LendPaper's early access community tight and valuable.</p>
-    <p>You'll hear from us shortly — usually within 24 hours.</p>
-    <div class="contact">
-      Questions? <a href="mailto:hello@lendpaper.com">hello@lendpaper.com</a>
+  <canvas id="waveBg"></canvas>
+  <div class="glow"></div>
+  <div class="page">
+    <div class="card">
+      <div class="logo">
+        <canvas class="logo-mark" id="logoMark" width="28" height="28"></canvas>
+        <div class="logo-word">lend<span>paper</span>.</div>
+      </div>
+      <div class="clock-wrap">
+        <svg class="clock-svg" viewBox="0 0 36 36" fill="none">
+          <circle class="clock-face" cx="18" cy="18" r="16" stroke-width="1.2"/>
+          <line class="clock-tick" x1="18" y1="4" x2="18" y2="7.5" stroke-width="1.5"/>
+          <line class="clock-tick" x1="32" y1="18" x2="28.5" y2="18" stroke-width="1.5"/>
+          <line class="clock-tick" x1="18" y1="32" x2="18" y2="28.5" stroke-width="1.5"/>
+          <line class="clock-tick" x1="4" y1="18" x2="7.5" y2="18" stroke-width="1.5"/>
+          <line class="clock-hour" x1="18" y1="18" x2="11" y2="11" stroke-width="2"/>
+          <line class="clock-minute" x1="18" y1="18" x2="18" y2="6.5" stroke-width="1.4"/>
+          <circle class="clock-center" cx="18" cy="18" r="1.8"/>
+        </svg>
+      </div>
+      <h1>You're on the list.</h1>
+      <p class="body-text">We manually review each application to keep LendPaper's early access community tight and valuable — <strong>you'll hear from us within 24 hours.</strong></p>
+      <div class="divider"></div>
+      <p class="share-label">Invite a colleague and move up the list.</p>
+      <div class="share-row">
+        <button class="btn-copy" id="copyLinkBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Copy invite link
+        </button>
+        <button class="btn-slack" id="slackToggle">
+          <!-- Official Slack logo colours -->
+          <svg width="16" height="16" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19.712.133a5.381 5.381 0 0 0-5.376 5.387 5.381 5.381 0 0 0 5.376 5.386h5.376V5.52A5.381 5.381 0 0 0 19.712.133m0 14.365H5.376A5.381 5.381 0 0 0 0 19.884a5.381 5.381 0 0 0 5.376 5.387h14.336a5.381 5.381 0 0 0 5.376-5.387 5.381 5.381 0 0 0-5.376-5.386" fill="#36C5F0"/>
+            <path d="M53.76 19.884a5.381 5.381 0 0 0-5.376-5.386 5.381 5.381 0 0 0-5.376 5.386v5.387h5.376a5.381 5.381 0 0 0 5.376-5.387m-14.336 0V5.52A5.381 5.381 0 0 0 34.048.133a5.381 5.381 0 0 0-5.376 5.387v14.364a5.381 5.381 0 0 0 5.376 5.387 5.381 5.381 0 0 0 5.376-5.387" fill="#2EB67D"/>
+            <path d="M34.048 54a5.381 5.381 0 0 0 5.376-5.387 5.381 5.381 0 0 0-5.376-5.386h-5.376v5.386A5.381 5.381 0 0 0 34.048 54m0-14.365h14.336a5.381 5.381 0 0 0 5.376-5.386 5.381 5.381 0 0 0-5.376-5.387H34.048a5.381 5.381 0 0 0-5.376 5.387 5.381 5.381 0 0 0 5.376 5.386" fill="#ECB22E"/>
+            <path d="M0 34.249a5.381 5.381 0 0 0 5.376 5.386 5.381 5.381 0 0 0 5.376-5.386v-5.387H5.376A5.381 5.381 0 0 0 0 34.249m14.336 0v14.364A5.381 5.381 0 0 0 19.712 54a5.381 5.381 0 0 0 5.376-5.387V34.249a5.381 5.381 0 0 0-5.376-5.387 5.381 5.381 0 0 0-5.376 5.387" fill="#E01E5A"/>
+          </svg>
+          Share on Slack
+        </button>
+      </div>
+      <div class="slack-msg" id="slackMsg">
+        <p>"Hey team — I just applied to LendPaper, an invite-only toolkit for commercial brokers. Deal calculators, lender waterfall, client PDFs. If you want in: lendpaper.com/early-access"</p>
+        <button class="btn-copy-slack" id="copySlackBtn">Copy this message →</button>
+      </div>
+      <div class="card-footer">
+        <a href="mailto:hello@lendpaper.com">Questions? <span>hello@lendpaper.com</span></a>
+      </div>
     </div>
   </div>
-
-  <script type="importmap">
-    { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
-  </script>
-  <script type="module">
-    import { createClient } from '@supabase/supabase-js';
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    setInterval(async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const { data: profile } = await supabase.from('profiles').select('status').eq('id', session.user.id).single();
-      if (profile?.status === 'approved') window.location.href = '/index.html';
-    }, 30000);
+  <script>
+  (function(){
+    const cv=document.getElementById('waveBg'),ctx=cv.getContext('2d');let f=0,raf;
+    function rsz(){cv.width=window.innerWidth;cv.height=window.innerHeight;}rsz();window.addEventListener('resize',rsz);
+    const WS=[{yF:.58,amp:.055,freq:.007,spd:.20,a:.030},{yF:.70,amp:.040,freq:.010,spd:-.17,a:.021},{yF:.44,amp:.050,freq:.006,spd:.13,a:.025},{yF:.80,amp:.030,freq:.012,spd:.28,a:.015},{yF:.36,amp:.044,freq:.008,spd:-.11,a:.019}];
+    function draw(){const W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);const t=f*.018;WS.forEach(w=>{ctx.beginPath();ctx.strokeStyle=`rgba(26,60,46,${w.a})`;ctx.lineWidth=.9;for(let x=0;x<=W;x+=3){const y=w.yF*H+Math.sin(x*w.freq+t*w.spd)*w.amp*H;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();});f++;raf=requestAnimationFrame(draw);}
+    draw();document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else{f=0;draw();}});
+    const lc=document.getElementById('logoMark');if(lc){const lx=lc.getContext('2d');let lf=0;(function ld(){const S=28;lx.clearRect(0,0,S,S);lx.save();lx.beginPath();const r=7;lx.moveTo(r,0);lx.lineTo(S-r,0);lx.quadraticCurveTo(S,0,S,r);lx.lineTo(S,S-r);lx.quadraticCurveTo(S,S,S-r,S);lx.lineTo(r,S);lx.quadraticCurveTo(0,S,0,S-r);lx.lineTo(0,r);lx.quadraticCurveTo(0,0,r,0);lx.closePath();lx.clip();const g=lx.createLinearGradient(0,0,0,S);g.addColorStop(0,'#01170e');g.addColorStop(1,'#043220');lx.fillStyle=g;lx.fillRect(0,0,S,S);const t2=lf*.025;[[.485,.12,1,'rgba(8,48,32,.95)'],[.547,.15,-.85,'rgba(16,80,56,.85)'],[.422,.18,1.35,'rgba(52,168,120,.7)']].forEach(([yf,fr,spd,col],i)=>{lx.fillStyle=col;lx.beginPath();lx.moveTo(0,S);for(let x=0;x<=S;x++)lx.lineTo(x,S*yf+Math[i===1?'cos':'sin'](x*fr+t2*spd)*S*.138);lx.lineTo(S,S);lx.fill();});lx.restore();lx.save();const bob=Math.sin(lf*.08)*.6;lx.translate(0,bob);const sc=S/24;lx.scale(sc,sc);lx.shadowColor='rgba(0,0,0,.35)';lx.shadowBlur=1.5;lx.shadowOffsetY=.5;lx.strokeStyle='rgba(255,255,255,.52)';lx.lineWidth=1.7;lx.lineCap='round';lx.lineJoin='round';lx.beginPath();lx.moveTo(4,4);lx.lineTo(4,20);lx.lineTo(15,20);lx.lineTo(20,15);lx.lineTo(20,4);lx.closePath();lx.stroke();lx.beginPath();lx.moveTo(15,20);lx.lineTo(15,15);lx.lineTo(20,15);lx.stroke();lx.beginPath();lx.moveTo(9,9);lx.lineTo(9,15);lx.lineTo(14,15);lx.stroke();lx.restore();lf++;requestAnimationFrame(ld);})();}
+    const INVITE_URL='https://lendpaper.com/early-access';
+    const SLACK_TEXT=`Hey team — I just applied to LendPaper, an invite-only toolkit for commercial brokers. Deal calculators, lender waterfall, client PDFs. If you want in: lendpaper.com/early-access`;
+    document.getElementById('copyLinkBtn').addEventListener('click',async()=>{
+      try{await navigator.clipboard.writeText(INVITE_URL);}catch{}
+      const b=document.getElementById('copyLinkBtn');b.textContent='Copied ✓';b.classList.add('done');
+      setTimeout(()=>{b.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Copy invite link`;b.classList.remove('done');},2500);
+    });
+    document.getElementById('slackToggle').addEventListener('click',()=>document.getElementById('slackMsg').classList.toggle('visible'));
+    document.getElementById('copySlackBtn').addEventListener('click',async()=>{
+      try{await navigator.clipboard.writeText(SLACK_TEXT);}catch{}
+      const b=document.getElementById('copySlackBtn');b.textContent='Copied ✓';setTimeout(()=>{b.textContent='Copy this message →';},2500);
+    });
+  })();
   </script>
 </body>
 </html>

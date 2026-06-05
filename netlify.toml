@@ -84,19 +84,34 @@
   status = 200
   force  = true
 
-# ── Dead-end redirects for old URLs (404 — reveals nothing) ─────────────────
+# ── Admin dashboard (auth-gated in-page: non-admins are redirected) ─────────
+[[headers]]
+  for = "/admin"
+  [headers.values]
+    X-Frame-Options           = "DENY"
+    X-Content-Type-Options    = "nosniff"
+    Referrer-Policy           = "no-referrer"
+    Cache-Control             = "no-store, no-cache, must-revalidate, private"
+    Permissions-Policy        = "geolocation=(), microphone=(), camera=()"
+    X-Permitted-Cross-Domain-Policies = "none"
+
+[[headers]]
+  for = "/admin.html"
+  [headers.values]
+    X-Frame-Options           = "DENY"
+    X-Content-Type-Options    = "nosniff"
+    Referrer-Policy           = "no-referrer"
+    Cache-Control             = "no-store, no-cache, must-revalidate, private"
+    Permissions-Policy        = "geolocation=(), microphone=(), camera=()"
+    X-Permitted-Cross-Domain-Policies = "none"
+
 [[redirects]]
   from   = "/admin"
-  to     = "/404.html"
-  status = 404
+  to     = "/admin.html"
+  status = 200
   force  = true
 
-[[redirects]]
-  from   = "/admin.html"
-  to     = "/404.html"
-  status = 404
-  force  = true
-
+# ── Dead-end redirects for old URLs (404 — reveals nothing) ─────────────────
 [[redirects]]
   from   = "/recruiter"
   to     = "/404.html"

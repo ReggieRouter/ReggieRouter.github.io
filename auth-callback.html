@@ -4,68 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Signing you in — LendPaper</title>
+  <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg">
   <script src="js/config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --bg: #1c1c26; --text: #ffffff; --muted: rgba(255,255,255,0.50); }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .spinner {
-      width: 36px; height: 36px;
-      border: 2px solid rgba(255,255,255,0.08);
-      border-top-color: #4ADE80;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
+    body { background: #F8FAF7; color: #0D1A10; font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+    .spinner { width: 32px; height: 32px; border: 2px solid rgba(0,0,0,0.08); border-top-color: #2D6A4F; border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    p { color: var(--muted); font-size: 14px; }
+    p { color: #6B7C70; font-size: 14px; }
   </style>
 </head>
 <body>
   <div class="spinner"></div>
   <p>Signing you in...</p>
-
-  <script type="importmap">
-    { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
-  </script>
+  <script type="importmap">{"imports":{"@supabase/supabase-js":"https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"}}</script>
   <script type="module">
     import { createClient } from '@supabase/supabase-js';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Give Supabase a moment to process the token from the URL
     await new Promise(r => setTimeout(r, 500));
-
-    const { data: { session }, error } = await supabase.auth.getSession();
-
+    const { data:{ session }, error } = await supabase.auth.getSession();
     if (!session || error) {
       window.location.href = '/login.html';
     } else {
-      // Check if profile exists
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id, status')
-        .eq('id', session.user.id)
-        .single();
-
+      const { data: profile } = await supabase.from('profiles').select('id, status, is_admin').eq('id', session.user.id).single();
       if (!profile) {
-        // New user — send to onboarding
         window.location.href = '/onboarding.html';
+      } else if (profile.is_admin) {
+        window.location.href = '/admin.html';
       } else if (profile.status === 'pending') {
         window.location.href = '/pending.html';
+      } else if (profile.status === 'waitlist') {
+        window.location.href = '/waitlist.html';
       } else if (profile.status === 'denied') {
-        window.location.href = '/denied.html';
+        window.location.href = '/waitlist.html'; // denied → waitlist page, soft landing
       } else if (profile.status === 'approved') {
         const next = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
         sessionStorage.removeItem('redirectAfterLogin');

@@ -4,421 +4,139 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Complete Your Profile — LendPaper</title>
+  <meta property="og:title" content="Complete Your Profile — LendPaper" />
+  <meta property="og:description" content="Tell us who you are to join LendPaper. Questions? Email hello@lendpaper.com" />
+  <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+  <meta property="og:url" content="https://lendpaper.com/onboarding" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg">
   <script src="js/config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #1c1c26;
-      --surface: rgba(255,255,255,0.04);
-      --border: rgba(255,255,255,0.10);
-      --brand: #1A3C2E;
-      --brand-mid: #2D6A4F;
-      --gold: #D4A017;
-      --gold-dim: rgba(212,160,23,0.10);
-      --text: #ffffff;
-      --muted: rgba(255,255,255,0.50);
-      --muted2: rgba(255,255,255,0.78);
+      --bg: #F8FAF7; --card: #FFFFFF; --border: rgba(0,0,0,0.08); --border-mid: rgba(0,0,0,0.12);
+      --brand: #1A3C2E; --brand-mid: #2D6A4F; --brand-light: #34A878; --brand-vivid: #4ADE80;
+      --gold: #B8870A; --gold-bg: rgba(184,135,10,0.07); --gold-bd: rgba(184,135,10,0.2);
+      --text: #0D1A10; --muted: #6B7C70; --muted2: #3D5445;
+      --surface: rgba(0,0,0,0.025);
     }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(74,222,128,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(74,222,128,0.04) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-    }
-
-    body::after {
-      content: '';
-      position: fixed;
-      top: -20%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 400px;
-      background: radial-gradient(ellipse, rgba(45,106,79,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 0.5px solid var(--border);
-      border-radius: 16px;
-      padding: 48px;
-      width: 100%;
-      max-width: 440px;
-      position: relative;
-      z-index: 1;
-      animation: fadeUp 0.4s ease;
-      overflow: hidden;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .logo { margin-bottom: 32px; }
-    .logo img { display: block; height: 28px; width: auto; }
-
-    .progress {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 32px;
-    }
-
-    .dot {
-      height: 5px;
-      width: 5px;
-      border-radius: 3px;
-      background: rgba(255,255,255,0.15);
-      transition: width 0.3s ease, background 0.3s ease, opacity 0.3s ease;
-    }
-
-    .dot.active {
-      width: 20px;
-      background: var(--brand-mid);
-    }
-
-    .dot.done {
-      background: var(--brand-mid);
-      opacity: 0.4;
-    }
-
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: linear-gradient(rgba(26,60,46,0.032) 1px, transparent 1px), linear-gradient(90deg, rgba(26,60,46,0.032) 1px, transparent 1px); background-size: 52px 52px; }
+    #waveBg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .glow { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); width: 560px; height: 280px; background: radial-gradient(ellipse, rgba(52,168,120,0.065) 0%, transparent 68%); pointer-events: none; z-index: 0; animation: breathe 7s ease-in-out infinite; }
+    @keyframes breathe { 0%,100%{opacity:.6;transform:translateX(-50%) scale(1)} 50%{opacity:1;transform:translateX(-50%) scale(1.06)} }
+    .page { position: relative; z-index: 1; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 44px; width: 100%; max-width: 440px; box-shadow: 0 4px 32px rgba(0,0,0,0.055); animation: riseIn .42s cubic-bezier(.22,1,.36,1) both; overflow: hidden; position: relative; }
+    @keyframes riseIn { from{opacity:0;transform:translateY(16px) scale(.99)} to{opacity:1;transform:none} }
+    .logo { display: flex; align-items: center; gap: 9px; margin-bottom: 28px; }
+    .logo-mark { width: 28px; height: 28px; border-radius: 7px; overflow: hidden; flex-shrink: 0; }
+    .logo-word { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 16px; color: var(--text); letter-spacing: -0.02em; }
+    .logo-word span { color: var(--brand-mid); }
+    .progress { display: flex; align-items: center; gap: 6px; margin-bottom: 28px; }
+    .dot { height: 5px; width: 5px; border-radius: 3px; background: rgba(0,0,0,0.12); transition: width .3s ease, background .3s ease, opacity .3s ease; }
+    .dot.active { width: 20px; background: var(--brand-mid); }
+    .dot.done { background: var(--brand-mid); opacity: .35; }
     .steps-viewport { overflow: hidden; }
-
-    .steps-track {
-      display: flex;
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      will-change: transform;
-    }
-
+    .steps-track { display: flex; transition: transform .35s cubic-bezier(.4,0,.2,1); will-change: transform; }
     .step { min-width: 100%; flex-shrink: 0; }
-
-    .btn-back {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 13px;
-      cursor: pointer;
-      padding: 0;
-      margin-bottom: 20px;
-      transition: color 0.2s;
-    }
-
+    .btn-back { display: inline-flex; align-items: center; gap: 4px; background: none; border: none; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; padding: 0; margin-bottom: 18px; transition: color .18s; }
     .btn-back:hover { color: var(--text); }
-
-    h1 {
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 24px;
-      line-height: 1.6;
-      font-weight: 400;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 13px 14px;
-      background: rgba(255,255,255,0.04);
-      border: 0.5px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 15px;
-      outline: none;
-      transition: border-color 0.2s;
-      margin-bottom: 14px;
-      -webkit-appearance: none;
-    }
-
-    input[type="text"]:focus { border-color: var(--gold); }
-    input[type="text"]::placeholder { color: var(--muted); }
-
-    .btn-next {
-      width: 100%;
-      padding: 13px;
-      background: var(--brand);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 10px;
-      font-family: 'Inter', system-ui, sans-serif;
-      font-weight: 500;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-
+    h1 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 7px; color: var(--text); }
+    .subtitle { font-size: 13.5px; color: var(--muted); margin-bottom: 22px; line-height: 1.6; }
+    .msg { padding: 10px 13px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; display: none; }
+    .msg.error { background: rgba(220,38,38,0.05); border: 1px solid rgba(220,38,38,0.18); color: #B91C1C; display: block; }
+    input[type="text"] { width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--border-mid); border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; outline: none; transition: border-color .18s, box-shadow .18s; margin-bottom: 14px; -webkit-appearance: none; }
+    input[type="text"]:focus { border-color: var(--brand-light); box-shadow: 0 0 0 3px rgba(52,168,120,0.1); }
+    input[type="text"]::placeholder { color: var(--muted); opacity: .6; }
+    .btn-next { width: 100%; padding: 13px; background: var(--brand); color: #fff; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: background .18s, transform .1s; letter-spacing: -0.01em; }
     .btn-next:hover { background: var(--brand-mid); transform: translateY(-1px); }
-    .btn-next:active { transform: translateY(0); }
-
-    .role-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .role-card {
-      background: rgba(255,255,255,0.03);
-      border: 0.5px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 14px;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s, transform 0.15s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      text-align: center;
-      outline: none;
-    }
-
-    .role-card:hover, .role-card:focus-visible {
-      border-color: rgba(45,106,79,0.6);
-      background: rgba(45,106,79,0.08);
-      transform: translateY(-2px);
-    }
-
-    .role-card.selected {
-      border-color: var(--brand-mid);
-      background: rgba(45,106,79,0.12);
-    }
-
-    .role-icon {
-      width: 40px;
-      height: 40px;
-      background: rgba(45,106,79,0.12);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .role-icon svg {
-      width: 20px;
-      height: 20px;
-      stroke: #4ADE80;
-      stroke-width: 1.75;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .role-label {
-      font-weight: 600;
-      font-size: 13px;
-      color: var(--text);
-      letter-spacing: -0.01em;
-    }
-
-    .role-desc {
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.4;
-      margin-top: 2px;
-    }
-
-    .message {
-      padding: 12px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      margin-bottom: 16px;
-      display: none;
-    }
-
-    .message.error {
-      background: rgba(239,68,68,0.08);
-      border: 0.5px solid rgba(239,68,68,0.3);
-      color: #f87171;
-      display: block;
-    }
-
-    .loading-overlay {
-      display: none;
-      position: absolute;
-      inset: 0;
-      background: rgba(28,28,38,0.95);
-      border-radius: 16px;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      z-index: 10;
-    }
-
+    .btn-next:active { transform: none; }
+    .loading-overlay { display: none; position: absolute; inset: 0; background: rgba(248,250,247,0.95); border-radius: 20px; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 10; }
     .loading-overlay.visible { display: flex; }
-
-    .spinner {
-      width: 28px;
-      height: 28px;
-      border: 2px solid rgba(255,255,255,0.10);
-      border-top-color: #4ADE80;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
+    .spinner { width: 28px; height: 28px; border: 2px solid rgba(0,0,0,0.08); border-top-color: var(--brand-mid); border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .loading-text { font-weight: 600; font-size: 15px; }
+    .loading-text { font-weight: 600; font-size: 15px; color: var(--text); }
     .loading-sub { font-size: 13px; color: var(--muted); }
   </style>
 </head>
 <body>
-  <div class="card">
-
-    <div class="logo">
-      <img src="/public/assets/brand/logo-lockup-dark.svg" alt="LendPaper" height="28">
-    </div>
-
-    <div class="progress">
-      <div class="dot active" id="dot-0"></div>
-      <div class="dot" id="dot-1"></div>
-      <div class="dot" id="dot-2"></div>
-    </div>
-
-    <div id="message" class="message"></div>
-
-    <div class="steps-viewport">
-      <div class="steps-track" id="track">
-
-        <!-- Step 1: Name -->
-        <div class="step" id="step-0">
-          <h1>What's your name?</h1>
-          <p class="subtitle">Just your first and last — we'll use this on your account.</p>
-          <input type="text" id="inputName" placeholder="Jane Smith" autocomplete="name" />
-          <button class="btn-next" id="nextFromName">Continue →</button>
-        </div>
-
-        <!-- Step 2: Company -->
-        <div class="step" id="step-1">
-          <button class="btn-back" id="backToName">← Back</button>
-          <h1>Where do you work?</h1>
-          <p class="subtitle">Your company or brokerage name.</p>
-          <input type="text" id="inputCompany" placeholder="Acme Capital LLC" autocomplete="organization" />
-          <button class="btn-next" id="nextFromCompany">Continue →</button>
-        </div>
-
-        <!-- Step 3: Role -->
-        <div class="step" id="step-2">
-          <button class="btn-back" id="backToCompany">← Back</button>
-          <h1>What best describes your role?</h1>
-          <p class="subtitle">We'll tailor your experience from here.</p>
-          <div class="role-grid">
-            <div class="role-card" data-role="broker" tabindex="0">
-              <div class="role-icon">
-                <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
-              </div>
-              <div>
-                <div class="role-label">Broker</div>
-                <div class="role-desc">Commercial loan originator</div>
-              </div>
-            </div>
-            <div class="role-card" data-role="iso" tabindex="0">
-              <div class="role-icon">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="19.5" cy="18.5" r="2.5"/><circle cx="4.5" cy="18.5" r="2.5"/><line x1="12" y1="7.5" x2="12" y2="13"/><line x1="12" y1="13" x2="19.5" y2="16"/><line x1="12" y1="13" x2="4.5" y2="16"/></svg>
-              </div>
-              <div>
-                <div class="role-label">ISO</div>
-                <div class="role-desc">Independent sales org</div>
-              </div>
-            </div>
-            <div class="role-card" data-role="lender" tabindex="0">
-              <div class="role-icon">
-                <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              </div>
-              <div>
-                <div class="role-label">Lender</div>
-                <div class="role-desc">Direct funder or MCA</div>
-              </div>
-            </div>
-            <div class="role-card" data-role="other" tabindex="0">
-              <div class="role-icon">
-                <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
-              </div>
-              <div>
-                <div class="role-label">Other</div>
-                <div class="role-desc">Advisor, ops, or explorer</div>
-              </div>
-            </div>
+  <canvas id="waveBg"></canvas>
+  <div class="glow"></div>
+  <div class="page">
+    <div class="card">
+      <div class="logo">
+        <canvas class="logo-mark" id="logoMark" width="28" height="28"></canvas>
+        <div class="logo-word">lend<span>paper</span>.</div>
+      </div>
+      <div class="progress">
+        <div class="dot active" id="dot-0"></div>
+        <div class="dot" id="dot-1"></div>
+      </div>
+      <div id="message" class="msg"></div>
+      <div class="steps-viewport">
+        <div class="steps-track" id="track">
+          <div class="step" id="step-0">
+            <h1>What's your name?</h1>
+            <p class="subtitle">Just your first and last — we'll use this on your account.</p>
+            <input type="text" id="inputName" placeholder="Jane Smith" autocomplete="name" />
+            <button class="btn-next" id="nextFromName">Continue →</button>
+          </div>
+          <div class="step" id="step-1">
+            <button class="btn-back" id="backToName">← Back</button>
+            <h1>Where do you work?</h1>
+            <p class="subtitle">Your company or brokerage name.</p>
+            <input type="text" id="inputCompany" placeholder="Acme Capital LLC" autocomplete="organization" />
+            <button class="btn-next" id="nextFromCompany">Let's go →</button>
           </div>
         </div>
-
+      </div>
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Setting up your account</div>
+        <div class="loading-sub">Just a moment...</div>
       </div>
     </div>
-
-    <div class="loading-overlay" id="loadingOverlay">
-      <div class="spinner"></div>
-      <div class="loading-text">Setting up your account</div>
-      <div class="loading-sub">Just a moment...</div>
-    </div>
-
   </div>
 
-  <script type="importmap">
-    { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+  <script>
+  (function(){
+    const cv=document.getElementById('waveBg'),ctx=cv.getContext('2d');let f=0,raf;
+    function rsz(){cv.width=window.innerWidth;cv.height=window.innerHeight;}rsz();window.addEventListener('resize',rsz);
+    const WS=[{yF:.58,amp:.055,freq:.007,spd:.20,a:.030},{yF:.70,amp:.040,freq:.010,spd:-.17,a:.021},{yF:.44,amp:.050,freq:.006,spd:.13,a:.025},{yF:.80,amp:.030,freq:.012,spd:.28,a:.015},{yF:.36,amp:.044,freq:.008,spd:-.11,a:.019}];
+    function draw(){const W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);const t=f*.018;WS.forEach(w=>{ctx.beginPath();ctx.strokeStyle=`rgba(26,60,46,${w.a})`;ctx.lineWidth=.9;for(let x=0;x<=W;x+=3){const y=w.yF*H+Math.sin(x*w.freq+t*w.spd)*w.amp*H;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();});f++;raf=requestAnimationFrame(draw);}
+    draw();document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else{f=0;draw();}});
+    const lc=document.getElementById('logoMark');if(lc){const lx=lc.getContext('2d');let lf=0;(function ld(){const S=28;lx.clearRect(0,0,S,S);lx.save();lx.beginPath();const r=7;lx.moveTo(r,0);lx.lineTo(S-r,0);lx.quadraticCurveTo(S,0,S,r);lx.lineTo(S,S-r);lx.quadraticCurveTo(S,S,S-r,S);lx.lineTo(r,S);lx.quadraticCurveTo(0,S,0,S-r);lx.lineTo(0,r);lx.quadraticCurveTo(0,0,r,0);lx.closePath();lx.clip();const g=lx.createLinearGradient(0,0,0,S);g.addColorStop(0,'#01170e');g.addColorStop(1,'#043220');lx.fillStyle=g;lx.fillRect(0,0,S,S);const t2=lf*.025;[[.485,.12,1,'rgba(8,48,32,.95)'],[.547,.15,-.85,'rgba(16,80,56,.85)'],[.422,.18,1.35,'rgba(52,168,120,.7)']].forEach(([yf,fr,spd,col],i)=>{lx.fillStyle=col;lx.beginPath();lx.moveTo(0,S);for(let x=0;x<=S;x++)lx.lineTo(x,S*yf+Math[i===1?'cos':'sin'](x*fr+t2*spd)*S*.138);lx.lineTo(S,S);lx.fill();});lx.restore();lx.save();const bob=Math.sin(lf*.08)*.6;lx.translate(0,bob);const sc=S/24;lx.scale(sc,sc);lx.shadowColor='rgba(0,0,0,.35)';lx.shadowBlur=1.5;lx.shadowOffsetY=.5;lx.strokeStyle='rgba(255,255,255,.52)';lx.lineWidth=1.7;lx.lineCap='round';lx.lineJoin='round';lx.beginPath();lx.moveTo(4,4);lx.lineTo(4,20);lx.lineTo(15,20);lx.lineTo(20,15);lx.lineTo(20,4);lx.closePath();lx.stroke();lx.beginPath();lx.moveTo(15,20);lx.lineTo(15,15);lx.lineTo(20,15);lx.stroke();lx.beginPath();lx.moveTo(9,9);lx.lineTo(9,15);lx.lineTo(14,15);lx.stroke();lx.restore();lf++;requestAnimationFrame(ld);})();}
+  })();
   </script>
+
+  <script type="importmap">{"imports":{"@supabase/supabase-js":"https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"}}</script>
   <script type="module">
     import { createClient } from '@supabase/supabase-js';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { window.location.href = '/login.html'; }
-
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (!session) { window.location.replace('/login.html'); throw new Error('no session — redirecting'); }
     const { data: existing } = await supabase.from('profiles').select('id').eq('id', session.user.id).single();
-    if (existing) { window.location.href = '/pending.html'; }
+    if (existing) { window.location.replace('/auth-callback.html'); throw new Error('profile exists — redirecting'); }
 
     const track = document.getElementById('track');
-    const dots = [0, 1, 2].map(i => document.getElementById(`dot-${i}`));
+    const dots = [0,1].map(i => document.getElementById(`dot-${i}`));
     const msg = document.getElementById('message');
     let currentStep = 0;
-
     setTimeout(() => document.getElementById('inputName').focus(), 100);
 
     function goToStep(n) {
       currentStep = n;
       const w = track.parentElement.offsetWidth;
       track.style.transform = `translateX(${-n * w}px)`;
-      dots.forEach((d, i) => {
-        d.className = 'dot' + (i < n ? ' done' : i === n ? ' active' : '');
-      });
-      msg.className = 'message';
+      dots.forEach((d,i) => { d.className = 'dot' + (i < n ? ' done' : i === n ? ' active' : ''); });
+      msg.className = 'msg';
       if (n === 0) setTimeout(() => document.getElementById('inputName').focus(), 380);
       if (n === 1) setTimeout(() => document.getElementById('inputCompany').focus(), 380);
     }
-
     window.addEventListener('resize', () => {
       const w = track.parentElement.offsetWidth;
       track.style.transition = 'none';
@@ -428,59 +146,30 @@
 
     function advanceName() {
       const v = document.getElementById('inputName').value.trim();
-      if (!v) { showError('Please enter your name.'); return; }
+      if (!v) { showErr('Please enter your name.'); return; }
       goToStep(1);
     }
-
-    function advanceCompany() {
+    async function submitProfile() {
       const v = document.getElementById('inputCompany').value.trim();
-      if (!v) { showError('Please enter your company name.'); return; }
-      goToStep(2);
-    }
-
-    document.getElementById('nextFromName').addEventListener('click', advanceName);
-    document.getElementById('nextFromCompany').addEventListener('click', advanceCompany);
-    document.getElementById('backToName').addEventListener('click', () => goToStep(0));
-    document.getElementById('backToCompany').addEventListener('click', () => goToStep(1));
-
-    document.getElementById('inputName').addEventListener('keydown', e => { if (e.key === 'Enter') advanceName(); });
-    document.getElementById('inputCompany').addEventListener('keydown', e => { if (e.key === 'Enter') advanceCompany(); });
-
-    document.querySelectorAll('.role-card').forEach(card => {
-      const activate = () => selectRole(card.dataset.role, card);
-      card.addEventListener('click', activate);
-      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
-    });
-
-    async function selectRole(role, card) {
-      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-
-      await new Promise(r => setTimeout(r, 280));
+      if (!v) { showErr('Please enter your company name.'); return; }
       document.getElementById('loadingOverlay').classList.add('visible');
-
       const { error } = await supabase.from('profiles').insert({
-        id: session.user.id,
-        email: session.user.email,
+        id: session.user.id, email: session.user.email,
         full_name: document.getElementById('inputName').value.trim(),
-        company: document.getElementById('inputCompany').value.trim(),
-        role,
-        status: 'pending'
+        company: v,
+        status: 'pending', invite_credits: 5, invites_sent: 0
       });
-
       if (error) {
         document.getElementById('loadingOverlay').classList.remove('visible');
-        card.classList.remove('selected');
-        showError(error.message);
-      } else {
-        window.location.href = '/pending.html';
-      }
+        showErr(error.message);
+      } else { window.location.href = '/pending.html'; }
     }
-
-    function showError(text) {
-      msg.textContent = text;
-      msg.className = 'message error';
-    }
+    document.getElementById('nextFromName').addEventListener('click', advanceName);
+    document.getElementById('nextFromCompany').addEventListener('click', submitProfile);
+    document.getElementById('backToName').addEventListener('click', () => goToStep(0));
+    document.getElementById('inputName').addEventListener('keydown', e => { if (e.key === 'Enter') advanceName(); });
+    document.getElementById('inputCompany').addEventListener('keydown', e => { if (e.key === 'Enter') submitProfile(); });
+    function showErr(text) { msg.textContent = text; msg.className = 'msg error'; }
   </script>
 </body>
 </html>
