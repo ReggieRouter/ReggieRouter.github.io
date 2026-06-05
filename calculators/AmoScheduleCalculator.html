@@ -242,7 +242,7 @@
         }
 
         .prepay-target-row td {
-            background: #F0FDF4 !important;
+            background: #DCFCE7 !important;
             font-weight: 800 !important;
             border-top: 2px solid #14532D !important;
         }
@@ -395,7 +395,7 @@
             }
             /* Make sure the prepay-target-row green highlight prints */
             body.pdf-export-mode .prepay-target-row td {
-                background: #F0FDF4 !important;
+                background: #DCFCE7 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -407,7 +407,7 @@
             /* Paper has no clicks: always show paid-to-date expanded, and print the gray row highlight */
             body.pdf-export-mode .lp-paid-row { display: flex !important; }
             body.pdf-export-mode .paid-target-row td {
-                background: #F8FAFC !important;
+                background: #F1F5F9 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -539,7 +539,7 @@
         .takeaway-nav-btn:hover { color: #14532D; }
         .takeaway-counter { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; margin-top: 6px; white-space: nowrap; }
         .amo-detail-cell { background: #e8f5ec; box-shadow: inset 2px 0 0 #0a4d2c; font-style: italic; font-size: 12px; color: #14532D; padding: 5px 12px 5px 16px; }
-        .lp-expand-inner { padding: 12px 18px 14px; background: #DCFCE7; border-left: 4px solid #14532D; border-top: 1px solid #86EFAC; }
+        .lp-expand-inner { padding: 16px 24px 18px; background: #F0FDF4; border-left: 4px solid #14532D; border-top: 1px solid #86EFAC; }
         .lp-expand-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
         .lp-expand-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #14532D; font-weight: 700; }
         .lp-expand-date { font-weight: 800; }
@@ -550,18 +550,18 @@
         .lp-eq-grid { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
         .lp-eq-div { font-size: 14px; font-weight: 500; color: #9CA3AF; }
         .lp-eq-answer { font-weight: 700; font-size: 17px; }
-        .lp-paid-toggle { background: none; border: none; padding: 0; font-size: 11px; font-weight: 600; color: #6B7280; cursor: pointer; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; white-space: nowrap; }
-        .lp-paid-toggle:hover { text-decoration: underline; color: #14532D; }
+        .lp-paid-toggle { background: none; border: none; padding: 0; margin-top: 14px; font-size: 11px; font-weight: 700; color: #14532D; cursor: pointer; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; white-space: nowrap; text-decoration: underline dotted; text-underline-offset: 3px; }
+        .lp-paid-toggle:hover { text-decoration: underline; }
         .lp-paid-count { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #64748B; font-weight: 600; white-space: nowrap; }
         .lp-paid-row { margin-top: 10px; }
         .lp-paid-row .lp-inline-stat-value { font-size: 14px; color: #374151; }
         .lp-paid-row .lp-paid-total { font-size: 15px; font-weight: 700; }
         /* Pre-pay-off variant: neutral gray ledger card */
-        .lp-expand-paid { background: #F1F5F9; border-left-color: #94A3B8; border-top-color: #CBD5E1; }
+        .lp-expand-paid { background: #F8FAFC; border-left-color: #94A3B8; border-top-color: #CBD5E1; }
         .lp-expand-paid .lp-expand-title { color: #64748B; }
         .lp-expand-paid .lp-inline-stat-value { color: #374151; }
         .lp-expand-paid .lp-paid-row { margin-top: 0; }
-        .paid-target-row td { background: #F8FAFC; }
+        .paid-target-row td { background: #F1F5F9; }
 
         /* Talk track arrow shimmer */
         @keyframes arrowShimmer {
@@ -1700,7 +1700,6 @@
                     <div class="lp-expand-inner">
                         <div class="lp-expand-head">
                             <div class="lp-expand-title">If borrower pays off here → <span class="lp-expand-date">${sel.date}</span></div>
-                            <button type="button" class="lp-paid-toggle no-print" onclick="togglePaidDetail(${id})">${open ? '&#9662;' : '&#9656;'} Paid to date &mdash; ${payments}</button>
                         </div>
                         <div class="lp-eq-grid">
                             <div><div class="lp-inline-stat-label">Remaining payments</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.balance + sel.unearned)}</div></div>
@@ -1709,6 +1708,7 @@
                             <div class="lp-eq-div">=</div>
                             <div><div class="lp-inline-stat-label">Payoff balance</div><div class="lp-inline-stat-value lp-eq-answer">${fmtUsd.format(sel.buyout)}</div></div>
                         </div>
+                        <button type="button" class="lp-paid-toggle no-print" onclick="togglePaidDetail(${id})">${open ? '&#9662; Hide paid to date' : `&#9656; Show paid to date &mdash; ${payments} so far`}</button>
                         ${paidEqHTML(sel, open)}
                     </div>
                 </td>`;
