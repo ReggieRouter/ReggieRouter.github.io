@@ -242,10 +242,9 @@
         }
 
         .prepay-target-row td {
-            background: #dcfce7 !important;
+            background: #DCFCE7 !important;
             font-weight: 800 !important;
             border-top: 2px solid #14532D !important;
-            border-bottom: 2px solid #14532D !important;
         }
         .prepay-target-row td:first-child {
             border-left: 4px solid #14532D !important;
@@ -259,12 +258,20 @@
             border: 1px solid var(--brand-border);
             border-radius: 8px;
         }
+        /* border-collapse:collapse breaks sticky th painting in Chrome (rows bleed through the
+           header on scroll) — use separate borders and a box-shadow rule that sticks with the cells */
+        .table-scroll-container table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
         .table-scroll-container thead th {
             position: sticky;
             top: 0;
             z-index: 10;
             background-color: #F9FAFB !important;
-            border-bottom: 1px solid #E5E7EB !important;
+            background-clip: padding-box;
+            border-bottom: none !important;
+            box-shadow: inset 0 -1px 0 #E5E7EB;
         }
         .table-scroll-container::-webkit-scrollbar { width: 6px; }
         .table-scroll-container::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
@@ -389,6 +396,18 @@
             /* Make sure the prepay-target-row green highlight prints */
             body.pdf-export-mode .prepay-target-row td {
                 background: #DCFCE7 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            /* Panel backgrounds must survive print */
+            body.pdf-export-mode .lp-expand-inner {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            /* Paper has no clicks: always show paid-to-date expanded, and print the gray row highlight */
+            body.pdf-export-mode .lp-paid-row { display: flex !important; }
+            body.pdf-export-mode .paid-target-row td {
+                background: #F1F5F9 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -520,12 +539,29 @@
         .takeaway-nav-btn:hover { color: #14532D; }
         .takeaway-counter { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; margin-top: 6px; white-space: nowrap; }
         .amo-detail-cell { background: #e8f5ec; box-shadow: inset 2px 0 0 #0a4d2c; font-style: italic; font-size: 12px; color: #14532D; padding: 5px 12px 5px 16px; }
-        .lp-expand-inner { padding: 14px 18px 16px; background: #F0FDF4; border-left: 3px solid #14532D; }
-        .lp-expand-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #14532D; font-weight: 700; margin-bottom: 10px; }
-        .lp-inline-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+        .lp-expand-inner { padding: 18px 32px 20px; background: #F0FDF4; border-left: 4px solid #14532D; border-top: 1px solid #86EFAC; }
+        .lp-expand-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+        .lp-expand-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #14532D; font-weight: 700; }
+        .lp-expand-date { font-weight: 800; }
         .lp-inline-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #6B7280; margin-bottom: 3px; font-weight: 600; }
-        .lp-inline-stat-value { font-size: 16px; font-weight: 600; color: #111827; }
-        .lp-inline-stat-value.savings { color: #14532D; font-size: 18px; }
+        .lp-inline-stat-value { font-size: 15px; font-weight: 600; color: #111827; }
+        .lp-inline-stat-value.savings { color: #14532D; font-size: 20px; font-weight: 800; }
+        /* Payoff equation: 3 stat columns with − / = as standalone dividers between them */
+        .lp-eq-grid { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .lp-eq-div { font-size: 14px; font-weight: 500; color: #9CA3AF; }
+        .lp-eq-answer { font-weight: 700; font-size: 17px; }
+        .lp-paid-toggle { background: none; border: none; padding: 0; margin-top: 20px; font-size: 11px; font-weight: 700; color: #14532D; cursor: pointer; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; white-space: nowrap; text-decoration: underline dotted; text-underline-offset: 3px; }
+        .lp-paid-toggle:hover { text-decoration: underline; }
+        .lp-paid-count { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #64748B; font-weight: 600; white-space: nowrap; }
+        .lp-paid-row { margin-top: 14px; }
+        .lp-paid-row .lp-inline-stat-value { font-size: 14px; color: #374151; }
+        .lp-paid-row .lp-paid-total { font-size: 15px; font-weight: 700; }
+        /* Pre-pay-off variant: neutral gray ledger card */
+        .lp-expand-paid { background: #F8FAFC; border-left-color: #94A3B8; border-top-color: #CBD5E1; }
+        .lp-expand-paid .lp-expand-title { color: #64748B; }
+        .lp-expand-paid .lp-inline-stat-value { color: #374151; }
+        .lp-expand-paid .lp-paid-row { margin-top: 0; }
+        .paid-target-row td { background: #F1F5F9; }
 
         /* Talk track arrow shimmer */
         @keyframes arrowShimmer {
@@ -728,10 +764,13 @@
 
         /* Mobile pay-off detail stacking */
         @media (max-width: 640px) {
-            .lp-inline-stats {
-                grid-template-columns: 1fr !important;
-                gap: 10px !important;
+            .lp-eq-grid {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
             }
+            .lp-eq-div { display: none; }
+            .lp-expand-head { flex-direction: column; gap: 4px; }
             /* Reduce padding and fonts in the dynamic header to prevent squeezing */
             .h-\[64px\] {
                 padding-left: 8px !important;
@@ -987,6 +1026,7 @@
 
         const fmtUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
         const rowSelection = {};
+        const paidDetailOpen = {};
         const cardTracks = {};
         const lastCalc = {};
 
@@ -1438,7 +1478,7 @@
                     <div id="detailsWrap-${id}" class="px-[24px] pb-[28px]">
                         <div class="table-scroll-container">
                             <table class="min-w-full text-left bg-white text-[12px]">
-                                <thead class="bg-[#F9FAFB] sticky top-0 border-b border-[#E5E7EB]">
+                                <thead class="bg-[#F9FAFB] border-b border-[#E5E7EB]">
                                     <tr>
                                         <th class="p-3 font-bold text-[#6B7280] w-[40px] text-center">#</th>
                                         <th class="p-3 font-bold text-[#111827]">Date</th>
@@ -1550,7 +1590,9 @@
             const curIdx = Math.min(cardTracks[id] ?? 0, tracks.length - 1);
             cardTracks[id] = curIdx;
             const track = tracks[curIdx];
-            const sel = rowSelection[id];
+            const isPrepayOn = document.getElementById(`enablePrepay-${id}`)?.checked;
+            // With pre-pay off, row selections are paid-to-date views — keep payoff phrasing out of the takeaway
+            const sel = isPrepayOn ? rowSelection[id] : null;
 
             let html;
             if (track.key === 'summary') {
@@ -1584,7 +1626,6 @@
             if (counter) counter.textContent = `${track.name} · ${curIdx + 1} / ${tracks.length}`;
 
             const summary = document.getElementById(`prepaySummary-${id}`);
-            const isPrepayOn = document.getElementById(`enablePrepay-${id}`)?.checked;
 
             if (isPrepayOn && sel && sel.savings > 0) {
                 summary.classList.remove('hidden');
@@ -1600,11 +1641,10 @@
 
         function selectAmoRow(id, period) {
             const isPrepay = document.getElementById(`enablePrepay-${id}`)?.checked;
-            if (!isPrepay) return;
             const rowEl = document.getElementById(`arow-${id}-${period}`);
             if (!rowEl) return;
             const tbody = document.getElementById(`tableBody-${id}`);
-            tbody.querySelectorAll('tr').forEach(r => r.classList.remove('prepay-target-row'));
+            tbody.querySelectorAll('tr').forEach(r => r.classList.remove('prepay-target-row', 'paid-target-row'));
 
             if (rowSelection[id] && rowSelection[id].period === period) {
                 delete rowSelection[id];
@@ -1615,36 +1655,74 @@
                     unearned: parseFloat(rowEl.dataset.unearned),
                     savings: parseFloat(rowEl.dataset.savings),
                     buyout: parseFloat(rowEl.dataset.buyout),
+                    ppaid: parseFloat(rowEl.dataset.ppaid),
+                    ipaid: parseFloat(rowEl.dataset.ipaid),
+                    tpaid: parseFloat(rowEl.dataset.tpaid),
                     date: rowEl.dataset.date,
                     day: parseInt(rowEl.dataset.day, 10),
                     month: rowEl.dataset.month,
                     year: parseInt(rowEl.dataset.year, 10)
                 };
-                rowEl.classList.add('prepay-target-row');
+                rowEl.classList.add(isPrepay ? 'prepay-target-row' : 'paid-target-row');
             }
             renderDetailRow(id);
             renderTakeaway(id);
+        }
+
+        function paidEqHTML(sel, visible) {
+            return `<div class="lp-eq-grid lp-paid-row" style="display:${visible ? 'flex' : 'none'}">
+                <div><div class="lp-inline-stat-label">Principal paid</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.ppaid)}</div></div>
+                <div class="lp-eq-div">+</div>
+                <div><div class="lp-inline-stat-label">Interest paid</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.ipaid)}</div></div>
+                <div class="lp-eq-div">=</div>
+                <div><div class="lp-inline-stat-label">Total paid</div><div class="lp-inline-stat-value lp-paid-total">${fmtUsd.format(sel.tpaid)}</div></div>
+            </div>`;
+        }
+
+        function togglePaidDetail(id) {
+            paidDetailOpen[id] = !paidDetailOpen[id];
+            renderDetailRow(id);
         }
 
         function renderDetailRow(id) {
             document.querySelectorAll(`.amo-detail-for-${id}`).forEach(r => r.remove());
             const sel = rowSelection[id];
             const isPrepay = document.getElementById(`enablePrepay-${id}`)?.checked;
-            if (!sel || !isPrepay || sel.savings <= 0) return;
+            if (!sel || (isPrepay && sel.savings <= 0)) return;
             const rowEl = document.getElementById(`arow-${id}-${sel.period}`);
             if (!rowEl) return;
             const tr = document.createElement('tr');
             tr.className = `amo-detail-for-${id}`;
-            tr.innerHTML = `<td colspan="6" style="padding:0">
-                <div class="lp-expand-inner">
-                    <div class="lp-expand-title">If borrower pays off here →</div>
-                    <div class="lp-inline-stats">
-                        <div><div class="lp-inline-stat-label">Payoff date</div><div class="lp-inline-stat-value">${sel.date}</div></div>
-                        <div><div class="lp-inline-stat-label">Payoff balance</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.buyout)}</div></div>
-                        <div><div class="lp-inline-stat-label">Borrower saves</div><div class="lp-inline-stat-value savings">${fmtUsd.format(sel.savings)}</div></div>
+            const payments = `${sel.period} payment${sel.period === 1 ? '' : 's'}`;
+            if (isPrepay) {
+                const open = !!paidDetailOpen[id];
+                tr.innerHTML = `<td colspan="6" style="padding:0">
+                    <div class="lp-expand-inner">
+                        <div class="lp-expand-head">
+                            <div class="lp-expand-title">If borrower pays off here → <span class="lp-expand-date">${sel.date}</span></div>
+                        </div>
+                        <div class="lp-eq-grid">
+                            <div><div class="lp-inline-stat-label">Remaining payments</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.balance + sel.unearned)}</div></div>
+                            <div class="lp-eq-div">&minus;</div>
+                            <div><div class="lp-inline-stat-label">Borrower saves</div><div class="lp-inline-stat-value savings">${fmtUsd.format(sel.savings)}</div></div>
+                            <div class="lp-eq-div">=</div>
+                            <div><div class="lp-inline-stat-label">Payoff balance</div><div class="lp-inline-stat-value lp-eq-answer">${fmtUsd.format(sel.buyout)}</div></div>
+                        </div>
+                        <button type="button" class="lp-paid-toggle no-print" onclick="togglePaidDetail(${id})">${open ? '&#9662; Hide paid to date' : `&#9656; Show paid to date &mdash; ${payments} so far`}</button>
+                        ${paidEqHTML(sel, open)}
                     </div>
-                </div>
-            </td>`;
+                </td>`;
+            } else {
+                tr.innerHTML = `<td colspan="6" style="padding:0">
+                    <div class="lp-expand-inner lp-expand-paid">
+                        <div class="lp-expand-head">
+                            <div class="lp-expand-title">Paid through ${sel.date} →</div>
+                            <span class="lp-paid-count">${payments} made</span>
+                        </div>
+                        ${paidEqHTML(sel, true)}
+                    </div>
+                </td>`;
+            }
             rowEl.after(tr);
         }
 
@@ -1741,6 +1819,7 @@
             document.getElementById(`outApr-${id}`).innerText = apr.toFixed(1) + '%';
             
             let balance = amt, unearnedInterest = totalCost, currentDate = new Date(startDate);
+            let paidPrincipal = 0, paidInterest = 0, paidTotal = 0;
             let tbodyHTML = '', printTbodyHTML = '', maturityDate = '';
 
             const periodRate = getPeriodRate(amt, pmt, periods);
@@ -1761,6 +1840,8 @@
                 if(unearnedInterest < 0) unearnedInterest = 0;
                 if(balance < 0) balance = 0;
 
+                paidPrincipal += principal; paidInterest += interest; paidTotal += pmt;
+
                 const rowSavings = unearnedInterest * (discPct / 100);
                 const rowBuyout = balance + unearnedInterest - rowSavings;
                 const dateStr = currentDate.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
@@ -1776,13 +1857,16 @@
                     } else {
                         isSelected = defaultPeriod === i;
                     }
+                } else if (rowSelection[id]) {
+                    // Pre-pay off: keep a user-clicked paid-to-date row selected across recalcs (no default selection)
+                    isSelected = rowSelection[id].period === i;
                 }
 
                 if (isSelected) {
-                    rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, date: dateStr, day: dateDay, month: dateMonth, year: dateYear };
+                    rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, ppaid: paidPrincipal, ipaid: paidInterest, tpaid: paidTotal, date: dateStr, day: dateDay, month: dateMonth, year: dateYear };
                 }
 
-                const dateCellContent = isSelected
+                const dateCellContent = isSelected && isPrepayEnabled
                     ? `${dateStr} <span style="font-size:10px;font-weight:700;color:#14532D;white-space:nowrap">&middot; payoff &#10003;</span>`
                     : dateStr;
                 const row = `
@@ -1792,7 +1876,7 @@
                     <td class="p-3 text-right">${fmtUsd.format(principal)}</td>
                     <td class="p-3 text-right">${fmtUsd.format(interest)}</td>
                     <td class="p-3 font-extrabold text-[#14532D] text-right">${fmtUsd.format(balance)}</td>`;
-                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? ' prepay-target-row' : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" data-year="${dateYear}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
+                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? (isPrepayEnabled ? ' prepay-target-row' : ' paid-target-row') : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-ppaid="${paidPrincipal.toFixed(2)}" data-ipaid="${paidInterest.toFixed(2)}" data-tpaid="${paidTotal.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" data-year="${dateYear}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
                 const printRow = `<td>${i}</td><td>${dateStr}</td><td style="text-align:right">${fmtUsd.format(pmt)}</td><td style="text-align:right">${fmtUsd.format(principal)}</td><td style="text-align:right">${fmtUsd.format(interest)}</td><td style="text-align:right;color:#14532D;font-weight:800">${fmtUsd.format(balance)}</td>`;
                 printTbodyHTML += `<tr>${printRow}</tr>`;
                 if(balance <= 0) break;
@@ -1809,6 +1893,22 @@
             }
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
             renderDetailRow(id);
+
+            // Park the selected payoff row + panel just under the sticky header so the
+            // payoff math is visible without hunting for it
+            const selRowEl = rowSelection[id] && document.getElementById(`arow-${id}-${rowSelection[id].period}`);
+            if (selRowEl) {
+                const scrollCont = selRowEl.closest('.table-scroll-container');
+                if (scrollCont) {
+                    const parkRow = () => {
+                        const r = rowSelection[id] && document.getElementById(`arow-${id}-${rowSelection[id].period}`);
+                        if (r) scrollCont.scrollTop = Math.max(0, r.offsetTop - 48);
+                    };
+                    parkRow();
+                    // row heights shift once the webfont swaps in — re-park after fonts settle
+                    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => requestAnimationFrame(parkRow));
+                }
+            }
 
             lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate };
             renderTakeaway(id);
