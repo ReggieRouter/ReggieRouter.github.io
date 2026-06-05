@@ -542,7 +542,11 @@
         .lp-expand-inner { padding: 18px 32px 20px; background: #F0FDF4; border-left: 4px solid #14532D; border-top: 1px solid #86EFAC; }
         .lp-expand-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
         .lp-expand-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #14532D; font-weight: 700; }
-        .lp-expand-date { font-weight: 800; }
+        .lp-expand-date { font-weight: 800; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+        .lp-expand-date:hover { text-decoration: underline; }
+        .lp-paid-row.lp-allin { margin-top: 8px; padding-top: 10px; border-top: 1px dashed #BBF7D0; }
+        .lp-allin .lp-allin-total { font-size: 15px; font-weight: 800; color: #14532D; }
+        .lp-allin .lp-fullterm { text-decoration: line-through; color: #9CA3AF; font-weight: 600; font-size: 13px; }
         .lp-inline-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #6B7280; margin-bottom: 3px; font-weight: 600; }
         .lp-inline-stat-value { font-size: 15px; font-weight: 600; color: #111827; }
         .lp-inline-stat-value.savings { color: #14532D; font-size: 20px; font-weight: 800; }
@@ -1028,6 +1032,8 @@
         const rowSelection = {};
         const paidDetailOpen = {};
         const cardTracks = {};
+        const PAYOFF_MARK_HTML = '<span class="payoff-mark" style="font-size:10px;font-weight:700;color:#14532D;white-space:nowrap">&middot; payoff &#10003;</span>';
+        let payoffLabelMode = 0; // 0 = date, 1 = payment N of M, 2 = % paid in
         const lastCalc = {};
 
         let compareCardId = null;
@@ -1645,6 +1651,8 @@
             if (!rowEl) return;
             const tbody = document.getElementById(`tableBody-${id}`);
             tbody.querySelectorAll('tr').forEach(r => r.classList.remove('prepay-target-row', 'paid-target-row'));
+            // The ✓ marker is baked into the build HTML — move it with the selection
+            tbody.querySelectorAll('.payoff-mark').forEach(el => el.remove());
 
             if (rowSelection[id] && rowSelection[id].period === period) {
                 delete rowSelection[id];
@@ -1664,6 +1672,7 @@
                     year: parseInt(rowEl.dataset.year, 10)
                 };
                 rowEl.classList.add(isPrepay ? 'prepay-target-row' : 'paid-target-row');
+                if (isPrepay && rowEl.cells[1]) rowEl.cells[1].insertAdjacentHTML('beforeend', ' ' + PAYOFF_MARK_HTML);
             }
             renderDetailRow(id);
             renderTakeaway(id);
@@ -1684,6 +1693,18 @@
             renderDetailRow(id);
         }
 
+        function cyclePayoffLabel(id) {
+            payoffLabelMode = (payoffLabelMode + 1) % 3;
+            renderDetailRow(id);
+        }
+
+        function payoffLabelText(id, sel) {
+            const c = lastCalc[id];
+            if (payoffLabelMode === 1 && c?.periods) return `payment ${sel.period} of ${c.periods}`;
+            if (payoffLabelMode === 2 && c?.payback) return `${(sel.tpaid / c.payback * 100).toFixed(1)}% paid in`;
+            return sel.date;
+        }
+
         function renderDetailRow(id) {
             document.querySelectorAll(`.amo-detail-for-${id}`).forEach(r => r.remove());
             const sel = rowSelection[id];
@@ -1696,10 +1717,19 @@
             const payments = `${sel.period} payment${sel.period === 1 ? '' : 's'}`;
             if (isPrepay) {
                 const open = !!paidDetailOpen[id];
+                const c = lastCalc[id];
+                const allinHTML = c ? `<div class="lp-eq-grid lp-paid-row lp-allin" style="display:${open ? 'flex' : 'none'}">
+                            <div><div class="lp-inline-stat-label">Total paid</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.tpaid)}</div></div>
+                            <div class="lp-eq-div">+</div>
+                            <div><div class="lp-inline-stat-label">Payoff balance</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.buyout)}</div></div>
+                            <div class="lp-eq-div">=</div>
+                            <div><div class="lp-inline-stat-label">All-in payback</div><div class="lp-inline-stat-value lp-allin-total">${fmtUsd.format(sel.tpaid + sel.buyout)}</div></div>
+                            <div><div class="lp-inline-stat-label">Vs full term</div><div class="lp-inline-stat-value lp-fullterm">${fmtUsd.format(c.payback)}</div></div>
+                        </div>` : '';
                 tr.innerHTML = `<td colspan="6" style="padding:0">
                     <div class="lp-expand-inner">
                         <div class="lp-expand-head">
-                            <div class="lp-expand-title">If borrower pays off here → <span class="lp-expand-date">${sel.date}</span></div>
+                            <div class="lp-expand-title">If borrower pays off here → <span class="lp-expand-date" role="button" title="Click to switch: date / payment # / % paid in" onclick="cyclePayoffLabel(${id})">${payoffLabelText(id, sel)}</span></div>
                         </div>
                         <div class="lp-eq-grid">
                             <div><div class="lp-inline-stat-label">Remaining payments</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.balance + sel.unearned)}</div></div>
@@ -1710,6 +1740,7 @@
                         </div>
                         <button type="button" class="lp-paid-toggle no-print" onclick="togglePaidDetail(${id})">${open ? '&#9662; Hide paid to date' : `&#9656; Show paid to date &mdash; ${payments} so far`}</button>
                         ${paidEqHTML(sel, open)}
+                        ${allinHTML}
                     </div>
                 </td>`;
             } else {
@@ -1867,7 +1898,7 @@
                 }
 
                 const dateCellContent = isSelected && isPrepayEnabled
-                    ? `${dateStr} <span style="font-size:10px;font-weight:700;color:#14532D;white-space:nowrap">&middot; payoff &#10003;</span>`
+                    ? `${dateStr} ${PAYOFF_MARK_HTML}`
                     : dateStr;
                 const row = `
                     <td class="p-3 font-medium text-[#94A3B8] text-center text-[11px]">${i}</td>
@@ -1892,6 +1923,7 @@
                 }
             }
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
+            lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate, periods };
             renderDetailRow(id);
 
             // Park the selected payoff row + panel just under the sticky header so the
@@ -1910,7 +1942,6 @@
                 }
             }
 
-            lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate };
             renderTakeaway(id);
         }
 
