@@ -242,10 +242,9 @@
         }
 
         .prepay-target-row td {
-            background: #dcfce7 !important;
+            background: #F0FDF4 !important;
             font-weight: 800 !important;
             border-top: 2px solid #14532D !important;
-            border-bottom: 2px solid #14532D !important;
         }
         .prepay-target-row td:first-child {
             border-left: 4px solid #14532D !important;
@@ -259,12 +258,20 @@
             border: 1px solid var(--brand-border);
             border-radius: 8px;
         }
+        /* border-collapse:collapse breaks sticky th painting in Chrome (rows bleed through the
+           header on scroll) — use separate borders and a box-shadow rule that sticks with the cells */
+        .table-scroll-container table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
         .table-scroll-container thead th {
             position: sticky;
             top: 0;
             z-index: 10;
             background-color: #F9FAFB !important;
-            border-bottom: 1px solid #E5E7EB !important;
+            background-clip: padding-box;
+            border-bottom: none !important;
+            box-shadow: inset 0 -1px 0 #E5E7EB;
         }
         .table-scroll-container::-webkit-scrollbar { width: 6px; }
         .table-scroll-container::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
@@ -388,14 +395,19 @@
             }
             /* Make sure the prepay-target-row green highlight prints */
             body.pdf-export-mode .prepay-target-row td {
-                background: #DCFCE7 !important;
+                background: #F0FDF4 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            /* Panel backgrounds must survive print */
+            body.pdf-export-mode .lp-expand-inner {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
             /* Paper has no clicks: always show paid-to-date expanded, and print the gray row highlight */
             body.pdf-export-mode .lp-paid-row { display: flex !important; }
             body.pdf-export-mode .paid-target-row td {
-                background: #F1F5F9 !important;
+                background: #F8FAFC !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -527,26 +539,29 @@
         .takeaway-nav-btn:hover { color: #14532D; }
         .takeaway-counter { font-size: 10px; color: #94a3b8; font-variant-numeric: tabular-nums; margin-top: 6px; white-space: nowrap; }
         .amo-detail-cell { background: #e8f5ec; box-shadow: inset 2px 0 0 #0a4d2c; font-style: italic; font-size: 12px; color: #14532D; padding: 5px 12px 5px 16px; }
-        .lp-expand-inner { padding: 14px 18px 16px; background: #F0FDF4; border-left: 3px solid #14532D; }
-        .lp-expand-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #14532D; font-weight: 700; margin-bottom: 10px; }
-        .lp-inline-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+        .lp-expand-inner { padding: 12px 18px 14px; background: #DCFCE7; border-left: 4px solid #14532D; border-top: 1px solid #86EFAC; }
+        .lp-expand-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+        .lp-expand-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #14532D; font-weight: 700; }
+        .lp-expand-date { font-weight: 800; }
         .lp-inline-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #6B7280; margin-bottom: 3px; font-weight: 600; }
-        .lp-inline-stat-value { font-size: 16px; font-weight: 600; color: #111827; }
-        .lp-inline-stat-value.savings { color: #14532D; font-size: 18px; }
-        /* Payoff equation row: A − B = C reading left to right */
-        .lp-eq-row { display: flex; align-items: flex-end; gap: 18px; flex-wrap: wrap; }
-        .lp-eq-date { padding-right: 18px; border-right: 1px solid #BBE3C8; }
-        .lp-eq-op { font-size: 17px; color: #9CA3AF; font-weight: 500; line-height: 1.5; }
-        .lp-eq-answer { font-weight: 800; font-size: 19px; }
-        .lp-paid-toggle { background: none; border: none; padding: 0; margin-top: 12px; font-size: 11px; font-weight: 700; color: #14532D; cursor: pointer; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; }
-        .lp-paid-toggle:hover { text-decoration: underline; }
+        .lp-inline-stat-value { font-size: 15px; font-weight: 600; color: #111827; }
+        .lp-inline-stat-value.savings { color: #14532D; font-size: 20px; font-weight: 800; }
+        /* Payoff equation: 3 stat columns with − / = as standalone dividers between them */
+        .lp-eq-grid { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .lp-eq-div { font-size: 14px; font-weight: 500; color: #9CA3AF; }
+        .lp-eq-answer { font-weight: 700; font-size: 17px; }
+        .lp-paid-toggle { background: none; border: none; padding: 0; font-size: 11px; font-weight: 600; color: #6B7280; cursor: pointer; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; white-space: nowrap; }
+        .lp-paid-toggle:hover { text-decoration: underline; color: #14532D; }
+        .lp-paid-count { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #64748B; font-weight: 600; white-space: nowrap; }
         .lp-paid-row { margin-top: 10px; }
         .lp-paid-row .lp-inline-stat-value { font-size: 14px; color: #374151; }
+        .lp-paid-row .lp-paid-total { font-size: 15px; font-weight: 700; }
         /* Pre-pay-off variant: neutral gray ledger card */
-        .lp-expand-paid { background: #F8FAFC; border-left-color: #94A3B8; }
+        .lp-expand-paid { background: #F1F5F9; border-left-color: #94A3B8; border-top-color: #CBD5E1; }
         .lp-expand-paid .lp-expand-title { color: #64748B; }
         .lp-expand-paid .lp-inline-stat-value { color: #374151; }
-        .paid-target-row td { background: #F1F5F9; }
+        .lp-expand-paid .lp-paid-row { margin-top: 0; }
+        .paid-target-row td { background: #F8FAFC; }
 
         /* Talk track arrow shimmer */
         @keyframes arrowShimmer {
@@ -749,10 +764,13 @@
 
         /* Mobile pay-off detail stacking */
         @media (max-width: 640px) {
-            .lp-inline-stats {
-                grid-template-columns: 1fr !important;
-                gap: 10px !important;
+            .lp-eq-grid {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
             }
+            .lp-eq-div { display: none; }
+            .lp-expand-head { flex-direction: column; gap: 4px; }
             /* Reduce padding and fonts in the dynamic header to prevent squeezing */
             .h-\[64px\] {
                 padding-left: 8px !important;
@@ -1460,7 +1478,7 @@
                     <div id="detailsWrap-${id}" class="px-[24px] pb-[28px]">
                         <div class="table-scroll-container">
                             <table class="min-w-full text-left bg-white text-[12px]">
-                                <thead class="bg-[#F9FAFB] sticky top-0 border-b border-[#E5E7EB]">
+                                <thead class="bg-[#F9FAFB] border-b border-[#E5E7EB]">
                                     <tr>
                                         <th class="p-3 font-bold text-[#6B7280] w-[40px] text-center">#</th>
                                         <th class="p-3 font-bold text-[#111827]">Date</th>
@@ -1652,12 +1670,12 @@
         }
 
         function paidEqHTML(sel, visible) {
-            return `<div class="lp-eq-row lp-paid-row" style="display:${visible ? 'flex' : 'none'}">
+            return `<div class="lp-eq-grid lp-paid-row" style="display:${visible ? 'flex' : 'none'}">
                 <div><div class="lp-inline-stat-label">Principal paid</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.ppaid)}</div></div>
-                <div class="lp-eq-op">+</div>
+                <div class="lp-eq-div">+</div>
                 <div><div class="lp-inline-stat-label">Interest paid</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.ipaid)}</div></div>
-                <div class="lp-eq-op">=</div>
-                <div><div class="lp-inline-stat-label">Total paid</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.tpaid)}</div></div>
+                <div class="lp-eq-div">=</div>
+                <div><div class="lp-inline-stat-label">Total paid</div><div class="lp-inline-stat-value lp-paid-total">${fmtUsd.format(sel.tpaid)}</div></div>
             </div>`;
         }
 
@@ -1680,23 +1698,27 @@
                 const open = !!paidDetailOpen[id];
                 tr.innerHTML = `<td colspan="6" style="padding:0">
                     <div class="lp-expand-inner">
-                        <div class="lp-expand-title">If borrower pays off here →</div>
-                        <div class="lp-eq-row">
-                            <div class="lp-eq-date"><div class="lp-inline-stat-label">Payoff date</div><div class="lp-inline-stat-value">${sel.date}</div></div>
+                        <div class="lp-expand-head">
+                            <div class="lp-expand-title">If borrower pays off here → <span class="lp-expand-date">${sel.date}</span></div>
+                            <button type="button" class="lp-paid-toggle no-print" onclick="togglePaidDetail(${id})">${open ? '&#9662;' : '&#9656;'} Paid to date &mdash; ${payments}</button>
+                        </div>
+                        <div class="lp-eq-grid">
                             <div><div class="lp-inline-stat-label">Remaining payments</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.balance + sel.unearned)}</div></div>
-                            <div class="lp-eq-op">&minus;</div>
+                            <div class="lp-eq-div">&minus;</div>
                             <div><div class="lp-inline-stat-label">Borrower saves</div><div class="lp-inline-stat-value savings">${fmtUsd.format(sel.savings)}</div></div>
-                            <div class="lp-eq-op">=</div>
+                            <div class="lp-eq-div">=</div>
                             <div><div class="lp-inline-stat-label">Payoff balance</div><div class="lp-inline-stat-value lp-eq-answer">${fmtUsd.format(sel.buyout)}</div></div>
                         </div>
-                        <button type="button" class="lp-paid-toggle no-print" onclick="togglePaidDetail(${id})">${open ? '&#9662;' : '&#9656;'} Paid to date &mdash; ${payments}</button>
                         ${paidEqHTML(sel, open)}
                     </div>
                 </td>`;
             } else {
                 tr.innerHTML = `<td colspan="6" style="padding:0">
                     <div class="lp-expand-inner lp-expand-paid">
-                        <div class="lp-expand-title" style="display:flex;justify-content:space-between;gap:12px"><span>Paid through ${sel.date} →</span><span>${payments} made</span></div>
+                        <div class="lp-expand-head">
+                            <div class="lp-expand-title">Paid through ${sel.date} →</div>
+                            <span class="lp-paid-count">${payments} made</span>
+                        </div>
                         ${paidEqHTML(sel, true)}
                     </div>
                 </td>`;
