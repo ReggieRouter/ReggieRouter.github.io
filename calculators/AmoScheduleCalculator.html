@@ -392,6 +392,13 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
+            /* Paper has no clicks: always show paid-to-date expanded, and print the gray row highlight */
+            body.pdf-export-mode .lp-paid-row { display: flex !important; }
+            body.pdf-export-mode .paid-target-row td {
+                background: #F1F5F9 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
             /* Force hide the duplicate "Complete Payment Schedule" block — it was for the old html2pdf path */
             body.pdf-export-mode div.hidden { display: none !important; }
             /* Better print table spacing — closer to the ideal-version padding */
@@ -526,6 +533,20 @@
         .lp-inline-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #6B7280; margin-bottom: 3px; font-weight: 600; }
         .lp-inline-stat-value { font-size: 16px; font-weight: 600; color: #111827; }
         .lp-inline-stat-value.savings { color: #14532D; font-size: 18px; }
+        /* Payoff equation row: A − B = C reading left to right */
+        .lp-eq-row { display: flex; align-items: flex-end; gap: 18px; flex-wrap: wrap; }
+        .lp-eq-date { padding-right: 18px; border-right: 1px solid #BBE3C8; }
+        .lp-eq-op { font-size: 17px; color: #9CA3AF; font-weight: 500; line-height: 1.5; }
+        .lp-eq-answer { font-weight: 800; font-size: 19px; }
+        .lp-paid-toggle { background: none; border: none; padding: 0; margin-top: 12px; font-size: 11px; font-weight: 700; color: #14532D; cursor: pointer; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; }
+        .lp-paid-toggle:hover { text-decoration: underline; }
+        .lp-paid-row { margin-top: 10px; }
+        .lp-paid-row .lp-inline-stat-value { font-size: 14px; color: #374151; }
+        /* Pre-pay-off variant: neutral gray ledger card */
+        .lp-expand-paid { background: #F8FAFC; border-left-color: #94A3B8; }
+        .lp-expand-paid .lp-expand-title { color: #64748B; }
+        .lp-expand-paid .lp-inline-stat-value { color: #374151; }
+        .paid-target-row td { background: #F1F5F9; }
 
         /* Talk track arrow shimmer */
         @keyframes arrowShimmer {
@@ -987,6 +1008,7 @@
 
         const fmtUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
         const rowSelection = {};
+        const paidDetailOpen = {};
         const cardTracks = {};
         const lastCalc = {};
 
@@ -1550,7 +1572,9 @@
             const curIdx = Math.min(cardTracks[id] ?? 0, tracks.length - 1);
             cardTracks[id] = curIdx;
             const track = tracks[curIdx];
-            const sel = rowSelection[id];
+            const isPrepayOn = document.getElementById(`enablePrepay-${id}`)?.checked;
+            // With pre-pay off, row selections are paid-to-date views — keep payoff phrasing out of the takeaway
+            const sel = isPrepayOn ? rowSelection[id] : null;
 
             let html;
             if (track.key === 'summary') {
@@ -1584,7 +1608,6 @@
             if (counter) counter.textContent = `${track.name} · ${curIdx + 1} / ${tracks.length}`;
 
             const summary = document.getElementById(`prepaySummary-${id}`);
-            const isPrepayOn = document.getElementById(`enablePrepay-${id}`)?.checked;
 
             if (isPrepayOn && sel && sel.savings > 0) {
                 summary.classList.remove('hidden');
@@ -1600,11 +1623,10 @@
 
         function selectAmoRow(id, period) {
             const isPrepay = document.getElementById(`enablePrepay-${id}`)?.checked;
-            if (!isPrepay) return;
             const rowEl = document.getElementById(`arow-${id}-${period}`);
             if (!rowEl) return;
             const tbody = document.getElementById(`tableBody-${id}`);
-            tbody.querySelectorAll('tr').forEach(r => r.classList.remove('prepay-target-row'));
+            tbody.querySelectorAll('tr').forEach(r => r.classList.remove('prepay-target-row', 'paid-target-row'));
 
             if (rowSelection[id] && rowSelection[id].period === period) {
                 delete rowSelection[id];
@@ -1615,36 +1637,70 @@
                     unearned: parseFloat(rowEl.dataset.unearned),
                     savings: parseFloat(rowEl.dataset.savings),
                     buyout: parseFloat(rowEl.dataset.buyout),
+                    ppaid: parseFloat(rowEl.dataset.ppaid),
+                    ipaid: parseFloat(rowEl.dataset.ipaid),
+                    tpaid: parseFloat(rowEl.dataset.tpaid),
                     date: rowEl.dataset.date,
                     day: parseInt(rowEl.dataset.day, 10),
                     month: rowEl.dataset.month,
                     year: parseInt(rowEl.dataset.year, 10)
                 };
-                rowEl.classList.add('prepay-target-row');
+                rowEl.classList.add(isPrepay ? 'prepay-target-row' : 'paid-target-row');
             }
             renderDetailRow(id);
             renderTakeaway(id);
+        }
+
+        function paidEqHTML(sel, visible) {
+            return `<div class="lp-eq-row lp-paid-row" style="display:${visible ? 'flex' : 'none'}">
+                <div><div class="lp-inline-stat-label">Principal paid</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.ppaid)}</div></div>
+                <div class="lp-eq-op">+</div>
+                <div><div class="lp-inline-stat-label">Interest paid</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.ipaid)}</div></div>
+                <div class="lp-eq-op">=</div>
+                <div><div class="lp-inline-stat-label">Total paid</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.tpaid)}</div></div>
+            </div>`;
+        }
+
+        function togglePaidDetail(id) {
+            paidDetailOpen[id] = !paidDetailOpen[id];
+            renderDetailRow(id);
         }
 
         function renderDetailRow(id) {
             document.querySelectorAll(`.amo-detail-for-${id}`).forEach(r => r.remove());
             const sel = rowSelection[id];
             const isPrepay = document.getElementById(`enablePrepay-${id}`)?.checked;
-            if (!sel || !isPrepay || sel.savings <= 0) return;
+            if (!sel || (isPrepay && sel.savings <= 0)) return;
             const rowEl = document.getElementById(`arow-${id}-${sel.period}`);
             if (!rowEl) return;
             const tr = document.createElement('tr');
             tr.className = `amo-detail-for-${id}`;
-            tr.innerHTML = `<td colspan="6" style="padding:0">
-                <div class="lp-expand-inner">
-                    <div class="lp-expand-title">If borrower pays off here →</div>
-                    <div class="lp-inline-stats">
-                        <div><div class="lp-inline-stat-label">Payoff date</div><div class="lp-inline-stat-value">${sel.date}</div></div>
-                        <div><div class="lp-inline-stat-label">Payoff balance</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.buyout)}</div></div>
-                        <div><div class="lp-inline-stat-label">Borrower saves</div><div class="lp-inline-stat-value savings">${fmtUsd.format(sel.savings)}</div></div>
+            const payments = `${sel.period} payment${sel.period === 1 ? '' : 's'}`;
+            if (isPrepay) {
+                const open = !!paidDetailOpen[id];
+                tr.innerHTML = `<td colspan="6" style="padding:0">
+                    <div class="lp-expand-inner">
+                        <div class="lp-expand-title">If borrower pays off here →</div>
+                        <div class="lp-eq-row">
+                            <div class="lp-eq-date"><div class="lp-inline-stat-label">Payoff date</div><div class="lp-inline-stat-value">${sel.date}</div></div>
+                            <div><div class="lp-inline-stat-label">Remaining payments</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.balance + sel.unearned)}</div></div>
+                            <div class="lp-eq-op">&minus;</div>
+                            <div><div class="lp-inline-stat-label">Borrower saves</div><div class="lp-inline-stat-value savings">${fmtUsd.format(sel.savings)}</div></div>
+                            <div class="lp-eq-op">=</div>
+                            <div><div class="lp-inline-stat-label">Payoff balance</div><div class="lp-inline-stat-value lp-eq-answer">${fmtUsd.format(sel.buyout)}</div></div>
+                        </div>
+                        <button type="button" class="lp-paid-toggle no-print" onclick="togglePaidDetail(${id})">${open ? '&#9662;' : '&#9656;'} Paid to date &mdash; ${payments}</button>
+                        ${paidEqHTML(sel, open)}
                     </div>
-                </div>
-            </td>`;
+                </td>`;
+            } else {
+                tr.innerHTML = `<td colspan="6" style="padding:0">
+                    <div class="lp-expand-inner lp-expand-paid">
+                        <div class="lp-expand-title" style="display:flex;justify-content:space-between;gap:12px"><span>Paid through ${sel.date} →</span><span>${payments} made</span></div>
+                        ${paidEqHTML(sel, true)}
+                    </div>
+                </td>`;
+            }
             rowEl.after(tr);
         }
 
@@ -1741,6 +1797,7 @@
             document.getElementById(`outApr-${id}`).innerText = apr.toFixed(1) + '%';
             
             let balance = amt, unearnedInterest = totalCost, currentDate = new Date(startDate);
+            let paidPrincipal = 0, paidInterest = 0, paidTotal = 0;
             let tbodyHTML = '', printTbodyHTML = '', maturityDate = '';
 
             const periodRate = getPeriodRate(amt, pmt, periods);
@@ -1761,6 +1818,8 @@
                 if(unearnedInterest < 0) unearnedInterest = 0;
                 if(balance < 0) balance = 0;
 
+                paidPrincipal += principal; paidInterest += interest; paidTotal += pmt;
+
                 const rowSavings = unearnedInterest * (discPct / 100);
                 const rowBuyout = balance + unearnedInterest - rowSavings;
                 const dateStr = currentDate.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
@@ -1776,13 +1835,16 @@
                     } else {
                         isSelected = defaultPeriod === i;
                     }
+                } else if (rowSelection[id]) {
+                    // Pre-pay off: keep a user-clicked paid-to-date row selected across recalcs (no default selection)
+                    isSelected = rowSelection[id].period === i;
                 }
 
                 if (isSelected) {
-                    rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, date: dateStr, day: dateDay, month: dateMonth, year: dateYear };
+                    rowSelection[id] = { period: i, balance, unearned: unearnedInterest, savings: rowSavings, buyout: rowBuyout, ppaid: paidPrincipal, ipaid: paidInterest, tpaid: paidTotal, date: dateStr, day: dateDay, month: dateMonth, year: dateYear };
                 }
 
-                const dateCellContent = isSelected
+                const dateCellContent = isSelected && isPrepayEnabled
                     ? `${dateStr} <span style="font-size:10px;font-weight:700;color:#14532D;white-space:nowrap">&middot; payoff &#10003;</span>`
                     : dateStr;
                 const row = `
@@ -1792,7 +1854,7 @@
                     <td class="p-3 text-right">${fmtUsd.format(principal)}</td>
                     <td class="p-3 text-right">${fmtUsd.format(interest)}</td>
                     <td class="p-3 font-extrabold text-[#14532D] text-right">${fmtUsd.format(balance)}</td>`;
-                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? ' prepay-target-row' : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" data-year="${dateYear}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
+                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? (isPrepayEnabled ? ' prepay-target-row' : ' paid-target-row') : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-ppaid="${paidPrincipal.toFixed(2)}" data-ipaid="${paidInterest.toFixed(2)}" data-tpaid="${paidTotal.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" data-year="${dateYear}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
                 const printRow = `<td>${i}</td><td>${dateStr}</td><td style="text-align:right">${fmtUsd.format(pmt)}</td><td style="text-align:right">${fmtUsd.format(principal)}</td><td style="text-align:right">${fmtUsd.format(interest)}</td><td style="text-align:right;color:#14532D;font-weight:800">${fmtUsd.format(balance)}</td>`;
                 printTbodyHTML += `<tr>${printRow}</tr>`;
                 if(balance <= 0) break;
