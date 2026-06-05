@@ -1894,6 +1894,22 @@
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
             renderDetailRow(id);
 
+            // Park the selected payoff row + panel just under the sticky header so the
+            // payoff math is visible without hunting for it
+            const selRowEl = rowSelection[id] && document.getElementById(`arow-${id}-${rowSelection[id].period}`);
+            if (selRowEl) {
+                const scrollCont = selRowEl.closest('.table-scroll-container');
+                if (scrollCont) {
+                    const parkRow = () => {
+                        const r = rowSelection[id] && document.getElementById(`arow-${id}-${rowSelection[id].period}`);
+                        if (r) scrollCont.scrollTop = Math.max(0, r.offsetTop - 48);
+                    };
+                    parkRow();
+                    // row heights shift once the webfont swaps in — re-park after fonts settle
+                    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => requestAnimationFrame(parkRow));
+                }
+            }
+
             lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate };
             renderTakeaway(id);
         }
