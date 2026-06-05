@@ -23,10 +23,35 @@
   <script type="module">
     import { createClient } from '@supabase/supabase-js';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    await new Promise(r => setTimeout(r, 500));
-    const { data:{ session }, error } = await supabase.auth.getSession();
-    if (!session || error) {
-      window.location.href = '/login.html';
+
+    function showError(msg) {
+      document.querySelector('.spinner').style.display = 'none';
+      const p = document.querySelector('p');
+      p.textContent = 'Sign-in hit a snag: ' + msg + ' ';
+      const a = document.createElement('a');
+      a.href = '/login.html';
+      a.textContent = '← Back to login';
+      a.style.color = '#2D6A4F';
+      p.appendChild(document.createElement('br'));
+      p.appendChild(a);
+    }
+
+    // Supabase reports failures as error params (query or hash) — surface them instead of bouncing
+    const qs = new URLSearchParams(window.location.search);
+    const hs = new URLSearchParams(window.location.hash.slice(1));
+    const errMsg = qs.get('error_description') || hs.get('error_description') || qs.get('error') || hs.get('error');
+    if (errMsg) { showError(decodeURIComponent(errMsg.replace(/\+/g, ' '))); throw new Error(errMsg); }
+
+    // Wait for the client to establish the session — token parsing can outlast a fixed delay
+    const session = await new Promise((resolve) => {
+      let done = false;
+      const finish = (s) => { if (!done) { done = true; resolve(s); } };
+      supabase.auth.onAuthStateChange((event, s) => { if (s) finish(s); });
+      supabase.auth.getSession().then(({ data: { session: s } }) => { if (s) finish(s); });
+      setTimeout(() => finish(null), 6000);
+    });
+    if (!session) {
+      showError('No session was established after sign-in. Please try again.');
     } else {
       const { data: profile } = await supabase.from('profiles').select('id, status, is_admin').eq('id', session.user.id).single();
       if (!profile) {
