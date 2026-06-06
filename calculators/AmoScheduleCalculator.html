@@ -850,10 +850,8 @@
 <script type="module">
   import { requireApprovedUser, logUsage } from '../js/auth.js';
   const profile = await requireApprovedUser();
-  if (profile) {
-    window.lpProfile = profile; // invite toast reads invite_credits / invites_sent (LEN-75)
-    logUsage('amortization', 'view');
-  }
+  if (!profile) return;
+  logUsage('amortization', 'view');
 </script>
 </head>
 <body>
