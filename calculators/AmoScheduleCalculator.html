@@ -538,20 +538,26 @@
         .lp-expand-inner { padding: 18px 32px 20px; background: #F0FDF4; }
         .lp-expand-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; }
         .lp-expand-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #14532D; font-weight: 700; }
-        .lp-expand-date { font-weight: 800; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
-        .lp-expand-date:hover { text-decoration: underline; }
-        .lp-paid-row.lp-allin { margin-top: 8px; padding-top: 10px; border-top: 1px dashed #BBF7D0; }
-        .lp-allin .lp-allin-total { font-size: 15px; font-weight: 800; color: #14532D; }
-        .lp-allin .lp-fullterm { text-decoration: line-through; color: #9CA3AF; font-weight: 600; font-size: 13px; }
         .lp-inline-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #6B7280; margin-bottom: 3px; font-weight: 600; }
         .lp-inline-stat-value { font-size: 15px; font-weight: 600; color: #111827; }
-        .lp-inline-stat-value.savings { color: #14532D; font-size: 20px; font-weight: 800; }
-        /* Payoff equation: 3 stat columns with − / = as standalone dividers between them */
+        .lp-inline-stat-value.savings { color: #1A3C2E; font-size: 20px; font-weight: 800; }
+        /* Paid-to-date equation: stat columns with + / = as standalone dividers */
         .lp-eq-grid { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
         .lp-eq-div { font-size: 14px; font-weight: 500; color: #9CA3AF; }
-        .lp-eq-answer { font-weight: 700; font-size: 17px; }
-        .lp-paid-toggle { background: none; border: none; padding: 0; margin-top: 20px; font-size: 11px; font-weight: 700; color: #14532D; cursor: pointer; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; white-space: nowrap; text-decoration: underline dotted; text-underline-offset: 3px; }
-        .lp-paid-toggle:hover { text-decoration: underline; }
+        /* Payoff expansion: 3 stat cards + metadata row + copy-quote button */
+        .lp-payoff-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .lp-payoff-card { background: #FFFFFF; border: 1px solid #9fe1cb; border-radius: 8px; padding: 12px 14px; }
+        .lp-payoff-card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #2D6A4F; font-weight: 700; margin-bottom: 4px; }
+        .lp-payoff-card-value { font-size: 19px; font-weight: 500; color: #1A3C2E; font-variant-numeric: tabular-nums; }
+        .lp-payoff-card-hero .lp-payoff-card-value { font-size: 23px; }
+        .lp-payoff-meta { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid #D1FAE5; }
+        .lp-quote-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+        .lp-quote-btn { background: transparent; border: 1px solid #9fe1cb; border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 700; color: #1A3C2E; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+        .lp-quote-btn:hover { background: #FFFFFF; }
+        .lp-quote-copied { font-size: 11px; font-weight: 700; color: #1A3C2E; opacity: 0; transition: opacity 0.3s; }
+        .lp-quote-copied.show { opacity: 1; }
+        /* Payoff columns only mean something with the pre-pay discount on */
+        .amo-prepay-off .col-payoff { display: none; }
         .lp-paid-count { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #64748B; font-weight: 600; white-space: nowrap; }
         .lp-paid-row { margin-top: 14px; }
         .lp-paid-row .lp-inline-stat-value { font-size: 14px; color: #374151; }
@@ -770,6 +776,7 @@
                 gap: 10px;
             }
             .lp-eq-div { display: none; }
+            .lp-payoff-cards { grid-template-columns: 1fr; }
             .lp-expand-head { flex-direction: column; gap: 4px; }
             /* Reduce padding and fonts in the dynamic header to prevent squeezing */
             .h-\[64px\] {
@@ -799,7 +806,7 @@
         /* PDF layout: weekly payment hero is left-aligned per the perfect example */
         body.pdf-export-mode .pdf-hero-block { text-align: left !important; margin-top: 4px !important; margin-bottom: 20px !important; padding-bottom: 16px !important; }
 
-        /* PDF layout: show the 2x2 stats grid (Est. Total Payback / Total Interest / Cost per Dollar / APR) */
+        /* PDF layout: show the 2x2 stats grid (Full-Term Cost / Total Interest / Cost per Dollar / APR) */
         body.pdf-export-mode .pdf-stats-grid { display: grid !important; }
 
         /* PDF polish: keep the takeaway summary visible in print and match the May 23 PDF format.
@@ -1028,10 +1035,8 @@
 
         const fmtUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
         const rowSelection = {};
-        const paidDetailOpen = {};
         const cardTracks = {};
-        const PAYOFF_MARK_HTML = '<span class="payoff-mark" style="font-size:10px;font-weight:700;color:#14532D;white-space:nowrap">&middot; payoff &#10003;</span>';
-        let payoffLabelMode = 0; // 0 = date, 1 = payment N of M, 2 = % paid in
+        const PAYOFF_MARK_HTML = '<span class="payoff-mark" style="font-size:10px;font-weight:700;color:#1A3C2E;white-space:nowrap">&middot; payoff &#10003;</span>';
         const lastCalc = {};
 
         let compareCardId = null;
@@ -1391,7 +1396,7 @@
 
                             <div class="grid grid-cols-2 gap-y-6 gap-x-8 text-[13px] mb-8 pdf-stats-grid">
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">Est. total payback</div>
+                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">Full-term cost</div>
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outPayback-${id}">$0.00</div>
                                 </div>
                                 <div>
@@ -1413,8 +1418,9 @@
                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                                      <span id="outSavingsPhrase-${id}" style="font-size:15px; font-weight:700; color:#14532D; line-height:1.3">—</span>
                                  </div>
-                                 <div class="flex flex-wrap gap-x-5 gap-y-1 px-4 pb-4" style="font-size:11.5px; color:#166534">
-                                     <span>Est. early payoff: <strong id="outBuyout-${id}">—</strong></span>
+                                 <div class="flex flex-wrap gap-x-3 gap-y-1 px-4 pb-4" style="font-size:11.5px; color:#166534">
+                                     <span>Payoff amount: <strong id="outBuyout-${id}">—</strong></span>
+                                     <span aria-hidden="true" style="color:#86EFAC">&middot;</span>
                                      <span>Full term: <strong id="outFullTermDate-${id}">—</strong></span>
                                  </div>
                                  <span id="outSavings-${id}" style="display:none">$0.00</span>
@@ -1438,14 +1444,14 @@
                                     </div>
                                 </div>
                                 <div class="takeaway-footer no-print">
-                                    APR disclosure required in CA and NY
+                                    * APR disclosure required in CA and NY
                                 </div>
                             </div>
 
                             <div class="action-buttons flex flex-col gap-3 mt-5 no-print">
                                 <button onclick="copyResults(${id})" class="lp-copy-btn">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                    Copy Results
+                                    Copy Scenario
                                 </button>
                                 <button onclick="handleLendPaperSavePDF()" class="lp-print-btn">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
@@ -1489,7 +1495,15 @@
                                         <th class="p-3 font-bold text-[#111827] text-right">Payment</th>
                                         <th class="p-3 font-bold text-[#111827] text-right">Principal</th>
                                         <th class="p-3 font-bold text-[#111827] text-right">Interest</th>
-                                        <th class="p-3 font-bold text-[#14532D] text-right">Remaining Balance</th>
+                                        <th class="p-3 font-bold text-[#1A3C2E] text-right">Remaining Balance</th>
+                                        <th class="p-3 font-bold text-[#1A3C2E] text-right col-payoff">Payoff Amount<span class="tooltip tooltip-right-anchor ml-1 no-print">
+                                            <span class="w-[14px] h-[14px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9px] font-bold italic transition-colors bg-white">i</span>
+                                            <span class="tooltiptext">The discounted amount to settle the deal on this date &mdash; remaining balance minus the early-payoff discount. This is the number you quote to the borrower.</span>
+                                        </span></th>
+                                        <th class="p-3 font-bold text-[#1A3C2E] text-right col-payoff">Interest Saved<span class="tooltip tooltip-right-anchor ml-1 no-print">
+                                            <span class="w-[14px] h-[14px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9px] font-bold italic transition-colors bg-white">i</span>
+                                            <span class="tooltiptext">How much less the borrower pays versus completing the full term. Calculated as: Full-term cost minus (payments made + payoff amount).</span>
+                                        </span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="tableBody-${id}" class="divide-y divide-[#F3F4F6]"></tbody>
@@ -1601,7 +1615,7 @@
             let html;
             if (track.key === 'summary') {
                 if (sel) {
-                    html = `You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}.`;
+                    html = `You're looking at <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>. Pay off on your ${payoffLink(id, sel)}, and your payoff amount is <strong>${fmtUsd.format(sel.buyout)}</strong>${sel.savings > 0 ? ` — saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest` : ''}.`;
                 } else {
                     const unitLabel = c.termUnit === 'wks' ? (c.term === 1 ? 'week' : 'weeks') :
                                       (c.termUnit === 'days' ? (c.term === 1 ? 'day' : 'days') :
@@ -1610,7 +1624,7 @@
                 }
             } else if (track.key === 'apr') {
                 if (sel) {
-                    html = `You're looking at <strong>${c.apr.toFixed(1)}% APR</strong> on net funded. Pay off on your ${payoffLink(id, sel)}, and your buyout is <strong>${fmtUsd.format(sel.buyout)}</strong>.`;
+                    html = `You're looking at <strong>${c.apr.toFixed(1)}% APR</strong> on net funded. Pay off on your ${payoffLink(id, sel)}, and your payoff amount is <strong>${fmtUsd.format(sel.buyout)}</strong>.`;
                 } else {
                     html = `You're looking at <strong>${fmtUsd.format(c.totalCost)}</strong> in total funding costs — a <strong>${c.apr.toFixed(1)}% APR</strong>, or <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>.`;
                 }
@@ -1618,9 +1632,9 @@
                 html = `For every dollar you receive, you're paying back <strong>${c.factor.toFixed(2)}</strong> — that's <strong>${c.centsDisplay}¢ on the dollar</strong>. On <strong>${fmtUsd.format(c.amt)}</strong> funded, you repay <strong>${fmtUsd.format(c.payback)}</strong> total.`;
             } else if (track.key === 'prepay') {
                 if (sel && sel.savings > 0) {
-                    html = `Pay off on your ${payoffLink(id, sel)} — your buyout drops to <strong>${fmtUsd.format(sel.buyout)}</strong>, saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest.`;
+                    html = `Pay off on your ${payoffLink(id, sel)} — your payoff amount drops to <strong>${fmtUsd.format(sel.buyout)}</strong>, saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest.`;
                 } else {
-                    html = `This deal has a <strong>${c.discPct}%</strong> pre-pay discount — pay off early and keep the unearned interest savings. Click any row below to model the exact buyout.`;
+                    html = `This deal has a <strong>${c.discPct}%</strong> pre-pay discount — pay off early and keep the unearned interest savings. Click any row below to model the exact payoff amount.`;
                 }
             }
 
@@ -1686,21 +1700,16 @@
             </div>`;
         }
 
-        function togglePaidDetail(id) {
-            paidDetailOpen[id] = !paidDetailOpen[id];
-            renderDetailRow(id);
-        }
-
-        function cyclePayoffLabel(id) {
-            payoffLabelMode = (payoffLabelMode + 1) % 3;
-            renderDetailRow(id);
-        }
-
-        function payoffLabelText(id, sel) {
-            const c = lastCalc[id];
-            if (payoffLabelMode === 1 && c?.periods) return `payment ${sel.period} of ${c.periods}`;
-            if (payoffLabelMode === 2 && c?.payback) return `${(sel.tpaid / c.payback * 100).toFixed(1)}% paid in`;
-            return sel.date;
+        function copyPayoffQuote(id) {
+            const sel = rowSelection[id];
+            if (!sel) return;
+            navigator.clipboard.writeText(`Payoff Amount: ${fmtUsd.format(sel.buyout)} | Interest Saved: ${fmtUsd.format(sel.savings)} | Payoff Date: ${sel.date}`);
+            const el = document.getElementById(`quoteCopied-${id}`);
+            if (el) {
+                el.classList.add('show');
+                clearTimeout(el._fadeTimer);
+                el._fadeTimer = setTimeout(() => el.classList.remove('show'), 2000);
+            }
         }
 
         function renderDetailRow(id) {
@@ -1714,31 +1723,33 @@
             tr.className = `amo-detail-for-${id}`;
             const payments = `${sel.period} payment${sel.period === 1 ? '' : 's'}`;
             if (isPrepay) {
-                const open = !!paidDetailOpen[id];
                 const c = lastCalc[id];
-                const allinHTML = c ? `<div class="lp-eq-grid lp-paid-row lp-allin" style="display:${open ? 'flex' : 'none'}">
-                            <div><div class="lp-inline-stat-label">Total paid</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.tpaid)}</div></div>
-                            <div class="lp-eq-div">+</div>
-                            <div><div class="lp-inline-stat-label">Payoff balance</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.buyout)}</div></div>
-                            <div class="lp-eq-div">=</div>
-                            <div><div class="lp-inline-stat-label">All-in payback</div><div class="lp-inline-stat-value lp-allin-total">${fmtUsd.format(sel.tpaid + sel.buyout)}</div></div>
-                            <div><div class="lp-inline-stat-label">Vs full term</div><div class="lp-inline-stat-value lp-fullterm">${fmtUsd.format(c.payback)}</div></div>
-                        </div>` : '';
-                tr.innerHTML = `<td colspan="6" style="padding:0">
+                const shortDate = sel.date.replace(/,\s*\d{4}$/, '');
+                tr.innerHTML = `<td colspan="8" style="padding:0">
                     <div class="lp-expand-inner">
-                        <div class="lp-expand-head">
-                            <div class="lp-expand-title">If borrower pays off here → <span class="lp-expand-date" role="button" title="Click to switch: date / payment # / % paid in" onclick="cyclePayoffLabel(${id})">${payoffLabelText(id, sel)}</span></div>
+                        <div class="lp-payoff-cards">
+                            <div class="lp-payoff-card lp-payoff-card-hero">
+                                <div class="lp-payoff-card-label">Payoff Amount</div>
+                                <div class="lp-payoff-card-value">${fmtUsd.format(sel.buyout)}</div>
+                            </div>
+                            <div class="lp-payoff-card">
+                                <div class="lp-payoff-card-label">Interest Saved</div>
+                                <div class="lp-payoff-card-value">${fmtUsd.format(sel.savings)}</div>
+                            </div>
+                            <div class="lp-payoff-card">
+                                <div class="lp-payoff-card-label">All-in cost if paid off ${shortDate}</div>
+                                <div class="lp-payoff-card-value">${fmtUsd.format(sel.tpaid + sel.buyout)}</div>
+                            </div>
                         </div>
-                        <div class="lp-eq-grid">
-                            <div><div class="lp-inline-stat-label">Remaining payments</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.balance + sel.unearned)}</div></div>
-                            <div class="lp-eq-div">&minus;</div>
-                            <div><div class="lp-inline-stat-label">Borrower saves</div><div class="lp-inline-stat-value savings">${fmtUsd.format(sel.savings)}</div></div>
-                            <div class="lp-eq-div">=</div>
-                            <div><div class="lp-inline-stat-label">Payoff balance</div><div class="lp-inline-stat-value lp-eq-answer">${fmtUsd.format(sel.buyout)}</div></div>
+                        <div class="lp-payoff-meta">
+                            <div><div class="lp-inline-stat-label">Payoff date</div><div class="lp-inline-stat-value">${sel.date}</div></div>
+                            <div><div class="lp-inline-stat-label">Paid to date</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.tpaid)}</div></div>
+                            <div><div class="lp-inline-stat-label">Full-term cost</div><div class="lp-inline-stat-value">${c ? fmtUsd.format(c.payback) : '&mdash;'}</div></div>
                         </div>
-                        <button type="button" class="lp-paid-toggle no-print" onclick="togglePaidDetail(${id})">${open ? '&#9662; Hide paid to date' : `&#9656; Show paid to date &mdash; ${payments} so far`}</button>
-                        ${paidEqHTML(sel, open)}
-                        ${allinHTML}
+                        <div class="lp-quote-row no-print">
+                            <button type="button" class="lp-quote-btn" onclick="copyPayoffQuote(${id})">&#128203; Copy payoff quote</button>
+                            <span class="lp-quote-copied" id="quoteCopied-${id}">Copied!</span>
+                        </div>
                     </div>
                 </td>`;
             } else {
@@ -1904,7 +1915,9 @@
                     <td class="p-3 font-bold text-right">${fmtUsd.format(pmt)}</td>
                     <td class="p-3 text-right">${fmtUsd.format(principal)}</td>
                     <td class="p-3 text-right">${fmtUsd.format(interest)}</td>
-                    <td class="p-3 font-extrabold text-[#14532D] text-right">${fmtUsd.format(balance)}</td>`;
+                    <td class="p-3 font-extrabold text-[#1A3C2E] text-right">${fmtUsd.format(balance)}</td>
+                    <td class="p-3 font-semibold text-[#1A3C2E] text-right col-payoff">${fmtUsd.format(rowBuyout)}</td>
+                    <td class="p-3 text-[#2D6A4F] text-right col-payoff">${fmtUsd.format(rowSavings)}</td>`;
                 tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? (isPrepayEnabled ? ' prepay-target-row' : ' paid-target-row') : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-ppaid="${paidPrincipal.toFixed(2)}" data-ipaid="${paidInterest.toFixed(2)}" data-tpaid="${paidTotal.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" data-year="${dateYear}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
                 const printRow = `<td>${i}</td><td>${dateStr}</td><td style="text-align:right">${fmtUsd.format(pmt)}</td><td style="text-align:right">${fmtUsd.format(principal)}</td><td style="text-align:right">${fmtUsd.format(interest)}</td><td style="text-align:right;color:#14532D;font-weight:800">${fmtUsd.format(balance)}</td>`;
                 printTbodyHTML += `<tr>${printRow}</tr>`;
@@ -1919,6 +1932,9 @@
                 } else {
                     tbody.classList.remove('prepay-enabled');
                 }
+                // Payoff Amount / Interest Saved columns only render with the discount on
+                const tableEl = tbody.closest('table');
+                if (tableEl) tableEl.classList.toggle('amo-prepay-off', !isPrepayEnabled);
             }
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
             lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate, periods };
