@@ -84,31 +84,17 @@
   status = 200
   force  = true
 
-# ── Admin dashboard (auth-gated in-page: non-admins are redirected) ─────────
-[[headers]]
-  for = "/admin"
-  [headers.values]
-    X-Frame-Options           = "DENY"
-    X-Content-Type-Options    = "nosniff"
-    Referrer-Policy           = "no-referrer"
-    Cache-Control             = "no-store, no-cache, must-revalidate, private"
-    Permissions-Policy        = "geolocation=(), microphone=(), camera=()"
-    X-Permitted-Cross-Domain-Policies = "none"
-
-[[headers]]
-  for = "/admin.html"
-  [headers.values]
-    X-Frame-Options           = "DENY"
-    X-Content-Type-Options    = "nosniff"
-    Referrer-Policy           = "no-referrer"
-    Cache-Control             = "no-store, no-cache, must-revalidate, private"
-    Permissions-Policy        = "geolocation=(), microphone=(), camera=()"
-    X-Permitted-Cross-Domain-Policies = "none"
-
+# ── Admin dashboard — folded into lp-panel Members tab (LEN-84) ─────────────
 [[redirects]]
   from   = "/admin"
-  to     = "/admin.html"
-  status = 200
+  to     = "/lp-panel.html"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/admin.html"
+  to     = "/lp-panel.html"
+  status = 301
   force  = true
 
 # ── Dead-end redirects for old URLs (404 — reveals nothing) ─────────────────
