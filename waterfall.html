@@ -8169,7 +8169,7 @@
   searchInput.addEventListener('input', (e) => {
     activeFilters.search = e.target.value;
     renderTable();
-    if (!window._lpShareShown) { window._lpShareShown = true; document.getElementById('sharePrompt').style.display = 'block'; }
+    if (!window._lpShareShown) { window._lpShareShown = true; showInviteToast(); }
   });
 
   // Risk chips (exclusive)
@@ -8945,11 +8945,130 @@
   // v2026-05-28
 </script>
 
-<div id="sharePrompt" style="display:none; position:fixed; bottom:24px; right:24px; background:#111520; border:1px solid #1e2535; border-radius:12px; padding:16px 20px; font-family:'Inter',sans-serif; font-size:14px; color:#e2e8f0; z-index:999; max-width:300px; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
-  Your team would love this.
-  <a href="#" id="shareLink" style="color:#e8b84b; display:block; margin-top:6px; text-decoration:none;" onclick="shareWithTeam()">Invite them →</a>
-  <button onclick="document.getElementById('sharePrompt').style.display='none'" style="position:absolute;top:8px;right:12px;background:none;border:none;color:#64748b;cursor:pointer;font-size:16px;">×</button>
+<style>
+  .invite-toast {
+    position: fixed;
+    bottom: 28px;
+    right: 24px;
+    z-index: 9999;
+    width: 232px;
+    background: #1A3C2E;
+    border-radius: 14px;
+    padding: 16px 18px 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.12);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .24s ease, transform .24s ease;
+    pointer-events: none;
+  }
+  .invite-toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .invite-toast-close {
+    position: absolute;
+    top: 10px; right: 12px;
+    background: none; border: none;
+    color: rgba(255,255,255,0.35);
+    font-size: 16px; line-height: 1;
+    cursor: pointer;
+    padding: 2px 4px;
+    transition: color .15s;
+  }
+  .invite-toast-close:hover { color: rgba(255,255,255,0.7); }
+  .invite-toast-msg {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: #ffffff;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+    padding-right: 16px; /* clear the X */
+  }
+  .invite-toast-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: #4ADE80;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    letter-spacing: -0.01em;
+    transition: opacity .15s;
+  }
+  .invite-toast-cta:hover { opacity: .75; }
+  .invite-toast-cta svg {
+    width: 13px; height: 13px;
+    stroke: currentColor; stroke-width: 2.2;
+    fill: none; stroke-linecap: round; stroke-linejoin: round;
+    transition: transform .15s;
+  }
+  .invite-toast-cta:hover svg { transform: translateX(2px); }
+</style>
+<div class="invite-toast" id="inviteToast" role="status" aria-live="polite">
+  <button class="invite-toast-close" id="inviteToastClose" aria-label="Dismiss">×</button>
+  <div class="invite-toast-msg" id="inviteToastMsg"></div>
+  <button class="invite-toast-cta" id="inviteToastCta">
+    <span id="inviteToastCtaLabel">Send one</span>
+    <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  </button>
 </div>
+<script>
+(function () {
+  // Live invite count once the auth gate (LEN-68) sets window.lpProfile;
+  // returns null until then and we fall back to the default allocation of 5.
+  function invitesLeft() {
+    const p = window.lpProfile;
+    if (p && (p.invite_credits != null || p.invites_sent != null)) {
+      return Math.max(0, (p.invite_credits ?? 5) - (p.invites_sent ?? 0));
+    }
+    return null;
+  }
+
+  let toastTimer = null;
+
+  window.showInviteToast = function () {
+    const toast = document.getElementById('inviteToast');
+    const msgEl = document.getElementById('inviteToastMsg');
+    const ctaEl = document.getElementById('inviteToastCtaLabel');
+    if (!toast || !msgEl || !ctaEl) return;
+
+    const n = invitesLeft();
+    if (n === 0) return; // out of credits — nothing to ask for
+
+    if (n === 1) {
+      msgEl.textContent = 'Last invite left.';
+      ctaEl.textContent = 'Make it count';
+    } else {
+      msgEl.textContent = 'You have ' + (n == null ? '5 invites.' : n + ' invites left.');
+      ctaEl.textContent = 'Send one';
+    }
+
+    toast.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('visible'), 6000);
+  };
+
+  // Close button
+  document.getElementById('inviteToastClose').addEventListener('click', () => {
+    document.getElementById('inviteToast').classList.remove('visible');
+    clearTimeout(toastTimer);
+  });
+
+  // CTA — opens the team share email (swap for the invite modal when LEN-52 ships)
+  document.getElementById('inviteToastCta').addEventListener('click', () => {
+    document.getElementById('inviteToast').classList.remove('visible');
+    clearTimeout(toastTimer);
+    shareWithTeam();
+  });
+})();
+</script>
 <script>
 function shareWithTeam() {
   const subject = encodeURIComponent('Check out LendPaper');
