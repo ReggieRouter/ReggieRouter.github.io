@@ -436,7 +436,7 @@
                 border-top: 0.5pt solid #E5E7EB;
                 padding-top: 5px;
             }
-            .lp-print-footer a { color: #14532D; font-weight: 700; text-decoration: none; }
+            .lp-print-footer a { color: #1A3C2E; font-weight: 700; text-decoration: none; }
             .lp-print-footer .lp-print-footer-disclaimer { font-size: 5pt; color: #9CA3AF; }
         }
         /* Hidden in screen view — only visible during print */
@@ -813,7 +813,7 @@
            Keep the soft card look (light bg, green left accent), but hide the on-screen-only
            "What you tell the borrower" eyebrow and the cycle-arrow nav (those are .no-print).
            Quote-mark characters are stripped from the renderTakeaway template strings. */
-        body.pdf-export-mode .takeaway { background: #FFFFFF !important; border: 1px solid #E5E7EB !important; border-left: 4px solid #14532D !important; border-radius: 12px !important; padding: 16px 18px !important; margin-top: 14px !important; box-shadow: none !important; }
+        body.pdf-export-mode .takeaway { background: #FFFFFF !important; border: 1px solid #E5E7EB !important; border-left: 4px solid #1A3C2E !important; border-radius: 12px !important; padding: 16px 18px !important; margin-top: 14px !important; box-shadow: none !important; }
         body.pdf-export-mode .takeaway .takeaway-eyebrow { display: none !important; }
         body.pdf-export-mode .takeaway-body { padding: 0 !important; }
         body.pdf-export-mode .takeaway-content,
@@ -835,20 +835,39 @@
         body.pdf-export-mode .print-header-content { margin-bottom: 12px !important; padding-top: 0 !important; }
         body.pdf-export-mode .pdf-document-title { margin-top: 8px !important; margin-bottom: 16px !important; }
 
-        /* PDF layout: fixed-column amortization table — order: # | Date | Payment | Principal | Interest | Balance */
+        /* PDF layout: fixed-column amortization table.
+           Pre-pay OFF (6 cols): # | Date | Payment | Principal | Interest | Balance
+           Pre-pay ON (8 cols): + Payoff Amount | Interest Saved — the two numbers
+           the borrower most needs get full-width columns (LEN-83). */
         body.pdf-export-mode .table-scroll-container table { table-layout: fixed !important; width: 100% !important; }
-        body.pdf-export-mode .table-scroll-container table th:nth-child(1),
-        body.pdf-export-mode .table-scroll-container table td:nth-child(1) { width: 5% !important; }
-        body.pdf-export-mode .table-scroll-container table th:nth-child(2),
-        body.pdf-export-mode .table-scroll-container table td:nth-child(2) { width: 17% !important; }
-        body.pdf-export-mode .table-scroll-container table th:nth-child(3),
-        body.pdf-export-mode .table-scroll-container table td:nth-child(3) { width: 18% !important; }
-        body.pdf-export-mode .table-scroll-container table th:nth-child(4),
-        body.pdf-export-mode .table-scroll-container table td:nth-child(4) { width: 18% !important; }
-        body.pdf-export-mode .table-scroll-container table th:nth-child(5),
-        body.pdf-export-mode .table-scroll-container table td:nth-child(5) { width: 16% !important; }
-        body.pdf-export-mode .table-scroll-container table th:nth-child(6),
-        body.pdf-export-mode .table-scroll-container table td:nth-child(6) { width: 26% !important; }
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off th:nth-child(1),
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off td:nth-child(1) { width: 5% !important; }
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off th:nth-child(2),
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off td:nth-child(2) { width: 17% !important; }
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off th:nth-child(3),
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off td:nth-child(3) { width: 18% !important; }
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off th:nth-child(4),
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off td:nth-child(4) { width: 18% !important; }
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off th:nth-child(5),
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off td:nth-child(5) { width: 16% !important; }
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off th:nth-child(6),
+        body.pdf-export-mode .table-scroll-container table.amo-prepay-off td:nth-child(6) { width: 26% !important; }
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) th:nth-child(1),
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) td:nth-child(1) { width: 4% !important; }
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) th:nth-child(2),
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) td:nth-child(2) { width: 14% !important; }
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) th:nth-child(3),
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) td:nth-child(3) { width: 13% !important; }
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) th:nth-child(4),
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) td:nth-child(4) { width: 12% !important; }
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) th:nth-child(5),
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) td:nth-child(5) { width: 11% !important; }
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) th:nth-child(6),
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) td:nth-child(6) { width: 15% !important; }
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) th:nth-child(7),
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) td:nth-child(7) { width: 16% !important; }
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) th:nth-child(8),
+        body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) td:nth-child(8) { width: 15% !important; }
     </style>
 <script src="../js/config.js"></script>
 <script type="importmap">
