@@ -449,6 +449,39 @@ header {
 .suspicious-row td { background:#FFF7ED !important; }
 .suspicious-badge { display:inline-block;background:#FFF7ED;color:#C2410C;border:1px solid #FDBA74;border-radius:4px;padding:1px 5px;font-size:10px;font-weight:700;margin-left:4px;vertical-align:middle; }
 
+/* ── MEMBERS PANEL */
+#members-view { overflow-y: auto; }
+.mem-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.mem-search { flex: 1; max-width: 320px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; background: var(--white); color: var(--text); outline: none; }
+.mem-search:focus { border-color: var(--green-mid); }
+.mem-select { padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; background: var(--white); color: var(--text); cursor: pointer; }
+.mem-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.mem-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); padding: 0 10px 8px; border-bottom: 1px solid var(--border); }
+.mem-table td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.mem-table tr:last-child td { border-bottom: none; }
+.mem-user { display: flex; align-items: center; gap: 10px; }
+.mem-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--green-light); color: var(--green); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mem-name { font-weight: 600; }
+.mem-email { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+.mem-pill { display: inline-block; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; }
+.mem-pill.broker { background: #DBEAFE; color: #1D4ED8; }
+.mem-pill.iso { background: #EDE9FE; color: #6D28D9; }
+.mem-pill.lender { background: var(--amber-light); color: var(--amber); }
+.mem-pill.other { background: var(--bg); color: var(--muted); }
+.mem-badge { display: inline-block; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; }
+.mem-badge.pending { background: var(--amber-light); color: var(--amber); }
+.mem-badge.approved { background: var(--green-light); color: var(--green); }
+.mem-badge.waitlist { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.mem-badge.denied { background: var(--red-light); color: var(--red); }
+.mem-credits { width: 52px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; text-align: center; background: var(--white); color: var(--text); }
+.mem-credits:focus { border-color: var(--green-mid); outline: none; }
+.btn-mem-approve { background: var(--green); color: var(--white); border: none; border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-mem-approve:hover { background: var(--green-mid); }
+.btn-mem-approve:disabled { opacity: .5; cursor: not-allowed; }
+.btn-mem-waitlist { background: var(--white); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
+.btn-mem-waitlist:hover { color: var(--text); }
+.btn-mem-waitlist:disabled { opacity: .5; cursor: not-allowed; }
+
 /* ── RECRUITER PANEL */
 #recruiter-view { overflow-y: auto; }
 .rec-job-table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -528,6 +561,7 @@ header {
     <div class="header-right">
       <span id="user-email"></span>
       <button class="btn-ghost" onclick="showMainView('dashboard')">Dashboard</button>
+      <button class="btn-ghost" onclick="showMainView('members')">Members</button>
       <button class="btn-ghost" onclick="showMainView('recruiter')">Recruiter</button>
       <button class="btn-ghost" onclick="showMainView('registry')">Registry</button>
       <button class="btn-ghost" onclick="openOverridesReport()">Overrides</button>
@@ -563,6 +597,7 @@ header {
     <main id="main">
       <div id="empty-state"><p>Select a lender to review</p></div>
       <div id="dashboard-view" style="display:none"></div>
+      <div id="members-view" style="display:none"></div>
       <div id="recruiter-view" style="display:none"></div>
       <div id="registry-view" style="display:none"></div>
 
@@ -962,9 +997,11 @@ function showMainView(view) {
   document.getElementById('empty-state').style.display = view==='empty' ? 'flex' : 'none';
   document.getElementById('dashboard-view').style.display = view==='dashboard' ? 'block' : 'none';
   document.getElementById('lender-detail').style.display = view==='detail' ? 'block' : 'none';
+  document.getElementById('members-view').style.display = view==='members' ? 'block' : 'none';
   document.getElementById('recruiter-view').style.display = view==='recruiter' ? 'block' : 'none';
   document.getElementById('registry-view').style.display = view==='registry' ? 'block' : 'none';
   if (view === 'dashboard') renderDashboard();
+  if (view === 'members') renderMembersPanel();
   if (view === 'recruiter') renderRecruiterPanel();
   if (view === 'registry') renderRegistryPanel();
 }
@@ -2374,6 +2411,208 @@ async function renderRecruiterPanel() {
         <tbody>${rows}</tbody>
        </table>`
     : `<p id="rec-jobs-content" style="color:var(--muted);font-size:13px">No job postings found. Run <code>python3 scrape_jobs.py</code> to populate.</p>`;
+}
+
+// ── Members Panel (signups / approvals — was admin.html, LEN-84) ──────────
+let memProfiles = [];
+let memTab = 'pending';
+let memRealtimeStarted = false;
+
+async function renderMembersPanel() {
+  const view = document.getElementById('members-view');
+  view.innerHTML = `
+    <div class="dash-header">
+      <div><h1>Members</h1><p>Signups, approvals, and invite credits — live from Supabase</p></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn-ghost" onclick="memExportCSV()">Export CSV</button>
+        <button class="btn-ghost" onclick="loadMembers()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="dash-section" id="mem-stats"><div style="color:var(--muted);font-size:13px">Loading…</div></div>
+    <div class="dash-section">
+      <div class="tabs" style="margin-bottom:14px">
+        <button class="tab active" id="mem-tabbtn-pending" onclick="memShowTab('pending')">Needs Review <span class="tab-count" id="mem-count-pending" style="display:none"></span></button>
+        <button class="tab" id="mem-tabbtn-all" onclick="memShowTab('all')">All Users <span class="tab-count" id="mem-count-all" style="display:none"></span></button>
+        <button class="tab" id="mem-tabbtn-waitlist" onclick="memShowTab('waitlist')">Waitlist <span class="tab-count" id="mem-count-waitlist" style="display:none"></span></button>
+      </div>
+      <div class="mem-toolbar">
+        <input type="text" class="mem-search" id="mem-search" placeholder="Search name, company, email…" oninput="memRenderTable()" />
+        <select class="mem-select" id="mem-role" onchange="memRenderTable()">
+          <option value="">All roles</option>
+          <option value="broker">Broker</option>
+          <option value="iso">ISO</option>
+          <option value="lender">Lender</option>
+          <option value="other">Other</option>
+        </select>
+        <select class="mem-select" id="mem-status" onchange="memRenderTable()" style="display:none">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="waitlist">Waitlist</option>
+          <option value="denied">Denied</option>
+        </select>
+      </div>
+      <div id="mem-table-wrap" style="color:var(--muted);font-size:13px">Loading…</div>
+    </div>`;
+  memTab = 'pending';
+  await loadMembers();
+
+  if (!memRealtimeStarted) {
+    memRealtimeStarted = true;
+    sb.channel('lp-members')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        if (document.getElementById('members-view').style.display !== 'none') loadMembers();
+      })
+      .subscribe();
+  }
+}
+
+async function loadMembers() {
+  const { data, error } = await sb.from('profiles')
+    .select('id, email, full_name, company, role, status, created_at, invite_credits, invites_sent, is_admin, approved_at')
+    .order('created_at', { ascending: false });
+  if (error) {
+    const statsEl = document.getElementById('mem-stats');
+    if (statsEl) statsEl.innerHTML = `<span style="color:var(--red)">Error loading profiles: ${esc(error.message)}</span>`;
+    const wrap = document.getElementById('mem-table-wrap');
+    if (wrap) wrap.textContent = '';
+    return;
+  }
+  memProfiles = data || [];
+  memRenderStats();
+  memRenderTable();
+}
+
+function memRenderStats() {
+  const statsEl = document.getElementById('mem-stats');
+  if (!statsEl) return;
+  const approved = memProfiles.filter(u => u.status === 'approved').length;
+  const pending  = memProfiles.filter(u => u.status === 'pending').length;
+  const waitlist = memProfiles.filter(u => u.status === 'waitlist').length;
+  const today    = memProfiles.filter(u => u.created_at && new Date(u.created_at).toDateString() === new Date().toDateString()).length;
+  statsEl.innerHTML = `
+    <div class="dash-section-title">Overview</div>
+    <div class="dash-cards">
+      <div class="dash-card good"><div class="dash-card-num">${approved}</div><div class="dash-card-label">Approved members</div></div>
+      <div class="dash-card warn"><div class="dash-card-num">${pending}</div><div class="dash-card-label">Pending review</div></div>
+      <div class="dash-card"><div class="dash-card-num">${waitlist}</div><div class="dash-card-label">Waitlisted</div></div>
+      <div class="dash-card"><div class="dash-card-num">${today}</div><div class="dash-card-label">Applied today</div></div>
+    </div>`;
+  const setCount = (id, n) => { const el = document.getElementById(id); if (!el) return; el.textContent = n; el.style.display = n > 0 ? 'inline-flex' : 'none'; };
+  setCount('mem-count-pending', pending);
+  setCount('mem-count-all', memProfiles.filter(u => !u.is_admin).length);
+  setCount('mem-count-waitlist', waitlist);
+}
+
+function memShowTab(name) {
+  memTab = name;
+  ['pending','all','waitlist'].forEach(t => {
+    document.getElementById('mem-tabbtn-' + t).className = 'tab' + (t === name ? ' active' : '');
+  });
+  document.getElementById('mem-status').style.display = name === 'all' ? '' : 'none';
+  memRenderTable();
+}
+
+function memInitials(name) { return (name || '').split(' ').slice(0,2).map(w => w[0] || '').join('').toUpperCase() || '?'; }
+
+function memRolePill(role) {
+  const map = { broker:['broker','Broker'], iso:['iso','ISO'], lender:['lender','Lender'] };
+  const [cls, label] = map[role] || ['other', role || 'Other'];
+  return `<span class="mem-pill ${cls}">${esc(label)}</span>`;
+}
+
+function memStatusBadge(status) {
+  const map = { pending:'Pending', approved:'Approved', waitlist:'Waitlist', denied:'Denied' };
+  const cls = map[status] ? status : 'waitlist';
+  return `<span class="mem-badge ${cls}">${esc(map[status] || status || 'Unknown')}</span>`;
+}
+
+function memRenderTable() {
+  const wrap = document.getElementById('mem-table-wrap');
+  if (!wrap) return;
+  const q   = (document.getElementById('mem-search')?.value || '').toLowerCase();
+  const rol = document.getElementById('mem-role')?.value || '';
+  const st  = document.getElementById('mem-status')?.value || '';
+  let rows = memProfiles.filter(u => !u.is_admin);
+  if (memTab === 'pending')  rows = rows.filter(u => u.status === 'pending');
+  if (memTab === 'waitlist') rows = rows.filter(u => u.status === 'waitlist');
+  if (memTab === 'all' && st) rows = rows.filter(u => u.status === st);
+  if (rol) rows = rows.filter(u => u.role === rol);
+  if (q)   rows = rows.filter(u => [u.full_name, u.email, u.company].join(' ').toLowerCase().includes(q));
+
+  if (!rows.length) {
+    const msg = q || rol || st ? 'No users match your filters.'
+      : memTab === 'pending' ? 'No pending applications.'
+      : memTab === 'waitlist' ? 'Waitlist is empty.'
+      : 'No users found.';
+    wrap.innerHTML = `<p style="color:var(--muted);font-size:13px">${msg}</p>`;
+    return;
+  }
+
+  const isAll = memTab === 'all';
+  wrap.innerHTML = `<table class="mem-table">
+    <thead><tr><th>User</th><th>Company</th><th>Role</th><th>Applied</th><th>Status</th>${isAll ? '<th>Invites</th>' : ''}<th>Actions</th></tr></thead>
+    <tbody>${rows.map(u => `<tr>
+      <td><div class="mem-user"><span class="mem-avatar">${esc(memInitials(u.full_name))}</span><div><div class="mem-name">${esc(u.full_name || '—')}</div><div class="mem-email">${esc(u.email || '')}</div></div></div></td>
+      <td style="color:var(--muted)">${esc(u.company || '—')}</td>
+      <td>${memRolePill(u.role)}</td>
+      <td style="color:var(--muted)">${u.created_at ? new Date(u.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'}</td>
+      <td>${memStatusBadge(u.status)}</td>
+      ${isAll ? `<td><input class="mem-credits" type="number" min="0" max="20" value="${u.invite_credits ?? 5}" onchange="memCredits('${u.id}', this.value)" title="Invite credits" /> <span style="font-size:11px;color:var(--muted)">/ ${u.invites_sent ?? 0} sent</span></td>` : ''}
+      <td style="white-space:nowrap">
+        ${u.status !== 'approved' ? `<button class="btn-mem-approve" onclick="memApprove('${u.id}', this)">Approve</button>` : ''}
+        ${memTab !== 'waitlist' && u.status !== 'waitlist' ? ` <button class="btn-mem-waitlist" onclick="memWaitlist('${u.id}', this)">Waitlist</button>` : ''}
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+async function memApprove(userId, btn) {
+  btn.disabled = true; btn.textContent = '…';
+  const { error } = await sb.from('profiles')
+    .update({ status: 'approved', approved_at: new Date().toISOString() })
+    .eq('id', userId);
+  if (error) { toast('Approve failed: ' + error.message); btn.disabled = false; btn.textContent = 'Approve'; return; }
+  const u = memProfiles.find(p => p.id === userId);
+  toast(u ? `Approved — email ${u.email} manually in Resend` : 'Approved');
+  await loadMembers();
+}
+
+async function memWaitlist(userId, btn) {
+  btn.disabled = true; btn.textContent = '…';
+  const { error } = await sb.from('profiles').update({ status: 'waitlist' }).eq('id', userId);
+  if (error) { toast('Update failed: ' + error.message); btn.disabled = false; btn.textContent = 'Waitlist'; return; }
+  toast('Moved to waitlist');
+  await loadMembers();
+}
+
+async function memCredits(userId, val) {
+  const n = parseInt(val, 10);
+  if (isNaN(n) || n < 0 || n > 20) { toast('Invite credits must be 0–20'); memRenderTable(); return; }
+  const { error } = await sb.from('profiles').update({ invite_credits: n }).eq('id', userId);
+  if (error) { toast('Credits update failed: ' + error.message); return; }
+  const u = memProfiles.find(p => p.id === userId);
+  if (u) u.invite_credits = n;
+  toast('Invite credits updated');
+}
+
+function memExportCSV() {
+  const rows = memTab === 'pending' ? memProfiles.filter(u => u.status === 'pending')
+             : memTab === 'waitlist' ? memProfiles.filter(u => u.status === 'waitlist')
+             : memProfiles;
+  const headers = ['Name','Email','Company','Role','Status','Applied','Invites Sent','Invite Credits'];
+  const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const lines = [headers.join(','), ...rows.map(r => [
+    cell(r.full_name), cell(r.email), cell(r.company), cell(r.role), cell(r.status),
+    cell(r.created_at ? new Date(r.created_at).toLocaleDateString() : ''),
+    r.invites_sent || 0, r.invite_credits ?? 5
+  ].join(','))];
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `lendpaper-members-${memTab}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ── Registry Route Panel ──────────────────────────────────

@@ -71,7 +71,7 @@
       if (!profile) {
         window.location.href = '/onboarding.html';
       } else if (profile.is_admin) {
-        window.location.href = '/admin.html';
+        window.location.href = '/lp-panel.html'; // admin page folded into lp-panel Members tab (LEN-84)
       } else if (profile.status === 'pending') {
         window.location.href = '/pending.html';
       } else if (profile.status === 'waitlist') {
