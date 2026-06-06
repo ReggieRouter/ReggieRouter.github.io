@@ -101,6 +101,9 @@
         }
         .tooltip-left-anchor .tooltiptext { left: 0; transform: translateX(-20%); }
         .tooltip-right-anchor .tooltiptext { right: 0; transform: translateX(20%); }
+        /* Inside .table-scroll-container (overflow-y:auto) anything above the top edge gets clipped —
+           sticky-header tooltips must open BELOW the icon and hug the right edge instead */
+        .tooltip-below .tooltiptext { bottom: auto; top: calc(100% + 8px); left: auto; right: 0; transform: none; }
         .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
 
         /* Input Overrides */
@@ -1332,7 +1335,7 @@
                                     <label class="flex items-end min-h-[32px]">
                                         Cost per Dollar Borrowed
                                         <span class="tooltip ml-1 no-print">
-                                            <span class="w-[14px] h-[14px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9px] font-bold italic transition-colors bg-white">i</span>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                                             <span class="tooltiptext">How many cents you pay per dollar funded. e.g. 25¢ means $1.25 repaid per $1 borrowed.</span>
                                         </span>
                                     </label>
@@ -1514,13 +1517,16 @@
                                         <th class="p-3 font-bold text-[#111827] text-right">Payment</th>
                                         <th class="p-3 font-bold text-[#111827] text-right">Principal</th>
                                         <th class="p-3 font-bold text-[#111827] text-right">Interest</th>
-                                        <th class="p-3 font-bold text-[#1A3C2E] text-right">Remaining Balance</th>
-                                        <th class="p-3 font-bold text-[#1A3C2E] text-right col-payoff">Payoff Amount<span class="tooltip tooltip-right-anchor ml-1 no-print">
-                                            <span class="w-[14px] h-[14px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9px] font-bold italic transition-colors bg-white">i</span>
-                                            <span class="tooltiptext">The discounted amount to settle the deal on this date &mdash; remaining balance minus the early-payoff discount. This is the number you quote to the borrower.</span>
+                                        <th class="p-3 font-bold text-[#1A3C2E] text-right">Principal Balance<span class="tooltip tooltip-below ml-1 no-print">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                            <span class="tooltiptext">Principal still owed after this payment. Doesn&rsquo;t include remaining interest.</span>
                                         </span></th>
-                                        <th class="p-3 font-bold text-[#1A3C2E] text-right col-payoff">Interest Saved<span class="tooltip tooltip-right-anchor ml-1 no-print">
-                                            <span class="w-[14px] h-[14px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9px] font-bold italic transition-colors bg-white">i</span>
+                                        <th class="p-3 font-bold text-[#1A3C2E] text-right col-payoff">Payoff Amount<span class="tooltip tooltip-below ml-1 no-print">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                            <span class="tooltiptext">Total to settle the deal on this date &mdash; principal balance plus all remaining interest, minus the early-payoff discount. This is the number you quote to the borrower.</span>
+                                        </span></th>
+                                        <th class="p-3 font-bold text-[#1A3C2E] text-right col-payoff">Interest Saved<span class="tooltip tooltip-below ml-1 no-print">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                                             <span class="tooltiptext">How much less the borrower pays versus completing the full term. Calculated as: Full-term cost minus (payments made + payoff amount).</span>
                                         </span></th>
                                     </tr>
@@ -1541,7 +1547,7 @@
                                 <th class="py-3 font-black text-[#111827] uppercase text-right">Payment</th>
                                 <th class="py-3 font-black text-[#111827] uppercase text-right">Principal</th>
                                 <th class="py-3 font-black text-[#111827] uppercase text-right">Interest</th>
-                                <th class="py-3 font-black text-[#14532D] uppercase text-right">Remaining Balance</th>
+                                <th class="py-3 font-black text-[#1A3C2E] uppercase text-right">Principal Balance</th>
                             </tr>
                         </thead>
                         <tbody id="printTableBody-${id}" class="divide-y divide-[#E5E7EB]"></tbody>
