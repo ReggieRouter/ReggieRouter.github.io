@@ -15,6 +15,13 @@
 - Repo: `github.com:ReggieRouter/lendpaper.git` (Netlify auto-deploys on push to `main`)
 - Working directory: `~/Desktop/LendPaper`
 
+## Two-copy sync rule (every edit)
+Files exist in BOTH `~/Documents/GitHub/lendpaper/` (the repo) and `~/Desktop/LendPaper/`. After any edit, sync the other copy **by applying the diff — never blind-copy whole files**:
+```bash
+git diff HEAD~1 HEAD | patch -p1 -d ~/Desktop/LendPaper
+```
+The copies are NOT byte-identical: Desktop copies may carry extra auth-gate/share-prompt blocks (e.g. `calculators/AmoScheduleCalculator.html`). A blind `cp` destroys those blocks.
+
 ## Every new HTML page must include
 
 ### Favicon (inline SVG, same on every page)
@@ -49,6 +56,7 @@ Do this for every new tool added to `tools.js` with `presentation: "page"`.
 
 ## Branding Rules
 
+- **Brand green is `#1A3C2E`** (`--color-brand-dark`, with `#2D6A4F` as mid tier — see `BRANDING.md`). **`#14532D` is deprecated** — never use it in new UI/CSS. Known legacy exceptions pending an asset refresh: the inline favicon data-URI below and `/public/assets/brand/og-image.png`. When touching old code that uses `#14532D`, migrate it to `#1A3C2E` (rgba form: `rgba(26,60,46,…)`).
 - **Logo naming convention:** Assets ending in `-dark.svg` contain white/light text — place on dark backgrounds only. Assets ending in `-light.svg` contain dark text — place on light backgrounds only. Always verify contrast before finalizing.
 - **NEVER use the word "Lendio"** or any Lendio-branded assets in any content, code, or metadata. LendPaper is the exclusive project identity.
 - **Never append "Inc.", "LLC.", or any corporate suffix** to LendPaper until incorporation is confirmed. See `LEGAL.md`.

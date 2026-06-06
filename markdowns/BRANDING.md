@@ -52,6 +52,11 @@ wordmark on generated documents. Not required on all surfaces.
 | `--color-danger` | `#991B1B` | High/severe risk indicators |
 
 ### Color Rules
+- **`#14532D` is DEPRECATED** (pre-2026-06 app accent). All UI/CSS uses
+  `--color-brand-dark` `#1A3C2E` instead — rgba form `rgba(26,60,46,…)`.
+  Legacy exceptions pending asset refresh: inline favicon data-URIs and
+  `/public/assets/brand/og-image.png`. Migrate `#14532D` on sight when
+  editing old code (unified across index.html + auth suite in LEN-78).
 - Never use `--color-brand-dark` as a background for large areas — it's a mark
   and accent color, not a fill.
 - The gold accent (`--color-accent-gold`) is reserved for savings/early-payoff
