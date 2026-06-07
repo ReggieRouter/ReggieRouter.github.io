@@ -12,10 +12,13 @@
 <script src="public/assets/js/compliance-rules.js"></script>
 <script src="public/assets/js/compliance.js"></script>
 <script src="public/assets/js/legal-glossary.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --green:       #14532D;
-  --green-mid:   #15803D;
+  --green:       #1A3C2E; /* brand green per BRANDING.md — #14532D deprecated */
+  --green-mid:   #2D6A4F;
   --green-light: #DCFCE7;
   --green-pale:  #F0FDF4;
   --border:      #E2E8F0;
@@ -500,7 +503,7 @@ header {
 /* ── REGISTRY PANEL */
 #registry-view { overflow-y: auto; }
 #compliance-view { overflow-y: auto; }
-.nav-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#DC2626; margin-left:5px; vertical-align:middle; }
+#compliance-view h2, .comp-card h3, .comp-pending-banner h3 { font-family: 'Figtree', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .comp-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
 .comp-card h3 { font-size: 14px; font-weight: 700; margin: 0 0 4px; }
 .comp-card .comp-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
@@ -512,7 +515,7 @@ header {
 .comp-switch input:checked + .comp-slider:before { transform: translateX(18px); }
 .comp-bulletin-item { padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
 .comp-bulletin-item:last-child { border-bottom: none; }
-.comp-new-badge { display: inline-block; font-size: 10px; font-weight: 700; color: #fff; background: #DC2626; border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+.comp-new-badge { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; color: #DC2626; margin-left: 6px; text-transform: uppercase; } /* plain text kicker — no pills/dots per branding standard */
 .comp-status-law { color: #166534; background: #DCFCE7; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
 .comp-status-pending { color: #92400E; background: #FEF3C7; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
 .comp-status-none { color: #475569; background: #F1F5F9; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
@@ -2831,16 +2834,15 @@ async function complianceFetchBulletin() {
   return compBulletinCache;
 }
 
-// Red dot on the Compliance nav button when bulletin has unseen items —
-// this is the "dashboard notification" for new regulations.
+// Unseen-bulletin count appended as plain text on the Compliance nav button —
+// this is the "dashboard notification" for new regulations. Plain text by
+// design: dot/pill badges are banned from the LendPaper design language.
 async function complianceCheckBadge() {
   const data = await complianceFetchBulletin();
   const seen = localStorage.getItem(COMP_SEEN_KEY) || '1970-01-01';
-  const hasNew = (data.items || []).some(i => i.date > seen);
+  const newCount = (data.items || []).filter(i => i.date > seen).length;
   const btn = document.getElementById('compliance-nav-btn');
-  if (btn && hasNew && !btn.querySelector('.nav-dot')) {
-    btn.insertAdjacentHTML('beforeend', '<span class="nav-dot"></span>');
-  }
+  if (btn) btn.textContent = newCount ? `Compliance (${newCount})` : 'Compliance';
 }
 
 async function renderCompliancePanel() {
@@ -2968,10 +2970,10 @@ async function renderCompliancePanel() {
 
   renderComplianceGlossary('');
 
-  // Viewing the panel marks the bulletin as seen and clears the nav dot.
+  // Viewing the panel marks the bulletin as seen and resets the nav count.
   localStorage.setItem(COMP_SEEN_KEY, new Date().toISOString().slice(0, 10));
-  const dot = document.querySelector('#compliance-nav-btn .nav-dot');
-  if (dot) dot.remove();
+  const navBtn = document.getElementById('compliance-nav-btn');
+  if (navBtn) navBtn.textContent = 'Compliance';
 }
 
 function renderComplianceGlossary(q) {
