@@ -402,3 +402,21 @@ Test in: Chrome print preview (primary path), Safari print preview.
 | Table rows split mid-row | Amortization | 🔧 Spec'd | `break-inside: avoid` on `tr` — §4 |
 
 When a new calculator ships, add a row here for any issues found on first PDF review.
+
+---
+
+## State Compliance Disclosures in PDFs — see LEGAL.md
+
+PDF exports participate in the compliance engine (LEN-88). Regulatory content
+lives in `markdowns/LEGAL.md` only — reference, don't copy:
+
+- `PDF_HELPER.generatePDF()` STEP 7.5 calls `LPCompliance.buildPdfBlock()`:
+  when a borrower state is selected and that state has PDF rules (LEGAL.md §13),
+  a disclosure block + source links + the §14 disclaimer is appended to the
+  printed element, rendered only in `pdf-export-mode`, and cleaned up after
+  the dialog closes
+- No state selected, or no rule for the state → nothing is added (by design)
+- The block is marked `page-break-inside: avoid` and styled at 7.5pt to match
+  the §3 micro-copy footer aesthetic
+- Never hardcode state disclosure strings in pdf-helper or a calculator; they
+  live in `compliance-rules.js` (PDF surface strings) mirrored from LEGAL.md

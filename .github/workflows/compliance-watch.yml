@@ -1,0 +1,43 @@
+# LendPaper Compliance Watch (LEN-93)
+# Fully automated monthly regulatory scrape — no manual trigger required.
+# Monitors the Source Registry in markdowns/LEGAL.md §15, updates the
+# compliance bulletin JSON (surfaces on the lp-panel Compliance dashboard
+# with a notification dot), and commits the results. Pushing to main
+# auto-deploys via Netlify, so the bulletin goes live in the same run.
+
+name: Compliance Watch
+
+on:
+  schedule:
+    # 09:17 UTC on the 3rd of every month (off-peak minute to dodge cron congestion)
+    - cron: '17 9 3 * *'
+  workflow_dispatch: {}   # optional manual run for testing — the schedule never depends on it
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    if: github.repository == 'ReggieRouter/lendpaper'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run compliance scraper
+        run: python scrapers/compliance_scraper.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "lendpaper-compliance-bot"
+          git config user.email "actions@github.com"
+          git add scrapers/compliance_state.json public/assets/data/compliance-bulletin.json markdowns/LEGAL.md
+          if git diff --cached --quiet; then
+            echo "No regulatory changes detected this month."
+          else
+            git commit -m "Compliance watch: monthly regulatory scrape $(date -u +%Y-%m-%d) (LEN-93)"
+            git push
+          fi

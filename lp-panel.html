@@ -9,6 +9,9 @@
 <meta http-equiv="Expires" content="0">
 <title>LendPaper Portal</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="public/assets/js/compliance-rules.js"></script>
+<script src="public/assets/js/compliance.js"></script>
+<script src="public/assets/js/legal-glossary.js"></script>
 <style>
 :root {
   --green:       #14532D;
@@ -496,6 +499,24 @@ header {
 
 /* ── REGISTRY PANEL */
 #registry-view { overflow-y: auto; }
+#compliance-view { overflow-y: auto; }
+.nav-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#DC2626; margin-left:5px; vertical-align:middle; }
+.comp-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
+.comp-card h3 { font-size: 14px; font-weight: 700; margin: 0 0 4px; }
+.comp-card .comp-sub { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+.comp-switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+.comp-switch input { opacity: 0; width: 0; height: 0; }
+.comp-slider { position: absolute; inset: 0; cursor: pointer; background: #CBD5E1; border-radius: 22px; transition: 0.2s; }
+.comp-slider:before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.2s; }
+.comp-switch input:checked + .comp-slider { background: var(--green); }
+.comp-switch input:checked + .comp-slider:before { transform: translateX(18px); }
+.comp-bulletin-item { padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.comp-bulletin-item:last-child { border-bottom: none; }
+.comp-new-badge { display: inline-block; font-size: 10px; font-weight: 700; color: #fff; background: #DC2626; border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+.comp-status-law { color: #166534; background: #DCFCE7; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
+.comp-status-pending { color: #92400E; background: #FEF3C7; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
+.comp-status-none { color: #475569; background: #F1F5F9; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
+.comp-status-verify { color: #9A3412; background: #FFEDD5; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
 .rr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; padding: 20px 24px; }
 .rr-state-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
 .rr-state-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
@@ -564,6 +585,7 @@ header {
       <button class="btn-ghost" onclick="showMainView('members')">Members</button>
       <button class="btn-ghost" onclick="showMainView('recruiter')">Recruiter</button>
       <button class="btn-ghost" onclick="showMainView('registry')">Registry</button>
+      <button class="btn-ghost" id="compliance-nav-btn" onclick="showMainView('compliance')">Compliance</button>
       <button class="btn-ghost" onclick="openOverridesReport()">Overrides</button>
       <button class="btn-ghost" onclick="toggleFAQ()">? Help</button>
       <button class="btn-ghost" onclick="doLogout()">Sign out</button>
@@ -600,6 +622,7 @@ header {
       <div id="members-view" style="display:none"></div>
       <div id="recruiter-view" style="display:none"></div>
       <div id="registry-view" style="display:none"></div>
+      <div id="compliance-view" style="display:none"></div>
 
       <div id="lender-detail" style="display:none">
 
@@ -1000,10 +1023,12 @@ function showMainView(view) {
   document.getElementById('members-view').style.display = view==='members' ? 'block' : 'none';
   document.getElementById('recruiter-view').style.display = view==='recruiter' ? 'block' : 'none';
   document.getElementById('registry-view').style.display = view==='registry' ? 'block' : 'none';
+  document.getElementById('compliance-view').style.display = view==='compliance' ? 'block' : 'none';
   if (view === 'dashboard') renderDashboard();
   if (view === 'members') renderMembersPanel();
   if (view === 'recruiter') renderRecruiterPanel();
   if (view === 'registry') renderRegistryPanel();
+  if (view === 'compliance') renderCompliancePanel();
 }
 
 // ── Actions ──────────────────────────────────────────────
@@ -2782,8 +2807,149 @@ async function rrCheckAll() {
   toast('Registry check complete');
 }
 
+// ── Compliance Engine view (LEN-88) ──────────────────────
+// Source of truth: markdowns/LEGAL.md Part II. Data: compliance-rules.js.
+const COMP_SEEN_KEY = 'lp_compliance_bulletin_seen';
+let compBulletinCache = null;
+
+async function complianceFetchBulletin() {
+  if (compBulletinCache) return compBulletinCache;
+  try {
+    const res = await fetch('public/assets/data/compliance-bulletin.json', { cache: 'no-store' });
+    compBulletinCache = await res.json();
+  } catch (e) {
+    compBulletinCache = { generated: null, items: [] };
+  }
+  return compBulletinCache;
+}
+
+// Red dot on the Compliance nav button when bulletin has unseen items —
+// this is the "dashboard notification" for new regulations.
+async function complianceCheckBadge() {
+  const data = await complianceFetchBulletin();
+  const seen = localStorage.getItem(COMP_SEEN_KEY) || '1970-01-01';
+  const hasNew = (data.items || []).some(i => i.date > seen);
+  const btn = document.getElementById('compliance-nav-btn');
+  if (btn && hasNew && !btn.querySelector('.nav-dot')) {
+    btn.insertAdjacentHTML('beforeend', '<span class="nav-dot"></span>');
+  }
+}
+
+async function renderCompliancePanel() {
+  const view = document.getElementById('compliance-view');
+  const R = window.LP_COMPLIANCE_RULES;
+  if (!R || !window.LPCompliance) {
+    view.innerHTML = '<div class="comp-card">compliance-rules.js failed to load.</div>';
+    return;
+  }
+  const enabled = LPCompliance.isEnabled();
+  const data = await complianceFetchBulletin();
+  const seen = localStorage.getItem(COMP_SEEN_KEY) || '1970-01-01';
+
+  // Bulletin
+  const items = (data.items || []).slice(0, 50);
+  const bulletinHTML = items.length ? items.map(i => `
+    <div class="comp-bulletin-item">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <strong>${esc(i.name || i.id)}</strong>
+        <span style="color:var(--muted);font-size:12px">${esc(i.jurisdiction || '')} · ${esc(i.date || '')}${i.date > seen ? '<span class="comp-new-badge">NEW</span>' : ''}</span>
+      </div>
+      <div style="color:#374151;margin-top:3px">${esc(i.summary || 'Source content changed — review for regulatory updates.')}</div>
+      ${i.url ? `<a href="${esc(i.url)}" target="_blank" style="font-size:12px;color:var(--green)">View source →</a>` : ''}
+    </div>`).join('')
+    : '<div style="font-size:13px;color:var(--muted);padding:8px 0">No regulatory changes detected yet. The scraper runs automatically on the 3rd of each month.</div>';
+
+  // State matrix
+  const matrixRows = Object.keys(R.states).map(code => {
+    const s = R.states[code];
+    const d = s.disclosureLaw || {};
+    const statusClass = 'comp-status-' + (d.status || 'none');
+    const statusLabel = { law: 'LAW', pending: 'PENDING', none: '—', verify: 'VERIFY' }[d.status] || '—';
+    return `<tr>
+      <td><strong>${esc(code)}</strong> ${esc(s.name || '')}</td>
+      <td>${esc(d.id || '—')} <span class="${statusClass}">${statusLabel}</span></td>
+      <td>${d.aprRequired ? 'Yes' : '—'}</td>
+      <td>${d.threshold ? '≤$' + d.threshold.toLocaleString() : '—'}</td>
+      <td style="max-width:260px">${esc(s.licensing || '—')}</td>
+      <td style="max-width:200px">${esc(s.usury || '—')}</td>
+      <td style="max-width:200px">${esc(s.emerging || '—')}</td>
+    </tr>`;
+  }).join('');
+
+  view.innerHTML = `
+    <div style="padding:20px 24px;max-width:1100px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+        <div>
+          <h2 style="font-size:18px;font-weight:800;margin:0">Compliance Engine</h2>
+          <div style="font-size:12px;color:var(--muted)">Rules version ${esc(R.version)} · Source of truth: <code>markdowns/LEGAL.md</code> Part II</div>
+        </div>
+      </div>
+
+      <div class="comp-card" style="display:flex;justify-content:space-between;align-items:center;gap:14px">
+        <div>
+          <h3>Master toggle — compliance layer</h3>
+          <div class="comp-sub" style="margin-bottom:0">Affects <strong>this browser only</strong> (for testing). Live users always have the compliance layer ON — disabling here never reaches clients.</div>
+        </div>
+        <label class="comp-switch">
+          <input type="checkbox" id="comp-master-toggle" ${enabled ? 'checked' : ''} onchange="LPCompliance.setEnabled(this.checked); toast('Compliance layer ' + (this.checked ? 'enabled' : 'disabled') + ' in this browser');">
+          <span class="comp-slider"></span>
+        </label>
+      </div>
+
+      <div class="comp-card">
+        <h3>Compliance News Bulletin</h3>
+        <div class="comp-sub">Automated monthly scrape of CFPB, FTC, and state sources (registry in LEGAL.md §15). Last run: ${esc(data.generated || 'never')}</div>
+        ${bulletinHTML}
+      </div>
+
+      <div class="comp-card">
+        <h3>State Regulatory Matrix</h3>
+        <div class="comp-sub">States not listed = federal baseline only. Canonical data: <code>compliance-rules.js</code> · readable version: LEGAL.md §13</div>
+        <div style="overflow-x:auto">
+        <table class="stale-table">
+          <thead><tr><th>State</th><th>Disclosure law</th><th>APR req.</th><th>Threshold</th><th>Licensing</th><th>Usury (business)</th><th>Emerging</th></tr></thead>
+          <tbody>${matrixRows}</tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <h3>Legal Glossary</h3>
+        <div class="comp-sub">One-sentence definition per regulation tracked in LEGAL.md. Admin-only for now (placement TBD).</div>
+        <input type="text" id="comp-glossary-search" placeholder="Search regulations…" oninput="renderComplianceGlossary(this.value)"
+               style="width:100%;max-width:380px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:10px">
+        <div id="comp-glossary-list"></div>
+      </div>
+
+      <div style="margin:4px 2px 24px">${LPCompliance.disclaimerHTML()}</div>
+    </div>`;
+
+  renderComplianceGlossary('');
+
+  // Viewing the panel marks the bulletin as seen and clears the nav dot.
+  localStorage.setItem(COMP_SEEN_KEY, new Date().toISOString().slice(0, 10));
+  const dot = document.querySelector('#compliance-nav-btn .nav-dot');
+  if (dot) dot.remove();
+}
+
+function renderComplianceGlossary(q) {
+  const list = document.getElementById('comp-glossary-list');
+  if (!list || typeof LEGAL_GLOSSARY === 'undefined') return;
+  q = (q || '').toLowerCase().trim();
+  const matches = LEGAL_GLOSSARY.filter(g =>
+    !q || g.term.toLowerCase().includes(q) || (g.keywords || '').toLowerCase().includes(q) || g.def.toLowerCase().includes(q));
+  list.innerHTML = matches.length ? matches.map(g => `
+    <div class="comp-bulletin-item">
+      <strong>${esc(g.term)}</strong>
+      <div style="color:#374151;margin-top:3px">${esc(g.def)}</div>
+      ${g.source ? `<a href="${esc(g.source)}" target="_blank" style="font-size:12px;color:var(--green)">Primary source →</a>` : ''}
+    </div>`).join('')
+    : '<div style="font-size:13px;color:var(--muted)">No matches.</div>';
+}
+
 // ── Init ─────────────────────────────────────────────────
 checkSession();
+complianceCheckBadge();
 </script>
 </body>
 </html>

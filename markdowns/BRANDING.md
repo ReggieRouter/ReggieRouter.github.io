@@ -305,3 +305,16 @@ This shows the full calculator: two-column layout, input panel, hero payment, st
 | Verifying print layout or PDF output | `Payment Breakdown Save as PDF page.png` |
 
 All files are in: `~/Desktop/Payment breakdown calculator screenshots/`
+
+---
+
+## Compliance & Legal Copy — see LEGAL.md
+
+Regulatory content is **never** duplicated here. For anything compliance-related
+in copy or visuals, reference `markdowns/LEGAL.md`:
+
+- Prohibited words/phrases in any copy → LEGAL.md §5 + §9.1 (No Absolutes)
+- Misrepresentation rules (product/rate/term/timing) → LEGAL.md §9.2
+- Outreach copy (SMS/email/calls, opt-out language) → LEGAL.md §8
+- The canonical "not legal advice" disclaimer → LEGAL.md §14 (auto-injected by
+  `compliance.js` — never hardcode it in a layout)

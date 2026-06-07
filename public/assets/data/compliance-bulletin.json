@@ -1,0 +1,29 @@
+{
+  "generated": "2026-06-07",
+  "items": [
+    {
+      "id": "md-sb881",
+      "date": "2026-06-07",
+      "name": "MD SB 881 (2026) — commercial financing disclosure bill",
+      "jurisdiction": "MD",
+      "url": "https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/sb0881?ys=2026RS",
+      "summary": "Seeded at engine launch: Maryland's NY-style disclosure bill (APR disclosure, ≤$2.5M, OFR enforcement) is PENDING in the 2026 session with a proposed effective date of Oct 1, 2026. Predecessor SB 754 died in 2025. Watch monthly."
+    },
+    {
+      "id": "cfpb-1071",
+      "date": "2026-06-07",
+      "name": "CFPB §1071 small business lending rule — revised final rule",
+      "jurisdiction": "Federal",
+      "url": "https://www.consumerfinance.gov/1071-rule/",
+      "summary": "Seeded at engine launch: CFPB issued a revised final 1071 rule (May 2026) — narrowed scope, single compliance date Jan 1, 2028, ≥1,000 originations/yr threshold. Litigation ongoing; status fluid."
+    },
+    {
+      "id": "fcc-tcpa",
+      "date": "2026-06-07",
+      "name": "TCPA — revocation rule in effect; one-to-one consent rule vacated",
+      "jurisdiction": "Federal",
+      "url": "https://www.fcc.gov/tcpa",
+      "summary": "Seeded at engine launch: the FCC revocation rule (STOP-keyword honoring within 10 business days) has been in effect since Apr 2025; the Dec 2023 one-to-one consent rule was VACATED by the 11th Circuit (Jan 2025) — bundled consent permissible again, PEWC still required."
+    }
+  ]
+}
