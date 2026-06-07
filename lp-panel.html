@@ -517,6 +517,12 @@ header {
 .comp-status-pending { color: #92400E; background: #FEF3C7; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
 .comp-status-none { color: #475569; background: #F1F5F9; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
 .comp-status-verify { color: #9A3412; background: #FFEDD5; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
+.comp-pending-banner { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; }
+.comp-pending-banner h3 { font-size: 14px; font-weight: 800; margin: 0 0 6px; color: #92400E; display: flex; align-items: center; gap: 8px; }
+.comp-pending-count { display: inline-flex; align-items: center; justify-content: center; min-width: 19px; height: 19px; border-radius: 10px; background: #D97706; color: #fff; font-size: 11px; font-weight: 800; padding: 0 6px; }
+.comp-pending-item { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid #FDE68A; font-size: 13px; color: #374151; }
+.comp-pending-item:last-child { border-bottom: none; padding-bottom: 2px; }
+.comp-pending-state { font-weight: 800; font-family: monospace; font-size: 13px; color: #92400E; width: 26px; flex-shrink: 0; margin-top: 1px; }
 .rr-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; padding: 20px 24px; }
 .rr-state-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
 .rr-state-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
@@ -2846,6 +2852,38 @@ async function renderCompliancePanel() {
   const data = await complianceFetchBulletin();
   const seen = localStorage.getItem(COMP_SEEN_KEY) || '1970-01-01';
 
+  // Pending legislation watch — derived straight from the rules data, so this
+  // banner updates itself when a bill passes (status flips to "law") or a
+  // verify-flagged statute gets confirmed. Always rendered first, above the fold.
+  const pendingStates = Object.keys(R.states).filter(c => {
+    const st = (R.states[c].disclosureLaw || {}).status;
+    return st === 'pending' || st === 'verify';
+  });
+  const pendingBannerHTML = pendingStates.length ? `
+    <div class="comp-pending-banner">
+      <h3>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Pending legislation watch
+        <span class="comp-pending-count">${pendingStates.length}</span>
+      </h3>
+      ${pendingStates.map(c => {
+        const s = R.states[c];
+        const d = s.disclosureLaw || {};
+        const badge = d.status === 'pending'
+          ? '<span class="comp-status-pending">PENDING BILL</span>'
+          : '<span class="comp-status-verify">VERIFY</span>';
+        const link = (s.sourceIds || []).map(id => R.sources[id]).filter(Boolean)[0];
+        return `<div class="comp-pending-item">
+          <span class="comp-pending-state">${esc(c)}</span>
+          <div>
+            <strong>${esc(d.id || s.name)}</strong> ${badge}
+            <div style="margin-top:2px">${esc(d.summary || '')}</div>
+            ${link ? `<a href="${esc(link.url)}" target="_blank" style="font-size:12px;color:#92400E;font-weight:600">Track bill →</a>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : '';
+
   // Bulletin
   const items = (data.items || []).slice(0, 50);
   const bulletinHTML = items.length ? items.map(i => `
@@ -2884,6 +2922,8 @@ async function renderCompliancePanel() {
           <div style="font-size:12px;color:var(--muted)">Rules version ${esc(R.version)} · Source of truth: <code>markdowns/LEGAL.md</code> Part II</div>
         </div>
       </div>
+
+      ${pendingBannerHTML}
 
       <div class="comp-card" style="display:flex;justify-content:space-between;align-items:center;gap:14px">
         <div>
