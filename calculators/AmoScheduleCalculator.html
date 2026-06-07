@@ -49,6 +49,8 @@
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css?v=2026.05.25.1000">
     <script src="../public/assets/js/calculator-app.js?v=2026.05.25.1000"></script>
     <script src="../public/assets/js/pdf-helper.js?v=2026.05.25.1200"></script>
+    <script src="../public/assets/js/compliance-rules.js?v=2026.06.07.1"></script>
+    <script src="../public/assets/js/compliance.js?v=2026.06.07.1"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Typography & Core Variables */
@@ -891,6 +893,9 @@
             <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
             <h1>Payment Breakdown Report</h1>
         </div>
+
+        <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
+        <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
 
         <div id="cardsContainer" class="cards-container">
             <!-- Cards injected here via JS -->

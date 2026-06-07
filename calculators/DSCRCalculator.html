@@ -56,6 +56,8 @@
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
 <script src="../public/assets/js/calculator-app.js"></script>
 <script src="../public/assets/js/pdf-helper.js"></script>
+<script src="../public/assets/js/compliance-rules.js"></script>
+<script src="../public/assets/js/compliance.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
@@ -507,6 +509,8 @@ body.pdf-export-mode .print-watermark { display: none !important; }
         <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
         <h1>DSCR Analysis</h1>
     </div>
+    <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
+    <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
     <div class="lp-container">
         <div class="calc-card-header">
             <div class="calc-card-header-title">DSCR Calculator</div>

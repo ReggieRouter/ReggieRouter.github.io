@@ -7,7 +7,7 @@
 | `markdowns/CALCULATORS.md` | Building or editing any calculator, tool, or financial UI |
 | `markdowns/PDF.md` | Touching any PDF export, print stylesheet, html2canvas config, or watermark |
 | `markdowns/BRANDING.md` | Any visual, layout, color, or typography decision |
-| `markdowns/LEGAL.md` | Any copy, disclaimer, legal page, or entity reference |
+| `markdowns/LEGAL.md` | Any copy, disclaimer, legal page, or entity reference — **Part II** is the single source of truth for ALL regulatory/compliance content (state matrix, source registry, canonical disclaimer) |
 
 ---
 
@@ -75,6 +75,22 @@ cd ~/lendpaper-engine && source venv/bin/activate && PYTHONUNBUFFERED=1 python3 
 ```
 
 To add lenders: update the `NEW_LENDERS` list in `ingest_rest.py` with `{"name": "...", "url": "..."}` entries, then run it. Each lender is scraped with Playwright + Gemini and inserted directly to Supabase with `review_status=approved`.
+
+## Compliance Engine (LEN-88)
+
+- **Source of truth:** `markdowns/LEGAL.md` Part II. Machine-readable mirror:
+  `public/assets/js/compliance-rules.js` — update both in the same commit.
+- Engine: `public/assets/js/compliance.js` (`window.LPCompliance`). Fires
+  silently off borrower-state selection; renders nothing unless a rule applies.
+- The "not legal advice" disclaimer is injected via `LPCompliance` only —
+  **never hardcode it** (LEGAL.md §14).
+- New calculators/surfaces: include `compliance-rules.js` + `compliance.js`
+  after `pdf-helper.js` and add `<div data-lp-compliance-host>`.
+- Monthly scraper: `scrapers/compliance_scraper.py` via
+  `.github/workflows/compliance-watch.yml` — monitors the LEGAL.md §15 source
+  registry; bulletin renders in lp-panel → Compliance.
+- Admin master toggle (lp-panel → Compliance) is **per-browser** for testing;
+  live users always have the layer ON.
 
 ## PDF exports
 Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules, and known failure modes are in `PDF.md`.

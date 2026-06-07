@@ -451,6 +451,17 @@ window.PDF_HELPER = {
         _fpDiv.textContent = _fpPayload;
         document.body.appendChild(_fpDiv);
 
+        // STEP 7.5 — State-triggered compliance disclosures (LEN-88).
+        // Fires automatically off the borrower state; renders nothing when no
+        // state is selected or the state has no PDF rules. Canonical rules:
+        // markdowns/LEGAL.md Part II via compliance.js (optional dependency).
+        if (window.LPCompliance) {
+            var _compBlock = window.LPCompliance.buildPdfBlock();
+            if (_compBlock) {
+                (element || document.body).appendChild(_compBlock);
+            }
+        }
+
         window.addEventListener('afterprint', () => self._handlePdfSaveSuccess(), { once: true });
 
         try {
@@ -471,6 +482,8 @@ window.PDF_HELPER = {
                 if (ps) ps.parentNode.removeChild(ps);
                 var fp = document.getElementById('lp-doc-fingerprint');
                 if (fp) fp.parentNode.removeChild(fp);
+                var cb = document.getElementById('lp-compliance-print-block');
+                if (cb) cb.parentNode.removeChild(cb);
             }, 1500);
 
             if (btn) {

@@ -355,3 +355,22 @@ This is the canonical style guide. Check your work against it for layout, spacin
 | Verifying print layout or PDF output | `Payment Breakdown Save as PDF page.png` |
 
 All files: `~/Desktop/Payment breakdown calculator screenshots/`
+
+---
+
+## State Compliance Layer — see LEGAL.md
+
+Calculators participate in the compliance engine (LEN-88). Regulatory content
+lives in `markdowns/LEGAL.md` only — reference, don't copy:
+
+- State disclosure rules surfaced in calculators → LEGAL.md §10 + §13 (matrix)
+- Engine + data: `public/assets/js/compliance.js` + `compliance-rules.js`,
+  loaded after `pdf-helper.js` in every calculator
+- Every calculator includes `<div data-lp-compliance-host>` (after the
+  `print-header-content` block) — the engine renders a borrower-state selector
+  there and stays silent unless the selected state has a rule
+- State selection persists across calculators (`lp_borrower_state`) and fires
+  `lp:compliance:statechange` — new calculators get this for free by including
+  the two scripts + host div
+- Never hardcode state-specific notes in a calculator; add them to
+  `compliance-rules.js` (and LEGAL.md §13) instead
