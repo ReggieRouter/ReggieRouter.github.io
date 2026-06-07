@@ -896,7 +896,30 @@ async function loadLenders() {
     .eq('status', 'pending')
     .order('created_at', { ascending: false });
 
-  allPendingChanges = counts || [];
+  // Dedupe (LEN-102): the scraper inserts a fresh pending row each run, so the
+  // same lender+field stacks duplicate approvals across runs. Keep only the
+  // NEWEST row per (lender, field) and mark the older duplicates superseded in
+  // the DB so they never resurface — every field gets exactly one Keep/Revert.
+  // (Root-cause follow-up: scrape_blanks_v2.py should upsert instead.)
+  const rawPending = counts || [];
+  const newestByKey = new Map();
+  const supersededIds = [];
+  rawPending.forEach(r => {              // rows arrive sorted created_at DESC
+    const key = r.lender_id + '::' + r.field_name;
+    if (newestByKey.has(key)) supersededIds.push(r.id);
+    else newestByKey.set(key, r);
+  });
+  allPendingChanges = [...newestByKey.values()];
+  if (supersededIds.length) {
+    const stamp = { status: 'superseded', reviewed_at: new Date().toISOString() };
+    const { error: supErr } = await sb.from('pending_changes').update(stamp).in('id', supersededIds);
+    if (supErr) {
+      // status value may be constrained in the schema — fall back to rejected
+      await sb.from('pending_changes').update({ ...stamp, status: 'rejected' }).in('id', supersededIds);
+    }
+    console.log(`LEN-102: superseded ${supersededIds.length} duplicate pending change(s)`);
+  }
+
   const pendingMap = {};
   allPendingChanges.forEach(r => {
     pendingMap[r.lender_id] = (pendingMap[r.lender_id] || 0) + 1;
@@ -918,7 +941,12 @@ async function loadLenderDetail(lender) {
     .eq('status', 'pending')
     .order('created_at', { ascending: true });
 
-  currentPending = pending || [];
+  // Dedupe per field (LEN-102): rows are ascending, so the Map keeps the
+  // newest per field. Global cleanup happens in loadLenders; this guards
+  // against duplicates inserted mid-session (e.g. a scrape run while open).
+  const byField = new Map();
+  (pending || []).forEach(c => byField.set(c.field_name, c));
+  currentPending = [...byField.values()];
 
   // Fallback: if no pending_changes but previous_data exists, synthesize diffs
   if (currentPending.length === 0 && lender.previous_data && lender.review_status === 'pending') {
