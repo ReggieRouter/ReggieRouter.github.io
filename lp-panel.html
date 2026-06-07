@@ -517,6 +517,8 @@ header {
 .comp-status-pending { color: #92400E; background: #FEF3C7; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
 .comp-status-none { color: #475569; background: #F1F5F9; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
 .comp-status-verify { color: #9A3412; background: #FFEDD5; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
+.comp-status-watch { color: #1E40AF; background: #DBEAFE; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 700; }
+.comp-penalty-chip { display: inline-block; font-size: 11px; font-weight: 700; color: #991B1B; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 4px; padding: 1px 7px; margin-top: 4px; }
 .comp-pending-banner { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; }
 .comp-pending-banner h3 { font-size: 14px; font-weight: 800; margin: 0 0 6px; color: #92400E; display: flex; align-items: center; gap: 8px; }
 .comp-pending-count { display: inline-flex; align-items: center; justify-content: center; min-width: 19px; height: 19px; border-radius: 10px; background: #D97706; color: #fff; font-size: 11px; font-weight: 800; padding: 0 6px; }
@@ -2857,7 +2859,7 @@ async function renderCompliancePanel() {
   // verify-flagged statute gets confirmed. Always rendered first, above the fold.
   const pendingStates = Object.keys(R.states).filter(c => {
     const st = (R.states[c].disclosureLaw || {}).status;
-    return st === 'pending' || st === 'verify';
+    return st === 'pending' || st === 'verify' || st === 'watch';
   });
   const pendingBannerHTML = pendingStates.length ? `
     <div class="comp-pending-banner">
@@ -2869,8 +2871,8 @@ async function renderCompliancePanel() {
       ${pendingStates.map(c => {
         const s = R.states[c];
         const d = s.disclosureLaw || {};
-        const badge = d.status === 'pending'
-          ? '<span class="comp-status-pending">PENDING BILL</span>'
+        const badge = d.status === 'pending' ? '<span class="comp-status-pending">PENDING BILL</span>'
+          : d.status === 'watch' ? '<span class="comp-status-watch">WATCH</span>'
           : '<span class="comp-status-verify">VERIFY</span>';
         const link = (s.sourceIds || []).map(id => R.sources[id]).filter(Boolean)[0];
         return `<div class="comp-pending-item">
@@ -2902,7 +2904,7 @@ async function renderCompliancePanel() {
     const s = R.states[code];
     const d = s.disclosureLaw || {};
     const statusClass = 'comp-status-' + (d.status || 'none');
-    const statusLabel = { law: 'LAW', pending: 'PENDING', none: '—', verify: 'VERIFY' }[d.status] || '—';
+    const statusLabel = { law: 'LAW', pending: 'PENDING', none: '—', verify: 'VERIFY', watch: 'WATCH' }[d.status] || '—';
     return `<tr>
       <td><strong>${esc(code)}</strong> ${esc(s.name || '')}</td>
       <td>${esc(d.id || '—')} <span class="${statusClass}">${statusLabel}</span></td>
@@ -2982,6 +2984,7 @@ function renderComplianceGlossary(q) {
     <div class="comp-bulletin-item">
       <strong>${esc(g.term)}</strong>
       <div style="color:#374151;margin-top:3px">${esc(g.def)}</div>
+      ${g.penalty ? `<div><span class="comp-penalty-chip">Penalty: ${esc(g.penalty)}</span></div>` : ''}
       ${g.source ? `<a href="${esc(g.source)}" target="_blank" style="font-size:12px;color:var(--green)">Primary source →</a>` : ''}
     </div>`).join('')
     : '<div style="font-size:13px;color:var(--muted)">No matches.</div>';

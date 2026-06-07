@@ -10,7 +10,7 @@
  */
 
 window.LP_COMPLIANCE_RULES = {
-  version: "2026-06-07",
+  version: "2026-06-07-r2",
 
   // Canonical "not legal advice" disclaimer — LEGAL.md §14. NEVER hardcode
   // this string anywhere else; always render via LPCompliance.disclaimer*().
@@ -35,7 +35,10 @@ window.LP_COMPLIANCE_RULES = {
     "md-ofr":         { name: "MD Office of Financial Regulation",             url: "https://www.labor.maryland.gov/finance/" },
     "de-usury":       { name: "DE Code Title 6 Ch. 23 (usury)",                url: "https://delcode.delaware.gov/title6/c023/index.html" },
     "ut-dfi":         { name: "UT DFI — commercial financing registration",    url: "https://dfi.utah.gov/non-depository/commercial-financing/" },
-    "va-sbf":         { name: "VA Code 6.2-22.1 — sales-based financing",      url: "https://law.lis.virginia.gov/vacodefull/title6.2/chapter22.1/" }
+    "va-sbf":         { name: "VA Code 6.2-22.1 — sales-based financing",      url: "https://law.lis.virginia.gov/vacodefull/title6.2/chapter22.1/" },
+    "tx-hb700":       { name: "TX HB 700 (2025) — Fin. Code Ch. 398",          url: "https://capitol.texas.gov/BillLookup/History.aspx?LegSess=89R&Bill=HB700" },
+    "tx-occc":        { name: "Texas OCCC — sales-based financing rules",      url: "https://occc.texas.gov/" },
+    "la-act198":      { name: "LA Act 198 (2025) / HB 470 — R.S. 9:3137.10",   url: "https://www.legis.la.gov/legis/BillInfo.aspx?i=248484" }
   },
 
   // Federal baseline — applies in every state. LEGAL.md §8–§9, §12.
@@ -43,7 +46,7 @@ window.LP_COMPLIANCE_RULES = {
     outreach: [
       { id: "tcpa-consent",  channel: "sms_call", text: "Marketing calls/texts require prior express written consent (TCPA). The 2023 one-to-one consent rule was vacated (11th Cir., 2025) — bundled consent is permissible, but PEWC still applies.", source: "fcc-tcpa" },
       { id: "tcpa-optout",   channel: "sms_call", text: "Honor STOP/QUIT/REVOKE/OPT OUT/CANCEL/UNSUBSCRIBE/END within 10 business days (FCC revocation rule, in effect Apr 2025).", source: "fcc-tcpa" },
-      { id: "canspam",       channel: "email",    text: "CAN-SPAM applies to B2B email: truthful headers/subject, physical postal address, working opt-out honored within 10 business days.", source: "ftc-canspam" },
+      { id: "canspam",       channel: "email",    text: "CAN-SPAM applies to B2B email: truthful headers/subject, physical postal address, working opt-out honored within 10 business days. Penalties up to $53,088 per email (2025 level carried into 2026 — OMB M-26-11).", source: "ftc-canspam" },
       { id: "tsr-b2b",       channel: "call",     text: "TSR misrepresentation prohibitions extend to B2B telemarketing (2024 amendments). Keep call, consent, and DNC records.", source: "ftc-tsr" }
     ],
     conduct: [
@@ -109,20 +112,20 @@ window.LP_COMPLIANCE_RULES = {
     },
     MD: {
       name: "Maryland",
-      disclosureLaw: { status: "pending", id: "SB 881 (2026)", aprRequired: false, threshold: 2500000,
-        summary: "No disclosure law in effect. SB 754 (2025) died; SB 881 (2026 session) is pending with proposed effective date Oct 1, 2026 — modeled on NY CFDL (APR disclosure, ≤$2.5M, OFR enforcement)." },
+      disclosureLaw: { status: "watch", id: "SB 881 — died 4/2026", aprRequired: false, threshold: null,
+        summary: "No disclosure law. SB 881 (2026) passed the Senate 42-0 but DIED in the House at sine die (Apr 13, 2026); crossfile HB 1007 also died. Would have required APR disclosure + OFR licensing, penalties $2,000/violation ($10,000 willful). A 42-0 Senate vote makes a 2027 reintroduction highly likely — keep watching." },
       disclosures: {
         calculator: null,
         pdf: null,
-        talktrack: "Maryland: no disclosure law in effect yet, but SB 881 (NY-style APR disclosure) is pending — monitored monthly. Build deals as if disclosure is coming.",
+        talktrack: "Maryland: no disclosure law in effect. SB 881 (NY-style APR disclosure) died Apr 2026 after a unanimous Senate vote — expect a 2027 reintroduction. Build deals as if disclosure is coming.",
         sms: null, email: null,
-        internal: "MD WATCH: SB 881 (2026) pending — proposed NY-style APR disclosure effective 10/1/2026 if enacted."
+        internal: "MD WATCH: SB 881 died at 2026 sine die (passed Senate 42-0) — high likelihood of 2027 reintroduction; scraper watches MGA."
       },
       underwritingDocs: [],
       licensing: "MD OFR lender licensing regime applies to certain credit activity today.",
       usury: "General caps with commercial exemptions.",
       products: { mca: { available: true, note: null } },
-      emerging: "SB 881 (2026) pending — scraper watches the bill page.",
+      emerging: "SB 881 died Apr 2026 (Senate 42-0) — 2027 reintroduction likely; scraper watches the MGA bill pages.",
       sourceIds: ["md-sb881", "md-ofr"]
     },
     DE: {
@@ -152,7 +155,7 @@ window.LP_COMPLIANCE_RULES = {
     CT: { name: "Connecticut", disclosureLaw: { status: "law", id: "CT SBF", aprRequired: true, threshold: 250000, summary: "Disclosures for sales-based financing ≤$250k + registration (since July 2023)." }, disclosures: { calculator: "Connecticut requires registration and disclosures (incl. financing cost metrics) for sales-based financing of $250,000 or less.", pdf: "CONNECTICUT NOTICE: Sales-based financing of $250,000 or less in Connecticut requires statutory disclosures and provider registration." }, sourceIds: [] },
     KS: { name: "Kansas",      disclosureLaw: { status: "law", id: "KS CFDA", aprRequired: false, threshold: 500000, summary: "Commercial Financing Disclosure Act (2024): disclosures prior to consummation." }, disclosures: { calculator: "Kansas requires commercial financing disclosures prior to consummation (Commercial Financing Disclosure Act).", pdf: "KANSAS NOTICE: Kansas' Commercial Financing Disclosure Act requires statutory disclosures before consummation of covered commercial financing." }, sourceIds: [] },
     MO: { name: "Missouri",    disclosureLaw: { status: "law", id: "MO CFDL", aprRequired: false, threshold: 500000, summary: "Commercial Financing Disclosure Law: disclosures + provider registration (effective Feb 28, 2025)." }, disclosures: { calculator: "Missouri requires provider registration and commercial financing disclosures (effective Feb 2025).", pdf: "MISSOURI NOTICE: Missouri's Commercial Financing Disclosure Law requires registration and statutory disclosures on covered commercial financing." }, sourceIds: [] },
-    TX: { name: "Texas",       disclosureLaw: { status: "verify", id: "HB 700 (2025)", aprRequired: false, threshold: null, summary: "Disclosure regime enacted 2025 (HB 700) — VERIFY effective date and scope before relying." }, disclosures: { calculator: null, pdf: null, internal: "TX VERIFY: HB 700 (2025) commercial financing disclosures — confirm effective date/scope before surfacing to users." }, sourceIds: [] },
-    LA: { name: "Louisiana",   disclosureLaw: { status: "verify", id: "2025 law", aprRequired: false, threshold: null, summary: "Disclosure regime enacted 2025 — VERIFY effective date and scope before relying." }, disclosures: { calculator: null, pdf: null, internal: "LA VERIFY: 2025 commercial financing disclosure law — confirm effective date/scope before surfacing to users." }, sourceIds: [] }
+    TX: { name: "Texas",       disclosureLaw: { status: "law", id: "HB 700 / Fin. Code Ch. 398", aprRequired: false, threshold: 1000000, summary: "Commercial sales-based financing (MCA) disclosures on offers under $1M to a Texas recipient (effective Sept 1, 2025). Total-cost model — no APR required. Providers AND brokers must register with the Texas OCCC by Dec 31, 2026 (registration duty is not capped at $1M)." }, disclosures: { calculator: "Texas requires statutory disclosures on commercial sales-based financing offers under $1,000,000 (Tex. Fin. Code Ch. 398, eff. 9/1/2025) — total-cost model, no APR. Providers and brokers must register with the OCCC by Dec 31, 2026.", pdf: "TEXAS NOTICE: Commercial sales-based financing offers under $1,000,000 to a Texas recipient require statutory disclosures (Tex. Fin. Code Ch. 398). Providers and brokers must register with the Texas OCCC." }, sourceIds: ["tx-hb700", "tx-occc"] },
+    LA: { name: "Louisiana",   disclosureLaw: { status: "law", id: "Act 198 (2025) + 2024 law", aprRequired: false, threshold: null, summary: "Two layered laws: the 2024 commercial financing disclosure law (La. R.S. 9:3138.1–3138.6, eff. Jan 1, 2025) plus Act 198 of 2025 (R.S. 9:3137.10, eff. Aug 1, 2025) covering revenue-based financing with NO dollar threshold and no entity exemptions. Total-cost disclosures — no APR. No registration requirement." }, disclosures: { calculator: "Louisiana requires commercial financing disclosures (2024 law, eff. 1/1/2025) plus revenue-based financing disclosures with no dollar threshold (Act 198, eff. 8/1/2025) — total-cost model, no APR.", pdf: "LOUISIANA NOTICE: Louisiana law (La. R.S. 9:3138.1–3138.6 and R.S. 9:3137.10) requires statutory total-cost disclosures on covered commercial financing, including revenue-based financing with no dollar threshold." }, sourceIds: ["la-act198"] }
   }
 };

@@ -4,10 +4,34 @@
     {
       "id": "md-sb881",
       "date": "2026-06-07",
-      "name": "MD SB 881 (2026) — commercial financing disclosure bill",
+      "name": "MD SB 881 DIED — no Maryland disclosure law; watch for 2027",
       "jurisdiction": "MD",
       "url": "https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/sb0881?ys=2026RS",
-      "summary": "Seeded at engine launch: Maryland's NY-style disclosure bill (APR disclosure, ≤$2.5M, OFR enforcement) is PENDING in the 2026 session with a proposed effective date of Oct 1, 2026. Predecessor SB 754 died in 2025. Watch monthly."
+      "summary": "Verified 6/7/2026 against the official MGA pages: SB 881 passed the Senate 42-0 but died in the House at sine die (Apr 13, 2026); crossfile HB 1007 also died. Maryland has NO commercial financing disclosure law. The unanimous Senate vote makes a 2027 reintroduction highly likely — status moved to WATCH."
+    },
+    {
+      "id": "tx-hb700",
+      "date": "2026-06-07",
+      "name": "Texas HB 700 confirmed LAW — Fin. Code Ch. 398, effective 9/1/2025",
+      "jurisdiction": "TX",
+      "url": "https://capitol.texas.gov/BillLookup/History.aspx?LegSess=89R&Bill=HB700",
+      "summary": "Verified 6/7/2026 from capitol.texas.gov: total-cost disclosures (no APR) on commercial sales-based financing offers under $1M. Providers AND brokers must register with the Texas OCCC by Dec 31, 2026 — registration is not capped at $1M. Finance Commission rules pending (due 9/1/2026). Matrix status moved verify → LAW."
+    },
+    {
+      "id": "la-act198",
+      "date": "2026-06-07",
+      "name": "Louisiana confirmed LAW — Act 198 (R.S. 9:3137.10) + 2024 disclosure law",
+      "jurisdiction": "LA",
+      "url": "https://www.legis.la.gov/legis/BillInfo.aspx?i=248484",
+      "summary": "Verified 6/7/2026 from legis.la.gov: Act 198 of 2025 (HB 470, eff. Aug 1, 2025) requires total-cost disclosures on revenue-based financing with NO dollar threshold and no exemptions, layered on the 2024 law (R.S. 9:3138.1–3138.6, eff. Jan 1, 2025). No APR requirement, no registration. Matrix status moved verify → LAW."
+    },
+    {
+      "id": "ftc-canspam",
+      "date": "2026-06-07",
+      "name": "CAN-SPAM penalty confirmed: $53,088/email for 2026",
+      "jurisdiction": "Federal",
+      "url": "https://www.law.cornell.edu/cfr/text/16/1.98",
+      "summary": "Verified 6/7/2026: the 2026 inflation adjustment was canceled (OMB Memo M-26-11 — appropriations lapse blocked the Oct 2025 CPI-U), so the 2025 maximum of $53,088 per email carries into 2026."
     },
     {
       "id": "cfpb-1071",
