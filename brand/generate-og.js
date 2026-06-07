@@ -47,7 +47,7 @@ const html = `<!DOCTYPE html>
   <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <rect width="24" height="24" rx="5" fill="#14532D"/>
     <path d="M4 4v16h11l5-5V4H4z" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"/>
-    <path d="M15 20v-5h5" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"/>
+    <path d="M15 20v-5h5" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="butt" stroke-linejoin="miter"/>
     <path d="M9 9v6" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"/>
     <path d="M9 15h4" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"/>
   </svg>

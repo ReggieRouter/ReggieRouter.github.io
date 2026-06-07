@@ -72,7 +72,7 @@ window.PDF_HELPER = {
                         <div style="display: flex !important; align-items: center !important; gap: 6px !important;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
                                 <path d="M4 4v16h11l5-5V4H4z"/>
-                                <path d="M15 20v-5h5"/>
+                                <path d="M15 20v-5h5" stroke-linecap="butt"/>
                                 <path d="M9 9v6"/>
                                 <path d="M9 15h4"/>
                             </svg>
@@ -96,7 +96,7 @@ window.PDF_HELPER = {
                     <div class="print-header-right" style="text-align: right !important; display: flex !important; align-items: center !important; gap: 6px !important; color: #6B7280 !important;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
                             <path d="M4 4v16h11l5-5V4H4z"/>
-                            <path d="M15 20v-5h5"/>
+                            <path d="M15 20v-5h5" stroke-linecap="butt"/>
                             <path d="M9 9v6"/>
                             <path d="M9 15h4"/>
                         </svg>
