@@ -153,16 +153,24 @@
       const v = document.getElementById('inputCompany').value.trim();
       if (!v) { showErr('Please enter your company name.'); return; }
       document.getElementById('loadingOverlay').classList.add('visible');
-      const { error } = await supabase.from('profiles').insert({
+      // LEN-105: admin-invited emails skip the approval queue
+      const { data: invite } = await supabase.from('invites')
+        .select('id').eq('email', (session.user.email || '').toLowerCase()).maybeSingle();
+      const profile = {
         id: session.user.id, email: session.user.email,
         full_name: document.getElementById('inputName').value.trim(),
         company: v,
-        status: 'pending', invite_credits: 5, invites_sent: 0
-      });
+        status: invite ? 'approved' : 'pending', invite_credits: 5, invites_sent: 0
+      };
+      if (invite) profile.approved_at = new Date().toISOString();
+      const { error } = await supabase.from('profiles').insert(profile);
       if (error) {
         document.getElementById('loadingOverlay').classList.remove('visible');
         showErr(error.message);
-      } else { window.location.href = '/pending.html'; }
+      } else {
+        if (invite) await supabase.from('invites').update({ accepted_at: new Date().toISOString() }).eq('id', invite.id);
+        window.location.href = invite ? '/index.html' : '/pending.html';
+      }
     }
     document.getElementById('nextFromName').addEventListener('click', advanceName);
     document.getElementById('nextFromCompany').addEventListener('click', submitProfile);

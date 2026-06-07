@@ -481,6 +481,11 @@ header {
 .btn-mem-waitlist { background: var(--white); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
 .btn-mem-waitlist:hover { color: var(--text); }
 .btn-mem-waitlist:disabled { opacity: .5; cursor: not-allowed; }
+.mem-badge.invited { background: #DBEAFE; color: #1D4ED8; }
+.inv-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); margin: 12px 0 4px; }
+.inv-input { width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; background: var(--white); color: var(--text); outline: none; }
+.inv-input:focus { border-color: var(--green-mid); }
+.inv-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; color: var(--text); margin-bottom: 14px; max-height: 220px; overflow-y: auto; }
 
 /* ── RECRUITER PANEL */
 #recruiter-view { overflow-y: auto; }
@@ -814,6 +819,34 @@ header {
     <div id="overrides-modal-content"></div>
     <div class="modal-actions" style="margin-top:16px">
       <button class="btn-cancel" onclick="closeOverridesModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVITE MODAL (LEN-105) -->
+<div class="modal-overlay" id="invite-modal" style="display:none" onclick="if(event.target===this) closeInviteModal()">
+  <div class="modal-box" style="width:460px">
+    <div id="invite-step-form">
+      <h3>Invite someone</h3>
+      <p>They're pre-approved — when they sign in with Google using this email, they skip the review queue.</p>
+      <label class="inv-label" for="inv-name">Name</label>
+      <input type="text" id="inv-name" class="inv-input" placeholder="First Last (optional)" />
+      <label class="inv-label" for="inv-email">Email</label>
+      <input type="email" id="inv-email" class="inv-input" placeholder="name@company.com" />
+      <div class="modal-actions" style="margin-top:18px">
+        <button class="btn-cancel" onclick="closeInviteModal()">Cancel</button>
+        <button class="btn-mem-approve" style="padding:8px 16px;font-size:13px" id="inv-submit" onclick="inviteSubmit()">Add &amp; compose</button>
+      </div>
+    </div>
+    <div id="invite-step-send" style="display:none">
+      <h3>Invite recorded — now send it</h3>
+      <p id="inv-send-desc"></p>
+      <div class="inv-preview" id="inv-preview"></div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeInviteModal()">Done</button>
+        <button class="btn-mem-waitlist" style="padding:8px 14px;font-size:13px" onclick="inviteCopyMsg()">Copy message</button>
+        <button class="btn-mem-approve" style="padding:8px 16px;font-size:13px" onclick="inviteOpenMail()">Open in Mail</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2415,6 +2448,8 @@ async function renderRecruiterPanel() {
 
 // ── Members Panel (signups / approvals — was admin.html, LEN-84) ──────────
 let memProfiles = [];
+let memInvites = [];
+let memInvitesError = null;
 let memTab = 'pending';
 let memRealtimeStarted = false;
 
@@ -2424,6 +2459,7 @@ async function renderMembersPanel() {
     <div class="dash-header">
       <div><h1>Members</h1><p>Signups, approvals, and invite credits — live from Supabase</p></div>
       <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn-mem-approve" style="padding:8px 14px;font-size:13px" onclick="openInviteModal()">+ Invite</button>
         <button class="btn-ghost" onclick="memExportCSV()">Export CSV</button>
         <button class="btn-ghost" onclick="loadMembers()">↻ Refresh</button>
       </div>
@@ -2434,6 +2470,7 @@ async function renderMembersPanel() {
         <button class="tab active" id="mem-tabbtn-pending" onclick="memShowTab('pending')">Needs Review <span class="tab-count" id="mem-count-pending" style="display:none"></span></button>
         <button class="tab" id="mem-tabbtn-all" onclick="memShowTab('all')">All Users <span class="tab-count" id="mem-count-all" style="display:none"></span></button>
         <button class="tab" id="mem-tabbtn-waitlist" onclick="memShowTab('waitlist')">Waitlist <span class="tab-count" id="mem-count-waitlist" style="display:none"></span></button>
+        <button class="tab" id="mem-tabbtn-invited" onclick="memShowTab('invited')">Invited <span class="tab-count" id="mem-count-invited" style="display:none"></span></button>
       </div>
       <div class="mem-toolbar">
         <input type="text" class="mem-search" id="mem-search" placeholder="Search name, company, email…" oninput="memRenderTable()" />
@@ -2479,6 +2516,12 @@ async function loadMembers() {
     return;
   }
   memProfiles = data || [];
+  // LEN-105: admin-initiated invites (table may not exist until the migration runs)
+  const { data: inv, error: invErr } = await sb.from('invites')
+    .select('id, email, full_name, created_at, accepted_at')
+    .order('created_at', { ascending: false });
+  memInvites = inv || [];
+  memInvitesError = invErr ? invErr.message : null;
   memRenderStats();
   memRenderTable();
 }
@@ -2502,14 +2545,16 @@ function memRenderStats() {
   setCount('mem-count-pending', pending);
   setCount('mem-count-all', memProfiles.filter(u => !u.is_admin).length);
   setCount('mem-count-waitlist', waitlist);
+  setCount('mem-count-invited', memInvites.filter(i => !i.accepted_at).length);
 }
 
 function memShowTab(name) {
   memTab = name;
-  ['pending','all','waitlist'].forEach(t => {
+  ['pending','all','waitlist','invited'].forEach(t => {
     document.getElementById('mem-tabbtn-' + t).className = 'tab' + (t === name ? ' active' : '');
   });
   document.getElementById('mem-status').style.display = name === 'all' ? '' : 'none';
+  document.getElementById('mem-role').style.display = name === 'invited' ? 'none' : '';
   memRenderTable();
 }
 
@@ -2530,6 +2575,7 @@ function memStatusBadge(status) {
 function memRenderTable() {
   const wrap = document.getElementById('mem-table-wrap');
   if (!wrap) return;
+  if (memTab === 'invited') { memRenderInvitedTable(wrap); return; }
   const q   = (document.getElementById('mem-search')?.value || '').toLowerCase();
   const rol = document.getElementById('mem-role')?.value || '';
   const st  = document.getElementById('mem-status')?.value || '';
@@ -2596,17 +2642,143 @@ async function memCredits(userId, val) {
   toast('Invite credits updated');
 }
 
+// ── Admin-initiated invites (LEN-105) ─────────────────────
+const INVITE_SUBJECT = "You're invited to LendPaper";
+let invCurrent = null; // { email, name }
+
+function inviteMessage(name) {
+  const first = (name || '').trim().split(/\s+/)[0] || 'there';
+  return `Hi ${first},
+
+I'd like to invite you to LendPaper — pricing, payoff, and lender-matching tools for business lending brokers. It's invite-only right now, and your access is already approved.
+
+Just sign in with Google using this email address and you're in:
+
+https://lendpaper.com/login.html
+
+— Steve
+LendPaper`;
+}
+
+function memRenderInvitedTable(wrap) {
+  if (memInvitesError) {
+    wrap.innerHTML = `<p style="color:var(--red);font-size:13px">Couldn't load invites: ${esc(memInvitesError)}. Run the LEN-105 migration in the Supabase SQL editor first.</p>`;
+    return;
+  }
+  const q = (document.getElementById('mem-search')?.value || '').toLowerCase();
+  let rows = memInvites;
+  if (q) rows = rows.filter(i => [i.full_name, i.email].join(' ').toLowerCase().includes(q));
+  if (!rows.length) {
+    wrap.innerHTML = `<p style="color:var(--muted);font-size:13px">${q ? 'No invites match your search.' : 'No invites sent yet — click + Invite to send the first one.'}</p>`;
+    return;
+  }
+  const fmt = d => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+  wrap.innerHTML = `<table class="mem-table">
+    <thead><tr><th>Invitee</th><th>Invited</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>${rows.map(i => `<tr>
+      <td><div class="mem-user"><span class="mem-avatar">${esc(memInitials(i.full_name || i.email))}</span><div><div class="mem-name">${esc(i.full_name || '—')}</div><div class="mem-email">${esc(i.email)}</div></div></div></td>
+      <td style="color:var(--muted)">${fmt(i.created_at)}</td>
+      <td>${i.accepted_at ? `<span class="mem-badge approved">Accepted ${fmt(i.accepted_at)}</span>` : '<span class="mem-badge invited">Awaiting sign-in</span>'}</td>
+      <td style="white-space:nowrap">
+        ${i.accepted_at ? '' : `<button class="btn-mem-approve" onclick="inviteResend('${i.id}')">Resend</button> `}
+        <button class="btn-mem-waitlist" onclick="inviteRevoke('${i.id}', this)">Revoke</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function openInviteModal() {
+  invCurrent = null;
+  document.getElementById('inv-name').value = '';
+  document.getElementById('inv-email').value = '';
+  document.getElementById('invite-step-form').style.display = '';
+  document.getElementById('invite-step-send').style.display = 'none';
+  document.getElementById('invite-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('inv-name').focus(), 50);
+}
+
+function closeInviteModal() { document.getElementById('invite-modal').style.display = 'none'; }
+
+async function inviteSubmit() {
+  const name  = document.getElementById('inv-name').value.trim();
+  const email = document.getElementById('inv-email').value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Enter a valid email address'); return; }
+  const btn = document.getElementById('inv-submit');
+  btn.disabled = true; btn.textContent = '…';
+  const { data: { user } } = await sb.auth.getUser();
+  const { error } = await sb.from('invites').insert({ email, full_name: name || null, invited_by: user?.id });
+  btn.disabled = false; btn.textContent = 'Add & compose';
+  if (error && error.code === '23505') {
+    toast('Already invited — reopening the message');
+  } else if (error) {
+    toast('Invite failed: ' + error.message);
+    return;
+  }
+  invCurrent = { email, name };
+  inviteShowSendStep();
+  loadMembers();
+}
+
+function inviteShowSendStep() {
+  document.getElementById('inv-send-desc').innerHTML = `To: <strong>${esc(invCurrent.email)}</strong> · Subject: <strong>${esc(INVITE_SUBJECT)}</strong>`;
+  document.getElementById('inv-preview').textContent = inviteMessage(invCurrent.name);
+  document.getElementById('invite-step-form').style.display = 'none';
+  document.getElementById('invite-step-send').style.display = '';
+  document.getElementById('invite-modal').style.display = 'flex';
+}
+
+function inviteOpenMail() {
+  if (!invCurrent) return;
+  window.location.href = `mailto:${encodeURIComponent(invCurrent.email)}?subject=${encodeURIComponent(INVITE_SUBJECT)}&body=${encodeURIComponent(inviteMessage(invCurrent.name))}`;
+}
+
+async function inviteCopyMsg() {
+  if (!invCurrent) return;
+  try {
+    await navigator.clipboard.writeText(inviteMessage(invCurrent.name));
+    toast('Message copied');
+  } catch (e) {
+    toast('Copy failed: ' + e.message);
+  }
+}
+
+function inviteResend(id) {
+  const i = memInvites.find(x => x.id === id);
+  if (!i) return;
+  invCurrent = { email: i.email, name: i.full_name || '' };
+  inviteShowSendStep();
+}
+
+async function inviteRevoke(id, btn) {
+  const i = memInvites.find(x => x.id === id);
+  if (!confirm(`Revoke the invite for ${i?.email || 'this person'}? They'll go through the normal review queue if they sign up.`)) return;
+  btn.disabled = true; btn.textContent = '…';
+  const { error } = await sb.from('invites').delete().eq('id', id);
+  if (error) { toast('Revoke failed: ' + error.message); btn.disabled = false; btn.textContent = 'Revoke'; return; }
+  toast('Invite revoked');
+  await loadMembers();
+}
+
 function memExportCSV() {
+  const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  let lines;
+  if (memTab === 'invited') {
+    lines = [['Name','Email','Invited','Accepted'].join(','), ...memInvites.map(i => [
+      cell(i.full_name), cell(i.email),
+      cell(i.created_at ? new Date(i.created_at).toLocaleDateString() : ''),
+      cell(i.accepted_at ? new Date(i.accepted_at).toLocaleDateString() : '')
+    ].join(','))];
+  } else {
   const rows = memTab === 'pending' ? memProfiles.filter(u => u.status === 'pending')
              : memTab === 'waitlist' ? memProfiles.filter(u => u.status === 'waitlist')
              : memProfiles;
   const headers = ['Name','Email','Company','Role','Status','Applied','Invites Sent','Invite Credits'];
-  const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const lines = [headers.join(','), ...rows.map(r => [
+  lines = [headers.join(','), ...rows.map(r => [
     cell(r.full_name), cell(r.email), cell(r.company), cell(r.role), cell(r.status),
     cell(r.created_at ? new Date(r.created_at).toLocaleDateString() : ''),
     r.invites_sent || 0, r.invite_credits ?? 5
   ].join(','))];
+  }
   const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
