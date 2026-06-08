@@ -92,6 +92,26 @@ To add lenders: update the `NEW_LENDERS` list in `ingest_rest.py` with `{"name":
 - Admin master toggle (lp-panel → Compliance) is **per-browser** for testing;
   live users always have the layer ON.
 
+## Quote Log (LEN-123)
+
+Cross-tool log of every estimate. Full spec: `markdowns/CALCULATORS.md §15`.
+- **Every calculator must call `saveEstimate()`** on PDF generation AND on "Copy
+  Scenario". Shared utility: `js/quote-log.js` (import as
+  `<script type="module" src="../js/quote-log.js">`; exposes `window.saveEstimate`
+  / `window.LPQuoteLog`).
+- Signature: `saveEstimate({ calculator_type, params, pdf_generated, prepared_for })`.
+  `params` is **schemaless per calculator** (no migration to add a calculator).
+- Persists to Supabase `estimates` (tied to `user_id`) + mirrors to `localStorage`
+  (works offline / logged-out / before the table exists).
+- **Restore** re-fills via `sessionStorage`, never the URL (no PII in URLs). On
+  load: `LPQuoteLog.consumeRestorePayload('<calculator_type>')`.
+- Freemium: free = last 10 displayed (all rows retained); Pro = full history.
+- Page: `/quote-log` (`quote-log/index.html`). Nav: left sidebar in `index.html`.
+- **DB setup:** run `supabase/estimates.sql` once in the Supabase SQL editor
+  (table + indexes + RLS). Until then the log runs on the localStorage mirror.
+- Display terminology standards (Buyout amount / Finance charge / Funded / etc.):
+  `CALCULATORS.md §14`. Canonical product term "Quote Log": `BRANDING.md §1`.
+
 ## PDF exports
 Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules, and known failure modes are in `PDF.md`.
 
@@ -103,7 +123,7 @@ Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules,
 ## Supabase & Infrastructure
 
 - **Supabase URL:** `https://arpquyoucdsdmbetgftj.supabase.co`
-- **Tables:** `lender_data`, `state_registries`, `pending_changes`, `scrape_runs`
+- **Tables:** `lender_data`, `state_registries`, `pending_changes`, `scrape_runs`, `estimates` (Quote Log — see below)
 - **Admin panel:** `lp-panel.html` — manages pending changes, scrape diffs, lender data
 - **Scraper (current):** `~/lendpaper-engine/scrape_blanks_v2.py` — writes diffs to `pending_changes` table. Use this. Do NOT use `fill_blanks.py` (deprecated — writes directly to DB).
 - **Publisher:** `~/lendpaper-engine/publish.py` — regenerates `waterfall.html` from Supabase. **Pending fix needed:** must escape source_snippets before writing to waterfall.html:

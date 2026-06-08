@@ -159,10 +159,14 @@ If user is on variant 4 and unchecks pre-pay: snap back to variant 1 silently.
 - `align-items: center` on main flex container
 
 ### Action buttons (exact labels — deviation is a bug)
-- `Copy` — solid dark green fill (#14532D), white text
-- `Save PDF` — dark green outline (#14532D), transparent background
-- `Save PDF` is **always present** — never skip it
-- `Copy` above `Save PDF`, always
+**Updated standard (LEN-123, supersedes the old "Copy on top" rule).** CTA stack,
+top to bottom:
+- Primary: `Save Estimate as PDF` — solid brand-dark fill (`#1A3C2E`), white text, full width
+- Secondary: `Copy Scenario` — brand-dark outline, transparent fill, full width
+- Footer row (subtle text links): `+ Compare scenarios` (left) · `🕐 Quote Log` (right)
+
+`Save Estimate as PDF` is **always present** — never skip it. Both the PDF save and
+`Copy Scenario` fire `saveEstimate()` (see §15 Quote Log).
 
 ### Copy output format
 ```
@@ -384,3 +388,77 @@ lives in `markdowns/LEGAL.md` only — reference, don't copy:
   the two scripts + host div
 - Never hardcode state-specific notes in a calculator; add them to
   `compliance-rules.js` (and LEGAL.md §13) instead
+
+---
+
+## 14. Display Terminology Standards (LEN-123)
+
+Apply these display terms consistently across **all** calculators going forward.
+Canonicalized from the Payment Breakdown handoff (2026-06-08).
+
+| Use this | Not this |
+|---|---|
+| Buyout amount | Payoff, Payoff amount |
+| Finance charge | Interest, Interest charge |
+| Maturity | Maturity date, End date |
+| Funded | Loan amount, Principal |
+| Total payback | Total repayment, Total cost |
+| Factor rate | Multiplier, Cost per dollar (in labels) |
+| Borrower state | State, Location |
+| Prepared by | Submitted by, From |
+| Estimate | Quote (in document disclaimers) |
+| Quote | Estimate (in nav/CTA labels — "Save Estimate as PDF" uses *Estimate*; "Quote Log" uses *Quote*) |
+
+Notes:
+- **"Finance charge"** is the chosen display label (it replaces the old "Total
+  interest"). It is a TILA/Reg-Z term of art; this is a deliberate copy decision,
+  not a claim that an MCA is a loan. The §3 compliance rule still holds: never
+  pitch an MCA's cost as "interest" or call the product a "loan."
+- **Borrower State** field: optional, lighter styling, `[i]` tooltip
+  ("Will check for state-specific disclosure requirements …"). It drives the
+  compliance engine via `LPCompliance.setState()` + `_renderAllHosts()`; the
+  engine's own host selector is hidden (the field is the single entry point).
+- **Prepared by**: single free-text field, green-tinted block at the bottom of the
+  input column. Feeds the PDF deal-summary; if blank, the line is omitted (no
+  broken layout). Placeholder: `e.g. John Smith · ABC Funding Solutions`.
+
+### Payoff banner (output column)
+Between the secondary metrics row and the talk track. Line 1: tag icon +
+`Save $X with early payoff by <date>` then a muted plain-text `···` affordance
+(not a button/pill) that opens the **Payoff Points modal**. Line 2:
+`Buyout amount: $X` + `[i]` tooltip. Do not repeat Maturity here (it lives in the
+secondary metrics row).
+
+---
+
+## 15. Quote Log (cross-tool, LEN-123)
+
+A cross-tool log of every estimate generated on the site (Payment Breakdown, DSCR,
+Fundability, NAICS, Deal Read, future calculators). Page: `/quote-log`. Nav: left
+panel, below the tool links.
+
+**Every calculator must fire `saveEstimate()`** on PDF generation **and** on
+"Copy Scenario". The shared utility is `js/quote-log.js` — import it as a module
+(`<script type="module" src="../js/quote-log.js"></script>`); it exposes
+`window.saveEstimate` / `window.LPQuoteLog`.
+
+```javascript
+saveEstimate({
+  calculator_type: 'payment_breakdown',   // own string per calculator
+  params: { /* everything needed to restore calculator state */ },
+  pdf_generated: true,                     // false for Copy Scenario
+  prepared_for: "Joe's Landscaping"        // optional
+});
+```
+
+- `params` is **schemaless per calculator** — each calculator owns its own shape;
+  no migration when a new calculator is added.
+- Records persist to Supabase (`estimates`, tied to `user_id`) and are mirrored to
+  `localStorage` so the log works offline / logged-out / before the table exists.
+- **Restore** re-fills the calculator from `params` via `sessionStorage` —
+  **never the URL** (no PII in URLs, §9). Calculators call
+  `LPQuoteLog.consumeRestorePayload('<type>')` on load.
+- **Freemium:** Free shows the last 10 (display cap only — all rows are retained
+  in the DB for Pro eligibility). Pro: full history, deal naming, shareable links,
+  CSV export.
+- Schema + RLS migration: `supabase/estimates.sql`.

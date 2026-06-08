@@ -27,6 +27,15 @@ wordmark on generated documents. Not required on all surfaces.
 ### LendPaper Fit
 **Perfect.** Lean sales and underwriting desks are facing crushing transaction volumes. They are actively hunting for tools to eliminate manual calculation errors, speed up deal structuring, and maximize throughput per employee without adding W2 overhead.
 
+### Canonical Product Terms
+Write these exactly; do not coin synonyms.
+- **Quote Log** — the cross-tool record of saved estimates (nav, sidebar, page
+  titles). Two words, capital Q, capital L. Never "Quotes," "History," "Saved
+  deals." See `CALCULATORS.md §15`.
+- **Estimate** vs **Quote**: an *Estimate* is what a calculator produces (document
+  disclaimers say "Estimate"); *Quote* is the product-surface word in nav/labels
+  ("Quote Log"). Display-term standards: `CALCULATORS.md §14`.
+
 ---
 
 ## 2. Color System
