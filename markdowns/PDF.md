@@ -307,15 +307,19 @@ Per-calculator titles:
 
 ### Payment Breakdown
 - Two-column on-screen → must collapse for print: hide `.input-col`, promote `.results-col` to full-width
-- Add a print-only **Loan Parameters** summary at top of print view (amount, term, origination fee, frequency, start date)
 - Suppress screen logo/byline in favor of `.pdf-header` partial
+- **Page-1 tile layout (LEN-110 follow-up).** Print-only (`body.pdf-export-mode`); the on-screen results column is untouched. Page 1 speaks the same white-tile language as the payoff panel:
+  - `.pdf-loan-params` → a clean **white "Deal summary" card** (eyebrow via `::before`), not the old flat-gray box. Values are filled by `populatePdfParams(id)` in the save flow — never ship it blank.
+  - `.pdf-hero-block` → the **green-left-accent payment tile** (mirrors the action payoff tile).
+  - `.pdf-stats-grid` → **four white mini-tiles** (Full-term cost / Total interest / Cost per dollar / APR), `repeat(4,1fr)`, values pinned to a common baseline with `margin-top:auto`, `break-inside: avoid`.
 
 ### Amortization — payoff panel (LEN-110 redesign)
-- Hide input panel; replace with print-only **Loan Parameters** summary
+- Hide input panel; replace with print-only **Deal summary** card (see Payment Breakdown above)
 - The selected row expands to the **payoff tile panel** (`tr[class*="amo-detail-for-"]`), not the old "IF BORROWER PAYS OFF HERE" callout. Keep the whole panel together:
   - `body.pdf-export-mode .lp-tiles` holds the 3-col grid; `.lp-tiles` + `.lp-todate` band carry `break-inside: avoid`
   - **Tiles are white** — print does not fill them. Hierarchy survives via `print-color-adjust: exact` on Tile 1's green left-accent, Tile 3's green border, and the green date pill (already in the print block)
   - **No-pre-pay deals** print the single muted `Run-to-term cost` tile + To-date band on a **neutral** (`#F9FAFB`) container with a gray date pill — both forced via `print-color-adjust: exact` on `.lp-expand-inner`/`.lp-payoff-datepill`. Verified: the lone tile holds its constrained width and does not stretch across the 3-col grid.
+- **Schedule header:** white with a 2px brand-green underline (`thead th`, print-only) + brand-green `.amo-sched-label` — ties the table to the tile system. On-screen sticky header is untouched.
 - Repeat table header on every page — `thead { display: table-header-group }` handles this
 
 ---
