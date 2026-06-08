@@ -66,6 +66,12 @@
       <p class="ql-sub">Your saved estimates — restore any deal or download the PDF.</p>
     </div>
 
+    <!-- Soft-gate sign-in upsell (LEN-127): shown only when logged out -->
+    <div id="signinBanner" style="display:none; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:18px; padding:12px 16px; background:var(--lp-light); border:1px solid #BBF7D0; border-radius:12px; font-size:13px; color:#166534;">
+      <span>You're viewing quotes saved on <strong>this device</strong>. Sign in to sync them across devices and keep your full history.</span>
+      <a href="/login.html" target="_top" onclick="try{sessionStorage.setItem('redirectAfterLogin','/quote-log')}catch(e){}" style="white-space:nowrap; background:var(--lp-dark); color:#fff; text-decoration:none; font-weight:600; font-size:12px; padding:8px 14px; border-radius:8px;">Sign in to sync</a>
+    </div>
+
     <div class="ql-tiles">
       <div class="ql-tile"><div class="t-label">Estimates this month</div><div class="t-val" id="statMonth">—</div></div>
       <div class="ql-tile"><div class="t-label">Avg. deal size</div><div class="t-val" id="statAvg">—</div></div>
@@ -93,11 +99,17 @@
   </div>
 
   <script type="module">
-    import { requireApprovedUser } from '/js/auth.js';
+    import { getProfile } from '/js/auth.js';
     import { fetchEstimates, computeStats, restoreEstimate, calcLabel, FREE_DISPLAY_LIMIT } from '/js/quote-log.js';
 
-    const profile = await requireApprovedUser();
-    if (!profile) { /* requireApprovedUser redirects */ }
+    // Soft gate (LEN-127): never redirect. Logged-out users see their localStorage
+    // quotes + a sign-in/sync upsell — consistent with saveEstimate() working
+    // logged-out (CALCULATORS.md §15) and the LEN-87 calculator un-gate.
+    let profile = null;
+    try { profile = await getProfile(); } catch (e) { profile = null; }
+    const signedIn = !!profile;
+    const sb = document.getElementById('signinBanner');
+    if (sb) sb.style.display = signedIn ? 'none' : 'flex';
 
     const fmtUsd0 = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 });
     const isPro = !!(profile && (profile.plan === 'pro' || profile.tier === 'pro'));
@@ -167,9 +179,10 @@
         body.innerHTML = rows.map(rowHTML).join('');
       }
 
-      // Freemium note when more records exist than are shown
+      // Freemium "Upgrade to Pro" note — only for signed-in free users hitting the
+      // cap. Logged-out users get the sign-in/sync banner instead (LEN-127).
       const note = document.getElementById('freemiumNote');
-      if (!isPro && all.length > FREE_DISPLAY_LIMIT) {
+      if (signedIn && !isPro && all.length > FREE_DISPLAY_LIMIT) {
         document.getElementById('freemiumText').innerHTML =
           `Showing your last ${FREE_DISPLAY_LIMIT} of ${all.length} estimates. <a href="/?p=upgrade" target="_top">Upgrade to Pro</a> for full history, deal naming, shareable links, and CSV export.`;
         note.style.display = 'flex';

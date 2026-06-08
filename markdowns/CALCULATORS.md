@@ -461,6 +461,10 @@ saveEstimate({
 - **Freemium:** Free shows the last 10 (display cap only — all rows are retained
   in the DB for Pro eligibility). Pro: full history, deal naming, shareable links,
   CSV export.
+- **Soft-gated (LEN-127):** `/quote-log` never hard-redirects. Logged-out users
+  see their `localStorage` quotes + a "Sign in to sync" banner; signed-in free
+  users hitting the 10 cap see the "Upgrade to Pro" note. Use `getProfile()`,
+  not `requireApprovedUser()`, on this page.
 - Schema + RLS migration: `supabase/estimates.sql`.
 
 ---
