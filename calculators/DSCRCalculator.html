@@ -141,7 +141,7 @@
 .gated-msg { background: var(--lp-dark); color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,.15); }
 
 /* -- Form Reference Badges -- */
-.form-ref-badge { display: inline-block; background: var(--lp-green-light); border: 1px solid var(--lp-border); color: var(--lp-green); font-family: monospace; font-size: 11px; padding: 2px 8px; border-radius: 99px; }
+.form-ref-badge { display: inline-block; background: var(--lp-green-light); border: 1px solid var(--lp-border); color: var(--lp-green); font-family: inherit; font-variant-numeric: tabular-nums; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 5px; }
 .helper-text { font-size: 11px; color: var(--lp-text-muted) !important; font-weight: 400; display: block; margin-top: 4px; line-height: 1.4; text-transform: none; }
 .pers-ref { font-size: 10px; color: var(--lp-green); font-weight: 600; display: block; margin-top: 2px; }
 
@@ -944,7 +944,7 @@ function updDebt(id,f,v){ S.debts.forEach(d => { if(d.id===id) d[f] = (f==='cred
 function togRefi(id){ S.debts.forEach(d => { if(d.id===id) d.refi = !d.refi; }); renderDebts(); updScenarioDisplays(); renderSummaries(); }
 function updDebtTotals(){
   var nonRefi = S.debts.filter(d => !d.refi).reduce((s,d)=>s+d.mp, 0) * 12;
-  document.getElementById('debtTotals').innerHTML = '<div class="tot-bar tot-muted"><span class="tot-label">Existing Annual Debt</span><span class="tot-val">'+fmt(nonRefi)+'</span></div>';
+  document.getElementById('debtTotals').innerHTML = '<div class="tot-bar tot-muted"><span class="tot-label">Annual Debt Service</span><span class="tot-val">'+fmt(nonRefi)+'</span></div>';
 }
 
 function renderOwners() {
