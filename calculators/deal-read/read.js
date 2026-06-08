@@ -358,16 +358,25 @@ function fundabilityHref(d, lv){
   p.set('src','deal-read');
   return '/calculators/FundabilityCalculator.html?'+p.toString();
 }
-// Standalone Affordability check (LEN-125, ships as /affordability.html). NOTE: param
-// names below are best-effort and must be reconciled against the LEN-125 reader when it merges.
+// Standalone Affordability Check (LEN-125, calculators/AffordabilityCalculator.html,
+// slug /tools/affordability). Param names map to its hydrateFromParams() reader:
+// deposits / payback (+paybackMode) / payment / freq / term / state / deal. Real-file
+// path so params survive the SPA 404 fallback.
 function affordabilityHref(d, lv){
   const p=new URLSearchParams();
-  const amt=handoffAmount(d,lv); if(amt) p.set('amount', amt);
-  const f=handoffFactor(lv); if(f) p.set('factor', f);
-  const tv=handoffTerm(lv); if(tv){ p.set('term', tv); p.set('term_unit','months'); }
-  if(S.rev) p.set('revenue', S.rev);
+  const a=(lv && lv.atr)?affordability(d, lv.atr):null;
+  if(S.rev) p.set('deposits', S.rev);
+  if(a){
+    if(a.paybackTotal){ p.set('payback', a.paybackTotal); p.set('paybackMode','entered'); }
+    if(a.perPayment!=null) p.set('payment', Math.round(a.perPayment));
+    p.set('freq', a.perLabel==='/day'?'daily':a.perLabel==='/wk'?'weekly':'monthly');
+    if(a.termM) p.set('term', Math.round(a.termM));
+  } else { const tv=handoffTerm(lv); if(tv) p.set('term', tv); }
+  if(S.state==='CA'||S.state==='NY') p.set('state', S.state);
+  const e=(d && d.code)?NAICS_DB.find(n=>n.c===d.code):null;
+  if(e && e.d) p.set('deal', e.d);
   p.set('src','deal-read');
-  return '/affordability.html?'+p.toString();
+  return '/calculators/AffordabilityCalculator.html?'+p.toString();
 }
 function relatedTools(d, lv){
   if(!lv) return '';
