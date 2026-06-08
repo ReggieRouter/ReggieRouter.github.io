@@ -457,7 +457,11 @@ saveEstimate({
   `localStorage` so the log works offline / logged-out / before the table exists.
 - **Restore** re-fills the calculator from `params` via `sessionStorage` —
   **never the URL** (no PII in URLs, §9). Calculators call
-  `LPQuoteLog.consumeRestorePayload('<type>')` on load.
+  `LPQuoteLog.consumeRestorePayload('<type>')` on load; wired in all shipped
+  calculators (Payment Breakdown, DSCR, Fundability, SBA Fees). When fields can't
+  be fully restored (e.g. an estimate saved before a field existed), show a
+  "review before generating a new PDF" banner. Module-script calculators (DSCR)
+  must run restore on `load`, not at parse time, so `window.LPQuoteLog` exists.
 - **Freemium:** Free shows the last 10 (display cap only — all rows are retained
   in the DB for Pro eligibility). Pro: full history, deal naming, shareable links,
   CSV export.
@@ -477,13 +481,15 @@ Replicate this top-to-bottom order so every calculator reads the same way:
 1. **Hero number** — the one figure the rep needs in 10s. `42px`, weight 700/900,
    brand-dark, monospace numerals. Secondary equivalent (e.g. `≈ $X/mo`) muted,
    below, never inline with the hero.
-2. **Cost pair + charge strip** — a 2-col row of the two headline money figures
-   (e.g. `Funded` / `Total payback`), then a full-width tinted `#F4F8F5` strip for
-   the single derived charge (`Finance charge`). The pair + strip form an identity
-   the borrower can verify (Funded + Finance charge = Total payback).
+2. **Deal-math row** — three equal cells: `Funded` / `Total payback` / `Finance
+   charge`. They form an identity the borrower can verify (Funded + Finance charge
+   = Total payback). The `Finance charge` cell stays subdued — a faint `#F4F8F5`
+   tint + muted value — so it reads as the derived cost without a full-width strip.
+   (Earlier 2-up + full-width strip was retired 6/8 — looked unbalanced.)
 3. **Secondary metrics row** — exactly **4 equal cells**, small monospace values,
-   tiny uppercase labels (`Factor rate` / `Est. APR` / `Cost / $1` / `Maturity`).
+   tiny uppercase labels (`Factor rate` / `Est. APR` / `Cost per dollar` / `Maturity`).
    Carry the `pdf-stats-grid` class so print styling applies. APR always `*`-footnoted.
+   The `≈ $X/mo` hero sub-figure is right-aligned within the card.
 4. **Payoff / savings banner** — see §14. Green-tinted, brand left-accent.
 5. **Talk track** — "What you tell the borrower," collapsible (∧/∨), scrollable body
    (`max-height:80px`); secondary footer holds the APR `*` note. See §5.

@@ -1140,10 +1140,31 @@
 
     function runAll() { runNetCalc(); runRiskCalc(); }
 
+    function lpRestoreBanner() {
+        if (document.getElementById('lp-restore-banner')) return;
+        const main = document.querySelector('.lp-main') || document.body;
+        const b = document.createElement('div');
+        b.id = 'lp-restore-banner'; b.className = 'no-print';
+        b.style.cssText = 'display:flex;align-items:center;gap:8px;max-width:1000px;margin:0 auto 12px;padding:9px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:12px;color:#92400E;';
+        b.textContent = 'Restored from your Quote Log — review the figures before generating a new PDF.';
+        main.insertBefore(b, main.firstChild);
+    }
+
     window.onload = () => {
         addPosition(450, 'daily');
         bindTips();
         runAll();
+        // Quote Log restore (LEN-123)
+        try {
+            const rec = window.LPQuoteLog && window.LPQuoteLog.consumeRestorePayload('fundability');
+            if (rec && rec.params) {
+                const p = rec.params, sv = (id, v) => { const e = document.getElementById(id); if (e && v != null && v !== '') e.value = v; };
+                sv('funding_amt', p.amount); sv('net_pct', p.net_pct); sv('monthly_rev', p.monthly_revenue);
+                sv('factor', p.factor); sv('term_val', p.term_val); sv('term_unit', p.term_unit);
+                runAll();
+                lpRestoreBanner();
+            }
+        } catch (e) { /* restore is best-effort */ }
         if (typeof window.PDF_HELPER !== 'undefined') {
             window.PDF_HELPER.initPrintLayout("FUNDABILITY ESTIMATE");
         }

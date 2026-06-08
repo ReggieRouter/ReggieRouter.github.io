@@ -893,11 +893,32 @@ function copyResults(id) {
     });
 }
 
+function lpRestoreBanner() {
+    if (document.getElementById('lp-restore-banner')) return;
+    const main = document.querySelector('.lp-main') || document.body;
+    const b = document.createElement('div');
+    b.id = 'lp-restore-banner'; b.className = 'no-print';
+    b.style.cssText = 'display:flex;align-items:center;gap:8px;max-width:1000px;margin:0 auto 12px;padding:9px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:12px;color:#92400E;';
+    b.textContent = 'Restored from your Quote Log — review the figures before generating a new PDF.';
+    main.insertBefore(b, main.firstChild);
+}
+
 window.onload = () => {
     addCard();
     if (typeof window.PDF_HELPER !== 'undefined') {
         window.PDF_HELPER.initPrintLayout("SBA 7(a) RATES & FEES");
     }
+    // Quote Log restore (LEN-123)
+    try {
+        const rec = window.LPQuoteLog && window.LPQuoteLog.consumeRestorePayload('sba_fees');
+        if (rec && rec.params) {
+            const p = rec.params, id = 1, sv = (k, v) => { const e = document.getElementById(`${k}-${id}`); if (e && v != null && v !== '') e.value = v; };
+            sv('loanAmount', p.amount); sv('termYears', p.term); sv('rateSpread', p.rate_spread);
+            sv('pkgFee', p.packaging_fee); sv('closeFee', p.closing_fee);
+            if (typeof calculate === 'function') calculate(id);
+            lpRestoreBanner();
+        }
+    } catch (e) { /* restore is best-effort */ }
     if (window.self !== window.top) {
         document.body.classList.add('is-embedded');
     }

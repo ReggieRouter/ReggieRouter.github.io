@@ -1426,7 +1426,7 @@ async function runPDF() {
                     amount: sc0.amount ?? null, rate: sc0.rate ?? null, term: sc0.term ?? null,
                     entity: S.entity, mode: S.mode,
                     dscr: S.mode === 'gdscr' ? gdscr : bdscr, bdscr, gdscr,
-                    scenarios: S.scenarios,
+                    scenarios: S.scenarios, ebida: S.ebida, debts: S.debts, owners: S.owners,
                     borrower_state: (window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState()) || ''
                 },
                 pdf_generated: true,
@@ -1506,6 +1506,36 @@ if (typeof window.PDF_HELPER !== 'undefined') window.PDF_HELPER.initPrintLayout(
 if (window.self !== window.top) {
     document.body.classList.add('is-embedded');
 }
+
+// ── Quote Log restore (LEN-123) ──────────────────────────────────────────────
+// Deferred to load so the quote-log.js module (window.LPQuoteLog) has executed.
+function lpRestoreBanner(partial) {
+    if (document.getElementById('lp-restore-banner')) return;
+    const main = document.querySelector('.lp-main') || document.body;
+    const b = document.createElement('div');
+    b.id = 'lp-restore-banner'; b.className = 'no-print';
+    b.style.cssText = 'display:flex;align-items:center;gap:8px;max-width:1000px;margin:0 auto 12px;padding:9px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:12px;color:#92400E;';
+    b.textContent = partial
+        ? 'Restored from your Quote Log — some fields could not be restored, please review before generating a new PDF.'
+        : 'Restored from your Quote Log — review the figures before generating a new PDF.';
+    main.insertBefore(b, main.firstChild);
+}
+window.addEventListener('load', () => {
+    try {
+        const rec = window.LPQuoteLog && window.LPQuoteLog.consumeRestorePayload('dscr');
+        if (!rec || !rec.params) return;
+        const p = rec.params; let partial = false;
+        if (p.entity) S.entity = p.entity;
+        if (p.mode) S.mode = p.mode;
+        if (p.ebida) S.ebida = p.ebida; else partial = true; // older estimates lack EBIDA
+        if (Array.isArray(p.debts)) S.debts = p.debts;
+        if (Array.isArray(p.owners) && p.owners.length) S.owners = p.owners;
+        if (Array.isArray(p.scenarios) && p.scenarios.length) S.scenarios = p.scenarios;
+        if (p.borrower_state && window.LPCompliance && window.LPCompliance.setState) window.LPCompliance.setState(p.borrower_state);
+        renderEntities(); renderMode(); renderEbida(); renderDebts(); renderOwners(); renderScenarios(); renderSummaries();
+        lpRestoreBanner(partial);
+    } catch (e) { /* restore is best-effort */ }
+});
 </script>
 <style>
     body.is-embedded { background: transparent; }
