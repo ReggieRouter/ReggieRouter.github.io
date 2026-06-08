@@ -9,6 +9,7 @@
     "test:golden": "playwright test golden.spec",
     "test:smoke": "playwright test smoke.spec",
     "test:regress": "playwright test regressions.spec",
+    "test:visual": "QA_VISUAL=1 playwright test visual.spec --project=chromium",
     "report": "playwright show-report"
   },
   "devDependencies": {

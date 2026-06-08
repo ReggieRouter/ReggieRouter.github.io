@@ -11,6 +11,9 @@ const PORT = process.env.QA_PORT ? Number(process.env.QA_PORT) : 8099;
 
 module.exports = defineConfig({
   testDir: './tests',
+  // The visual screenshot pass is opt-in (npm run test:visual) — it writes PNGs,
+  // it isn't a pass/fail gate, so keep it out of the default run.
+  testIgnore: process.env.QA_VISUAL ? [] : ['**/visual.spec.js'],
   // Run serially-ish; these are fast and the static server is shared.
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
