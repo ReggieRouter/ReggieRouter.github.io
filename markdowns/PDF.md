@@ -308,12 +308,14 @@ Per-calculator titles:
 ### Payment Breakdown
 - Two-column on-screen → must collapse for print: hide `.input-col`, promote `.results-col` to full-width
 - Add a print-only **Loan Parameters** summary at top of print view (amount, term, origination fee, frequency, start date)
-- Wrap early-payoff callout in `.callout` — must not split across pages
 - Suppress screen logo/byline in favor of `.pdf-header` partial
 
-### Amortization
+### Amortization — payoff panel (LEN-110 redesign)
 - Hide input panel; replace with print-only **Loan Parameters** summary
-- Group highlighted prepay row + "IF BORROWER PAYS OFF HERE" callout into `<tbody class="prepay-block">`
+- The selected row expands to the **payoff tile panel** (`tr[class*="amo-detail-for-"]`), not the old "IF BORROWER PAYS OFF HERE" callout. Keep the whole panel together:
+  - `body.pdf-export-mode .lp-tiles` holds the 3-col grid; `.lp-tiles` + `.lp-todate` band carry `break-inside: avoid`
+  - **Tiles are white** — print does not fill them. Hierarchy survives via `print-color-adjust: exact` on Tile 1's green left-accent, Tile 3's green border, and the green date pill (already in the print block)
+  - **No-pre-pay deals** print the single muted `Run-to-term cost` tile + To-date band on a **neutral** (`#F9FAFB`) container with a gray date pill — both forced via `print-color-adjust: exact` on `.lp-expand-inner`/`.lp-payoff-datepill`. Verified: the lone tile holds its constrained width and does not stretch across the 3-col grid.
 - Repeat table header on every page — `thead { display: table-header-group }` handles this
 
 ---
