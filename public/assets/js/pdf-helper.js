@@ -76,7 +76,7 @@ window.PDF_HELPER = {
                                 <path d="M9 9v6"/>
                                 <path d="M9 15h4"/>
                             </svg>
-                            <span style="font-size: 16px !important; font-weight: 800 !important; color: #111827 !important; letter-spacing: -0.02em !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">lend<span style="font-weight: 300 !important; color: #6B7280 !important;">paper</span><span style="color: #14532D !important;">.</span></span>
+                            <span style="font-size: 16px !important; font-weight: 800 !important; color: #111827 !important; letter-spacing: -0.02em !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">lend<span style="font-weight: 300 !important; color: #6B7280 !important;">paper</span><span style="color: #1A3C2E !important;">.</span></span>
                         </div>
                         <span style="font-size: 9px !important; color: #6B7280 !important; margin-top: 2px !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">· Scenario Modeling Engine</span>
                     </div>
@@ -86,7 +86,7 @@ window.PDF_HELPER = {
             headerHTML = `
                 <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 0 10px 0 !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
                     <div class="print-header-left" style="display: flex !important; align-items: center !important; gap: 8px !important;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #14532D !important;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #1A3C2E !important;">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"/>
                             <polyline points="2 17 12 22 22 17"/>
                             <polyline points="2 12 12 17 22 12"/>
@@ -269,7 +269,7 @@ window.PDF_HELPER = {
                 let seg1Width = pdf.getTextWidth(seg1);
                 startX += seg1Width;
                 
-                pdf.setTextColor(20, 83, 45); // #14532D
+                pdf.setTextColor(20, 83, 45); // #1A3C2E
                 pdf.setFont("helvetica", "bold");
                 try {
                     pdf.textWithLink("lendpaper.com", startX, y1, { url: "https://lendpaper.com" });

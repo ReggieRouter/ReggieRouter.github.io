@@ -9,7 +9,7 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --green: #14532D; --green-mid: #16A34A; --green-light: #DCFCE7; --green-border: #BBF7D0;
+      --green: #1A3C2E; --green-mid: #16A34A; --green-light: #DCFCE7; --green-border: #BBF7D0;
       --text: #111827; --text2: #374151; --muted: #6B7280; --surface: #F9FAFB; --border: #E5E7EB;
       --ok: #065f46; --ok-bg: #d1fae5; --ok-border: #a7f3d0;
       --flag: #991b1b; --flag-bg: #fee2e2; --flag-border: #fecaca;
@@ -172,7 +172,7 @@
   <div class="section-label">Spot Check</div>
   <div class="game-wrap" id="game-wrap">
     <div class="start-screen">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px;display:block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px;display:block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <h2 id="start-title">Loading…</h2>
       <p id="start-desc">Fetching lender data.</p>
     </div>
@@ -539,7 +539,7 @@
     );
     document.getElementById('game-wrap').innerHTML = `
       <div class="start-screen">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px;display:block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 14px;display:block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <h2>${queue.length} lenders in queue</h2>
         <p>Randomly shuffled. Compare our data against each lender's live source page.<br>Mark OK or flag anything that looks off. Use <kbd style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:3px;padding:1px 5px;font-family:inherit;">O</kbd> / <kbd style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:3px;padding:1px 5px;font-family:inherit;">F</kbd> / <kbd style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:3px;padding:1px 5px;font-family:inherit;">→</kbd> for speed.</p>
         <button class="start-btn" onclick="restartSession()">

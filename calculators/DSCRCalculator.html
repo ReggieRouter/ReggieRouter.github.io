@@ -63,10 +63,10 @@
 <style>
 :root {
   /* DSCR specific colors */
-  --pass-bg: #f0fdf4; --pass-tx: #14532D;
+  --pass-bg: #f0fdf4; --pass-tx: #1A3C2E;
   --fail-bg: #fee2e2; --fail-tx: #991b1b;
-  --tax-pass: #14532D;
-  --tax-pass-bg: rgba(20, 83, 45, 0.12);
+  --tax-pass: #1A3C2E;
+  --tax-pass-bg: rgba(26, 60, 46, 0.12);
   --tax-dbl: #9b85b9;
   --tax-dbl-bg: rgba(155, 133, 185, 0.12);
   --lp-green-light: #f0fdf4;
@@ -120,7 +120,7 @@
 .unified-tax-card.pass {
   background-color: #F0FDF4; /* Soft green, matches lp-howto exactly */
   border: 1px solid #BBF7D0;
-  border-left: 4px solid #14532D;
+  border-left: 4px solid #1A3C2E;
 }
 .unified-tax-card.dbl {
   background-color: #F5F3FF; /* Soft purple */
@@ -377,7 +377,7 @@
         border-top: 0.5pt solid #E5E7EB;
         padding-top: 6px;
     }
-    .lp-print-footer a { color: #14532D; font-weight: 700; text-decoration: none; }
+    .lp-print-footer a { color: #1A3C2E; font-weight: 700; text-decoration: none; }
     .lp-print-footer .lp-print-footer-disclaimer { font-size: 5.5pt; color: #9CA3AF; }
 }
 /* Hidden in screen view */
@@ -397,6 +397,11 @@
     .sc-body { display: block !important; }
     .sc.collapsed .sc-body { display: block !important; }
     .sc.pdf-hide { display: none !important; }
+    .sc.save-area { background: #fff !important; }
+    .sc.save-area .sc-hd { background: #fff !important; border-bottom-color: #e5e7eb !important; }
+    .sc.save-area .sc-title { color: #111827 !important; }
+    .sc.save-area .sc-sub { color: #6b7280 !important; }
+    .sc.save-area .save-field label { color: #6b7280 !important; }
     .gated-section.is-locked .sc-body { opacity: 1 !important; filter: none !important; }
     
     .inp { border: none !important; padding-left: 18px !important; font-weight: 700 !important; }
@@ -464,7 +469,7 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     line-height: 1.6;
     margin-bottom: 24px;
 }
-.lp-definition strong { color: #14532D; font-weight: 800; }
+.lp-definition strong { color: #1A3C2E; font-weight: 800; }
 
 /* Dismissible intro banner — sits above Step 1, sets expectations */
 .lp-intro {
@@ -481,7 +486,7 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     color: #334155;
     line-height: 1.6;
 }
-.lp-intro-def strong { color: #14532D; font-weight: 800; }
+.lp-intro-def strong { color: #1A3C2E; font-weight: 800; }
 .lp-intro-steps {
     display: flex;
     align-items: center;
@@ -490,7 +495,7 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     gap: 8px;
     margin-top: 14px;
     padding-top: 14px;
-    border-top: 1px dashed rgba(20, 83, 45, 0.18);
+    border-top: 1px dashed rgba(26, 60, 46, 0.18);
 }
 .lp-intro-step {
     display: inline-flex;
@@ -498,7 +503,7 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     gap: 7px;
     font-size: 12.5px;
     font-weight: 700;
-    color: #14532D;
+    color: #1A3C2E;
 }
 .lp-intro-step .n {
     width: 18px;
@@ -514,6 +519,15 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     flex-shrink: 0;
 }
 .lp-intro-arrow { color: #86C99B; font-size: 13px; font-weight: 700; }
+/* Flash the first step to pull the eye to where to start */
+@keyframes stepFlash {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); background: var(--lp-green); }
+    50%      { box-shadow: 0 0 0 4px rgba(34,197,94,0.45); background: #22C55E; }
+}
+.lp-intro-step.step-attn .n { animation: stepFlash 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+    .lp-intro-step.step-attn .n { animation: none; }
+}
 .lp-intro-x {
     position: absolute;
     top: 10px;
@@ -530,10 +544,22 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     justify-content: center;
     transition: background 0.15s, color 0.15s;
 }
-.lp-intro-x:hover { background: rgba(20, 83, 45, 0.08); color: #14532D; }
+.lp-intro-x:hover { background: rgba(26, 60, 46, 0.08); color: #1A3C2E; }
 
 /* Save area — standalone, not a numbered step */
 .save-area .sc-num { display: none; }
+/* Terminal action: full dark-green block; inputs stay light, CTA inverts to pop */
+.sc.save-area { background: #1A3C2E; border-color: #1A3C2E; }
+.sc.save-area .sc-hd { background: transparent; border-bottom-color: rgba(255,255,255,0.14); }
+.sc.save-area .sc-title { color: #fff; }
+.sc.save-area .sc-sub { color: rgba(255,255,255,0.72); }
+.sc.save-area .sc-collapse { color: rgba(255,255,255,0.85); }
+.sc.save-area .save-field label { color: rgba(255,255,255,0.82); }
+.sc.save-area .save-field input { background: #fff; border-color: transparent; color: #111827; }
+.sc.save-area .save-field input:focus { border-color: #86C99B; box-shadow: 0 0 0 3px rgba(134,201,155,0.30); }
+.sc.save-area .pdf-btn { background: #fff; color: #1A3C2E; }
+.sc.save-area .pdf-btn:hover { background: #ECFDF3; }
+.sc.save-area .pdf-btn:disabled { opacity: 0.55; }
 
 .live-indicator-pill {
   font-size: 10px;
@@ -557,14 +583,14 @@ body.pdf-export-mode .print-watermark { display: none !important; }
 
 <header class="modal-header">
     <svg class="modal-logo" width="124" height="22" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
-      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
         <path d="M4 4v16h11l5-5V4H4z"/>
         <path d="M15 20v-5h5" stroke-linecap="butt"/>
         <path d="M9 9v6"/>
         <path d="M9 15h4"/>
       </svg>
       <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
-        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#14532D">.</tspan>
+        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#1A3C2E">.</tspan>
       </text>
     </svg>
     <div class="modal-title">
@@ -595,7 +621,7 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                     The <strong>Debt Service Coverage Ratio (DSCR)</strong> measures a business's ability to cover its debt obligations with its available cash flow, providing a critical indicator of funding serviceability.
                 </div>
                 <div class="lp-intro-steps">
-                    <span class="lp-intro-step"><span class="n">1</span> Entity &amp; tax form</span>
+                    <span class="lp-intro-step step-attn"><span class="n">1</span> Entity &amp; tax form</span>
                     <span class="lp-intro-arrow">&rarr;</span>
                     <span class="lp-intro-step"><span class="n">2</span> EBIDA &amp; financials</span>
                     <span class="lp-intro-arrow">&rarr;</span>
@@ -901,7 +927,7 @@ function renderEntities(mode = 'entity') {
     // Dynamic EBIDA hint badge in Step 2 Title (Static pill, no distracting infinite pulse)
     const hintEl = document.getElementById('ebidaFormHint');
     if (hintEl) {
-      hintEl.innerHTML = '<span class="live-indicator-pill" style="background:#14532D; margin-left:8px;">Auto-Populated [' + ent.form + ']</span>';
+      hintEl.innerHTML = '<span class="live-indicator-pill" style="background:#1A3C2E; margin-left:8px;">Auto-Populated [' + ent.form + ']</span>';
       hintEl.style.display = 'inline-block';
     }
 
@@ -1293,7 +1319,7 @@ async function runPDF() {
                 dscrResultsHTML += `
                     <div style="text-align: center; background: ${db >= 1.15 ? '#F0FDF4' : '#FEF2F2'}; border: 1px solid ${db >= 1.15 ? '#BBF7D0' : '#FCA5A5'}; padding: 10px; border-radius: 8px; flex: 1;">
                         <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #4B5563;">BDSCR</div>
-                        <div style="font-size: 20px; font-weight: 800; color: ${db >= 1.15 ? '#14532D' : '#991B1B'};">${db.toFixed(2)}</div>
+                        <div style="font-size: 20px; font-weight: 800; color: ${db >= 1.15 ? '#1A3C2E' : '#991B1B'};">${db.toFixed(2)}</div>
                         <div style="font-size: 9px; color: #6B7280; margin-top: 2px;">min 1.15x</div>
                     </div>
                 `;
@@ -1302,7 +1328,7 @@ async function runPDF() {
                 dscrResultsHTML += `
                     <div style="text-align: center; background: ${dg >= 1.0 ? '#F0FDF4' : '#FEF2F2'}; border: 1px solid ${dg >= 1.0 ? '#BBF7D0' : '#FCA5A5'}; padding: 10px; border-radius: 8px; flex: 1;">
                         <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #4B5563;">GDSCR</div>
-                        <div style="font-size: 20px; font-weight: 800; color: ${dg >= 1.0 ? '#14532D' : '#991B1B'};">${dg.toFixed(2)}</div>
+                        <div style="font-size: 20px; font-weight: 800; color: ${dg >= 1.0 ? '#1A3C2E' : '#991B1B'};">${dg.toFixed(2)}</div>
                         <div style="font-size: 9px; color: #6B7280; margin-top: 2px;">min 1.00x</div>
                     </div>
                 `;
@@ -1322,7 +1348,7 @@ async function runPDF() {
                     <div style="display: flex; gap: 12px; margin-bottom: 14px;">
                         ${dscrResultsHTML}
                     </div>
-                    <div style="font-size: 12.5px; color: ${pass ? '#14532D' : '#991B1B'}; font-weight: 600; padding: 8px 12px; background: ${pass ? '#F0FDF4' : '#FEF2F2'}; border-radius: 6px; border: 1px solid ${pass ? '#BBF7D0' : '#FCA5A5'};">
+                    <div style="font-size: 12.5px; color: ${pass ? '#1A3C2E' : '#991B1B'}; font-weight: 600; padding: 8px 12px; background: ${pass ? '#F0FDF4' : '#FEF2F2'}; border-radius: 6px; border: 1px solid ${pass ? '#BBF7D0' : '#FCA5A5'};">
                         ${pass ? '✔ PASS - Likely to approve.' : '✘ FAIL - Below lender DSCR thresholds.'}
                     </div>
                 </div>
@@ -1333,8 +1359,8 @@ async function runPDF() {
             <div style="margin-bottom: 24px; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 20px;">
                 <div>
                     <h3 style="font-size: 12px; font-weight: 800; color: #111827; margin-top: 0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Entity & Tax Form Information</h3>
-                    <div style="font-size: 13px; color: #111827; font-weight: 600; margin-bottom: 6px;">Entity Type: <span style="font-weight: 700; color: #14532D;">${entityName}</span></div>
-                    <div style="font-size: 13px; color: #111827; font-weight: 600; margin-bottom: 12px;">Tax Form: <span style="font-weight: 700; color: #14532D;">${taxForm}</span></div>
+                    <div style="font-size: 13px; color: #111827; font-weight: 600; margin-bottom: 6px;">Entity Type: <span style="font-weight: 700; color: #1A3C2E;">${entityName}</span></div>
+                    <div style="font-size: 13px; color: #111827; font-weight: 600; margin-bottom: 12px;">Tax Form: <span style="font-weight: 700; color: #1A3C2E;">${taxForm}</span></div>
                     <h4 style="font-size: 11px; font-weight: 700; color: #6B7280; margin-top: 0; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Required Tax Documents</h4>
                     ${reqDocs}
                 </div>
@@ -1345,7 +1371,7 @@ async function runPDF() {
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: 14px; padding-top: 10px; border-top: 1.5px solid #E5E7EB; font-weight: 800; font-size: 13px;">
                         <span style="color: #111827;">Total EBIDA</span>
-                        <span style="color: #14532D;">${fmt(totalEbida)}</span>
+                        <span style="color: #1A3C2E;">${fmt(totalEbida)}</span>
                     </div>
                 </div>
             </div>
@@ -1471,7 +1497,7 @@ if (window.self !== window.top) {
         font-size: 18pt;
         font-weight: 600;
         letter-spacing: 0.06em;
-        color: rgba(20, 83, 45, 0.07);
+        color: rgba(26, 60, 46, 0.07);
         z-index: 99997;
         pointer-events: none;
         white-space: nowrap;
