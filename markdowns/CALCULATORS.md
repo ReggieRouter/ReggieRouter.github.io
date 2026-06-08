@@ -136,13 +136,23 @@ If user is on variant 4 and unchecks pre-pay: snap back to variant 1 silently.
 
 ### Amortization table
 - Hint text: `Click any row to quantify the pre-pay discount`
-- Clickable rows: inject a detail row directly below the selected row
-  - `colspan` spans all columns
-  - Same green bg as selected row (`#e8f5ec`)
-  - Same left accent (`box-shadow: inset 2px 0 0 #0a4d2c`)
-  - Text: italic, 12px, green — `↳ Borrower saves $X,XXX.XX by paying off here · buyout $X,XXX.XX`
-- Pre-pay disabled: row still highlights; no detail row; never show "saves $0"
-- Only one detail row at a time
+- Clickable rows: inject a detail row directly below the selected row (`colspan` spans
+  all columns; only one detail row open at a time)
+- **Pre-pay enabled → payoff panel** (the LEN-110 redesign, see BRANDING.md §12):
+  - `Early payoff` eyebrow + a green valid-through **date pill**
+  - **Three parallel-grammar tiles**, all white-backed: `Early payoff quote`
+    (action — green left-accent) / `Run-to-term cost` (muted) / `Total savings`
+    (green border + green numerals). Identical internal structure: `eyebrow → big
+    number → one-line sub → divider → same stat rows`.
+  - A labeled **"To date"** band beneath the tiles (Paid so far / Payments made /
+    Contract progress / Payment amount) — backward-looking facts only.
+  - `Copy payoff quote` button → paste-ready plain-text quote (no-print).
+  - Container may carry a light-green "savings-zone" tint; the tiles stay white.
+- **Pre-pay disabled (deal offers no discount) → degraded grammar:** same tile
+  system, but render **only** a single muted `Run-to-term cost` tile + the "To date"
+  band, on a **neutral** (gray) container with a gray date pill. Never show an
+  "Early payoff" tile or a "saves $0" line.
+- Hierarchy comes from borders + type, never from colored tile fills (BRANDING.md §12.6).
 
 ### Modals
 - Vertically centered in viewport, minimal dead space

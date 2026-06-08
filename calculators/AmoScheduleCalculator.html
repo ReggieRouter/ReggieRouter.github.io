@@ -106,6 +106,9 @@
         /* Inside .table-scroll-container (overflow-y:auto) anything above the top edge gets clipped —
            sticky-header tooltips must open BELOW the icon and hug the right edge instead */
         .tooltip-below .tooltiptext { bottom: auto; top: calc(100% + 8px); left: auto; right: 0; transform: none; }
+        /* Payoff-tile tooltips (All-in cost) sit near the left of each tile — open below and extend RIGHT
+           so the leftmost tile's tooltip doesn't overflow/clip at the scroll-container's left edge */
+        .lp-tile .tooltip .tooltiptext { top: calc(100% + 8px); bottom: auto; left: 0; right: auto; transform: none; max-width: 240px; }
         .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
 
         /* Input Overrides */
@@ -405,6 +408,27 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
+            /* Payoff redesign: hold the equal-width tile grid in print; keep tiles + To-date band
+               together below them, and force the green accents (Tile 1 left border, Tile 3 green border, date pill) */
+            body.pdf-export-mode .lp-tiles {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            body.pdf-export-mode .lp-tile,
+            body.pdf-export-mode .lp-tile-savings,
+            body.pdf-export-mode .lp-payoff-datepill,
+            body.pdf-export-mode .lp-todate {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            body.pdf-export-mode .lp-todate-grid {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+            }
             /* Paper has no clicks: always show paid-to-date expanded, and print the gray row highlight */
             body.pdf-export-mode .lp-paid-row { display: flex !important; }
             body.pdf-export-mode .paid-target-row td {
@@ -549,13 +573,47 @@
         /* Paid-to-date equation: stat columns with + / = as standalone dividers */
         .lp-eq-grid { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
         .lp-eq-div { font-size: 14px; font-weight: 500; color: #9CA3AF; }
-        /* Payoff expansion: 3 stat cards + metadata row + copy-quote button */
-        .lp-payoff-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .lp-payoff-card { background: #FFFFFF; border: 1px solid #9fe1cb; border-radius: 8px; padding: 12px 14px; }
-        .lp-payoff-card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #2D6A4F; font-weight: 700; margin-bottom: 4px; }
-        .lp-payoff-card-value { font-size: 19px; font-weight: 500; color: #1A3C2E; font-variant-numeric: tabular-nums; }
-        .lp-payoff-card-hero .lp-payoff-card-value { font-size: 23px; }
-        .lp-payoff-meta { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid #D1FAE5; }
+        /* Payoff redesign: header + 3 parallel-grammar tiles + "To date" band + copy-quote button */
+        .lp-payoff-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .lp-payoff-eyebrow-main { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #1A3C2E; }
+        .lp-payoff-datepill { background: #1A3C2E; color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.02em; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+        /* Every tile shares the same internal grammar: eyebrow -> big number -> sub -> divider -> 4 stat rows */
+        .lp-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: stretch; }
+        .lp-tile { background: #FFFFFF; border: 1px solid #C9E9D6; border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; }
+        .lp-tile-action { border: 1px solid #E5E7EB; border-left: 4px solid #16A34A; }
+        .lp-tile-muted { background: #FFFFFF; border-color: #E5E7EB; }
+        .lp-tile-muted .lp-tile-big { color: #475569; }
+        .lp-tile-savings { background: #FFFFFF; border: 1.5px solid #16A34A; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        /* Single-tile layout for deals with no pre-pay discount: run-to-term tile + To-date band only */
+        .lp-tiles-single { grid-template-columns: minmax(240px, 360px); }
+        /* Neutral (no-discount) expansion: drop the green "savings zone" tint + green date pill for honest framing */
+        .lp-expand-neutral { background: #F9FAFB; }
+        .lp-datepill-neutral { background: #475569; }
+        .lp-tile-eyebrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2D6A4F; }
+        .lp-tile-fn { font-size: 9px; font-weight: 600; text-transform: none; letter-spacing: 0; color: #9CA3AF; font-style: italic; white-space: nowrap; }
+        .lp-tile-big { font-size: 26px; font-weight: 700; color: #1A3C2E; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 6px; }
+        .lp-tile-savings .lp-tile-big { color: #15803D; }
+        .lp-tile-sub { font-size: 11px; color: #6B7280; line-height: 1.35; margin-top: 5px; min-height: 30px; }
+        .lp-tile-div { border-top: 1px solid #E5E7EB; margin: 12px 0 10px; }
+        .lp-tile-savings .lp-tile-div { border-color: #BBE5CC; }
+        .lp-tile-stats { margin: 0; display: flex; flex-direction: column; gap: 7px; }
+        .lp-tile-stats > div { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+        .lp-tile-stats dt { margin: 0; font-size: 11px; color: #6B7280; }
+        .lp-tile-stats dd { margin: 0; font-size: 12px; font-weight: 600; color: #111827; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .lp-tile-savings .lp-tile-stats dd { color: #15803D; }
+        .lp-tiles-math { margin-top: 12px; font-size: 11px; color: #9CA3AF; font-variant-numeric: tabular-nums; line-height: 1.4; }
+
+        /* "To date" band: backward-looking current-state facts, zoned off from the forward tiles */
+        .lp-todate { margin-top: 18px; }
+        .lp-todate-label { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .lp-todate-label > span:first-child { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9CA3AF; white-space: nowrap; }
+        .lp-todate-rule { flex: 1; height: 1px; background: #D1D5DB; }
+        .lp-todate-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        .lp-todate-grid > div { display: flex; flex-direction: column; gap: 2px; }
+        .lp-todate-grid dt { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #6B7280; font-weight: 600; }
+        .lp-todate-grid dd { margin: 0; font-size: 15px; font-weight: 600; color: #111827; font-variant-numeric: tabular-nums; }
+        .lp-todate-meta { font-size: 10px; color: #9CA3AF; }
         .lp-quote-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
         .lp-quote-btn { background: transparent; border: 1px solid #9fe1cb; border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 700; color: #1A3C2E; cursor: pointer; font-family: inherit; transition: background 0.15s; }
         .lp-quote-btn:hover { background: #FFFFFF; }
@@ -781,7 +839,8 @@
                 gap: 10px;
             }
             .lp-eq-div { display: none; }
-            .lp-payoff-cards { grid-template-columns: 1fr; }
+            .lp-tiles { grid-template-columns: 1fr; }
+            .lp-todate-grid { grid-template-columns: 1fr 1fr; }
             .lp-expand-head { flex-direction: column; gap: 4px; }
             /* Reduce padding and fonts in the dynamic header to prevent squeezing */
             .h-\[64px\] {
@@ -945,6 +1004,9 @@
             const set = (eid, val) => { const el = document.getElementById(eid); if (el) el.textContent = val; };
             set(`ppAmt-${id}`, fmtUsd.format(amt));
             set(`ppFactor-${id}`, factor.toFixed(2) + 'x');
+            // Pair APR with factor (CA/NY etc.) — estimated APR from the last calc; '—' until calculated
+            const apr = lastCalc[id]?.apr;
+            set(`ppApr-${id}`, (apr != null) ? ('~' + apr.toFixed(1) + '%') : '—');
             set(`ppTerm-${id}`, term + ' ' + (termUnitLabels[termUnit] || 'months'));
             set(`ppFreq-${id}`, freqLabels[freq] || freq);
             set(`ppFee-${id}`, feeText);
@@ -1059,6 +1121,17 @@
         }
 
         const fmtUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        // Whole-dollar variant for at-a-glance headline figures (cents add noise to big numbers)
+        const fmtUsd0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+        // COMPLIANCE — rate/APR pairing (CA SB 1235, NY CFDL, and a growing disclosure-state list):
+        // a factor rate / cents-on-the-dollar / simple-interest quote must NEVER appear without an
+        // accompanying APR, co-located in the same unit and in every copied/exported artifact. Render
+        // any rate metric in prose/exports through this helper so the pairing can't be dropped. The APR
+        // here is the estimated effective APR (~), not a state-prescribed disclosure (LEN-110 / BRANDING.md §12).
+        function rateWithApr(factor, centsDisplay, apr) {
+            return `${factor.toFixed(2)}× factor — ${centsDisplay}¢ on the dollar, about a ~${apr.toFixed(1)}% APR`;
+        }
         const rowSelection = {};
         const cardTracks = {};
         const PAYOFF_MARK_HTML = '<span class="payoff-mark" style="font-size:10px;font-weight:700;color:#1A3C2E;white-space:nowrap">&middot; payoff &#10003;</span>';
@@ -1407,6 +1480,7 @@
                                 <div class="pdf-params-grid">
                                     <div><div class="pdf-param-label">Financing Amount</div><div class="pdf-param-value" id="ppAmt-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Factor Rate</div><div class="pdf-param-value" id="ppFactor-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Est. APR</div><div class="pdf-param-value" id="ppApr-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Term</div><div class="pdf-param-value" id="ppTerm-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Payment Frequency</div><div class="pdf-param-value" id="ppFreq-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Origination Fee</div><div class="pdf-param-value" id="ppFee-${id}">—</div></div>
@@ -1433,7 +1507,7 @@
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outCents-${id}">0¢</div>
                                 </div>
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">APR<sup title="Required disclosure in CA and NY" class="cursor-help" style="font-size:8px;font-weight:700;vertical-align:super">*</sup></div>
+                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">APR<sup title="A factor rate alone is not a complete quote — APR disclosure is required on a specific offer in CA, NY, and other states" class="cursor-help" style="font-size:8px;font-weight:700;vertical-align:super">*</sup></div>
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outApr-${id}">0%</div>
                                 </div>
                             </div>
@@ -1469,7 +1543,7 @@
                                     </div>
                                 </div>
                                 <div class="takeaway-footer no-print">
-                                    * APR disclosure required in CA and NY
+                                    * A factor rate alone is not a complete quote — APR disclosure is required on a specific offer in CA, NY, and other states
                                 </div>
                             </div>
 
@@ -1657,7 +1731,7 @@
                     html = `You're looking at <strong>${fmtUsd.format(c.totalCost)}</strong> in total funding costs — a <strong>${c.apr.toFixed(1)}% APR</strong>, or <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>.`;
                 }
             } else if (track.key === 'perdollar') {
-                html = `For every dollar you receive, you're paying back <strong>${c.factor.toFixed(2)}</strong> — that's <strong>${c.centsDisplay}¢ on the dollar</strong>. On <strong>${fmtUsd.format(c.amt)}</strong> funded, you repay <strong>${fmtUsd.format(c.payback)}</strong> total.`;
+                html = `For every dollar you receive, you're paying back <strong>${c.factor.toFixed(2)}</strong> — that's <strong>${c.centsDisplay}¢ on the dollar, about a ~${c.apr.toFixed(1)}% APR</strong>. On <strong>${fmtUsd.format(c.amt)}</strong> funded, you repay <strong>${fmtUsd.format(c.payback)}</strong> total.`;
             } else if (track.key === 'prepay') {
                 if (sel && sel.savings > 0) {
                     html = `Pay off on your ${payoffLink(id, sel)} — your payoff amount drops to <strong>${fmtUsd.format(sel.buyout)}</strong>, saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest.`;
@@ -1731,7 +1805,36 @@
         function copyPayoffQuote(id) {
             const sel = rowSelection[id];
             if (!sel) return;
-            navigator.clipboard.writeText(`Payoff Amount: ${fmtUsd.format(sel.buyout)} | Interest Saved: ${fmtUsd.format(sel.savings)} | Payoff Date: ${sel.date}`);
+            const c = lastCalc[id];
+            // Paste-ready plain-text quote (Slack / CRM friendly) — mirrors the on-screen tiles
+            let lines;
+            if (c) {
+                const buyoutAllIn = sel.tpaid + sel.buyout;
+                const runToTerm = c.payback - sel.tpaid;
+                const paymentsLeft = Math.max(0, c.periods - sel.period);
+                lines = [
+                    `Early payoff — valid through ${sel.date}`,
+                    ``,
+                    `Early payoff quote (buy out early):  ${fmtUsd0.format(sel.buyout)}`,
+                    `Run-to-term cost (do nothing):       ${fmtUsd0.format(runToTerm)}`,
+                    `Total savings:                       ${fmtUsd0.format(sel.savings)}`,
+                    ``,
+                    // Rate metric never travels without APR (see rateWithApr / compliance note)
+                    `Deal terms: ${rateWithApr(c.factor, c.centsDisplay, c.apr)}`,
+                    `Payments eliminated: ${paymentsLeft}    All-in if bought out: ${fmtUsd0.format(buyoutAllIn)}`,
+                    `Paid to date: ${fmtUsd0.format(sel.tpaid)} (${sel.period} of ${c.periods} payments)`,
+                    ``,
+                    `Estimate only — not a financing offer or a required disclosure. A factor rate alone is not a`,
+                    `complete quote; APR and standardized disclosures are required on a specific commercial financing`,
+                    `offer in CA, NY, and other states.`
+                ];
+            } else {
+                lines = [
+                    `Early payoff quote: ${fmtUsd0.format(sel.buyout)} | Total savings: ${fmtUsd0.format(sel.savings)} | Valid through ${sel.date}`,
+                    `Estimate only — not a financing offer or required disclosure (APR/standardized disclosures required on a specific offer in CA, NY, and other states).`
+                ];
+            }
+            navigator.clipboard.writeText(lines.join('\n'));
             const el = document.getElementById(`quoteCopied-${id}`);
             if (el) {
                 el.classList.add('show');
@@ -1752,27 +1855,70 @@
             const payments = `${sel.period} payment${sel.period === 1 ? '' : 's'}`;
             if (isPrepay) {
                 const c = lastCalc[id];
-                const shortDate = sel.date.replace(/,\s*\d{4}$/, '');
+                // ---- Forward-looking figures, all derived from calculator state ----
+                const buyoutAllIn = sel.tpaid + sel.buyout;          // paid-to-date + discounted payoff
+                const runToTerm   = c.payback - sel.tpaid;           // remaining scheduled payments
+                // Whole-dollar display values, rounded once here so the on-tile equation always reconciles
+                // (savings = run-to-term − early payoff, exact to the cent; round each consistently).
+                const buyR  = Math.round(sel.buyout);                 // early-payoff quote, displayed
+                const runR  = Math.round(runToTerm);                  // run-to-term cost, displayed
+                const saveR = runR - buyR;                            // total savings, reconciles by construction
+                const paymentsLeft = Math.max(0, c.periods - sel.period);
+                const progressPct = Math.round((sel.period / c.periods) * 100);
+                const maturityMo  = c.maturityDate.replace(/\s\d{1,2},/, '');   // "Aug 31, 2027" -> "Aug 2027"
+                // Rate metrics (factor/APR) intentionally NOT shown on the comparison tiles: a rate quote must
+                // carry APR (CA/NY etc.), and an early-buyout APR is volatile and misleading (it explodes at
+                // early periods — paying a deal off after one payment implies a ~1000%+ annualized rate). The
+                // mandated factor+APR pairing lives on the base-deal stats grid + copy-quote; the tiles compare
+                // on dollars and payment counts only (LEN-110; see BRANDING.md §12).
+                const allInTip = `<span class="tooltip tooltip-below ml-1 no-print"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span class="tooltiptext">Everything paid on this contract under this scenario — payments already made to date plus the remaining cost. It runs higher than the headline because the headline is only what's left to pay; all-in also includes what's already been paid.</span></span>`;
                 tr.innerHTML = `<td colspan="8" style="padding:0">
                     <div class="lp-expand-inner">
-                        <div class="lp-payoff-cards">
-                            <div class="lp-payoff-card lp-payoff-card-hero">
-                                <div class="lp-payoff-card-label">Payoff Amount</div>
-                                <div class="lp-payoff-card-value">${fmtUsd.format(sel.buyout)}</div>
+                        <div class="lp-payoff-header">
+                            <span class="lp-payoff-eyebrow-main">Early payoff</span>
+                            <span class="lp-payoff-datepill">${sel.date}</span>
+                        </div>
+                        <div class="lp-tiles">
+                            <div class="lp-tile lp-tile-action">
+                                <div class="lp-tile-eyebrow"><span>Early payoff quote</span><span class="lp-tile-fn">Buy out early</span></div>
+                                <div class="lp-tile-big">${fmtUsd0.format(sel.buyout)}</div>
+                                <div class="lp-tile-sub">Discounted payoff to close out the contract on the payoff date</div>
+                                <div class="lp-tile-div"></div>
+                                <dl class="lp-tile-stats">
+                                    <div><dt>Payments left</dt><dd>0</dd></div>
+                                    <div><dt>All-in cost${allInTip}</dt><dd>${fmtUsd0.format(buyoutAllIn)}</dd></div>
+                                </dl>
                             </div>
-                            <div class="lp-payoff-card">
-                                <div class="lp-payoff-card-label">Interest Saved</div>
-                                <div class="lp-payoff-card-value">${fmtUsd.format(sel.savings)}</div>
+                            <div class="lp-tile lp-tile-muted">
+                                <div class="lp-tile-eyebrow"><span>Run-to-term cost</span><span class="lp-tile-fn">Do nothing</span></div>
+                                <div class="lp-tile-big">${fmtUsd0.format(runToTerm)}</div>
+                                <div class="lp-tile-sub">Remaining scheduled payments if the contract runs to ${maturityMo}</div>
+                                <div class="lp-tile-div"></div>
+                                <dl class="lp-tile-stats">
+                                    <div><dt>Payments left</dt><dd>${paymentsLeft}</dd></div>
+                                    <div><dt>All-in cost${allInTip}</dt><dd>${fmtUsd0.format(c.payback)}</dd></div>
+                                </dl>
                             </div>
-                            <div class="lp-payoff-card">
-                                <div class="lp-payoff-card-label">All-in cost if paid off ${shortDate}</div>
-                                <div class="lp-payoff-card-value">${fmtUsd.format(sel.tpaid + sel.buyout)}</div>
+                            <div class="lp-tile lp-tile-savings">
+                                <div class="lp-tile-eyebrow"><span>Total savings</span><span class="lp-tile-fn">The difference</span></div>
+                                <div class="lp-tile-big">${fmtUsd0.format(saveR)}</div>
+                                <div class="lp-tile-sub">What the merchant saves by buying out early</div>
+                                <div class="lp-tile-div"></div>
+                                <dl class="lp-tile-stats">
+                                    <div><dt>Payments eliminated</dt><dd>${paymentsLeft}</dd></div>
+                                    <div><dt>Cost avoided</dt><dd>&minus;${fmtUsd0.format(saveR)}</dd></div>
+                                </dl>
                             </div>
                         </div>
-                        <div class="lp-payoff-meta">
-                            <div><div class="lp-inline-stat-label">Payoff date</div><div class="lp-inline-stat-value">${sel.date}</div></div>
-                            <div><div class="lp-inline-stat-label">Paid to date</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.tpaid)}</div></div>
-                            <div><div class="lp-inline-stat-label">Full-term cost</div><div class="lp-inline-stat-value">${c ? fmtUsd.format(c.payback) : '&mdash;'}</div></div>
+                        <div class="lp-tiles-math">Total savings = run-to-term ${fmtUsd0.format(runR)} &minus; early payoff ${fmtUsd0.format(buyR)}</div>
+                        <div class="lp-todate">
+                            <div class="lp-todate-label"><span>To date</span><span class="lp-todate-rule"></span></div>
+                            <div class="lp-todate-grid">
+                                <div><dt>Paid so far</dt><dd>${fmtUsd0.format(sel.tpaid)}</dd><span class="lp-todate-meta">across ${sel.period} payment${sel.period === 1 ? '' : 's'}</span></div>
+                                <div><dt>Payments made</dt><dd>${sel.period} of ${c.periods}</dd><span class="lp-todate-meta">${paymentsLeft} remaining</span></div>
+                                <div><dt>Contract progress</dt><dd>${progressPct}%</dd><span class="lp-todate-meta">of term elapsed</span></div>
+                                <div><dt>Payment amount</dt><dd>${fmtUsd.format(c.pmt)}</dd><span class="lp-todate-meta">per ${c.freqName}</span></div>
+                            </div>
                         </div>
                         <div class="lp-quote-row no-print">
                             <button type="button" class="lp-quote-btn" onclick="copyPayoffQuote(${id})">&#128203; Copy payoff quote</button>
@@ -1781,13 +1927,43 @@
                     </div>
                 </td>`;
             } else {
+                // No pre-pay discount on this deal: there's no early-payoff story and no savings to show.
+                // Reuse the payoff redesign's grammar (LEN-110) — a single muted Run-to-term tile carrying the
+                // forward-looking "what's left to pay" number, plus the same backward-looking To-date band.
+                // Never fabricate an "Early payoff" tile or a "saves $0" line when no discount exists.
+                const c = lastCalc[id];
+                const runToTerm   = c.payback - sel.tpaid;                          // remaining scheduled payments
+                const paymentsLeft = Math.max(0, c.periods - sel.period);
+                const progressPct  = Math.round((sel.period / c.periods) * 100);
+                const maturityMo   = c.maturityDate.replace(/\s\d{1,2},/, '');       // "Aug 31, 2027" -> "Aug 2027"
+                const allInTip = `<span class="tooltip tooltip-below ml-1 no-print"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span class="tooltiptext">Everything paid on this contract — payments already made to date plus the remaining cost to run the term out.</span></span>`;
                 tr.innerHTML = `<td colspan="6" style="padding:0">
-                    <div class="lp-expand-inner lp-expand-paid">
-                        <div class="lp-expand-head">
-                            <div class="lp-expand-title">Paid through ${sel.date} →</div>
-                            <span class="lp-paid-count">${payments} made</span>
+                    <div class="lp-expand-inner lp-expand-neutral">
+                        <div class="lp-payoff-header">
+                            <span class="lp-payoff-eyebrow-main">Remaining balance</span>
+                            <span class="lp-payoff-datepill lp-datepill-neutral">${sel.date}</span>
                         </div>
-                        ${paidEqHTML(sel, true)}
+                        <div class="lp-tiles lp-tiles-single">
+                            <div class="lp-tile lp-tile-muted">
+                                <div class="lp-tile-eyebrow"><span>Run-to-term cost</span><span class="lp-tile-fn">No pre-pay discount</span></div>
+                                <div class="lp-tile-big">${fmtUsd0.format(runToTerm)}</div>
+                                <div class="lp-tile-sub">Remaining scheduled payments if the contract runs to ${maturityMo}</div>
+                                <div class="lp-tile-div"></div>
+                                <dl class="lp-tile-stats">
+                                    <div><dt>Payments left</dt><dd>${paymentsLeft}</dd></div>
+                                    <div><dt>All-in cost${allInTip}</dt><dd>${fmtUsd0.format(c.payback)}</dd></div>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="lp-todate">
+                            <div class="lp-todate-label"><span>To date</span><span class="lp-todate-rule"></span></div>
+                            <div class="lp-todate-grid">
+                                <div><dt>Paid so far</dt><dd>${fmtUsd0.format(sel.tpaid)}</dd><span class="lp-todate-meta">across ${sel.period} payment${sel.period === 1 ? '' : 's'}</span></div>
+                                <div><dt>Payments made</dt><dd>${sel.period} of ${c.periods}</dd><span class="lp-todate-meta">${paymentsLeft} remaining</span></div>
+                                <div><dt>Contract progress</dt><dd>${progressPct}%</dd><span class="lp-todate-meta">of term elapsed</span></div>
+                                <div><dt>Payment amount</dt><dd>${fmtUsd.format(c.pmt)}</dd><span class="lp-todate-meta">per ${c.freqName}</span></div>
+                            </div>
+                        </div>
                     </div>
                 </td>`;
             }
@@ -1965,7 +2141,7 @@
                 if (tableEl) tableEl.classList.toggle('amo-prepay-off', !isPrepayEnabled);
             }
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
-            lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate, periods };
+            lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, netFunded, pYear, centsDisplay, discPct, maturityDate, periods };
             renderDetailRow(id);
 
             // Park the selected payoff row + panel just under the sticky header so the
