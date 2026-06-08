@@ -894,6 +894,52 @@
         }
         body.pdf-export-mode [id^="outApr-"] { font-size: 14px !important; }
 
+        /* ── PDF redesign (LEN-110 follow-up): bring the on-screen white-tile language to page 1 ──
+           Print-only; the screen results column is untouched. Hero = green-accent lead tile,
+           the four stats = white mini-tiles, the loan params = a clean white "Deal summary" card. */
+        body.pdf-export-mode .pdf-loan-params {
+            background: #FFFFFF !important;
+            border: 1px solid #E5E7EB !important;
+            border-radius: 10px !important;
+            padding: 15px 18px 13px !important;
+            margin-bottom: 16px !important;
+        }
+        body.pdf-export-mode .pdf-loan-params::before {
+            content: "Deal summary";
+            display: block;
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: #2D6A4F; margin-bottom: 12px;
+        }
+        body.pdf-export-mode .pdf-hero-block {
+            border: 1px solid #E5E7EB !important;
+            border-left: 4px solid #16A34A !important;
+            border-radius: 10px !important;
+            padding: 15px 18px !important;
+            margin-bottom: 12px !important;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-stats-grid {
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 10px !important;
+            margin-bottom: 18px !important;
+        }
+        body.pdf-export-mode .pdf-stats-grid > div {
+            background: #FFFFFF !important;
+            border: 1px solid #E5E7EB !important;
+            border-radius: 8px !important;
+            padding: 11px 13px !important;
+            display: flex !important; flex-direction: column !important;
+            min-height: 70px !important;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        /* one- vs two-line labels shouldn't shift the value — pin all four values to a common baseline */
+        body.pdf-export-mode .pdf-stats-grid > div > div:first-child { line-height: 1.25 !important; }
+        body.pdf-export-mode .pdf-stats-grid > div > div:last-child { margin-top: auto !important; }
+        /* keep these four summary tiles together on page 1, never split across a page break */
+        body.pdf-export-mode .pdf-stats-grid { break-inside: avoid !important; page-break-inside: avoid !important; }
+        body.pdf-export-mode .pdf-stats-grid > div .text-\[16px\] { font-size: 15px !important; }
+
         /* PDF polish: tighten the print header (lendpaper logo + tagline + PAYMENT BREAKDOWN title)
            — reduce empty space at top of page 1 */
         body.pdf-export-mode .print-header-content { margin-bottom: 12px !important; padding-top: 0 !important; }
