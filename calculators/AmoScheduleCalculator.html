@@ -1009,7 +1009,11 @@
         /* The compliance host renders its own duplicate state selector — hide that
            label/select; keep its disclosure note (the borrower-state field below
            drives it via LPCompliance.setState). */
-        [data-lp-compliance-host] > div > label { display:none !important; }
+        /* The disclosure note is relocated into the in-card field (LEN-126); the
+           shared top host is only the engine's render target — keep it hidden. */
+        [data-lp-compliance-host] { display:none !important; }
+        .lp-state-note { margin-top:8px; }
+        .lp-state-note:empty { display:none; }
 
         /* Prepared by block */
         .lp-preparedby { background:#F4F8F5; border:1px solid #E3EFE8; border-radius:12px; padding:14px 14px 12px; }
@@ -1023,9 +1027,11 @@
         .lp-metric-label { color:#64748B; font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:0.04em; margin-bottom:3px; }
         .lp-metric-val { font-weight:800; color:#111827; font-size:16px; }
         .lp-metric-val-sm { font-weight:700; color:#111827; font-size:13px; font-variant-numeric:tabular-nums; }
-        .lp-finance-strip { display:flex; align-items:baseline; justify-content:space-between;
-            background:#F4F8F5; border-radius:8px; padding:9px 12px; }
-        .lp-finance-strip .lp-metric-label { margin-bottom:0; }
+        /* Deal-math row: 3 equal cells; finance charge kept subdued via a faint tint + muted value */
+        .lp-costrow { margin-left:-10px; margin-right:-10px; }
+        .lp-costrow > div { padding:8px 10px; border-radius:8px; }
+        .lp-costrow .lp-finance-cell { background:#F4F8F5; }
+        .lp-costrow .lp-finance-cell .lp-metric-val { color:#374151; }
         .lp-secondary-metrics .lp-metric-label { font-size:9px; }
 
         /* Payoff banner */
@@ -1781,6 +1787,8 @@
                                     ${LP_STATE_OPTIONS}
                                 </select>
                             </div>
+                            <!-- Compliance disclosure note, anchored to this field (LEN-126) -->
+                            <div id="stateNote-${id}" class="lp-state-note no-print"></div>
                         </div>
 
                         <!-- Prepared by -->
@@ -1812,11 +1820,11 @@
                             <div class="mb-6 pb-6 border-b border-[#E5E7EB] pdf-hero-block">
                                 <div class="text-[11px] text-[#64748B] font-bold uppercase tracking-wider mb-2" id="lblPmt-${id}">Est. payment</div>
                                 <div class="text-[42px] font-black text-[#1A3C2E] leading-none tracking-tight" id="valPmt-${id}">$0.00</div>
-                                <div id="moEquiv-${id}" class="text-[13px] text-[#9CA3AF]" style="display:none;margin-top:6px"></div>
+                                <div id="moEquiv-${id}" class="text-[13px] text-[#9CA3AF]" style="display:none;margin-top:6px;text-align:right"></div>
                             </div>
 
-                            <!-- Cost trio: Funded / Total payback, then Finance charge strip -->
-                            <div class="grid grid-cols-2 gap-x-8 gap-y-2 mb-3">
+                            <!-- Deal math: Funded / Total payback / Finance charge (3-up; finance charge subdued) -->
+                            <div class="lp-costrow grid grid-cols-3 gap-x-3 mb-6">
                                 <div>
                                     <div class="lp-metric-label">Funded</div>
                                     <div class="lp-metric-val" id="outFunded-${id}">$0.00</div>
@@ -1825,10 +1833,10 @@
                                     <div class="lp-metric-label">Total payback</div>
                                     <div class="lp-metric-val" id="outPayback-${id}">$0.00</div>
                                 </div>
-                            </div>
-                            <div class="lp-finance-strip mb-6">
-                                <span class="lp-metric-label">Finance charge</span>
-                                <span class="lp-metric-val" id="outFinance-${id}">$0.00</span>
+                                <div class="lp-finance-cell">
+                                    <div class="lp-metric-label">Finance charge</div>
+                                    <div class="lp-metric-val" id="outFinance-${id}">$0.00</div>
+                                </div>
                             </div>
 
                             <!-- Secondary metrics: Factor / Est. APR / Cost per $1 / Maturity -->
@@ -1842,7 +1850,7 @@
                                     <div class="lp-metric-val-sm" id="outApr-${id}">0%</div>
                                 </div>
                                 <div>
-                                    <div class="lp-metric-label">Cost / $1</div>
+                                    <div class="lp-metric-label">Cost per dollar</div>
                                     <div class="lp-metric-val-sm" id="outCents-${id}">0¢</div>
                                 </div>
                                 <div>
@@ -2533,6 +2541,16 @@
             }
             // Keep every scenario card's state field in sync (one borrower)
             document.querySelectorAll('select[id^="state-"]').forEach(s => { if (s.value !== val) s.value = val; });
+            relocateStateNote();
+        }
+
+        // LEN-126: render the compliance disclosure note next to the in-card state
+        // field instead of the detached top host (clone the engine's rendered note).
+        function relocateStateNote() {
+            const host = document.querySelector('[data-lp-compliance-host]');
+            const note = host ? host.querySelector('[data-lp-compliance-note]') : null;
+            const html = note ? note.outerHTML : '';
+            document.querySelectorAll('[id^="stateNote-"]').forEach(c => { c.innerHTML = html; });
         }
 
         function syncPreparedBy(id) {
@@ -2544,6 +2562,7 @@
         document.addEventListener('lp:compliance:statechange', (e) => {
             const code = (e.detail && e.detail.state) || '';
             document.querySelectorAll('select[id^="state-"]').forEach(s => { if (s.value !== code) s.value = code; });
+            relocateStateNote();
         });
 
         // ── Talk-track collapse ────────────────────────────────────────────────────
@@ -2728,7 +2747,7 @@
             }
             // Sync borrower state from the shared compliance engine (persists across calculators)
             const savedState = window.LPCompliance?.getState?.() || '';
-            if (savedState) { const s = document.getElementById('state-1'); if (s) s.value = savedState; }
+            if (savedState) { const s = document.getElementById('state-1'); if (s) s.value = savedState; relocateStateNote(); }
             // Restore an estimate handed off from the Quote Log (sessionStorage, not URL)
             try {
                 const rec = window.LPQuoteLog?.consumeRestorePayload?.('payment_breakdown');
