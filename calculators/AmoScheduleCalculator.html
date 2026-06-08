@@ -368,6 +368,285 @@
             }
         }
 
+        /* ============================================================================
+           Redesigned borrower-facing document (LEN-124). Hidden on screen; revealed only
+           during export (body.pdf-export-mode) so the same rules apply to the window.print
+           capture. Per-page legal footers come from the @page margin boxes above; the
+           PDF_HELPER watermark/fingerprint are untouched. Colors forced with
+           print-color-adjust: exact so banner/green tile/highlights/bars survive export.
+           ============================================================================ */
+        .pdf-document { display: none; }
+        body.pdf-export-mode .pdf-document {
+            display: block !important;
+            color: #111827;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+        /* Suppress the legacy "print the live UI" path in favor of the document.
+           print-header-content needs a main-scoped (higher-specificity) selector to beat the
+           legacy `body.pdf-export-mode .print-header-content { display:block }` show-rules that
+           appear later in this stylesheet — the redesigned page 1 opens with the amber banner. */
+        body.pdf-export-mode #cardsContainer,
+        body.pdf-export-mode main .print-header-content,
+        body.pdf-export-mode .print-footer-legal,
+        body.pdf-export-mode .print-watermark { display: none !important; }
+
+        body.pdf-export-mode .pdf-document * { box-sizing: border-box; }
+
+        body.pdf-export-mode .pdf-document .estimate-banner {
+            padding: 12px 14px 11px;
+            margin-bottom: 14px;
+            border: 1px solid #FCD34D;
+            border-radius: 8px;
+            background: #FFFBEB;
+            color: #92400E;
+            font-size: 10.5px;
+            font-weight: 700;
+            line-height: 1.35;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            break-inside: avoid; page-break-inside: avoid;
+        }
+        body.pdf-export-mode .pdf-document .estimate-banner span { font-weight: 500; }
+
+        body.pdf-export-mode .pdf-document .prepared {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+            padding: 4px 0 13px; margin-bottom: 12px; border-bottom: 1px solid #dbe3ea;
+        }
+        body.pdf-export-mode .pdf-document .eyebrow {
+            margin-bottom: 6px; color: #64748b; font-size: 9.5px; font-weight: 800;
+            letter-spacing: 0.08em; text-transform: uppercase;
+        }
+        body.pdf-export-mode .pdf-document .prepared-name { font-size: 16px; font-weight: 800; word-break: break-word; }
+        body.pdf-export-mode .pdf-document .prepared-subline {
+            max-width: 300px; margin-top: 4px; color: #64748b; font-size: 10.5px; font-style: italic;
+        }
+        body.pdf-export-mode .pdf-document .doc-meta {
+            margin-top: 4px; color: #64748b;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 10.5px;
+        }
+
+        body.pdf-export-mode .pdf-document .deal-strip {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+            margin-bottom: 12px; padding: 10px 12px;
+            border: 1px solid #dbe3ea; border-radius: 8px; background: #f8fafc;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            break-inside: avoid; page-break-inside: avoid;
+        }
+        body.pdf-export-mode .pdf-document .deal-strip strong { display: block; margin-top: 3px; font-size: 12px; word-break: break-word; }
+
+        body.pdf-export-mode .pdf-document h1 {
+            margin: 18px 0 12px; font-size: 21px; line-height: 1.15;
+            break-after: avoid; page-break-after: avoid;
+        }
+        body.pdf-export-mode .pdf-document .pdf-scenario-tag {
+            font-size: 11px; font-weight: 800; color: #17613f; letter-spacing: 0.04em; text-transform: uppercase;
+        }
+        body.pdf-export-mode .pdf-document h2 {
+            margin: 0 0 10px; color: #334155; font-size: 12px; font-weight: 850;
+            letter-spacing: 0.03em; text-transform: uppercase; break-after: avoid; page-break-after: avoid;
+        }
+
+        body.pdf-export-mode .pdf-document .hero-grid {
+            display: grid; grid-template-columns: 1.25fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 13px;
+            break-inside: avoid; page-break-inside: avoid;
+        }
+        body.pdf-export-mode .pdf-document .metric {
+            min-height: 92px; padding: 13px 14px; border: 1px solid #dbe3ea; border-radius: 8px; background: #fff;
+        }
+        body.pdf-export-mode .pdf-document .metric.primary {
+            border-color: #1a3c2e; background: #1a3c2e; color: #fff;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-document .metric-label {
+            color: #64748b; font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+        }
+        body.pdf-export-mode .pdf-document .primary .metric-label,
+        body.pdf-export-mode .pdf-document .primary .metric-note { color: rgba(255,255,255,0.78); }
+        body.pdf-export-mode .pdf-document .metric-value { margin-top: 8px; font-size: 22px; font-weight: 850; line-height: 1; }
+        body.pdf-export-mode .pdf-document .metric-value.mono {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 20px;
+        }
+        body.pdf-export-mode .pdf-document .metric-note { margin-top: 6px; color: #64748b; font-size: 10.5px; }
+
+        body.pdf-export-mode .pdf-document .section { margin-top: 13px; }
+        body.pdf-export-mode .pdf-document .snapshot-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; break-inside: avoid; page-break-inside: avoid;
+        }
+        body.pdf-export-mode .pdf-document .snapshot { padding: 11px 13px; border: 1px solid #dbe3ea; border-radius: 8px; background: #fff; }
+        body.pdf-export-mode .pdf-document .snapshot.highlight {
+            border-color: #bbf7d0; background: #ecfdf3; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-document .snapshot-value { margin-top: 4px; font-size: 19px; font-weight: 850; }
+
+        body.pdf-export-mode .pdf-document .details-row {
+            display: grid; grid-template-columns: repeat(6, 1fr); overflow: hidden;
+            border: 1px solid #dbe3ea; border-radius: 8px; background: #f8fafc;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            break-inside: avoid; page-break-inside: avoid;
+        }
+        body.pdf-export-mode .pdf-document .detail-cell { min-height: 50px; padding: 9px 11px; border-right: 1px solid #dbe3ea; }
+        body.pdf-export-mode .pdf-document .detail-cell:last-child { border-right: 0; }
+        body.pdf-export-mode .pdf-document .detail-value { margin-top: 5px; font-weight: 800; }
+
+        body.pdf-export-mode .pdf-document .payoff-band {
+            padding: 13px 14px; border: 1px solid #bbf7d0; border-left: 5px solid #17613f; border-radius: 8px;
+            background: #f3fbf6; break-inside: avoid; page-break-inside: avoid;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-document .payoff-header {
+            display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 14px; align-items: start;
+        }
+        body.pdf-export-mode .pdf-document .payoff-title { color: #1a3c2e; font-size: 15px; font-weight: 850; line-height: 1.25; }
+        body.pdf-export-mode .pdf-document .payoff-kicker {
+            margin-bottom: 5px; color: #17613f; font-size: 10px; font-weight: 850; letter-spacing: 0.05em; text-transform: uppercase;
+        }
+        body.pdf-export-mode .pdf-document .savings-number { margin-top: 6px; color: #15803d; font-size: 30px; font-weight: 900; line-height: 1; }
+        body.pdf-export-mode .pdf-document .comparison-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        body.pdf-export-mode .pdf-document .comparison { padding: 10px 11px; border: 1px solid #dbe3ea; border-radius: 8px; background: #fff; }
+        body.pdf-export-mode .pdf-document .comparison.emphasis { border-color: #86efac; }
+        body.pdf-export-mode .pdf-document .comparison strong { display: block; margin-top: 4px; color: #1a3c2e; font-size: 17px; }
+        body.pdf-export-mode .pdf-document .note {
+            margin-top: 10px; padding: 8px 10px; border: 1px solid #FCD34D; border-radius: 8px;
+            background: #FFFBEB; color: #92400E; font-size: 10.5px; font-weight: 650;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+
+        body.pdf-export-mode .pdf-document .table-head {
+            display: flex; align-items: flex-end; justify-content: space-between; margin: 0 0 12px;
+            break-after: avoid; page-break-after: avoid;
+        }
+        body.pdf-export-mode .pdf-document .legend { display: flex; gap: 10px; color: #64748b; font-size: 10.5px; }
+        body.pdf-export-mode .pdf-document .legend span::before {
+            content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 5px;
+            border-radius: 99px; background: #17613f; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-document .legend span:nth-child(2)::before { background: #2563eb; }
+        body.pdf-export-mode .pdf-document .legend span:nth-child(3)::before { background: #7c3aed; }
+
+        body.pdf-export-mode .pdf-document table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+        body.pdf-export-mode .pdf-document thead { display: table-header-group; }
+        body.pdf-export-mode .pdf-document th {
+            padding: 10px 10px; border-bottom: 1px solid #dbe3ea; background: #f8fafc; color: #334155;
+            font-size: 10px; letter-spacing: 0.04em; text-align: right; text-transform: uppercase;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-document th:nth-child(1),
+        body.pdf-export-mode .pdf-document th:nth-child(2),
+        body.pdf-export-mode .pdf-document td:nth-child(1),
+        body.pdf-export-mode .pdf-document td:nth-child(2) { text-align: left; }
+        body.pdf-export-mode .pdf-document td { padding: 9px 10px; border-bottom: 1px solid #eef2f7; text-align: right; }
+        body.pdf-export-mode .pdf-document tbody tr { break-inside: avoid; page-break-inside: avoid; }
+        body.pdf-export-mode .pdf-document tbody tr:nth-child(even):not(.payoff-expansion) td { background: #fbfdff; }
+        body.pdf-export-mode .pdf-document .payoff-row td {
+            background: #ecfdf3 !important; color: #143d2b; font-weight: 800;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-document .payoff-pill {
+            display: inline-block; margin-top: 4px; padding: 2px 7px; border-radius: 99px;
+            background: #1a3c2e; color: #fff; font-size: 9px; font-weight: 850; text-transform: uppercase;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-document .payoff-expansion td {
+            padding: 0 0 14px; border-bottom: 1px solid #bbf7d0; text-align: left;
+        }
+        body.pdf-export-mode .pdf-document .payoff-expansion { break-inside: avoid; page-break-inside: avoid; }
+        body.pdf-export-mode .pdf-document .inline-expansion {
+            padding: 14px; background: #f0fdf4; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-document .expansion-label {
+            display: flex; justify-content: space-between; color: #1a3c2e; font-size: 11px; font-weight: 850;
+        }
+        body.pdf-export-mode .pdf-document .progress {
+            overflow: hidden; height: 7px; margin: 10px 0 12px; border-radius: 99px; background: #dbeafe;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-document .progress div {
+            height: 100%; background: #17613f; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        body.pdf-export-mode .pdf-document .expansion-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        body.pdf-export-mode .pdf-document .stat { padding: 9px 10px; border: 1px solid #bbf7d0; border-radius: 8px; background: #fff; }
+        body.pdf-export-mode .pdf-document .stat strong { display: block; margin-top: 4px; font-size: 15px; }
+
+        body.pdf-export-mode .pdf-document .pdf-footer {
+            display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-top: 22px;
+            padding-top: 8px; border-top: 1px solid #dbe3ea; color: #64748b; font-size: 8px; line-height: 1.28;
+            break-inside: avoid; page-break-inside: avoid;
+        }
+        body.pdf-export-mode .pdf-document .pdf-footer-line {
+            align-self: end; color: #94a3b8;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; text-align: right;
+        }
+        body.pdf-export-mode .pdf-document .pdf-page-break { break-before: page; page-break-before: always; }
+
+        /* LEN-124 Stage B — Option 2 (blue) / Option 3 (purple) colour variants */
+        body.pdf-export-mode .pdf-document .payoff-band.opt2 { border-color: #bfdbfe; border-left-color: #2563eb; background: #f5f8ff; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt2 .payoff-kicker { color: #1d4ed8; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt2 .payoff-title { color: #1e3a8a; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt2 .savings-number { color: #1d4ed8; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt2 .comparison.emphasis { border-color: #93c5fd; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt2 .comparison strong { color: #1e3a8a; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt3 { border-color: #ddd6fe; border-left-color: #7c3aed; background: #f8f6ff; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt3 .payoff-kicker { color: #6d28d9; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt3 .payoff-title { color: #4c1d95; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt3 .savings-number { color: #6d28d9; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt3 .comparison.emphasis { border-color: #c4b5fd; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt3 .comparison strong { color: #4c1d95; }
+
+        body.pdf-export-mode .pdf-document .payoff-row.opt2 td { background: #eff6ff !important; color: #1e3a8a; }
+        body.pdf-export-mode .pdf-document .payoff-row.opt3 td { background: #f5f3ff !important; color: #4c1d95; }
+        body.pdf-export-mode .pdf-document .payoff-row.opt2 .payoff-pill { background: #2563eb; }
+        body.pdf-export-mode .pdf-document .payoff-row.opt3 .payoff-pill { background: #7c3aed; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt2 td { border-bottom-color: #bfdbfe; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt2 .inline-expansion { background: #eff6ff; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt2 .expansion-label { color: #1d4ed8; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt2 .progress div { background: #2563eb; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt2 .stat { border-color: #bfdbfe; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt3 td { border-bottom-color: #ddd6fe; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt3 .inline-expansion { background: #f5f3ff; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt3 .expansion-label { color: #6d28d9; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt3 .progress div { background: #7c3aed; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt3 .stat { border-color: #ddd6fe; }
+
+        /* On-screen feedback for Shift/Cmd-clicked comparison options (live table only) */
+        .amo-row.pdf-opt-2-row > td:first-child { box-shadow: inset 3px 0 0 #2563eb; }
+        .amo-row.pdf-opt-3-row > td:first-child { box-shadow: inset 3px 0 0 #7c3aed; }
+        .amo-row.pdf-opt-2-row td { background: rgba(37, 99, 235, 0.06) !important; }
+        .amo-row.pdf-opt-3-row td { background: rgba(124, 58, 237, 0.06) !important; }
+
+        /* LEN-124 — optional Document details panel (screen only; never printed) */
+        .lp-doc-details {
+            max-width: 980px; margin: 0 auto 14px; padding: 0 4px;
+            border: 1px solid #E5E7EB; border-radius: 10px; background: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .lp-doc-details > summary {
+            list-style: none; cursor: pointer; padding: 12px 14px;
+            font-size: 12px; font-weight: 800; color: #111827; letter-spacing: 0.01em;
+        }
+        .lp-doc-details > summary::-webkit-details-marker { display: none; }
+        .lp-doc-details > summary::before { content: "+ "; color: #1A3C2E; font-weight: 900; }
+        .lp-doc-details[open] > summary::before { content: "– "; }
+        .lp-doc-details > summary span { color: #6B7280; font-weight: 500; }
+        .lp-doc-details-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px;
+            padding: 4px 14px 16px;
+        }
+        .lp-doc-details-grid label {
+            display: flex; flex-direction: column; gap: 4px;
+            font-size: 10px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .lp-doc-details-grid input,
+        .lp-doc-details-grid select {
+            padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 7px;
+            font-size: 13px; font-weight: 500; color: #111827; text-transform: none; letter-spacing: 0;
+            font-family: inherit; background: #fff;
+        }
+        .lp-doc-details-grid input:focus,
+        .lp-doc-details-grid select:focus { outline: none; border-color: #1A3C2E; }
+        .lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
+        @media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+
         @media print {
             html, body {
                 -webkit-print-color-adjust: exact !important;
@@ -1018,9 +1297,27 @@
         <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
         <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
 
+        <!-- LEN-124 — optional document details that personalize the redesigned PDF.
+             All fields are optional; buildPdfDocument() falls back gracefully when blank. -->
+        <details id="pdfDocDetails" class="lp-doc-details no-print">
+            <summary>Document details <span>— optional, appears on the PDF</span></summary>
+            <div class="lp-doc-details-grid">
+                <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+                <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+                <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+                <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
+                <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+            </div>
+            <p class="lp-doc-details-hint">Borrower state is set above and drives both the document's deal context and state-specific compliance disclosures. Tip: <strong>Shift-click</strong> (or ⌘/Ctrl-click) extra rows in the schedule to compare up to 3 payoff options on the PDF.</p>
+        </details>
+
         <div id="cardsContainer" class="cards-container">
             <!-- Cards injected here via JS -->
         </div>
+
+        <!-- Redesigned borrower-facing document (LEN-124). Built from calculator state at
+             Save time by buildPdfDocument(); hidden on screen, revealed only in pdf-export-mode. -->
+        <div id="pdf-document" class="pdf-document" aria-hidden="true"></div>
 
         <!-- Footer inside main so html2pdf capture includes it -->
         <div class="print-footer-legal">
@@ -1075,6 +1372,299 @@
             set(`ppStart-${id}`, startDate);
         }
 
+        /* ============================================================================
+           Redesigned borrower-facing document (LEN-124)
+           Builds the presentation-quality PDF from calculator state at Save time and
+           injects it into #pdf-document. Shown only in pdf-export-mode. Page 1 per
+           scenario: amber banner (once) -> prepared by/for -> deal context strip ->
+           Funding Summary hero -> Cost Snapshot -> Deal Details -> Early Payoff.
+           Pages 2+: full amortization table + option legend + highlighted payoff row
+           + inline at-payoff expansion. Terminology + rules per HANDOFF_pdf.md.
+           NOTE (Stage A): single payoff option (Option 1) wired off rowSelection[id];
+           3-option multi-select is Stage B (LEN-124).
+           ============================================================================ */
+        function pdfEscape(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+        function pdfOrdinal(n) {
+            const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
+        function pdfFmtDate(d) {
+            if (!(d instanceof Date) || isNaN(d)) return '—';
+            return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        const PDF_FREQ = {
+            daily:       { pay: 'Daily Payment',        adj: 'daily',        plural: 'daily payments',        title: 'Daily' },
+            weekly:      { pay: 'Weekly Payment',       adj: 'weekly',       plural: 'weekly payments',       title: 'Weekly' },
+            semimonthly: { pay: 'Semi-Monthly Payment', adj: 'semi-monthly', plural: 'semi-monthly payments', title: 'Semi-Monthly' },
+            monthly:     { pay: 'Monthly Payment',      adj: 'monthly',      plural: 'monthly payments',      title: 'Monthly' }
+        };
+
+        function pdfGetCardIds() {
+            return [...document.querySelectorAll('[id^="cardContainer-"]')]
+                .map(c => parseInt(c.id.split('-')[1], 10))
+                .filter(n => !isNaN(n))
+                .sort((a, b) => a - b);
+        }
+
+        // Borrower state for the deal-context strip + compliance: read the LEN-88 host
+        // selector if present, else the optional document-details field.
+        function pdfGetBorrowerState() {
+            const host = document.querySelector('[data-lp-compliance-host] select');
+            if (host && host.value) return host.options[host.selectedIndex]?.text || host.value;
+            const fld = document.getElementById('pdfBorrowerState');
+            return fld && fld.value ? (fld.options ? fld.options[fld.selectedIndex]?.text : fld.value) : '';
+        }
+
+        function pdfContext() {
+            const v = id => (document.getElementById(id)?.value || '').trim();
+            const name = v('pdfPreparedBy');
+            const company = v('pdfPreparedByCompany');
+            return {
+                preparedByName: name,
+                preparedByCompany: company,
+                preparedBy: [name, company].filter(Boolean).join(' · '),
+                preparedFor: v('pdfPreparedFor'),
+                dealName: v('pdfDealName'),
+                lender: v('pdfLender'),
+                borrowerState: pdfGetBorrowerState()
+            };
+        }
+
+        // Build the four-tile Funding Summary + Cost Snapshot + Deal Details + payoff
+        // for one scenario. Returns the page-1 body HTML (everything below the shared header).
+        function pdfScenarioPage1(c, options, scenarioTag) {
+            const freq = PDF_FREQ[c.freq] || PDF_FREQ.monthly;
+            const origFeeText = c.feeIsDollar ? fmtUsd0.format(c.feeAmt) : (c.feeInput || 0) + '%';
+            const termText = `${c.term} ${c.termUnit}`;
+
+            const hero = `
+                <h1>Funding Summary${scenarioTag ? ` <span class="pdf-scenario-tag">${pdfEscape(scenarioTag)}</span>` : ''}</h1>
+                <div class="hero-grid">
+                    <div class="metric primary">
+                        <div class="metric-label">Funding Amount</div>
+                        <div class="metric-value">${fmtUsd0.format(c.amt)}</div>
+                        <div class="metric-note">Gross financing amount</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">${freq.pay}</div>
+                        <div class="metric-value mono">${fmtUsd.format(c.pmt)}</div>
+                        <div class="metric-note">Paid ${freq.adj}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Term</div>
+                        <div class="metric-value">${pdfEscape(termText)}</div>
+                        <div class="metric-note">${c.periods} ${freq.plural}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Total Repayment</div>
+                        <div class="metric-value">${fmtUsd0.format(c.payback)}</div>
+                        <div class="metric-note">Maturity ${pdfEscape(c.maturityDate)}</div>
+                    </div>
+                </div>`;
+
+            const snapshot = `
+                <section class="section">
+                    <h2>Cost Snapshot</h2>
+                    <div class="snapshot-grid">
+                        <div class="snapshot"><div class="metric-label">Funding Received</div><div class="snapshot-value">${fmtUsd0.format(c.netFunded)}</div></div>
+                        <div class="snapshot"><div class="metric-label">Finance Charge</div><div class="snapshot-value">${fmtUsd0.format(c.totalCost)}</div></div>
+                        <div class="snapshot highlight"><div class="metric-label">Total Repayment</div><div class="snapshot-value">${fmtUsd0.format(c.payback)}</div></div>
+                    </div>
+                </section>`;
+
+            const details = `
+                <section class="section">
+                    <h2>Deal Details</h2>
+                    <div class="details-row">
+                        <div class="detail-cell"><div class="metric-label">Factor Rate</div><div class="detail-value">${c.factor.toFixed(2)}x</div></div>
+                        <div class="detail-cell"><div class="metric-label">Est. APR</div><div class="detail-value">~${c.apr.toFixed(1)}%</div></div>
+                        <div class="detail-cell"><div class="metric-label">Orig. Fee</div><div class="detail-value">${pdfEscape(origFeeText)}</div></div>
+                        <div class="detail-cell"><div class="metric-label">Frequency</div><div class="detail-value">${freq.title}</div></div>
+                        <div class="detail-cell"><div class="metric-label">Start</div><div class="detail-value">${pdfFmtDate(c.startDate)}</div></div>
+                        <div class="detail-cell"><div class="metric-label">Maturity</div><div class="detail-value">${pdfEscape(c.maturityDate)}</div></div>
+                    </div>
+                </section>`;
+
+            return hero + snapshot + details + pdfPayoffSection(c, options, freq);
+        }
+
+        // Early Payoff Opportunities — up to 3 colour-coded option cards (Option 1 green /
+        // 2 blue / 3 purple). Rendered only when at least one valid discounted buyout exists.
+        function pdfPayoffSection(c, options, freq) {
+            if (!options.length) return '';
+            const cards = options.map(o => pdfPayoffCard(c, o, freq)).join('');
+            return `<section class="section"><h2>Early Payoff Opportunities</h2>${cards}</section>`;
+        }
+
+        function pdfOptClass(color) {
+            return color === 'blue' ? ' opt2' : (color === 'purple' ? ' opt3' : '');
+        }
+
+        function pdfPayoffCard(c, o, freq) {
+            const runToTerm = c.payback - o.tpaid;
+            const paymentsAvoided = Math.max(0, c.periods - o.period);
+            const retiredPct = Math.round((o.period / c.periods) * 100);
+            return `
+                <div class="payoff-band${pdfOptClass(o.color)}">
+                    <div class="payoff-header">
+                        <div>
+                            <div class="payoff-kicker">Option ${o.optionIdx} · Buy Out By ${pdfEscape(o.date)}</div>
+                            <div class="payoff-title">Buying out on your ${pdfOrdinal(o.period)} payment closes the contract early and locks in the savings below.</div>
+                            <div class="savings-number">${fmtUsd0.format(o.savings)}</div>
+                            <div class="metric-note">Estimated Savings compared with continuing scheduled payments to maturity.</div>
+                        </div>
+                        <div class="comparison emphasis">
+                            <div class="metric-label">Buyout Amount</div>
+                            <strong>${fmtUsd0.format(o.buyout)}</strong>
+                            <div class="metric-note">Illustrative amount to close out the contract on the buyout date.</div>
+                        </div>
+                    </div>
+                    <div class="comparison-grid">
+                        <div class="comparison">
+                            <div class="metric-label">Continue Paying</div>
+                            <strong>${fmtUsd0.format(runToTerm)}</strong>
+                            <div class="metric-note">Remaining scheduled payments after ${pdfEscape(o.date)}</div>
+                        </div>
+                        <div class="comparison">
+                            <div class="metric-label">Payments Avoided</div>
+                            <strong>${paymentsAvoided}</strong>
+                            <div class="metric-note">${freq.title} payments no longer due after buyout</div>
+                        </div>
+                        <div class="comparison">
+                            <div class="metric-label">Contract Retired</div>
+                            <strong>${retiredPct}%</strong>
+                            <div class="metric-note">${o.period} of ${c.periods} payments made by the buyout date</div>
+                        </div>
+                    </div>
+                    <div class="note">🏷 Actual buyout quotes must be obtained directly from your lender and may differ materially from these estimates.</div>
+                </div>`;
+        }
+
+        // Full amortization table for one scenario (page 2+). Existing schedule logic is
+        // reused verbatim from lastCalc[id].schedule — no recompute. Adds the option legend,
+        // highlighted payoff row, and inline at-payoff expansion (single option in Stage A).
+        function pdfScenarioSchedule(c, options, freq) {
+            const prepay = c.isPrepayEnabled;
+            const multi = options.length > 1;
+            const byPeriod = {};
+            options.forEach(o => { byPeriod[o.period] = o; });
+            const legend = options.length
+                ? `<div class="legend">${options.map(o => `<span>Option ${o.optionIdx}</span>`).join('')}</div>`
+                : '';
+            const head = prepay
+                ? `<tr><th>#</th><th>Date</th><th>Payment</th><th>Principal</th><th>Interest</th><th>Principal Balance</th><th>Buyout Amount</th><th>Estimated Savings</th></tr>`
+                : `<tr><th>#</th><th>Date</th><th>Payment</th><th>Principal</th><th>Interest</th><th>Principal Balance</th></tr>`;
+            const cols = prepay ? 8 : 6;
+
+            let rows = '';
+            (c.schedule || []).forEach(r => {
+                const o = byPeriod[r.period];
+                const pillTxt = o ? (multi ? `Option ${o.optionIdx}` : 'Buyout') : '';
+                const dateCell = `${pdfEscape(r.date)}${o ? `<br><span class="payoff-pill">${pillTxt}</span>` : ''}`;
+                const tail = prepay ? `<td>${fmtUsd.format(r.buyout)}</td><td>${fmtUsd.format(r.savings)}</td>` : '';
+                const cells = `<td>${r.period}</td><td>${dateCell}</td><td>${fmtUsd.format(r.pmt)}</td><td>${fmtUsd.format(r.principal)}</td><td>${fmtUsd.format(r.interest)}</td><td>${fmtUsd.format(r.balance)}</td>${tail}`;
+                rows += `<tr class="${o ? 'payoff-row' + pdfOptClass(o.color) : ''}">${cells}</tr>`;
+                if (o) {
+                    const retiredPct = Math.round((o.period / c.periods) * 100);
+                    const paymentsAvoided = Math.max(0, c.periods - o.period);
+                    rows += `
+                        <tr class="payoff-expansion${pdfOptClass(o.color)}"><td colspan="${cols}">
+                            <div class="inline-expansion">
+                                <div class="expansion-label"><span>Option ${o.optionIdx} — At Payoff ${pdfEscape(o.date)} (${pdfOrdinal(o.period)} payment)</span><span>${retiredPct}% of contract retired</span></div>
+                                <div class="progress"><div style="width:${Math.max(2, retiredPct)}%"></div></div>
+                                <div class="expansion-stats">
+                                    <div class="stat"><div class="metric-label">Paid In</div><strong>${fmtUsd0.format(o.tpaid)}</strong></div>
+                                    <div class="stat"><div class="metric-label">${freq.pay}</div><strong>${fmtUsd.format(c.pmt)}</strong></div>
+                                    <div class="stat"><div class="metric-label">Payments Avoided</div><strong>${paymentsAvoided}</strong></div>
+                                    <div class="stat"><div class="metric-label">Buyout Amount</div><strong>${fmtUsd0.format(o.buyout)}</strong></div>
+                                </div>
+                            </div>
+                        </td></tr>`;
+                }
+            });
+
+            return `
+                <div class="pdf-page-break"></div>
+                <div class="table-head">
+                    <h2>Amortization Schedule</h2>
+                    ${legend}
+                </div>
+                <table><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+        }
+
+        function buildPdfDocument(quoteId) {
+            const host = document.getElementById('pdf-document');
+            if (!host) return;
+            const ids = pdfGetCardIds();
+            if (!ids.length) { host.innerHTML = ''; return; }
+
+            const ctx = pdfContext();
+            const docDate = window.PDF_HELPER ? window.PDF_HELPER.formatQuoteDate() : pdfFmtDate(new Date());
+            const docNo = quoteId || '';
+
+            // Shared header (banner + prepared by/for) — rendered once at the top.
+            const preparedByMain = ctx.preparedBy
+                ? pdfEscape(ctx.preparedBy)
+                : `LendPaper${docNo ? ` · ${pdfEscape(docNo)}` : ''}`;
+            const preparedForMain = ctx.preparedFor ? pdfEscape(ctx.preparedFor) : '—';
+            const docMeta = [docDate, docNo].filter(Boolean).map(pdfEscape).join(' · ');
+
+            // Deal context strip — defensive: hide empty fields; omit strip if all empty.
+            const stripCells = [
+                ctx.dealName ? `<div><div class="metric-label">Deal Name</div><strong>${pdfEscape(ctx.dealName)}</strong></div>` : '',
+                ctx.borrowerState ? `<div><div class="metric-label">Borrower State</div><strong>${pdfEscape(ctx.borrowerState)}</strong></div>` : '',
+                ctx.lender ? `<div><div class="metric-label">Lender / Program</div><strong>${pdfEscape(ctx.lender)}</strong></div>` : ''
+            ].filter(Boolean).join('');
+            const dealStrip = stripCells ? `<div class="deal-strip">${stripCells}</div>` : '';
+
+            // Footer disclaimer (preparer liability — verbatim from handoff). The state
+            // "not legal advice" §14 disclaimer is injected separately by LPCompliance.
+            const preparerName = ctx.preparedByName || (ctx.preparedBy ? ctx.preparedBy : '');
+            const footerPrepared = preparerName ? `<strong>Prepared by:</strong> ${pdfEscape(preparerName)}. ` : '';
+            const footer = `
+                <footer class="pdf-footer">
+                    <div>${footerPrepared}This document was prepared using LendPaper software and is not an official financing offer from any lender. The preparer is solely responsible for representations made to the recipient. <strong>LendPaper</strong> is a software provider only — not a lender, broker, or financial advisor. Early payoff estimates are illustrative; actual buyout quotes must come directly from your lender. lendpaper.com/legal/estimates</div>
+                    <div class="pdf-footer-line">${docNo ? pdfEscape(docNo) + ' · ' : ''}ESTIMATES ONLY<br>Generated by LendPaper · lendpaper.com/legal/estimates</div>
+                </footer>`;
+
+            const header = `
+                <div class="estimate-banner">⚠ Estimated Terms Only. <span>For planning purposes. Final approval, pricing, and payoff amounts subject to lender review and may differ. Not financial advice. lendpaper.com/legal/estimates</span></div>
+                <div class="prepared">
+                    <div class="prepared-card">
+                        <div class="eyebrow">Prepared By</div>
+                        <div class="prepared-name">${preparedByMain}</div>
+                        <div class="prepared-subline">Prepared using LendPaper software. Not an official financing offer.</div>
+                    </div>
+                    <div class="prepared-card">
+                        <div class="eyebrow">Prepared For</div>
+                        <div class="prepared-name">${preparedForMain}</div>
+                        <div class="doc-meta">${docMeta}</div>
+                    </div>
+                </div>
+                ${dealStrip}`;
+
+            const multi = ids.length > 1;
+            let body = '';
+            ids.forEach((id, i) => {
+                const c = lastCalc[id];
+                if (!c) return;
+                // Up to 3 colour-coded payoff options (Option 1 primary + extras), each
+                // validated against the fresh schedule (before maturity, meaningful savings).
+                const options = getPdfOptions(id);
+                const freq = PDF_FREQ[c.freq] || PDF_FREQ.monthly;
+                const tag = multi ? `Scenario ${String.fromCharCode(65 + i)}` : '';
+                if (i > 0) body += '<div class="pdf-page-break"></div>';
+                body += pdfScenarioPage1(c, options, tag);
+                body += pdfScenarioSchedule(c, options, freq);
+            });
+
+            host.innerHTML = `<div class="pdf-page">${header}${body}${footer}</div>`;
+        }
+
         async function handleLendPaperSavePDF() {
             const btn = event.currentTarget;
             const origText = btn.innerHTML;
@@ -1114,16 +1704,25 @@
             window.PDF_HELPER.initPrintLayout("PAYMENT BREAKDOWN");
 
             // Populate read-only loan parameter summary (replaces hidden form in PDF)
+            // and force a fresh calc so lastCalc[id] (schedule + summary) is current
+            // before buildPdfDocument() reads it.
             cards.forEach(card => {
                 const cid = card.id.split('-')[1];
+                calcCard(cid);
                 populatePdfParams(cid);
             });
+
+            // LEN-124 — build the redesigned borrower-facing document from live state.
+            // Generate the forensic quote ID once so it appears identically in the document
+            // body (prepared-for + footer) and in the PDF_HELPER watermark/fingerprint.
+            const quoteId = window.PDF_HELPER.generateQuoteId();
+            buildPdfDocument(quoteId);
 
             const isMultiScenario = cards.length > 1;
             const element = document.querySelector('main');
             const filename = `LendPaper_Amortization_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
-            await window.PDF_HELPER.generatePDF(element, "PAYMENT BREAKDOWN", filename, btn, origText, isMultiScenario);
+            await window.PDF_HELPER.generatePDF(element, "PAYMENT BREAKDOWN", filename, btn, origText, isMultiScenario, quoteId);
         }
         
         const holidays = [
@@ -1195,6 +1794,12 @@
             return `${factor.toFixed(2)}× factor — ${centsDisplay}¢ on the dollar, about a ~${apr.toFixed(1)}% APR`;
         }
         const rowSelection = {};
+        // LEN-124 Stage B — up to 2 ADDITIONAL payoff picks per scenario for the PDF
+        // (Option 2 / Option 3). Stored as period numbers only and resolved against the
+        // fresh lastCalc[id].schedule at build/highlight time, so they survive recalcs.
+        // The primary single selection (rowSelection[id], Option 1) is unchanged and still
+        // drives the on-screen payoff panel/takeaway (LEN-110).
+        const pdfExtra = {};
         const cardTracks = {};
         const PAYOFF_MARK_HTML = '<span class="payoff-mark" style="font-size:10px;font-weight:700;color:#1A3C2E;white-space:nowrap">&middot; payoff &#10003;</span>';
         const lastCalc = {};
@@ -1821,7 +2426,14 @@
             }
         }
 
-        function selectAmoRow(id, period) {
+        function selectAmoRow(id, period, ev) {
+            // Modifier-click (Shift / Cmd / Ctrl) adds or removes an extra PDF payoff option
+            // (Option 2 / Option 3) without disturbing the primary single selection.
+            if (ev && (ev.shiftKey || ev.metaKey || ev.ctrlKey)) {
+                if (ev.preventDefault) ev.preventDefault();
+                togglePdfExtraOption(id, period);
+                return;
+            }
             const isPrepay = document.getElementById(`enablePrepay-${id}`)?.checked;
             const rowEl = document.getElementById(`arow-${id}-${period}`);
             if (!rowEl) return;
@@ -1849,9 +2461,65 @@
                 };
                 rowEl.classList.add(isPrepay ? 'prepay-target-row' : 'paid-target-row');
                 if (isPrepay && rowEl.cells[1]) rowEl.cells[1].insertAdjacentHTML('beforeend', ' ' + PAYOFF_MARK_HTML);
+                // A row promoted to primary should not also linger as an extra option
+                if (pdfExtra[id]) pdfExtra[id] = pdfExtra[id].filter(p => p !== period);
             }
             renderDetailRow(id);
             renderTakeaway(id);
+            syncPdfOptionHighlights(id);
+        }
+
+        // --- LEN-124 Stage B: extra payoff options (Option 2 / Option 3) for the PDF ---
+        function togglePdfExtraOption(id, period) {
+            if (!document.getElementById(`enablePrepay-${id}`)?.checked) return; // payoff story needs pre-pay on
+            if (!document.getElementById(`arow-${id}-${period}`)) return;
+            if (rowSelection[id] && rowSelection[id].period === period) return;     // already the primary
+            if (!pdfExtra[id]) pdfExtra[id] = [];
+            const arr = pdfExtra[id];
+            const at = arr.indexOf(period);
+            if (at >= 0) {
+                arr.splice(at, 1);
+            } else {
+                const total = (rowSelection[id] ? 1 : 0) + arr.length;
+                if (total >= 3) {
+                    window.PDF_HELPER && window.PDF_HELPER.showToast &&
+                        window.PDF_HELPER.showToast('You can compare up to 3 payoff options.', true);
+                    return;
+                }
+                arr.push(period);
+            }
+            syncPdfOptionHighlights(id);
+        }
+
+        // Resolve the ordered payoff options (primary first, then extras in pick order)
+        // against the fresh schedule. Assigns Option 1=green / 2=blue / 3=purple.
+        function getPdfOptions(id) {
+            const c = lastCalc[id];
+            if (!c || !c.isPrepayEnabled) return [];
+            const COLORS = ['green', 'blue', 'purple'];
+            const periods = [];
+            if (rowSelection[id]) periods.push(rowSelection[id].period);
+            (pdfExtra[id] || []).forEach(p => { if (!periods.includes(p)) periods.push(p); });
+            const opts = [];
+            periods.forEach(p => {
+                const r = (c.schedule || []).find(row => row.period === p);
+                if (r && p < c.periods && r.savings >= 0.5) opts.push(r);
+            });
+            return opts.slice(0, 3).map((r, i) => ({ ...r, optionIdx: i + 1, color: COLORS[i] }));
+        }
+
+        // Re-apply on-screen color highlights for Options 2/3 (additive — primary keeps its
+        // existing prepay-target-row styling). Safe to call after every calc/selection.
+        function syncPdfOptionHighlights(id) {
+            const tbody = document.getElementById(`tableBody-${id}`);
+            if (!tbody) return;
+            tbody.querySelectorAll('.pdf-opt-2-row, .pdf-opt-3-row')
+                .forEach(r => r.classList.remove('pdf-opt-2-row', 'pdf-opt-3-row'));
+            getPdfOptions(id).forEach(o => {
+                if (o.optionIdx === 1) return;
+                const rowEl = document.getElementById(`arow-${id}-${o.period}`);
+                if (rowEl) rowEl.classList.add(o.optionIdx === 2 ? 'pdf-opt-2-row' : 'pdf-opt-3-row');
+            });
         }
 
         function paidEqHTML(sel, visible) {
@@ -2125,6 +2793,7 @@
             let balance = amt, unearnedInterest = totalCost, currentDate = new Date(startDate);
             let paidPrincipal = 0, paidInterest = 0, paidTotal = 0;
             let tbodyHTML = '', printTbodyHTML = '', maturityDate = '';
+            const schedule = [];   // full per-row data for the redesigned PDF document (buildPdfDocument)
 
             const periodRate = getPeriodRate(amt, pmt, periods);
             const defaultPeriod = Math.max(1, Math.round(periods * 0.25) - 1);
@@ -2154,6 +2823,13 @@
                 const dateYear = currentDate.getFullYear();
                 maturityDate = dateStr;
 
+                schedule.push({
+                    period: i, date: dateStr, day: dateDay, month: dateMonth, year: dateYear,
+                    pmt, principal, interest, balance,
+                    buyout: rowBuyout, savings: rowSavings,
+                    ppaid: paidPrincipal, ipaid: paidInterest, tpaid: paidTotal
+                });
+
                 let isSelected = false;
                 if (isPrepayEnabled) {
                     if (rowSelection[id]) {
@@ -2182,7 +2858,7 @@
                     <td class="p-3 font-extrabold text-[#1A3C2E] text-right">${fmtUsd.format(balance)}</td>
                     <td class="p-3 font-semibold text-[#1A3C2E] text-right col-payoff">${fmtUsd.format(rowBuyout)}</td>
                     <td class="p-3 text-[#2D6A4F] text-right col-payoff">${fmtUsd.format(rowSavings)}</td>`;
-                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? (isPrepayEnabled ? ' prepay-target-row' : ' paid-target-row') : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-ppaid="${paidPrincipal.toFixed(2)}" data-ipaid="${paidInterest.toFixed(2)}" data-tpaid="${paidTotal.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" data-year="${dateYear}" onclick="selectAmoRow(${id}, ${i})">${row}</tr>`;
+                tbodyHTML += `<tr id="arow-${id}-${i}" class="amo-row${isSelected ? (isPrepayEnabled ? ' prepay-target-row' : ' paid-target-row') : ''}" data-bal="${balance.toFixed(2)}" data-unearned="${unearnedInterest.toFixed(2)}" data-savings="${rowSavings.toFixed(2)}" data-buyout="${rowBuyout.toFixed(2)}" data-ppaid="${paidPrincipal.toFixed(2)}" data-ipaid="${paidInterest.toFixed(2)}" data-tpaid="${paidTotal.toFixed(2)}" data-date="${dateStr}" data-day="${dateDay}" data-month="${dateMonth}" data-year="${dateYear}" onclick="selectAmoRow(${id}, ${i}, event)">${row}</tr>`;
                 const printRow = `<td>${i}</td><td>${dateStr}</td><td style="text-align:right">${fmtUsd.format(pmt)}</td><td style="text-align:right">${fmtUsd.format(principal)}</td><td style="text-align:right">${fmtUsd.format(interest)}</td><td style="text-align:right;color:#1A3C2E;font-weight:800">${fmtUsd.format(balance)}</td>`;
                 printTbodyHTML += `<tr>${printRow}</tr>`;
                 if(balance <= 0) break;
@@ -2201,7 +2877,13 @@
                 if (tableEl) tableEl.classList.toggle('amo-prepay-off', !isPrepayEnabled);
             }
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
-            lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, netFunded, pYear, centsDisplay, discPct, maturityDate, periods };
+            lastCalc[id] = {
+                pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, netFunded, pYear,
+                centsDisplay, discPct, maturityDate, periods,
+                // Redesigned-PDF fields (buildPdfDocument): funding summary + deal details + schedule
+                freq, pmtLabel, feeAmt, feeIsDollar, feeInput, startDateStr, startDate,
+                isPrepayEnabled, schedule
+            };
             renderDetailRow(id);
 
             // Park the selected payoff row + panel just under the sticky header so the
@@ -2221,6 +2903,7 @@
             }
 
             renderTakeaway(id);
+            syncPdfOptionHighlights(id);   // re-apply Option 2/3 highlights after the table re-renders
         }
 
         function copyResults(id) {
