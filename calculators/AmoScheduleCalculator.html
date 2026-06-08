@@ -1315,12 +1315,6 @@
         .lp-state-note:empty { display:none; }
 
         /* Prepared by block */
-        .lp-preparedby { background:#F4F8F5; border:1px solid #E3EFE8; border-radius:12px; padding:14px 14px 12px; }
-        .lp-preparedby .lp-section-label { color:#1A3C2E; margin-bottom:8px; }
-        .lp-preparedby-input { width:100%; border:1px solid #D9E5DE; border-radius:8px; padding:9px 11px;
-            font-size:13px; color:#111827; background:#fff; outline:none; }
-        .lp-preparedby-input:focus { border-color:#2D6A4F; box-shadow:0 0 0 2px rgba(45,106,79,0.15); }
-        .lp-preparedby-note { font-size:10.5px; color:#6B7280; line-height:1.45; margin-top:7px; }
 
         /* Output metrics */
         .lp-metric-label { color:#64748B; font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:0.04em; margin-bottom:3px; }
@@ -1580,7 +1574,7 @@
             set(`ppPayback-${id}`, lc ? fmtUsd.format(lc.payback) : '—');
             set(`ppFinance-${id}`, lc ? fmtUsd.format(lc.totalCost) : '—');
             // Prepared by — feeds the PDF; row stays hidden when blank (no broken layout)
-            const prep = (document.getElementById(`preparedBy-${id}`)?.value || '').trim();
+            const prep = (document.getElementById('pdfPreparedBy')?.value || '').trim();
             const prepRow = document.getElementById(`ppPreparedByRow-${id}`);
             set(`ppPreparedBy-${id}`, prep);
             if (prepRow) prepRow.style.display = prep ? '' : 'none';
@@ -1961,7 +1955,15 @@
                 prepay_enabled: !!g('enablePrepay')?.checked,
                 discount_pct: cleanNumericInput(g('discPct')?.value),
                 borrower_state: g('state')?.value || (window.LPCompliance?.getState?.() || ''),
-                prepared_by: (g('preparedBy')?.value || '').trim(),
+                // Document metadata source of truth = the LEN-124 #pdfDocDetails panel
+                prepared_by: (() => {
+                    const n = (document.getElementById('pdfPreparedBy')?.value || '').trim();
+                    const c = (document.getElementById('pdfPreparedByCompany')?.value || '').trim();
+                    return [n, c].filter(Boolean).join(' · ');
+                })(),
+                prepared_for: (document.getElementById('pdfPreparedFor')?.value || '').trim(),
+                deal_name: (document.getElementById('pdfDealName')?.value || '').trim(),
+                lender: (document.getElementById('pdfLender')?.value || '').trim(),
                 payoff_periods: (payoffPins[id] && payoffPins[id].length)
                     ? [...payoffPins[id]]
                     : (rowSelection[id]?.period ? [rowSelection[id].period] : []),
@@ -1979,6 +1981,7 @@
                     params,
                     pdf_generated: !!pdfGenerated,
                     prepared_by: params.prepared_by || null,
+                    prepared_for: params.prepared_for || null,
                 });
             } catch (e) { /* logging must never break the calculator */ }
         }
@@ -2426,12 +2429,8 @@
                             <div id="stateNote-${id}" class="lp-state-note no-print"></div>
                         </div>
 
-                        <!-- Prepared by -->
-                        <div class="lp-preparedby mt-6">
-                            <div class="lp-section-label">Prepared by</div>
-                            <input type="text" id="preparedBy-${id}" class="lp-preparedby-input" placeholder="e.g. John Smith · ABC Funding Solutions" oninput="syncPreparedBy(${id})">
-                            <div class="lp-preparedby-note">Your name or company — appears as the document preparer, not as a lender or offer.</div>
-                        </div>
+                        <!-- Prepared by / document metadata lives in the #pdfDocDetails panel
+                             above the cards (LEN-124) — single source of truth for the PDF. -->
 
                         <input type="number" id="discPct-${id}" value="25" min="0" max="100" style="display:none">
                     </div>
@@ -3266,11 +3265,6 @@
             document.querySelectorAll('[id^="stateNote-"]').forEach(c => { c.innerHTML = html; });
         }
 
-        function syncPreparedBy(id) {
-            const val = document.getElementById(`preparedBy-${id}`)?.value || '';
-            document.querySelectorAll('input[id^="preparedBy-"]').forEach(i => { if (i.value !== val) i.value = val; });
-        }
-
         // Reflect compliance state into the field (e.g. set on another calculator)
         document.addEventListener('lp:compliance:statechange', (e) => {
             const code = (e.detail && e.detail.state) || '';
@@ -3437,7 +3431,11 @@
             const setV = (eid, v) => { const el = document.getElementById(`${eid}-${id}`); if (el != null && v != null && v !== '') el.value = v; };
             setV('amt', p.amount); setV('factor', p.rate); setV('term', p.term);
             setV('fee', p.origination_fee); setV('freq', p.frequency); setV('start', p.start_date);
-            setV('discPct', p.discount_pct); setV('state', p.borrower_state); setV('preparedBy', p.prepared_by);
+            setV('discPct', p.discount_pct); setV('state', p.borrower_state);
+            // Document metadata → the #pdfDocDetails panel (global ids, not per-card)
+            const sd = (eid, v) => { const e = document.getElementById(eid); if (e && v) e.value = v; };
+            sd('pdfPreparedBy', p.prepared_by); sd('pdfPreparedFor', p.prepared_for);
+            sd('pdfDealName', p.deal_name); sd('pdfLender', p.lender);
             // restore term unit + fee mode
             const tw = document.getElementById(`termWrap-${id}`); if (tw && p.term_unit) { tw.dataset.termUnit = p.term_unit; const lbl = document.getElementById(`termUnitLabel-${id}`); if (lbl) lbl.textContent = p.term_unit; }
             const fw = document.getElementById(`feeWrap-${id}`); if (fw && p.fee_mode) fw.dataset.feeMode = p.fee_mode;
