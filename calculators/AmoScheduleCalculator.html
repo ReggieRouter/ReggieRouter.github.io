@@ -344,7 +344,7 @@
             margin: 0.45in 0.55in 1.3in 0.55in;
         }
         @page :first {
-            margin-top: 0.35in;
+            margin-top: 0.55in;
         }
         @page {
             @bottom-left {
@@ -352,7 +352,7 @@
                 white-space: pre-line;
                 font-size: 5.5pt;
                 color: #6B7280;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 vertical-align: top;
                 padding-top: 6pt;
                 border-top: 0.5pt solid #E5E7EB;
@@ -361,7 +361,7 @@
                 content: "Page " counter(page) " of " counter(pages);
                 font-size: 7pt;
                 color: #9CA3AF;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 vertical-align: top;
                 padding-top: 6pt;
                 border-top: 0.5pt solid #E5E7EB;
@@ -395,8 +395,8 @@
         body.pdf-export-mode .pdf-document * { box-sizing: border-box; }
 
         body.pdf-export-mode .pdf-document .estimate-banner {
-            padding: 12px 14px 11px;
-            margin-bottom: 14px;
+            padding: 13px 15px 12px;
+            margin-bottom: 18px;
             border: 1px solid #FCD34D;
             border-radius: 8px;
             background: #FFFBEB;
@@ -411,7 +411,7 @@
 
         body.pdf-export-mode .pdf-document .prepared {
             display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
-            padding: 4px 0 13px; margin-bottom: 12px; border-bottom: 1px solid #dbe3ea;
+            padding: 8px 0 16px; margin-bottom: 15px; border-bottom: 1px solid #dbe3ea;
         }
         body.pdf-export-mode .pdf-document .eyebrow {
             margin-bottom: 6px; color: #64748b; font-size: 9.5px; font-weight: 800;
@@ -428,7 +428,7 @@
 
         body.pdf-export-mode .pdf-document .deal-strip {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-            margin-bottom: 12px; padding: 10px 12px;
+            margin-bottom: 16px; padding: 12px 14px;
             border: 1px solid #dbe3ea; border-radius: 8px; background: #f8fafc;
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
             break-inside: avoid; page-break-inside: avoid;
@@ -436,7 +436,7 @@
         body.pdf-export-mode .pdf-document .deal-strip strong { display: block; margin-top: 3px; font-size: 12px; word-break: break-word; }
 
         body.pdf-export-mode .pdf-document h1 {
-            margin: 18px 0 12px; font-size: 21px; line-height: 1.15;
+            margin: 22px 0 14px; font-size: 21px; line-height: 1.15;
             break-after: avoid; page-break-after: avoid;
         }
         body.pdf-export-mode .pdf-document .pdf-scenario-tag {
@@ -448,7 +448,7 @@
         }
 
         body.pdf-export-mode .pdf-document .hero-grid {
-            display: grid; grid-template-columns: 1.25fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 13px;
+            display: grid; grid-template-columns: 1.25fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px;
             break-inside: avoid; page-break-inside: avoid;
         }
         body.pdf-export-mode .pdf-document .metric {
@@ -465,11 +465,11 @@
         body.pdf-export-mode .pdf-document .primary .metric-note { color: rgba(255,255,255,0.78); }
         body.pdf-export-mode .pdf-document .metric-value { margin-top: 8px; font-size: 22px; font-weight: 850; line-height: 1; }
         body.pdf-export-mode .pdf-document .metric-value.mono {
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 20px;
+            font-size: 20px; font-variant-numeric: tabular-nums;
         }
         body.pdf-export-mode .pdf-document .metric-note { margin-top: 6px; color: #64748b; font-size: 10.5px; }
 
-        body.pdf-export-mode .pdf-document .section { margin-top: 13px; }
+        body.pdf-export-mode .pdf-document .section { margin-top: 16px; }
         body.pdf-export-mode .pdf-document .snapshot-grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; break-inside: avoid; page-break-inside: avoid;
         }
@@ -755,7 +755,7 @@
                 font-size: 5pt;
                 line-height: 1.35;
                 color: #9CA3AF;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             }
             .lp-print-footer .lp-print-footer-top {
                 font-size: 6.5pt;
@@ -1320,6 +1320,9 @@
         .lp-metric-label { color:#64748B; font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:0.04em; margin-bottom:3px; }
         .lp-metric-val { font-weight:800; color:#111827; font-size:16px; }
         .lp-metric-val-sm { font-weight:700; color:#111827; font-size:13px; font-variant-numeric:tabular-nums; }
+        /* Subtle weekly↔monthly headline toggle cue */
+        #moEquiv-1 .hero-toggle-hint, [id^="moEquiv-"] .hero-toggle-hint { color:#9CA3AF; font-size:11px; margin-left:3px; }
+        [id^="moEquiv-"]:hover { color:#1A3C2E; }
         /* Deal-math row: 3 equal cells; finance charge kept subdued via a faint tint + muted value */
         .lp-costrow { margin-left:-10px; margin-right:-10px; }
         .lp-costrow > div { padding:8px 10px; border-radius:8px; }
@@ -1433,8 +1436,8 @@
 
         <!-- LEN-124 — optional document details that personalize the redesigned PDF.
              All fields are optional; buildPdfDocument() falls back gracefully when blank. -->
-        <details id="pdfDocDetails" class="lp-doc-details no-print">
-            <summary>Document details <span>— optional, appears on the PDF</span></summary>
+        <details id="pdfDocDetails" class="lp-doc-details no-print" open>
+            <summary>Document details <span>— prepared by, lender, deal name · optional, appears on the PDF</span></summary>
             <div class="lp-doc-details-grid">
                 <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
                 <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
@@ -2394,7 +2397,7 @@
                                         <select id="freq-${id}" class="w-full py-2.5 px-3 outline-none text-[#111827] text-[14px] font-semibold bg-transparent appearance-none cursor-pointer" onchange="calcCard(${id})">
                                             <option value="daily">Daily</option>
                                             <option value="weekly" selected>Weekly</option>
-                                            <option value="semimonthly">Semi-Mo</option>
+                                            <option value="semimonthly">Semi-Monthly</option>
                                             <option value="monthly">Monthly</option>
                                         </select>
                                     </div>
@@ -2454,7 +2457,7 @@
                             <div class="mb-6 pb-6 border-b border-[#E5E7EB] pdf-hero-block">
                                 <div class="text-[11px] text-[#64748B] font-bold uppercase tracking-wider mb-2" id="lblPmt-${id}">Est. payment</div>
                                 <div class="text-[42px] font-black text-[#1A3C2E] leading-none tracking-tight" id="valPmt-${id}">$0.00</div>
-                                <div id="moEquiv-${id}" class="text-[13px] text-[#9CA3AF]" style="display:none;margin-top:6px;text-align:right"></div>
+                                <div id="moEquiv-${id}" class="text-[13px] text-[#4B5563]" style="display:none;margin-top:6px;text-align:right;cursor:pointer" title="Toggle weekly / monthly headline" onclick="toggleHeroView(${id})"></div>
                             </div>
 
                             <!-- Deal math: Funded / Total payback / Finance charge (3-up; finance charge subdued) -->
@@ -3034,6 +3037,47 @@
             }
         }
 
+        // Headline payment view — 'period' (default) or 'monthly'. Toggle is offered
+        // only for daily/weekly deals (where a monthly equivalent is meaningful).
+        const heroView = {};
+        const heroData = {};
+        function heroSubHTML(text, togglable) {
+            return togglable ? `${text} <span class="hero-toggle-hint">⇄</span>` : text;
+        }
+        function renderHero(id) {
+            const d = heroData[id]; if (!d) return;
+            const togglable = (d.freq === 'daily' || d.freq === 'weekly');
+            const view = togglable ? (heroView[id] || 'period') : 'period';
+            const lbl = document.getElementById(`lblPmt-${id}`);
+            const val = document.getElementById(`valPmt-${id}`);
+            const mo = document.getElementById(`moEquiv-${id}`);
+            const perAbbr = d.freq === 'daily' ? '/day' : d.freq === 'weekly' ? '/wk' : '/period';
+            if (lbl && val) {
+                if (view === 'monthly') {
+                    lbl.innerText = 'Monthly payment';
+                    val.innerText = fmtUsd.format(d.monthlyEquiv);
+                } else {
+                    lbl.innerText = d.pmtLabel;
+                    val.innerText = fmtUsd.format(d.pmt);
+                }
+            }
+            if (mo) {
+                if (!togglable) { mo.style.display = 'none'; }
+                else {
+                    const sub = (view === 'monthly')
+                        ? fmtUsd.format(d.pmt) + perAbbr
+                        : '≈ $' + Math.round(d.monthlyEquiv).toLocaleString('en-US') + '/mo';
+                    mo.innerHTML = heroSubHTML(sub, true);
+                    mo.style.display = '';
+                }
+            }
+        }
+        function toggleHeroView(id) {
+            const d = heroData[id]; if (!d || !(d.freq === 'daily' || d.freq === 'weekly')) return;
+            heroView[id] = (heroView[id] === 'monthly') ? 'period' : 'monthly';
+            renderHero(id);
+        }
+
         function calcCard(id) {
             const el = document.getElementById(`cardContainer-${id}`);
             if(!el) return;
@@ -3083,7 +3127,7 @@
             let periods, pmtLabel, pYear, freqName;
             if (freq === 'daily') { periods = Math.round(termMonths * 21.66); pmtLabel = 'Daily payment'; pYear = 252; freqName = 'day'; }
             else if (freq === 'weekly') { periods = Math.round(termMonths * 4.333); pmtLabel = 'Weekly payment'; pYear = 52; freqName = 'week'; }
-            else if (freq === 'semimonthly') { periods = Math.round(termMonths * 2); pmtLabel = 'Semi-mo payment'; pYear = 24; freqName = 'semi-month'; }
+            else if (freq === 'semimonthly') { periods = Math.round(termMonths * 2); pmtLabel = 'Semi-monthly payment'; pYear = 24; freqName = 'semi-month'; }
             else { periods = Math.round(termMonths); pmtLabel = 'Monthly payment'; pYear = 12; freqName = 'month'; }
 
             periods = Math.max(1, periods);
@@ -3097,18 +3141,9 @@
             const truePeriodRate = getPeriodRate(netFunded, pmt, periods);
             const apr = truePeriodRate * pYear * 100;
 
-            document.getElementById(`lblPmt-${id}`).innerText = pmtLabel;
-            document.getElementById(`valPmt-${id}`).innerText = fmtUsd.format(pmt);
-
-            const moEquivEl = document.getElementById(`moEquiv-${id}`);
-            if (moEquivEl) {
-                if (freq === 'daily' || freq === 'weekly') {
-                    moEquivEl.textContent = '≈ $' + Math.round(payback / termMonths).toLocaleString('en-US') + '/mo';
-                    moEquivEl.style.display = '';
-                } else {
-                    moEquivEl.style.display = 'none';
-                }
-            }
+            // Headline payment — period (default) with a subtle weekly↔monthly toggle (daily/weekly only)
+            heroData[id] = { pmt, pmtLabel, monthlyEquiv: payback / termMonths, freq, freqName };
+            renderHero(id);
 
             const setOut = (eid, val) => { const e = document.getElementById(`${eid}-${id}`); if (e) e.innerText = val; };
             setOut('outFunded', fmtUsd.format(amt));
