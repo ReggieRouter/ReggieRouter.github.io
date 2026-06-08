@@ -303,7 +303,7 @@
 .save-field input:focus { border-color: var(--lp-green); }
 .pdf-btn { width: 100%; padding: 16px; background: var(--lp-green); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: all .2s; }
 .pdf-btn:hover { background: #166534; }
-.pdf-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pdf-btn:disabled { opacity: 0.72; cursor: not-allowed; }
 
 /* -- Lender Context modal -- */
 .lc-modal { display: none; position: fixed; inset: 0; background: rgba(51,66,67,0.6); z-index: 9998; align-items: center; justify-content: center; padding: 24px; }
@@ -466,6 +466,75 @@ body.pdf-export-mode .print-watermark { display: none !important; }
 }
 .lp-definition strong { color: #14532D; font-weight: 800; }
 
+/* Dismissible intro banner — sits above Step 1, sets expectations */
+.lp-intro {
+    position: relative;
+    background-color: #F0FDF4;
+    border: 1px solid #DCFCE7;
+    border-radius: 12px;
+    padding: 18px 44px 18px 20px;
+    margin-bottom: 16px;
+}
+.lp-intro-def {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #334155;
+    line-height: 1.6;
+}
+.lp-intro-def strong { color: #14532D; font-weight: 800; }
+.lp-intro-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(20, 83, 45, 0.18);
+}
+.lp-intro-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #14532D;
+}
+.lp-intro-step .n {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    background: var(--lp-green);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.lp-intro-arrow { color: #86C99B; font-size: 13px; font-weight: 700; }
+.lp-intro-x {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    background: transparent;
+    color: #94A3B8;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+}
+.lp-intro-x:hover { background: rgba(20, 83, 45, 0.08); color: #14532D; }
+
+/* Save area — standalone, not a numbered step */
+.save-area .sc-num { display: none; }
+
 .live-indicator-pill {
   font-size: 10px;
   font-weight: 800;
@@ -518,6 +587,22 @@ body.pdf-export-mode .print-watermark { display: none !important; }
         </div>
 
         <div class="lp-body">
+            <div class="lp-intro no-print" id="lpIntro">
+                <button class="lp-intro-x" onclick="dismissIntro()" title="Dismiss" aria-label="Dismiss">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+                </button>
+                <div class="lp-intro-def">
+                    The <strong>Debt Service Coverage Ratio (DSCR)</strong> measures a business's ability to cover its debt obligations with its available cash flow, providing a critical indicator of funding serviceability.
+                </div>
+                <div class="lp-intro-steps">
+                    <span class="lp-intro-step"><span class="n">1</span> Entity &amp; tax form</span>
+                    <span class="lp-intro-arrow">&rarr;</span>
+                    <span class="lp-intro-step"><span class="n">2</span> EBIDA &amp; financials</span>
+                    <span class="lp-intro-arrow">&rarr;</span>
+                    <span class="lp-intro-step"><span class="n">3</span> Run your numbers</span>
+                </div>
+            </div>
+
             <div class="sc" data-sc-collapsible data-pdf-sec="entity">
                 <div class="sc-hd">
                     <span class="sc-num">1</span>
@@ -525,10 +610,6 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                     <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
                 </div>
                 <div class="sc-body">
-                    <div class="lp-definition">
-                        The <strong>Debt Service Coverage Ratio (DSCR)</strong> measures a business's ability to cover its debt obligations with its available cash flow, providing a critical indicator of funding serviceability.
-                    </div>
-                    
                     <div class="ent-toggle-bar">
                         <button class="ent-toggle-btn active" id="btnEntMode" onclick="setEntMode('entity')">By entity</button>
                         <button class="ent-toggle-btn" id="btnFormMode" onclick="setEntMode('form')">By tax form</button>
@@ -657,9 +738,8 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                 </div>
             </div>
 
-            <div class="sc" data-sc-collapsible data-pdf-sec="save">
+            <div class="sc save-area" data-sc-collapsible data-pdf-sec="save">
                 <div class="sc-hd">
-                    <span class="sc-num">4</span>
                     <span class="sc-title">Save this analysis<span class="sc-sub">Download PDF for your records</span></span>
                     <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
                 </div>
@@ -1139,6 +1219,8 @@ function renderLenderModal() {
 }
 
 function toggleSc(btn){ var sc=btn.closest('.sc'); sc.classList.toggle('collapsed'); btn.innerHTML=sc.classList.contains('collapsed')?'&#9660;':'&#9650;'; }
+function dismissIntro(){ var el=document.getElementById('lpIntro'); if(el) el.style.display='none'; try{ localStorage.setItem('dscrIntroDismissed','1'); }catch(e){} }
+(function(){ try{ if(localStorage.getItem('dscrIntroDismissed')==='1'){ var el=document.getElementById('lpIntro'); if(el) el.style.display='none'; } }catch(e){} })();
 function toggleAddbacks(){ document.getElementById('addbacksContent').classList.toggle('show'); }
 function openLenderCtx(){ document.getElementById('lenderCtxModal').classList.add('open'); }
 function closeLenderCtx(){ document.getElementById('lenderCtxModal').classList.remove('open'); }
