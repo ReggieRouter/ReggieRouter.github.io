@@ -575,6 +575,9 @@
         .lp-eq-div { font-size: 14px; font-weight: 500; color: #9CA3AF; }
         /* Payoff redesign: header + 3 parallel-grammar tiles + "To date" band + copy-quote button */
         .lp-payoff-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .lp-payoff-header .lp-quote-copied { margin-left: auto; }
+        .lp-payoff-header .lp-quote-btn-header { margin-left: auto; }
+        .lp-payoff-header .lp-quote-copied + .lp-quote-btn-header { margin-left: 0; }
         .lp-payoff-eyebrow-main { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #1A3C2E; }
         .lp-payoff-datepill { background: #1A3C2E; color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.02em; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
@@ -1936,6 +1939,8 @@
                         <div class="lp-payoff-header">
                             <span class="lp-payoff-eyebrow-main">Early payoff</span>
                             <span class="lp-payoff-datepill">${sel.date}</span>
+                            <span class="lp-quote-copied no-print" id="quoteCopied-${id}">Copied!</span>
+                            <button type="button" class="lp-quote-btn no-print lp-quote-btn-header" onclick="copyPayoffQuote(${id})">&#128203; Copy payoff quote</button>
                         </div>
                         <div class="lp-tiles">
                             <div class="lp-tile lp-tile-action">
@@ -1978,10 +1983,6 @@
                                 <div><dt>Contract progress</dt><dd>${progressPct}%</dd><span class="lp-todate-meta">of term elapsed</span></div>
                                 <div><dt>Payment amount</dt><dd>${fmtUsd.format(c.pmt)}</dd><span class="lp-todate-meta">per ${c.freqName}</span></div>
                             </div>
-                        </div>
-                        <div class="lp-quote-row no-print">
-                            <button type="button" class="lp-quote-btn" onclick="copyPayoffQuote(${id})">&#128203; Copy payoff quote</button>
-                            <span class="lp-quote-copied" id="quoteCopied-${id}">Copied!</span>
                         </div>
                     </div>
                 </td>`;
