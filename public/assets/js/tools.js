@@ -112,15 +112,17 @@ var TOOLS = [
     kw: "naics sic code industry search lookup classification restricted"
   },
   {
-    id: "roi",
-    name: "ROI Analysis", 
-    desc: "Identify the break even point.",
-    status: "soon", 
-    group: "deal-math", 
-    icon: "lineChart", 
+    id: "affordability",
+    name: "Affordability Check",
+    desc: "See if the borrower can handle the payment — and whether the capital pays for itself.",
+    status: "live",
+    group: "deal-math",
+    icon: "lineChart",
     color: "green",
-    href: "#",
-    kw: "roi break even profit investment"
+    slug: "/tools/affordability",
+    presentation: "page",
+    path: "/calculators/AffordabilityCalculator.html",
+    kw: "affordability roi break even payment load deposits cash cushion qualify borrower upside"
   },
   { 
     id: "uw-analysis", 
