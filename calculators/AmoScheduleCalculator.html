@@ -106,6 +106,9 @@
         /* Inside .table-scroll-container (overflow-y:auto) anything above the top edge gets clipped —
            sticky-header tooltips must open BELOW the icon and hug the right edge instead */
         .tooltip-below .tooltiptext { bottom: auto; top: calc(100% + 8px); left: auto; right: 0; transform: none; }
+        /* Payoff-tile tooltips (All-in cost) sit near the left of each tile — open below and extend RIGHT
+           so the leftmost tile's tooltip doesn't overflow/clip at the scroll-container's left edge */
+        .lp-tile .tooltip .tooltiptext { top: calc(100% + 8px); bottom: auto; left: 0; right: auto; transform: none; max-width: 240px; }
         .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
 
         /* Input Overrides */
@@ -592,8 +595,6 @@
         .lp-tile-stats dt { margin: 0; font-size: 11px; color: #6B7280; }
         .lp-tile-stats dd { margin: 0; font-size: 12px; font-weight: 600; color: #111827; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .lp-tile-savings .lp-tile-stats dd { color: #15803D; }
-        /* Plain-English caveat shown under the tiles when early payoff raises the effective APR (prints too) */
-        .lp-tiles-note { margin-top: 10px; font-size: 11px; color: #6B7280; font-style: italic; line-height: 1.4; }
 
         /* "To date" band: backward-looking current-state facts, zoned off from the forward tiles */
         .lp-todate { margin-top: 18px; }
@@ -1107,20 +1108,6 @@
                 let mid = (low + high) / 2;
                 let calcPv = pmt * (1 - Math.pow(1 + mid, -n)) / mid;
                 if(calcPv > pv) low = mid; else high = mid;
-            }
-            return (low + high) / 2;
-        }
-
-        // True effective period rate of an early-buyout cash flow: advance (net funded) out at t0,
-        // `k` level payments, then the discounted buyout lump at period k. Annualized by pYear elsewhere.
-        function getBuyoutPeriodRate(pv, pmt, k, buyout) {
-            let low = 0, high = 1;
-            for (let i = 0; i < 60; i++) {
-                let mid = (low + high) / 2;
-                let npv = -pv;
-                for (let t = 1; t <= k; t++) npv += pmt / Math.pow(1 + mid, t);
-                npv += buyout / Math.pow(1 + mid, k);
-                if (npv > 0) low = mid; else high = mid;
             }
             return (low + high) / 2;
         }
@@ -1865,21 +1852,14 @@
                 const runToTerm   = c.payback - sel.tpaid;           // remaining scheduled payments
                 const totalSaved  = sel.savings;                     // == run-to-term all-in − buyout all-in
                 const paymentsLeft = Math.max(0, c.periods - sel.period);
-                const origFactor  = c.factor;
-                const revFactor   = buyoutAllIn / c.amt;             // revised factor = all-in ÷ advance
-                const factorDrop  = Math.max(0, Math.round((origFactor - revFactor) * 100)); // tenths-of-a-point (1pt = 0.10)
-                const factorDropLbl = `−${factorDrop}/10${factorDrop === 1 ? 'th' : 'ths'} pt`;
-                const origApr     = c.apr;
-                // True effective APR of the actual buyout cash flow (advance out, `period` payments, then the
-                // discounted buyout lump). Shown SYMMETRICALLY: on a small discount, paying nearly the same
-                // dollars faster can RAISE the effective APR even as factor/dollars fall — we disclose that
-                // honestly rather than a flattering construct that always shows a reduction (LEN-110 compliance
-                // decision; APR is an estimate ~, not a state-prescribed disclosure — see BRANDING.md §12).
-                const revApr      = getBuyoutPeriodRate(c.netFunded, c.pmt, sel.period, sel.buyout) * c.pYear * 100;
-                const aprChange   = revApr - origApr;                // + = APR rose (unfavorable), − = fell
-                const aprChangeLbl = `${aprChange <= 0 ? '−' : '+'}${Math.abs(aprChange).toFixed(1)} pts`;
                 const progressPct = Math.round((sel.period / c.periods) * 100);
                 const maturityMo  = c.maturityDate.replace(/\s\d{1,2},/, '');   // "Aug 31, 2027" -> "Aug 2027"
+                // Rate metrics (factor/APR) intentionally NOT shown on the comparison tiles: a rate quote must
+                // carry APR (CA/NY etc.), and an early-buyout APR is volatile and misleading (it explodes at
+                // early periods — paying a deal off after one payment implies a ~1000%+ annualized rate). The
+                // mandated factor+APR pairing lives on the base-deal stats grid + copy-quote; the tiles compare
+                // on dollars and payment counts only (LEN-110; see BRANDING.md §12).
+                const allInTip = `<span class="tooltip tooltip-below ml-1 no-print"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span class="tooltiptext">Everything paid on this contract under this scenario — payments already made to date plus the remaining cost. It runs higher than the headline because the headline is only what's left to pay; all-in also includes what's already been paid.</span></span>`;
                 tr.innerHTML = `<td colspan="8" style="padding:0">
                     <div class="lp-expand-inner">
                         <div class="lp-payoff-header">
@@ -1893,10 +1873,8 @@
                                 <div class="lp-tile-sub">Discounted payoff to close out the contract on the payoff date</div>
                                 <div class="lp-tile-div"></div>
                                 <dl class="lp-tile-stats">
-                                    <div><dt>Effective APR</dt><dd>~${revApr.toFixed(1)}%</dd></div>
-                                    <div><dt>Factor rate</dt><dd>${revFactor.toFixed(2)}&times;</dd></div>
                                     <div><dt>Payments left</dt><dd>0</dd></div>
-                                    <div><dt>All-in cost</dt><dd>${fmtUsd0.format(buyoutAllIn)}</dd></div>
+                                    <div><dt>All-in cost${allInTip}</dt><dd>${fmtUsd0.format(buyoutAllIn)}</dd></div>
                                 </dl>
                             </div>
                             <div class="lp-tile">
@@ -1905,10 +1883,8 @@
                                 <div class="lp-tile-sub">Remaining scheduled payments if the contract runs to ${maturityMo}</div>
                                 <div class="lp-tile-div"></div>
                                 <dl class="lp-tile-stats">
-                                    <div><dt>Effective APR</dt><dd>~${origApr.toFixed(1)}%</dd></div>
-                                    <div><dt>Factor rate</dt><dd>${origFactor.toFixed(2)}&times;</dd></div>
                                     <div><dt>Payments left</dt><dd>${paymentsLeft}</dd></div>
-                                    <div><dt>All-in cost</dt><dd>${fmtUsd0.format(c.payback)}</dd></div>
+                                    <div><dt>All-in cost${allInTip}</dt><dd>${fmtUsd0.format(c.payback)}</dd></div>
                                 </dl>
                             </div>
                             <div class="lp-tile lp-tile-savings">
@@ -1917,14 +1893,11 @@
                                 <div class="lp-tile-sub">What the merchant saves by buying out early</div>
                                 <div class="lp-tile-div"></div>
                                 <dl class="lp-tile-stats">
-                                    <div><dt>APR change</dt><dd${aprChange > 0 ? ' style="color:#B45309"' : ''}>${aprChangeLbl}</dd></div>
-                                    <div><dt>Factor reduction</dt><dd>${factorDropLbl}</dd></div>
                                     <div><dt>Payments eliminated</dt><dd>${paymentsLeft}</dd></div>
                                     <div><dt>Cost avoided</dt><dd>&minus;${fmtUsd0.format(totalSaved)}</dd></div>
                                 </dl>
                             </div>
                         </div>
-                        ${aprChange > 0 ? '<div class="lp-tiles-note">Early payoff saves total dollars but shortens the term, so the annualized rate (APR) rises even as the factor and dollar cost fall.</div>' : ''}
                         <div class="lp-todate">
                             <div class="lp-todate-label"><span>To date</span><span class="lp-todate-rule"></span></div>
                             <div class="lp-todate-grid">

@@ -319,7 +319,7 @@ Breakdown payoff-summary redesign (LEN-110).
    positions. Comparison should happen by reading *across* aligned rows, not by
    re-learning each tile. (Reference implementation: the three payoff tiles in
    `AmoScheduleCalculator.html` — Early payoff quote / Run-to-term cost / Total
-   savings — each `eyebrow → big number → one-line sub → divider → 4 stat rows`.)
+   savings — each `eyebrow → big number → one-line sub → divider → the same stat rows`.)
 2. **One home per number.** A headline figure appears in exactly one tile. Never
    duplicate a value as both a tag and a hero number — it creates "which number is
    real?" friction.
