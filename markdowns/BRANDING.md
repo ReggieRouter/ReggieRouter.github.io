@@ -366,6 +366,46 @@ Breakdown payoff-summary redesign (LEN-110).
 
 ---
 
+## 13. Calculator UI Components (canonical — LEN-123)
+
+Shared component language so every calculator looks like one product. Full
+behavioral spec + the output-column order live in `CALCULATORS.md §16–17`; this is
+the visual token reference.
+
+### Surfaces & accents
+| Component | Background | Border / accent | Radius |
+|---|---|---|---|
+| Tinted strip / charge / prepared-by | `#F4F8F5` | `#E3EFE8` (when bordered) | `8–12px` |
+| Savings / payoff banner | `#F0FDF4` | `4px` brand-dark left accent + `#BBF7D0` | `12px` |
+| Modal card | `#FFFFFF` | shadow `0 24px 60px rgba(0,0,0,.25)` | `16px` |
+| Instructional tile (modals) | `#FFFBEB` | `#FDE68A` | `10px` |
+
+- **Amber** (`#FFFBEB`/`#FDE68A`/`#92400E`) is reserved for *instructional* and
+  *compliance* moments only — never for computed values or decoration.
+- **Selection accent order** for multi-select pills: green → blue → purple. Single
+  selection is always green. (Blue/purple appear *only* here, never elsewhere in
+  calculator UI — they remain banned for outputs and chrome per §2 color rules.)
+
+### Buttons (calculator CTA hierarchy — supersedes "Copy on top")
+- **Primary** (`Save Estimate as PDF`): solid `--color-brand-dark` fill, white text,
+  full width, `10px` radius.
+- **Secondary** (`Copy Scenario`): brand-dark outline, transparent fill, full width.
+- **Tertiary**: plain text links (`#6B7280`, hover `--color-brand-mid`) in a footer
+  row — used for `+ Compare scenarios` and `🕐 Quote Log`.
+
+### Type tokens
+- Metric label: `10px`/700/uppercase/`0.04em`/`#64748B`.
+- Hero number: `42px`/700–900/brand-dark/mono numerals.
+- Tabular numbers everywhere money or rates align in a grid
+  (`font-variant-numeric: tabular-nums`).
+
+### Modals
+Vertically centered (`align-items:center`, no dead space), single `.open` toggle,
+close on backdrop-click + `Escape`. Pill-tabs for mode switches. (Reference shells:
+`#payoffModal`, `#compareModal` in `AmoScheduleCalculator.html`.)
+
+---
+
 ## Compliance & Legal Copy — see LEGAL.md
 
 Regulatory content is **never** duplicated here. For anything compliance-related

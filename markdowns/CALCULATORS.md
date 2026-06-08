@@ -462,3 +462,52 @@ saveEstimate({
   in the DB for Pro eligibility). Pro: full history, deal naming, shareable links,
   CSV export.
 - Schema + RLS migration: `supabase/estimates.sql`.
+
+---
+
+## 16. Output Column Hierarchy (canonical — all calculators)
+
+Reference build: Payment Breakdown (`calculators/AmoScheduleCalculator.html`).
+Replicate this top-to-bottom order so every calculator reads the same way:
+
+1. **Hero number** — the one figure the rep needs in 10s. `42px`, weight 700/900,
+   brand-dark, monospace numerals. Secondary equivalent (e.g. `≈ $X/mo`) muted,
+   below, never inline with the hero.
+2. **Cost pair + charge strip** — a 2-col row of the two headline money figures
+   (e.g. `Funded` / `Total payback`), then a full-width tinted `#F4F8F5` strip for
+   the single derived charge (`Finance charge`). The pair + strip form an identity
+   the borrower can verify (Funded + Finance charge = Total payback).
+3. **Secondary metrics row** — exactly **4 equal cells**, small monospace values,
+   tiny uppercase labels (`Factor rate` / `Est. APR` / `Cost / $1` / `Maturity`).
+   Carry the `pdf-stats-grid` class so print styling applies. APR always `*`-footnoted.
+4. **Payoff / savings banner** — see §14. Green-tinted, brand left-accent.
+5. **Talk track** — "What you tell the borrower," collapsible (∧/∨), scrollable body
+   (`max-height:80px`); secondary footer holds the APR `*` note. See §5.
+6. **CTA stack** — Save Estimate as PDF (primary) / Copy Scenario (secondary) /
+   footer text links. See §5.
+
+### Component tokens (reuse, don't reinvent)
+- **Metric label:** `10px`, weight 700, uppercase, `0.04em` tracking, `#64748B`.
+- **Metric value:** `16px` weight 800 (`#111827`); secondary-row values `13px`
+  weight 700, `font-variant-numeric: tabular-nums`.
+- **Charge strip / tinted block:** `#F4F8F5` bg, `8px` radius.
+- **Optional input** (e.g. Borrower State): lighter border `#EEF2EF`, `#FAFCFA`
+  bg, `— optional` suffix in `#9CA3AF`, lowercase circle-`i` tooltip (never a
+  paperclip, never a status dot).
+- **Prepared-by block:** `#F4F8F5` bg, `#E3EFE8` border, `12px` radius; the
+  section label is brand-dark; sub-note `10.5px` `#6B7280`.
+
+## 17. Modal Standard (Payoff Points, Compare, future)
+
+All calculator modals share one shell so they look identical:
+- **Backdrop** `rgba(15,23,42,0.45)`, flex-centered (`align-items:center` — no dead
+  space, BRANDING §12). Toggle a single `.open` class; close on backdrop click and
+  on `Escape`.
+- **Card** white, `16px` radius, `max-width:520px` (`760px` for side-by-side like
+  Compare), `max-height:88vh` scroll. Header = title (16/800) + `×` close.
+- **Instructional context** uses the **amber tile** (`#FFFBEB` bg, `#FDE68A`
+  border) — the only place amber appears in calculator UI besides compliance flags.
+- **Mode switches** use the **pill-tab** pattern (`.lp-tab`, active = brand-dark
+  fill). Selectable options use **pills** (`.lp-pill`); multi-select accents go
+  green → blue → purple in that order.
+- Modals never carry computed-output color rules from §4 onto their own chrome.
