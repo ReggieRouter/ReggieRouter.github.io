@@ -159,10 +159,14 @@ If user is on variant 4 and unchecks pre-pay: snap back to variant 1 silently.
 - `align-items: center` on main flex container
 
 ### Action buttons (exact labels — deviation is a bug)
-- `Copy` — solid dark green fill (#14532D), white text
-- `Save PDF` — dark green outline (#14532D), transparent background
-- `Save PDF` is **always present** — never skip it
-- `Copy` above `Save PDF`, always
+**Updated standard (LEN-123, supersedes the old "Copy on top" rule).** CTA stack,
+top to bottom:
+- Primary: `Save Estimate as PDF` — solid brand-dark fill (`#1A3C2E`), white text, full width
+- Secondary: `Copy Scenario` — brand-dark outline, transparent fill, full width
+- Footer row (subtle text links): `+ Compare scenarios` (left) · `🕐 Quote Log` (right)
+
+`Save Estimate as PDF` is **always present** — never skip it. Both the PDF save and
+`Copy Scenario` fire `saveEstimate()` (see §15 Quote Log).
 
 ### Copy output format
 ```
@@ -384,3 +388,126 @@ lives in `markdowns/LEGAL.md` only — reference, don't copy:
   the two scripts + host div
 - Never hardcode state-specific notes in a calculator; add them to
   `compliance-rules.js` (and LEGAL.md §13) instead
+
+---
+
+## 14. Display Terminology Standards (LEN-123)
+
+Apply these display terms consistently across **all** calculators going forward.
+Canonicalized from the Payment Breakdown handoff (2026-06-08).
+
+| Use this | Not this |
+|---|---|
+| Buyout amount | Payoff, Payoff amount |
+| Finance charge | Interest, Interest charge |
+| Maturity | Maturity date, End date |
+| Funded | Loan amount, Principal |
+| Total payback | Total repayment, Total cost |
+| Factor rate | Multiplier, Cost per dollar (in labels) |
+| Borrower state | State, Location |
+| Prepared by | Submitted by, From |
+| Estimate | Quote (in document disclaimers) |
+| Quote | Estimate (in nav/CTA labels — "Save Estimate as PDF" uses *Estimate*; "Quote Log" uses *Quote*) |
+
+Notes:
+- **"Finance charge"** is the chosen display label (it replaces the old "Total
+  interest"). It is a TILA/Reg-Z term of art; this is a deliberate copy decision,
+  not a claim that an MCA is a loan. The §3 compliance rule still holds: never
+  pitch an MCA's cost as "interest" or call the product a "loan."
+- **Borrower State** field: optional, lighter styling, `[i]` tooltip
+  ("Will check for state-specific disclosure requirements …"). It drives the
+  compliance engine via `LPCompliance.setState()` + `_renderAllHosts()`; the
+  engine's own host selector is hidden (the field is the single entry point).
+- **Prepared by**: single free-text field, green-tinted block at the bottom of the
+  input column. Feeds the PDF deal-summary; if blank, the line is omitted (no
+  broken layout). Placeholder: `e.g. John Smith · ABC Funding Solutions`.
+
+### Payoff banner (output column)
+Between the secondary metrics row and the talk track. Line 1: tag icon +
+`Save $X with early payoff by <date>` then a muted plain-text `···` affordance
+(not a button/pill) that opens the **Payoff Points modal**. Line 2:
+`Buyout amount: $X` + `[i]` tooltip. Do not repeat Maturity here (it lives in the
+secondary metrics row).
+
+---
+
+## 15. Quote Log (cross-tool, LEN-123)
+
+A cross-tool log of every estimate generated on the site (Payment Breakdown, DSCR,
+Fundability, NAICS, Deal Read, future calculators). Page: `/quote-log`. Nav: left
+panel, below the tool links.
+
+**Every calculator must fire `saveEstimate()`** on PDF generation **and** on
+"Copy Scenario". The shared utility is `js/quote-log.js` — import it as a module
+(`<script type="module" src="../js/quote-log.js"></script>`); it exposes
+`window.saveEstimate` / `window.LPQuoteLog`.
+
+```javascript
+saveEstimate({
+  calculator_type: 'payment_breakdown',   // own string per calculator
+  params: { /* everything needed to restore calculator state */ },
+  pdf_generated: true,                     // false for Copy Scenario
+  prepared_for: "Joe's Landscaping"        // optional
+});
+```
+
+- `params` is **schemaless per calculator** — each calculator owns its own shape;
+  no migration when a new calculator is added.
+- Records persist to Supabase (`estimates`, tied to `user_id`) and are mirrored to
+  `localStorage` so the log works offline / logged-out / before the table exists.
+- **Restore** re-fills the calculator from `params` via `sessionStorage` —
+  **never the URL** (no PII in URLs, §9). Calculators call
+  `LPQuoteLog.consumeRestorePayload('<type>')` on load.
+- **Freemium:** Free shows the last 10 (display cap only — all rows are retained
+  in the DB for Pro eligibility). Pro: full history, deal naming, shareable links,
+  CSV export.
+- Schema + RLS migration: `supabase/estimates.sql`.
+
+---
+
+## 16. Output Column Hierarchy (canonical — all calculators)
+
+Reference build: Payment Breakdown (`calculators/AmoScheduleCalculator.html`).
+Replicate this top-to-bottom order so every calculator reads the same way:
+
+1. **Hero number** — the one figure the rep needs in 10s. `42px`, weight 700/900,
+   brand-dark, monospace numerals. Secondary equivalent (e.g. `≈ $X/mo`) muted,
+   below, never inline with the hero.
+2. **Cost pair + charge strip** — a 2-col row of the two headline money figures
+   (e.g. `Funded` / `Total payback`), then a full-width tinted `#F4F8F5` strip for
+   the single derived charge (`Finance charge`). The pair + strip form an identity
+   the borrower can verify (Funded + Finance charge = Total payback).
+3. **Secondary metrics row** — exactly **4 equal cells**, small monospace values,
+   tiny uppercase labels (`Factor rate` / `Est. APR` / `Cost / $1` / `Maturity`).
+   Carry the `pdf-stats-grid` class so print styling applies. APR always `*`-footnoted.
+4. **Payoff / savings banner** — see §14. Green-tinted, brand left-accent.
+5. **Talk track** — "What you tell the borrower," collapsible (∧/∨), scrollable body
+   (`max-height:80px`); secondary footer holds the APR `*` note. See §5.
+6. **CTA stack** — Save Estimate as PDF (primary) / Copy Scenario (secondary) /
+   footer text links. See §5.
+
+### Component tokens (reuse, don't reinvent)
+- **Metric label:** `10px`, weight 700, uppercase, `0.04em` tracking, `#64748B`.
+- **Metric value:** `16px` weight 800 (`#111827`); secondary-row values `13px`
+  weight 700, `font-variant-numeric: tabular-nums`.
+- **Charge strip / tinted block:** `#F4F8F5` bg, `8px` radius.
+- **Optional input** (e.g. Borrower State): lighter border `#EEF2EF`, `#FAFCFA`
+  bg, `— optional` suffix in `#9CA3AF`, lowercase circle-`i` tooltip (never a
+  paperclip, never a status dot).
+- **Prepared-by block:** `#F4F8F5` bg, `#E3EFE8` border, `12px` radius; the
+  section label is brand-dark; sub-note `10.5px` `#6B7280`.
+
+## 17. Modal Standard (Payoff Points, Compare, future)
+
+All calculator modals share one shell so they look identical:
+- **Backdrop** `rgba(15,23,42,0.45)`, flex-centered (`align-items:center` — no dead
+  space, BRANDING §12). Toggle a single `.open` class; close on backdrop click and
+  on `Escape`.
+- **Card** white, `16px` radius, `max-width:520px` (`760px` for side-by-side like
+  Compare), `max-height:88vh` scroll. Header = title (16/800) + `×` close.
+- **Instructional context** uses the **amber tile** (`#FFFBEB` bg, `#FDE68A`
+  border) — the only place amber appears in calculator UI besides compliance flags.
+- **Mode switches** use the **pill-tab** pattern (`.lp-tab`, active = brand-dark
+  fill). Selectable options use **pills** (`.lp-pill`); multi-select accents go
+  green → blue → purple in that order.
+- Modals never carry computed-output color rules from §4 onto their own chrome.

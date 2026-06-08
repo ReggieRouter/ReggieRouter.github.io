@@ -995,6 +995,112 @@
         body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) th:nth-child(8),
         body.pdf-export-mode .table-scroll-container table:not(.amo-prepay-off) td:nth-child(8) { width: 15% !important; }
     </style>
+    <style>
+        /* ── Quote Log / handoff additions (LEN-123) ───────────────────────────── */
+        /* Brand tokens used here: dark #1A3C2E, mid #2D6A4F, muted #6B7280 */
+
+        /* Optional-field label (Borrower state) */
+        .lp-optlabel { font-size:10px; letter-spacing:1.2px; font-weight:600; color:#6B7280;
+            text-transform:uppercase; display:flex; align-items:center; margin-bottom:6px; }
+        .lp-optnote { font-weight:400; letter-spacing:0; text-transform:none; color:#9CA3AF; margin-left:4px; }
+        /* Lighter styling for optional inputs */
+        .lp-input-light { border-color:#EEF2EF !important; background:#FAFCFA !important; }
+        .lp-input-light select { font-size:13px; color:#374151; }
+        /* The compliance host renders its own duplicate state selector — hide that
+           label/select; keep its disclosure note (the borrower-state field below
+           drives it via LPCompliance.setState). */
+        [data-lp-compliance-host] > div > label { display:none !important; }
+
+        /* Prepared by block */
+        .lp-preparedby { background:#F4F8F5; border:1px solid #E3EFE8; border-radius:12px; padding:14px 14px 12px; }
+        .lp-preparedby .lp-section-label { color:#1A3C2E; margin-bottom:8px; }
+        .lp-preparedby-input { width:100%; border:1px solid #D9E5DE; border-radius:8px; padding:9px 11px;
+            font-size:13px; color:#111827; background:#fff; outline:none; }
+        .lp-preparedby-input:focus { border-color:#2D6A4F; box-shadow:0 0 0 2px rgba(45,106,79,0.15); }
+        .lp-preparedby-note { font-size:10.5px; color:#6B7280; line-height:1.45; margin-top:7px; }
+
+        /* Output metrics */
+        .lp-metric-label { color:#64748B; font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:0.04em; margin-bottom:3px; }
+        .lp-metric-val { font-weight:800; color:#111827; font-size:16px; }
+        .lp-metric-val-sm { font-weight:700; color:#111827; font-size:13px; font-variant-numeric:tabular-nums; }
+        .lp-finance-strip { display:flex; align-items:baseline; justify-content:space-between;
+            background:#F4F8F5; border-radius:8px; padding:9px 12px; }
+        .lp-finance-strip .lp-metric-label { margin-bottom:0; }
+        .lp-secondary-metrics .lp-metric-label { font-size:9px; }
+
+        /* Payoff banner */
+        .lp-payoff-banner { background:#F0FDF4; border:1px solid #BBF7D0; border-left:4px solid #1A3C2E;
+            border-radius:12px; padding:12px 14px; overflow:hidden; }
+        .lp-payoff-line1 { display:flex; align-items:center; gap:8px; }
+        .lp-payoff-line1 #outSavingsPhrase-1, .lp-payoff-line1 [id^="outSavingsPhrase-"] {
+            font-size:15px; font-weight:700; color:#1A3C2E; line-height:1.3; }
+        .lp-payoff-dots { color:#6B7280; font-size:11px; font-weight:400; cursor:pointer; letter-spacing:1px;
+            user-select:none; transition:color 120ms; padding:0 2px; }
+        .lp-payoff-dots:hover { color:#2D6A4F; }
+        .lp-payoff-line2 { font-size:11.5px; color:#166534; margin-top:6px; display:flex; align-items:center; gap:4px; }
+
+        /* Talk-track collapse */
+        .takeaway-head { display:flex; align-items:center; justify-content:space-between; }
+        .takeaway-collapse { background:transparent; border:none; cursor:pointer; color:#9CA3AF; padding:2px; line-height:0; }
+        .takeaway-collapse:hover { color:#2D6A4F; }
+        .takeaway-scroll { max-height:80px; overflow:auto; margin-top:4px; }
+        .takeaway.collapsed .takeaway-scroll { display:none; }
+
+        /* CTAs */
+        .lp-cta-primary, .lp-cta-secondary { display:flex; align-items:center; justify-content:center; gap:8px;
+            width:100%; padding:12px 16px; border-radius:10px; font-size:13px; font-weight:700;
+            letter-spacing:0.02em; cursor:pointer; transition:all 120ms; }
+        .lp-cta-primary { background:#1A3C2E; color:#fff; border:1px solid #1A3C2E; }
+        .lp-cta-primary:hover { background:#2D6A4F; }
+        .lp-cta-secondary { background:transparent; color:#1A3C2E; border:1px solid #1A3C2E; }
+        .lp-cta-secondary:hover { background:#F0FDF4; }
+        .lp-cta-footer { display:flex; align-items:center; justify-content:space-between; margin-top:2px; }
+        .lp-textlink { font-size:12px; color:#6B7280; cursor:pointer; text-decoration:none; transition:color 120ms; }
+        .lp-textlink:hover { color:#2D6A4F; }
+
+        /* Modals (Payoff Points / Compare) */
+        .lp-modal-backdrop { position:fixed; inset:0; background:rgba(15,23,42,0.45); z-index:1000;
+            display:none; align-items:center; justify-content:center; padding:20px; }
+        .lp-modal-backdrop.open { display:flex; }
+        .lp-modal { background:#fff; border-radius:16px; box-shadow:0 24px 60px rgba(0,0,0,0.25);
+            width:100%; max-width:520px; max-height:88vh; overflow:auto; }
+        .lp-modal.lp-modal-wide { max-width:760px; }
+        .lp-modal-head { display:flex; align-items:center; justify-content:space-between; padding:18px 20px 12px; }
+        .lp-modal-title { font-size:16px; font-weight:800; color:#111827; }
+        .lp-modal-x { background:transparent; border:none; font-size:22px; line-height:1; color:#6B7280; cursor:pointer; }
+        .lp-modal-x:hover { color:#1A3C2E; }
+        .lp-modal-body { padding:0 20px 20px; }
+        .lp-amber-tile { background:#FFFBEB; border:1px solid #FDE68A; border-radius:10px; padding:11px 13px;
+            font-size:12px; color:#92400E; line-height:1.5; margin-bottom:14px; }
+        .lp-tabs { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+        .lp-tab { padding:7px 14px; border-radius:999px; border:1px solid #E5E7EB; background:#fff;
+            font-size:12px; font-weight:600; color:#374151; cursor:pointer; }
+        .lp-tab.active { background:#1A3C2E; color:#fff; border-color:#1A3C2E; }
+        .lp-pill-row { display:flex; flex-wrap:wrap; gap:8px; }
+        .lp-pill { padding:8px 14px; border-radius:999px; border:1px solid #E5E7EB; background:#fff;
+            font-size:12px; font-weight:600; color:#374151; cursor:pointer; text-align:left; }
+        .lp-pill.sel-green { background:#F0FDF4; border-color:#1A3C2E; color:#166534; }
+        .lp-pill.sel-blue  { background:#EFF6FF; border-color:#2563EB; color:#1D4ED8; }
+        .lp-pill.sel-purple{ background:#F5F3FF; border-color:#7C3AED; color:#6D28D9; }
+        .lp-pill .lp-pill-sub { display:block; font-weight:400; font-size:10.5px; color:#6B7280; margin-top:2px; }
+        .lp-modal-date { width:100%; border:1px solid #E5E7EB; border-radius:8px; padding:9px 11px; font-size:13px; }
+        .lp-modal-help { font-size:11px; color:#6B7280; margin-top:6px; }
+        /* Compare modal columns */
+        .lp-compare-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        @media (max-width:560px){ .lp-compare-cols { grid-template-columns:1fr; } }
+        .lp-compare-col h4 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+            color:#6B7280; margin-bottom:10px; }
+        .lp-compare-field { margin-bottom:10px; }
+        .lp-compare-field label { display:block; font-size:10px; font-weight:600; text-transform:uppercase;
+            letter-spacing:0.06em; color:#6B7280; margin-bottom:3px; }
+        .lp-compare-field input { width:100%; border:1px solid #E5E7EB; border-radius:8px; padding:8px 10px; font-size:13px; }
+        .lp-compare-field .lp-locked { background:#F9FAFB; color:#374151; }
+        .lp-compare-out { font-size:12px; color:#374151; line-height:1.9; border-top:1px solid #F1F5F9; padding-top:10px; margin-top:6px; }
+        .lp-compare-out .v { float:right; font-weight:700; color:#111827; font-variant-numeric:tabular-nums; }
+        .lp-compare-delta { background:#1A3C2E; color:#fff; border-radius:10px; padding:12px 14px; margin-top:14px; }
+        .lp-compare-delta .lp-delta-label { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; opacity:0.85; }
+        .lp-compare-delta .lp-delta-val { font-size:18px; font-weight:800; margin-top:3px; }
+    </style>
 <script src="../js/config.js"></script>
 <script type="importmap">
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
@@ -1005,6 +1111,8 @@
   if (!profile) return;
   logUsage('amortization', 'view');
 </script>
+<!-- Quote Log: exposes window.saveEstimate / window.LPQuoteLog (LEN-123) -->
+<script type="module" src="../js/quote-log.js"></script>
 </head>
 <body>
 
@@ -1017,6 +1125,12 @@
 
         <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
         <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
+
+        <!-- Restored-from-Quote-Log banner (LEN-123) -->
+        <div id="lp-restore-banner" class="no-print" style="display:none; align-items:center; gap:8px; max-width:1000px; margin:0 auto 12px; padding:9px 13px; background:#FFFBEB; border:1px solid #FDE68A; border-radius:10px; font-size:12px; color:#92400E;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-6.36 2.64L3 8"/><path d="M3 3v5h5"/></svg>
+            <span>Restored from your Quote Log — review the figures before generating a new PDF.</span>
+        </div>
 
         <div id="cardsContainer" class="cards-container">
             <!-- Cards injected here via JS -->
@@ -1036,8 +1150,74 @@
         Copied!
     </div>
 
+    <!-- Payoff Points modal (LEN-123) -->
+    <div class="lp-modal-backdrop" id="payoffModal" onclick="if(event.target===this)closePayoffModal()">
+        <div class="lp-modal" role="dialog" aria-modal="true" aria-labelledby="payoffModalTitle">
+            <div class="lp-modal-head">
+                <div class="lp-modal-title" id="payoffModalTitle">Payoff points</div>
+                <button class="lp-modal-x" onclick="closePayoffModal()" aria-label="Close">&times;</button>
+            </div>
+            <div class="lp-modal-body">
+                <div class="lp-amber-tile">On the amortization table, you can click any row's payoff amount to pin it as a payoff scenario (up to 3 total). Selected rows will appear highlighted and carry through to the PDF.</div>
+                <div class="lp-tabs">
+                    <button class="lp-tab active" data-ptab="preset" onclick="payoffTab('preset')">Preset dates</button>
+                    <button class="lp-tab" data-ptab="custom" onclick="payoffTab('custom')">Custom date</button>
+                    <button class="lp-tab" data-ptab="schedule" onclick="payoffTab('schedule')">Pick from schedule</button>
+                </div>
+                <div data-ppane="preset"><div class="lp-pill-row" id="payoffPresetPills"></div></div>
+                <div data-ppane="custom" style="display:none">
+                    <input type="date" class="lp-modal-date" id="payoffCustomDate" onchange="payoffPickCustom()">
+                    <div class="lp-modal-help">Snaps to the nearest payment date within the contract term.</div>
+                </div>
+                <div data-ppane="schedule" style="display:none"><div class="lp-pill-row" id="payoffScheduleList" style="flex-direction:column; max-height:320px; overflow:auto"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compare scenarios modal (LEN-123) -->
+    <div class="lp-modal-backdrop" id="compareModal" onclick="if(event.target===this)closeCompareModal()">
+        <div class="lp-modal lp-modal-wide" role="dialog" aria-modal="true" aria-labelledby="compareModalTitle">
+            <div class="lp-modal-head">
+                <div class="lp-modal-title" id="compareModalTitle">Compare scenarios</div>
+                <button class="lp-modal-x" onclick="closeCompareModal()" aria-label="Close">&times;</button>
+            </div>
+            <div class="lp-modal-body">
+                <div class="lp-compare-cols">
+                    <div class="lp-compare-col">
+                        <h4>Scenario A · current</h4>
+                        <div class="lp-compare-field"><label>Funded</label><input class="lp-locked" id="cmpA_amt" readonly></div>
+                        <div class="lp-compare-field"><label>Cost / $1 (factor)</label><input class="lp-locked" id="cmpA_factor" readonly></div>
+                        <div class="lp-compare-field"><label>Term (months)</label><input class="lp-locked" id="cmpA_term" readonly></div>
+                        <div class="lp-compare-out" id="cmpA_out"></div>
+                    </div>
+                    <div class="lp-compare-col">
+                        <h4>Scenario B · what-if</h4>
+                        <div class="lp-compare-field"><label>Funded</label><input type="number" id="cmpB_amt" oninput="recalcCompare()"></div>
+                        <div class="lp-compare-field"><label>Cost / $1 (factor)</label><input type="number" step="0.01" id="cmpB_factor" oninput="recalcCompare()"></div>
+                        <div class="lp-compare-field"><label>Term (months)</label><input type="number" id="cmpB_term" oninput="recalcCompare()"></div>
+                        <div class="lp-compare-out" id="cmpB_out"></div>
+                        <div class="lp-compare-delta"><div class="lp-delta-label">Difference vs Scenario A</div><div class="lp-delta-val" id="cmpDelta">—</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const WATERMARK_FOOTER = "Powered by LendPaper | hello@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.";
+
+        // US states for the Borrower State field (drives the compliance engine)
+        const LP_STATES = {
+            AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',
+            DE:'Delaware',DC:'District of Columbia',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',
+            IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',
+            MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',
+            NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',
+            OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',
+            SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',
+            WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming'
+        };
+        const LP_STATE_OPTIONS = Object.keys(LP_STATES).map(c => `<option value="${c}">${LP_STATES[c]}</option>`).join('');
 
         function populatePdfParams(id) {
             const amt = parseFloat(document.getElementById(`amt-${id}`)?.value) || 0;
@@ -1073,6 +1253,14 @@
             set(`ppFreq-${id}`, freqLabels[freq] || freq);
             set(`ppFee-${id}`, feeText);
             set(`ppStart-${id}`, startDate);
+            const lc = lastCalc[id];
+            set(`ppPayback-${id}`, lc ? fmtUsd.format(lc.payback) : '—');
+            set(`ppFinance-${id}`, lc ? fmtUsd.format(lc.totalCost) : '—');
+            // Prepared by — feeds the PDF; row stays hidden when blank (no broken layout)
+            const prep = (document.getElementById(`preparedBy-${id}`)?.value || '').trim();
+            const prepRow = document.getElementById(`ppPreparedByRow-${id}`);
+            set(`ppPreparedBy-${id}`, prep);
+            if (prepRow) prepRow.style.display = prep ? '' : 'none';
         }
 
         async function handleLendPaperSavePDF() {
@@ -1124,6 +1312,49 @@
             const filename = `LendPaper_Amortization_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
             await window.PDF_HELPER.generatePDF(element, "PAYMENT BREAKDOWN", filename, btn, origText, isMultiScenario);
+
+            // Quote Log: record one estimate per scenario card (LEN-123)
+            cards.forEach(card => {
+                const cid = card.id.split('-')[1];
+                logEstimate(cid, true);
+            });
+        }
+
+        // Build the restorable params payload for one card (no PII in URLs — see CALCULATORS.md §9)
+        function collectParams(id) {
+            const g = eid => document.getElementById(`${eid}-${id}`);
+            return {
+                amount: cleanNumericInput(g('amt')?.value),
+                rate: cleanNumericInput(g('factor')?.value),
+                term: cleanNumericInput(g('term')?.value),
+                term_unit: g('termWrap')?.dataset.termUnit || 'mos',
+                origination_fee: cleanNumericInput(g('fee')?.value),
+                fee_mode: g('feeWrap')?.dataset.feeMode || 'pct',
+                frequency: g('freq')?.value || 'weekly',
+                start_date: g('start')?.value || '',
+                prepay_enabled: !!g('enablePrepay')?.checked,
+                discount_pct: cleanNumericInput(g('discPct')?.value),
+                borrower_state: g('state')?.value || (window.LPCompliance?.getState?.() || ''),
+                prepared_by: (g('preparedBy')?.value || '').trim(),
+                payoff_periods: (payoffPins[id] && payoffPins[id].length)
+                    ? [...payoffPins[id]]
+                    : (rowSelection[id]?.period ? [rowSelection[id].period] : []),
+            };
+        }
+
+        // Fire saveEstimate() if the Quote Log utility is loaded. Never blocks.
+        function logEstimate(id, pdfGenerated) {
+            if (typeof window.saveEstimate !== 'function') return;
+            const params = collectParams(id);
+            if (!params.amount || !params.rate || !params.term) return; // don't log empty deals
+            try {
+                window.saveEstimate({
+                    calculator_type: 'payment_breakdown',
+                    params,
+                    pdf_generated: !!pdfGenerated,
+                    prepared_by: params.prepared_by || null,
+                });
+            } catch (e) { /* logging must never break the calculator */ }
         }
         
         const holidays = [
@@ -1195,6 +1426,7 @@
             return `${factor.toFixed(2)}× factor — ${centsDisplay}¢ on the dollar, about a ~${apr.toFixed(1)}% APR`;
         }
         const rowSelection = {};
+        const payoffPins = {};   // Quote Log: pinned payoff periods per card (LEN-123)
         const cardTracks = {};
         const PAYOFF_MARK_HTML = '<span class="payoff-mark" style="font-size:10px;font-weight:700;color:#1A3C2E;white-space:nowrap">&middot; payoff &#10003;</span>';
         const lastCalc = {};
@@ -1533,6 +1765,31 @@
                             </div>
                         </div>
 
+                        <!-- Borrower State (optional) — drives the compliance engine -->
+                        <div class="mt-6">
+                            <div class="lp-optlabel">
+                                Borrower State
+                                <span class="tooltip ml-1 no-print">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                    <span class="tooltiptext">Will check for state-specific disclosure requirements (CA, NY, VA, UT, and others)</span>
+                                </span>
+                                <span class="lp-optnote">— optional</span>
+                            </div>
+                            <div class="lp-input-group lp-input-light pr-2">
+                                <select id="state-${id}" class="w-full py-2 px-3 outline-none text-[#374151] text-[13px] bg-transparent appearance-none cursor-pointer" onchange="setBorrowerState(${id}, this.value)">
+                                    <option value="">Select state…</option>
+                                    ${LP_STATE_OPTIONS}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Prepared by -->
+                        <div class="lp-preparedby mt-6">
+                            <div class="lp-section-label">Prepared by</div>
+                            <input type="text" id="preparedBy-${id}" class="lp-preparedby-input" placeholder="e.g. John Smith · ABC Funding Solutions" oninput="syncPreparedBy(${id})">
+                            <div class="lp-preparedby-note">Your name or company — appears as the document preparer, not as a lender or offer.</div>
+                        </div>
+
                         <input type="number" id="discPct-${id}" value="25" min="0" max="100" style="display:none">
                     </div>
 
@@ -1540,14 +1797,17 @@
                         <div>
                             <div class="pdf-loan-params" id="pdfParams-${id}">
                                 <div class="pdf-params-grid">
-                                    <div><div class="pdf-param-label">Financing Amount</div><div class="pdf-param-value" id="ppAmt-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Funded</div><div class="pdf-param-value" id="ppAmt-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Factor Rate</div><div class="pdf-param-value" id="ppFactor-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Est. APR</div><div class="pdf-param-value" id="ppApr-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Term</div><div class="pdf-param-value" id="ppTerm-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Total payback</div><div class="pdf-param-value" id="ppPayback-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Finance charge</div><div class="pdf-param-value" id="ppFinance-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Payment Frequency</div><div class="pdf-param-value" id="ppFreq-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Origination Fee</div><div class="pdf-param-value" id="ppFee-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Start Date</div><div class="pdf-param-value" id="ppStart-${id}">—</div></div>
                                 </div>
+                                <div class="pdf-param-preparedby" id="ppPreparedByRow-${id}" style="display:none; margin-top:8px; font-size:11px; color:#374151;">Prepared by <strong id="ppPreparedBy-${id}"></strong></div>
                             </div>
                             <div class="mb-6 pb-6 border-b border-[#E5E7EB] pdf-hero-block">
                                 <div class="text-[11px] text-[#64748B] font-bold uppercase tracking-wider mb-2" id="lblPmt-${id}">Est. payment</div>
@@ -1555,34 +1815,53 @@
                                 <div id="moEquiv-${id}" class="text-[13px] text-[#9CA3AF]" style="display:none;margin-top:6px"></div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-y-6 gap-x-8 text-[13px] mb-8 pdf-stats-grid">
+                            <!-- Cost trio: Funded / Total payback, then Finance charge strip -->
+                            <div class="grid grid-cols-2 gap-x-8 gap-y-2 mb-3">
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">Full-term cost</div>
-                                    <div class="font-extrabold text-[#111827] text-[16px]" id="outPayback-${id}">$0.00</div>
+                                    <div class="lp-metric-label">Funded</div>
+                                    <div class="lp-metric-val" id="outFunded-${id}">$0.00</div>
                                 </div>
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">Total interest</div>
-                                    <div class="font-extrabold text-[#111827] text-[16px]" id="outInterest-${id}">$0.00</div>
+                                    <div class="lp-metric-label">Total payback</div>
+                                    <div class="lp-metric-val" id="outPayback-${id}">$0.00</div>
+                                </div>
+                            </div>
+                            <div class="lp-finance-strip mb-6">
+                                <span class="lp-metric-label">Finance charge</span>
+                                <span class="lp-metric-val" id="outFinance-${id}">$0.00</span>
+                            </div>
+
+                            <!-- Secondary metrics: Factor / Est. APR / Cost per $1 / Maturity -->
+                            <div class="grid grid-cols-4 gap-x-3 gap-y-2 mb-6 lp-secondary-metrics pdf-stats-grid">
+                                <div>
+                                    <div class="lp-metric-label">Factor rate</div>
+                                    <div class="lp-metric-val-sm" id="outFactor-${id}">—</div>
                                 </div>
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">Cost per Dollar</div>
-                                    <div class="font-extrabold text-[#111827] text-[16px]" id="outCents-${id}">0¢</div>
+                                    <div class="lp-metric-label">Est. APR<sup title="A factor rate alone is not a complete quote — APR disclosure is required on a specific offer in CA, NY, and other states" class="cursor-help" style="font-size:8px;font-weight:700;vertical-align:super">*</sup></div>
+                                    <div class="lp-metric-val-sm" id="outApr-${id}">0%</div>
                                 </div>
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">APR<sup title="A factor rate alone is not a complete quote — APR disclosure is required on a specific offer in CA, NY, and other states" class="cursor-help" style="font-size:8px;font-weight:700;vertical-align:super">*</sup></div>
-                                    <div class="font-extrabold text-[#111827] text-[16px]" id="outApr-${id}">0%</div>
+                                    <div class="lp-metric-label">Cost / $1</div>
+                                    <div class="lp-metric-val-sm" id="outCents-${id}">0¢</div>
+                                </div>
+                                <div>
+                                    <div class="lp-metric-label">Maturity</div>
+                                    <div class="lp-metric-val-sm" id="outMaturity-${id}">—</div>
                                 </div>
                             </div>
 
-                            <div id="prepaySummary-${id}" class="hidden rounded-xl border mb-6 callout" style="background:#F0FDF4; border-color:#BBF7D0; border-left: 4px solid #1A3C2E; overflow:hidden">
-                                 <div class="flex items-center gap-2 px-4 pt-4 pb-2">
+                            <div id="prepaySummary-${id}" class="hidden lp-payoff-banner mb-6 callout">
+                                 <div class="lp-payoff-line1">
                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                                     <span id="outSavingsPhrase-${id}" style="font-size:15px; font-weight:700; color:#1A3C2E; line-height:1.3">—</span>
+                                     <span id="outSavingsPhrase-${id}">—</span><span class="lp-payoff-dots no-print" role="button" tabindex="0" title="Choose payoff points" onclick="openPayoffModal(${id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPayoffModal(${id});}">···</span>
                                  </div>
-                                 <div class="flex flex-wrap gap-x-3 gap-y-1 px-4 pb-4" style="font-size:11.5px; color:#166534">
-                                     <span>Payoff amount: <strong id="outBuyout-${id}">—</strong></span>
-                                     <span aria-hidden="true" style="color:#86EFAC">&middot;</span>
-                                     <span>Full term: <strong id="outFullTermDate-${id}">—</strong></span>
+                                 <div class="lp-payoff-line2">
+                                     <span>Buyout amount: <strong id="outBuyout-${id}">—</strong></span>
+                                     <span class="tooltip no-print" style="line-height:0">
+                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                         <span class="tooltiptext">The estimated amount to close the contract early. Contact your lender for an official quote.</span>
+                                     </span>
                                  </div>
                                  <span id="outSavings-${id}" style="display:none">$0.00</span>
                                  <span id="outRenDate-${id}" style="display:none">—</span>
@@ -1591,9 +1870,16 @@
                             <div class="takeaway" id="takeaway-box-${id}" tabindex="0" onkeydown="handleTakeawayKey(event, ${id})" onmouseenter="showCounter(${id})" onmouseleave="hideCounter(${id})">
                                 <div class="takeaway-main">
                                     <div class="takeaway-body">
-                                        <span class="takeaway-eyebrow">What you tell the borrower</span>
-                                        <span id="takeaway-content-${id}"></span>
-                                        <div id="track-counter-${id}" class="takeaway-counter" style="display:none"></div>
+                                        <div class="takeaway-head">
+                                            <span class="takeaway-eyebrow">What you tell the borrower</span>
+                                            <button type="button" class="takeaway-collapse no-print" id="ttCollapse-${id}" onclick="toggleTakeaway(${id})" aria-label="Collapse talk track">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                                            </button>
+                                        </div>
+                                        <div class="takeaway-scroll">
+                                            <span id="takeaway-content-${id}"></span>
+                                            <div id="track-counter-${id}" class="takeaway-counter" style="display:none"></div>
+                                        </div>
                                     </div>
                                     <div class="takeaway-nav no-print">
                                         <button onclick="prevTrack(${id})" class="takeaway-nav-btn tt-arrow-up" type="button" aria-label="Previous track">
@@ -1610,14 +1896,18 @@
                             </div>
 
                             <div class="action-buttons flex flex-col gap-3 mt-5 no-print">
-                                <button onclick="copyResults(${id})" class="lp-copy-btn">
+                                <button onclick="handleLendPaperSavePDF()" class="lp-cta-primary">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                                    Save Estimate as PDF
+                                </button>
+                                <button onclick="copyResults(${id})" class="lp-cta-secondary">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                     Copy Scenario
                                 </button>
-                                <button onclick="handleLendPaperSavePDF()" class="lp-print-btn">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                                    Save as PDF
-                                </button>
+                                <div class="lp-cta-footer">
+                                    <a class="lp-textlink" role="button" tabindex="0" onclick="openCompareModal(${id})" onkeydown="if(event.key==='Enter'){openCompareModal(${id})}">+ Compare scenarios</a>
+                                    <a class="lp-textlink" href="/quote-log" target="_top" title="Quote Log">🕐 Quote Log</a>
+                                </div>
                             </div>
 
                         </div>
@@ -2115,12 +2405,15 @@
                 }
             }
 
-            document.getElementById(`outPayback-${id}`).innerText = fmtUsd.format(payback);
-            document.getElementById(`outInterest-${id}`).innerText = fmtUsd.format(totalCost);
+            const setOut = (eid, val) => { const e = document.getElementById(`${eid}-${id}`); if (e) e.innerText = val; };
+            setOut('outFunded', fmtUsd.format(amt));
+            setOut('outPayback', fmtUsd.format(payback));
+            setOut('outFinance', fmtUsd.format(totalCost));
+            setOut('outFactor', factor.toFixed(2) + '×');
             const rawCents = (totalCost / amt) * 100;
             const centsDisplay = rawCents % 1 === 0 ? rawCents.toFixed(0) : parseFloat(rawCents.toFixed(2)).toString();
-            document.getElementById(`outCents-${id}`).innerText = centsDisplay + '¢';
-            document.getElementById(`outApr-${id}`).innerText = apr.toFixed(1) + '%';
+            setOut('outCents', centsDisplay + '¢');
+            setOut('outApr', apr.toFixed(1) + '%');
             
             let balance = amt, unearnedInterest = totalCost, currentDate = new Date(startDate);
             let paidPrincipal = 0, paidInterest = 0, paidTotal = 0;
@@ -2202,6 +2495,7 @@
             }
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
             lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, netFunded, pYear, centsDisplay, discPct, maturityDate, periods };
+            setOut('outMaturity', maturityDate || '—');
             renderDetailRow(id);
 
             // Park the selected payoff row + panel just under the sticky header so the
@@ -2228,6 +2522,39 @@
             navigator.clipboard.writeText(el ? el.innerText : '');
             const t = document.getElementById('toast'); t.style.opacity = '1';
             setTimeout(() => t.style.opacity = '0', 2000);
+            logEstimate(id, false); // Quote Log: Copy Scenario records an estimate too (LEN-123)
+        }
+
+        // ── Borrower State / Prepared by ──────────────────────────────────────────
+        function setBorrowerState(id, val) {
+            if (window.LPCompliance) {
+                window.LPCompliance.setState(val);
+                if (window.LPCompliance._renderAllHosts) window.LPCompliance._renderAllHosts();
+            }
+            // Keep every scenario card's state field in sync (one borrower)
+            document.querySelectorAll('select[id^="state-"]').forEach(s => { if (s.value !== val) s.value = val; });
+        }
+
+        function syncPreparedBy(id) {
+            const val = document.getElementById(`preparedBy-${id}`)?.value || '';
+            document.querySelectorAll('input[id^="preparedBy-"]').forEach(i => { if (i.value !== val) i.value = val; });
+        }
+
+        // Reflect compliance state into the field (e.g. set on another calculator)
+        document.addEventListener('lp:compliance:statechange', (e) => {
+            const code = (e.detail && e.detail.state) || '';
+            document.querySelectorAll('select[id^="state-"]').forEach(s => { if (s.value !== code) s.value = code; });
+        });
+
+        // ── Talk-track collapse ────────────────────────────────────────────────────
+        function toggleTakeaway(id) {
+            const box = document.getElementById(`takeaway-box-${id}`);
+            if (!box) return;
+            const collapsed = box.classList.toggle('collapsed');
+            const btn = document.getElementById(`ttCollapse-${id}`);
+            if (btn) btn.innerHTML = collapsed
+                ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>'
+                : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
         }
 
         function dismissIntro() {
@@ -2242,11 +2569,178 @@
             document.querySelectorAll('.lp-intro-toggle-btn').forEach(el => el.style.display = 'none');
         }
 
+        // ── Payoff Points modal (LEN-123) ─────────────────────────────────────────
+        let _payoffCard = null;
+
+        function buildSchedule(id) {
+            const rows = [];
+            document.querySelectorAll(`#tableBody-${id} tr[id^="arow-${id}-"]`).forEach(tr => {
+                rows.push({ period: parseInt(tr.id.split('-').pop(), 10), date: tr.dataset.date, buyout: parseFloat(tr.dataset.buyout) });
+            });
+            return rows;
+        }
+
+        function openPayoffModal(id) {
+            _payoffCard = id;
+            payoffTab('preset');
+            renderPayoffPresets(id);
+            renderPayoffSchedule(id);
+            const cd = document.getElementById('payoffCustomDate');
+            if (cd) { cd.min = document.getElementById(`start-${id}`)?.value || ''; cd.value = ''; }
+            document.getElementById('payoffModal').classList.add('open');
+        }
+        function closePayoffModal() { document.getElementById('payoffModal').classList.remove('open'); }
+
+        function payoffTab(tab) {
+            document.querySelectorAll('#payoffModal .lp-tab').forEach(b => b.classList.toggle('active', b.dataset.ptab === tab));
+            document.querySelectorAll('#payoffModal [data-ppane]').forEach(p => p.style.display = (p.dataset.ppane === tab ? '' : 'none'));
+        }
+
+        function renderPayoffPresets(id) {
+            const sched = buildSchedule(id);
+            const el = document.getElementById('payoffPresetPills');
+            if (!sched.length) { el.innerHTML = '<div class="lp-modal-help">Enter deal terms to see payoff points.</div>'; return; }
+            const n = sched.length;
+            const idxs = [...new Set([Math.max(0, Math.round(n * 0.25) - 1), Math.round(n * 0.5) - 1, Math.round(n * 0.75) - 1])].filter(i => i >= 0 && i < n);
+            const cls = ['sel-green', 'sel-blue', 'sel-purple'];
+            const active = rowSelection[id]?.period;
+            el.innerHTML = idxs.map((i, k) => {
+                const r = sched[i];
+                return `<button class="lp-pill ${r.period === active ? cls[k] : ''}" onclick="payoffPick(${id}, ${r.period})">${r.date}<span class="lp-pill-sub">Buyout ${fmtUsd.format(r.buyout)}</span></button>`;
+            }).join('');
+        }
+
+        function renderPayoffSchedule(id) {
+            const sched = buildSchedule(id);
+            const el = document.getElementById('payoffScheduleList');
+            const active = rowSelection[id]?.period;
+            el.innerHTML = sched.map(r => `<button class="lp-pill ${r.period === active ? 'sel-green' : ''}" onclick="payoffPick(${id}, ${r.period})">#${r.period} · ${r.date}<span class="lp-pill-sub">Buyout ${fmtUsd.format(r.buyout)}</span></button>`).join('');
+        }
+
+        function setPayoffPoint(id, period) {
+            if (rowSelection[id] && rowSelection[id].period === period) return;
+            selectAmoRow(id, period);
+        }
+
+        function payoffPick(id, period) {
+            const cb = document.getElementById(`enablePrepay-${id}`);
+            if (cb && !cb.checked) { cb.checked = true; togglePrepay(id); calcCard(id); }
+            setPayoffPoint(id, period);
+            payoffPins[id] = [period];
+            renderPayoffPresets(id);
+            renderPayoffSchedule(id);
+        }
+
+        function payoffPickCustom() {
+            const id = _payoffCard; if (id == null) return;
+            const val = document.getElementById('payoffCustomDate').value;
+            if (!val) return;
+            const target = parseLocalDate(val).getTime();
+            const sched = buildSchedule(id);
+            if (!sched.length) return;
+            let best = sched[0], bestDiff = Infinity;
+            sched.forEach(r => { const d = Math.abs(new Date(r.date).getTime() - target); if (d < bestDiff) { bestDiff = d; best = r; } });
+            payoffPick(id, best.period);
+            payoffTab('preset');
+        }
+
+        // ── Compare scenarios modal (LEN-123) ──────────────────────────────────────
+        let _compareCard = null;
+        function cmpNum(eid) { return cleanNumericInput(document.getElementById(eid)?.value) || 0; }
+
+        function openCompareModal(id) {
+            _compareCard = id;
+            const amt = cleanNumericInput(document.getElementById(`amt-${id}`)?.value) || 0;
+            const factor = cleanNumericInput(document.getElementById(`factor-${id}`)?.value) || 0;
+            const termRaw = cleanNumericInput(document.getElementById(`term-${id}`)?.value) || 0;
+            const termUnit = document.getElementById(`termWrap-${id}`)?.dataset.termUnit || 'mos';
+            const termMonths = termUnit === 'wks' ? termRaw / 4.333 : termUnit === 'days' ? termRaw / 30 : termRaw;
+            document.getElementById('cmpA_amt').value = amt;
+            document.getElementById('cmpA_factor').value = factor;
+            document.getElementById('cmpA_term').value = Math.round(termMonths);
+            document.getElementById('cmpB_amt').value = amt;
+            document.getElementById('cmpB_factor').value = factor;
+            document.getElementById('cmpB_term').value = Math.round(termMonths);
+            recalcCompare();
+            document.getElementById('compareModal').classList.add('open');
+        }
+        function closeCompareModal() { document.getElementById('compareModal').classList.remove('open'); }
+
+        function scenarioMath(amt, factor, termMonths, freq) {
+            const payback = amt * factor;
+            const financeCharge = payback - amt;
+            const pYear = freq === 'daily' ? 252 : freq === 'weekly' ? 52 : freq === 'semimonthly' ? 24 : 12;
+            const periods = Math.max(1, freq === 'daily' ? Math.round(termMonths * 21.66) : freq === 'weekly' ? Math.round(termMonths * 4.333) : freq === 'semimonthly' ? Math.round(termMonths * 2) : Math.round(termMonths));
+            const pmt = payback / periods;
+            const apr = getPeriodRate(amt, pmt, periods) * pYear * 100;
+            return { payback, financeCharge, pmt, apr };
+        }
+
+        function compareOutHTML(s, fl) {
+            return `<div>Payment<span class="v">${fmtUsd.format(s.pmt)}${fl}</span></div>
+                <div>Total payback<span class="v">${fmtUsd.format(s.payback)}</span></div>
+                <div>Finance charge<span class="v">${fmtUsd.format(s.financeCharge)}</span></div>
+                <div>Est. APR<span class="v">${(isFinite(s.apr) ? s.apr : 0).toFixed(1)}%</span></div>`;
+        }
+
+        function recalcCompare() {
+            const id = _compareCard; if (id == null) return;
+            const freq = document.getElementById(`freq-${id}`)?.value || 'weekly';
+            const fl = freq === 'daily' ? '/day' : freq === 'weekly' ? '/wk' : freq === 'semimonthly' ? '/semi-mo' : '/mo';
+            const a = scenarioMath(cmpNum('cmpA_amt'), cmpNum('cmpA_factor'), cmpNum('cmpA_term'), freq);
+            const b = scenarioMath(cmpNum('cmpB_amt'), cmpNum('cmpB_factor'), cmpNum('cmpB_term'), freq);
+            document.getElementById('cmpA_out').innerHTML = compareOutHTML(a, fl);
+            document.getElementById('cmpB_out').innerHTML = compareOutHTML(b, fl);
+            const dEl = document.getElementById('cmpDelta');
+            if (!cmpNum('cmpB_amt') || !cmpNum('cmpB_factor') || !cmpNum('cmpB_term')) { dEl.textContent = '—'; return; }
+            const diff = b.pmt - a.pmt;
+            dEl.textContent = `${fmtUsd.format(Math.abs(diff))} ${diff >= 0 ? 'more' : 'less'}${fl} · ${fmtUsd.format(Math.abs(b.payback - a.payback))} ${b.payback >= a.payback ? 'more' : 'less'} total`;
+        }
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closePayoffModal(); closeCompareModal(); } });
+
+        // ── Restore from Quote Log (LEN-123) ───────────────────────────────────────
+        function applyRestore(id, rec) {
+            const p = rec && rec.params; if (!p) return;
+            const setV = (eid, v) => { const el = document.getElementById(`${eid}-${id}`); if (el != null && v != null && v !== '') el.value = v; };
+            setV('amt', p.amount); setV('factor', p.rate); setV('term', p.term);
+            setV('fee', p.origination_fee); setV('freq', p.frequency); setV('start', p.start_date);
+            setV('discPct', p.discount_pct); setV('state', p.borrower_state); setV('preparedBy', p.prepared_by);
+            // restore term unit + fee mode
+            const tw = document.getElementById(`termWrap-${id}`); if (tw && p.term_unit) { tw.dataset.termUnit = p.term_unit; const lbl = document.getElementById(`termUnitLabel-${id}`); if (lbl) lbl.textContent = p.term_unit; }
+            const fw = document.getElementById(`feeWrap-${id}`); if (fw && p.fee_mode) fw.dataset.feeMode = p.fee_mode;
+            const cb = document.getElementById(`enablePrepay-${id}`); if (cb && typeof p.prepay_enabled === 'boolean') { cb.checked = p.prepay_enabled; togglePrepay(id); }
+            if (p.borrower_state) setBorrowerState(id, p.borrower_state);
+            calcCard(id);
+            // re-pin payoff period(s)
+            if (Array.isArray(p.payoff_periods) && p.payoff_periods.length) {
+                setPayoffPoint(id, p.payoff_periods[0]);
+                payoffPins[id] = [...p.payoff_periods];
+            }
+            const banner = document.getElementById('lp-restore-banner');
+            if (banner) banner.style.display = 'flex';
+        }
+
         window.onload = () => {
             addCard();
             if (typeof window.PDF_HELPER !== 'undefined') {
                 window.PDF_HELPER.initPrintLayout("PAYMENT BREAKDOWN");
             }
+            // Sync borrower state from the shared compliance engine (persists across calculators)
+            const savedState = window.LPCompliance?.getState?.() || '';
+            if (savedState) { const s = document.getElementById('state-1'); if (s) s.value = savedState; }
+            // Restore an estimate handed off from the Quote Log (sessionStorage, not URL)
+            try {
+                const rec = window.LPQuoteLog?.consumeRestorePayload?.('payment_breakdown');
+                if (rec) {
+                    applyRestore(1, rec);
+                    // Quote Log "PDF" action: restore then auto-trigger Save Estimate as PDF
+                    if (sessionStorage.getItem('lp_restore_autopdf') === '1') {
+                        sessionStorage.removeItem('lp_restore_autopdf');
+                        setTimeout(() => { const b = document.querySelector('.lp-cta-primary'); if (b) b.click(); }, 900);
+                    }
+                }
+            } catch (e) { /* ignore */ }
             if (window.self !== window.top) document.body.classList.add('is-embedded');
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                 console.log('%c origination fee field online. you\'re doing better than you think.', 'color:#1D9E75; font-style:italic;');
