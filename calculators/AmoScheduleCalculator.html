@@ -409,7 +409,7 @@
                 print-color-adjust: exact !important;
             }
             /* Payoff redesign: hold the equal-width tile grid in print; keep tiles + To-date band
-               together below them, and force the green accents (Tile 1 border, Tile 3 fill, date pill) */
+               together below them, and force the green accents (Tile 1 left border, Tile 3 green border, date pill) */
             body.pdf-export-mode .lp-tiles {
                 display: grid !important;
                 grid-template-columns: repeat(3, 1fr) !important;
@@ -582,9 +582,14 @@
         .lp-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: stretch; }
         .lp-tile { background: #FFFFFF; border: 1px solid #C9E9D6; border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; }
         .lp-tile-action { border: 1px solid #E5E7EB; border-left: 4px solid #16A34A; }
-        .lp-tile-muted { background: #F9FAFB; border-color: #E5E7EB; }
+        .lp-tile-muted { background: #FFFFFF; border-color: #E5E7EB; }
         .lp-tile-muted .lp-tile-big { color: #475569; }
-        .lp-tile-savings { background: #E9F8EF; border: 1.5px solid #16A34A; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .lp-tile-savings { background: #FFFFFF; border: 1.5px solid #16A34A; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        /* Single-tile layout for deals with no pre-pay discount: run-to-term tile + To-date band only */
+        .lp-tiles-single { grid-template-columns: minmax(240px, 360px); }
+        /* Neutral (no-discount) expansion: drop the green "savings zone" tint + green date pill for honest framing */
+        .lp-expand-neutral { background: #F9FAFB; }
+        .lp-datepill-neutral { background: #475569; }
         .lp-tile-eyebrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2D6A4F; }
         .lp-tile-fn { font-size: 9px; font-weight: 600; text-transform: none; letter-spacing: 0; color: #9CA3AF; font-style: italic; white-space: nowrap; }
         .lp-tile-big { font-size: 26px; font-weight: 700; color: #1A3C2E; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 6px; }
@@ -1922,13 +1927,43 @@
                     </div>
                 </td>`;
             } else {
+                // No pre-pay discount on this deal: there's no early-payoff story and no savings to show.
+                // Reuse the payoff redesign's grammar (LEN-110) — a single muted Run-to-term tile carrying the
+                // forward-looking "what's left to pay" number, plus the same backward-looking To-date band.
+                // Never fabricate an "Early payoff" tile or a "saves $0" line when no discount exists.
+                const c = lastCalc[id];
+                const runToTerm   = c.payback - sel.tpaid;                          // remaining scheduled payments
+                const paymentsLeft = Math.max(0, c.periods - sel.period);
+                const progressPct  = Math.round((sel.period / c.periods) * 100);
+                const maturityMo   = c.maturityDate.replace(/\s\d{1,2},/, '');       // "Aug 31, 2027" -> "Aug 2027"
+                const allInTip = `<span class="tooltip tooltip-below ml-1 no-print"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span class="tooltiptext">Everything paid on this contract — payments already made to date plus the remaining cost to run the term out.</span></span>`;
                 tr.innerHTML = `<td colspan="6" style="padding:0">
-                    <div class="lp-expand-inner lp-expand-paid">
-                        <div class="lp-expand-head">
-                            <div class="lp-expand-title">Paid through ${sel.date} →</div>
-                            <span class="lp-paid-count">${payments} made</span>
+                    <div class="lp-expand-inner lp-expand-neutral">
+                        <div class="lp-payoff-header">
+                            <span class="lp-payoff-eyebrow-main">Remaining balance</span>
+                            <span class="lp-payoff-datepill lp-datepill-neutral">${sel.date}</span>
                         </div>
-                        ${paidEqHTML(sel, true)}
+                        <div class="lp-tiles lp-tiles-single">
+                            <div class="lp-tile lp-tile-muted">
+                                <div class="lp-tile-eyebrow"><span>Run-to-term cost</span><span class="lp-tile-fn">No pre-pay discount</span></div>
+                                <div class="lp-tile-big">${fmtUsd0.format(runToTerm)}</div>
+                                <div class="lp-tile-sub">Remaining scheduled payments if the contract runs to ${maturityMo}</div>
+                                <div class="lp-tile-div"></div>
+                                <dl class="lp-tile-stats">
+                                    <div><dt>Payments left</dt><dd>${paymentsLeft}</dd></div>
+                                    <div><dt>All-in cost${allInTip}</dt><dd>${fmtUsd0.format(c.payback)}</dd></div>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="lp-todate">
+                            <div class="lp-todate-label"><span>To date</span><span class="lp-todate-rule"></span></div>
+                            <div class="lp-todate-grid">
+                                <div><dt>Paid so far</dt><dd>${fmtUsd0.format(sel.tpaid)}</dd><span class="lp-todate-meta">across ${sel.period} payment${sel.period === 1 ? '' : 's'}</span></div>
+                                <div><dt>Payments made</dt><dd>${sel.period} of ${c.periods}</dd><span class="lp-todate-meta">${paymentsLeft} remaining</span></div>
+                                <div><dt>Contract progress</dt><dd>${progressPct}%</dd><span class="lp-todate-meta">of term elapsed</span></div>
+                                <div><dt>Payment amount</dt><dd>${fmtUsd.format(c.pmt)}</dd><span class="lp-todate-meta">per ${c.freqName}</span></div>
+                            </div>
+                        </div>
                     </div>
                 </td>`;
             }

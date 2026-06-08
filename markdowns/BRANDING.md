@@ -337,6 +337,23 @@ Breakdown payoff-summary redesign (LEN-110).
    the deadline ("expires end of day"). Carry approximate financial figures with a
    `~` tilde (APR, factor) since we don't assert an exact APR on a factor-rate
    product.
+6. **Hierarchy through accents, not fills.** Comparison tiles share a **white**
+   background. Emphasis comes from borders and type — a green left-accent on the
+   action tile, a green outline + green numerals on the "winner" tile — never from
+   colored background fills. Filling every tile with its own tint flattens the
+   comparison (the eye can't tell which tile is the action), reads as
+   "AI-generated," and wastes ink in print. *Color the zone, not the cards:* a
+   light-green container behind the tiles can signal "savings available," but the
+   cards themselves stay white. (Reference: the three payoff tiles are all white;
+   only the savings tile carries a green border + green numbers.)
+7. **Degrade the grammar, don't fabricate the option.** When an option doesn't
+   exist for a deal (e.g. a deal with **no pre-pay discount**), reuse the same tile
+   grammar but render only the tiles that carry a real number — a single
+   `Run-to-term cost` tile plus the To-date band. Never show an empty "Early
+   payoff" tile or a "saves $0" line. Drop the green "savings-zone" container to a
+   neutral surface and the date pill to gray, so color still honestly signals
+   *whether a savings opportunity exists at all.* (Reference: the no-pre-pay branch
+   of `renderDetailRow` in `AmoScheduleCalculator.html`.)
 
 ---
 
