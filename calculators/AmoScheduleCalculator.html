@@ -993,6 +993,9 @@
             const set = (eid, val) => { const el = document.getElementById(eid); if (el) el.textContent = val; };
             set(`ppAmt-${id}`, fmtUsd.format(amt));
             set(`ppFactor-${id}`, factor.toFixed(2) + 'x');
+            // Pair APR with factor (CA/NY etc.) — estimated APR from the last calc; '—' until calculated
+            const apr = lastCalc[id]?.apr;
+            set(`ppApr-${id}`, (apr != null) ? ('~' + apr.toFixed(1) + '%') : '—');
             set(`ppTerm-${id}`, term + ' ' + (termUnitLabels[termUnit] || 'months'));
             set(`ppFreq-${id}`, freqLabels[freq] || freq);
             set(`ppFee-${id}`, feeText);
@@ -1106,9 +1109,32 @@
             return (low + high) / 2;
         }
 
+        // True effective period rate of an early-buyout cash flow: advance (net funded) out at t0,
+        // `k` level payments, then the discounted buyout lump at period k. Annualized by pYear elsewhere.
+        function getBuyoutPeriodRate(pv, pmt, k, buyout) {
+            let low = 0, high = 1;
+            for (let i = 0; i < 60; i++) {
+                let mid = (low + high) / 2;
+                let npv = -pv;
+                for (let t = 1; t <= k; t++) npv += pmt / Math.pow(1 + mid, t);
+                npv += buyout / Math.pow(1 + mid, k);
+                if (npv > 0) low = mid; else high = mid;
+            }
+            return (low + high) / 2;
+        }
+
         const fmtUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
         // Whole-dollar variant for at-a-glance headline figures (cents add noise to big numbers)
         const fmtUsd0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+        // COMPLIANCE — rate/APR pairing (CA SB 1235, NY CFDL, and a growing disclosure-state list):
+        // a factor rate / cents-on-the-dollar / simple-interest quote must NEVER appear without an
+        // accompanying APR, co-located in the same unit and in every copied/exported artifact. Render
+        // any rate metric in prose/exports through this helper so the pairing can't be dropped. The APR
+        // here is the estimated effective APR (~), not a state-prescribed disclosure (LEN-110 / BRANDING.md §12).
+        function rateWithApr(factor, centsDisplay, apr) {
+            return `${factor.toFixed(2)}× factor — ${centsDisplay}¢ on the dollar, about a ~${apr.toFixed(1)}% APR`;
+        }
         const rowSelection = {};
         const cardTracks = {};
         const PAYOFF_MARK_HTML = '<span class="payoff-mark" style="font-size:10px;font-weight:700;color:#1A3C2E;white-space:nowrap">&middot; payoff &#10003;</span>';
@@ -1457,6 +1483,7 @@
                                 <div class="pdf-params-grid">
                                     <div><div class="pdf-param-label">Financing Amount</div><div class="pdf-param-value" id="ppAmt-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Factor Rate</div><div class="pdf-param-value" id="ppFactor-${id}">—</div></div>
+                                    <div><div class="pdf-param-label">Est. APR</div><div class="pdf-param-value" id="ppApr-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Term</div><div class="pdf-param-value" id="ppTerm-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Payment Frequency</div><div class="pdf-param-value" id="ppFreq-${id}">—</div></div>
                                     <div><div class="pdf-param-label">Origination Fee</div><div class="pdf-param-value" id="ppFee-${id}">—</div></div>
@@ -1483,7 +1510,7 @@
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outCents-${id}">0¢</div>
                                 </div>
                                 <div>
-                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">APR<sup title="Required disclosure in CA and NY" class="cursor-help" style="font-size:8px;font-weight:700;vertical-align:super">*</sup></div>
+                                    <div class="text-[#64748B] font-bold uppercase text-[10px] tracking-wider mb-1">APR<sup title="A factor rate alone is not a complete quote — APR disclosure is required on a specific offer in CA, NY, and other states" class="cursor-help" style="font-size:8px;font-weight:700;vertical-align:super">*</sup></div>
                                     <div class="font-extrabold text-[#111827] text-[16px]" id="outApr-${id}">0%</div>
                                 </div>
                             </div>
@@ -1519,7 +1546,7 @@
                                     </div>
                                 </div>
                                 <div class="takeaway-footer no-print">
-                                    * APR disclosure required in CA and NY
+                                    * A factor rate alone is not a complete quote — APR disclosure is required on a specific offer in CA, NY, and other states
                                 </div>
                             </div>
 
@@ -1707,7 +1734,7 @@
                     html = `You're looking at <strong>${fmtUsd.format(c.totalCost)}</strong> in total funding costs — a <strong>${c.apr.toFixed(1)}% APR</strong>, or <strong>${fmtUsd.format(c.pmt)}</strong> per <span class="lp-dynamic-text">${c.freqName}</span>.`;
                 }
             } else if (track.key === 'perdollar') {
-                html = `For every dollar you receive, you're paying back <strong>${c.factor.toFixed(2)}</strong> — that's <strong>${c.centsDisplay}¢ on the dollar</strong>. On <strong>${fmtUsd.format(c.amt)}</strong> funded, you repay <strong>${fmtUsd.format(c.payback)}</strong> total.`;
+                html = `For every dollar you receive, you're paying back <strong>${c.factor.toFixed(2)}</strong> — that's <strong>${c.centsDisplay}¢ on the dollar, about a ~${c.apr.toFixed(1)}% APR</strong>. On <strong>${fmtUsd.format(c.amt)}</strong> funded, you repay <strong>${fmtUsd.format(c.payback)}</strong> total.`;
             } else if (track.key === 'prepay') {
                 if (sel && sel.savings > 0) {
                     html = `Pay off on your ${payoffLink(id, sel)} — your payoff amount drops to <strong>${fmtUsd.format(sel.buyout)}</strong>, saving you <strong>${fmtUsd.format(sel.savings)}</strong> in interest.`;
@@ -1795,11 +1822,20 @@
                     `Run-to-term cost (do nothing):       ${fmtUsd0.format(runToTerm)}`,
                     `Total savings:                       ${fmtUsd0.format(sel.savings)}`,
                     ``,
+                    // Rate metric never travels without APR (see rateWithApr / compliance note)
+                    `Deal terms: ${rateWithApr(c.factor, c.centsDisplay, c.apr)}`,
                     `Payments eliminated: ${paymentsLeft}    All-in if bought out: ${fmtUsd0.format(buyoutAllIn)}`,
-                    `Paid to date: ${fmtUsd0.format(sel.tpaid)} (${sel.period} of ${c.periods} payments)`
+                    `Paid to date: ${fmtUsd0.format(sel.tpaid)} (${sel.period} of ${c.periods} payments)`,
+                    ``,
+                    `Estimate only — not a financing offer or a required disclosure. A factor rate alone is not a`,
+                    `complete quote; APR and standardized disclosures are required on a specific commercial financing`,
+                    `offer in CA, NY, and other states.`
                 ];
             } else {
-                lines = [`Early payoff quote: ${fmtUsd0.format(sel.buyout)} | Total savings: ${fmtUsd0.format(sel.savings)} | Valid through ${sel.date}`];
+                lines = [
+                    `Early payoff quote: ${fmtUsd0.format(sel.buyout)} | Total savings: ${fmtUsd0.format(sel.savings)} | Valid through ${sel.date}`,
+                    `Estimate only — not a financing offer or required disclosure (APR/standardized disclosures required on a specific offer in CA, NY, and other states).`
+                ];
             }
             navigator.clipboard.writeText(lines.join('\n'));
             const el = document.getElementById(`quoteCopied-${id}`);
@@ -1829,15 +1865,17 @@
                 const paymentsLeft = Math.max(0, c.periods - sel.period);
                 const origFactor  = c.factor;
                 const revFactor   = buyoutAllIn / c.amt;             // revised factor = all-in ÷ advance
-                const origApr     = c.apr;
-                // Revised effective APR: the discounted all-in cost expressed over the ORIGINAL term,
-                // computed exactly like the run-to-term APR (level annuity on net funded). This keeps it
-                // directly comparable to Tile 2 and guarantees savings always read as a reduction — a true
-                // IRR of the compressed buyout stream can exceed the original APR on small discounts.
-                const revApr      = getPeriodRate(c.netFunded, buyoutAllIn / c.periods, c.periods) * c.pYear * 100;
-                const aprDrop     = Math.max(0, origApr - revApr);   // percentage points
                 const factorDrop  = Math.max(0, Math.round((origFactor - revFactor) * 100)); // tenths-of-a-point (1pt = 0.10)
                 const factorDropLbl = `−${factorDrop}/10${factorDrop === 1 ? 'th' : 'ths'} pt`;
+                const origApr     = c.apr;
+                // True effective APR of the actual buyout cash flow (advance out, `period` payments, then the
+                // discounted buyout lump). Shown SYMMETRICALLY: on a small discount, paying nearly the same
+                // dollars faster can RAISE the effective APR even as factor/dollars fall — we disclose that
+                // honestly rather than a flattering construct that always shows a reduction (LEN-110 compliance
+                // decision; APR is an estimate ~, not a state-prescribed disclosure — see BRANDING.md §12).
+                const revApr      = getBuyoutPeriodRate(c.netFunded, c.pmt, sel.period, sel.buyout) * c.pYear * 100;
+                const aprChange   = revApr - origApr;                // + = APR rose (unfavorable), − = fell
+                const aprChangeLbl = `${aprChange <= 0 ? '−' : '+'}${Math.abs(aprChange).toFixed(1)} pts`;
                 const progressPct = Math.round((sel.period / c.periods) * 100);
                 const maturityMo  = c.maturityDate.replace(/\s\d{1,2},/, '');   // "Aug 31, 2027" -> "Aug 2027"
                 tr.innerHTML = `<td colspan="8" style="padding:0">
@@ -1877,7 +1915,7 @@
                                 <div class="lp-tile-sub">What the merchant saves by buying out early</div>
                                 <div class="lp-tile-div"></div>
                                 <dl class="lp-tile-stats">
-                                    <div><dt>APR reduction</dt><dd>&minus;${aprDrop.toFixed(1)} pts</dd></div>
+                                    <div><dt>APR change</dt><dd${aprChange > 0 ? ' style="color:#B45309"' : ''}>${aprChangeLbl}</dd></div>
                                     <div><dt>Factor reduction</dt><dd>${factorDropLbl}</dd></div>
                                     <div><dt>Payments eliminated</dt><dd>${paymentsLeft}</dd></div>
                                     <div><dt>Cost avoided</dt><dd>&minus;${fmtUsd0.format(totalSaved)}</dd></div>
