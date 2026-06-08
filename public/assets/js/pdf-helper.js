@@ -616,22 +616,24 @@ window.PDF_HELPER = {
                 +   '<div class="lpm-sprog"><div class="lpm-sprog-fill" id="lpm-spfill"></div></div>'
                 + '</div>'
                 + '<div class="lpm-foot">'
-                +   '<div class="lpm-dsa-wrap" id="lpm-dsa-wrap"><input type="checkbox" id="lpm-dsa-cb"/><label for="lpm-dsa-cb">Don\'t show again</label></div>'
+                +   '<div class="lpm-dsa-wrap" id="lpm-dsa-wrap"><input type="checkbox" id="lpm-dsa-cb"/><label for="lpm-dsa-cb">Never show this again</label></div>'
                 +   '<button class="lpm-btn-cancel" id="lpm-cancel-btn">Cancel</button>'
                 +   '<button class="lpm-btn-proceed lpm-locked" id="lpm-proceed-btn">Open print menu →</button>'
                 + '</div>'
                 + '</div>';
             document.body.appendChild(overlay);
 
-            // Show DSA checkbox if user has earned it
+            // Returning users who've already seen it get the opt-out immediately on open;
+            // first-time users get it the moment they finish watching once (see unlock block below).
             const saveCount = parseInt(localStorage.getItem(KEY_SAVE_COUNT) || '0', 10);
             if (saveCount >= DSA_AFTER_SAVES) {
                 document.getElementById('lpm-dsa-wrap').classList.add('lpm-visible');
             }
 
             function dismiss(result) {
+                // Honor "Never show this again" whether they proceed OR cancel out of the modal.
                 const dsaCb = document.getElementById('lpm-dsa-cb');
-                if (dsaCb && dsaCb.checked && result) {
+                if (dsaCb && dsaCb.checked) {
                     localStorage.setItem(KEY_DSA, '1');
                 }
                 animRunning = false;
@@ -765,13 +767,15 @@ window.PDF_HELPER = {
                     sv.className = 'lpm-d-save';
                     await wait(720); if (!animRunning) return;
 
-                    // Unlock CTA after first complete loop
+                    // Unlock CTA after first complete loop — and surface "Never show this again"
+                    // at the same moment, so even a first-ever viewer can opt out once they've watched once.
                     if (!unlocked) {
                         unlocked = true;
                         const btn = document.getElementById('lpm-proceed-btn');
                         btn.classList.remove('lpm-locked');
                         btn.classList.add('lpm-unlocking');
                         setTimeout(() => btn.classList.remove('lpm-unlocking'), 560);
+                        document.getElementById('lpm-dsa-wrap').classList.add('lpm-visible');
                     }
                 } catch (e) { return; }
                 animate();
