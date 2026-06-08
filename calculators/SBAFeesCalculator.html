@@ -361,6 +361,54 @@ label {
 }
 
 .lp-actions { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
+/* LEN-11 — standard action-button CTAs (matches Payment Breakdown) */
+.lp-cta-primary, .lp-cta-secondary { display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:12px 16px; border-radius:10px; font-size:13px; font-weight:700;
+    letter-spacing:0.02em; cursor:pointer; transition:all 120ms; }
+.lp-cta-primary { background:#1A3C2E; color:#fff; border:1px solid #1A3C2E; }
+.lp-cta-primary:hover { background:#2D6A4F; }
+.lp-cta-secondary { background:transparent; color:#1A3C2E; border:1px solid #1A3C2E; }
+.lp-cta-secondary:hover { background:#F0FDF4; }
+/* LEN-11 — optional Document details panel (screen only; never printed) */
+.lp-doc-details {
+    max-width: 980px; margin: 0 auto 14px; padding: 0 4px;
+    border: 1px solid #E5E7EB; border-radius: 10px; background: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.lp-doc-details > summary {
+    list-style: none; cursor: pointer; padding: 12px 14px;
+    font-size: 12px; font-weight: 800; color: #111827; letter-spacing: 0.01em;
+}
+.lp-doc-details > summary::-webkit-details-marker { display: none; }
+.lp-doc-details > summary::before { content: "+ "; color: #1A3C2E; font-weight: 900; }
+.lp-doc-details[open] > summary::before { content: "– "; }
+.lp-doc-details > summary span { color: #6B7280; font-weight: 500; }
+.lp-doc-details-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px;
+    padding: 4px 14px 16px;
+}
+.lp-doc-details-grid label {
+    display: flex; flex-direction: column; gap: 4px;
+    font-size: 10px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.lp-doc-details-grid input {
+    padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 7px;
+    font-size: 13px; font-weight: 500; color: #111827; text-transform: none; letter-spacing: 0;
+    font-family: inherit; background: #fff;
+}
+.lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
+.lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
+@media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+/* LEN-11 — broker/deal context block injected into the captured body at print time */
+.lp-doc-context { display: none; }
+body.pdf-export-mode .lp-doc-context {
+    display: block; margin: 0 0 14px; padding: 11px 15px;
+    border: 1px solid #E5E7EB; border-radius: 10px; background: #F9FAFB;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.lp-doc-context .dc-for { font-size: 15px; font-weight: 800; color: #111827; word-break: break-word; }
+.lp-doc-context .dc-meta { font-size: 11px; color: #6B7280; margin-top: 3px; }
+.lp-doc-context .dc-by { font-size: 11px; color: #374151; margin-top: 2px; }
 .lp-copy-btn {
     background-color: var(--lp-green);
     color: white;
@@ -570,6 +618,18 @@ body.pdf-export-mode .card-center-title { display: none !important; }
     </div>
     <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
     <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
+    <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
+    <details id="pdfDocDetails" class="lp-doc-details no-print">
+        <summary>Document details <span>— optional, appears on the PDF</span></summary>
+        <div class="lp-doc-details-grid">
+            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
+            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+        </div>
+        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
+    </details>
     <div class="flex justify-end mb-8 no-print">
         <button class="lp-pill-btn" onclick="addCard()">+ Compare</button>
     </div>
@@ -626,6 +686,40 @@ function bindTips() {
     });
 }
 
+// LEN-11 — read the optional Document-details fields
+function pdfDocContext() {
+    const v = id => (document.getElementById(id)?.value || '').trim();
+    const name = v('pdfPreparedBy'), company = v('pdfPreparedByCompany');
+    return {
+        preparedBy: [name, company].filter(Boolean).join(' · '),
+        preparedFor: v('pdfPreparedFor'),
+        dealName: v('pdfDealName'),
+        lender: v('pdfLender')
+    };
+}
+// LEN-11 — inject the broker/deal context into the captured body. The print header is
+// overwritten by generatePDF → initPrintLayout, so this block must live in the body.
+function mountDocContext(element) {
+    const c = pdfDocContext();
+    if (!c.preparedBy && !c.preparedFor && !c.dealName && !c.lender) return null;
+    const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    const rows = [];
+    if (c.preparedFor) rows.push(`<div class="dc-for">Prepared for ${esc(c.preparedFor)}</div>`);
+    const meta = [];
+    if (c.dealName) meta.push(esc(c.dealName));
+    if (c.lender) meta.push(esc(c.lender));
+    if (meta.length) rows.push(`<div class="dc-meta">${meta.join(' · ')}</div>`);
+    if (c.preparedBy) rows.push(`<div class="dc-by">Prepared by ${esc(c.preparedBy)}</div>`);
+    if (!rows.length) return null;
+    const node = document.createElement('div');
+    node.className = 'lp-doc-context';
+    node.innerHTML = rows.join('');
+    const hdr = element.querySelector('.print-header-content');
+    if (hdr) hdr.insertAdjacentElement('afterend', node);
+    else element.insertAdjacentElement('afterbegin', node);
+    return node;
+}
+
 async function handleLendPaperSavePDF() {
     const btn = event.currentTarget;
     const origText = btn.innerHTML;
@@ -671,7 +765,9 @@ async function handleLendPaperSavePDF() {
     const element = document.querySelector('.lp-main');
     const filename = `LendPaper_SBA_Fees_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
+    let _docCtxNode = null;
     try {
+        _docCtxNode = mountDocContext(element);
         await window.PDF_HELPER.generatePDF(element, "SBA 7(a) RATES & FEES", filename, btn, origText);
         // Quote Log (LEN-123) — one record per scenario card
         try {
@@ -690,11 +786,13 @@ async function handleLendPaperSavePDF() {
                         monthly_payment: document.getElementById(`res-monthly-pmt-${cid}`)?.innerText,
                         total_fees: document.getElementById(`res-total-fees-${cid}`)?.innerText
                     },
-                    pdf_generated: true
+                    pdf_generated: true,
+                    prepared_for: document.getElementById('pdfPreparedFor')?.value?.trim() || null
                 });
             });
         } catch (e) { /* logging must never block the export */ }
     } finally {
+        if (_docCtxNode) _docCtxNode.remove();
         document.body.classList.remove('multi-scenario');
         btn.innerHTML = origText;
         btn.disabled = false;
@@ -830,13 +928,13 @@ function addCard() {
                     <span id="takeaway-content-${id}"></span>
                 </div>
                 <div class="lp-actions no-print">
-                    <button class="lp-copy-btn" onclick="copyResults(${id})">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy Results
-                    </button>
-                    <button class="lp-print-btn" onclick="handleLendPaperSavePDF()">
+                    <button class="lp-cta-primary" onclick="handleLendPaperSavePDF()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        Save as PDF
+                        Save Estimate as PDF
+                    </button>
+                    <button class="lp-cta-secondary" onclick="copyResults(${id})">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy Scenario
                     </button>
                 </div>
             </div>

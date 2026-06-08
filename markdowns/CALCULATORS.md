@@ -159,14 +159,54 @@ If user is on variant 4 and unchecks pre-pay: snap back to variant 1 silently.
 - `align-items: center` on main flex container
 
 ### Action buttons (exact labels — deviation is a bug)
-**Updated standard (LEN-123, supersedes the old "Copy on top" rule).** CTA stack,
-top to bottom:
-- Primary: `Save Estimate as PDF` — solid brand-dark fill (`#1A3C2E`), white text, full width
-- Secondary: `Copy Scenario` — brand-dark outline, transparent fill, full width
+**Updated standard (LEN-123, supersedes the old "Copy on top" rule; consistency pass LEN-11).**
+Identical on **every** calculator. CTA stack, top to bottom, inside
+`.action-buttons.flex.flex-col.gap-3`:
+- Primary: `Save Estimate as PDF` — class `lp-cta-primary`, solid brand-dark fill (`#1A3C2E`),
+  white text, full width, leading **printer SVG** icon
+- Secondary: `Copy Scenario` — class `lp-cta-secondary`, brand-dark outline, transparent fill,
+  full width, leading **copy SVG** icon
 - Footer row (subtle text links): `+ Compare scenarios` (left) · `🕐 Quote Log` (right)
 
 `Save Estimate as PDF` is **always present** — never skip it. Both the PDF save and
 `Copy Scenario` fire `saveEstimate()` (see §15 Quote Log).
+
+**Exact label copy** — do not paraphrase: `Save Estimate as PDF`, `Copy Scenario`.
+- **Only exception:** single-result tools with no scenarios (e.g. Fundability) use
+  `Copy results` instead of `Copy Scenario`. Everything else stays verbatim.
+- Never use the compact `lp-print-btn` / `lp-copy-btn` icon-button variant or the bare
+  labels `Save as PDF` / `Copy` / `Copy Results` — those are pre-LEN-11 drift.
+- Copy-button **icons are SVG only** — never an emoji (no 📋 / 📎). The banned-paperclip
+  rule extends to all clipboard glyphs on buttons.
+
+### Document details panel (PDF branding — LEN-11)
+Optional broker/deal metadata that personalizes the exported PDF. **Identical on every
+calculator** (single shared pattern, no per-calc drift).
+
+- Collapsible panel placed above the cards container, `no-print`:
+  `<details id="pdfDocDetails" class="lp-doc-details no-print">` with summary
+  `Document details — optional, appears on the PDF`.
+- **Five fields, exact ids + labels** (all optional, blank degrades gracefully):
+
+  | Label | id | Placeholder |
+  |---|---|---|
+  | Prepared by | `pdfPreparedBy` | `Your name` |
+  | Company | `pdfPreparedByCompany` | `Your company` |
+  | Prepared for | `pdfPreparedFor` | `Merchant / borrower name` |
+  | Deal name | `pdfDealName` | `e.g. Q3 Working Capital` |
+  | Lender / program | `pdfLender` | `e.g. Northline Capital` |
+
+- Read with a `*Context()` helper: `preparedBy = [pdfPreparedBy, pdfPreparedByCompany]`
+  joined ` · `; `preparedFor`, `dealName`, `lender` passed through trimmed.
+- **Rendering rule (critical):** `PDF_HELPER.generatePDF()` calls `initPrintLayout()`
+  internally, which **overwrites `.print-header-content`** — so anything written to the
+  tier header before export is wiped. Render the prepared-by/for block into the **captured
+  body** (`.lp-doc-context` prepended into `.lp-main`, or the hidden print template),
+  **never** the page header. Tear the injected node down in `finally`.
+- `pdfPreparedFor` flows to `saveEstimate({ prepared_for })` (see §15). Hide empty fields
+  on the PDF; never print a blank "Prepared for —" line.
+- DSCR keeps its stricter gate (requires Prepared-for + Deal name before Save enables);
+  all other calcs treat the five fields as optional.
 
 ### Copy output format
 ```
