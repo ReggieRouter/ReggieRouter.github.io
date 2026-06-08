@@ -581,7 +581,9 @@
         /* Every tile shares the same internal grammar: eyebrow -> big number -> sub -> divider -> 4 stat rows */
         .lp-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: stretch; }
         .lp-tile { background: #FFFFFF; border: 1px solid #C9E9D6; border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; }
-        .lp-tile-action { border: 1.5px solid #16A34A; }
+        .lp-tile-action { border: 1px solid #E5E7EB; border-left: 4px solid #16A34A; }
+        .lp-tile-muted { background: #F9FAFB; border-color: #E5E7EB; }
+        .lp-tile-muted .lp-tile-big { color: #475569; }
         .lp-tile-savings { background: #E9F8EF; border: 1.5px solid #16A34A; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .lp-tile-eyebrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2D6A4F; }
         .lp-tile-fn { font-size: 9px; font-weight: 600; text-transform: none; letter-spacing: 0; color: #9CA3AF; font-style: italic; white-space: nowrap; }
@@ -595,6 +597,7 @@
         .lp-tile-stats dt { margin: 0; font-size: 11px; color: #6B7280; }
         .lp-tile-stats dd { margin: 0; font-size: 12px; font-weight: 600; color: #111827; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .lp-tile-savings .lp-tile-stats dd { color: #15803D; }
+        .lp-tiles-math { margin-top: 12px; font-size: 11px; color: #9CA3AF; font-variant-numeric: tabular-nums; line-height: 1.4; }
 
         /* "To date" band: backward-looking current-state facts, zoned off from the forward tiles */
         .lp-todate { margin-top: 18px; }
@@ -1850,7 +1853,11 @@
                 // ---- Forward-looking figures, all derived from calculator state ----
                 const buyoutAllIn = sel.tpaid + sel.buyout;          // paid-to-date + discounted payoff
                 const runToTerm   = c.payback - sel.tpaid;           // remaining scheduled payments
-                const totalSaved  = sel.savings;                     // == run-to-term all-in − buyout all-in
+                // Whole-dollar display values, rounded once here so the on-tile equation always reconciles
+                // (savings = run-to-term − early payoff, exact to the cent; round each consistently).
+                const buyR  = Math.round(sel.buyout);                 // early-payoff quote, displayed
+                const runR  = Math.round(runToTerm);                  // run-to-term cost, displayed
+                const saveR = runR - buyR;                            // total savings, reconciles by construction
                 const paymentsLeft = Math.max(0, c.periods - sel.period);
                 const progressPct = Math.round((sel.period / c.periods) * 100);
                 const maturityMo  = c.maturityDate.replace(/\s\d{1,2},/, '');   // "Aug 31, 2027" -> "Aug 2027"
@@ -1877,7 +1884,7 @@
                                     <div><dt>All-in cost${allInTip}</dt><dd>${fmtUsd0.format(buyoutAllIn)}</dd></div>
                                 </dl>
                             </div>
-                            <div class="lp-tile">
+                            <div class="lp-tile lp-tile-muted">
                                 <div class="lp-tile-eyebrow"><span>Run-to-term cost</span><span class="lp-tile-fn">Do nothing</span></div>
                                 <div class="lp-tile-big">${fmtUsd0.format(runToTerm)}</div>
                                 <div class="lp-tile-sub">Remaining scheduled payments if the contract runs to ${maturityMo}</div>
@@ -1889,15 +1896,16 @@
                             </div>
                             <div class="lp-tile lp-tile-savings">
                                 <div class="lp-tile-eyebrow"><span>Total savings</span><span class="lp-tile-fn">The difference</span></div>
-                                <div class="lp-tile-big">${fmtUsd0.format(totalSaved)}</div>
+                                <div class="lp-tile-big">${fmtUsd0.format(saveR)}</div>
                                 <div class="lp-tile-sub">What the merchant saves by buying out early</div>
                                 <div class="lp-tile-div"></div>
                                 <dl class="lp-tile-stats">
                                     <div><dt>Payments eliminated</dt><dd>${paymentsLeft}</dd></div>
-                                    <div><dt>Cost avoided</dt><dd>&minus;${fmtUsd0.format(totalSaved)}</dd></div>
+                                    <div><dt>Cost avoided</dt><dd>&minus;${fmtUsd0.format(saveR)}</dd></div>
                                 </dl>
                             </div>
                         </div>
+                        <div class="lp-tiles-math">Total savings = run-to-term ${fmtUsd0.format(runR)} &minus; early payoff ${fmtUsd0.format(buyR)}</div>
                         <div class="lp-todate">
                             <div class="lp-todate-label"><span>To date</span><span class="lp-todate-rule"></span></div>
                             <div class="lp-todate-grid">
