@@ -666,6 +666,19 @@
         /* PDF polish: talk-track jump links are dead in PDF — render as plain text */
         body.pdf-export-mode .amo-row-link { color: inherit !important; font-weight: inherit !important; cursor: default !important; text-decoration: none !important; }
 
+        /* ── PDF whole-doc cohesion pass (LEN-110 follow-up): tie the schedule to the tile system ──
+           Brand-green section label + a clean white header anchored by a green underline rule,
+           instead of the heavier flat-gray header band. Print-only; on-screen sticky header is untouched. */
+        body.pdf-export-mode .amo-sched-label { color: #14532D !important; }
+        body.pdf-export-mode .table-scroll-container thead { background: #FFFFFF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        body.pdf-export-mode .table-scroll-container thead th {
+            background: #FFFFFF !important;
+            border-bottom: 2px solid #14532D !important;
+            color: #1A3C2E !important;
+            letter-spacing: 0.01em !important;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+
         /* Form Section Grouping Labels */
         .lp-section-label {
             font-size: 10px;
@@ -1611,7 +1624,7 @@
 
                 <div class="border-t border-[#E5E7EB] amo-section">
                     <div class="px-[24px] pt-5 pb-2">
-                        <span class="text-[11px] font-extrabold text-[#6B7280] uppercase tracking-widest">Amortization Schedule</span>
+                        <span class="text-[11px] font-extrabold text-[#6B7280] uppercase tracking-widest amo-sched-label">Amortization Schedule</span>
                     </div>
                     <div class="lp-amo-toggle no-print">
                         <div>
