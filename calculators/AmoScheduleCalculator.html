@@ -592,6 +592,8 @@
         .lp-tile-stats dt { margin: 0; font-size: 11px; color: #6B7280; }
         .lp-tile-stats dd { margin: 0; font-size: 12px; font-weight: 600; color: #111827; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .lp-tile-savings .lp-tile-stats dd { color: #15803D; }
+        /* Plain-English caveat shown under the tiles when early payoff raises the effective APR (prints too) */
+        .lp-tiles-note { margin-top: 10px; font-size: 11px; color: #6B7280; font-style: italic; line-height: 1.4; }
 
         /* "To date" band: backward-looking current-state facts, zoned off from the forward tiles */
         .lp-todate { margin-top: 18px; }
@@ -1922,6 +1924,7 @@
                                 </dl>
                             </div>
                         </div>
+                        ${aprChange > 0 ? '<div class="lp-tiles-note">Early payoff saves total dollars but shortens the term, so the annualized rate (APR) rises even as the factor and dollar cost fall.</div>' : ''}
                         <div class="lp-todate">
                             <div class="lp-todate-label"><span>To date</span><span class="lp-todate-rule"></span></div>
                             <div class="lp-todate-grid">
