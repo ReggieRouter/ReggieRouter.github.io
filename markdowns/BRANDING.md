@@ -308,6 +308,38 @@ All files are in: `~/Desktop/Payment breakdown calculator screenshots/`
 
 ---
 
+## 12. Comparison & Decision UI Principles
+
+These govern any UI where the user compares options or weighs a decision (payoff
+summaries, scenario tiles, side-by-side outputs). Established with the Payment
+Breakdown payoff-summary redesign (LEN-110).
+
+1. **Parallel tile grammar.** When tiles are meant to be compared, give them
+   identical internal structure — same fields, in the same order, in the same
+   positions. Comparison should happen by reading *across* aligned rows, not by
+   re-learning each tile. (Reference implementation: the three payoff tiles in
+   `AmoScheduleCalculator.html` — Early payoff quote / Run-to-term cost / Total
+   savings — each `eyebrow → big number → one-line sub → divider → 4 stat rows`.)
+2. **One home per number.** A headline figure appears in exactly one tile. Never
+   duplicate a value as both a tag and a hero number — it creates "which number is
+   real?" friction.
+3. **Forward vs. backward zoning.** Separate decision/option content
+   (forward-looking) from current-state/history (backward-looking) with a labeled
+   band — e.g. the "To date" band beneath the payoff tiles. Keep each zone's
+   contents consistent with its label: only historical/current-state facts go in a
+   "To date" zone; only options/outcomes go in the decision zone.
+4. **Broker vocabulary over merchant vocabulary** in B2B tools: "run to term,"
+   "buy out," "factor rate," "payments eliminated" — not "save money," "interest,"
+   "remaining balance." ("Balance" reads to merchants as the payoff amount;
+   "remittance" is jargon.)
+5. **Don't assert third-party terms.** Quote expiry, payoff timing, etc. are the
+   lender's terms — surface the date (e.g. a valid-through pill), don't editorialize
+   the deadline ("expires end of day"). Carry approximate financial figures with a
+   `~` tilde (APR, factor) since we don't assert an exact APR on a factor-rate
+   product.
+
+---
+
 ## Compliance & Legal Copy — see LEGAL.md
 
 Regulatory content is **never** duplicated here. For anything compliance-related

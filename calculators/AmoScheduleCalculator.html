@@ -405,6 +405,27 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
+            /* Payoff redesign: hold the equal-width tile grid in print; keep tiles + To-date band
+               together below them, and force the green accents (Tile 1 border, Tile 3 fill, date pill) */
+            body.pdf-export-mode .lp-tiles {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            body.pdf-export-mode .lp-tile,
+            body.pdf-export-mode .lp-tile-savings,
+            body.pdf-export-mode .lp-payoff-datepill,
+            body.pdf-export-mode .lp-todate {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            body.pdf-export-mode .lp-todate-grid {
+                display: grid !important;
+                grid-template-columns: repeat(4, 1fr) !important;
+            }
             /* Paper has no clicks: always show paid-to-date expanded, and print the gray row highlight */
             body.pdf-export-mode .lp-paid-row { display: flex !important; }
             body.pdf-export-mode .paid-target-row td {
@@ -549,13 +570,39 @@
         /* Paid-to-date equation: stat columns with + / = as standalone dividers */
         .lp-eq-grid { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
         .lp-eq-div { font-size: 14px; font-weight: 500; color: #9CA3AF; }
-        /* Payoff expansion: 3 stat cards + metadata row + copy-quote button */
-        .lp-payoff-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .lp-payoff-card { background: #FFFFFF; border: 1px solid #9fe1cb; border-radius: 8px; padding: 12px 14px; }
-        .lp-payoff-card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #2D6A4F; font-weight: 700; margin-bottom: 4px; }
-        .lp-payoff-card-value { font-size: 19px; font-weight: 500; color: #1A3C2E; font-variant-numeric: tabular-nums; }
-        .lp-payoff-card-hero .lp-payoff-card-value { font-size: 23px; }
-        .lp-payoff-meta { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid #D1FAE5; }
+        /* Payoff redesign: header + 3 parallel-grammar tiles + "To date" band + copy-quote button */
+        .lp-payoff-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .lp-payoff-eyebrow-main { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #1A3C2E; }
+        .lp-payoff-datepill { background: #1A3C2E; color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.02em; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+        /* Every tile shares the same internal grammar: eyebrow -> big number -> sub -> divider -> 4 stat rows */
+        .lp-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: stretch; }
+        .lp-tile { background: #FFFFFF; border: 1px solid #C9E9D6; border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; }
+        .lp-tile-action { border: 1.5px solid #16A34A; }
+        .lp-tile-savings { background: #E9F8EF; border: 1.5px solid #16A34A; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .lp-tile-eyebrow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2D6A4F; }
+        .lp-tile-fn { font-size: 9px; font-weight: 600; text-transform: none; letter-spacing: 0; color: #9CA3AF; font-style: italic; white-space: nowrap; }
+        .lp-tile-big { font-size: 26px; font-weight: 700; color: #1A3C2E; font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 6px; }
+        .lp-tile-savings .lp-tile-big { color: #15803D; }
+        .lp-tile-sub { font-size: 11px; color: #6B7280; line-height: 1.35; margin-top: 5px; min-height: 30px; }
+        .lp-tile-div { border-top: 1px solid #E5E7EB; margin: 12px 0 10px; }
+        .lp-tile-savings .lp-tile-div { border-color: #BBE5CC; }
+        .lp-tile-stats { margin: 0; display: flex; flex-direction: column; gap: 7px; }
+        .lp-tile-stats > div { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+        .lp-tile-stats dt { margin: 0; font-size: 11px; color: #6B7280; }
+        .lp-tile-stats dd { margin: 0; font-size: 12px; font-weight: 600; color: #111827; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .lp-tile-savings .lp-tile-stats dd { color: #15803D; }
+
+        /* "To date" band: backward-looking current-state facts, zoned off from the forward tiles */
+        .lp-todate { margin-top: 18px; }
+        .lp-todate-label { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .lp-todate-label > span:first-child { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9CA3AF; white-space: nowrap; }
+        .lp-todate-rule { flex: 1; height: 1px; background: #D1D5DB; }
+        .lp-todate-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+        .lp-todate-grid > div { display: flex; flex-direction: column; gap: 2px; }
+        .lp-todate-grid dt { font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #6B7280; font-weight: 600; }
+        .lp-todate-grid dd { margin: 0; font-size: 15px; font-weight: 600; color: #111827; font-variant-numeric: tabular-nums; }
+        .lp-todate-meta { font-size: 10px; color: #9CA3AF; }
         .lp-quote-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
         .lp-quote-btn { background: transparent; border: 1px solid #9fe1cb; border-radius: 6px; padding: 5px 12px; font-size: 11px; font-weight: 700; color: #1A3C2E; cursor: pointer; font-family: inherit; transition: background 0.15s; }
         .lp-quote-btn:hover { background: #FFFFFF; }
@@ -781,7 +828,8 @@
                 gap: 10px;
             }
             .lp-eq-div { display: none; }
-            .lp-payoff-cards { grid-template-columns: 1fr; }
+            .lp-tiles { grid-template-columns: 1fr; }
+            .lp-todate-grid { grid-template-columns: 1fr 1fr; }
             .lp-expand-head { flex-direction: column; gap: 4px; }
             /* Reduce padding and fonts in the dynamic header to prevent squeezing */
             .h-\[64px\] {
@@ -1059,6 +1107,8 @@
         }
 
         const fmtUsd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+        // Whole-dollar variant for at-a-glance headline figures (cents add noise to big numbers)
+        const fmtUsd0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
         const rowSelection = {};
         const cardTracks = {};
         const PAYOFF_MARK_HTML = '<span class="payoff-mark" style="font-size:10px;font-weight:700;color:#1A3C2E;white-space:nowrap">&middot; payoff &#10003;</span>';
@@ -1731,7 +1781,27 @@
         function copyPayoffQuote(id) {
             const sel = rowSelection[id];
             if (!sel) return;
-            navigator.clipboard.writeText(`Payoff Amount: ${fmtUsd.format(sel.buyout)} | Interest Saved: ${fmtUsd.format(sel.savings)} | Payoff Date: ${sel.date}`);
+            const c = lastCalc[id];
+            // Paste-ready plain-text quote (Slack / CRM friendly) — mirrors the on-screen tiles
+            let lines;
+            if (c) {
+                const buyoutAllIn = sel.tpaid + sel.buyout;
+                const runToTerm = c.payback - sel.tpaid;
+                const paymentsLeft = Math.max(0, c.periods - sel.period);
+                lines = [
+                    `Early payoff — valid through ${sel.date}`,
+                    ``,
+                    `Early payoff quote (buy out early):  ${fmtUsd0.format(sel.buyout)}`,
+                    `Run-to-term cost (do nothing):       ${fmtUsd0.format(runToTerm)}`,
+                    `Total savings:                       ${fmtUsd0.format(sel.savings)}`,
+                    ``,
+                    `Payments eliminated: ${paymentsLeft}    All-in if bought out: ${fmtUsd0.format(buyoutAllIn)}`,
+                    `Paid to date: ${fmtUsd0.format(sel.tpaid)} (${sel.period} of ${c.periods} payments)`
+                ];
+            } else {
+                lines = [`Early payoff quote: ${fmtUsd0.format(sel.buyout)} | Total savings: ${fmtUsd0.format(sel.savings)} | Valid through ${sel.date}`];
+            }
+            navigator.clipboard.writeText(lines.join('\n'));
             const el = document.getElementById(`quoteCopied-${id}`);
             if (el) {
                 el.classList.add('show');
@@ -1752,27 +1822,76 @@
             const payments = `${sel.period} payment${sel.period === 1 ? '' : 's'}`;
             if (isPrepay) {
                 const c = lastCalc[id];
-                const shortDate = sel.date.replace(/,\s*\d{4}$/, '');
+                // ---- Forward-looking figures, all derived from calculator state ----
+                const buyoutAllIn = sel.tpaid + sel.buyout;          // paid-to-date + discounted payoff
+                const runToTerm   = c.payback - sel.tpaid;           // remaining scheduled payments
+                const totalSaved  = sel.savings;                     // == run-to-term all-in − buyout all-in
+                const paymentsLeft = Math.max(0, c.periods - sel.period);
+                const origFactor  = c.factor;
+                const revFactor   = buyoutAllIn / c.amt;             // revised factor = all-in ÷ advance
+                const origApr     = c.apr;
+                // Revised effective APR: the discounted all-in cost expressed over the ORIGINAL term,
+                // computed exactly like the run-to-term APR (level annuity on net funded). This keeps it
+                // directly comparable to Tile 2 and guarantees savings always read as a reduction — a true
+                // IRR of the compressed buyout stream can exceed the original APR on small discounts.
+                const revApr      = getPeriodRate(c.netFunded, buyoutAllIn / c.periods, c.periods) * c.pYear * 100;
+                const aprDrop     = Math.max(0, origApr - revApr);   // percentage points
+                const factorDrop  = Math.max(0, Math.round((origFactor - revFactor) * 100)); // tenths-of-a-point (1pt = 0.10)
+                const factorDropLbl = `−${factorDrop}/10${factorDrop === 1 ? 'th' : 'ths'} pt`;
+                const progressPct = Math.round((sel.period / c.periods) * 100);
+                const maturityMo  = c.maturityDate.replace(/\s\d{1,2},/, '');   // "Aug 31, 2027" -> "Aug 2027"
                 tr.innerHTML = `<td colspan="8" style="padding:0">
                     <div class="lp-expand-inner">
-                        <div class="lp-payoff-cards">
-                            <div class="lp-payoff-card lp-payoff-card-hero">
-                                <div class="lp-payoff-card-label">Payoff Amount</div>
-                                <div class="lp-payoff-card-value">${fmtUsd.format(sel.buyout)}</div>
+                        <div class="lp-payoff-header">
+                            <span class="lp-payoff-eyebrow-main">Early payoff</span>
+                            <span class="lp-payoff-datepill">${sel.date}</span>
+                        </div>
+                        <div class="lp-tiles">
+                            <div class="lp-tile lp-tile-action">
+                                <div class="lp-tile-eyebrow"><span>Early payoff quote</span><span class="lp-tile-fn">Buy out early</span></div>
+                                <div class="lp-tile-big">${fmtUsd0.format(sel.buyout)}</div>
+                                <div class="lp-tile-sub">Discounted payoff to close out the contract on the payoff date</div>
+                                <div class="lp-tile-div"></div>
+                                <dl class="lp-tile-stats">
+                                    <div><dt>Effective APR</dt><dd>~${revApr.toFixed(1)}%</dd></div>
+                                    <div><dt>Factor rate</dt><dd>${revFactor.toFixed(2)}&times;</dd></div>
+                                    <div><dt>Payments left</dt><dd>0</dd></div>
+                                    <div><dt>All-in cost</dt><dd>${fmtUsd0.format(buyoutAllIn)}</dd></div>
+                                </dl>
                             </div>
-                            <div class="lp-payoff-card">
-                                <div class="lp-payoff-card-label">Interest Saved</div>
-                                <div class="lp-payoff-card-value">${fmtUsd.format(sel.savings)}</div>
+                            <div class="lp-tile">
+                                <div class="lp-tile-eyebrow"><span>Run-to-term cost</span><span class="lp-tile-fn">Do nothing</span></div>
+                                <div class="lp-tile-big">${fmtUsd0.format(runToTerm)}</div>
+                                <div class="lp-tile-sub">Remaining scheduled payments if the contract runs to ${maturityMo}</div>
+                                <div class="lp-tile-div"></div>
+                                <dl class="lp-tile-stats">
+                                    <div><dt>Effective APR</dt><dd>~${origApr.toFixed(1)}%</dd></div>
+                                    <div><dt>Factor rate</dt><dd>${origFactor.toFixed(2)}&times;</dd></div>
+                                    <div><dt>Payments left</dt><dd>${paymentsLeft}</dd></div>
+                                    <div><dt>All-in cost</dt><dd>${fmtUsd0.format(c.payback)}</dd></div>
+                                </dl>
                             </div>
-                            <div class="lp-payoff-card">
-                                <div class="lp-payoff-card-label">All-in cost if paid off ${shortDate}</div>
-                                <div class="lp-payoff-card-value">${fmtUsd.format(sel.tpaid + sel.buyout)}</div>
+                            <div class="lp-tile lp-tile-savings">
+                                <div class="lp-tile-eyebrow"><span>Total savings</span><span class="lp-tile-fn">The difference</span></div>
+                                <div class="lp-tile-big">${fmtUsd0.format(totalSaved)}</div>
+                                <div class="lp-tile-sub">What the merchant saves by buying out early</div>
+                                <div class="lp-tile-div"></div>
+                                <dl class="lp-tile-stats">
+                                    <div><dt>APR reduction</dt><dd>&minus;${aprDrop.toFixed(1)} pts</dd></div>
+                                    <div><dt>Factor reduction</dt><dd>${factorDropLbl}</dd></div>
+                                    <div><dt>Payments eliminated</dt><dd>${paymentsLeft}</dd></div>
+                                    <div><dt>Cost avoided</dt><dd>&minus;${fmtUsd0.format(totalSaved)}</dd></div>
+                                </dl>
                             </div>
                         </div>
-                        <div class="lp-payoff-meta">
-                            <div><div class="lp-inline-stat-label">Payoff date</div><div class="lp-inline-stat-value">${sel.date}</div></div>
-                            <div><div class="lp-inline-stat-label">Paid to date</div><div class="lp-inline-stat-value">${fmtUsd.format(sel.tpaid)}</div></div>
-                            <div><div class="lp-inline-stat-label">Full-term cost</div><div class="lp-inline-stat-value">${c ? fmtUsd.format(c.payback) : '&mdash;'}</div></div>
+                        <div class="lp-todate">
+                            <div class="lp-todate-label"><span>To date</span><span class="lp-todate-rule"></span></div>
+                            <div class="lp-todate-grid">
+                                <div><dt>Paid so far</dt><dd>${fmtUsd0.format(sel.tpaid)}</dd><span class="lp-todate-meta">across ${sel.period} payment${sel.period === 1 ? '' : 's'}</span></div>
+                                <div><dt>Payments made</dt><dd>${sel.period} of ${c.periods}</dd><span class="lp-todate-meta">${paymentsLeft} remaining</span></div>
+                                <div><dt>Contract progress</dt><dd>${progressPct}%</dd><span class="lp-todate-meta">of term elapsed</span></div>
+                                <div><dt>Payment amount</dt><dd>${fmtUsd.format(c.pmt)}</dd><span class="lp-todate-meta">per ${c.freqName}</span></div>
+                            </div>
                         </div>
                         <div class="lp-quote-row no-print">
                             <button type="button" class="lp-quote-btn" onclick="copyPayoffQuote(${id})">&#128203; Copy payoff quote</button>
@@ -1965,7 +2084,7 @@
                 if (tableEl) tableEl.classList.toggle('amo-prepay-off', !isPrepayEnabled);
             }
             document.getElementById(`printTableBody-${id}`).innerHTML = printTbodyHTML;
-            lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, centsDisplay, discPct, maturityDate, periods };
+            lastCalc[id] = { pmt, freqName, term, termUnit, payback, apr, totalCost, factor, amt, netFunded, pYear, centsDisplay, discPct, maturityDate, periods };
             renderDetailRow(id);
 
             // Park the selected payoff row + panel just under the sticky header so the
