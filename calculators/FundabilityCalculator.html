@@ -1252,6 +1252,22 @@
         addPosition(450, 'daily');
         bindTips();
         runAll();
+        // Deal Read handoff: prefill the new-position fields from URL params (no PII).
+        // Param names mirror the field ids: funding_amt / monthly_rev / factor / term_val / term_unit.
+        try {
+            const qp = new URLSearchParams(window.location.search);
+            if (qp.has('funding_amt') || qp.has('monthly_rev') || qp.has('factor') || qp.has('term_val')) {
+                const sv = (id, v) => { const e = document.getElementById(id); if (e && v != null && v !== '') e.value = v; };
+                sv('funding_amt', qp.get('funding_amt'));
+                sv('monthly_rev', qp.get('monthly_rev'));
+                sv('factor', qp.get('factor'));
+                sv('term_val', qp.get('term_val'));
+                const tu = (qp.get('term_unit') || '').toLowerCase();
+                const sel = document.getElementById('term_unit');
+                if (tu && sel) { Array.from(sel.options).forEach(o => { if (o.value.toLowerCase() === tu) sel.value = o.value; }); }
+                runAll();
+            }
+        } catch (e) { /* prefill is best-effort */ }
         // Quote Log restore (LEN-123)
         try {
             const rec = window.LPQuoteLog && window.LPQuoteLog.consumeRestorePayload('fundability');

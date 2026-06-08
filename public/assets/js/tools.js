@@ -17,6 +17,19 @@ var TOOLS = [
     path: "/calculators/AmoScheduleCalculator.html",
     kw: "amortization schedule prepay payoff buyout mca payment deal desk"
   },
+  {
+    id: "deal-read",
+    name: "Deal Read",
+    desc: "Read any deal in seconds — industry, credit, and revenue become a product stack, funding range, and talk track.",
+    status: "live",
+    group: "deal-math",
+    icon: "search",
+    color: "green",
+    slug: "/tools/deal-read",
+    presentation: "page",
+    path: "/calculators/deal-read/index.html",
+    kw: "deal read fundability naics industry credit fico revenue product stack talk track lender underwriting affordability"
+  },
   /*
   { 
     id: "verifier", 
