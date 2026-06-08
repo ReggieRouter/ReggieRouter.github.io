@@ -307,6 +307,56 @@
 .save-field label { display: block; font-size: 11px; font-weight: 800; color: var(--lp-text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
 .save-field input { width: 100%; padding: 12px; border: 2px solid var(--lp-border); border-radius: 8px; font-size: 14px; font-weight: 600; font-family: inherit; outline: none; }
 .save-field input:focus { border-color: var(--lp-green); }
+/* LEN-11 — standard action-button CTAs (matches Payment Breakdown) */
+.action-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.lp-cta-primary, .lp-cta-secondary { display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:12px 16px; border-radius:10px; font-size:13px; font-weight:700;
+    letter-spacing:0.02em; cursor:pointer; transition:all 120ms; font-family:inherit; }
+.lp-cta-primary { background:#1A3C2E; color:#fff; border:1px solid #1A3C2E; }
+.lp-cta-primary:hover { background:#2D6A4F; }
+.lp-cta-primary:disabled { opacity:0.55; cursor:not-allowed; }
+.lp-cta-secondary { background:transparent; color:#1A3C2E; border:1px solid #1A3C2E; }
+.lp-cta-secondary:hover { background:#F0FDF4; }
+/* LEN-11 — optional Document details panel (screen only; never printed) */
+.lp-doc-details {
+    max-width: 980px; margin: 0 auto 14px; padding: 0 4px;
+    border: 1px solid #E5E7EB; border-radius: 10px; background: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.lp-doc-details > summary {
+    list-style: none; cursor: pointer; padding: 12px 14px;
+    font-size: 12px; font-weight: 800; color: #111827; letter-spacing: 0.01em;
+}
+.lp-doc-details > summary::-webkit-details-marker { display: none; }
+.lp-doc-details > summary::before { content: "+ "; color: #1A3C2E; font-weight: 900; }
+.lp-doc-details[open] > summary::before { content: "– "; }
+.lp-doc-details > summary span { color: #6B7280; font-weight: 500; }
+.lp-doc-details-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px;
+    padding: 4px 14px 16px;
+}
+.lp-doc-details-grid label {
+    display: flex; flex-direction: column; gap: 4px;
+    font-size: 10px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.lp-doc-details-grid input {
+    padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 7px;
+    font-size: 13px; font-weight: 500; color: #111827; text-transform: none; letter-spacing: 0;
+    font-family: inherit; background: #fff;
+}
+.lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
+.lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
+@media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+/* LEN-11 — broker/deal context block injected into the captured body at print time */
+.lp-doc-context { display: none; }
+body.pdf-export-mode .lp-doc-context {
+    display: block; margin: 0 0 14px; padding: 11px 15px;
+    border: 1px solid #E5E7EB; border-radius: 10px; background: #F9FAFB;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.lp-doc-context .dc-for { font-size: 15px; font-weight: 800; color: #111827; word-break: break-word; }
+.lp-doc-context .dc-meta { font-size: 11px; color: #6B7280; margin-top: 3px; }
+.lp-doc-context .dc-by { font-size: 11px; color: #374151; margin-top: 2px; }
 .pdf-btn { width: 100%; padding: 16px; background: var(--lp-green); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: all .2s; }
 .pdf-btn:hover { background: #166534; }
 .pdf-btn:disabled { opacity: 0.72; cursor: not-allowed; }
@@ -612,6 +662,19 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     </div>
     <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
     <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
+    <!-- LEN-11 — document details that personalize the exported PDF. Prepared for + Deal name
+         are required to enable Save on this calculator (kept gate); the rest are optional. -->
+    <details id="pdfDocDetails" class="lp-doc-details no-print" open>
+        <summary>Document details <span>— Prepared for + Deal name required; appears on the PDF</span></summary>
+        <div class="lp-doc-details-grid">
+            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name" oninput="updPdfBtnState()"></label>
+            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital" oninput="updPdfBtnState()"></label>
+            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+        </div>
+        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Borrower state is set above and drives state-specific compliance disclosures.</p>
+    </details>
     <div class="lp-container">
         <div class="calc-card-header">
             <div class="calc-card-header-title">DSCR Calculator</div>
@@ -770,18 +833,16 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                 </div>
             </div>
 
-            <div class="sc save-area" data-sc-collapsible data-pdf-sec="save">
-                <div class="sc-hd">
-                    <span class="sc-title">Save this analysis<span class="sc-sub">Download PDF for your records</span></span>
-                    <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
-                </div>
-                <div class="sc-body">
-                    <div class="save-row">
-                        <div class="save-field"><label>Business name</label><input type="text" id="pdfBizName" placeholder="e.g. Acme Plumbing" oninput="updPdfBtnState()"></div>
-                        <div class="save-field"><label>Deal name</label><input type="text" id="pdfDealName" placeholder="e.g. Working Capital Q3" oninput="updPdfBtnState()"></div>
-                    </div>
-                    <button class="pdf-btn" id="pdfBtn" onclick="runPDF()" disabled>Save as PDF</button>
-                </div>
+            <!-- LEN-11 — standard action-button stack (fields now live in #pdfDocDetails above) -->
+            <div class="action-buttons no-print">
+                <button class="lp-cta-primary" id="pdfBtn" onclick="runPDF()" disabled>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    Save Estimate as PDF
+                </button>
+                <button class="lp-cta-secondary" onclick="copyDscr()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy Scenario
+                </button>
             </div>
         </div>
 
@@ -1258,13 +1319,84 @@ function openLenderCtx(){ document.getElementById('lenderCtxModal').classList.ad
 function closeLenderCtx(){ document.getElementById('lenderCtxModal').classList.remove('open'); }
 
 function updPdfBtnState(){
-  var bn = document.getElementById('pdfBizName').value.trim();
+  var bn = document.getElementById('pdfPreparedFor').value.trim();
   var dn = document.getElementById('pdfDealName').value.trim();
   document.getElementById('pdfBtn').disabled = !(bn && dn);
 }
 
+// LEN-11 — read the optional Document-details fields
+function pdfDocContext() {
+    const v = id => (document.getElementById(id)?.value || '').trim();
+    const name = v('pdfPreparedBy'), company = v('pdfPreparedByCompany');
+    return {
+        preparedBy: [name, company].filter(Boolean).join(' · '),
+        preparedFor: v('pdfPreparedFor'),
+        dealName: v('pdfDealName'),
+        lender: v('pdfLender')
+    };
+}
+// LEN-11 — inject the broker/deal context into the captured body. The print header is
+// overwritten by generatePDF → initPrintLayout, so this block must live in the body.
+function mountDocContext(element) {
+    const c = pdfDocContext();
+    if (!c.preparedBy && !c.preparedFor && !c.dealName && !c.lender) return null;
+    const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    const rows = [];
+    if (c.preparedFor) rows.push(`<div class="dc-for">Prepared for ${esc(c.preparedFor)}</div>`);
+    const meta = [];
+    if (c.dealName) meta.push(esc(c.dealName));
+    if (c.lender) meta.push(esc(c.lender));
+    if (meta.length) rows.push(`<div class="dc-meta">${meta.join(' · ')}</div>`);
+    if (c.preparedBy) rows.push(`<div class="dc-by">Prepared by ${esc(c.preparedBy)}</div>`);
+    if (!rows.length) return null;
+    const node = document.createElement('div');
+    node.className = 'lp-doc-context';
+    node.innerHTML = rows.join('');
+    const hdr = element.querySelector('.print-header-content');
+    if (hdr) hdr.insertAdjacentElement('afterend', node);
+    else element.insertAdjacentElement('afterbegin', node);
+    return node;
+}
+
+// LEN-11 — Copy Scenario for DSCR (net-new; mirrors the PDF Quote Log payload)
+function copyDscr() {
+    const biz = document.getElementById('pdfPreparedFor').value.trim();
+    const deal = document.getElementById('pdfDealName').value.trim();
+    const cd = getCalcData();
+    const sc0 = (S.scenarios && S.scenarios[0]) || {};
+    const mp0 = sc0.amount ? calcPmt(sc0.amount, sc0.rate, sc0.term) : 0;
+    const bdscr = (mp0 * 12 + cd.bObl) > 0 ? cd.ebida / (mp0 * 12 + cd.bObl) : null;
+    const gdscr = (mp0 * 12 + cd.gObl) > 0 ? cd.global / (mp0 * 12 + cd.gObl) : null;
+    const activeEntity = S.entity ? ENTITIES.find(x => x.id === S.entity) : null;
+    const lines = ['DSCR Analysis — LendPaper'];
+    if (biz || deal) lines.push([biz, deal].filter(Boolean).join(' · '));
+    lines.push('');
+    if (activeEntity) lines.push('Entity: ' + activeEntity.name);
+    lines.push('Total EBIDA: ' + fmt(cd.ebida));
+    if (sc0.amount) lines.push('Scenario: ' + fmt(sc0.amount) + ' @ ' + sc0.rate + '% / ' + sc0.term + ' mo  ·  ' + fmt(mp0) + '/mo');
+    if (bdscr != null) lines.push('Business DSCR: ' + bdscr.toFixed(2) + 'x');
+    if (gdscr != null) lines.push('Global DSCR: ' + gdscr.toFixed(2) + 'x');
+    lines.push('');
+    lines.push('Estimate only — not a financing offer or a required disclosure.');
+    navigator.clipboard.writeText(lines.join('\n'));
+    window.PDF_HELPER && window.PDF_HELPER.showToast && window.PDF_HELPER.showToast('Scenario copied');
+    try {
+        window.saveEstimate && window.saveEstimate({
+            calculator_type: 'dscr',
+            params: {
+                amount: sc0.amount ?? null, rate: sc0.rate ?? null, term: sc0.term ?? null,
+                entity: S.entity, mode: S.mode, dscr: S.mode === 'gdscr' ? gdscr : bdscr, bdscr, gdscr,
+                scenarios: S.scenarios, ebida: S.ebida, debts: S.debts, owners: S.owners,
+                borrower_state: (window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState()) || ''
+            },
+            pdf_generated: false,
+            prepared_for: biz || null
+        });
+    } catch (e) { /* logging must never block the copy */ }
+}
+
 async function runPDF() {
-    const biz = document.getElementById('pdfBizName').value.trim();
+    const biz = document.getElementById('pdfPreparedFor').value.trim();
     const deal = document.getElementById('pdfDealName').value.trim();
     const btn = document.getElementById('pdfBtn');
     const origText = btn.innerHTML;
@@ -1394,14 +1526,9 @@ async function runPDF() {
     }
 
     // Setup custom print header band dynamically per plan tier
+    // (broker/deal context renders into the captured body via mountDocContext below —
+    //  the print header is overwritten by initPrintLayout, so it can't live there)
     window.PDF_HELPER.initPrintLayout("DSCR ANALYSIS");
-    const headerEl = document.querySelector('.print-header-content');
-    if (headerEl && (biz || deal)) {
-        const sub = document.createElement('div');
-        sub.style.cssText = 'text-align:center;margin-top:-8px;margin-bottom:12px;font-size:12px;color:#6B7280;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;';
-        sub.textContent = [biz, deal].filter(Boolean).join(' · ');
-        headerEl.appendChild(sub);
-    }
 
     const cards = document.querySelectorAll('[id^="card-"]');
     if (cards.length > 1) {
@@ -1411,7 +1538,9 @@ async function runPDF() {
     const element = document.querySelector('.lp-main');
     const filename = `LendPaper_DSCR_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
+    let _docCtxNode = null;
     try {
+        _docCtxNode = mountDocContext(element);
         await window.PDF_HELPER.generatePDF(element, "DSCR ANALYSIS", filename, btn, origText);
         // Quote Log (LEN-123)
         try {
@@ -1430,10 +1559,11 @@ async function runPDF() {
                     borrower_state: (window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState()) || ''
                 },
                 pdf_generated: true,
-                prepared_for: (document.getElementById('pdfBizName') && document.getElementById('pdfBizName').value) || null
+                prepared_for: (document.getElementById('pdfPreparedFor') && document.getElementById('pdfPreparedFor').value) || null
             });
         } catch (e) { /* logging must never block the export */ }
     } finally {
+        if (_docCtxNode) _docCtxNode.remove();
         if (printView) printView.innerHTML = '';
         document.body.classList.remove('multi-scenario');
         btn.innerHTML = origText;
@@ -1490,7 +1620,7 @@ const COMPANY_NAMES = [
 ];
 
 function setRandomBusinessPlaceholder() {
-  const input = document.getElementById('pdfBizName');
+  const input = document.getElementById('pdfPreparedFor');
   if (!input) return;
   const name = COMPANY_NAMES[Math.floor(Math.random() * COMPANY_NAMES.length)];
   input.placeholder = "e.g. " + name;
