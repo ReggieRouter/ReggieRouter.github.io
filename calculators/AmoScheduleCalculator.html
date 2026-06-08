@@ -1408,9 +1408,10 @@
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
 </script>
 <script type="module">
-  import { requireApprovedUser, logUsage } from '../js/auth.js';
-  const profile = await requireApprovedUser();
-  if (!profile) return;
+  // Ungated to match the other calculators (auth gates reverted on main, LEN-87).
+  // logUsage() no-ops when logged out. NOTE: a bare top-level `return` here is a
+  // parse error in an ES module and silently kills the whole block — don't add one.
+  import { logUsage } from '../js/auth.js';
   logUsage('amortization', 'view');
 </script>
 <!-- Quote Log: exposes window.saveEstimate / window.LPQuoteLog (LEN-123) -->

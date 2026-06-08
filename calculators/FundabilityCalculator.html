@@ -325,9 +325,57 @@
         .legend-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
         .legend-range { color: #94a3b8; font-weight: 700; margin-left: auto; }
 
-        .lp-actions { display: flex; flex-direction: row; gap: 12px; margin-top: 20px; }
+        .lp-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         .lp-actions .lp-copy-btn,
         .lp-actions .lp-print-btn { flex: 1; width: auto; }
+        /* LEN-11 — standard action-button CTAs (matches Payment Breakdown) */
+        .lp-cta-primary, .lp-cta-secondary { display:flex; align-items:center; justify-content:center; gap:8px;
+            width:100%; padding:12px 16px; border-radius:10px; font-size:13px; font-weight:700;
+            letter-spacing:0.02em; cursor:pointer; transition:all 120ms; }
+        .lp-cta-primary { background:#1A3C2E; color:#fff; border:1px solid #1A3C2E; }
+        .lp-cta-primary:hover { background:#2D6A4F; }
+        .lp-cta-secondary { background:transparent; color:#1A3C2E; border:1px solid #1A3C2E; }
+        .lp-cta-secondary:hover { background:#F0FDF4; }
+        /* LEN-11 — optional Document details panel (screen only; never printed) */
+        .lp-doc-details {
+            max-width: 980px; margin: 0 auto 14px; padding: 0 4px;
+            border: 1px solid #E5E7EB; border-radius: 10px; background: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .lp-doc-details > summary {
+            list-style: none; cursor: pointer; padding: 12px 14px;
+            font-size: 12px; font-weight: 800; color: #111827; letter-spacing: 0.01em;
+        }
+        .lp-doc-details > summary::-webkit-details-marker { display: none; }
+        .lp-doc-details > summary::before { content: "+ "; color: #1A3C2E; font-weight: 900; }
+        .lp-doc-details[open] > summary::before { content: "– "; }
+        .lp-doc-details > summary span { color: #6B7280; font-weight: 500; }
+        .lp-doc-details-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px;
+            padding: 4px 14px 16px;
+        }
+        .lp-doc-details-grid label {
+            display: flex; flex-direction: column; gap: 4px;
+            font-size: 10px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .lp-doc-details-grid input {
+            padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 7px;
+            font-size: 13px; font-weight: 500; color: #111827; text-transform: none; letter-spacing: 0;
+            font-family: inherit; background: #fff;
+        }
+        .lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
+        .lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
+        @media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+        /* LEN-11 — broker/deal context block injected into the captured body at print time */
+        .lp-doc-context { display: none; }
+        body.pdf-export-mode .lp-doc-context {
+            display: block; margin: 0 0 14px; padding: 11px 15px;
+            border: 1px solid #E5E7EB; border-radius: 10px; background: #F9FAFB;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .lp-doc-context .dc-for { font-size: 15px; font-weight: 800; color: #111827; word-break: break-word; }
+        .lp-doc-context .dc-meta { font-size: 11px; color: #6B7280; margin-top: 3px; }
+        .lp-doc-context .dc-by { font-size: 11px; color: #374151; margin-top: 2px; }
         .panel > .lp-howto { margin: 20px 24px 0; }
         .lp-copy-btn {
             background-color: var(--lp-green); color: white; padding: 18px; border: none; border-radius: 10px;
@@ -521,6 +569,18 @@
     </div>
     <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
     <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
+    <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
+    <details id="pdfDocDetails" class="lp-doc-details no-print">
+        <summary>Document details <span>— optional, appears on the PDF</span></summary>
+        <div class="lp-doc-details-grid">
+            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
+            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+        </div>
+        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
+    </details>
     <div class="lp-container">
         <div class="calc-card-header">
             <div class="calc-card-header-title">Fundability</div>
@@ -558,7 +618,7 @@
         <!-- ============ PANEL: NET REQUIREMENT ============ -->
         <div class="panel active" id="panel_net">
             <div class="lp-inputs">
-                <label for="net_pct">Net Requirement <span class="tooltip-icon" data-tip="Percentage of the new funding that must go directly to the borrower.">📎</span></label>
+                <label for="net_pct">Net Requirement <span class="tooltip-icon" data-tip="Percentage of the new funding that must go directly to the borrower."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                 <div class="input-wrap">
                     <div class="input-prefix">%</div>
                     <input type="number" id="net_pct" class="input-field" value="50" oninput="runNetCalc()">
@@ -572,7 +632,7 @@
                         <div id="hero_val" class="hero-value">$25,000</div>
                     </div>
                     <div class="hero-output">
-                        <div class="hero-label">Max payoff <span class="tooltip-icon" data-tip="Total amount available to pay off existing debt or liens.">📎</span></div>
+                        <div class="hero-label">Max payoff <span class="tooltip-icon" data-tip="Total amount available to pay off existing debt or liens."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                         <div id="res_payoff" class="hero-value">$25,000</div>
                     </div>
                 </div>
@@ -580,13 +640,13 @@
                     <span class="tk-eyebrow">What you tell the borrower</span>
                 </div>
                 <div class="lp-actions">
-                    <button class="lp-copy-btn" onclick="copyNet()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy
-                    </button>
-                    <button class="lp-print-btn" onclick="handleLendPaperSavePDF()">
+                    <button class="lp-cta-primary" onclick="handleLendPaperSavePDF()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        Save as PDF
+                        Save Estimate as PDF
+                    </button>
+                    <button class="lp-cta-secondary" onclick="copyNet()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy results
                     </button>
                 </div>
             </div>
@@ -597,7 +657,7 @@
             <div class="lp-inputs">
                 <div class="lp-section-label">Revenue</div>
                 <div class="lp-group" style="margin-bottom: 0;">
-                    <label for="monthly_rev">Average monthly revenue <span class="tooltip-icon" data-tip="Gross monthly deposits / sales. Use a true monthly average from bank statements.">📎</span></label>
+                    <label for="monthly_rev">Average monthly revenue <span class="tooltip-icon" data-tip="Gross monthly deposits / sales. Use a true monthly average from bank statements."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                     <div class="input-wrap">
                         <div class="input-prefix">$</div>
                         <input type="number" id="monthly_rev" class="input-field" value="120000" oninput="runRiskCalc()">
@@ -617,13 +677,13 @@
 
                 <div class="lp-section-label">New funding terms</div>
                 <div class="lp-group">
-                    <label for="factor">Factor rate / total payback multiple <span class="tooltip-icon" data-tip="Total payback multiple. e.g. 1.40 means $50,000 funded is repaid as $70,000. For an interest loan, enter total payback ÷ principal.">📎</span></label>
+                    <label for="factor">Factor rate / total payback multiple <span class="tooltip-icon" data-tip="Total payback multiple. e.g. 1.40 means $50,000 funded is repaid as $70,000. For an interest loan, enter total payback ÷ principal."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                     <div class="input-wrap">
                         <input type="number" step="0.01" id="factor" class="input-field" value="1.40" oninput="runRiskCalc()">
                     </div>
                 </div>
                 <div class="lp-group" style="margin-bottom: 0;">
-                    <label for="term_val">Term <span class="tooltip-icon" data-tip="Repayment length. Choose the unit that matches the product: business days for daily-ACH advances, weeks for weekly remits, or months for a term loan.">📎</span></label>
+                    <label for="term_val">Term <span class="tooltip-icon" data-tip="Repayment length. Choose the unit that matches the product: business days for daily-ACH advances, weeks for weekly remits, or months for a term loan."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                     <div class="input-wrap">
                         <input type="number" id="term_val" class="input-field" value="120" oninput="runRiskCalc()">
                         <select class="unit-select" id="term_unit" onchange="runRiskCalc()">
@@ -643,7 +703,7 @@
                 </button>
                 <div class="lp-collapse" id="exp_collapse" hidden>
                     <div class="lp-group" style="margin: 14px 0 0;">
-                        <label for="open_bal">Total outstanding balance on existing positions <span class="tooltip-icon" data-tip="Combined remaining payback across all current obligations. Powers the total-exposure ratio (typically capped near 1.0x–1.5x of monthly revenue).">📎</span></label>
+                        <label for="open_bal">Total outstanding balance on existing positions <span class="tooltip-icon" data-tip="Combined remaining payback across all current obligations. Powers the total-exposure ratio (typically capped near 1.0x–1.5x of monthly revenue)."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                         <div class="input-wrap">
                             <div class="input-prefix">$</div>
                             <input type="number" id="open_bal" class="input-field" placeholder="0" oninput="runRiskCalc()">
@@ -671,7 +731,7 @@
 
                 <div class="hero-grid">
                     <div class="hero-output">
-                        <div class="hero-label">Debt-service ratio <span class="tooltip-icon" data-tip="Total monthly debt service (all positions + new) divided by monthly revenue. The primary position-risk signal.">📎</span></div>
+                        <div class="hero-label">Debt-service ratio <span class="tooltip-icon" data-tip="Total monthly debt service (all positions + new) divided by monthly revenue. The primary position-risk signal."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                         <div id="hero_dsr" class="hero-value">—</div>
                     </div>
                     <div class="hero-output">
@@ -686,7 +746,7 @@
 
                 <div class="result-grid">
                     <div class="result-item">
-                        <div class="result-label">Combined daily debt service <span class="tooltip-icon" data-tip="All positions plus the new funding, normalized to a daily-equivalent across ~21.7 business days/month.">📎</span></div>
+                        <div class="result-label">Combined daily debt service <span class="tooltip-icon" data-tip="All positions plus the new funding, normalized to a daily-equivalent across ~21.7 business days/month."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                         <div id="res_daily" class="result-val">—</div>
                     </div>
                     <div class="result-item">
@@ -698,7 +758,7 @@
                         <div id="res_remaining" class="result-val">—</div>
                     </div>
                     <div class="result-item hidden" id="row_exposure">
-                        <div class="result-label">Total exposure vs revenue <span class="tooltip-icon" data-tip="Total outstanding + new payback, as a multiple of monthly revenue. Responsible funders typically cap this near 1.0x–1.5x.">📎</span></div>
+                        <div class="result-label">Total exposure vs revenue <span class="tooltip-icon" data-tip="Total outstanding + new payback, as a multiple of monthly revenue. Responsible funders typically cap this near 1.0x–1.5x."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                         <div id="res_exposure" class="result-val">—</div>
                     </div>
                 </div>
@@ -712,13 +772,13 @@
                 </div>
 
                 <div class="lp-actions">
-                    <button class="lp-copy-btn" onclick="copyRisk()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy
-                    </button>
-                    <button class="lp-print-btn" onclick="handleLendPaperSavePDF()">
+                    <button class="lp-cta-primary" onclick="handleLendPaperSavePDF()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        Save as PDF
+                        Save Estimate as PDF
+                    </button>
+                    <button class="lp-cta-secondary" onclick="copyRisk()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy results
                     </button>
                 </div>
             </div>
@@ -764,6 +824,40 @@
         toast.style.opacity = '1';
         setTimeout(() => { toast.style.opacity = '0'; }, 2000);
     }
+    // LEN-11 — read the optional Document-details fields
+    function pdfDocContext() {
+        const v = id => (document.getElementById(id)?.value || '').trim();
+        const name = v('pdfPreparedBy'), company = v('pdfPreparedByCompany');
+        return {
+            preparedBy: [name, company].filter(Boolean).join(' · '),
+            preparedFor: v('pdfPreparedFor'),
+            dealName: v('pdfDealName'),
+            lender: v('pdfLender')
+        };
+    }
+    // LEN-11 — inject the broker/deal context into the captured body. The print header is
+    // overwritten by generatePDF → initPrintLayout, so this block must live in the body.
+    function mountDocContext(element) {
+        const c = pdfDocContext();
+        if (!c.preparedBy && !c.preparedFor && !c.dealName && !c.lender) return null;
+        const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+        const rows = [];
+        if (c.preparedFor) rows.push(`<div class="dc-for">Prepared for ${esc(c.preparedFor)}</div>`);
+        const meta = [];
+        if (c.dealName) meta.push(esc(c.dealName));
+        if (c.lender) meta.push(esc(c.lender));
+        if (meta.length) rows.push(`<div class="dc-meta">${meta.join(' · ')}</div>`);
+        if (c.preparedBy) rows.push(`<div class="dc-by">Prepared by ${esc(c.preparedBy)}</div>`);
+        if (!rows.length) return null;
+        const node = document.createElement('div');
+        node.className = 'lp-doc-context';
+        node.innerHTML = rows.join('');
+        const hdr = element.querySelector('.print-header-content');
+        if (hdr) hdr.insertAdjacentElement('afterend', node);
+        else element.insertAdjacentElement('afterbegin', node);
+        return node;
+    }
+
     async function handleLendPaperSavePDF() {
         const btn = event.currentTarget;
         const origText = btn.innerHTML;
@@ -810,7 +904,9 @@
         const element = document.querySelector('.lp-main');
         const filename = `LendPaper_Fundability_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
+        let _docCtxNode = null;
         try {
+            _docCtxNode = mountDocContext(element);
             await window.PDF_HELPER.generatePDF(element, "FUNDABILITY ESTIMATE", filename, btn, origText);
             // Quote Log (LEN-123)
             try {
@@ -827,10 +923,12 @@
                         verdict: (document.getElementById('verdict_headline') && document.getElementById('verdict_headline').innerText) || null,
                         borrower_state: (window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState()) || ''
                     },
-                    pdf_generated: true
+                    pdf_generated: true,
+                    prepared_for: document.getElementById('pdfPreparedFor')?.value?.trim() || null
                 });
             } catch (e) { /* logging must never block the export */ }
         } finally {
+            if (_docCtxNode) _docCtxNode.remove();
             document.body.classList.remove('multi-scenario');
             btn.innerHTML = origText;
             btn.disabled = false;
