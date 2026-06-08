@@ -58,6 +58,12 @@
 <script src="../public/assets/js/pdf-helper.js"></script>
 <script src="../public/assets/js/compliance-rules.js"></script>
 <script src="../public/assets/js/compliance.js"></script>
+<!-- Quote Log bootstrap (LEN-123): config + supabase importmap + shared util -->
+<script src="../js/config.js"></script>
+<script type="importmap">
+  { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+</script>
+<script type="module" src="../js/quote-log.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
@@ -1407,6 +1413,26 @@ async function runPDF() {
 
     try {
         await window.PDF_HELPER.generatePDF(element, "DSCR ANALYSIS", filename, btn, origText);
+        // Quote Log (LEN-123)
+        try {
+            const cdQL = getCalcData();
+            const sc0 = (S.scenarios && S.scenarios[0]) || {};
+            const mp0 = sc0.amount ? calcPmt(sc0.amount, sc0.rate, sc0.term) : 0;
+            const bdscr = (mp0 * 12 + cdQL.bObl) > 0 ? cdQL.ebida / (mp0 * 12 + cdQL.bObl) : null;
+            const gdscr = (mp0 * 12 + cdQL.gObl) > 0 ? cdQL.global / (mp0 * 12 + cdQL.gObl) : null;
+            window.saveEstimate && window.saveEstimate({
+                calculator_type: 'dscr',
+                params: {
+                    amount: sc0.amount ?? null, rate: sc0.rate ?? null, term: sc0.term ?? null,
+                    entity: S.entity, mode: S.mode,
+                    dscr: S.mode === 'gdscr' ? gdscr : bdscr, bdscr, gdscr,
+                    scenarios: S.scenarios,
+                    borrower_state: (window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState()) || ''
+                },
+                pdf_generated: true,
+                prepared_for: (document.getElementById('pdfBizName') && document.getElementById('pdfBizName').value) || null
+            });
+        } catch (e) { /* logging must never block the export */ }
     } finally {
         if (printView) printView.innerHTML = '';
         document.body.classList.remove('multi-scenario');

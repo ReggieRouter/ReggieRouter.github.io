@@ -52,6 +52,12 @@
 <script src="../public/assets/js/pdf-helper.js"></script>
 <script src="../public/assets/js/compliance-rules.js"></script>
 <script src="../public/assets/js/compliance.js"></script>
+<!-- Quote Log bootstrap (LEN-123): config + supabase importmap + shared util -->
+<script src="../js/config.js"></script>
+<script type="importmap">
+  { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+</script>
+<script type="module" src="../js/quote-log.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
@@ -667,6 +673,27 @@ async function handleLendPaperSavePDF() {
 
     try {
         await window.PDF_HELPER.generatePDF(element, "SBA 7(a) RATES & FEES", filename, btn, origText);
+        // Quote Log (LEN-123) — one record per scenario card
+        try {
+            cards.forEach(card => {
+                const cid = card.id.split('-')[1];
+                const amt = cleanNumericInput(document.getElementById(`loanAmount-${cid}`)?.value);
+                if (!amt) return;
+                window.saveEstimate && window.saveEstimate({
+                    calculator_type: 'sba_fees',
+                    params: {
+                        amount: amt,
+                        term: cleanNumericInput(document.getElementById(`termYears-${cid}`)?.value),
+                        rate_spread: cleanNumericInput(document.getElementById(`rateSpread-${cid}`)?.value),
+                        packaging_fee: cleanNumericInput(document.getElementById(`pkgFee-${cid}`)?.value),
+                        closing_fee: cleanNumericInput(document.getElementById(`closeFee-${cid}`)?.value),
+                        monthly_payment: document.getElementById(`res-monthly-pmt-${cid}`)?.innerText,
+                        total_fees: document.getElementById(`res-total-fees-${cid}`)?.innerText
+                    },
+                    pdf_generated: true
+                });
+            });
+        } catch (e) { /* logging must never block the export */ }
     } finally {
         document.body.classList.remove('multi-scenario');
         btn.innerHTML = origText;
@@ -845,6 +872,19 @@ function copyResults(id) {
     text += `----------------\n${WATERMARK_FOOTER}`;
     
     navigator.clipboard.writeText(text).then(() => {
+        // Quote Log (LEN-123)
+        try {
+            window.saveEstimate && window.saveEstimate({
+                calculator_type: 'sba_fees',
+                params: {
+                    amount: cleanNumericInput(loan),
+                    term: cleanNumericInput(document.getElementById(`termYears-${id}`)?.value),
+                    rate_spread: cleanNumericInput(document.getElementById(`rateSpread-${id}`)?.value),
+                    monthly_payment: pmt, total_fees: fees, total_interest: interest, scenario_name: name
+                },
+                pdf_generated: false
+            });
+        } catch (e) {}
         // Simple visual feedback
         const btn = event.currentTarget;
         const origText = btn.innerHTML;
