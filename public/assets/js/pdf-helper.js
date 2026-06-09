@@ -135,7 +135,24 @@ window.PDF_HELPER = {
         
         headerEl.innerHTML = headerHTML;
     },
-    
+
+    // Calm "Estimate only" notice (LEN-141) inserted at the top of the captured body so
+    // every calculator's PDF opens with the same amber banner. Styled by pdf-calm.css.
+    // Skipped for calculators that render their own calm-native notice (Payment Breakdown,
+    // which owns #pdf-document). Removed after the print dialog closes.
+    mountEstimateNotice: function(element) {
+        if (!element || document.getElementById('pdf-document')) return null;
+        if (element.querySelector('.lp-pdf-notice')) return null;
+        var note = document.createElement('div');
+        note.className = 'lp-pdf-notice';
+        note.id = 'lp-estimate-notice';
+        note.innerHTML = '<strong>Estimate only.</strong> For planning and discussion. Final approval, pricing, fees, and payoff quotes come from the lender and may differ. lendpaper.com/legal/estimates';
+        var hdr = element.querySelector('.print-header-content');
+        if (hdr) hdr.insertAdjacentElement('afterend', note);
+        else element.insertAdjacentElement('afterbegin', note);
+        return note;
+    },
+
     resetScroll: async function(delayMs) {
         // 1. Reset local window scroll offsets
         window.scrollTo(0, 0);
@@ -464,6 +481,10 @@ window.PDF_HELPER = {
             }
         }
 
+        // STEP 7.6 — Calm "Estimate only" notice at the top of the captured body (LEN-141).
+        // No-op for Payment Breakdown, which renders its own calm-native notice.
+        this.mountEstimateNotice(element);
+
         window.addEventListener('afterprint', () => self._handlePdfSaveSuccess(), { once: true });
 
         try {
@@ -486,6 +507,8 @@ window.PDF_HELPER = {
                 if (fp) fp.parentNode.removeChild(fp);
                 var cb = document.getElementById('lp-compliance-print-block');
                 if (cb) cb.parentNode.removeChild(cb);
+                var en = document.getElementById('lp-estimate-notice');
+                if (en) en.parentNode.removeChild(en);
             }, 1500);
 
             if (btn) {
