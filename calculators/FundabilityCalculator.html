@@ -98,7 +98,7 @@
 
         .lp-container {
             width: 100%;
-            max-width: 680px;
+            max-width: 960px;
             background: #ffffff;
             border: 1px solid var(--lp-border);
             border-radius: 20px;
@@ -366,6 +366,23 @@
         .lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
         .lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
         @media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+        /* LEN-136 — shared deal-context band (borrower state + document details) inside the card */
+        .lp-context {
+            border-top: 1px solid var(--lp-border);
+            background: #f8fafc;
+            padding: 18px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .lp-context-title {
+            font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+            color: #64748b; margin: 0;
+        }
+        .lp-context [data-lp-compliance-host] { margin: 0 !important; }
+        /* host wrapper is right-aligned for its legacy top-right slot; left-align it inside the band */
+        .lp-context [data-lp-compliance-host] > div { align-items: flex-start !important; }
+        .lp-context .lp-doc-details { max-width: 100%; margin: 0; }
         /* LEN-11 — broker/deal context block injected into the captured body at print time */
         .lp-doc-context { display: none; }
         body.pdf-export-mode .lp-doc-context {
@@ -416,7 +433,21 @@
         body.is-embedded .lp-container { border: none; box-shadow: none; border-radius: 0; max-width: 100%; }
 
         .panel { display: none; }
-        .panel.active { display: block; }
+        /* Two-column calculator body (CALCULATORS.md §4): inputs left (~45%), results right (~55%) */
+        .panel.active {
+            display: grid;
+            grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+            align-items: start;
+            gap: 0;
+        }
+        .panel.active .lp-results {
+            border-top: none;
+            border-left: 1px solid var(--lp-border);
+        }
+        @media (max-width: 760px) {
+            .panel.active { grid-template-columns: 1fr; }
+            .panel.active .lp-results { border-left: none; border-top: 1px solid var(--lp-border); }
+        }
 
         @media (max-width: 420px) { .grid-2 { grid-template-columns: 1fr; } }
 
@@ -567,20 +598,6 @@
         <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
         <h1>Fundability Assessment</h1>
     </div>
-    <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
-    <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
-    <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
-    <details id="pdfDocDetails" class="lp-doc-details no-print">
-        <summary>Document details <span>— optional, appears on the PDF</span></summary>
-        <div class="lp-doc-details-grid">
-            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
-            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
-            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
-            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
-            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
-        </div>
-        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
-    </details>
     <div class="lp-container">
         <div class="calc-card-header">
             <div class="calc-card-header-title">Fundability</div>
@@ -782,6 +799,24 @@
                     </button>
                 </div>
             </div>
+        </div>
+        <!-- LEN-136 — shared deal-context band: borrower state (drives compliance) + optional PDF document details -->
+        <div class="lp-context no-print">
+            <p class="lp-context-title">Deal context &amp; document details</p>
+            <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
+            <div data-lp-compliance-host></div>
+            <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
+            <details id="pdfDocDetails" class="lp-doc-details">
+                <summary>Document details <span>— optional, appears on the PDF</span></summary>
+                <div class="lp-doc-details-grid">
+                    <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+                    <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+                    <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+                    <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
+                    <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+                </div>
+                <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
+            </details>
         </div>
         <div class="print-footer-legal">
             THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
