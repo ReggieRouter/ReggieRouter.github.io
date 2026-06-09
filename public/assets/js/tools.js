@@ -30,9 +30,22 @@ var TOOLS = [
     path: "/calculators/deal-read/index.html",
     kw: "deal read fundability naics industry credit fico revenue product stack talk track lender underwriting affordability"
   },
+  {
+    id: "affordability",
+    name: "Payment Fit",
+    desc: "See if the borrower can handle the payment — and whether the capital pays for itself.",
+    status: "live",
+    group: "deal-math",
+    icon: "lineChart",
+    color: "green",
+    slug: "/tools/affordability",
+    presentation: "page",
+    path: "/calculators/AffordabilityCalculator.html",
+    kw: "payment fit affordability roi break even payment load deposits cash cushion qualify borrower upside net"
+  },
   /*
-  { 
-    id: "verifier", 
+  {
+    id: "verifier",
     name: "Business Verifier", 
     desc: "Verify business entity details, residential status, and D&B credentials.",
     status: "live", 
@@ -126,22 +139,9 @@ var TOOLS = [
     path: "/legislation.html",
     kw: "legislation law regulation disclosure commercial financing state federal cfpb 1071 cfdl map tracker compliance bill statute"
   },
-  {
-    id: "affordability",
-    name: "Payment Fit",
-    desc: "See if the borrower can handle the payment — and whether the capital pays for itself.",
-    status: "live",
-    group: "deal-math",
-    icon: "lineChart",
-    color: "green",
-    slug: "/tools/affordability",
-    presentation: "page",
-    path: "/calculators/AffordabilityCalculator.html",
-    kw: "payment fit affordability roi break even payment load deposits cash cushion qualify borrower upside net"
-  },
   /*
-  { 
-    id: "scripting", 
+  {
+    id: "scripting",
     name: "Scripting", 
     desc: "Automate custom calculations and rules via LendPaper JS APIs.",
     status: "soon", 
