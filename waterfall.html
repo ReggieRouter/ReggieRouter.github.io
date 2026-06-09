@@ -7401,7 +7401,29 @@
         "detailed_restrictions": []
     }
 ];
+  // LENDER_TYPE_OVERRIDES — hard-coded lender_type corrections.
+  // Add an entry here when a lender's type has been manually verified and must not be changed by future data imports.
+  // Keys are the lender name exactly as it appears in the data. Values are the raw string before normalization.
+  const LENDER_TYPE_OVERRIDES = {
+    'Mulligan Funding': 'Direct Lender',
+  };
+
+  // Normalize placeholder sentinel values (1 = data not yet sourced; negatives = blank)
   lenderData.forEach(l => {
+    if (l.fico === 1) l.fico = 300;
+    if (l.tib === 1) l.tib = 0;
+    if (l.rev === 1) l.rev = 0;
+    if (l.stacking === 1) l.stacking = 0;
+    if (l.fico < 0) l.fico = null;
+    if (l.tib < 0) l.tib = null;
+    if (l.rev < 0) l.rev = null;
+    if (l.stacking < 0) l.stacking = null;
+    // Enforce 300 as minimum displayable FICO floor
+    if (l.fico > 0 && l.fico < 300) l.fico = 300;
+    // Apply any hard-coded lender_type overrides before normalization
+    if (Object.prototype.hasOwnProperty.call(LENDER_TYPE_OVERRIDES, l.name)) {
+      l.lender_type = LENDER_TYPE_OVERRIDES[l.name];
+    }
     // Normalize lender_type to internal tokens
     if (l.lender_type === 'Direct+')        l.lender_type = 'direct_plus';
     if (l.lender_type === 'Direct Lender')  l.lender_type = 'direct';
