@@ -1,0 +1,51 @@
+# LendPaper Compliance Source Verify (LEN-163)
+# Fact-checks the Compliance Desk seed data (public/assets/js/legislation-data.js):
+# every item must cite BOTH an official legislation/government source AND an
+# independent news source, and every link must resolve. Runs on any change to
+# the data file or the verifier, monthly (link rot), and on manual dispatch.
+# Fails the run on a dead/missing/misclassified source. WARNs (e.g. a gov page
+# that bot-blocks the crawler) do NOT fail the run — they print for a human glance.
+
+name: Compliance Source Verify
+
+on:
+  pull_request:
+    paths:
+      - 'public/assets/js/legislation-data.js'
+      - 'tools/qa/verify-compliance-sources.js'
+  push:
+    branches: [main]
+    paths:
+      - 'public/assets/js/legislation-data.js'
+  schedule:
+    - cron: '37 9 5 * *'   # 5th of the month, off-peak — catches link rot
+  workflow_dispatch: {}
+
+jobs:
+  verify-sources:
+    runs-on: ubuntu-latest
+    if: github.repository == 'ReggieRouter/lendpaper'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install QA harness + Chromium
+        working-directory: tools/qa
+        run: |
+          npm ci || npm install
+          npx playwright install --with-deps chromium
+
+      - name: Verify compliance sources
+        working-directory: tools/qa
+        run: npm run verify:sources
+
+      - name: Upload source report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-source-report
+          path: tools/qa/compliance-source-report.json
+          if-no-files-found: ignore

@@ -32,19 +32,24 @@ var LEG_FEDERAL = {
       statusClass: 'final',
       statusLabel: 'Final rule',
       desc: 'Dodd-Frank §1071. Requires covered lenders to collect & report small-business credit application data. Revised final rule (May 2026): narrowed scope, single compliance date Jan 1, 2028, first filing June 2029, ≥1,000 originations/yr threshold. Applies to covered lenders, not SaaS vendors. Litigation ongoing — re-verify before building features on it.',
-      url: 'https://www.consumerfinance.gov/1071-rule/'
+      url: 'https://www.consumerfinance.gov/1071-rule/',
+      newsUrl: 'https://www.mayerbrown.com/en/insights/publications/2026/05/cfpb-issues-final-section-1071-rule-on-small-business-lending-data-collection',
+      newsTitle: 'Mayer Brown — CFPB Issues Final Section 1071 Rule (May 2026)'
     },
     {
       name: 'Small Business Financing Disclosure (federal proposals)',
       statusClass: 'proposed',
       statusLabel: 'Proposed',
       desc: 'Periodic Congressional proposals to extend TILA-style APR / total-cost disclosure to commercial financing. None enacted to date — federal coverage remains a patchwork driven by the states below. 2025 CFPB determination: state disclosure laws are NOT preempted by TILA.',
-      url: 'https://www.consumerfinance.gov/about-us/newsroom/state-disclosure-laws-business-lending-consistent-with-truth-in-lending-act/'
+      url: 'https://www.consumerfinance.gov/about-us/newsroom/state-disclosure-laws-business-lending-consistent-with-truth-in-lending-act/',
+      newsUrl: 'https://www.womblebonddickinson.com/us/insights/alerts/commercial-financing-disclosure-laws-proposed-us-congress',
+      newsTitle: 'Womble Bond Dickinson — Commercial Financing Disclosure Laws Proposed in U.S. Congress'
     },
     {
       name: 'TILA (Truth in Lending) — scope note',
       statusClass: 'final',
       statusLabel: 'In force',
+      infoOnly: true,
       desc: 'TILA governs CONSUMER credit and generally does not reach business-purpose financing. This is why state commercial-financing disclosure laws exist — verify whether a deal is consumer- or business-purpose before assuming TILA applies.',
       url: 'https://www.consumerfinance.gov/rules-policy/regulations/1026/'
     }
@@ -59,8 +64,8 @@ var LEG_DATA = {
     penaltyMax: 2500,
     desc: 'Standardized disclosures (amount financed, APR incl. for sales-based financing, finance charge, payment amounts, prepayment policies) on covered offers, via DFPI regulations. SB 666 (eff. Jan 1, 2024) additionally bars certain ACH/platform/collateral-monitoring/UCC fees against small businesses.',
     url: 'https://dfpi.ca.gov/regulated-industries/california-financing-law/about-california-financing-law/california-financing-law-commercial-financing-disclosures/',
-    newsUrl: 'https://dfpi.ca.gov/press_release/dfpis-commercial-financing-disclosure-regulations-approved-to-become-effective-as-of-december-9-2022/',
-    newsTitle: 'DFPI — Commercial Financing Disclosure Regulations Effective Dec 9, 2022' }] },
+    newsUrl: 'https://www.buchalter.com/insights/california-dfpi-publishes-final-commercial-loan-disclosure-regulations/',
+    newsTitle: 'Buchalter — California DFPI Publishes Final Commercial Loan Disclosure Regulations' }] },
 
   NY: { name: 'New York', status: 'enacted', bills: [{
     name: 'Commercial Finance Disclosure Law (CFDL)', citation: 'N.Y. Fin. Serv. Law Art. 8 (S5470-B); 23 NYCRR Part 600',
@@ -98,7 +103,7 @@ var LEG_DATA = {
     penaltyText: '$500 / violation (cap $20,000); $1,000 / repeat violation (cap $50,000) — AG only, no private right of action',
     penaltyMax: 1000,
     desc: 'Disclosure of total cost and payment terms for covered commercial financing transactions. Enforced exclusively by the Georgia Attorney General.',
-    url: 'https://www.legis.ga.gov/legislation/64404',
+    url: 'https://www.legis.ga.gov/api/legislation/document/20232024/219440',
     newsUrl: 'https://www.buchalter.com/insights/georgia-enacts-commercial-financing-disclosure-law-mandatory-compliance-date-january-1-2024/',
     newsTitle: 'Buchalter — Georgia Enacts CF Disclosure Law (Compliance Jan 1, 2024)' }] },
 
@@ -128,17 +133,17 @@ var LEG_DATA = {
     penaltyText: '$500 / violation (cap $20,000); $1,000 / violation after AG written warning (cap $50,000)',
     penaltyMax: 1000,
     desc: 'Disclosure regime enacted Apr 2024, effective July 1, 2024. Enforced by the Kansas Attorney General.',
-    url: 'http://www.kslegislature.org/li/b2023_24/measures/sb345/',
+    url: 'https://www.kslegislature.gov/li_2024/b2023_24/measures/sb345/',
     newsUrl: 'https://www.mayerbrown.com/en/insights/publications/2024/06/kansas-enacts-commercial-finance-disclosure-law',
     newsTitle: 'Mayer Brown — Kansas Enacts Commercial Finance Disclosure Law' }] },
 
   MO: { name: 'Missouri', status: 'enacted', bills: [{
-    name: 'Commercial Financing Disclosure Law (SB 1359)', citation: 'Mo. Rev. Stat. §427',
+    name: 'Commercial Financing Disclosure Law (SB 1359)', citation: 'Mo. Rev. Stat. §427.300 et seq.',
     effISO: '2025-02-28', scope: 'Commercial financing; provider/broker registration',
     penaltyText: '$500 / violation (cap $20,000), plus additional penalties for violations continued after AG notice',
     penaltyMax: 500,
     desc: 'Requires disclosures and registration of commercial financing brokers. Signed Jul 2024; effective Feb 28, 2025. Enforced by the Missouri Attorney General.',
-    url: 'https://www.senate.mo.gov/24info/BTS_Web/Bill.aspx?SessionType=R&BillID=78809126',
+    url: 'https://revisor.mo.gov/main/OneSection.aspx?section=427.300',
     newsUrl: 'https://www.consumerfinancialserviceslawmonitor.com/2024/07/after-multiple-attempts-missouri-becomes-latest-state-to-enact-commercial-financing-disclosure-law/',
     newsTitle: 'Troutman CFS Law Monitor — Missouri Enacts CF Disclosure Law' }] },
 

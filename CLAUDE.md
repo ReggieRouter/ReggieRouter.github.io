@@ -92,6 +92,33 @@ To add lenders: update the `NEW_LENDERS` list in `ingest_rest.py` with `{"name":
 - Admin master toggle (lp-panel → Compliance) is **per-browser** for testing;
   live users always have the layer ON.
 
+### Compliance Desk source rule (LEN-159 / LEN-163) — NON-NEGOTIABLE
+
+The public **Compliance Desk** (`legislation.html`, route `/compliance`,
+data in `public/assets/js/legislation-data.js`) is a legal surface. **Every
+item — federal and every state bill — must cite BOTH:**
+1. an **official legislation / government source** (`url` — the statute, on a
+   `.gov`/`.state.*.us`/official-legislature domain), and
+2. an **independent news source** (`newsUrl` — law-firm alert / trade press,
+   NOT a government domain, and a different domain than the statute).
+   (`infoOnly: true` exempts pure scope-notes from the news requirement.)
+
+**Never add or edit a Compliance Desk item without running the verifier**, and
+fix every FAIL before merging:
+```bash
+cd tools/qa && npm run verify:sources   # node verify-compliance-sources.js
+```
+It loads the data file, classifies each source (official vs independent),
+confirms every link resolves in a real browser, and cross-checks that each
+statute page echoes its bill citation. **FAIL = dead / missing / misclassified
+source (blocks).** WARN = a gov page that bot-blocks the crawler or doesn't
+render its text headless (correct link, just needs a human glance — does not
+block). Also runs in CI on any change to the data file
+(`.github/workflows/compliance-source-verify.yml`). This is the fact-check
+companion to `compliance_scraper.py` (which watches the §15 registry for
+*changes*); the verifier proves the *public data's* sources are real, official,
+independent, and live. Seed data stays Beta until a clean verify + counsel sign-off.
+
 ## Estimate Log (LEN-123)
 
 Cross-tool log of every estimate. Full spec: `markdowns/CALCULATORS.md §15`.

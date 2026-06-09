@@ -3,3 +3,4 @@ test-results/
 playwright-report/
 .playwright/
 screenshots/
+compliance-source-report.json
