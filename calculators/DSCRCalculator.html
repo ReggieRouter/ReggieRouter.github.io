@@ -601,6 +601,14 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     transition: background 0.15s, color 0.15s;
 }
 .lp-intro-x:hover { background: rgba(26, 60, 46, 0.08); color: #1A3C2E; }
+/* LEN-139 — restore "i" toggle in the header (matches the dismissible-intro standard) */
+.lp-intro-toggle-btn {
+    width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
+    font-size: 9.5px; font-weight: 800; background: #fff; cursor: pointer;
+    margin-left: 8px; vertical-align: middle; transition: all 0.15s; padding: 0;
+}
+.lp-intro-toggle-btn:hover { border-color: #1A3C2E; color: #1A3C2E; }
 
 /* Save area — standalone, not a numbered step */
 .save-area .sc-num { display: none; }
@@ -677,7 +685,7 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     </details>
     <div class="lp-container">
         <div class="calc-card-header">
-            <div class="calc-card-header-title">DSCR Calculator</div>
+            <div class="calc-card-header-title">DSCR Calculator<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
             <div class="calc-card-header-sub">Cash Flow Analysis Engine</div>
         </div>
 
@@ -1312,8 +1320,16 @@ function renderLenderModal() {
 }
 
 function toggleSc(btn){ var sc=btn.closest('.sc'); sc.classList.toggle('collapsed'); btn.innerHTML=sc.classList.contains('collapsed')?'&#9660;':'&#9650;'; }
-function dismissIntro(){ var el=document.getElementById('lpIntro'); if(el) el.style.display='none'; try{ localStorage.setItem('dscrIntroDismissed','1'); }catch(e){} }
-(function(){ try{ if(localStorage.getItem('dscrIntroDismissed')==='1'){ var el=document.getElementById('lpIntro'); if(el) el.style.display='none'; } }catch(e){} })();
+// LEN-139 — dismissible intro standard: × to close, restore "i" in the header,
+// persisted site-wide via the shared 'lendpaper_intro_dismissed' key.
+function applyIntroState(){
+    var dismissed=false; try{ dismissed = localStorage.getItem('lendpaper_intro_dismissed')==='true'; }catch(e){}
+    var el=document.getElementById('lpIntro'); if(el) el.style.display = dismissed ? 'none' : '';
+    document.querySelectorAll('.lp-intro-toggle-btn').forEach(function(b){ b.style.display = dismissed ? 'inline-flex' : 'none'; });
+}
+function dismissIntro(){ try{ localStorage.setItem('lendpaper_intro_dismissed','true'); }catch(e){} applyIntroState(); }
+function showIntro(){ try{ localStorage.removeItem('lendpaper_intro_dismissed'); }catch(e){} applyIntroState(); }
+applyIntroState();
 function toggleAddbacks(){ document.getElementById('addbacksContent').classList.toggle('show'); }
 function openLenderCtx(){ document.getElementById('lenderCtxModal').classList.add('open'); }
 function closeLenderCtx(){ document.getElementById('lenderCtxModal').classList.remove('open'); }
