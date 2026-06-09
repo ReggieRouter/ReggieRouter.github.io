@@ -460,16 +460,20 @@ body.pdf-export-mode .lp-doc-context {
 .lp-print-btn:hover { background-color: var(--lp-green-light); }
 
 /* LEN-147 — left-accent style for definition/intro banners */
+/* LEN-156 — mint-green filled intro box (Amortization standard; CALCULATORS.md §5).
+   Was the LEN-147 left-accent style. */
 .lp-definition {
-    border-left: 3px solid var(--lp-green);
-    padding: 4px 8px 4px 12px;
-    font-size: 12px;
+    background-color: #F0FDF4;
+    border-radius: 12px;
+    padding: 16px 34px 16px 18px;   /* right pad leaves room for the × */
+    font-size: 13px;
+    font-weight: 500;
     color: #334155;
     line-height: 1.6;
     margin-bottom: 20px;
     position: relative;
 }
-.lp-definition strong { color: #1A3C2E; font-weight: 700; }
+.lp-definition strong { color: #1A3C2E; font-weight: 800; }
 .lp-intro-toggle-btn {
     width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
     border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;

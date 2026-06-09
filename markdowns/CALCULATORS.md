@@ -103,9 +103,9 @@ strong { color: #1A3C2E; font-weight: 800; }
 ```
 - Brand green is `#1A3C2E` (never `#14532D`).
 - **Always dismissible** — see "Intro / how-to banner — must be dismissible" below.
-- **Sweep status:** Amortization + Position & Net use the mint box. DSCR / SBA Fees /
-  Payment Fit still carry the old left-accent style — bring them to the mint box when
-  next touched.
+- **Sweep status (LEN-156):** all calculators now use the mint box — Amortization,
+  Position & Net, DSCR, Payment Fit, and SBA Fees (the last left-accent holdout,
+  converted 6/9). The LEN-147 left-accent style is fully retired.
 
 ### Document details + borrower state placement standard (LEN-147)
 The compliance host (`[data-lp-compliance-host]`) and document-details panel
