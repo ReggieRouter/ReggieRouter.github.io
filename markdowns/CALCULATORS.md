@@ -83,23 +83,29 @@ Primary: SMB alt-finance sales reps and brokers — on a live call with a borrow
 ## 5. Required Components
 
 ### Intro / definition banner (every calculator, no exceptions)
-Appears at the top of the input panel. Explains what the calculator does in one or
-two sentences. **Standard treatment is left-accent style** — no filled background
-(LEN-147, supersedes mint-green filled treatment from LEN-142):
+Appears **atop the left input column** (inside the card). Explains what the calculator
+does in one or two sentences. **Standard treatment is the mint-green filled box** — the
+Amortization calculator is the canonical reference (LEN-156, supersedes the LEN-147
+left-accent style):
 ```css
 .lp-definition, .lp-howto {
-  border-left: 3px solid var(--lp-green);   /* --lp-green: #1A3C2E */
-  padding-left: 12px;
-  font-size: 12px;
+  background-color: #F0FDF4;          /* mint tint */
+  border-radius: 12px;
+  padding: 16px 34px 16px 18px;       /* right pad leaves room for the × */
+  font-size: 13px;
+  font-weight: 500;
   color: #334155;
   line-height: 1.6;
-  margin-bottom: 20px;
-  position: relative;  /* required for injected × button */
+  margin: 0 0 20px;
+  position: relative;                 /* required for injected × button */
 }
-strong { color: #1A3C2E; font-weight: 700; }
+strong { color: #1A3C2E; font-weight: 800; }
 ```
 - Brand green is `#1A3C2E` (never `#14532D`).
 - **Always dismissible** — see "Intro / how-to banner — must be dismissible" below.
+- **Sweep status:** Amortization + Position & Net use the mint box. DSCR / SBA Fees /
+  Payment Fit still carry the old left-accent style — bring them to the mint box when
+  next touched.
 
 ### Document details + borrower state placement standard (LEN-147)
 The compliance host (`[data-lp-compliance-host]`) and document-details panel
