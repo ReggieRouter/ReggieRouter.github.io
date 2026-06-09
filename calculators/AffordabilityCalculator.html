@@ -669,7 +669,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
                 <div class="af-hero">
                     <div>
                         <div class="af-hero-label">Affordability Verdict</div>
-                        <div class="af-verdict-value pending" id="heroVerdict">Ready for terms</div>
+                        <div class="af-verdict-value pending" id="heroVerdict">Pressure-test the payment</div>
                         <div class="af-hero-subline" id="heroSubline">Add payment and expected deposits when you're ready.</div>
                     </div>
                     <div class="af-cushion">
@@ -1063,7 +1063,7 @@ function update() {
   const hasCoreInputs = values.monthly > 0 && values.deposits > 0;
   const shareText = hasCoreInputs ? formatPercent(values.share) : "0%";
   const verdict = hasCoreInputs ? verdictFor(values.share) : "Pending";
-  const verdictText = verdict === "Pending" ? "Ready for terms" : verdict;
+  const verdictText = verdict === "Pending" ? "Pressure-test the payment" : verdict;
   const cashStatus = cashStatusFor(values);
   const selectedScenarioIndex = manualScenarioIndex ?? scenarioIndexFor(values.share);
   const scenario = scenarios[selectedScenarioIndex];
