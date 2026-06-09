@@ -144,6 +144,38 @@ Rules:
 
 ---
 
+## 3B. Client-facing framing — HARD RULES (LEN-160)
+
+Estimate PDFs are handed to the borrower. They must read as **neutral fact**, not as
+internal sales coaching. These are non-negotiable:
+
+1. **Never use a broker-coaching label as a header — and never as the first header.**
+   The on-screen talk-track header **"What you tell the borrower"** (and any 2nd-person
+   sell-to-the-borrower framing) is **screen-only**. In the PDF it must be hidden
+   (`.no-print` / hidden in `pdf-export-mode`) or replaced with a neutral label such as
+   **"Summary"**. The talk-track *content* may stay; the coaching *header* may not.
+
+2. **No acknowledgement / signature block on an estimate PDF.** Estimate calculators
+   (Amortization, DSCR, Fundability, SBA Fees, Payment Fit) produce *estimates, not
+   executed agreements* — never print a "Borrower / Representative / Date" signature or
+   "Acknowledgement & Signatures" section. (Signed-artifact flows such as Deal Analysis
+   are a separate, intentional document path and are out of scope for this rule.)
+
+3. **Internal qualification analysis stays on screen.** Broker-only reads — e.g.
+   "Qualification Read", Daily Pressure, WOW coverage, breakeven hurdles — must not
+   print on the client PDF. Only neutral facts (figures, terms) and required
+   disclosures belong there.
+
+4. **A cautionary verdict is honest, not alarming.** When a deal is stretching, lead
+   with a balanced top-line (e.g. *"Stretching, but possible. Make sure you're
+   comfortable."*) rather than a bare red verdict word.
+
+5. **No collapsed/`expand ▸` artifacts in the PDF.** Any on-screen `<details>` that
+   belongs in the PDF (e.g. Required Disclosures) must be force-rendered open with its
+   expand affordance hidden — never print a dangling header with no content.
+
+---
+
 ## 4. Print Stylesheet (Standard — All Calculators)
 
 All calculators share this base. Drop into a `print.css` or global `@media print` block.

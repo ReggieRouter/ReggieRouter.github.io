@@ -443,6 +443,8 @@ body.pdf-export-mode .lp-doc-context {
 
 /* Print-only elements hidden by default on screen */
 .print-header-content, .print-footer-legal, .print-watermark { display: none !important; }
+/* LEN-160 — label shown only in the client-facing PDF (neutral "Summary"). */
+.af-pdf-only { display: none; }
 
 /* ===== Native-print engine (universal) ===== */
 @page { size: letter portrait; margin: 0.45in 0.55in 0.85in 0.55in; }
@@ -480,6 +482,9 @@ body.pdf-export-mode .lp-doc-context {
   .lp-inputs { display: none !important; }
   .lp-results { background: white !important; padding: 0 !important; display: block !important; }
   .af-talk-body { max-height: none !important; overflow: visible !important; }
+  /* LEN-160 — neutral "Summary" label prints; force Required Disclosures open (no collapsed/expand artifact). */
+  .af-pdf-only { display: block !important; }
+  .af-disclosures > ul { display: block !important; }
   .print-footer-legal { display: block !important; margin-top: 36px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
 }
 
@@ -507,6 +512,9 @@ body.pdf-export-mode .lp-card { border: none !important; box-shadow: none !impor
 body.pdf-export-mode .card-body-flex { display: block !important; width: 100% !important; }
 body.pdf-export-mode .lp-results { background: white !important; padding: 0 !important; display: block !important; width: 100% !important; }
 body.pdf-export-mode .af-talk-body { max-height: none !important; overflow: visible !important; }
+/* LEN-160 — neutral PDF framing: show "Summary" label, force Required Disclosures open. */
+body.pdf-export-mode .af-pdf-only { display: block !important; }
+body.pdf-export-mode .af-disclosures > ul { display: block !important; }
 body.pdf-export-mode .lp-footer-container { display: block !important; width: 100% !important; margin-top: 36px !important; }
 body.pdf-export-mode .print-footer-legal { display: none !important; }
 body.pdf-export-mode .print-watermark { display: none !important; }
@@ -743,9 +751,11 @@ body.is-embedded .lp-main { padding-top: 16px; }
                     </div>
                 </div>
 
-                <!-- 4. What you tell the borrower -->
+                <!-- 4. Summary. Screen keeps the broker talk-track framing; the client-facing
+                     PDF shows a neutral "Summary" header (PDF.md neutral-fact rule, LEN-160). -->
                 <div class="result-block">
-                    <div class="section-label">What You Tell The Borrower</div>
+                    <div class="section-label no-print">What You Tell The Borrower</div>
+                    <div class="section-label af-pdf-only">Summary</div>
                     <div class="af-talk">
                         <div class="af-talk-head">
                             <div>
@@ -768,8 +778,9 @@ body.is-embedded .lp-main { padding-top: 16px; }
                     </div>
                 </div>
 
-                <!-- 5. Qualification read (collapsed by default) -->
-                <div class="result-block">
+                <!-- 5. Qualification read — broker-only analysis (Daily Pressure / WOW coverage).
+                     no-print: excluded from the client-facing PDF (PDF.md neutral-fact rule, LEN-160). -->
+                <div class="result-block no-print">
                     <details class="af-qual-details">
                         <summary class="section-label" style="cursor:pointer;list-style:none;user-select:none;">
                             Qualification Read
@@ -811,7 +822,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
                     <details class="af-qual-details af-disclosures">
                         <summary class="section-label" style="cursor:pointer;list-style:none;user-select:none;color:#6B7280;">
                             Required Disclosures
-                            <span style="float:right;font-size:10px;color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">expand ▸</span>
+                            <span class="no-print" style="float:right;font-size:10px;color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">expand ▸</span>
                         </summary>
                         <ul>
                             <li>Payment estimates are illustrative. Actual terms are set by the lender at time of funding.</li>
@@ -1118,9 +1129,13 @@ function update() {
 
   const cushionValue = values.expenses > 0 ? values.afterExpenses : values.left;
   els.heroPayment.textContent = hasCoreInputs ? formatMoney(cushionValue) : "$0";
-  els.heroSubline.textContent = hasCoreInputs
-    ? `${cashStatus} · ${shareText} of expected deposits`
-    : "Add payment and expected deposits when you're ready.";
+  // LEN-160 — a stretching deal reads as honest-but-balanced at the top, not just an
+  // alarming red word. (A true shortfall keeps the cautionary cushion/share line.)
+  els.heroSubline.textContent = !hasCoreInputs
+    ? "Add payment and expected deposits when you're ready."
+    : (verdict === "Stretching" && cashStatus !== "Shortfall")
+      ? "Stretching, but possible. Make sure you're comfortable."
+      : `${cashStatus} · ${shareText} of expected deposits`;
   els.cashStatus.textContent = hasCoreInputs ? `${formatMoney(values.monthly)}/mo est. payment` : "Awaiting deal terms";
 
   els.tileDeposits.textContent = formatMoney(values.deposits);
@@ -1222,12 +1237,19 @@ async function handleSavePDF(btn) {
   // NOTE: PDF_HELPER.generatePDF injects the state compliance block (LEN-88) and the
   // 3-layer watermark itself — do NOT inject the compliance block here or it duplicates.
   let _docCtxNode = null;
+  // LEN-160 — force Required Disclosures open for the PDF. A closed <details> hides its
+  // content via content-visibility, which CSS display overrides can't reliably defeat —
+  // so open it here, then restore the on-screen state afterward.
+  const _disclosures = [...document.querySelectorAll('.af-disclosures')];
+  const _disclosuresWasOpen = _disclosures.map(d => d.open);
+  _disclosures.forEach(d => { d.open = true; });
   try {
     _docCtxNode = mountDocContext(element);
     await window.PDF_HELPER.generatePDF(element, "PAYMENT FIT", filename, btn, origText);
     logEstimate(true);
   } finally {
     if (_docCtxNode) _docCtxNode.remove();
+    _disclosures.forEach((d, i) => { d.open = _disclosuresWasOpen[i]; });
     btn.innerHTML = origText;
     btn.disabled = false;
   }
