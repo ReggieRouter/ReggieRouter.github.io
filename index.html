@@ -1068,6 +1068,14 @@ input { font-family: inherit; }
 .cz-reset:hover { color: var(--text); }
 @media (max-width: 600px) { .cz-grid { grid-template-columns: 1fr; } }
 
+/* Viewed-tool relax (LEN-51): untried calculators stay vivid; explored ones
+   settle back (muted name + softened icon) so the unopened ones quietly draw the
+   eye. Re-lights on hover. No data = nothing relaxed = identical to before. */
+.card.is-viewed .card-icon { opacity: 0.5; transition: opacity var(--transition); }
+.card.is-viewed .card-name { color: var(--text-muted); }
+.card.is-viewed:hover .card-icon { opacity: 1; }
+.card.is-viewed:hover .card-name { color: var(--text); }
+
 @media (max-width: 900px) {
   .featured-grid { grid-template-columns: repeat(2, 1fr); }
   .soon-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1629,7 +1637,8 @@ function cardHTML(t, i) {
   var tag = dis ? 'div' : 'a';
   var href = dis ? '' : ' href="'+t.slug+'"';
   var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
-  var cls = 'card' + (dis ? ' is-disabled' : '') + (t.id === 'amo' ? ' card-amo-glisten' : '');
+  var cls = 'card' + (dis ? ' is-disabled' : '') + (t.id === 'amo' ? ' card-amo-glisten' : '')
+          + (!dis && isViewed(t.id) ? ' is-viewed' : '');
   var pillCls = t.status==='live' ? 'pill-live' : t.status==='new' ? 'pill-new' : t.status==='soon' ? 'pill-soon' : '';
   var pillTxt = t.status==='live' ? 'Live' : t.status==='new' ? 'New' : t.status==='soon' ? 'Soon' : '';
   
@@ -1640,7 +1649,7 @@ function cardHTML(t, i) {
     metaHTML += '<span class="pill pill-paid" style="margin-left: 4px;">Paid</span>';
   }
 
-  return '<'+tag+href+target+' class="'+cls+'" '+onclick+' data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
+  return '<'+tag+href+target+' class="'+cls+'" '+onclick+' data-id="'+t.id+'" data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
     +'<div class="card-icon '+t.color+'">'+ICO[t.icon]+'</div>'
     +'<div class="card-body"><div class="card-name">'+t.name+'</div><div class="card-desc">'+t.desc+'</div></div>'
     +'<div class="card-meta">'+metaHTML
@@ -1651,7 +1660,7 @@ function cardHTML(t, i) {
 function handleToolClick(e, id) {
   var t = TOOLS.find(function(x){ return x.id === id; });
   if (!t || t.status === 'soon') return;
-  if (t.presentation === 'external') return; // Let default link behavior happen
+  if (t.presentation === 'external') { recordToolUsage(id); return; } // count the visit, then let the link open
 
   e.preventDefault();
   openTool(t, true);
@@ -1942,6 +1951,19 @@ function recordToolUsage(id) {
     localStorage.setItem(LP_USAGE_KEY, JSON.stringify(usage));
     localStorage.setItem(LP_LAST_TOOL_KEY, id);
   } catch (e) { /* localStorage unavailable — degrade silently */ }
+}
+
+function isViewed(id) { var u = getToolUsage(); return !!(u[id] && u[id].count > 0); }
+
+// Update the viewed-relax state on home cards in place (no re-render, no
+// re-animation) — so a tool settles the moment you come back from using it.
+function refreshViewedRelax() {
+  var host = document.getElementById('homeTools');
+  if (!host) return;
+  host.querySelectorAll('.card[data-id]').forEach(function(c){
+    if (c.classList.contains('is-disabled')) return;
+    c.classList.toggle('is-viewed', isViewed(c.getAttribute('data-id')));
+  });
 }
 
 function getPersona() {
@@ -2591,6 +2613,7 @@ function switchView(v) {
   if (nb) nb.classList.add('active');
   document.getElementById('content').scrollTop = 0;
   closeMobile();
+  if (v === 'home') refreshViewedRelax();
 
   const searchWrap = document.querySelector('.search-wrap');
   if (searchWrap) {
