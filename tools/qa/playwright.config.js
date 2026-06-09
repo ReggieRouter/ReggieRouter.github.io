@@ -7,7 +7,16 @@ const { defineConfig, devices } = require('@playwright/test');
 
 // repo root is two levels up from tools/qa
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const PORT = process.env.QA_PORT ? Number(process.env.QA_PORT) : 8099;
+// Default port is derived from the worktree path so two worktrees running the
+// harness at once get their OWN server. A fixed port + reuseExistingServer makes
+// the second run reuse the first's server (rooted in the wrong worktree): shared
+// files still serve, but that worktree's unique files 404 (LEN-146). QA_PORT wins.
+function portFromPath(p) {
+  let h = 0;
+  for (let i = 0; i < p.length; i++) h = (h * 31 + p.charCodeAt(i)) >>> 0;
+  return 8100 + (h % 800); // 8100–8899
+}
+const PORT = process.env.QA_PORT ? Number(process.env.QA_PORT) : portFromPath(REPO_ROOT);
 
 module.exports = defineConfig({
   testDir: './tests',
