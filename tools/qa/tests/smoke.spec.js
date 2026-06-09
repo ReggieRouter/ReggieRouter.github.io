@@ -18,6 +18,9 @@ const PAGES = [
   { key: 'dscr', url: CALC.dscr, ready: '.scen-card',       live: '.dscr-val' },
   { key: 'fund', url: CALC.fund, ready: '#hero_val',        live: '#hero_val' },
   { key: 'sba',  url: CALC.sba,  ready: '#res-total-fees-1', live: '#res-total-fees-1' },
+  // Affordability has no default numeric inputs (tiles read $0 cold), so the
+  // "did it fire?" probe is the borrower talk track, which update() always builds.
+  { key: 'afford', url: CALC.afford, ready: '#heroVerdict', live: '#talkBody' },
 ];
 
 function attachErrorCollector(page) {
