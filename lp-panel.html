@@ -178,7 +178,13 @@ header {
 .val-same { color: var(--muted); font-size: 12px; font-style: italic; }
 .field-label { font-weight: 500; font-family: monospace; font-size: 12px; color: var(--text); }
 .field-locked { font-size: 11px; color: var(--amber); margin-top: 2px; }
-.action-btns { display: flex; gap: 6px; }
+.action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn-gcheck {
+  background: var(--white); color: var(--muted); border: 1px solid var(--border-dark);
+  border-radius: 6px; padding: 4px 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+  white-space: nowrap;
+}
+.btn-gcheck:hover { background: var(--green-light); color: var(--green); border-color: #86EFAC; }
 .btn-approve {
   background: var(--green-light); color: var(--green); border: 1px solid #86EFAC;
   border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; cursor: pointer;
@@ -195,6 +201,29 @@ header {
   border-radius: 7px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
 }
 .btn-bulk-approve:hover { background: var(--green-mid); }
+/* LEN-179 Part B — review-queue multi-select + per-change notes */
+.pending-table tr.row-selected td { background: var(--green-light); }
+.pchk { width: 15px; height: 15px; cursor: pointer; accent-color: var(--green); margin: 0; }
+.queue-bulk-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--green-light); border: 1px solid #BBF7D0; border-radius: 8px;
+  padding: 8px 14px; margin-bottom: 12px; font-size: 13px; color: var(--green); }
+.queue-bulk-bar .btn-approve, .queue-bulk-bar .btn-reject { padding: 5px 12px; }
+.btn-note { background: var(--white); color: var(--muted); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 9px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-note:hover { border-color: #86EFAC; color: var(--green); }
+.btn-note.has-note { background: var(--amber-light); color: var(--amber); border-color: #FCD34D; }
+.btn-copynotes { background: var(--amber); color: var(--white); border: none;
+  border-radius: 7px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn-copynotes:hover { background: #B45309; }
+.btn-push { background: var(--green); color: var(--white); border: none; border-radius: 7px;
+  padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.btn-push:hover { background: var(--green-mid); }
+.pnote-row td { background: var(--amber-light); padding-top: 0; }
+.pnote-wrap { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0 12px; }
+.pnote-ta { flex: 1; min-height: 54px; resize: vertical; font-family: inherit; font-size: 12.5px;
+  line-height: 1.5; padding: 8px 10px; border: 1px solid var(--green-mid); border-radius: 6px;
+  outline: none; box-sizing: border-box; }
+.pnote-actions { display: flex; flex-direction: column; gap: 6px; }
 .btn-bulk-reject {
   background: var(--white); color: var(--red); border: 1px solid #FECACA;
   border-radius: 7px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer;
@@ -938,6 +967,7 @@ let currentPending = [];
 let reviewedThisSession = new Set();
 let allScrapeRuns = [];
 let allPendingChanges = [];
+let selectedChangeIds = new Set();   // LEN-179 Part B: review-queue multi-select
 let scSample = [];
 let scVisited = new Set();
 const SPOTCHECK_REQUIRED = 1;
@@ -1292,29 +1322,43 @@ async function approvePendingById(changeId) {
   if (!change) return;
   const lender = allLenders.find(l => l.id === change.lender_id);
 
+  // LEN-179: save whatever is currently in the NOW-cell control — the reviewer
+  // may have edited the scraped value via the dropdown or open-text field.
+  const { val: parsedVal, edited } = readPendingControlValue(change);
+  const effChange = { ...change, new_value: JSON.stringify(parsedVal) };
+
   if (!lender?.source_url && !lender?.application_submission_url) {
     if (!confirm(`${lender?.lender_name || 'This lender'} has no source URL on file. Approve this change anyway?`)) return;
   }
-  if (isSuspiciousChange(change)) {
+  if (isSuspiciousChange(effChange)) {
     if (!confirm(`⚠ This sets ${change.field_name} to zero or blank (was: ${formatValue(change.old_value)}). Apply anyway?`)) return;
   }
 
-  const parsedVal = tryParse(change.new_value);
-  await sb.from('lender_data').update({ [change.field_name]: parsedVal }).eq('id', change.lender_id);
+  // An edited value is a manual override — lock it so future scrapes won't overwrite.
+  const update = { [change.field_name]: parsedVal };
+  let overrides = lender?.manually_overridden_fields || [];
+  if (edited) {
+    overrides = [...new Set([...overrides, change.field_name])];
+    update.manually_overridden_fields = overrides;
+  }
+  const { error } = await sb.from('lender_data').update(update).eq('id', change.lender_id);
+  if (error) { toast('Save failed: ' + error.message); return; }
   await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', changeId);
   allPendingChanges = allPendingChanges.filter(c => c.id !== changeId);
   if (lender) {
     lender[change.field_name] = parsedVal;
+    if (edited) lender.manually_overridden_fields = overrides;
     lender._pendingCount = Math.max(0, (lender._pendingCount || 1) - 1);
     if (currentLender && currentLender.id === lender.id) {
       currentPending = currentPending.filter(c => c.id !== changeId);
       currentLender[change.field_name] = parsedVal;
+      if (edited) currentLender.manually_overridden_fields = overrides;
     }
   }
   renderLenderList(filterLendersArr());
   renderDashboard();
   updatePublishBar();
-  toast('Change approved');
+  toast(edited ? `${change.field_name} set to custom value & locked 🔒` : 'Change approved');
 }
 
 async function rejectPendingById(changeId) {
@@ -1340,69 +1384,6 @@ async function rejectPendingById(changeId) {
   }
 }
 
-function openPendingEdit(changeId, fieldName, lenderId, currentNewVal) {
-  const nowCell = document.getElementById(`pnow-${changeId}`);
-  const actCell = document.getElementById(`pact-${changeId}`);
-  if (!nowCell || !actCell) return;
-
-  const type = FIELD_TYPE_MAP[fieldName] || 'text';
-  let currentStr;
-  if (type === 'bool') currentStr = currentNewVal ? 'true' : 'false';
-  else if (type === 'array') currentStr = Array.isArray(currentNewVal) ? currentNewVal.join(', ') : (currentNewVal || '');
-  else currentStr = currentNewVal == null ? '' : String(currentNewVal);
-
-  let inputHtml;
-  if (type === 'enum') {
-    const opts = (FIELD_ENUM_OPTIONS[fieldName] || []).map(o => `<option${currentStr===o?' selected':''}>${esc(o)}</option>`).join('');
-    inputHtml = `<select id="pedit-${changeId}" class="lp-inline-edit-input">${opts}</select>`;
-  } else if (type === 'bool') {
-    inputHtml = `<select id="pedit-${changeId}" class="lp-inline-edit-input" style="width:80px">
-      <option value="true" ${currentNewVal ? 'selected' : ''}>Yes</option>
-      <option value="false" ${!currentNewVal ? 'selected' : ''}>No</option>
-    </select>`;
-  } else if (type === 'number') {
-    inputHtml = `<input id="pedit-${changeId}" type="number" class="lp-inline-edit-input" style="width:100px" value="${esc(currentStr)}" />`;
-  } else {
-    inputHtml = `<input id="pedit-${changeId}" type="text" class="lp-inline-edit-input" style="min-width:160px" value="${esc(currentStr)}" />`;
-  }
-
-  nowCell.innerHTML = inputHtml;
-  actCell.innerHTML = `<div class="action-btns">
-    <button class="btn-approve" onclick="keepPendingEdit('${changeId}','${fieldName}','${lenderId}','${type}')">Keep</button>
-    <button class="btn-reject"  onclick="renderDashboard()">Cancel</button>
-  </div>`;
-  document.getElementById(`pedit-${changeId}`)?.focus();
-}
-
-async function keepPendingEdit(changeId, fieldName, lenderId, type) {
-  const input = document.getElementById(`pedit-${changeId}`);
-  if (!input) return;
-  let parsedVal;
-  if (type === 'bool') parsedVal = input.value === 'true';
-  else if (type === 'number') parsedVal = input.value === '' ? null : Number(input.value);
-  else if (type === 'array') parsedVal = input.value.split(',').map(s => s.trim()).filter(Boolean);
-  else parsedVal = input.value.trim() || null;
-
-  // Save to lender_data + lock field
-  const overrides = [...new Set([...(allLenders.find(l=>l.id==lenderId)?.manually_overridden_fields||[]), fieldName])];
-  const { error } = await sb.from('lender_data').update({ [fieldName]: parsedVal, manually_overridden_fields: overrides }).eq('id', lenderId);
-  if (error) { toast('Save failed: ' + error.message); return; }
-
-  // Mark the pending change approved
-  await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', changeId);
-
-  // Update local state
-  const lender = allLenders.find(l => l.id == lenderId);
-  if (lender) { lender[fieldName] = parsedVal; lender.manually_overridden_fields = overrides; }
-  allPendingChanges = allPendingChanges.filter(c => c.id !== changeId);
-  if (currentLender?.id == lenderId) { currentLender[fieldName] = parsedVal; currentLender.manually_overridden_fields = overrides; currentPending = currentPending.filter(c => c.id !== changeId); }
-
-  renderDashboard();
-  renderLenderList(filterLendersArr());
-  updatePublishBar();
-  toast(`${fieldName} set to custom value & locked 🔒`);
-}
-
 async function approveAllPending() {
   if (!allPendingChanges.length) return;
   const suspicious = allPendingChanges.filter(isSuspiciousChange);
@@ -1414,9 +1395,16 @@ async function approveAllPending() {
   }
   if (!toApprove.length) { toast('Nothing to approve'); return; }
   for (const change of toApprove) {
-    const parsedVal = tryParse(change.new_value);
-    await sb.from('lender_data').update({ [change.field_name]: parsedVal }).eq('id', change.lender_id);
+    // LEN-179: honor any edits the reviewer typed into the NOW-cell controls.
+    const { val: parsedVal, edited } = readPendingControlValue(change);
     const lender = allLenders.find(l => l.id === change.lender_id);
+    const update = { [change.field_name]: parsedVal };
+    if (edited) {
+      const overrides = [...new Set([...(lender?.manually_overridden_fields||[]), change.field_name])];
+      update.manually_overridden_fields = overrides;
+      if (lender) lender.manually_overridden_fields = overrides;
+    }
+    await sb.from('lender_data').update(update).eq('id', change.lender_id);
     if (lender) lender[change.field_name] = parsedVal;
   }
   const ids = toApprove.map(c => c.id);
@@ -1573,6 +1561,252 @@ const FIELD_TYPE_MAP = {
 const FIELD_ENUM_OPTIONS = {
   lender_type: ['Direct Lender', 'Direct+', 'Marketplace', 'Broker'],
 };
+
+// LEN-179: live editable control for the review-queue NOW cell — mirrors the
+// lenders Fields tab (dropdown for enum/bool, open text/number for the rest).
+// Pre-filled with the scraped value; id="pin-<changeId>" so the row's Keep
+// handler can read whatever the reviewer leaves in it.
+function pendingNowControl(c) {
+  const type = FIELD_TYPE_MAP[c.field_name] || 'text';
+  const v = tryParse(c.new_value);
+  const id = `pin-${c.id}`;
+  if (type === 'enum') {
+    const cur = v == null ? '' : String(v);
+    const opts = ['', ...(FIELD_ENUM_OPTIONS[c.field_name] || [])];
+    if (cur && !opts.includes(cur)) opts.push(cur); // keep the scraped value selectable
+    return `<select id="${id}" class="lp-inline-edit-input">${opts.map(o => `<option${cur===o?' selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  }
+  if (type === 'bool') {
+    return `<select id="${id}" class="lp-inline-edit-input" style="width:84px"><option value="true"${v?' selected':''}>Yes</option><option value="false"${!v?' selected':''}>No</option></select>`;
+  }
+  if (type === 'number') {
+    return `<input id="${id}" type="number" class="lp-inline-edit-input" style="width:120px" value="${v==null?'':esc(String(v))}" />`;
+  }
+  if (type === 'array') {
+    const s = Array.isArray(v) ? v.join(', ') : (v==null?'':String(v));
+    return `<input id="${id}" type="text" class="lp-inline-edit-input" style="min-width:220px" value="${esc(s)}" placeholder="comma-separated" />`;
+  }
+  return `<input id="${id}" type="text" class="lp-inline-edit-input" style="min-width:180px" value="${v==null?'':esc(String(v))}" />`;
+}
+
+// Reads the current value out of a NOW-cell control. Returns {val, edited}
+// where `edited` is true if the reviewer changed it away from the scraped
+// new_value. Falls back to the scraped value when the control isn't on screen.
+function readPendingControlValue(change) {
+  const scraped = tryParse(change.new_value);
+  const input = document.getElementById(`pin-${change.id}`);
+  if (!input) return { val: scraped, edited: false };
+  const type = FIELD_TYPE_MAP[change.field_name] || 'text';
+  let val;
+  if (type === 'bool') val = input.value === 'true';
+  else if (type === 'number') val = input.value === '' ? null : Number(input.value);
+  else if (type === 'array') val = input.value.split(',').map(s => s.trim()).filter(Boolean);
+  else val = input.value.trim() || null;
+  const edited = JSON.stringify(val) !== JSON.stringify(scraped);
+  return { val, edited };
+}
+
+// LEN-179: per-field phrasing for the Google verify (🔍) button.
+const FIELD_GOOGLE_QUERY = {
+  lender_type: 'direct lender or broker ISO',
+  product_types: 'products offered MCA term loan line of credit',
+  min_fico: 'minimum credit score FICO requirement',
+  min_tib_months: 'minimum time in business requirement',
+  min_monthly_revenue: 'minimum monthly revenue requirement',
+  max_funding_amount: 'maximum funding amount loan size',
+  max_term_months: 'maximum term length',
+  max_position_stacking: 'maximum position stacking',
+  soft_pull_only: 'soft credit pull or hard pull',
+  requires_hard_collateral: 'collateral requirement',
+  requires_bank_verification: 'bank statement verification requirement',
+  min_bank_statements_months: 'bank statements required how many months',
+  requires_personal_guarantee: 'personal guarantee requirement',
+  early_payment_discount: 'early payoff prepayment discount',
+  has_flex_line_of_credit: 'flexible line of credit',
+  payment_frequencies: 'payment frequency daily weekly monthly',
+  restricted_industries: 'restricted prohibited industries',
+  restricted_states: 'states not funded restricted',
+  preferred_industries: 'preferred industries',
+};
+
+// Opens a Google search for "<lender>" + a field-specific phrase so the
+// reviewer can sanity-check the scraped value before keeping it.
+function googleCheck(lenderId, fieldName) {
+  const l = allLenders.find(x => x.id == lenderId);
+  const name = l ? (l.display_name || l.lender_name) : '';
+  const phrase = FIELD_GOOGLE_QUERY[fieldName] || String(fieldName).replace(/_/g, ' ');
+  const q = `"${name}" ${phrase}`;
+  window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank', 'noopener');
+}
+
+// ── LEN-179 Part B: review-queue multi-select ──────────────
+function toggleChangeSelect(id, cb) {
+  if (cb.checked) selectedChangeIds.add(id); else selectedChangeIds.delete(id);
+  const row = document.getElementById('prow-' + id);
+  if (row) row.classList.toggle('row-selected', cb.checked);
+  syncSelectAll(); updateQueueBar();
+}
+function toggleAllChanges(cb) {
+  document.querySelectorAll('.pchk').forEach(b => {
+    b.checked = cb.checked;
+    const id = b.dataset.cid;
+    if (cb.checked) selectedChangeIds.add(id); else selectedChangeIds.delete(id);
+    const row = document.getElementById('prow-' + id);
+    if (row) row.classList.toggle('row-selected', cb.checked);
+  });
+  updateQueueBar();
+}
+function syncSelectAll() {
+  const head = document.getElementById('pchk-all');
+  if (!head) return;
+  const all = document.querySelectorAll('.pchk').length;
+  const sel = document.querySelectorAll('.pchk:checked').length;
+  head.checked = all > 0 && sel === all;
+  head.indeterminate = sel > 0 && sel < all;
+}
+function clearSelection() {
+  selectedChangeIds.clear();
+  document.querySelectorAll('.pchk').forEach(b => b.checked = false);
+  document.querySelectorAll('.pending-table tr.row-selected').forEach(r => r.classList.remove('row-selected'));
+  syncSelectAll(); updateQueueBar();
+}
+function updateQueueBar() {
+  const bar = document.getElementById('queue-bulk-bar');
+  if (!bar) return;
+  const n = selectedChangeIds.size;
+  const cnt = document.getElementById('queue-sel-count');
+  if (cnt) cnt.textContent = n;
+  bar.style.display = n > 0 ? 'flex' : 'none';
+}
+
+async function keepSelected() {
+  const targets = allPendingChanges.filter(c => selectedChangeIds.has(c.id));
+  if (!targets.length) { toast('Nothing selected'); return; }
+  const suspicious = targets.filter(isSuspiciousChange);
+  let toApprove = targets;
+  if (suspicious.length) {
+    const skip = confirm(`${suspicious.length} selected change${suspicious.length!==1?'s':''} set a field to zero or blank. OK = skip those, keep the rest. Cancel = keep everything.`);
+    if (skip) toApprove = targets.filter(c => !isSuspiciousChange(c));
+  }
+  if (!toApprove.length) { toast('Nothing to keep'); return; }
+  for (const change of toApprove) {
+    const { val: parsedVal, edited } = readPendingControlValue(change);
+    const lender = allLenders.find(l => l.id === change.lender_id);
+    const update = { [change.field_name]: parsedVal };
+    if (edited) {
+      const ov = [...new Set([...(lender?.manually_overridden_fields || []), change.field_name])];
+      update.manually_overridden_fields = ov;
+      if (lender) lender.manually_overridden_fields = ov;
+    }
+    await sb.from('lender_data').update(update).eq('id', change.lender_id);
+    if (lender) lender[change.field_name] = parsedVal;
+  }
+  const ids = toApprove.map(c => c.id);
+  await sb.from('pending_changes').update({ status: 'approved', reviewed_at: new Date().toISOString() }).in('id', ids);
+  allPendingChanges = allPendingChanges.filter(c => !ids.includes(c.id));
+  ids.forEach(id => selectedChangeIds.delete(id));
+  allLenders.forEach(l => { l._pendingCount = allPendingChanges.filter(c => c.lender_id === l.id).length; });
+  if (currentLender) currentPending = currentPending.filter(c => !ids.includes(c.id));
+  renderLenderList(filterLendersArr());
+  renderDashboard(); updatePublishBar();
+  toast(`${ids.length} change${ids.length!==1?'s':''} kept`);
+}
+async function revertSelected() {
+  const ids = allPendingChanges.filter(c => selectedChangeIds.has(c.id)).map(c => c.id);
+  if (!ids.length) { toast('Nothing selected'); return; }
+  if (!confirm(`Revert ${ids.length} selected change${ids.length!==1?'s':''}? The scraped values are discarded.`)) return;
+  await sb.from('pending_changes').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).in('id', ids);
+  allPendingChanges = allPendingChanges.filter(c => !ids.includes(c.id));
+  ids.forEach(id => selectedChangeIds.delete(id));
+  allLenders.forEach(l => { l._pendingCount = allPendingChanges.filter(c => c.lender_id === l.id).length; });
+  if (currentLender) currentPending = currentPending.filter(c => !ids.includes(c.id));
+  renderLenderList(filterLendersArr());
+  renderDashboard(); updatePublishBar();
+  toast(`${ids.length} change${ids.length!==1?'s':''} reverted`);
+}
+
+// "Push changes" (top button) — keep any selected changes first, then launch
+// the existing publish flow (spot-check → copyable `python3 publish.py`).
+// Only approved data is regenerated into the live waterfall.
+async function pushReviewedChanges() {
+  if (selectedChangeIds.size) await keepSelected();
+  openPublishModal();
+}
+
+// ── LEN-179 Part B: per-change notes (collect for Linear / Claude) ──
+function changeNoteKey(lenderId, field) { return `${lenderId}::${field}`; }
+function getChangeNotes() { try { return JSON.parse(localStorage.getItem('lp_change_notes') || '{}'); } catch { return {}; } }
+function setChangeNotes(o) { localStorage.setItem('lp_change_notes', JSON.stringify(o)); }
+function getChangeNote(lenderId, field) { const n = getChangeNotes()[changeNoteKey(lenderId, field)]; return n ? n.note : ''; }
+
+function toggleChangeNote(id) {
+  const row = document.getElementById('pnote-' + id);
+  if (!row) return;
+  const show = row.style.display === 'none';
+  row.style.display = show ? 'table-row' : 'none';
+  if (show) document.getElementById('pnotein-' + id)?.focus();
+}
+function saveChangeNote(id, lenderId, field) {
+  const ta = document.getElementById('pnotein-' + id);
+  if (!ta) return;
+  const notes = getChangeNotes();
+  const key = changeNoteKey(lenderId, field);
+  const txt = ta.value.trim();
+  if (txt) {
+    const change = allPendingChanges.find(c => c.id === id);
+    const lender = allLenders.find(l => l.id == lenderId);
+    notes[key] = {
+      lender: lender ? (lender.display_name || lender.lender_name) : String(lenderId),
+      field,
+      old: change ? formatValue(change.old_value) : '',
+      new: change ? formatValue(change.new_value) : '',
+      note: txt,
+      ts: new Date().toISOString(),
+    };
+  } else {
+    delete notes[key];
+  }
+  setChangeNotes(notes);
+  const btn = document.getElementById('pnotebtn-' + id);
+  if (btn) { btn.classList.toggle('has-note', !!txt); btn.innerHTML = txt ? '📝 ✓' : '📝'; btn.title = txt ? 'Edit note' : 'Add a note about this change'; }
+  document.getElementById('pnote-' + id).style.display = 'none';
+  updateNotesCount();
+  toast(txt ? 'Note saved' : 'Note cleared');
+}
+function updateNotesCount() {
+  const n = Object.keys(getChangeNotes()).length;
+  const b = document.getElementById('copy-notes-btn');
+  if (b) { b.style.display = n > 0 ? 'inline-flex' : 'none'; b.textContent = `📋 Copy ${n} Note${n!==1?'s':''}`; }
+}
+function copyChangeNotes() {
+  const notes = getChangeNotes();
+  const keys = Object.keys(notes);
+  if (!keys.length) { toast('No notes to copy'); return; }
+  const lines = [
+    '# LendPaper scrape-review notes',
+    `_${keys.length} note${keys.length!==1?'s':''} · exported ${new Date().toLocaleString()}_`,
+    '',
+    'Reviewer notes on scrape/edit errors — feed back into the scrape algorithm (LEN-179 / LEN-32).',
+    '',
+  ];
+  keys.forEach(k => {
+    const n = notes[k];
+    lines.push(`- **${n.lender} — \`${n.field}\`**  (was: ${n.old || '—'} → scraped: ${n.new || '—'})`);
+    lines.push(`    - ${String(n.note).replace(/\n/g, '\n    ')}`);
+  });
+  const text = lines.join('\n');
+  const done = () => toast(`${keys.length} note${keys.length!==1?'s':''} copied — paste into Linear or Claude`);
+  (navigator.clipboard?.writeText(text) || Promise.reject()).then(done, () => {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta);
+    ta.select(); try { document.execCommand('copy'); } catch {} ta.remove(); done();
+  });
+}
+function clearChangeNotes() {
+  if (!Object.keys(getChangeNotes()).length) { toast('No notes to clear'); return; }
+  if (!confirm('Clear all saved review notes? Copy them first if you still need them.')) return;
+  localStorage.removeItem('lp_change_notes');
+  updateNotesCount(); renderDashboard();
+}
 
 function openFieldEdit(field) {
   const type = FIELD_TYPE_MAP[field] || 'text';
@@ -2339,6 +2573,8 @@ function renderDashboard() {
   if (allPendingChanges.length === 0) {
     pendingSection = `<div class="empty-state-sm"><p style="color:var(--green-mid);font-weight:600">✓ No pending changes</p><small>All scraped data has been reviewed.</small></div>`;
   } else {
+    // Drop selections for changes no longer in the queue (approved/reverted elsewhere).
+    selectedChangeIds = new Set([...selectedChangeIds].filter(id => allPendingChanges.some(c => c.id === id)));
     const sortedChanges = [...allPendingChanges].sort((a,b) => {
       const as = isSuspiciousChange(a) ? 1 : 0;
       const bs = isSuspiciousChange(b) ? 1 : 0;
@@ -2350,16 +2586,18 @@ function renderDashboard() {
       const srcUrl = lender ? (lender.source_url || lender.application_submission_url) : null;
       const fieldLabel = FIELD_LABELS[c.field_name] || c.field_name;
       const oldFmt = esc(formatValue(c.old_value));
-      const newFmt = esc(formatValue(c.new_value));
       const d = new Date(c.created_at);
       const dateStr = d.toLocaleDateString([], {month:'short',day:'numeric'});
       const susp = isSuspiciousChange(c);
-      const newValJson = JSON.stringify(c.new_value).replace(/"/g,'&quot;');
-      return `<tr class="${susp ? 'suspicious-row' : ''}" id="prow-${c.id}">
+      const checked = selectedChangeIds.has(c.id);
+      const noteTxt = getChangeNote(c.lender_id, c.field_name);
+      const hasNote = !!noteTxt;
+      return `<tr class="${susp ? 'suspicious-row' : ''}${checked ? ' row-selected' : ''}" id="prow-${c.id}">
+        <td style="width:28px"><input type="checkbox" class="pchk" data-cid="${c.id}" ${checked ? 'checked' : ''} onchange="toggleChangeSelect('${c.id}', this)" /></td>
         <td style="cursor:pointer;color:var(--green);font-weight:500;white-space:nowrap" onclick="selectLender(${c.lender_id})">${lenderName}</td>
         <td><span class="field-label">${esc(fieldLabel)}</span>${susp ? '<span class="suspicious-badge">⚠ ZERO/BLANK</span>' : ''}</td>
         <td><span class="val-old">${oldFmt || '—'}</span></td>
-        <td id="pnow-${c.id}"><span class="val-new">${newFmt || '—'}</span></td>
+        <td id="pnow-${c.id}">${pendingNowControl(c)}</td>
         <td style="white-space:nowrap">
           ${srcUrl ? `<a href="${esc(srcUrl)}" target="_blank" style="color:var(--green);font-size:12px;text-decoration:none" title="${esc(srcUrl)}">↗ Source</a>` : '<span style="color:var(--muted);font-size:12px">—</span>'}
         </td>
@@ -2368,20 +2606,44 @@ function renderDashboard() {
           <div class="action-btns">
             <button class="btn-approve" onclick="approvePendingById('${c.id}')">Keep</button>
             <button class="btn-reject"  onclick="rejectPendingById('${c.id}')">Revert</button>
-            <button class="btn-field-edit" onclick="openPendingEdit('${c.id}','${c.field_name}','${c.lender_id}',${newValJson})">✏ edit</button>
+            <button class="btn-gcheck" onclick="googleCheck('${c.lender_id}','${c.field_name}')" title="Verify this value on Google">🔍 Google</button>
+            <button class="btn-note${hasNote ? ' has-note' : ''}" id="pnotebtn-${c.id}" onclick="toggleChangeNote('${c.id}')" title="${hasNote ? 'Edit note' : 'Add a note about this change'}">📝${hasNote ? ' ✓' : ''}</button>
+          </div>
+        </td>
+      </tr>
+      <tr class="pnote-row" id="pnote-${c.id}" style="display:none">
+        <td></td>
+        <td colspan="7">
+          <div class="pnote-wrap">
+            <textarea id="pnotein-${c.id}" class="pnote-ta" placeholder="What's wrong with this field / what should the scrape do differently? Collected for Linear or Claude to improve the algorithm.">${esc(noteTxt)}</textarea>
+            <div class="pnote-actions">
+              <button class="btn-approve" onclick="saveChangeNote('${c.id}','${c.lender_id}','${c.field_name}')">Save note</button>
+              <button class="btn-reject" onclick="toggleChangeNote('${c.id}')">Cancel</button>
+            </div>
           </div>
         </td>
       </tr>`;
     }).join('');
 
+    const noteCount = Object.keys(getChangeNotes()).length;
     pendingSection = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px;flex-wrap:wrap">
         <span style="font-size:12px;color:var(--muted)">${allPendingChanges.length} change${allPendingChanges.length!==1?'s':''} across ${[...new Set(allPendingChanges.map(c=>c.lender_id))].length} lenders</span>
-        <button class="btn-bulk-approve" onclick="approveAllPending()">Approve All ${allPendingChanges.length}</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn-copynotes" id="copy-notes-btn" onclick="copyChangeNotes()" style="${noteCount?'display:inline-flex':'display:none'}">📋 Copy ${noteCount} Note${noteCount!==1?'s':''}</button>
+          <button class="btn-bulk-approve" onclick="approveAllPending()">Approve All ${allPendingChanges.length}</button>
+        </div>
+      </div>
+      <div id="queue-bulk-bar" class="queue-bulk-bar" style="display:none">
+        <span><strong id="queue-sel-count">0</strong> selected</span>
+        <button class="btn-approve" onclick="keepSelected()">Keep selected</button>
+        <button class="btn-reject" onclick="revertSelected()">Revert selected</button>
+        <button class="btn-ghost" style="font-size:12px;padding:4px 10px" onclick="clearSelection()">Clear</button>
       </div>
       <div style="overflow-x:auto">
         <table class="pending-table">
           <thead><tr>
+            <th style="width:28px"><input type="checkbox" id="pchk-all" onchange="toggleAllChanges(this)" title="Select all" /></th>
             <th>Lender</th><th>Field</th><th>Was</th><th>Now</th><th>Source</th><th>Date</th><th>Actions</th>
           </tr></thead>
           <tbody>${pendingRows}</tbody>
@@ -2397,7 +2659,8 @@ function renderDashboard() {
       </div>
       <div style="display:flex;gap:10px">
         ${notesCount > 0 ? `<button class="btn-ghost" style="background:var(--amber);color:white" onclick="exportScraperNotes()">Export ${notesCount} Scraper Note${notesCount!==1?'s':''}</button>` : ''}
-        <button class="btn-ghost" style="background:var(--green);color:white" onclick="renderDashboard()">↻ Refresh</button>
+        <button class="btn-push" onclick="pushReviewedChanges()" title="Keep any selected changes, then regenerate the live waterfall from approved data">⬆ Push changes</button>
+        <button class="btn-ghost" onclick="renderDashboard()">↻ Refresh</button>
       </div>
     </div>
     <div class="dash-section">
@@ -2440,6 +2703,7 @@ function renderDashboard() {
     </div>
   `;
   loadDashboardRecruiter();
+  updateQueueBar(); syncSelectAll(); updateNotesCount();   // LEN-179 Part B restore
 }
 
 async function loadDashboardRecruiter() {
