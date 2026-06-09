@@ -7,7 +7,7 @@ var TOOLS = [
   { 
     id: "amo", 
     name: "Amortization",
-    desc: "Full payment schedule with early-payoff & buyout scenarios.",
+    desc: "Full payment schedule with pre-pay & buyout scenarios.",
     status: "live", 
     group: "deal-math", 
     icon: "chart", 
