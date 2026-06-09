@@ -48,6 +48,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
+<link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
 <script src="../public/assets/js/calculator-app.js"></script>
 <script src="../public/assets/js/pdf-helper.js"></script>
 <script src="../public/assets/js/compliance-rules.js"></script>
@@ -458,28 +459,17 @@ body.pdf-export-mode .lp-doc-context {
 }
 .lp-print-btn:hover { background-color: var(--lp-green-light); }
 
-/* Override global lp-definition to match lp-howto green-tinted style */
+/* LEN-147 — left-accent style for definition/intro banners */
 .lp-definition {
-    background-color: #F0FDF4;
-    border-radius: 12px;
-    border-left: none;
-    padding: 20px;
-    padding-left: 20px;
-    font-size: 13.5px;
-    font-weight: 500;
+    border-left: 3px solid var(--lp-green);
+    padding: 4px 8px 4px 12px;
+    font-size: 12px;
     color: #334155;
     line-height: 1.6;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    position: relative;
 }
-.lp-definition strong { color: #1A3C2E; font-weight: 800; }
-/* LEN-142 — dismissible intro standard (× to close, restore "i" in the card header) */
-.lp-definition { position: relative; padding-right: 44px; }
-.lp-howto-x {
-    position: absolute; top: 16px; right: 14px;
-    background: transparent; border: none; cursor: pointer; padding: 0;
-    color: #6B7280; font-weight: 800; font-size: 18px; line-height: 1; transition: color 0.15s;
-}
-.lp-howto-x:hover { color: #1A3C2E; }
+.lp-definition strong { color: #1A3C2E; font-weight: 700; }
 .lp-intro-toggle-btn {
     width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
     border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
@@ -612,6 +602,14 @@ body.pdf-export-mode .print-footer-legal { display: none !important; }
 body.pdf-export-mode .print-watermark { display: none !important; }
 body.pdf-export-mode .tk-eyebrow { display: none !important; }
 body.pdf-export-mode .card-center-title { display: none !important; }
+/* LEN-141: a single scenario needs no "Scenario A" label — collapse the whole (now
+   empty) card header so the top doesn't leave a void. Show the label only when comparing. */
+body.pdf-export-mode .card-header { display: none !important; }
+body.pdf-export-mode.multi-scenario .card-header { display: block !important; margin-bottom: 8px !important; }
+body.pdf-export-mode.multi-scenario .card-title-input {
+    display: inline-block !important;
+    border: none !important; background: transparent !important; padding: 0 !important;
+}
 </style>
 </head>
 <body>
@@ -641,26 +639,28 @@ body.pdf-export-mode .card-center-title { display: none !important; }
         <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
         <h1>SBA 7(a) Rates & Fees</h1>
     </div>
-    <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
-    <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
-    <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
-    <details id="pdfDocDetails" class="lp-doc-details no-print">
-        <summary>Document details <span>— optional, appears on the PDF</span></summary>
-        <div class="lp-doc-details-grid">
-            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
-            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
-            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
-            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
-            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
-        </div>
-        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
-    </details>
-    <div class="flex justify-end mb-8 no-print">
+    <div class="flex justify-end no-print" style="margin-bottom:16px;">
         <button class="lp-pill-btn" onclick="addCard()">+ Compare</button>
     </div>
     
     <div id="cardsContainer" class="cards-container">
         <!-- Cards injected via JS -->
+    </div>
+
+    <!-- LEN-147: borrower state + doc details at bottom of layout -->
+    <div class="lp-deal-context no-print" style="max-width:1000px;margin:0 auto;width:100%;">
+        <div data-lp-compliance-host></div>
+        <details id="pdfDocDetails" class="lp-doc-details">
+            <summary>Document details <span>— optional, appears on the PDF</span></summary>
+            <div class="lp-doc-details-grid">
+                <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+                <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+                <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+                <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
+                <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+            </div>
+            <p class="lp-doc-details-hint">These appear on the saved PDF. Borrower state drives compliance disclosures.</p>
+        </details>
     </div>
 
     <!-- Unified Footer Section -->
@@ -886,8 +886,7 @@ function addCard() {
         </div>
         <div class="card-body-flex">
             <div class="lp-inputs">
-                <div class="lp-definition">
-                    <button class="lp-howto-x no-print" onclick="dismissIntro()" aria-label="Dismiss">&times;</button>
+                <div class="lp-definition" data-lp-dismiss="sba_intro">
                     Enter the loan amount and term. You'll see the full fee picture and monthly payment — and what to tell your borrower about total cost.
                 </div>
                 <div class="lp-group">
@@ -971,19 +970,30 @@ function addCard() {
     document.getElementById('cardsContainer').insertAdjacentHTML('beforeend', cardHtml);
     bindTips();
     calculate(id);
-    applyIntroState(); // LEN-142 — new cards respect the current dismiss state
+    applyIntroState();
+    PDF_HELPER.initDismissibles();
+    rewireDefinitionDismiss();
 }
 
-// LEN-142 — dismissible intro standard. Multi-card: dismiss/restore acts on every
-// card's intro; persisted site-wide via the shared 'lendpaper_intro_dismissed' key.
+// LEN-147 — dismissible intro. Multi-card: dismiss/restore acts on every card's intro.
+// Per-calc key: lp_dismiss_sba_intro.
 function applyIntroState() {
-    let dismissed = false;
-    try { dismissed = localStorage.getItem('lendpaper_intro_dismissed') === 'true'; } catch (e) {}
+    const dismissed = localStorage.getItem('lp_dismiss_sba_intro') === '1';
     document.querySelectorAll('.lp-definition').forEach(el => { el.style.display = dismissed ? 'none' : ''; });
     document.querySelectorAll('.lp-intro-toggle-btn').forEach(b => { b.style.display = dismissed ? 'inline-flex' : 'none'; });
 }
-function dismissIntro() { try { localStorage.setItem('lendpaper_intro_dismissed', 'true'); } catch (e) {} applyIntroState(); }
-function showIntro() { try { localStorage.removeItem('lendpaper_intro_dismissed'); } catch (e) {} applyIntroState(); }
+function dismissIntro() { localStorage.setItem('lp_dismiss_sba_intro', '1'); applyIntroState(); }
+function showIntro() { localStorage.removeItem('lp_dismiss_sba_intro'); applyIntroState(); PDF_HELPER.initDismissibles(); rewireDefinitionDismiss(); }
+
+// After initDismissibles injects × buttons on .lp-definition, wire them to also
+// call applyIntroState so ALL cards' definitions hide immediately (not just the clicked one).
+function rewireDefinitionDismiss() {
+    document.querySelectorAll('.lp-definition [data-lp-dismiss-btn]').forEach(function(btn) {
+        if (btn.dataset.rewired) return;
+        btn.dataset.rewired = '1';
+        btn.addEventListener('click', applyIntroState);
+    });
+}
 
 function removeCard(id) {
     if (document.querySelectorAll('.lp-card').length > 1) {
@@ -1041,6 +1051,9 @@ function lpRestoreBanner() {
 
 window.onload = () => {
     addCard();
+    PDF_HELPER.initDismissibles();
+    rewireDefinitionDismiss();
+    PDF_HELPER.persistFields('sba', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor','pdfDealName','pdfLender']);
     if (typeof window.PDF_HELPER !== 'undefined') {
         window.PDF_HELPER.initPrintLayout("SBA 7(a) RATES & FEES");
     }

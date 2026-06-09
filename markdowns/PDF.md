@@ -242,6 +242,75 @@ All calculators share this base. Drop into a `print.css` or global `@media print
 
 ---
 
+## 4A. Calm PDF Design System (LEN-141) — the canonical look
+
+The borrower-facing PDF look is the **calm** system: quiet typography, a soft
+white-card language, a single green focus tile, and an amber estimate notice.
+It is owned by one shared stylesheet so the five calculators read as one product
+in a multi-PDF packet — **do not redefine these tokens or re-invent the notice/
+header/footer per calculator.**
+
+**Source of truth:** `public/assets/css/pdf-calm.css` — linked by every
+calculator, scoped entirely to `body.pdf-export-mode` (zero on-screen effect).
+Reference implementation: the Payment Breakdown PDF (`AmoScheduleCalculator.html`
+`#pdf-document` + `buildPdfDocument()`). Original spec artifact:
+`payment_breakdown_pdf_calm_mockup.html` (LEN-135).
+
+### Palette tokens (on `body.pdf-export-mode`)
+
+| Token | Value | Use |
+|---|---|---|
+| `--pdf-ink` | `#101827` | Primary text |
+| `--pdf-muted` | `#65758b` | Labels, captions, secondary text |
+| `--pdf-soft` | `#f7faf9` | Soft card / strip / table-head fills |
+| `--pdf-line` | `#dbe4e8` | Hairline borders |
+| `--pdf-green` | `#1A3C2E` | Primary fill (focus tile), totals — **brand green** |
+| `--pdf-green-mid` | `#17613f` | Green accents (eyebrows, savings) |
+| `--pdf-green-soft` | `#effaf3` | Highlighted schedule row |
+| `--pdf-amber-bg/line/ink` | `#fffdf4` / `#f3d675` / `#7c4a03` | Estimate notice |
+| `--pdf-mint-line/bg` | `#b7efcc` / `#fbfffc` | Early-payoff cards |
+
+The mockup's green (`#173f31`) **maps to brand `#1A3C2E`** per BRANDING.md — the
+mockup is a spec artifact, not production colour. All filled elements carry
+`print-color-adjust: exact` so they survive the print capture.
+
+### Shared chrome (applied to every calculator automatically)
+
+- **Estimate notice.** `PDF_HELPER.mountEstimateNotice(element)` (called inside
+  `generatePDF`) injects the amber `.lp-pdf-notice` at the top of the captured
+  body and removes it after the dialog. It **no-ops for Payment Breakdown**
+  (which renders its own calm-native notice inside `#pdf-document`). Never
+  hardcode a second notice in a calculator that already gets the injected one.
+- **Prepared-for/by block.** The shared `mountDocContext()` output
+  (`.lp-doc-context` / `.dc-for` / `.dc-meta` / `.dc-by`) is restyled to the calm
+  card by `pdf-calm.css`. Keep using `mountDocContext()`; don't restyle it locally.
+- **Footer partials.** `.print-footer-legal` + `.print-watermark` are quieted to
+  the calm muted footer by `pdf-calm.css`.
+- **Typography.** `pdf-calm.css` sets Inter on the printed content. The
+  PDF_HELPER tiered header keeps its own inline font and is unaffected.
+
+### Component library (for body migration — `body.pdf-export-mode .lp-pdf-*`)
+
+Migrate a calculator's PDF body onto these incrementally (Payment Breakdown is
+the worked example; the others currently get the shared chrome only):
+
+| Class | What it is |
+|---|---|
+| `.lp-pdf-topline` + `.lp-pdf-brand` / `.lp-pdf-company` / `.lp-pdf-meta` | Header: brand kicker / Prepared-For box / preparer meta |
+| `.lp-pdf-notice` | Amber estimate banner |
+| `.lp-pdf-card` (`.soft`) | White / soft rounded card |
+| `.lp-pdf-focus` (`.primary`) + `.lp-pdf-value` | Hero focus tile (green primary) |
+| `.lp-pdf-row` (`.total`) | Label … value definition row |
+| `.lp-pdf-details` | 6-up deal-details grid |
+| `.lp-pdf-table` | Calm schedule / data table |
+| `.lp-pdf-foot` (`.code`) | In-body two-column footer |
+
+**Rule of thumb:** new calculators and PDF-body rewrites compose from
+`.lp-pdf-*` and the tokens above — they must not introduce a new green, a new
+notice colour, or a bespoke header/footer.
+
+---
+
 ## 5. Print Partials (Add to Every Calculator)
 
 ### Print header
@@ -305,22 +374,38 @@ Per-calculator titles:
 - Right-edge clipping: global container-width rule in §4 should fix it; verify `.scenario-card` has no fixed width overriding
 - Confirm currency values wrapped in `.currency` for `white-space: nowrap`
 
-### Payment Breakdown
-- Two-column on-screen → must collapse for print: hide `.input-col`, promote `.results-col` to full-width
-- Suppress screen logo/byline in favor of `.pdf-header` partial
-- **Page-1 tile layout (LEN-110 follow-up).** Print-only (`body.pdf-export-mode`); the on-screen results column is untouched. Page 1 speaks the same white-tile language as the payoff panel:
-  - `.pdf-loan-params` → a clean **white "Deal summary" card** (eyebrow via `::before`), not the old flat-gray box. Values are filled by `populatePdfParams(id)` in the save flow — never ship it blank.
-  - `.pdf-hero-block` → the **green-left-accent payment tile** (mirrors the action payoff tile).
-  - `.pdf-stats-grid` → **four white mini-tiles** (Full-term cost / Total interest / Cost per dollar / APR), `repeat(4,1fr)`, values pinned to a common baseline with `margin-top:auto`, `break-inside: avoid`.
+### Payment Breakdown / Amortization (calm rebuild — LEN-141, supersedes LEN-110/124)
 
-### Amortization — payoff panel (LEN-110 redesign)
-- Hide input panel; replace with print-only **Deal summary** card (see Payment Breakdown above)
-- The selected row expands to the **payoff tile panel** (`tr[class*="amo-detail-for-"]`), not the old "IF BORROWER PAYS OFF HERE" callout. Keep the whole panel together:
-  - `body.pdf-export-mode .lp-tiles` holds the 3-col grid; `.lp-tiles` + `.lp-todate` band carry `break-inside: avoid`
-  - **Tiles are white** — print does not fill them. Hierarchy survives via `print-color-adjust: exact` on Tile 1's green left-accent, Tile 3's green border, and the green date pill (already in the print block)
-  - **No-pre-pay deals** print the single muted `Run-to-term cost` tile + To-date band on a **neutral** (`#F9FAFB`) container with a gray date pill — both forced via `print-color-adjust: exact` on `.lp-expand-inner`/`.lp-payoff-datepill`. Verified: the lone tile holds its constrained width and does not stretch across the 3-col grid.
-- **Schedule header:** white with a 2px brand-green underline (`thead th`, print-only) + brand-green `.amo-sched-label` — ties the table to the tile system. On-screen sticky header is untouched.
-- Repeat table header on every page — `thead { display: table-header-group }` handles this
+Print-only borrower document, built into the hidden `#pdf-document` by
+`buildPdfDocument()` from live state — the on-screen results column is untouched.
+Follows the §4A calm system. **This is the reference implementation; match it
+when migrating other calculators.**
+
+- **Header:** the `.topline` — brand kicker / **Prepared For** box (empty state
+  `Borrower not specified`) / preparer meta (`Prepared by {preparer}` ·
+  `Using LendPaper technology`). The legacy `.print-header-content` is suppressed.
+- **Page 1:** eyebrow (scenario label) + **"Proposal summary"** title + lead, then:
+  - Two hero focus cards — **Gross Funding** (green primary tile) and the
+    frequency **Payment** (mono value).
+  - **Funds To Borrower** card — `Gross funding → Origination fee deducted →
+    Estimated funds received` (the origination fee is explained here, never made
+    the centerpiece).
+  - **Repayment Summary** card — total repayment / finance charge / total cost
+    incl. origination fee / term.
+  - **Deal Details** 6-up grid (Factor / Est. APR / **Origination Fee** /
+    Frequency / Start / Maturity).
+  - Compact **Early Payoff** preview (Example date / Estimated buyout / Estimated
+    savings) + illustrative notice. Detailed tiles live in the schedule, not here.
+- **Schedule (page 2+):** a six-column calm table (`#`, Date, Payment, Principal,
+  Interest, Principal Balance). The selected payoff row gets the green highlight +
+  `.pill`, and expands into the inline three-tile **`.inline-payoff`** panel
+  (Early Payoff Quote / Run-To-Term Cost / Estimated Savings) + amber lender note.
+- **Multi-scenario** (page break per card) and **multi-option payoff** (≤3:
+  green / blue / purple via `pdfOptClass`) are preserved.
+- Per-page legal micro-copy + page numbers come from the `@page` margin boxes;
+  the in-body calm `.pdf-footer` renders once at the end. Colours are forced with
+  `print-color-adjust: exact`. Table header repeats via `thead { display:
+  table-header-group }`.
 
 ---
 

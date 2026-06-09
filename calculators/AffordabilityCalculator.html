@@ -44,6 +44,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
+<link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
 <script src="../public/assets/js/calculator-app.js"></script>
 <script src="../public/assets/js/pdf-helper.js"></script>
 <script src="../public/assets/js/compliance-rules.js"></script>
@@ -170,7 +171,7 @@ label.field-label {
   letter-spacing: 0.025em;
   margin-bottom: 8px;
 }
-.field-pair { display: grid; grid-template-columns: 1fr 132px; gap: 12px; }
+.field-pair { display: grid; grid-template-columns: 1fr 180px; gap: 12px; }
 @media (max-width: 480px) { .field-pair { grid-template-columns: 1fr; } }
 
 .input-wrap {
@@ -359,21 +360,15 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 .lp-cta-secondary { background: transparent; color: #1A3C2E; border: 1px solid #1A3C2E; }
 .lp-cta-secondary:hover { background: #F0FDF4; }
 
-/* ── Definition card (green-tinted, LEN-11 style) ─────────── */
+/* ── Definition banner (LEN-147 left-accent style) ───────── */
 .lp-definition {
-  background-color: #F0FDF4; border-radius: 12px; border-left: none;
-  padding: 18px 20px; font-size: 13.5px; font-weight: 500; color: #334155;
-  line-height: 1.6; margin-bottom: 24px;
+  border-left: 3px solid #1A3C2E;
+  padding: 4px 8px 4px 12px;
+  font-size: 12px; color: #334155;
+  line-height: 1.6; margin-bottom: 20px;
+  position: relative;
 }
-.lp-definition strong { color: #1A3C2E; font-weight: 800; }
-/* LEN-142 — dismissible intro standard (× to close, restore "i" in the card header) */
-.lp-definition { position: relative; padding-right: 44px; }
-.lp-howto-x {
-  position: absolute; top: 14px; right: 14px;
-  background: transparent; border: none; cursor: pointer; padding: 0;
-  color: #6B7280; font-weight: 800; font-size: 18px; line-height: 1; transition: color 0.15s;
-}
-.lp-howto-x:hover { color: #1A3C2E; }
+.lp-definition strong { color: #1A3C2E; font-weight: 700; }
 .lp-intro-toggle-btn {
   width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
   border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
@@ -516,22 +511,6 @@ body.is-embedded .lp-main { padding-top: 16px; }
         <h1>Affordability Check</h1>
     </div>
 
-    <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
-    <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
-
-    <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
-    <details id="pdfDocDetails" class="lp-doc-details no-print">
-        <summary>Document details <span>— optional, appears on the PDF</span></summary>
-        <div class="lp-doc-details-grid">
-            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
-            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
-            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
-            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Equipment offer"></label>
-            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
-        </div>
-        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
-    </details>
-
     <div class="lp-card">
         <div class="card-header">
             <button class="back-link no-print" type="button" id="backLink" title="Back to Deal Read">
@@ -546,9 +525,8 @@ body.is-embedded .lp-main { padding-top: 16px; }
         <div class="card-body-flex">
             <!-- ── Inputs ─────────────────────────────────────── -->
             <aside class="lp-inputs">
-                <div class="lp-definition">
-                    <button class="lp-howto-x no-print" onclick="dismissIntro()" aria-label="Dismiss">&times;</button>
-                    Answer the two questions that come up before close: <strong>can the borrower handle the payment</strong>, and <strong>does the capital have a clear path to pay for itself?</strong>
+                <div class="lp-definition" data-lp-dismiss="afford_intro">
+                    Answer the two questions before close: <strong>can the borrower handle the payment</strong>, and <strong>does the capital have a clear path to pay for itself?</strong>
                 </div>
 
                 <div class="lp-group">
@@ -576,22 +554,18 @@ body.is-embedded .lp-main { padding-top: 16px; }
 
                     <div style="margin-bottom:18px;">
                         <label class="field-label">Use of funds</label>
-                        <div class="cycler">
-                            <button class="icon-btn" type="button" id="prevProduct" aria-label="Previous use of funds">‹</button>
-                            <div class="input-wrap">
-                                <select id="productInput" class="input-field">
-                                    <option value="working-capital">Working capital</option>
-                                    <option value="equipment">Equipment</option>
-                                    <option value="inventory">Inventory</option>
-                                    <option value="payroll">Payroll</option>
-                                    <option value="marketing">Marketing</option>
-                                    <option value="expansion">Expansion</option>
-                                    <option value="bridge">Bridge capital</option>
-                                    <option value="debt-refinance">Debt refinance</option>
-                                    <option value="emergency-repair">Emergency repair</option>
-                                </select>
-                            </div>
-                            <button class="icon-btn" type="button" id="nextProduct" aria-label="Next use of funds">›</button>
+                        <div class="input-wrap">
+                            <select id="productInput" class="input-field">
+                                <option value="working-capital">Working capital</option>
+                                <option value="equipment">Equipment</option>
+                                <option value="inventory">Inventory</option>
+                                <option value="payroll">Payroll</option>
+                                <option value="marketing">Marketing</option>
+                                <option value="expansion">Expansion</option>
+                                <option value="bridge">Bridge capital</option>
+                                <option value="debt-refinance">Debt refinance</option>
+                                <option value="emergency-repair">Emergency repair</option>
+                            </select>
                         </div>
                     </div>
 
@@ -622,6 +596,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
                                     <option value="deal" selected>From deal</option>
                                     <option value="entered">Entered manually</option>
                                     <option value="estimate">Estimate from payment</option>
+                                    <option value="quote">From a saved quote</option>
                                 </select>
                             </div>
                         </div>
@@ -747,7 +722,6 @@ body.is-embedded .lp-main { padding-top: 16px; }
                     <div class="af-talk">
                         <div class="af-talk-head">
                             <div>
-                                <span class="af-metric-label">Scenario</span>
                                 <strong id="scenarioTitle">Comfortable</strong>
                             </div>
                             <div class="tabs no-print">
@@ -764,37 +738,48 @@ body.is-embedded .lp-main { padding-top: 16px; }
                                 <button class="icon-btn" type="button" id="nextScenario" aria-label="Next scenario" style="width:34px;height:34px;">›</button>
                             </div>
                             <div class="foot-actions">
-                                <button class="btn-sm primary" type="button" id="copyScenarioBtn">Copy Scenario</button>
-                                <button class="btn-sm secondary" type="button" id="inlineSaveBtn">Save as PDF</button>
+                                <button class="lp-cta-primary" type="button" id="inlineSaveBtn" style="font-size:11px;padding:8px 12px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                                    Save Estimate as PDF
+                                </button>
+                                <button class="lp-cta-secondary" type="button" id="copyScenarioBtn" style="font-size:11px;padding:8px 12px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    Copy Scenario
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 5. Qualification read -->
+                <!-- 5. Qualification read (collapsed by default) -->
                 <div class="result-block">
-                    <div class="af-qual">
-                        <span class="section-label">Qualification Read</span>
-                        <div class="body" id="qualificationText"></div>
-                        <div class="af-hurdle" id="breakevenText"></div>
-                        <div class="af-insights">
-                            <div class="af-insight">
-                                <span class="af-metric-label">Daily Pressure</span>
-                                <strong id="dailyPressure">$0/day</strong>
-                                <div class="note">Monthly payment spread over operating days</div>
-                            </div>
-                            <div class="af-insight">
-                                <span class="af-metric-label">WOW Coverage</span>
-                                <strong id="weeklyCoverage">0x</strong>
-                                <div class="note">Weekly deposit run-rate vs. weekly payment load</div>
-                            </div>
-                            <div class="af-insight">
-                                <span class="af-metric-label">Expense Cushion</span>
-                                <strong id="expenseCushion">Not entered</strong>
-                                <div class="note">Deposits after expenses and payment</div>
+                    <details class="af-qual-details">
+                        <summary class="section-label" style="cursor:pointer;list-style:none;user-select:none;">
+                            Qualification Read
+                            <span style="float:right;font-size:10px;color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">expand ▸</span>
+                        </summary>
+                        <div class="af-qual">
+                            <div class="body" id="qualificationText"></div>
+                            <div class="af-hurdle" id="breakevenText"></div>
+                            <div class="af-insights">
+                                <div class="af-insight">
+                                    <span class="af-metric-label">Daily Pressure</span>
+                                    <strong id="dailyPressure">$0/day</strong>
+                                    <div class="note">Monthly payment spread over operating days</div>
+                                </div>
+                                <div class="af-insight">
+                                    <span class="af-metric-label">WOW Coverage</span>
+                                    <strong id="weeklyCoverage">0x</strong>
+                                    <div class="note">Weekly deposit run-rate vs. weekly payment load</div>
+                                </div>
+                                <div class="af-insight">
+                                    <span class="af-metric-label">Expense Cushion</span>
+                                    <strong id="expenseCushion">Not entered</strong>
+                                    <div class="note">Deposits after expenses and payment</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </details>
                 </div>
 
                 <!-- 6. ROI panel (optional — only with upside data) -->
@@ -826,8 +811,24 @@ body.is-embedded .lp-main { padding-top: 16px; }
                     </button>
                     <button class="lp-cta-secondary" type="button" id="copySummaryBtn">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy Summary
+                        Copy Scenario
                     </button>
+                </div>
+
+                <!-- LEN-147: borrower state + doc details at bottom of input column -->
+                <div class="lp-deal-context no-print">
+                    <div data-lp-compliance-host></div>
+                    <details id="pdfDocDetails" class="lp-doc-details">
+                        <summary>Document details <span>— optional, appears on the PDF</span></summary>
+                        <div class="lp-doc-details-grid">
+                            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+                            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+                            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+                            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Equipment offer"></label>
+                            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+                        </div>
+                        <p class="lp-doc-details-hint">These appear on the saved PDF. Borrower state drives compliance disclosures.</p>
+                    </details>
                 </div>
             </section>
         </div>
@@ -937,6 +938,15 @@ function monthlyPayment(amount, frequency) {
 }
 function fullTermCost(payment, frequency, enteredPayback, termMonths, mode) {
   if (mode === "estimate") return monthlyPayment(payment, frequency) * (termMonths || 12);
+  if (mode === "quote") {
+    try {
+      const log = window.LPQuoteLog;
+      if (log && log.getLatest) {
+        const latest = log.getLatest();
+        if (latest && latest.params && latest.params.full_term_cost) return latest.params.full_term_cost;
+      }
+    } catch (e) {}
+  }
   return enteredPayback;
 }
 function verdictFor(share) {
@@ -953,6 +963,7 @@ function cashStatusFor(values) {
 function paybackModeLabel(mode) {
   if (mode === "estimate") return "Estimated from payment and term";
   if (mode === "entered") return "Entered manually";
+  if (mode === "quote") return "From saved quote";
   return "Picked up from deal";
 }
 function scenarioIndexFor(share) {
@@ -1025,19 +1036,19 @@ function talkTrack(kind, values, scenario) {
 
   const base = {
     comfortable: {
-      talk: `At ${payment} a month, you're looking at about ${share} of expected monthly deposits going to this payment. That leaves over ${left} coming in every month after it's covered.\n\nThe real question isn't whether you can afford it. It's what you're going to do with the capital. For ${useLower}, the proof point is ${proof}. If it helps you bring in even one extra job a month, it pays for itself before the first statement closes. ${timing} is the timing note we want to keep in view.`,
-      text: `The payment pencils at ${payment}/mo, about ${share} of expected monthly deposits. That leaves roughly ${left}/mo after the payment. For ${useLower}, we want proof around ${proof}. If the capital helps create at least ${breakeven}/mo in new gross profit, it is paying for itself.`,
-      email: `Subject: Affordability check\n\nBased on the estimated payment of ${payment}/mo and expected monthly deposits of ${deposits}, the payment is about ${share} of deposits. That leaves approximately ${left}/mo after the payment.\n\nFor ${useLower}, the proof point is ${proof}. The break-even line is simple: if the capital generates at least ${breakeven}/mo in new gross profit, the payment is covered.`
+      talk: `At ${payment}/mo — about ${share} of expected deposits — the payment leaves ${left} coming in each month. For ${useLower}, confirm ${proof} so the return is visible from day one.`,
+      text: `Payment: ${payment}/mo (${share} of deposits), ${left}/mo remaining. Proof point for ${useLower}: ${proof}.`,
+      email: `Subject: Affordability check\n\nEstimated payment of ${payment}/mo is about ${share} of expected monthly deposits of ${deposits}, leaving roughly ${left}/mo after the payment. For ${useLower}, the proof point is ${proof} — confirm that before close.`
     },
     tight: {
-      talk: `The payment is ${payment} a month, about ${share} of expected monthly deposits. That's workable, but it means you need a plan for what this capital is going to do.\n\nFor ${useLower}, we need to see ${proof}. The math that matters: if this funding helps you generate ${breakeven} more in new business each month, it's already paying for itself. We want to make sure the use of funds, timing, and payment-day coverage are clear before we move forward.`,
-      text: `The estimated payment is ${payment}/mo, about ${share} of deposits. It can work, but the use of funds needs to be clear. For ${useLower}, validate ${proof}. If this creates at least ${breakeven}/mo in new gross profit, it covers the payment.`,
-      email: `Subject: Affordability check\n\nThe estimated payment is ${payment}/mo, which is about ${share} of expected monthly deposits. That is workable, but tighter, so the plan for using the capital matters.\n\nFor ${useLower}, we should validate ${proof}. The key hurdle is ${breakeven}/mo in new gross profit. If the funding can reasonably create that, the payment has a clear path to cover itself.`
+      talk: `At ${payment}/mo, the payment is ${share} of expected deposits — workable, but it needs a clear use-of-funds story. For ${useLower}, validate ${proof} and confirm the first payment cycle is covered.`,
+      text: `Payment: ${payment}/mo (${share} of deposits). Tight — confirm ${proof} for ${useLower} before moving forward.`,
+      email: `Subject: Affordability check\n\nThe estimated payment of ${payment}/mo is about ${share} of expected monthly deposits of ${deposits} — workable but tighter than ideal. For ${useLower}, validate ${proof} to confirm the capital has a clear path to cover its own payment.`
     },
     stretching: {
-      talk: `I want to be straight with you. At ${payment} a month, we're looking at ${share} of expected monthly deposits going to this payment. That's the upper edge of what's manageable.\n\nFor ${useLower}, we need a hard answer on ${proof}. I'm not telling you not to do it. I'm telling you we need to be very clear about how you're putting this capital to work and how soon it starts helping. If it's general working capital without a clear plan, we might want to right-size the amount.`,
-      text: `At ${payment}/mo, the payment is about ${share} of expected monthly deposits. That is a stretch. For ${useLower}, this only makes sense if ${proof} can produce at least ${breakeven}/mo in new gross profit.`,
-      email: `Subject: Affordability check\n\nAt an estimated ${payment}/mo, this payment is about ${share} of expected monthly deposits. That puts it near the upper edge of what is manageable.\n\nFor ${useLower}, we need to validate ${proof}. Before moving forward, we should be very clear about how the capital will be used, when the return starts, and whether that use can generate at least ${breakeven}/mo in new gross profit. If not, it may be better to right-size the amount.`
+      talk: `At ${payment}/mo the payment is ${share} of expected deposits — that's a stretch. For ${useLower}, the capital needs to generate ${breakeven}/mo in new gross profit to cover itself, so confirm ${proof} before committing.`,
+      text: `Payment: ${payment}/mo (${share} of deposits). Stretch — only viable if ${proof} produces ${breakeven}+/mo for ${useLower}.`,
+      email: `Subject: Affordability check\n\nAt ${payment}/mo, the estimated payment is about ${share} of expected monthly deposits of ${deposits}. This is near the upper edge of what is manageable. For ${useLower}, confirm ${proof} can produce at least ${breakeven}/mo in new gross profit before moving forward.`
     }
   };
   return base[scenario.key][kind];
@@ -1249,14 +1260,6 @@ document.querySelectorAll(".tab").forEach((button) => {
   });
 });
 
-function cycleProduct(direction) {
-  const currentIndex = productOptions.findIndex((p) => p.value === els.product.value);
-  const nextIndex = (currentIndex + direction + productOptions.length) % productOptions.length;
-  setProduct(productOptions[nextIndex].value);
-}
-document.querySelector("#prevProduct").addEventListener("click", () => cycleProduct(-1));
-document.querySelector("#nextProduct").addEventListener("click", () => cycleProduct(1));
-
 document.querySelector("#prevScenario").addEventListener("click", () => {
   const current = manualScenarioIndex ?? scenarioIndexFor(currentValues().share);
   manualScenarioIndex = (current + scenarios.length - 1) % scenarios.length; update();
@@ -1344,19 +1347,23 @@ function restoreFromQuoteLog() {
   } catch (e) { /* best-effort */ }
 }
 
-// LEN-142 — dismissible intro standard (× to close, restore "i" in the header);
-// persisted site-wide via the shared 'lendpaper_intro_dismissed' key.
+// LEN-147 — dismissible intro via data-lp-dismiss="afford_intro" + initDismissibles()
 function applyIntroState() {
-  let dismissed = false;
-  try { dismissed = localStorage.getItem('lendpaper_intro_dismissed') === 'true'; } catch (e) {}
+  const dismissed = localStorage.getItem('lp_dismiss_afford_intro') === '1';
   document.querySelectorAll('.lp-definition').forEach(el => { el.style.display = dismissed ? 'none' : ''; });
   document.querySelectorAll('.lp-intro-toggle-btn').forEach(b => { b.style.display = dismissed ? 'inline-flex' : 'none'; });
 }
-function dismissIntro() { try { localStorage.setItem('lendpaper_intro_dismissed', 'true'); } catch (e) {} applyIntroState(); }
-function showIntro() { try { localStorage.removeItem('lendpaper_intro_dismissed'); } catch (e) {} applyIntroState(); }
+function dismissIntro() { localStorage.setItem('lp_dismiss_afford_intro', '1'); applyIntroState(); }
+function showIntro() {
+  localStorage.removeItem('lp_dismiss_afford_intro');
+  applyIntroState();
+  PDF_HELPER.initDismissibles();
+}
 
 window.addEventListener('load', () => {
   if (typeof window.PDF_HELPER !== 'undefined') window.PDF_HELPER.initPrintLayout("AFFORDABILITY CHECK");
+  PDF_HELPER.initDismissibles();
+  PDF_HELPER.persistFields('afford', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor','pdfDealName','pdfLender']);
   hydrateFromParams();
   restoreFromQuoteLog();
   bindTips();

@@ -47,6 +47,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
+    <link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
     <script src="../public/assets/js/calculator-app.js"></script>
     <script src="../public/assets/js/pdf-helper.js"></script>
     <script src="../public/assets/js/compliance-rules.js"></script>
@@ -169,27 +170,17 @@
         }
         .shared-strip .input-wrap { max-width: 380px; }
         .lp-inputs { padding: 24px; background: #fff; }
+        /* LEN-147 — left-accent style for howto banners */
         .lp-howto {
-            font-size: 14px;
-            font-weight: 500;
+            border-left: 3px solid var(--lp-green);
+            padding: 4px 8px 4px 12px;
+            font-size: 12px;
             color: #334155;
-            background: var(--lp-green-light);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
             line-height: 1.6;
+            margin-bottom: 20px;
+            position: relative;
         }
-        .lp-howto strong { color: #1A3C2E; font-weight: 800; }
-        /* LEN-139 — the intro/how-to banner must be dismissible (× to close, restore "i"
-           in the header). Persisted site-wide via localStorage 'lendpaper_intro_dismissed'. */
-        .lp-howto { position: relative; padding-right: 44px; }
-        .lp-howto-x {
-            position: absolute; top: 14px; right: 14px;
-            background: transparent; border: none; cursor: pointer; padding: 0;
-            color: #6B7280; font-weight: 800; font-size: 18px; line-height: 1;
-            transition: color 0.15s;
-        }
-        .lp-howto-x:hover { color: var(--lp-green); }
+        .lp-howto strong { color: #1A3C2E; font-weight: 700; }
         .lp-intro-toggle-btn {
             width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
             border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
@@ -401,27 +392,10 @@
         .lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
         .lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
         @media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
-        /* LEN-136/139 — shared deal-context (borrower state + document details).
-           Lives at the bottom of the left input column (relocated per active tab),
-           styled as a section to match Revenue / Positions / Terms. */
-        .lp-context {
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid var(--lp-border);
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-        .lp-context-title {
-            font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
-            color: var(--lp-green); margin: 0 0 2px;
-            display: flex; align-items: center; gap: 12px;
-        }
-        .lp-context-title::after { content: ""; flex: 1; height: 1px; background: var(--lp-border); }
-        .lp-context [data-lp-compliance-host] { margin: 0 !important; }
-        /* host wrapper is right-aligned for its legacy top-right slot; left-align it inside the band */
-        .lp-context [data-lp-compliance-host] > div { align-items: flex-start !important; }
-        .lp-context .lp-doc-details { max-width: 100%; margin: 0; }
+        /* LEN-147 — deal-context overrides (replaces .lp-context + uppercase title band) */
+        #deal-context [data-lp-compliance-host] { margin: 0 !important; }
+        #deal-context [data-lp-compliance-host] > div { align-items: flex-start !important; }
+        #deal-context .lp-doc-details { max-width: 100%; margin: 0; }
         /* LEN-11 — broker/deal context block injected into the captured body at print time */
         .lp-doc-context { display: none; }
         body.pdf-export-mode .lp-doc-context {
@@ -608,6 +582,11 @@
         body.pdf-export-mode .print-footer-legal { display: none !important; }
         body.pdf-export-mode .print-watermark { display: none !important; }
         body.pdf-export-mode .tk-eyebrow { display: none !important; }
+        /* LEN-141: never surface the competitor waterfall / "view lenders" CTAs in a
+           borrower-facing PDF — these sell from broker/lender TO borrower, not to the
+           competition. (A general a[href*="waterfall"] guard also lives in pdf-calm.css.) */
+        body.pdf-export-mode #wf-context,
+        body.pdf-export-mode #wf-cta { display: none !important; }
     </style>
 </head>
 <body>
@@ -655,12 +634,10 @@
         </div>
 
         <!-- Panel howto / intro copy — sits ABOVE the inputs so the instruction is read first -->
-        <div class="lp-howto" id="howto_net">
-            <button class="lp-howto-x no-print" onclick="dismissIntro()" aria-label="Dismiss">&times;</button>
+        <div class="lp-howto" id="howto_net" data-lp-dismiss="fund_howto">
             Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
         </div>
-        <div class="lp-howto" id="howto_risk" style="display:none">
-            <button class="lp-howto-x no-print" onclick="dismissIntro()" aria-label="Dismiss">&times;</button>
+        <div class="lp-howto" id="howto_risk" style="display:none" data-lp-dismiss="fund_howto">
             Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
         </div>
 
@@ -684,8 +661,7 @@
 
                 <!-- LEN-136/139 — shared deal-context: borrower state (drives compliance) + optional PDF document
                      details. Lives in the left input column; relocated to the active panel on tab switch. -->
-                <div class="lp-context no-print" id="deal-context">
-                    <p class="lp-context-title">Deal context &amp; document details</p>
+                <div class="lp-deal-context no-print" id="deal-context">
                     <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
                     <div data-lp-compliance-host></div>
                     <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
@@ -1025,17 +1001,31 @@
         mountDealContext(which);
     }
 
-    // LEN-139 — dismissible intro banner (site-wide flag, shared with the other calcs).
+    // LEN-147 — dismissible howto banners. Per-calc key: lp_dismiss_fund_howto.
     // Honors both the active tab AND the dismissed flag so switchTab can't re-show it.
     function updateIntroVisibility() {
-        const dismissed = localStorage.getItem('lendpaper_intro_dismissed') === 'true';
+        const dismissed = localStorage.getItem('lp_dismiss_fund_howto') === '1';
         const netActive = document.getElementById('panel_net').classList.contains('active');
         document.getElementById('howto_net').style.display = (!dismissed && netActive) ? '' : 'none';
         document.getElementById('howto_risk').style.display = (!dismissed && !netActive) ? '' : 'none';
         document.querySelectorAll('.lp-intro-toggle-btn').forEach(el => { el.style.display = dismissed ? 'inline-flex' : 'none'; });
     }
-    function dismissIntro() { localStorage.setItem('lendpaper_intro_dismissed', 'true'); updateIntroVisibility(); }
-    function showIntro() { localStorage.removeItem('lendpaper_intro_dismissed'); updateIntroVisibility(); }
+    function dismissIntro() { localStorage.setItem('lp_dismiss_fund_howto', '1'); updateIntroVisibility(); }
+    function showIntro() {
+        localStorage.removeItem('lp_dismiss_fund_howto');
+        updateIntroVisibility();
+        PDF_HELPER.initDismissibles();
+        rewireFundHowto();
+    }
+    // After initDismissibles injects × on .lp-howto, wire clicks to updateIntroVisibility
+    // so both panels' banners hide immediately (not just the clicked one).
+    function rewireFundHowto() {
+        document.querySelectorAll('.lp-howto [data-lp-dismiss-btn]').forEach(function(btn) {
+            if (btn.dataset.rewired) return;
+            btn.dataset.rewired = '1';
+            btn.addEventListener('click', updateIntroVisibility);
+        });
+    }
 
     // LEN-139 — one shared deal-context node (borrower state + doc details); move it
     // into whichever panel's input column is showing so it's always visible/editable.
@@ -1352,6 +1342,9 @@
     window.onload = () => {
         addPosition(450, 'daily');
         bindTips();
+        PDF_HELPER.initDismissibles();
+        rewireFundHowto();
+        PDF_HELPER.persistFields('fund', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor','pdfDealName','pdfLender']);
         updateIntroVisibility();
         runAll();
         // Deal Read handoff: prefill the new-position fields from URL params (no PII).

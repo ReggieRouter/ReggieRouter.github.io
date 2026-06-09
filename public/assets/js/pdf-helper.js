@@ -135,7 +135,24 @@ window.PDF_HELPER = {
         
         headerEl.innerHTML = headerHTML;
     },
-    
+
+    // Calm "Estimate only" notice (LEN-141) inserted at the top of the captured body so
+    // every calculator's PDF opens with the same amber banner. Styled by pdf-calm.css.
+    // Skipped for calculators that render their own calm-native notice (Payment Breakdown,
+    // which owns #pdf-document). Removed after the print dialog closes.
+    mountEstimateNotice: function(element) {
+        if (!element || document.getElementById('pdf-document')) return null;
+        if (element.querySelector('.lp-pdf-notice')) return null;
+        var note = document.createElement('div');
+        note.className = 'lp-pdf-notice';
+        note.id = 'lp-estimate-notice';
+        note.innerHTML = '<strong>Estimate only.</strong> For planning and discussion. Final approval, pricing, fees, and payoff quotes come from the lender and may differ. lendpaper.com/legal/estimates';
+        var hdr = element.querySelector('.print-header-content');
+        if (hdr) hdr.insertAdjacentElement('afterend', note);
+        else element.insertAdjacentElement('afterbegin', note);
+        return note;
+    },
+
     resetScroll: async function(delayMs) {
         // 1. Reset local window scroll offsets
         window.scrollTo(0, 0);
@@ -464,6 +481,10 @@ window.PDF_HELPER = {
             }
         }
 
+        // STEP 7.6 — Calm "Estimate only" notice at the top of the captured body (LEN-141).
+        // No-op for Payment Breakdown, which renders its own calm-native notice.
+        this.mountEstimateNotice(element);
+
         window.addEventListener('afterprint', () => self._handlePdfSaveSuccess(), { once: true });
 
         try {
@@ -486,6 +507,8 @@ window.PDF_HELPER = {
                 if (fp) fp.parentNode.removeChild(fp);
                 var cb = document.getElementById('lp-compliance-print-block');
                 if (cb) cb.parentNode.removeChild(cb);
+                var en = document.getElementById('lp-estimate-notice');
+                if (en) en.parentNode.removeChild(en);
             }, 1500);
 
             if (btn) {
@@ -791,6 +814,78 @@ window.PDF_HELPER = {
                 dismiss(true);
             });
             document.getElementById('lpm-cancel-btn').addEventListener('click', () => dismiss(false));
+        });
+    },
+
+    /**
+     * Auto-wire dismissible banners.
+     * Any element with data-lp-dismiss="<key>" gets an injected × button.
+     * State persists to localStorage['lp_dismiss_<key>']; hidden on reload if set.
+     */
+    initDismissibles: function() {
+        var self = this;
+        document.querySelectorAll('[data-lp-dismiss]').forEach(function(el) {
+            var key = 'lp_dismiss_' + el.getAttribute('data-lp-dismiss');
+            if (localStorage.getItem(key) === '1') {
+                el.style.display = 'none';
+                // Surface any lp-intro-toggle-btn in the same card on load
+                var card = el.closest('.lp-container, .lp-card, .sc, .card');
+                if (card) {
+                    var toggle = card.querySelector('.lp-intro-toggle-btn');
+                    if (toggle) toggle.style.display = '';
+                }
+                return;
+            }
+            // Guard against double-injection when initDismissibles is called again (e.g. after restore)
+            if (el.querySelector('[data-lp-dismiss-btn]')) return;
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.setAttribute('aria-label', 'Dismiss');
+            btn.setAttribute('data-lp-dismiss-btn', '1');
+            btn.style.cssText = 'position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;font-size:15px;line-height:1;color:#94a3b8;padding:2px 4px;border-radius:3px;';
+            btn.textContent = '×';
+            btn.addEventListener('mouseenter', function() { btn.style.color = '#1A3C2E'; });
+            btn.addEventListener('mouseleave', function() { btn.style.color = '#94a3b8'; });
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                el.style.display = 'none';
+                localStorage.setItem(key, '1');
+                // Surface any lp-intro-toggle-btn in the same card
+                var card = el.closest('.lp-container, .lp-card, .sc, .card');
+                if (card) {
+                    var toggle = card.querySelector('.lp-intro-toggle-btn');
+                    if (toggle) toggle.style.display = '';
+                }
+            });
+            // Ensure element is relatively positioned so button sits top-right
+            var pos = window.getComputedStyle(el).position;
+            if (pos === 'static') el.style.position = 'relative';
+            el.appendChild(btn);
+        });
+    },
+
+    /**
+     * Two-way bind a list of input IDs to localStorage under a scoped key.
+     * Restores values on load; writes on every input event.
+     * @param {string} scopeKey  - e.g. 'dscr', 'sba'
+     * @param {string[]} ids     - array of element IDs to persist
+     */
+    persistFields: function(scopeKey, ids) {
+        ids.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            var lsKey = 'lp_field_' + scopeKey + '_' + id;
+            var saved = localStorage.getItem(lsKey);
+            if (saved !== null && saved !== undefined) {
+                el.value = saved;
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            el.addEventListener('change', function() {
+                localStorage.setItem(lsKey, el.value);
+            });
+            el.addEventListener('input', function() {
+                localStorage.setItem(lsKey, el.value);
+            });
         });
     }
 };

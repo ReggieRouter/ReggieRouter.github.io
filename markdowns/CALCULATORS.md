@@ -83,25 +83,46 @@ Primary: SMB alt-finance sales reps and brokers — on a live call with a borrow
 ## 5. Required Components
 
 ### Intro / definition banner (every calculator, no exceptions)
-Appears at the top of the input panel (or above the columns). Explains what the
-calculator does in one or two sentences. **Standard treatment is the mint-green
-tinted banner** — unified across all calculators (LEN-142):
+Appears at the top of the input panel. Explains what the calculator does in one or
+two sentences. **Standard treatment is left-accent style** — no filled background
+(LEN-147, supersedes mint-green filled treatment from LEN-142):
 ```css
-.lp-definition, .lp-howto {   /* same look; .lp-intro is the DSCR variant w/ steps */
-  background-color: #F0FDF4;   /* mint tint */
-  border-radius: 12px;
-  padding: 18px 20px;
-  font-size: 13.5px;
-  font-weight: 500;
+.lp-definition, .lp-howto {
+  border-left: 3px solid var(--lp-green);   /* --lp-green: #1A3C2E */
+  padding-left: 12px;
+  font-size: 12px;
   color: #334155;
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  position: relative;  /* required for injected × button */
 }
-strong { color: #1A3C2E; font-weight: 800; }
+strong { color: #1A3C2E; font-weight: 700; }
 ```
 - Brand green is `#1A3C2E` (never `#14532D`).
 - **Always dismissible** — see "Intro / how-to banner — must be dismissible" below.
-  (The old "transparent, left-accent only, no box" treatment is retired.)
+
+### Document details + borrower state placement standard (LEN-147)
+The compliance host (`[data-lp-compliance-host]`) and document-details panel
+(`#pdfDocDetails`) **must live at the bottom of the left input column**, inside the
+card, wrapped in a `<div class="lp-deal-context no-print">`. They must never float
+above the card in `.lp-main` (which uses flex-row layout and would render siblings
+as a centered row).
+
+Placement in the HTML (inside `.lp-inputs` or the left column, after all user inputs):
+```html
+<div class="lp-deal-context no-print">
+  <div data-lp-compliance-host></div>
+  <details id="pdfDocDetails" class="lp-doc-details">
+    <summary>+ Document details</summary>
+    <!-- five standard fields (pdfPreparedBy, pdfPreparedByCompany,
+         pdfPreparedFor, pdfDealName, pdfLender) -->
+  </details>
+</div>
+```
+
+Fields should be persisted to localStorage via `PDF_HELPER.persistFields(scopeKey, ids[])`.
+Call it on DOMContentLoaded with `['borrowerState','pdfPreparedBy','pdfPreparedByCompany',
+'pdfPreparedFor','pdfDealName','pdfLender']` (include whatever IDs exist in that calc).
 
 ### Tooltip icon
 Lowercase `i` only. No circles, question marks, or other shapes.
@@ -227,19 +248,35 @@ Powered by LendPaper | hello@lendpaper.com | lendpaper.com — Custom branding a
 - Side-by-side cards must show a delta line beneath monthly payment when 2+ scenarios active
 - Format: `Scenario B costs $X,XXX more/less/mo` — updates reactively
 
-### Intro / how-to banner — must be dismissible (LEN-139)
-The mint-green intro banner at the top of a calculator (`.lp-howto`) is **always
-dismissible**. A banner with no close affordance reads as a permanent nag.
-- An `×` button sits top-right inside the banner → `dismissIntro()`.
-- A small restore `i` button lives in the card header → `showIntro()`; shown only
-  while the banner is dismissed.
-- State persists **site-wide** via `localStorage 'lendpaper_intro_dismissed'`
-  (shared key across all calculators — dismiss once, stays dismissed everywhere).
+### Intro / how-to banner — must be dismissible (LEN-139, updated LEN-147)
+The intro banner at the top of a calculator (`.lp-howto`, `.lp-definition`, `.lp-intro`) is
+**always dismissible**. A banner with no close affordance reads as a permanent nag.
+
+**Standard mechanism (LEN-147):** Add `data-lp-dismiss="<calc>_<slug>"` to the banner element
+and call `PDF_HELPER.initDismissibles()` on DOMContentLoaded. The helper auto-injects a `×`
+button top-right, hides the element on click, and persists the state to
+`localStorage['lp_dismiss_<calc>_<slug>']`. The element stays hidden on subsequent loads.
+
+Example:
+```html
+<div class="lp-definition" data-lp-dismiss="dscr_intro">
+  <strong>What this calculator does.</strong> One or two sentences.
+</div>
+```
+```javascript
+document.addEventListener('DOMContentLoaded', function() {
+  PDF_HELPER.initDismissibles();
+});
+```
+
+- A small restore `i` button in the card header (`class="lp-intro-toggle-btn"`) calls
+  `showIntro()` — shown only while the banner is dismissed.
 - Tab-switching must **not** re-show a dismissed banner. Route visibility through a
-  single `updateIntroVisibility()` that ANDs the active-tab check with the flag;
+  single `updateIntroVisibility()` that ANDs the active-tab check with the dismiss flag;
   never set `.lp-howto` `display` directly in a tab handler.
-- Canonical implementation: `AmoScheduleCalculator.html` (Tailwind) and
-  `FundabilityCalculator.html` (plain CSS — `.lp-howto-x` / `.lp-intro-toggle-btn`).
+- Per-banner localStorage keys (`lp_dismiss_<calc>_<slug>`) replace the old site-wide
+  `lendpaper_intro_dismissed` key. The AmoScheduleCalculator uses the old key and is
+  exempt from migration.
 
 ### Constrained shared inputs — no orphan tinted band (LEN-139)
 When an input is constrained narrower than its container (e.g. a shared "amount"

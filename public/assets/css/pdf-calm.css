@@ -1,0 +1,189 @@
+/* ============================================================================
+   LendPaper — Calm PDF design system (LEN-141)
+   ----------------------------------------------------------------------------
+   Single source of truth for the calm borrower-facing PDF look. Linked by every
+   calculator; all rules are scoped to `body.pdf-export-mode` so they apply ONLY
+   during a Save-as-PDF / print capture and never affect the on-screen UI.
+
+   Two layers:
+     1. TRAITS  — typography, palette tokens, and restyles of the shared legacy
+        print partials (`.print-header-content` title, `.lp-doc-context` /
+        `.dc-*` prepared block, `.print-footer-legal`, `.print-watermark`) plus
+        the `.lp-pdf-notice` estimate banner that PDF_HELPER injects. These take
+        effect on every calculator the moment the file is linked.
+     2. COMPONENTS — the reusable calm primitives (`.lp-pdf-topline`,
+        `.lp-pdf-card`, `.lp-pdf-focus`, `.lp-pdf-row`, `.lp-pdf-details`,
+        `.lp-pdf-table`, `.lp-pdf-foot`). Calculators migrate their PDF bodies
+        onto these incrementally. Payment Breakdown (AmoSchedule) is the
+        reference implementation; it currently inlines an equivalent block.
+
+   Brand: the mockup's green (#173f31) maps to the approved brand green #1A3C2E
+   (primary) / #17613f (mid accent) per BRANDING.md. Colours are forced with
+   print-color-adjust: exact so fills survive export.
+   ============================================================================ */
+
+body.pdf-export-mode {
+    --pdf-ink: #101827;
+    --pdf-muted: #65758b;
+    --pdf-soft: #f7faf9;
+    --pdf-line: #dbe4e8;
+    --pdf-green: #1A3C2E;
+    --pdf-green-mid: #17613f;
+    --pdf-green-soft: #effaf3;
+    --pdf-amber-bg: #fffdf4;
+    --pdf-amber-line: #f3d675;
+    --pdf-amber-ink: #7c4a03;
+    --pdf-mint-line: #b7efcc;
+    --pdf-mint-bg: #fbfffc;
+    --pdf-font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --pdf-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+/* ---- Layer 1: traits applied to every calculator's printed content ---- */
+
+/* Calm typography across the captured document. Inputs are hidden in export
+   mode, so this only ever restyles the printed results/partials. The
+   PDF_HELPER header sets its own font inline (!important) and is unaffected. */
+body.pdf-export-mode main,
+body.pdf-export-mode .lp-results,
+body.pdf-export-mode .dscr-print-view,
+body.pdf-export-mode .lp-doc-context,
+body.pdf-export-mode .lp-pdf-notice,
+body.pdf-export-mode .print-footer-legal,
+body.pdf-export-mode .print-watermark {
+    font-family: var(--pdf-font);
+    color: var(--pdf-ink);
+}
+
+/* Never surface the competitor lender waterfall in a borrower-facing PDF — these
+   documents sell from a broker/lender TO a borrower and must not advertise the
+   competition. General guard; calculators may also hide their own CTA containers. */
+body.pdf-export-mode a[href*="waterfall"] { display: none !important; }
+
+/* Estimate notice — injected at the top of the captured body by
+   PDF_HELPER.mountEstimateNotice() for calculators that don't render their own
+   calm-native notice (Payment Breakdown renders its own inside #pdf-document). */
+body.pdf-export-mode .lp-pdf-notice {
+    margin: 0 0 16px; padding: 8px 12px;
+    border: 1px solid var(--pdf-amber-line); border-radius: 8px;
+    background: var(--pdf-amber-bg); color: var(--pdf-amber-ink);
+    font-size: 10.5px; line-height: 1.35; font-weight: 500;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    break-inside: avoid; page-break-inside: avoid;
+}
+body.pdf-export-mode .lp-pdf-notice strong { font-weight: 850; }
+
+/* Shared Prepared-for / Prepared-by block (mountDocContext output). Calm card
+   that echoes the Payment Breakdown "Prepared For" box. */
+body.pdf-export-mode .lp-doc-context {
+    margin: 0 0 16px; padding: 9px 13px;
+    border: 1px solid var(--pdf-line); border-radius: 8px; background: var(--pdf-soft);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    break-inside: avoid; page-break-inside: avoid;
+}
+body.pdf-export-mode .lp-doc-context .dc-for {
+    font-size: 13px; font-weight: 850; color: var(--pdf-ink);
+}
+body.pdf-export-mode .lp-doc-context .dc-meta {
+    margin-top: 3px; font-size: 10.5px; color: var(--pdf-muted);
+}
+body.pdf-export-mode .lp-doc-context .dc-by {
+    margin-top: 3px; font-size: 10px; color: var(--pdf-muted);
+    font-family: var(--pdf-mono);
+}
+
+/* Calm document title (PDF_HELPER injects `.pdf-document-title` h1). */
+body.pdf-export-mode .print-header-content .pdf-document-title {
+    letter-spacing: 0.05em !important;
+}
+
+/* Footer partials — quiet, calm legal + plug. */
+body.pdf-export-mode .print-footer-legal {
+    color: var(--pdf-muted); font-size: 8.3px; line-height: 1.32; font-weight: 400;
+    letter-spacing: 0; text-transform: none;
+}
+body.pdf-export-mode .print-watermark {
+    color: #94a3b8; font-size: 8px; line-height: 1.3;
+}
+
+/* ---- Layer 2: reusable calm components (opt-in, for body migration) ---- */
+
+body.pdf-export-mode .lp-pdf * { box-sizing: border-box; }
+
+/* Topline header: brand kicker / Prepared For box / preparer meta */
+body.pdf-export-mode .lp-pdf-topline {
+    display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: flex-start;
+    gap: 28px; padding-bottom: 15px; margin-bottom: 13px; border-bottom: 1px solid var(--pdf-line);
+}
+body.pdf-export-mode .lp-pdf-brand {
+    color: #1f2937; font-size: 13px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase;
+}
+body.pdf-export-mode .lp-pdf-brand span {
+    display: block; margin-top: 3px; color: var(--pdf-muted); font-size: 9px; font-weight: 800; letter-spacing: 0.16em;
+}
+body.pdf-export-mode .lp-pdf-company {
+    padding: 8px 12px; border: 1px solid var(--pdf-line); border-radius: 8px; background: var(--pdf-soft); text-align: center;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+body.pdf-export-mode .lp-pdf-meta { color: var(--pdf-muted); font-size: 10px; text-align: right; }
+body.pdf-export-mode .lp-pdf-meta strong { display: block; color: var(--pdf-ink); font-family: var(--pdf-mono); font-size: 10.5px; font-weight: 700; }
+
+/* Eyebrow / label */
+body.pdf-export-mode .lp-pdf-label {
+    color: var(--pdf-muted); font-size: 9.5px; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* Cards */
+body.pdf-export-mode .lp-pdf-card {
+    padding: 13px 15px; border: 1px solid var(--pdf-line); border-radius: 8px; background: #fff;
+}
+body.pdf-export-mode .lp-pdf-card.soft { background: var(--pdf-soft); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* Focus tile (green primary) */
+body.pdf-export-mode .lp-pdf-focus {
+    min-height: 108px; padding: 17px 20px; border: 1px solid var(--pdf-line); border-radius: 8px; background: var(--pdf-soft);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+body.pdf-export-mode .lp-pdf-focus.primary { border-color: var(--pdf-green); background: var(--pdf-green); color: #fff; }
+body.pdf-export-mode .lp-pdf-focus .lp-pdf-value { margin-top: 7px; font-size: 34px; font-weight: 900; letter-spacing: -0.01em; line-height: 1; }
+
+/* Definition rows (label … value) */
+body.pdf-export-mode .lp-pdf-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+    padding: 7px 0; border-bottom: 1px solid #edf2f5; font-variant-numeric: tabular-nums;
+}
+body.pdf-export-mode .lp-pdf-row:last-child { padding-bottom: 0; border-bottom: 0; }
+body.pdf-export-mode .lp-pdf-row span { color: var(--pdf-muted); }
+body.pdf-export-mode .lp-pdf-row strong { font-size: 14px; }
+body.pdf-export-mode .lp-pdf-row.total strong { color: var(--pdf-green); font-size: 16px; }
+
+/* Detail grid */
+body.pdf-export-mode .lp-pdf-details {
+    display: grid; grid-template-columns: repeat(6, 1fr); overflow: hidden;
+    border: 1px solid var(--pdf-line); border-radius: 8px; background: var(--pdf-soft);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; break-inside: avoid; page-break-inside: avoid;
+}
+body.pdf-export-mode .lp-pdf-details > div { min-height: 50px; padding: 8px 10px; border-right: 1px solid var(--pdf-line); }
+body.pdf-export-mode .lp-pdf-details > div:last-child { border-right: 0; }
+body.pdf-export-mode .lp-pdf-details strong { display: block; margin-top: 5px; font-size: 12px; word-break: break-word; }
+
+/* Schedule / data table */
+body.pdf-export-mode .lp-pdf-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+body.pdf-export-mode .lp-pdf-table thead { display: table-header-group; }
+body.pdf-export-mode .lp-pdf-table th {
+    padding: 5px 8px; border-bottom: 1px solid var(--pdf-line); background: var(--pdf-soft); color: #334155;
+    font-size: 9.5px; letter-spacing: 0.04em; text-align: right; text-transform: uppercase;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+body.pdf-export-mode .lp-pdf-table td { padding: 4px 8px; border-bottom: 1px solid #eef2f7; color: #1f2937; text-align: right; }
+body.pdf-export-mode .lp-pdf-table tr { break-inside: avoid; page-break-inside: avoid; }
+
+/* In-body footer */
+body.pdf-export-mode .lp-pdf-foot {
+    display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-top: 22px;
+    padding-top: 10px; border-top: 1px solid var(--pdf-line); color: var(--pdf-muted); font-size: 8.3px; line-height: 1.32;
+    break-inside: avoid; page-break-inside: avoid;
+}
+body.pdf-export-mode .lp-pdf-foot .code {
+    align-self: end; color: #94a3b8; font-family: var(--pdf-mono); text-align: right;
+}
