@@ -31,8 +31,9 @@ async function requireApprovedUser(redirectTo = '/login.html') {
     window.location.href = '/pending.html';
     return null;
   }
-  if (profile.status === 'denied') {
-    window.location.href = '/denied.html';
+  if (profile.status === 'denied' || profile.status === 'waitlist') {
+    // denied.html is intentionally unrouted — both land on the waitlist soft landing
+    window.location.href = '/waitlist.html';
     return null;
   }
   // Update last_seen
