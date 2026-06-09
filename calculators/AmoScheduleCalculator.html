@@ -521,7 +521,7 @@
             content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 5px;
             border-radius: 99px; background: #17613f; -webkit-print-color-adjust: exact; print-color-adjust: exact;
         }
-        body.pdf-export-mode .pdf-document .legend span:nth-child(2)::before { background: #2563eb; }
+        body.pdf-export-mode .pdf-document .legend span:nth-child(2)::before { background: #2c6fb0; }
         body.pdf-export-mode .pdf-document .legend span:nth-child(3)::before { background: #7c3aed; }
 
         body.pdf-export-mode .pdf-document table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
@@ -580,7 +580,7 @@
         body.pdf-export-mode .pdf-document .pdf-page-break { break-before: page; page-break-before: always; }
 
         /* LEN-124 Stage B — Option 2 (blue) / Option 3 (purple) colour variants */
-        body.pdf-export-mode .pdf-document .payoff-band.opt2 { border-color: #bfdbfe; border-left-color: #2563eb; background: #f5f8ff; }
+        body.pdf-export-mode .pdf-document .payoff-band.opt2 { border-color: #bfdbfe; border-left-color: #2c6fb0; background: #f5f8ff; }
         body.pdf-export-mode .pdf-document .payoff-band.opt2 .payoff-kicker { color: #1d4ed8; }
         body.pdf-export-mode .pdf-document .payoff-band.opt2 .payoff-title { color: #1e3a8a; }
         body.pdf-export-mode .pdf-document .payoff-band.opt2 .savings-number { color: #1d4ed8; }
@@ -595,12 +595,12 @@
 
         body.pdf-export-mode .pdf-document .payoff-row.opt2 td { background: #eff6ff !important; color: #1e3a8a; }
         body.pdf-export-mode .pdf-document .payoff-row.opt3 td { background: #f5f3ff !important; color: #4c1d95; }
-        body.pdf-export-mode .pdf-document .payoff-row.opt2 .payoff-pill { background: #2563eb; }
+        body.pdf-export-mode .pdf-document .payoff-row.opt2 .payoff-pill { background: #2c6fb0; }
         body.pdf-export-mode .pdf-document .payoff-row.opt3 .payoff-pill { background: #7c3aed; }
         body.pdf-export-mode .pdf-document .payoff-expansion.opt2 td { border-bottom-color: #bfdbfe; }
         body.pdf-export-mode .pdf-document .payoff-expansion.opt2 .inline-expansion { background: #eff6ff; }
         body.pdf-export-mode .pdf-document .payoff-expansion.opt2 .expansion-label { color: #1d4ed8; }
-        body.pdf-export-mode .pdf-document .payoff-expansion.opt2 .progress div { background: #2563eb; }
+        body.pdf-export-mode .pdf-document .payoff-expansion.opt2 .progress div { background: #2c6fb0; }
         body.pdf-export-mode .pdf-document .payoff-expansion.opt2 .stat { border-color: #bfdbfe; }
         body.pdf-export-mode .pdf-document .payoff-expansion.opt3 td { border-bottom-color: #ddd6fe; }
         body.pdf-export-mode .pdf-document .payoff-expansion.opt3 .inline-expansion { background: #f5f3ff; }
@@ -609,10 +609,10 @@
         body.pdf-export-mode .pdf-document .payoff-expansion.opt3 .stat { border-color: #ddd6fe; }
 
         /* On-screen feedback for Shift/Cmd-clicked comparison options (live table only) */
-        .amo-row.pdf-opt-2-row > td:first-child { box-shadow: inset 4px 0 0 #2563eb; }
+        .amo-row.pdf-opt-2-row > td:first-child { box-shadow: inset 4px 0 0 #2c6fb0; }
         .amo-row.pdf-opt-3-row > td:first-child { box-shadow: inset 4px 0 0 #7c3aed; }
-        .amo-row.pdf-opt-2-row td { background: rgba(37, 99, 235, 0.13) !important; font-weight: 700 !important; }
-        .amo-row.pdf-opt-3-row td { background: rgba(124, 58, 237, 0.13) !important; font-weight: 700 !important; }
+        .amo-row.pdf-opt-2-row td { background: rgba(44, 111, 176, 0.15) !important; font-weight: 700 !important; }
+        .amo-row.pdf-opt-3-row td { background: rgba(124, 58, 237, 0.15) !important; font-weight: 700 !important; }
 
         /* Multi-scenario divider in the PDF — colour-rotated, renameable label */
         body.pdf-export-mode .pdf-document .pdf-scenario-divider {
@@ -622,7 +622,7 @@
             -webkit-print-color-adjust: exact; print-color-adjust: exact;
             break-after: avoid; page-break-after: avoid;
         }
-        body.pdf-export-mode .pdf-document .pdf-scenario-divider.sc-1 { border-left-color: #2563eb; background: #eff6ff; color: #1e3a8a; }
+        body.pdf-export-mode .pdf-document .pdf-scenario-divider.sc-1 { border-left-color: #2c6fb0; background: #eff6ff; color: #1e3a8a; }
         body.pdf-export-mode .pdf-document .pdf-scenario-divider.sc-2 { border-left-color: #7c3aed; background: #f5f3ff; color: #4c1d95; }
 
         /* Editable on-screen scenario label (replaces the static SCENARIO badge when comparing) */
@@ -1336,16 +1336,18 @@
         .lp-payoff-line1 { display:flex; align-items:center; gap:8px; }
         .lp-payoff-line1 #outSavingsPhrase-1, .lp-payoff-line1 [id^="outSavingsPhrase-"] {
             font-size:15px; font-weight:700; color:#1A3C2E; line-height:1.3; }
-        .lp-payoff-dots { color:#6B7280; font-size:11px; font-weight:400; cursor:pointer; letter-spacing:1px;
-            user-select:none; transition:color 120ms; padding:0 2px; }
-        .lp-payoff-dots:hover { color:#2D6A4F; }
+        .lp-payoff-dots { display:inline-flex; align-items:center; gap:3px; margin-left:8px; vertical-align:middle;
+            padding:2px 9px; border:1px solid #CBD5E1; border-radius:999px; background:#fff; color:#475569;
+            font-size:11px; font-weight:600; font-family:inherit; cursor:pointer; transition:all 120ms; }
+        .lp-payoff-dots:hover { color:#1A3C2E; border-color:#2D6A4F; background:#F0FDF4; }
         .lp-payoff-line2 { font-size:11.5px; color:#166534; margin-top:6px; display:flex; align-items:center; gap:4px; }
 
         /* Talk-track collapse */
         .takeaway-head { display:flex; align-items:center; justify-content:space-between; }
         .takeaway-collapse { background:transparent; border:none; cursor:pointer; color:#9CA3AF; padding:2px; line-height:0; }
         .takeaway-collapse:hover { color:#2D6A4F; }
-        .takeaway-scroll { max-height:80px; overflow:auto; margin-top:4px; }
+        .takeaway-scroll { max-height:190px; overflow:auto; margin-top:4px; }
+        body.pdf-export-mode .takeaway-scroll { max-height:none !important; overflow:visible !important; }
         .takeaway.collapsed .takeaway-scroll { display:none; }
 
         /* CTAs */
@@ -1382,7 +1384,7 @@
         .lp-pill { padding:8px 14px; border-radius:999px; border:1px solid #E5E7EB; background:#fff;
             font-size:12px; font-weight:600; color:#374151; cursor:pointer; text-align:left; }
         .lp-pill.sel-green { background:#F0FDF4; border-color:#1A3C2E; color:#166534; }
-        .lp-pill.sel-blue  { background:#EFF6FF; border-color:#2563EB; color:#1D4ED8; }
+        .lp-pill.sel-blue  { background:#EFF6FF; border-color:#2c6fb0; color:#1D4ED8; }
         .lp-pill.sel-purple{ background:#F5F3FF; border-color:#7C3AED; color:#6D28D9; }
         .lp-pill .lp-pill-sub { display:block; font-weight:400; font-size:10.5px; color:#6B7280; margin-top:2px; }
         .lp-modal-date { width:100%; border:1px solid #E5E7EB; border-radius:8px; padding:9px 11px; font-size:13px; }
@@ -1437,7 +1439,7 @@
 
         <!-- LEN-124 — optional document details that personalize the redesigned PDF.
              All fields are optional; buildPdfDocument() falls back gracefully when blank. -->
-        <details id="pdfDocDetails" class="lp-doc-details no-print" open>
+        <details id="pdfDocDetails" class="lp-doc-details no-print">
             <summary>Document details <span>— prepared by, lender, deal name · optional, appears on the PDF</span></summary>
             <div class="lp-doc-details-grid">
                 <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
@@ -2500,7 +2502,7 @@
                             <div id="prepaySummary-${id}" class="hidden lp-payoff-banner mb-6 callout">
                                  <div class="lp-payoff-line1">
                                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                                     <span id="outSavingsPhrase-${id}">—</span><span class="lp-payoff-dots no-print" role="button" tabindex="0" title="Choose payoff points" onclick="openPayoffModal(${id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openPayoffModal(${id});}">···</span>
+                                     <span id="outSavingsPhrase-${id}">—</span><button type="button" class="lp-payoff-dots no-print" title="Choose a different payoff point" onclick="openPayoffModal(${id})">Change<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></button>
                                  </div>
                                  <div class="lp-payoff-line2">
                                      <span>Buyout amount: <strong id="outBuyout-${id}">—</strong></span>
@@ -2844,12 +2846,21 @@
         function syncPdfOptionHighlights(id) {
             const tbody = document.getElementById(`tableBody-${id}`);
             if (!tbody) return;
-            tbody.querySelectorAll('.pdf-opt-2-row, .pdf-opt-3-row')
-                .forEach(r => r.classList.remove('pdf-opt-2-row', 'pdf-opt-3-row'));
-            getPdfOptions(id).forEach(o => {
-                if (o.optionIdx === 1) return;
-                const rowEl = document.getElementById(`arow-${id}-${o.period}`);
-                if (rowEl) rowEl.classList.add(o.optionIdx === 2 ? 'pdf-opt-2-row' : 'pdf-opt-3-row');
+            const isPrepay = document.getElementById(`enablePrepay-${id}`)?.checked;
+            // Clear every selection class, then re-apply from state so the on-screen colours are
+            // stable and persist immediately (not just after a recalc). Pick-order colours:
+            // primary = green, first extra = blue (Option 2), second extra = purple (Option 3).
+            tbody.querySelectorAll('.prepay-target-row, .paid-target-row, .pdf-opt-2-row, .pdf-opt-3-row')
+                .forEach(r => r.classList.remove('prepay-target-row', 'paid-target-row', 'pdf-opt-2-row', 'pdf-opt-3-row'));
+            const sel = rowSelection[id];
+            if (sel) {
+                const pr = document.getElementById(`arow-${id}-${sel.period}`);
+                if (pr) pr.classList.add(isPrepay ? 'prepay-target-row' : 'paid-target-row');
+            }
+            (pdfExtra[id] || []).slice(0, 2).forEach((period, i) => {
+                if (sel && sel.period === period) return;
+                const r = document.getElementById(`arow-${id}-${period}`);
+                if (r) r.classList.add(i === 0 ? 'pdf-opt-2-row' : 'pdf-opt-3-row');
             });
         }
 
@@ -2939,7 +2950,7 @@
                             <span class="lp-payoff-eyebrow-main">Early payoff</span>
                             <span class="lp-payoff-datepill">${sel.date}</span>
                             <span class="lp-quote-copied no-print" id="quoteCopied-${id}">Copied!</span>
-                            <button type="button" class="lp-quote-btn no-print lp-quote-btn-header" onclick="copyPayoffQuote(${id})">&#128203; Copy payoff quote</button>
+                            <button type="button" class="lp-quote-btn no-print lp-quote-btn-header" onclick="copyPayoffQuote(${id})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>Copy payoff quote</button>
                         </div>
                         <div class="lp-tiles">
                             <div class="lp-tile lp-tile-action">
