@@ -396,7 +396,7 @@ matrix (§13 + `compliance-rules.js`). One-liners:
   SCC + give disclosures (since 2022).
 - **Georgia** — disclosures ≤$500k, no registration (mandatory Jan 1, 2024).
 - **Florida** — Commercial Financing Disclosure Law, ≤$500k (Jan 1, 2024).
-- **Connecticut** — sales-based financing ≤$250k + registration (July 1, 2023).
+- **Connecticut** — sales-based financing ≤$250k + registration (July 1, 2024; provider registration by Oct 1, 2024).
 - **Kansas** — Commercial Financing Disclosure Act (2024).
 - **Missouri** — disclosures + provider registration (effective Feb 28, 2025).
 - **Texas** — **LAW (verified 2026-06-07).** HB 700 → Tex. Fin. Code Ch. 398,
@@ -509,7 +509,7 @@ not this table. Keep both in sync in the same commit.
 | VA | LAW (2022, sales-based) | Disclosure regime | SCC registration | — | Per-product disclosure | — |
 | GA | LAW (1/2024) | Disclosure regime | None | — | Per-product disclosure | — |
 | FL | LAW (1/2024) | Disclosure regime | None | — | Per-product disclosure | — |
-| CT | LAW (7/2023, ≤$250k) | Disclosure regime | Registration | — | Per-product disclosure | — |
+| CT | LAW (7/2024, ≤$250k) | Disclosure regime | Registration | — | Per-product disclosure | — |
 | KS | LAW (2024) | Disclosure regime | None | — | Per-product disclosure | — |
 | MO | LAW (2/2025) | Disclosure regime | Registration | — | Per-product disclosure | — |
 | TX | LAW — Fin. Code Ch. 398 (eff. 9/1/2025, sales-based <$1M) | No (total-cost) | **OCCC registration — providers AND brokers, by 12/31/2026** | — | Ch. 398 disclosure | Finance Commission rules pending |
