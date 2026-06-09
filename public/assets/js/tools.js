@@ -19,7 +19,7 @@ var TOOLS = [
   },
   {
     id: "deal-read",
-    name: "Deal Read",
+    name: "Deal Analysis",
     desc: "Read any deal in seconds — industry, credit, and revenue become a product stack, funding range, and talk track.",
     status: "live",
     group: "deal-math",
