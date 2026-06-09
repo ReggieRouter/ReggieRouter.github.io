@@ -1662,8 +1662,8 @@ function lpRestoreBanner(partial) {
     b.id = 'lp-restore-banner'; b.className = 'no-print';
     b.style.cssText = 'display:flex;align-items:center;gap:8px;max-width:1000px;margin:0 auto 12px;padding:9px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:12px;color:#92400E;';
     b.textContent = partial
-        ? 'Restored from your Estimate Log — some fields could not be restored, please review before generating a new PDF.'
-        : 'Restored from your Estimate Log — review the figures before generating a new PDF.';
+        ? 'Restored from your Deal Log — some fields could not be restored, please review before generating a new PDF.'
+        : 'Restored from your Deal Log — review the figures before generating a new PDF.';
     main.insertBefore(b, main.firstChild);
 }
 window.addEventListener('load', () => {

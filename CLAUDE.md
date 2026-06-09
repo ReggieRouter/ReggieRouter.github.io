@@ -92,7 +92,7 @@ To add lenders: update the `NEW_LENDERS` list in `ingest_rest.py` with `{"name":
 - Admin master toggle (lp-panel → Compliance) is **per-browser** for testing;
   live users always have the layer ON.
 
-## Estimate Log (LEN-123)
+## Deal Log (LEN-123)
 
 Cross-tool log of every estimate. Full spec: `markdowns/CALCULATORS.md §15`.
 - **Every calculator must call `saveEstimate()`** on PDF generation AND on "Copy
@@ -110,7 +110,7 @@ Cross-tool log of every estimate. Full spec: `markdowns/CALCULATORS.md §15`.
 - **DB setup:** run `supabase/estimates.sql` once in the Supabase SQL editor
   (table + indexes + RLS). Until then the log runs on the localStorage mirror.
 - Display terminology standards (Buyout amount / Finance charge / Funded / etc.):
-  `CALCULATORS.md §14`. Canonical product term "Estimate Log": `BRANDING.md §1`.
+  `CALCULATORS.md §14`. Canonical product term "Deal Log": `BRANDING.md §1`.
 
 ## PDF exports
 Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules, and known failure modes are in `PDF.md`.
@@ -123,7 +123,7 @@ Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules,
 ## Supabase & Infrastructure
 
 - **Supabase URL:** `https://arpquyoucdsdmbetgftj.supabase.co`
-- **Tables:** `lender_data`, `state_registries`, `pending_changes`, `scrape_runs`, `estimates` (Estimate Log — see below)
+- **Tables:** `lender_data`, `state_registries`, `pending_changes`, `scrape_runs`, `estimates` (Deal Log — see below)
 - **Admin panel:** `lp-panel.html` — manages pending changes, scrape diffs, lender data
 - **Scraper (current):** `~/lendpaper-engine/scrape_blanks_v2.py` — writes diffs to `pending_changes` table. Use this. Do NOT use `fill_blanks.py` (deprecated — writes directly to DB).
 - **Publisher:** `~/lendpaper-engine/publish.py` — regenerates `waterfall.html` from Supabase. **Pending fix needed:** must escape source_snippets before writing to waterfall.html:
