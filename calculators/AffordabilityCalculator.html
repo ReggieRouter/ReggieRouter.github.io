@@ -182,7 +182,8 @@ label.field-label {
   overflow: hidden;
   transition: all 0.2s;
 }
-.input-wrap:focus-within { border-color: var(--lp-green); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--lp-green); }
+/* Single clean outline on focus (design-language standard — no double ring) */
+.input-wrap:focus-within { border-color: var(--lp-green); }
 .input-prefix {
   background: #f8fafc;
   border-right: 1px solid var(--lp-border);
@@ -191,10 +192,28 @@ label.field-label {
   color: var(--lp-text-muted); font-size: 14px; font-weight: 600;
 }
 .input-field {
-  border: none; padding: 12px; font-size: 16px; font-weight: 600;
-  color: var(--lp-dark); width: 100%; outline: none; font-family: inherit; background: #fff;
+  border: none; padding: 12px; font-size: 15px; font-weight: 600;
+  color: var(--lp-dark); width: 100%; min-width: 0; outline: none; font-family: inherit; background: #fff;
 }
 select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer; padding-right: 14px; }
+
+/* Inline unit-swap toggle (mirrors Amortization's % ⇄ / mos ⇄ control) */
+.unit-toggle {
+  display: inline-flex; align-items: center; gap: 5px; flex: 0 0 auto;
+  padding: 0 12px 0 10px; border: none; border-left: 1px solid var(--lp-border);
+  background: transparent; cursor: pointer; font-family: inherit;
+  font-size: 12px; font-weight: 700; color: #94A3B8; white-space: nowrap;
+  text-transform: lowercase; transition: color 0.15s;
+}
+.unit-toggle:hover { color: var(--lp-green); }
+.unit-toggle .swap { font-size: 11px; color: #94A3B8; }
+.unit-toggle:hover .swap { color: var(--lp-green); }
+
+/* Subdued (optional) field treatment */
+.input-wrap.subdued { border-color: #EEF2F7; }
+.input-wrap.subdued .input-field { color: var(--lp-text-muted); font-weight: 500; }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .helper { margin-top: 8px; color: var(--lp-text-muted); font-size: 12px; line-height: 1.45; }
 
 /* Use-of-funds cycler */
@@ -247,10 +266,10 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
   padding-bottom: 18px; border-bottom: 1px solid var(--lp-border); margin-bottom: 18px;
 }
 .af-hero-label, .af-metric-label {
-  font-size: 10px; font-weight: 800; color: var(--lp-green);
-  text-transform: uppercase; letter-spacing: 0.06em;
+  font-size: 10px; font-weight: 700; color: #64748B;
+  text-transform: uppercase; letter-spacing: 0.04em;
 }
-.af-metric-label { color: #6B7280; }
+.af-metric-label { color: #64748B; }
 .af-verdict-value {
   margin-top: 8px; color: var(--lp-green);
   font-size: clamp(40px, 5.2vw, 60px); font-weight: 900; line-height: 0.96; letter-spacing: -0.01em;
@@ -263,34 +282,39 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 .af-cushion {
   min-width: 188px; padding: 14px 16px; border: 1px solid var(--lp-border);
   border-radius: 12px; background: #fff;
+  transition: background-color 2000ms ease, border-color 2000ms ease;
 }
-.af-cushion strong { display: block; margin-top: 7px; color: var(--lp-green); font-size: 26px; line-height: 1; font-weight: 900; }
+.af-cushion.tone-good { background: #ecfdf3; border-color: #bbf7d0; }
+.af-cushion.tone-warn { background: #fffbeb; border-color: #fcd34d; }
+.af-cushion.tone-bad  { background: #fef2f2; border-color: #fecaca; }
+.af-cushion strong { display: block; margin-top: 7px; color: #111827; font-size: 26px; line-height: 1; font-weight: 800; }
 .af-cushion .note { display: block; margin-top: 6px; color: var(--lp-text-muted); font-size: 11px; }
 .af-cushion .status { display: block; margin-top: 8px; color: #334155; font-size: 12px; font-weight: 700; }
 
-/* ── Payment-load meter ───────────────────────────────────── */
-.af-meter { border: 1px solid var(--lp-border); border-radius: 12px; background: #fff; padding: 12px 14px; margin-bottom: 18px; }
-.af-meter summary { cursor: pointer; list-style: none; }
-.af-meter summary::-webkit-details-marker { display: none; }
-.af-meter-top { display: flex; justify-content: space-between; gap: 12px; color: #334155; font-size: 12px; font-weight: 800; }
-.af-bar { position: relative; height: 7px; margin-top: 10px; border-radius: 999px;
+/* ── Payment-load bar (subtle line + dot, readout on hover) ── */
+.af-loadbar { position: relative; margin: 4px 0 22px; padding-top: 6px; }
+.af-bar { position: relative; height: 4px; border-radius: 999px;
   background: linear-gradient(90deg, #fee2e2 0 25%, #fef3c7 45% 64%, #dcfce7 82% 100%); }
 .af-marker {
-  position: absolute; top: 50%; left: 100%; width: 13px; height: 13px;
+  position: absolute; top: 50%; left: 100%; width: 11px; height: 11px;
   border: 2px solid #fff; border-radius: 999px; background: var(--lp-green-mid);
-  box-shadow: 0 2px 8px rgba(15,23,42,0.22); transform: translate(-50%, -50%); transition: left 180ms ease;
+  box-shadow: 0 1px 4px rgba(15,23,42,0.25); transform: translate(-50%, -50%); transition: left 180ms ease;
 }
-.af-bar-axis { display: none; grid-template-columns: repeat(3, 1fr); color: var(--lp-text-muted); font-size: 11px; font-weight: 700; margin-top: 8px; }
-.af-meter[open] .af-bar-axis { display: grid; }
-.af-bar-axis span:nth-child(2) { text-align: center; }
-.af-bar-axis span:nth-child(3) { text-align: right; }
+.af-load-readout {
+  position: absolute; top: -16px; left: 0; right: 0;
+  display: flex; justify-content: space-between; gap: 12px;
+  font-size: 10px; font-weight: 700; color: #64748B;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  opacity: 0; transition: opacity 0.2s ease; pointer-events: none;
+}
+.af-loadbar:hover .af-load-readout { opacity: 1; }
 
 /* ── Tiles ────────────────────────────────────────────────── */
 .af-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 26px; }
 @media (max-width: 560px) { .af-tiles { grid-template-columns: 1fr; } }
 .af-tile { min-height: 88px; padding: 13px 14px; border: 1px solid var(--lp-border); border-radius: 12px; background: #fff; }
 .af-tile.primary { border-color: #bbf7d0; background: var(--lp-green-soft); }
-.af-tile-value { margin-top: 7px; font-size: 21px; font-weight: 900; line-height: 1; color: #334243; }
+.af-tile-value { margin-top: 7px; font-size: 21px; font-weight: 800; line-height: 1; color: #111827; }
 .af-tile-note { margin-top: 6px; color: var(--lp-text-muted); font-size: 11px; line-height: 1.35; }
 
 /* ── Talk track ───────────────────────────────────────────── */
@@ -309,7 +333,6 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 .af-talk-body { max-height: 260px; overflow: auto; padding: 18px; font-size: 14px; line-height: 1.6; white-space: pre-line; color: #1e293b; }
 .af-talk-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 16px; border-top: 1px solid var(--lp-border); flex-wrap: wrap; }
 .stepper { display: flex; align-items: center; gap: 8px; color: var(--lp-text-muted); font-size: 12px; font-weight: 800; }
-.af-talk-foot .foot-actions { display: flex; gap: 8px; }
 .btn-sm {
   display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 0 14px;
   border-radius: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
@@ -329,13 +352,13 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 .af-insights { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 14px; }
 @media (max-width: 560px) { .af-insights { grid-template-columns: 1fr; } }
 .af-insight { min-height: 86px; padding: 12px; border: 1px solid var(--lp-border); border-radius: 10px; background: #f8fafc; }
-.af-insight strong { display: block; margin-top: 5px; color: var(--lp-green); font-size: 18px; line-height: 1.1; font-weight: 900; }
+.af-insight strong { display: block; margin-top: 5px; color: var(--lp-green); font-size: 18px; line-height: 1.1; font-weight: 800; }
 .af-insight .note { margin-top: 6px; color: var(--lp-text-muted); font-size: 11px; line-height: 1.35; }
 
 /* ── ROI panel (optional) ─────────────────────────────────── */
 .af-roi { border: 1px solid #bbf7d0; border-radius: 12px; background: var(--lp-green-soft); padding: 18px; margin-bottom: 26px; }
 .af-roi[hidden] { display: none; }
-.af-roi-line { margin-top: 8px; color: var(--lp-green); font-size: 22px; font-weight: 900; line-height: 1.2; }
+.af-roi-line { margin-top: 8px; color: var(--lp-green); font-size: 22px; font-weight: 800; line-height: 1.2; }
 .af-roi .note { margin-top: 8px; color: var(--lp-text-muted); font-size: 12px; }
 
 /* ── Disclosures ──────────────────────────────────────────── */
@@ -363,10 +386,11 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 /* ── Definition banner — x-out-able light-green box (matches DSCR/lp-howto) ── */
 .lp-definition {
   background-color: #F0FDF4;
+  border: none;
   border-radius: 12px;
-  padding: 14px 40px 14px 16px;
+  padding: 18px 44px 18px 18px;
   font-size: 13.5px; font-weight: 500; color: #334155;
-  line-height: 1.6; margin-bottom: 20px;
+  line-height: 1.6; margin-bottom: 28px;
   position: relative;
 }
 .lp-definition strong { color: #1A3C2E; font-weight: 800; }
@@ -419,7 +443,7 @@ body.pdf-export-mode .lp-doc-context {
 @media print {
   html, body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background: white !important; margin: 0 !important; padding: 0 !important; }
   body.pdf-export-mode > *:not(.lp-main):not(main):not(.lp-print-footer):not(#lp-print-modal-overlay):not(#tt) { display: none !important; }
-  body.pdf-export-mode .af-tile, body.pdf-export-mode .af-meter, body.pdf-export-mode .af-talk,
+  body.pdf-export-mode .af-tile, body.pdf-export-mode .af-talk,
   body.pdf-export-mode .af-qual, body.pdf-export-mode .af-roi, body.pdf-export-mode .af-hero,
   body.pdf-export-mode .af-cushion, body.pdf-export-mode .af-disclosures, body.pdf-export-mode .af-insight { page-break-inside: avoid !important; break-inside: avoid !important; }
   body.pdf-export-mode div.hidden { display: none !important; }
@@ -533,24 +557,22 @@ body.is-embedded .lp-main { padding-top: 16px; }
                 <div class="lp-group">
                     <div class="section-label">Financing Terms</div>
 
-                    <div class="field-pair" style="margin-bottom:18px;">
-                        <div>
-                            <label class="field-label">Estimated payment</label>
-                            <div class="input-wrap">
-                                <div class="input-prefix">$</div>
-                                <input id="paymentInput" class="input-field" inputmode="decimal" placeholder="929">
-                            </div>
+                    <div style="margin-bottom:18px;">
+                        <label class="field-label">Estimated payment</label>
+                        <div class="input-wrap">
+                            <div class="input-prefix">$</div>
+                            <input id="paymentInput" class="input-field" inputmode="decimal" placeholder="929">
+                            <button id="freqToggle" type="button" class="unit-toggle" onclick="cycleFrequency()" title="Switch daily / weekly / monthly">
+                                <span id="freqLabel">/ mo</span> <span class="swap">⇄</span>
+                            </button>
                         </div>
-                        <div>
-                            <label class="field-label">Frequency</label>
-                            <div class="input-wrap">
-                                <select id="frequencyInput" class="input-field">
-                                    <option value="daily">Daily</option>
-                                    <option value="weekly">Weekly</option>
-                                    <option value="monthly" selected>Monthly</option>
-                                </select>
-                            </div>
-                        </div>
+                        <!-- Hidden select preserves the frequency value for all existing logic -->
+                        <select id="frequencyInput" class="visually-hidden" aria-hidden="true" tabindex="-1">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                        </select>
+                        <div class="helper" id="dailyHolidayNote" style="display:none;">Daily payments run on business days — weekends and bank holidays are excluded.</div>
                     </div>
 
                     <div style="margin-bottom:18px;">
@@ -566,13 +588,14 @@ body.is-embedded .lp-main { padding-top: 16px; }
                                 <option value="bridge">Bridge capital</option>
                                 <option value="debt-refinance">Debt refinance</option>
                                 <option value="emergency-repair">Emergency repair</option>
+                                <option value="other">Other / not listed</option>
                             </select>
                         </div>
                     </div>
 
                     <div style="margin-bottom:18px;">
                         <label class="field-label">Expected monthly deposits
-                            <span class="tooltip-icon" data-tip="Use 3 months of bank deposits, weight the most recent, and adjust for seasonality."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
+                            <span class="tooltip-icon" data-tip="Use 3 months of bank deposits, weight the most recent, and adjust for seasonality and projections."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
                         </label>
                         <div class="input-wrap">
                             <div class="input-prefix">$</div>
@@ -591,17 +614,18 @@ body.is-embedded .lp-main { padding-top: 16px; }
                             </div>
                         </div>
                         <div>
-                            <label class="field-label">Cost source</label>
-                            <div class="input-wrap">
+                            <label class="field-label" style="color:#94A3B8;">Cost source <span style="font-weight:600;text-transform:none;letter-spacing:0;">· optional</span></label>
+                            <div class="input-wrap subdued">
                                 <select id="paybackModeInput" class="input-field">
                                     <option value="deal" selected>From deal</option>
                                     <option value="entered">Entered manually</option>
                                     <option value="estimate">Estimate from payment</option>
-                                    <option value="quote">From a saved quote</option>
+                                    <option value="quote">From a saved estimate</option>
                                 </select>
                             </div>
                         </div>
                     </div>
+                    <div class="helper" style="margin:-8px 0 18px;">Can be pulled from a saved estimate in your <strong style="font-weight:700;color:var(--lp-text-muted);">Deal Log</strong>, entered manually, or estimated from the payment.</div>
 
                     <div>
                         <label class="field-label">Term months</label>
@@ -613,7 +637,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
 
                 <!-- Net Upside — single optional group -->
                 <div class="optional-group">
-                    <div class="section-label">Net Upside · Optional</div>
+                    <div class="section-label">Net Upside · Optional, recommended<span class="tooltip-icon" data-tip="The extra monthly profit this capital is expected to generate. Entering it proves the financing pays for itself — the strongest close on higher-cost capital."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                     <div style="margin-bottom:14px;">
                         <label class="field-label">Expected monthly upside from this capital
                             <span class="tooltip-icon" data-tip="Only enter if the use of funds has a clear, measurable return."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
@@ -622,7 +646,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
                             <div class="input-prefix">$</div>
                             <input id="upsideInput" class="input-field" inputmode="decimal" placeholder="3,000">
                         </div>
-                        <div class="helper">Use this to prove expensive capital is worth it.</div>
+                        <div class="helper">Recommended — this is what proves expensive capital pays for itself.</div>
                     </div>
                     <div class="field-pair" style="margin-bottom:14px;">
                         <div>
@@ -665,6 +689,17 @@ body.is-embedded .lp-main { padding-top: 16px; }
 
             <!-- ── Results ────────────────────────────────────── -->
             <section class="lp-results">
+                <!-- Payment-load bar — subtle line + dot at the very top; readout on hover -->
+                <div class="af-loadbar" id="paymentLoad" title="Payment as a share of expected deposits">
+                    <div class="af-load-readout">
+                        <span>Payment load</span>
+                        <span id="barShare">0% of expected deposits</span>
+                    </div>
+                    <div class="af-bar" aria-hidden="true">
+                        <div class="af-marker" id="barMarker"></div>
+                    </div>
+                </div>
+
                 <!-- 1. Affordability verdict hero -->
                 <div class="af-hero">
                     <div>
@@ -672,7 +707,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
                         <div class="af-verdict-value pending" id="heroVerdict">Pressure-test the payment</div>
                         <div class="af-hero-subline" id="heroSubline">Add payment and expected deposits when you're ready.</div>
                     </div>
-                    <div class="af-cushion">
+                    <div class="af-cushion" id="cushionCard">
                         <span class="af-metric-label">Cash Cushion</span>
                         <strong id="heroPayment">$0</strong>
                         <span class="note">After payment and listed expenses</span>
@@ -680,25 +715,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
                     </div>
                 </div>
 
-                <!-- 2. Payment-load meter -->
-                <details class="af-meter" id="paymentLoadDetails">
-                    <summary>
-                        <div class="af-meter-top">
-                            <span>Payment load</span>
-                            <span id="barShare">0% of expected deposits</span>
-                        </div>
-                        <div class="af-bar" aria-hidden="true">
-                            <div class="af-marker" id="barMarker"></div>
-                        </div>
-                    </summary>
-                    <div class="af-bar-axis">
-                        <span>High load</span>
-                        <span>20%</span>
-                        <span>Low load</span>
-                    </div>
-                </details>
-
-                <!-- 3. Key tiles -->
+                <!-- Key tiles -->
                 <div class="af-tiles">
                     <div class="af-tile">
                         <span class="af-metric-label">Expected Deposits</span>
@@ -737,16 +754,6 @@ body.is-embedded .lp-main { padding-top: 16px; }
                                 <button class="icon-btn" type="button" id="prevScenario" aria-label="Previous scenario" style="width:34px;height:34px;">‹</button>
                                 <span id="scenarioCount">1 / 3</span>
                                 <button class="icon-btn" type="button" id="nextScenario" aria-label="Next scenario" style="width:34px;height:34px;">›</button>
-                            </div>
-                            <div class="foot-actions">
-                                <button class="lp-cta-primary" type="button" id="inlineSaveBtn" style="font-size:11px;padding:8px 12px;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                                    Save Estimate as PDF
-                                </button>
-                                <button class="lp-cta-secondary" type="button" id="copyScenarioBtn" style="font-size:11px;padding:8px 12px;">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                    Copy Scenario
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -872,6 +879,7 @@ const els = {
   heroPayment: document.querySelector("#heroPayment"),
   heroSubline: document.querySelector("#heroSubline"),
   cashStatus: document.querySelector("#cashStatus"),
+  cushion: document.querySelector("#cushionCard"),
   tileDeposits: document.querySelector("#tileDeposits"),
   tileLeft: document.querySelector("#tileLeft"),
   tilePayback: document.querySelector("#tilePayback"),
@@ -907,7 +915,8 @@ const productOptions = [
   { value: "expansion", label: "Expansion", proof: "new location, added service line, or capacity that can be measured against deposits" },
   { value: "bridge", label: "Bridge capital", proof: "the receivable, contract, or event that clears the bridge" },
   { value: "debt-refinance", label: "Debt refinance", proof: "payment relief, payoff savings, or a cleaner repayment stack" },
-  { value: "emergency-repair", label: "Emergency repair", proof: "reopening revenue, avoiding downtime, or protecting existing deposits" }
+  { value: "emergency-repair", label: "Emergency repair", proof: "reopening revenue, avoiding downtime, or protecting existing deposits" },
+  { value: "other", label: "this use of funds", proof: "the specific, measurable outcome the capital is meant to produce" }
 ];
 
 let activeTab = "talk";
@@ -1058,6 +1067,14 @@ function talkTrack(kind, values, scenario) {
   return base[scenario.key][kind];
 }
 
+function cycleFrequency() {
+  const order = ["monthly", "weekly", "daily"];
+  const cur = els.frequency.value || "monthly";
+  els.frequency.value = order[(order.indexOf(cur) + 1) % order.length];
+  manualScenarioIndex = null;
+  update();
+}
+
 function update() {
   const values = currentValues();
   const hasCoreInputs = values.monthly > 0 && values.deposits > 0;
@@ -1072,6 +1089,16 @@ function update() {
   els.heroVerdict.classList.toggle("pending", verdict === "Pending");
   els.heroVerdict.classList.toggle("warning", verdict === "Workable");
   els.heroVerdict.classList.toggle("danger", verdict === "Stretching" || cashStatus === "Shortfall");
+
+  // Star-metric background fades by health tone (text color stays constant)
+  const tone = !hasCoreInputs ? ""
+    : (cashStatus === "Shortfall" || verdict === "Stretching") ? "tone-bad"
+    : (verdict === "Workable") ? "tone-warn"
+    : "tone-good";
+  if (els.cushion) {
+    els.cushion.classList.remove("tone-good", "tone-warn", "tone-bad");
+    if (tone) els.cushion.classList.add(tone);
+  }
 
   const cushionValue = values.expenses > 0 ? values.afterExpenses : values.left;
   els.heroPayment.textContent = hasCoreInputs ? formatMoney(cushionValue) : "$0";
@@ -1111,6 +1138,13 @@ function update() {
   els.scenarioCount.textContent = `${selectedScenarioIndex + 1} / ${scenarios.length}`;
   els.talkBody.textContent = talkTrack(activeTab, values, scenario);
   els.stateDisclosure.classList.toggle("active", els.stateToggle.checked);
+
+  // Frequency toggle label + daily business-day note
+  const freqLabels = { monthly: "/ mo", weekly: "/ wk", daily: "/ day" };
+  const fl = document.getElementById("freqLabel");
+  if (fl) fl.textContent = freqLabels[els.frequency.value] || "/ mo";
+  const dhn = document.getElementById("dailyHolidayNote");
+  if (dhn) dhn.style.display = (els.frequency.value === "daily") ? "" : "none";
 }
 
 /* ── Tooltips (circle-i, #tt) ─────────────────────────────── */
@@ -1273,18 +1307,12 @@ document.querySelector("#nextScenario").addEventListener("click", () => {
   manualScenarioIndex = (current + 1) % scenarios.length; update();
 });
 
-document.querySelector("#copyScenarioBtn").addEventListener("click", async (e) => {
-  const ok = await copyText(els.talkBody.textContent);
-  flash(e.currentTarget, ok ? "Copied" : "Select text");
-  logEstimate(false);
-});
 document.querySelector("#copySummaryBtn").addEventListener("click", async (e) => {
   const ok = await copyText(summaryText());
   if (window.PDF_HELPER) window.PDF_HELPER.showToast(ok ? "Copied!" : "Copy failed", !ok);
   logEstimate(false);
 });
 document.querySelector("#savePdfBtn").addEventListener("click", (e) => handleSavePDF(e.currentTarget));
-document.querySelector("#inlineSaveBtn").addEventListener("click", (e) => handleSavePDF(e.currentTarget));
 
 /* Back to Deal Read — works embedded (route the SPA top window) or standalone */
 document.querySelector("#backLink").addEventListener("click", () => {
