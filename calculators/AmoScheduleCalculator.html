@@ -32,8 +32,8 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Breakdown | LendPaper</title>
-    <meta property="og:title" content="Payment Breakdown Calculator — LendPaper" />
+    <title>Amortization | LendPaper</title>
+    <meta property="og:title" content="Amortization Calculator — LendPaper" />
     <meta property="og:description" content="Build instant amortization schedules and payment breakdowns for any loan structure. Questions? Email hello@lendpaper.com" />
     <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
     <meta property="og:url" content="https://lendpaper.com/calculators/AmoScheduleCalculator" />
@@ -1255,7 +1255,7 @@
         body.pdf-export-mode .pdf-stats-grid { break-inside: avoid !important; page-break-inside: avoid !important; }
         body.pdf-export-mode .pdf-stats-grid > div .text-\[16px\] { font-size: 15px !important; }
 
-        /* PDF polish: tighten the print header (lendpaper logo + tagline + PAYMENT BREAKDOWN title)
+        /* PDF polish: tighten the print header (lendpaper logo + tagline + AMORTIZATION title)
            — reduce empty space at top of page 1 */
         body.pdf-export-mode .print-header-content { margin-bottom: 12px !important; padding-top: 0 !important; }
         body.pdf-export-mode .pdf-document-title { margin-top: 8px !important; margin-bottom: 16px !important; }
@@ -1430,7 +1430,7 @@
     <main class="w-full relative">
         <div class="print-header-content">
             <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
-            <h1>Payment Breakdown Report</h1>
+            <h1>Amortization Report</h1>
         </div>
 
         <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
@@ -1921,7 +1921,7 @@
             }
 
             // Setup custom print header band dynamically per plan tier
-            window.PDF_HELPER.initPrintLayout("PAYMENT BREAKDOWN");
+            window.PDF_HELPER.initPrintLayout("AMORTIZATION");
 
             // Populate read-only loan parameter summary (replaces hidden form in PDF)
             // and force a fresh calc so lastCalc[id] (schedule + summary) is current
@@ -1942,7 +1942,7 @@
             const element = document.querySelector('main');
             const filename = `LendPaper_Amortization_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
-            await window.PDF_HELPER.generatePDF(element, "PAYMENT BREAKDOWN", filename, btn, origText, isMultiScenario, quoteId);
+            await window.PDF_HELPER.generatePDF(element, "AMORTIZATION", filename, btn, origText, isMultiScenario, quoteId);
 
             // Quote Log: record one estimate per scenario card (LEN-123)
             cards.forEach(card => {
@@ -2298,7 +2298,7 @@
 
                 headerCenter.innerHTML = `
                     <h1 class="text-[15px] font-extrabold text-[#111827] uppercase tracking-wider flex items-center gap-1.5 justify-center">
-                        Payment Breakdown
+                        Amortization
                         <button onclick="showIntro()" class="lp-intro-toggle-btn no-print w-[16px] h-[16px] inline-flex items-center justify-center rounded-full border border-[#6B7280] text-[#6B7280] text-[9.5px] font-bold transition-colors bg-white hover:border-[#1A3C2E] hover:text-[#1A3C2E] cursor-pointer" style="display: ${isDismissed ? 'inline-flex' : 'none'}; pointer-events: auto;" title="Restore introduction">i</button>
                     </h1>
                     <div class="text-[10px] uppercase tracking-[0.1em] text-[#6B7280] font-bold mt-0.5">Scenario Modeling Engine</div>
@@ -3517,7 +3517,7 @@
         window.onload = () => {
             addCard();
             if (typeof window.PDF_HELPER !== 'undefined') {
-                window.PDF_HELPER.initPrintLayout("PAYMENT BREAKDOWN");
+                window.PDF_HELPER.initPrintLayout("AMORTIZATION");
             }
             // Sync borrower state from the shared compliance engine (persists across calculators)
             const savedState = window.LPCompliance?.getState?.() || '';

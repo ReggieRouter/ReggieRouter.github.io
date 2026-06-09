@@ -264,6 +264,23 @@ border only, not a fill.
 
 ---
 
+## 6a. Canonical Tool Names (LEN-143 — deviation is a bug)
+
+One name per tool, identical across **tile (`tools.js`) · page `<title>` · on-screen header · PDF doc-title**. Rule of thumb: plain-English job-to-be-done name; keep an acronym only where brokers use it daily (DSCR, SBA, NAICS); never name a tool after an optional feature.
+
+| Tool id | Canonical name | PDF doc-title | Slug (frozen) | Notes |
+|---|---|---|---|---|
+| `amo` | **Amortization** | `AMORTIZATION` | `/tools/payment-breakdown` | Was "Payment Breakdown". Pre-pay/payoff is a feature → subtitle, never the name. Slug frozen for SEO. `logUsage('amortization')` unchanged. |
+| `deal-read` | **Deal Analysis** | (memo) | `/tools/deal-read` | Was "Deal Read". Not "File Analysis" — takes typed inputs, no file upload. *(Lands via the launch branch.)* |
+| `affordability` | **Affordability Check** | `AFFORDABILITY CHECK` | `/tools/affordability` | Optional upside module is **"Net Upside"** (was "ROI Assumptions") — it outputs `$net/mo`, not a return %. |
+| `fundability` | **Net & Position** | `NET & POSITION` | `/tools/fundability` | Was "Fundability". Names its two outputs (net requirement + stacking position); separates it from DSCR. `'fundability'` analytics keys + slug kept for continuity. |
+| `dscr` | **DSCR** | `DSCR ANALYSIS` | `/tools/dscr` | og:title keeps "DSCR Calculator" for search. |
+| `sba-rates` | **SBA Fees** | `SBA 7(a) RATES & FEES` | `/tools/sba-fees` | Was "SBA Scenario Builder"/"SBA rates & fees". Formal PDF/H1 title stays "SBA 7(a) Rates & Fees". |
+
+**Frozen:** slugs and `logUsage`/`calculator_type` keys never change on a rename (SEO + analytics continuity). Display strings only.
+
+---
+
 ## 7. Core JavaScript Framework (Authoritative — Do Not Reinvent)
 
 ```javascript
@@ -326,7 +343,7 @@ function showLendPaperToast() {
 
 ---
 
-## 8. Payment Breakdown — Formula Reference
+## 8. Amortization — Formula Reference
 
 | Output | Formula |
 |---|---|

@@ -32,9 +32,9 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fundability | LendPaper</title>
-    <meta property="og:title" content="Fundability Calculator — LendPaper" />
-    <meta property="og:description" content="Score a borrower's fundability profile and find the right lender tier instantly. Questions? Email hello@lendpaper.com" />
+    <title>Net & Position | LendPaper</title>
+    <meta property="og:title" content="Net & Position — LendPaper" />
+    <meta property="og:description" content="Net requirement & stacking-position risk — score a borrower's fundability and find the right lender tier instantly. Questions? Email hello@lendpaper.com" />
     <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
     <meta property="og:url" content="https://lendpaper.com/calculators/FundabilityCalculator" />
     <meta property="og:type" content="website" />
@@ -627,7 +627,7 @@
       </text>
     </svg>
     <div class="modal-title">
-        <span class="modal-title-main">Fundability</span>
+        <span class="modal-title-main">Net & Position</span>
         <span class="modal-title-sub">Borrower Readiness Report</span>
     </div>
 </header>
@@ -635,11 +635,11 @@
 <div class="lp-main">
     <div class="print-header-content">
         <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
-        <h1>Fundability Assessment</h1>
+        <h1>Net & Position</h1>
     </div>
     <div class="lp-container">
         <div class="calc-card-header">
-            <div class="calc-card-header-title">Fundability<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
+            <div class="calc-card-header-title">Net & Position<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
             <div class="calc-card-header-sub">Borrower Readiness Report</div>
         </div>
         <!-- Tabs -->
@@ -972,7 +972,7 @@
         }
 
         // Setup custom print header band dynamically per plan tier
-        window.PDF_HELPER.initPrintLayout("FUNDABILITY ESTIMATE");
+        window.PDF_HELPER.initPrintLayout("NET & POSITION");
 
         const cards = document.querySelectorAll('[id^="card-"]');
         if (cards.length > 1) {
@@ -980,12 +980,12 @@
         }
 
         const element = document.querySelector('.lp-main');
-        const filename = `LendPaper_Fundability_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
+        const filename = `LendPaper_NetPosition_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
         let _docCtxNode = null;
         try {
             _docCtxNode = mountDocContext(element);
-            await window.PDF_HELPER.generatePDF(element, "FUNDABILITY ESTIMATE", filename, btn, origText);
+            await window.PDF_HELPER.generatePDF(element, "NET & POSITION", filename, btn, origText);
             // Quote Log (LEN-123)
             try {
                 window.saveEstimate && window.saveEstimate({
@@ -1382,7 +1382,7 @@
             }
         } catch (e) { /* restore is best-effort */ }
         if (typeof window.PDF_HELPER !== 'undefined') {
-            window.PDF_HELPER.initPrintLayout("FUNDABILITY ESTIMATE");
+            window.PDF_HELPER.initPrintLayout("NET & POSITION");
         }
         if (window.self !== window.top) {
             document.body.classList.add('is-embedded');

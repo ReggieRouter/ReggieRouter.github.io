@@ -6,8 +6,8 @@
 var TOOLS = [
   { 
     id: "amo", 
-    name: "Payment Breakdown", 
-    desc: "Full payment breakdown by period with multi-scenario prepay logic.",
+    name: "Amortization",
+    desc: "Full payment schedule with early-payoff & buyout scenarios.",
     status: "live", 
     group: "deal-math", 
     icon: "chart", 
@@ -61,7 +61,7 @@ var TOOLS = [
   },
   {
     id: "dscr",
-    name: "DSCR calculator",
+    name: "DSCR",
     desc: "Debt service coverage ratio and payment-to-revenue benchmarking.",
     status: "live",
     group: "risk",
@@ -87,7 +87,7 @@ var TOOLS = [
   },
   {
     id: "fundability",
-    name: "Fundability",
+    name: "Net & Position",
     desc: "Combined net requirement and stacking risk assessment.",
     status: "live",
     group: "deal-math",
@@ -100,8 +100,8 @@ var TOOLS = [
   },
   {
     id: "sba-rates",
-    name: "SBA rates & fees",
-    desc: "Dynamic SBA 7(a) scenario builder with guarantee fee logic.",
+    name: "SBA Fees",
+    desc: "Dynamic SBA 7(a) guarantee-fee & rate scenarios.",
     status: "hidden",
     group: "deal-math",
     icon: "flag",
