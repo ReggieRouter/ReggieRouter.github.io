@@ -27,9 +27,9 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Affordability Check | LendPaper</title>
+<title>Payment Fit | LendPaper</title>
 <link rel="canonical" href="https://lendpaper.com/calculators/AffordabilityCalculator">
-<meta property="og:title" content="Affordability Check — LendPaper" />
+<meta property="og:title" content="Payment Fit — LendPaper" />
 <meta property="og:description" content="See if the borrower can handle the payment and whether the capital pays for itself. Questions? Email hello@lendpaper.com" />
 <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
 <meta property="og:url" content="https://lendpaper.com/calculators/AffordabilityCalculator" />
@@ -500,7 +500,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
   </text>
 </svg>
 <div class="modal-title">
-    <span class="modal-title-main">Affordability Check</span>
+    <span class="modal-title-main">Payment Fit</span>
     <span class="modal-title-sub">Payment &amp; Return Read</span>
 </div>
 </header>
@@ -508,7 +508,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
 <div class="lp-main">
     <div class="print-header-content">
         <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
-        <h1>Affordability Check</h1>
+        <h1>Payment Fit</h1>
     </div>
 
     <div class="lp-card">
@@ -518,7 +518,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
                 <span>Back to Deal Read</span>
             </button>
             <div class="card-center-title">
-                <div class="card-center-title-main">Affordability Check<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
+                <div class="card-center-title-main">Payment Fit<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
                 <div class="card-center-title-sub">Payment &amp; Return Read</div>
             </div>
         </div>
@@ -1165,16 +1165,16 @@ async function handleSavePDF(btn) {
   btn.innerHTML = "Generating...";
   btn.disabled = true;
 
-  window.PDF_HELPER.initPrintLayout("AFFORDABILITY CHECK");
+  window.PDF_HELPER.initPrintLayout("PAYMENT FIT");
   const element = document.querySelector('.lp-main');
-  const filename = `LendPaper_Affordability_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
+  const filename = `LendPaper_PaymentFit_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
   // NOTE: PDF_HELPER.generatePDF injects the state compliance block (LEN-88) and the
   // 3-layer watermark itself — do NOT inject the compliance block here or it duplicates.
   let _docCtxNode = null;
   try {
     _docCtxNode = mountDocContext(element);
-    await window.PDF_HELPER.generatePDF(element, "AFFORDABILITY CHECK", filename, btn, origText);
+    await window.PDF_HELPER.generatePDF(element, "PAYMENT FIT", filename, btn, origText);
     logEstimate(true);
   } finally {
     if (_docCtxNode) _docCtxNode.remove();
@@ -1240,7 +1240,7 @@ function summaryText() {
     "Full-term cost": formatMoney(v.payback)
   };
   if (v.upside > 0) rows["Net upside"] = `${formatMoney(v.upside - v.monthly)}/mo`;
-  let out = `[Affordability Check] — LendPaper\n${border}\n`;
+  let out = `[Payment Fit] — LendPaper\n${border}\n`;
   Object.entries(rows).forEach(([k, val]) => { out += `${k.padEnd(20)}: ${val}\n`; });
   out += `${border}\n${WATERMARK_FOOTER}`;
   return out;
@@ -1361,7 +1361,7 @@ function showIntro() {
 }
 
 window.addEventListener('load', () => {
-  if (typeof window.PDF_HELPER !== 'undefined') window.PDF_HELPER.initPrintLayout("AFFORDABILITY CHECK");
+  if (typeof window.PDF_HELPER !== 'undefined') window.PDF_HELPER.initPrintLayout("PAYMENT FIT");
   PDF_HELPER.initDismissibles();
   PDF_HELPER.persistFields('afford', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor','pdfDealName','pdfLender']);
   hydrateFromParams();

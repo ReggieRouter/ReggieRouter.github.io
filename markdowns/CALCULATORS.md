@@ -309,7 +309,7 @@ One name per tool, identical across **tile (`tools.js`) · page `<title>` · on-
 |---|---|---|---|---|
 | `amo` | **Amortization** | `AMORTIZATION` | `/tools/payment-breakdown` | Was "Payment Breakdown". Pre-pay/payoff is a feature → subtitle, never the name. Slug frozen for SEO. `logUsage('amortization')` unchanged. |
 | `deal-read` | **Deal Analysis** | (memo) | `/tools/deal-read` | Was "Deal Read". Not "File Analysis" — takes typed inputs, no file upload. *(Lands via the launch branch.)* |
-| `affordability` | **Affordability Check** | `AFFORDABILITY CHECK` | `/tools/affordability` | Optional upside module is **"Net Upside"** (was "ROI Assumptions") — it outputs `$net/mo`, not a return %. |
+| `affordability` | **Payment Fit** | `PAYMENT FIT` | `/tools/affordability` | Was "Affordability Check" (LEN-150). Names the primary carry gate; subtitle "Payment & Return Read" carries the ROI half. Slug + `logUsage('affordability')` + `calculator_type:'affordability'` frozen for continuity. Optional upside module is **"Net Upside"** (was "ROI Assumptions") — it outputs `$net/mo`, not a return %. |
 | `fundability` | **Net & Position** | `NET & POSITION` | `/tools/fundability` | Was "Fundability". Names its two outputs (net requirement + stacking position); separates it from DSCR. `'fundability'` analytics keys + slug kept for continuity. |
 | `dscr` | **DSCR** | `DSCR ANALYSIS` | `/tools/dscr` | og:title keeps "DSCR Calculator" for search. |
 | `sba-rates` | **SBA Fees** | `SBA 7(a) RATES & FEES` | `/tools/sba-fees` | Was "SBA Scenario Builder"/"SBA rates & fees". Formal PDF/H1 title stays "SBA 7(a) Rates & Fees". |

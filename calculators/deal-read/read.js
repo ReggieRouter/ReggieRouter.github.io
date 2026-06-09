@@ -358,7 +358,7 @@ function fundabilityHref(d, lv){
   p.set('src','deal-read');
   return '/calculators/FundabilityCalculator.html?'+p.toString();
 }
-// Standalone Affordability Check (LEN-125, calculators/AffordabilityCalculator.html,
+// Standalone Payment Fit calc (LEN-125, calculators/AffordabilityCalculator.html,
 // slug /tools/affordability). Param names map to its hydrateFromParams() reader:
 // deposits / payback (+paybackMode) / payment / freq / term / state / deal. Real-file
 // path so params survive the SPA 404 fallback.
@@ -972,7 +972,7 @@ function affHTML(deal, lv){
     body=`<div class="aff-verdict-row" style="color:var(--t${tc})"><span class="av-dot" style="background:var(--t${tc})"></span>${a.verdict}</div>
       <div class="aff-grid">${cells.join('')}</div>${bar}${breakeven}${confNote}
       <div class="aff-note">Estimate using band midpoints. Affordability depends on the final amount, term, and pricing — and on the rest of the operating expenses, which this does not see.</div>
-      <a class="aff-fulllink" href="${affordabilityHref(deal,lv)}" target="_top" style="display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-size:11.5px;font-weight:600;color:var(--lav-accent);text-decoration:none;border-bottom:1px dashed var(--lav-line);padding-bottom:1px">${I.lift}<span>Open full Affordability check</span></a>`;
+      <a class="aff-fulllink" href="${affordabilityHref(deal,lv)}" target="_top" style="display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-size:11.5px;font-weight:600;color:var(--lav-accent);text-decoration:none;border-bottom:1px dashed var(--lav-line);padding-bottom:1px">${I.lift}<span>Open full Payment Fit</span></a>`;
   }
   const beShort = (a && a.perMonth!=null && deal.rev) ? `<div class="aff-summary">Break-even — business needs ~<b>${Math.round(a.perMonth/deal.rev*100)}%</b> more gross profit to cover payments.</div>` : '';
   return `<div class="aff-wrap${open?' open':''}">${affHeader(open,v)}${beShort}<div class="aff-panel" id="affPanel">${body}</div></div>`;

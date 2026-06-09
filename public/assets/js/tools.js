@@ -128,7 +128,7 @@ var TOOLS = [
   },
   {
     id: "affordability",
-    name: "Affordability Check",
+    name: "Payment Fit",
     desc: "See if the borrower can handle the payment — and whether the capital pays for itself.",
     status: "live",
     group: "deal-math",
@@ -137,18 +137,7 @@ var TOOLS = [
     slug: "/tools/affordability",
     presentation: "page",
     path: "/calculators/AffordabilityCalculator.html",
-    kw: "affordability roi break even payment load deposits cash cushion qualify borrower upside"
-  },
-  { 
-    id: "uw-analysis", 
-    name: "UW analysis", 
-    desc: "Comprehensive deal health and credit scoring metrics.",
-    status: "soon", 
-    group: "risk", 
-    icon: "grid", 
-    color: "amber",
-    href: "#",
-    kw: "underwriting analysis credit scoring health"
+    kw: "payment fit affordability roi break even payment load deposits cash cushion qualify borrower upside net"
   },
   /*
   { 
