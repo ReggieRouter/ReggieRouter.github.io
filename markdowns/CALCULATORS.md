@@ -285,22 +285,30 @@ its strip must **not** keep a full-width tinted (`#f8fafc`) fill. The empty tint
 area beside a short field reads as a layout bug. Use the card color (`#fff`) for the
 strip and let the field define its footprint; separate with a border only, not a fill.
 
-**Match the panel grid — never hardcode a px width (LEN-156).** A full-width strip
-that sits *above* a two-column panel must mirror the panel's grid columns so its
-field tracks the left column at **every** viewport. A fixed `max-width` (e.g. the old
-`380px`) only aligns at the one width it was tuned for and overhangs to the right at
-every narrower two-column width — the recurring "row expands too far right" bug.
-Pattern:
-```css
-.shared-strip { display: grid; grid-template-columns: minmax(0,0.82fr) minmax(0,1fr); }
-.shared-strip > * { grid-column: 1; margin-left: 24px; margin-right: 24px; } /* gutter on the cell */
-@media (max-width: 760px) { .shared-strip { grid-template-columns: 1fr; } }   /* collapse with the panel */
+**A shared input belongs INSIDE the input column — never in a full-width strip
+above the grid (LEN-156).** A field placed in its own full-width band above a
+two-column panel has no column to inherit width from, so its width must be
+hand-matched to the left column — a fragile coupling that re-breaks at some viewport
+on every attempt (a fixed `max-width` overhangs everywhere but its tuned width; even
+a grid that mirrors the panel drifts under embedding/print). This was the root cause
+of the recurring Fundability "new funding row expands too far right" bug.
+
+**The permanent pattern:** if an input is shared across tabs/panels, keep it as a
+single node and *relocate* it into the active panel's `.lp-inputs` column on tab
+switch — the same way `#deal-context` is moved by `mountDealContext()`. As a normal
+field in the column it inherits the column width automatically, exactly like every
+other calculator's primary input, and **structurally cannot overhang**. There is no
+width logic to maintain.
+```js
+function mountFunding(which) {                       // call from switchTab()
+  const f = document.getElementById('funding-shared');
+  const col = document.querySelector('#panel_' + which + ' .lp-inputs');
+  if (f && col && f.parentElement !== col) col.insertBefore(f, col.firstChild); // top of column
+}
 ```
-Put the gutter on the cell as `margin` (not container `padding`, which narrows the
-grid, and not input `padding`, which sits inside the bordered field) so the columns
-divide the full strip width exactly like `.lp-inputs`. Verify alignment headlessly
-across 1280→380px: the strip field's left/right edges must match the left-column
-field's to the pixel.
+Style it as a plain field group (`.lp-funding-shared` = bottom border + margin to set
+it apart), not a strip. Never reintroduce a full-width input band above a two-column
+panel.
 
 ---
 

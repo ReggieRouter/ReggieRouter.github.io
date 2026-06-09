@@ -160,24 +160,21 @@
         }
 
         /* Inputs */
-        /* LEN-139 — the funding field is constrained to the left-column width, so the
-           strip must NOT carry a full-width tinted fill: the empty area to the right of
-           a constrained input reads as a layout bug. White (card color) instead.
-           LEN-156 — the strip mirrors the panel's grid columns so the funding input
-           tracks the left column at every width. A hardcoded max-width (was 380px) only
-           aligns at one viewport and overhangs to the right everywhere narrower. */
-        .shared-strip {
-            padding: 24px 0;
-            background: #fff;
+        /* LEN-156 — PERMANENT FIX for the recurring "funding row overhangs to the right"
+           bug. The shared "new funding under review" field used to be a bespoke full-width
+           strip sitting ABOVE the two-column grid, so its input width had to be hand-matched
+           to the 0.82fr left column — a fragile coupling that re-broke at some viewport on
+           every prior attempt (fixed px, then grid-mirroring).
+           Now the field is a NORMAL first field INSIDE the active panel's left input column,
+           relocated on tab switch exactly like #deal-context (see mountFunding()). It
+           inherits the column width automatically — identical to every other calculator's
+           primary input — so it structurally cannot overhang. No width logic to drift.
+           The bottom rule just sets it apart as the shared input shown on both tabs. */
+        .lp-funding-shared {
+            padding-bottom: 20px;
+            margin-bottom: 20px;
             border-bottom: 1px solid var(--lp-border);
-            display: grid;
-            grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
-            gap: 0;
         }
-        /* Gutter lives on the cell (not the grid container) so the columns divide the
-           full strip width — identical to the panel's .lp-inputs (24px pad inside an
-           0.82fr cell). This makes the funding input the exact width of the left column. */
-        .shared-strip > * { grid-column: 1; min-width: 0; margin-left: 24px; margin-right: 24px; }
         .lp-inputs { padding: 24px; background: #fff; }
         /* LEN-147 — left-accent style for howto banners */
         .lp-howto {
@@ -469,8 +466,6 @@
         @media (max-width: 760px) {
             .panel.active { grid-template-columns: 1fr; }
             .panel.active .lp-results { border-left: none; border-top: 1px solid var(--lp-border); }
-            /* LEN-156 — collapse the shared strip to match the single-column panel */
-            .shared-strip { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 420px) { .grid-2 { grid-template-columns: 1fr; } }
@@ -550,7 +545,7 @@
 
         @media print {
             body { background: white !important; }
-            .no-print, header, .modal-header, .lp-actions, .lp-pill-btn, .remove-card-btn, .lp-disclaimer, .tooltip-icon, .lp-howto, .lp-tab-sub, .shared-strip { display: none !important; }
+            .no-print, header, .modal-header, .lp-actions, .lp-pill-btn, .remove-card-btn, .lp-disclaimer, .tooltip-icon, .lp-howto, .lp-tab-sub, .lp-funding-shared { display: none !important; }
             .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
             .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
             .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
@@ -576,7 +571,7 @@
         body.pdf-export-mode .tooltip-icon, 
         body.pdf-export-mode .lp-howto,
         body.pdf-export-mode .lp-tab-sub,
-        body.pdf-export-mode .shared-strip,
+        body.pdf-export-mode .lp-funding-shared,
         body.pdf-export-mode .calc-card-header,
         body.pdf-export-mode .lp-tabs { display: none !important; }
         
@@ -652,18 +647,20 @@
             Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
         </div>
 
-        <!-- Shared funding amount -->
-        <div class="shared-strip">
-            <label for="funding_amt">New funding under review</label>
-            <div class="input-wrap">
-                <div class="input-prefix">$</div>
-                <input type="number" id="funding_amt" class="input-field" value="50000" oninput="runAll()">
-            </div>
-        </div>
-
         <!-- ============ PANEL: NET REQUIREMENT ============ -->
         <div class="panel active" id="panel_net">
             <div class="lp-inputs">
+                <!-- LEN-156 — shared "new funding" field. A normal first field in the active
+                     panel's left column (NOT a full-width strip); relocated on tab switch by
+                     mountFunding() like #deal-context, so it inherits the column width and
+                     can't overhang. Starts here because Net Requirement is the default tab. -->
+                <div class="lp-funding-shared" id="funding-shared">
+                    <label for="funding_amt">New funding under review</label>
+                    <div class="input-wrap">
+                        <div class="input-prefix">$</div>
+                        <input type="number" id="funding_amt" class="input-field" value="50000" oninput="runAll()">
+                    </div>
+                </div>
                 <label for="net_pct">Net Requirement <span class="tooltip-icon" data-tip="Percentage of the new funding that must go directly to the borrower."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                 <div class="input-wrap">
                     <div class="input-prefix">%</div>
@@ -1008,7 +1005,9 @@
         document.getElementById('panel_risk').classList.toggle('active', which === 'risk');
         // Show the active tab's intro (unless the user dismissed it — LEN-139)
         updateIntroVisibility();
-        // LEN-139 — keep the single deal-context block in the active panel's left column
+        // LEN-156 — keep the single shared "new funding" field at the top of the active
+        // panel's left column; LEN-139 — and the deal-context block at the bottom.
+        mountFunding(which);
         mountDealContext(which);
     }
 
@@ -1044,6 +1043,14 @@
         const ctx = document.getElementById('deal-context');
         const col = document.querySelector('#panel_' + which + ' .lp-inputs');
         if (ctx && col && ctx.parentElement !== col) col.appendChild(ctx);
+    }
+
+    // LEN-156 — one shared "new funding under review" field; keep it as the FIRST field
+    // in whichever panel's input column is showing (same relocate pattern as deal-context).
+    function mountFunding(which) {
+        const f = document.getElementById('funding-shared');
+        const col = document.querySelector('#panel_' + which + ' .lp-inputs');
+        if (f && col && f.parentElement !== col) col.insertBefore(f, col.firstChild);
     }
 
     // Tooltips
