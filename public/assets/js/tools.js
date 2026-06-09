@@ -125,6 +125,19 @@ var TOOLS = [
     kw: "naics sic code industry search lookup classification restricted"
   },
   {
+    id: "legislation",
+    name: "Legislation Tracker",
+    desc: "State + federal commercial financing disclosure law, mapped. Know where disclosure rules bite.",
+    status: "live",
+    group: "data",
+    icon: "flag",
+    color: "green",
+    slug: "/tools/legislation",
+    presentation: "page",
+    path: "/legislation.html",
+    kw: "legislation law regulation disclosure commercial financing state federal cfpb 1071 cfdl map tracker compliance bill statute"
+  },
+  {
     id: "affordability",
     name: "Affordability Check",
     desc: "See if the borrower can handle the payment — and whether the capital pays for itself.",
