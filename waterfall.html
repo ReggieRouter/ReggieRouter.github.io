@@ -2158,8 +2158,10 @@
 <script type="module">
   import { requireApprovedUser, logUsage } from './js/auth.js';
   const profile = await requireApprovedUser();
-  if (!profile) return;
-  logUsage('waterfall', 'view');
+  if (profile) {
+    window.lpProfile = profile; // invite toast reads invite_credits / invites_sent (LEN-75)
+    logUsage('waterfall', 'view');
+  }
 </script>
 </head>
 <body>
@@ -2168,7 +2170,7 @@
   <header class="lp-doc-header">
     <a href="https://lendpaper.com" style="text-decoration: none; display: inline-block;">
       <div class="lp-wordmark">
-        <span class="lp-glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5"/><path d="M9 9v6"/><path d="M9 15h4"/></svg></span><span class="lp-text-bold">lend</span><span class="lp-text-reg">paper</span><span class="lp-period">.</span>
+        <span class="lp-glyph"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2.5" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4 4v16h11l5-5V4H4z"/><path d="M15 20v-5h5" stroke-linecap="butt"/><path d="M9 9v6"/><path d="M9 15h4"/></svg></span><span class="lp-text-bold">lend</span><span class="lp-text-reg">paper</span><span class="lp-period">.</span>
       </div>
     </a>
     <div class="lp-tagline">Scenario Modeling Engine</div>
@@ -8094,7 +8096,7 @@
                     <span style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.06em;">Multi-Product Lender — General Underwriting Guidelines</span>
                   </div>
                   <div style="display:flex;flex-direction:column;">${rows}</div>
-                  <div style="margin-top:8px;font-size:11px;color:#94A3B8;">Requirements vary by product. Confirm specifics with the lender at submission. <a href="/underwriting-guide.html" target="_blank" style="color:#14532D;font-weight:600;text-decoration:none;">Full underwriting guide →</a></div>
+                  <div style="margin-top:8px;font-size:11px;color:#94A3B8;">Requirements vary by product. Confirm specifics with the lender at submission. <a href="/underwriting-guide.html" target="_blank" style="color:#1A3C2E;font-weight:600;text-decoration:none;">Full underwriting guide →</a></div>
                 </div>`;
               })()}
 

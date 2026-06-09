@@ -1,0 +1,185 @@
+{
+  "source": "CapCalc - Amortization Schedule from PEAC.xlsx",
+  "inputs": {
+    "loan": 250000,
+    "factor": 1.38,
+    "termMonths": 24,
+    "frequency": "monthly",
+    "originationFeePct": 2.5
+  },
+  "expected": {
+    "totalPayback": 345000,
+    "monthlyPayment": 14375,
+    "periods": 24
+  },
+  "schedule": [
+    {
+      "period": 1,
+      "payment": 14375.0,
+      "interest": 6887.51,
+      "principal": 7487.49,
+      "balance": 242512.51
+    },
+    {
+      "period": 2,
+      "payment": 14375.0,
+      "interest": 6681.23,
+      "principal": 7693.77,
+      "balance": 234818.73
+    },
+    {
+      "period": 3,
+      "payment": 14375.0,
+      "interest": 6469.26,
+      "principal": 7905.74,
+      "balance": 226912.99
+    },
+    {
+      "period": 4,
+      "payment": 14375.0,
+      "interest": 6251.46,
+      "principal": 8123.54,
+      "balance": 218789.45
+    },
+    {
+      "period": 5,
+      "payment": 14375.0,
+      "interest": 6027.65,
+      "principal": 8347.35,
+      "balance": 210442.11
+    },
+    {
+      "period": 6,
+      "payment": 14375.0,
+      "interest": 5797.69,
+      "principal": 8577.31,
+      "balance": 201864.79
+    },
+    {
+      "period": 7,
+      "payment": 14375.0,
+      "interest": 5561.38,
+      "principal": 8813.62,
+      "balance": 193051.17
+    },
+    {
+      "period": 8,
+      "payment": 14375.0,
+      "interest": 5318.56,
+      "principal": 9056.44,
+      "balance": 183994.74
+    },
+    {
+      "period": 9,
+      "payment": 14375.0,
+      "interest": 5069.06,
+      "principal": 9305.94,
+      "balance": 174688.8
+    },
+    {
+      "period": 10,
+      "payment": 14375.0,
+      "interest": 4812.68,
+      "principal": 9562.32,
+      "balance": 165126.48
+    },
+    {
+      "period": 11,
+      "payment": 14375.0,
+      "interest": 4549.24,
+      "principal": 9825.76,
+      "balance": 155300.72
+    },
+    {
+      "period": 12,
+      "payment": 14375.0,
+      "interest": 4278.54,
+      "principal": 10096.46,
+      "balance": 145204.25
+    },
+    {
+      "period": 13,
+      "payment": 14375.0,
+      "interest": 4000.38,
+      "principal": 10374.62,
+      "balance": 134829.64
+    },
+    {
+      "period": 14,
+      "payment": 14375.0,
+      "interest": 3714.56,
+      "principal": 10660.44,
+      "balance": 124169.19
+    },
+    {
+      "period": 15,
+      "payment": 14375.0,
+      "interest": 3420.86,
+      "principal": 10954.14,
+      "balance": 113215.06
+    },
+    {
+      "period": 16,
+      "payment": 14375.0,
+      "interest": 3119.08,
+      "principal": 11255.92,
+      "balance": 101959.14
+    },
+    {
+      "period": 17,
+      "payment": 14375.0,
+      "interest": 2808.98,
+      "principal": 11566.02,
+      "balance": 90393.11
+    },
+    {
+      "period": 18,
+      "payment": 14375.0,
+      "interest": 2490.33,
+      "principal": 11884.67,
+      "balance": 78508.45
+    },
+    {
+      "period": 19,
+      "payment": 14375.0,
+      "interest": 2162.91,
+      "principal": 12212.09,
+      "balance": 66296.36
+    },
+    {
+      "period": 20,
+      "payment": 14375.0,
+      "interest": 1826.47,
+      "principal": 12548.53,
+      "balance": 53747.82
+    },
+    {
+      "period": 21,
+      "payment": 14375.0,
+      "interest": 1480.75,
+      "principal": 12894.25,
+      "balance": 40853.58
+    },
+    {
+      "period": 22,
+      "payment": 14375.0,
+      "interest": 1125.52,
+      "principal": 13249.48,
+      "balance": 27604.09
+    },
+    {
+      "period": 23,
+      "payment": 14375.0,
+      "interest": 760.49,
+      "principal": 13614.51,
+      "balance": 13989.59
+    },
+    {
+      "period": 24,
+      "payment": 14375.0,
+      "interest": 385.41,
+      "principal": 13989.59,
+      "balance": 0.0
+    }
+  ]
+}

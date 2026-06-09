@@ -181,13 +181,424 @@ borrower-facing copy.
       for document accuracy and regulatory compliance
 - [ ] Any email template that includes financial figures from a generated document
 - [ ] Any feature that stores or transmits borrower PII alongside financial estimates
+- [ ] Part II (§7–§16) — full regulatory reference reviewed by fintech-adjacent
+      counsel before compliance content renders on any borrower-facing surface
 
 ---
 
-## 7. Change Log
+# PART II — Regulatory Compliance Engine (Single Source of Truth)
+
+Part II is the authoritative regulatory reference for the LendPaper Compliance
+Engine. Do NOT duplicate this content in other markdown files — `BRANDING.md`,
+`CALCULATORS.md`, and `PDF.md` reference sections of this file only.
+
+**Status:** Drafted by engineering from primary-source research (June 2026).
+Every item below is **pending attorney review** and pending Steve's additions
+from his own research and CFJ conversations (see §16). Statuses are flagged
+**LAW**, **PENDING BILL**, or **VACATED** as of 2026-06-07.
+
+**Machine-readable counterpart:** `public/assets/js/compliance-rules.js`
+(`window.LP_COMPLIANCE_RULES`). The rules engine (`public/assets/js/compliance.js`)
+consumes that file. When this file changes, update the rules file in the same
+commit — they must never drift.
+
+---
+
+## 7. Compliance Engine Overview
+
+How the system fits together:
+
+| Piece | File | Role |
+|---|---|---|
+| Regulatory reference (this file) | `markdowns/LEGAL.md` Part II | Human-readable source of truth |
+| Rules data | `public/assets/js/compliance-rules.js` | Machine-readable matrix + phrase rules + disclaimer |
+| Rules engine | `public/assets/js/compliance.js` | State-triggered logic, disclaimer injection, language linting, PDF block |
+| Legal glossary | `public/assets/js/legal-glossary.js` | One-sentence definitions, admin backend |
+| Admin dashboard | `lp-panel.html` → Compliance view | Bulletin, master toggle, matrix viewer, glossary |
+| Scraper | `scrapers/compliance_scraper.py` | Monthly automated source monitoring (§15 registry) |
+| Schedule | `.github/workflows/compliance-watch.yml` | GitHub Actions cron, fully automated |
+
+Operating principles:
+
+1. **State selection triggers rules silently.** No salesperson ever activates
+   compliance manually. Setting the borrower state (any element wired to the
+   engine, persisted as `lp_borrower_state`) conditions every downstream surface.
+2. **Rules surface only when relevant.** A state with no special requirements
+   renders nothing. No empty chrome, no banners for banner's sake.
+3. **Admin master toggle.** `localStorage["lp_compliance_layer"] = "off"`
+   disables the layer **in that browser only** (for Steve's testing). Live users
+   always get compliance ON — there is no global kill switch shipped to clients.
+4. **More disclosure, not less** (same rule as Part I).
+
+---
+
+## 8. Outreach & Communication
+
+### 8.1 TCPA — Telephone Consumer Protection Act — **LAW** (one rule VACATED)
+
+47 U.S.C. §227; FCC rules. Governs calls and texts placed with autodialers,
+prerecorded/artificial voice, and marketing messages.
+
+- **Prior express written consent (PEWC)** is required before marketing
+  robocalls/robotexts. Consent must be signed (e-sign ok), specific, and not a
+  condition of purchase.
+- **One-to-one consent rule: VACATED.** The FCC's Dec 2023 "one-to-one" consent
+  rule was struck down by the Eleventh Circuit (*IMC v. FCC*, Jan 24, 2025) and
+  the FCC reinstated the prior rule text. Bundled consent is permissible again —
+  but PEWC itself still applies.
+- **Revocation rule — in effect Apr 11, 2025:** consumers may revoke consent by
+  any reasonable method; the keywords STOP, QUIT, REVOKE, OPT OUT, CANCEL,
+  UNSUBSCRIBE, and END must be honored, within **10 business days**. (One
+  sub-provision — revocation on one message type reaching unrelated message
+  types — is waived until Apr 11, 2026.)
+- **Penalty exposure: $500–$1,500 per call/text** (statutory damages). This is
+  the headline existential risk for outbound MCA/broker shops.
+- **Engine behavior:** every SMS template gets an opt-out line appended; every
+  outbound sequence requires a recorded consent flag before send (enforced when
+  outreach features ship).
+
+Sources: [FCC TCPA](https://www.fcc.gov/tcpa) · [FCC 24-24 (revocation order)](https://docs.fcc.gov/public/attachments/FCC-24-24A1.pdf)
+
+### 8.2 DNC / Do Not Contact — **LAW**
+
+- The **National DNC Registry does not apply to genuine B2B calls** — but many
+  "business" numbers are personal cell phones, so treat the exemption as
+  unreliable cover. Several states maintain their own DNC lists with broader
+  reach.
+- **Telemarketing Sales Rule (TSR), 2024 amendments (effective May 16, 2024):**
+  the TSR's **misrepresentation prohibitions now extend to B2B telemarketing**,
+  and recordkeeping requirements expanded (keep call records, consent records,
+  and DNC requests; retention periods now 5 years).
+- **Penalty exposure: up to $53,088 per violation** (FTC civil penalty for rule
+  violations).
+- **Engine behavior:** internal do-not-contact suppression list is honored on
+  every channel before any send/dial; per-state DNC notes surface from the matrix.
+
+Sources: [FTC TSR compliance guide](https://www.ftc.gov/business-guidance/resources/complying-telemarketing-sales-rule) · [TSR 2024 amendments (Federal Register)](https://www.federalregister.gov/documents/2024/04/16/2024-07180/telemarketing-sales-rule)
+
+### 8.3 Opt-Out Requirements — **LAW**
+
+- **Email (CAN-SPAM — applies to B2B, no exemption):** truthful headers and
+  subject lines, a physical postal address in every commercial email, a clear
+  opt-out mechanism, opt-outs honored within **10 business days**, link
+  functional for ≥30 days after send. **Penalty exposure: up to $53,088 per
+  email** — the 2025 level carried into 2026 (OMB Memo M-26-11, Apr 2026,
+  canceled the 2026 inflation adjustment because the appropriations lapse
+  blocked the October 2025 CPI-U; verified 2026-06-07).
+- **SMS:** STOP-keyword handling per TCPA revocation rule (§8.1), within
+  10 business days.
+- **Calls:** entity-specific do-not-call demands must be honored regardless of
+  the B2B registry exemption.
+- **Engine behavior:** opt-out language is injected into every outbound
+  template; suppression is channel-wide, not per-campaign.
+
+Source: [FTC CAN-SPAM compliance guide](https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business)
+
+---
+
+## 9. Sales Conduct
+
+### 9.1 No Absolutes — house rule backed by FTC Act §5 — **LAW**
+
+Never guarantee approvals, rates, timelines, or outcomes. Prohibited patterns
+(enforced by the engine's language linter, which extends Part I §5):
+
+| Never say | Say instead |
+|---|---|
+| "You will be approved" / "guaranteed approval" | "Subject to lender underwriting and approval" |
+| "Guaranteed rate" / "locked rate" (pre-underwriting) | "Estimated rate, subject to final review" |
+| "Funds in 24 hours, guaranteed" | "Funding timing is determined by the lender; same-week timelines are common but not assured" |
+| "Lowest rate in the market" | Drop superlatives, or cite a verifiable comparison |
+| "Risk-free" / "no downside" | Never use in any financial context |
+
+### 9.2 No Misrepresentation — **LAW** (FTC Act §5 UDAP; TSR B2B; state UDAP)
+
+Accurate representation is required for **product type, interest rate, factor
+rate, term length, payment frequency, and timing of funding**:
+
+- Never present a factor-rate product as an interest-rate loan (or vice versa).
+  A 1.25 factor is **not** "25% interest."
+- Never quote a buy rate as the borrower's cost when a sell-rate markup applies.
+- Never describe an MCA/RBF as a "loan" in borrower-facing copy — it is a
+  purchase of future receivables (this is also what keeps it outside usury law;
+  see glossary: Reconciliation Clause).
+- Misrepresentation in B2B telemarketing is now directly actionable under the
+  TSR (§8.2), in addition to FTC Act §5 and state UDAP statutes (enforced by
+  state AGs).
+- **Penalty exposure: up to $53,088 per violation** (FTC §5 rule/order
+  violations and TSR), plus state UDAP penalties (e.g., CA UCL $2,500 per
+  violation) and AG restitution actions.
+
+Sources: [FTC Act §5 (UDAP)](https://www.ftc.gov/legal-library/browse/statutes/federal-trade-commission-act) · NY AG: [ag.ny.gov](https://ag.ny.gov/) · CA AG: [oag.ca.gov](https://oag.ca.gov/)
+
+---
+
+## 10. Disclosure Requirements
+
+### 10.1 APR Disclosure — mandatory in NY and CA — **LAW**
+
+Factor rates and simple-interest rates alone are **insufficient** in these
+states — an APR (or APR-equivalent) must be disclosed on covered offers.
+
+**New York — Commercial Finance Disclosure Law (CFDL)**
+NY Fin. Serv. Law Art. 8 (S5470-B as amended); 23 NYCRR Part 600. Mandatory
+compliance since **Aug 1, 2023**.
+- Covers commercial financing of **$2.5M or less** (closed-end, open-end,
+  sales-based/MCA, factoring, lease financing).
+- At the time of a specific offer: standardized disclosure of total amount,
+  disbursement, finance charge, **APR (converted from factor rate for
+  sales-based products)**, total repayment, payment amount/frequency,
+  prepayment terms.
+- **Brokers are directly regulated**: broker compensation must be disclosed in
+  writing; brokers transmitting disclosures must provide timestamped evidence
+  of transmission.
+- Enforced by NYDFS. **Penalty exposure: up to $2,000 per violation ($10,000
+  per knowing violation) + restitution.**
+
+**California — SB 1235 Commercial Financing Disclosures**
+Fin. Code §§22800–22805; 10 CCR §§900–956. DFPI regs effective **Dec 9, 2022**.
+- Covers offers of **$500,000 or less**.
+- Required: amount financed, APR (including for sales-based financing), finance
+  charge, payment amounts, prepayment policies. **Penalty exposure: DFPI
+  enforcement under the CFL — up to $2,500 per violation (verify).**
+- **CA SB 666 (effective Jan 1, 2024)** additionally prohibits providers *and
+  brokers* from charging small businesses certain fees: ACH-debit fees (except
+  NSF), unexplained "platform/due-diligence" fees stacked on origination,
+  collateral-monitoring fees (unless 60+ days delinquent), UCC fees >150% of
+  cost. **Penalty exposure: $500–$2,500 statutory damages per violation +
+  attorneys' fees.**
+
+**Maryland — NO LAW; SB 881 DIED (verified 2026-06-07).** SB 754 (2025) died;
+its successor **SB 881 (2026) passed the Senate 42-0 but died in the House**
+when the session adjourned sine die Apr 13, 2026 (crossfile HB 1007 also died).
+It would have required APR disclosure + OFR licensing, with penalties of
+**$2,000/violation ($10,000 willful)**. A unanimous Senate vote makes a **2027
+reintroduction highly likely — WATCH**; the scraper monitors the MGA pages.
+
+**Delaware — NO disclosure law, none pending identified.** DE's Division of
+Banking has begun registering MCA firms and brought enforcement actions in
+2025 — monitor registration/enforcement activity, not a disclosure statute.
+
+**Engine behavior:** selecting NY or CA injects the state's disclosure
+requirements into calculator notes and PDF output; MD/DE inject a short
+"emerging legislation" monitor note for internal users only.
+
+Sources: [NY FSL Art. 8](https://www.nysenate.gov/legislation/laws/FIS/A8) · [23 NYCRR 600](https://www.dfs.ny.gov/industry_guidance/regulations/final_financial_services/rf_finservices_23nycrr600_text) · [DFPI commercial financing disclosures](https://dfpi.ca.gov/regulated-industries/california-financing-law/about-california-financing-law/california-financing-law-commercial-financing-disclosures/) · [CA SB 666](https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202320240SB666) · [MD SB 881](https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/sb0881?ys=2026RS) · [DE legislature](https://legis.delaware.gov/)
+
+### 10.2 State-Specific Disclosures — other states with laws IN EFFECT
+
+Required disclosures vary by state and product. Full detail lives in the state
+matrix (§13 + `compliance-rules.js`). One-liners:
+
+- **Utah** — Commercial Financing Registration & Disclosure Act: registration
+  with DFI + disclosures (since Jan 1, 2023).
+- **Virginia** — sales-based financing providers/brokers must register with the
+  SCC + give disclosures (since 2022).
+- **Georgia** — disclosures ≤$500k, no registration (mandatory Jan 1, 2024).
+- **Florida** — Commercial Financing Disclosure Law, ≤$500k (Jan 1, 2024).
+- **Connecticut** — sales-based financing ≤$250k + registration (July 1, 2023).
+- **Kansas** — Commercial Financing Disclosure Act (2024).
+- **Missouri** — disclosures + provider registration (effective Feb 28, 2025).
+- **Texas** — **LAW (verified 2026-06-07).** HB 700 → Tex. Fin. Code Ch. 398,
+  effective **Sept 1, 2025**: total-cost disclosures (no APR) on commercial
+  **sales-based financing offers under $1M**; **providers AND brokers must
+  register with the OCCC by Dec 31, 2026** (registration is not capped at $1M;
+  Finance Commission rules pending).
+- **Louisiana** — **LAW (verified 2026-06-07).** Two layered statutes: the 2024
+  disclosure law (**La. R.S. 9:3138.1–3138.6**, eff. Jan 1, 2025) plus **Act
+  198 of 2025 / HB 470** (**R.S. 9:3137.10**, eff. **Aug 1, 2025**) covering
+  revenue-based financing with **no dollar threshold and no entity
+  exemptions** — total-cost model, no APR, no registration.
+
+> Note: Texas and Louisiana use a **total-cost** disclosure model — no APR
+> required. Among 2025–2026 enactments, the APR-mandating approach (NY/CA
+> style) so far exists only in the **failed** MD bill.
+
+2025 CFPB determination: these state laws are **not preempted by TILA** — they
+coexist with federal law. ([CFPB statement](https://www.consumerfinance.gov/about-us/newsroom/state-disclosure-laws-business-lending-consistent-with-truth-in-lending-act/))
+
+---
+
+## 11. Ethics & Integrity
+
+### 11.1 Anti-Bribery — **LAW**
+
+No payments, gifts, or incentives to influence lending decisions, referrals, or
+underwriting outcomes. Commercial bribery is a crime under state law (e.g., NY
+Penal Law §180.00) regardless of the FCPA's foreign-officials focus. Broker
+compensation must be disclosed where state law requires it (NY CFDL — §10.1).
+
+### 11.2 Anti-Corruption — **LAW**
+
+Compliance with federal anti-corruption statutes (FCPA for any foreign-touching
+business; 18 U.S.C. §666 where federal funds are involved) and applicable state
+statutes. Kickback arrangements between brokers, ISOs, and funder employees —
+including undisclosed referral-fee splits that influence placement — are treated
+as corruption risk, not "industry practice."
+
+**Engine behavior:** talk-track templates exclude any gift/incentive language;
+glossary documents Backdooring as an ethics violation, not a workaround.
+
+---
+
+## 12. Data & Privacy
+
+### 12.1 CCPA / CPRA (California) — **LAW — now fully covers B2B data**
+
+The B2B and employee exemptions **expired Jan 1, 2023**. B2B contact data —
+i.e., LendPaper's and its users' outreach lists — is fully in scope: rights to
+know/access, delete, correct, and opt out of sale/sharing apply.
+**Penalty exposure: $2,500 per violation / $7,500 intentional (regulator);
+$100–$750 per consumer per incident in private breach suits.**
+Source: [oag.ca.gov/privacy/ccpa](https://oag.ca.gov/privacy/ccpa)
+
+### 12.2 GLBA Safeguards Rule (FTC, 16 CFR Part 314) — **LAW**
+
+Applies to non-bank "financial institutions" including **loan brokers and
+finders** handling customer financial data. Requires a written infosec program,
+designated Qualified Individual, risk assessments, encryption, MFA, access
+controls, vendor oversight, incident response — and **breach notification to
+the FTC within 30 days** for events affecting ≥500 consumers.
+**Penalty exposure: up to $53,088 per violation in FTC enforcement (verify).**
+Source: [FTC Safeguards Rule guide](https://www.ftc.gov/business-guidance/resources/ftc-safeguards-rule-what-your-business-needs-know) · [16 CFR 314](https://www.ecfr.gov/current/title-16/part-314)
+
+### 12.3 FCRA — **LAW** (when pulling owner personal credit)
+
+Pulling a business **owner's** personal credit is a consumer-report use:
+requires permissible purpose + authorization, and triggers FCRA adverse-action
+notices when credit is denied based on the report.
+**Penalty exposure: $100–$1,000 statutory per willful violation + actual and
+punitive damages.**
+
+### 12.4 ECOA / Regulation B — **LAW — applies to business credit**
+
+Adverse-action notices are required for business applicants: written
+consumer-style notice for businesses ≤$1M gross revenue; on-request statement
+of reasons for larger applicants. **Penalty exposure: actual damages +
+punitive up to $10,000 (individual) / lesser of $500k or 1% of creditor net
+worth (class).** Source: [12 CFR 1002](https://www.ecfr.gov/current/title-12/chapter-X/part-1002)
+
+### 12.5 CFPB §1071 small-business lending data rule — **LAW (revised 2026, fluid)**
+
+Revised final rule (May 2026): narrowed scope, single compliance date
+**Jan 1, 2028**, first filing June 2029, ≥1,000 originations/yr threshold.
+Applies to covered **lenders**, not SaaS vendors — relevant to LendPaper's
+customers. Litigation ongoing; **re-verify before building features on it**.
+Source: [consumerfinance.gov/1071-rule](https://www.consumerfinance.gov/1071-rule/)
+
+### 12.6 Emerging state privacy laws — **MONITOR**
+
+The state-privacy patchwork (VA, CO, CT, UT, TX, OR, MT, …) keeps growing; most
+have B2B carve-outs narrower than CCPA's former one. Tracked via scraper.
+
+---
+
+## 13. State Regulatory Matrix
+
+Human-readable summary. **Canonical machine-readable data:
+`public/assets/js/compliance-rules.js`** — the rules engine reads that file,
+not this table. Keep both in sync in the same commit.
+
+| State | Disclosure law | APR required | Registration / licensing | Usury (business loans) | Underwriting doc adds | Emerging |
+|---|---|---|---|---|---|---|
+| **NY** | CFDL — LAW (≤$2.5M, since 8/2023) | **Yes**, incl. factor→APR conversion | Art. 9 license for ≤$50k loans >16%; broker comp disclosure under CFDL | Civil 16% (no corp defense) / criminal 25%; >$2.5M exempt | CFDL disclosure copy + transmission evidence (brokers); COJ restricted | Broker-licensing bills recur — monitor |
+| **CA** | SB 1235 — LAW (≤$500k, since 12/2022) | **Yes**, incl. sales-based financing | CFL license (lenders, some brokers); DFPI | Const. Art. XV ~10% cap, broad exemptions for licensed lenders | SB 1235 disclosure forms; SB 666 fee-prohibition check | CCPA/CPRA enforcement active |
+| **MD** | None — **SB 881 DIED 4/13/2026** (passed Senate 42-0) | No | OFR lender licensing regime exists today | General caps w/ commercial exemptions | None extra today; prep CFDL-style pack for likely 2027 bill | **WATCH — 2027 reintroduction likely** |
+| **DE** | None; none pending | No | Division of Banking registering MCA firms (2025 enforcement) | **No cap** >$100k business loans; no corp usury defense | None extra | Registration/enforcement trend |
+| UT | LAW (1/2023) | Disclosure regime (registration + disclosures) | DFI registration | — | Per-product disclosure | — |
+| VA | LAW (2022, sales-based) | Disclosure regime | SCC registration | — | Per-product disclosure | — |
+| GA | LAW (1/2024) | Disclosure regime | None | — | Per-product disclosure | — |
+| FL | LAW (1/2024) | Disclosure regime | None | — | Per-product disclosure | — |
+| CT | LAW (7/2023, ≤$250k) | Disclosure regime | Registration | — | Per-product disclosure | — |
+| KS | LAW (2024) | Disclosure regime | None | — | Per-product disclosure | — |
+| MO | LAW (2/2025) | Disclosure regime | Registration | — | Per-product disclosure | — |
+| TX | LAW — Fin. Code Ch. 398 (eff. 9/1/2025, sales-based <$1M) | No (total-cost) | **OCCC registration — providers AND brokers, by 12/31/2026** | — | Ch. 398 disclosure | Finance Commission rules pending |
+| LA | LAW — R.S. 9:3138.1–.6 (1/2025) + R.S. 9:3137.10 (8/2025, RBF, **no threshold**) | No (total-cost) | None | — | Per-product disclosure | — |
+| All others | Federal baseline only (§8–§12) | No | — | Varies | — | Scraper monitors |
+
+Product availability: no state currently bans MCA/RBF products outright for
+business recipients — the gating risk is **disclosure + registration**, plus
+**COJ restrictions** (NY bans confessions of judgment against out-of-state
+small businesses). The engine's product gating therefore defaults to
+"available + conditioned," with the structure in place to hard-disable a
+product per state the day a ban exists.
+
+---
+
+## 14. Compliance Disclaimer (Canonical — auto-injected)
+
+This is the single canonical "not legal advice" string. It lives here and as
+`LP_COMPLIANCE_RULES.disclaimer` — **never hardcode it anywhere else**. The
+engine appends it automatically to any UI element, PDF section, email, talk
+track, or generated content that surfaces regulatory or legal information.
+
+```
+This information is provided for general reference only and does not constitute
+legal advice. Consult qualified legal counsel for guidance specific to your situation.
+```
+
+---
+
+## 15. Source Registry (canonical scraper monitor list)
+
+Every regulation referenced anywhere in LendPaper links to its primary
+authoritative source below. This table is **parsed by
+`scrapers/compliance_scraper.py`** — keep the format exactly:
+`| id | name | jurisdiction | url |`. Add a row here and the scraper monitors
+it on the next monthly run.
+
+<!-- SOURCE-REGISTRY:BEGIN -->
+| id | name | jurisdiction | url |
+|---|---|---|---|
+| fcc-tcpa | FCC — TCPA rules | Federal | https://www.fcc.gov/tcpa |
+| ftc-tsr | FTC — Telemarketing Sales Rule guide | Federal | https://www.ftc.gov/business-guidance/resources/complying-telemarketing-sales-rule |
+| ftc-canspam | FTC — CAN-SPAM compliance guide | Federal | https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business |
+| ftc-safeguards | FTC — GLBA Safeguards Rule guide | Federal | https://www.ftc.gov/business-guidance/resources/ftc-safeguards-rule-what-your-business-needs-know |
+| cfpb-newsroom | CFPB — Newsroom | Federal | https://www.consumerfinance.gov/about-us/newsroom/ |
+| cfpb-1071 | CFPB — §1071 small business lending rule | Federal | https://www.consumerfinance.gov/1071-rule/ |
+| ecfr-regb | eCFR — Regulation B (12 CFR 1002) | Federal | https://www.ecfr.gov/current/title-12/chapter-X/part-1002 |
+| ny-cfdl | NY Financial Services Law Art. 8 (CFDL) | NY | https://www.nysenate.gov/legislation/laws/FIS/A8 |
+| ny-dfs-600 | NYDFS — 23 NYCRR Part 600 | NY | https://www.dfs.ny.gov/industry_guidance/regulations/final_financial_services/rf_finservices_23nycrr600_text |
+| ny-banking-9 | NY Banking Law Art. 9 (licensing) | NY | https://www.nysenate.gov/legislation/laws/BNK/A9 |
+| ny-ag | NY Attorney General | NY | https://ag.ny.gov/ |
+| ca-dfpi | CA DFPI — commercial financing disclosures | CA | https://dfpi.ca.gov/regulated-industries/california-financing-law/about-california-financing-law/california-financing-law-commercial-financing-disclosures/ |
+| ca-sb666 | CA SB 666 — prohibited fees | CA | https://leginfo.legislature.ca.gov/faces/billNavClient.xhtml?bill_id=202320240SB666 |
+| ca-ccpa | CA AG — CCPA/CPRA | CA | https://oag.ca.gov/privacy/ccpa |
+| md-sb881 | MD SB 881 (2026, died 4/2026) — watch for 2027 reintroduction | MD | https://mgaleg.maryland.gov/mgawebsite/Legislation/Details/sb0881?ys=2026RS |
+| md-ofr | MD Office of Financial Regulation | MD | https://www.labor.maryland.gov/finance/ |
+| de-usury | DE Code Title 6 Ch. 23 (usury) | DE | https://delcode.delaware.gov/title6/c023/index.html |
+| de-ag | DE Attorney General | DE | https://attorneygeneral.delaware.gov/ |
+| ut-dfi | UT DFI — commercial financing registration | UT | https://dfi.utah.gov/non-depository/commercial-financing/ |
+| va-sbf | VA Code Title 6.2 Ch. 22.1 — sales-based financing | VA | https://law.lis.virginia.gov/vacodefull/title6.2/chapter22.1/ |
+| tx-hb700 | TX HB 700 (2025) — Fin. Code Ch. 398 bill history | TX | https://capitol.texas.gov/BillLookup/History.aspx?LegSess=89R&Bill=HB700 |
+| tx-occc | Texas OCCC — sales-based financing registration/rules | TX | https://occc.texas.gov/ |
+| la-act198 | LA Act 198 (2025) / HB 470 — R.S. 9:3137.10 | LA | https://www.legis.la.gov/legis/BillInfo.aspx?i=248484 |
+<!-- SOURCE-REGISTRY:END -->
+
+**Monitoring log:** <!-- SCRAPER-LAST-RUN -->never (first automated run pending)<!-- /SCRAPER-LAST-RUN -->
+
+Detected changes are written to `public/assets/data/compliance-bulletin.json`
+and surface on the lp-panel Compliance dashboard — not into this file's legal
+text. A human (Steve + counsel) promotes bulletin items into §8–§13.
+
+---
+
+## 16. Steve's Additions (CFJ conversations + own research)
+
+> Placeholder — Steve to populate. Rules captured from CFJ ($500M/yr direct
+> lender) conversations and independent research land here first, then get
+> merged into the appropriate section above and into `compliance-rules.js`.
+
+- [ ] (none recorded yet)
+
+---
+
+## 17. Change Log
 
 | Date | Change | Author |
 |---|---|---|
 | 2026-05-22 | Initial legal copy established | Founder / LendPaper |
+| 2026-06-07 | Part II added: regulatory compliance engine sections (§7–§16), state matrix, source registry, canonical compliance disclaimer (LEN-88) | Claude / LendPaper |
+| 2026-06-07 | Primary-source verification pass: TX HB 700 = LAW (eff. 9/1/2025, OCCC registration); LA = LAW (2024 law + Act 198, eff. 8/1/2025, no threshold); MD SB 881 DIED 4/13/2026 (watch 2027); CAN-SPAM $53,088 confirmed for 2026 (OMB M-26-11). Penalty exposure ranges added per regulation (§8–§13 + glossary) | Claude / LendPaper |
 
 *Update this log whenever disclaimer copy, legal positions, or entity status change.*

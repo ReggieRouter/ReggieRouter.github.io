@@ -32,9 +32,9 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fundability | LendPaper</title>
-    <meta property="og:title" content="Fundability Calculator — LendPaper" />
-    <meta property="og:description" content="Score a borrower's fundability profile and find the right lender tier instantly. Questions? Email hello@lendpaper.com" />
+    <title>Position & Net | LendPaper</title>
+    <meta property="og:title" content="Position & Net — LendPaper" />
+    <meta property="og:description" content="Net requirement & stacking-position risk — score a borrower's fundability and find the right lender tier instantly. Questions? Email hello@lendpaper.com" />
     <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
     <meta property="og:url" content="https://lendpaper.com/calculators/FundabilityCalculator" />
     <meta property="og:type" content="website" />
@@ -47,19 +47,37 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
+    <link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
     <script src="../public/assets/js/calculator-app.js"></script>
     <script src="../public/assets/js/pdf-helper.js"></script>
+    <script src="../public/assets/js/compliance-rules.js"></script>
+    <script src="../public/assets/js/compliance.js"></script>
+    <!-- Quote Log bootstrap (LEN-123): config + supabase importmap + shared util -->
+    <script src="../js/config.js"></script>
+    <script type="importmap">
+      { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+    </script>
+    <!-- Hard auth gate (LEN-68, re-applied for launch): requireApprovedUser() redirects logged-out/unapproved users to /login.html. Never add a bare top-level return (ES-module parse error). -->
+    <script type="module">
+      import { requireApprovedUser, logUsage } from '../js/auth.js';
+      const profile = await requireApprovedUser();
+      if (profile) {
+        window.lpProfile = profile;
+        logUsage('fundability', 'view');
+      }
+    </script>
+    <script type="module" src="../js/quote-log.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         :root {
-            --lp-green: #14532D;
+            --lp-green: #1A3C2E;
             --lp-green-light: #f0fdf4;
             --lp-dark: #111827;
             --lp-text-muted: #64748b;
             --lp-border: #e5e7eb;
             
-            --risk-low-bg: #f0fdf4;    --risk-low-bd: #16a34a;  --risk-low-tx: #14532D;
+            --risk-low-bg: #f0fdf4;    --risk-low-bd: #16a34a;  --risk-low-tx: #1A3C2E;
             --risk-mod-bg: #fffbeb;    --risk-mod-bd: #f59e0b;  --risk-mod-tx: #92400e;
             --risk-high-bg: #fff7ed;   --risk-high-bd: #ea580c; --risk-high-tx: #9a3412;
             --risk-sev-bg: #fef2f2;    --risk-sev-bd: #dc2626;  --risk-sev-tx: #991b1b;
@@ -82,15 +100,15 @@
             .lp-main { padding: 16px 12px; }
             .lp-tab { padding: 16px 8px; font-size: 11px; }
             .lp-tab-sub { font-size: 8px; }
-            .lp-inputs, .shared-strip, .lp-results { padding: 20px; }
-            .lp-howto { padding: 16px; margin-bottom: 24px; }
+            .lp-inputs, .lp-results { padding: 20px; }
+            .lp-howto { padding: 16px 34px 16px 18px; margin-bottom: 24px; }
             .hero-grid { gap: 16px; }
             .hero-value { font-size: 24px; }
         }
 
         .lp-container {
             width: 100%;
-            max-width: 680px;
+            max-width: 960px;
             background: #ffffff;
             border: 1px solid var(--lp-border);
             border-radius: 20px;
@@ -142,23 +160,44 @@
         }
 
         /* Inputs */
-        .shared-strip {
-            padding: 24px;
-            background: #f8fafc;
+        /* LEN-156 — PERMANENT FIX for the recurring "funding row overhangs to the right"
+           bug. The shared "new funding under review" field used to be a bespoke full-width
+           strip sitting ABOVE the two-column grid, so its input width had to be hand-matched
+           to the 0.82fr left column — a fragile coupling that re-broke at some viewport on
+           every prior attempt (fixed px, then grid-mirroring).
+           Now the field is a NORMAL first field INSIDE the active panel's left input column,
+           relocated on tab switch exactly like #deal-context (see mountFunding()). It
+           inherits the column width automatically — identical to every other calculator's
+           primary input — so it structurally cannot overhang. No width logic to drift.
+           The bottom rule just sets it apart as the shared input shown on both tabs. */
+        .lp-funding-shared {
+            padding-bottom: 20px;
+            margin-bottom: 20px;
             border-bottom: 1px solid var(--lp-border);
         }
         .lp-inputs { padding: 24px; background: #fff; }
+        /* LEN-156 — intro banner matches the Amortization calc standard: a soft mint-green
+           filled box (no left-accent bar), sitting atop the active panel's left column.
+           Dismissible (× injected by PDF_HELPER.initDismissibles into this relative box). */
         .lp-howto {
-            font-size: 14px;
+            background-color: #F0FDF4;
+            border-radius: 12px;
+            padding: 16px 34px 16px 18px;   /* right pad leaves room for the × */
+            font-size: 13px;
             font-weight: 500;
             color: #334155;
-            background: var(--lp-green-light);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
             line-height: 1.6;
+            margin: 0 0 20px;
+            position: relative;
         }
-        .lp-howto strong { color: #14532D; font-weight: 800; }
+        .lp-howto strong { color: #1A3C2E; font-weight: 800; }
+        .lp-intro-toggle-btn {
+            width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
+            border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
+            font-size: 9.5px; font-weight: 800; background: #fff; cursor: pointer;
+            margin-left: 8px; vertical-align: middle; transition: all 0.15s; padding: 0;
+        }
+        .lp-intro-toggle-btn:hover { border-color: var(--lp-green); color: var(--lp-green); }
 
         .takeaway {
             background: #fff;
@@ -182,43 +221,48 @@
             margin-bottom: 8px;
         }
 
+        /* LEN-156 — field labels match the Amortization standard: dark (#111827), 11px/700,
+           tight tracking, 8px gap. (Was brand-green/800 — heavier and off from Amo.) */
         label {
             display: block;
             font-size: 11px;
-            font-weight: 800;
-            color: var(--lp-green);
+            font-weight: 700;
+            color: #111827;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 12px;
+            letter-spacing: 0.025em;
+            margin-bottom: 8px;
         }
 
+        /* LEN-156 — input fields match the Amortization standard: 8px radius and a LIGHT
+           affix (just a muted $ / % with a thin divider, no filled gray box — the filled
+           box made these read heavier and "sized differently" from Amo). */
         .input-wrap {
             display: flex;
             align-items: stretch;
             border: 2px solid var(--lp-border);
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
             background: #fff;
         }
         .input-wrap:focus-within { border-color: var(--lp-green); }
         .input-prefix, .input-suffix {
-            background: #f8fafc;
+            background: transparent;
             border-right: 1px solid var(--lp-border);
-            padding: 0 18px;
+            padding: 0 8px 0 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #94a3b8;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
         }
-        .input-suffix { border-right: none; border-left: 1px solid var(--lp-border); }
+        .input-suffix { border-right: none; border-left: 1px solid var(--lp-border); padding: 0 14px 0 8px; }
         .input-field {
             border: none;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            color: #1e293b;
+            padding: 10px 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #111827;
             width: 100%;
             outline: none;
             font-family: inherit;
@@ -226,19 +270,16 @@
 
         .lp-results { padding: 24px; border-top: 1px solid var(--lp-border); background-color: #fff; }
 
-        /* Position Risk Styles */
+        /* LEN-156 — section labels match the Amortization standard: simple muted-gray
+           kicker, no trailing rule line (the rule added visual noise Amo doesn't have). */
         .lp-section-label {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
-            color: var(--lp-green);
+            color: #6B7280;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            letter-spacing: 0.08em;
+            margin-bottom: 12px;
         }
-        .lp-section-label::after { content: ""; flex: 1; height: 1px; background: var(--lp-border); }
         .lp-divider { height: 1px; background: var(--lp-border); margin: 20px 0; }
 
         .lp-toggle {
@@ -288,13 +329,19 @@
         }
         .add-pos-btn:hover { border-color: var(--lp-green); color: var(--lp-green); background: var(--lp-green-light); }
 
+        /* LEN-156 — verdict is an on-brand card (Steve: brand-green, text only; standard =
+           Amortization calc). White card, brand-green left accent, 12px radius. Risk level
+           is conveyed by the headline text ("Moderate risk") + the band legend below — NOT
+           by amber/orange/red on the card. setVerdictColor() no longer tints per band. */
         .verdict {
-            border: 2px solid var(--risk-low-bd); background: var(--risk-low-bg);
-            border-radius: 16px; padding: 16px; margin-bottom: 20px; text-align: center;
+            background: #fff;
+            border: 1px solid var(--lp-border);
+            border-left: 5px solid var(--lp-green);
+            border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; text-align: left;
         }
-        .verdict-eyebrow { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; margin-bottom: 6px; }
-        .verdict-headline { font-size: 24px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
-        .verdict-sub { font-size: 13px; font-weight: 500; margin-top: 10px; line-height: 1.5; }
+        .verdict-eyebrow { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 6px; }
+        .verdict-headline { font-size: 30px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.1; color: var(--lp-green); }
+        .verdict-sub { font-size: 13px; font-weight: 500; margin-top: 8px; line-height: 1.5; color: #475569; }
 
         .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .hero-output { text-align: center; }
@@ -303,24 +350,75 @@
 
         .result-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; margin-bottom: 20px; }
         .result-item {
-            background: #fff; padding: 16px 20px; border-radius: 14px; border: 1px solid var(--lp-border);
+            background: #fff; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--lp-border);
             display: flex; justify-content: space-between; align-items: center;
         }
         .result-label { font-size: 13px; font-weight: 600; color: #64748b; display: flex; align-items: center; }
         .result-val { font-size: 16px; font-weight: 800; color: #1e293b; }
         .result-item.hidden { display: none; }
 
-        .legend { background: #f8fafc; border: 1px solid var(--lp-border); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
+        .legend { background: #f8fafc; border: 1px solid var(--lp-border); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
         .legend-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 14px; }
         .legend-row { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 10px; }
         .legend-row:last-child { margin-bottom: 0; }
         .legend-dot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
         .legend-range { color: #94a3b8; font-weight: 700; margin-left: auto; }
 
-        .lp-actions { display: flex; flex-direction: row; gap: 12px; margin-top: 20px; }
+        .lp-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         .lp-actions .lp-copy-btn,
         .lp-actions .lp-print-btn { flex: 1; width: auto; }
-        .panel > .lp-howto { margin: 20px 24px 0; }
+        /* LEN-11 — standard action-button CTAs (matches Payment Breakdown) */
+        .lp-cta-primary, .lp-cta-secondary { display:flex; align-items:center; justify-content:center; gap:8px;
+            width:100%; padding:12px 16px; border-radius:10px; font-size:13px; font-weight:700;
+            letter-spacing:0.02em; cursor:pointer; transition:all 120ms; }
+        .lp-cta-primary { background:#1A3C2E; color:#fff; border:1px solid #1A3C2E; }
+        .lp-cta-primary:hover { background:#2D6A4F; }
+        .lp-cta-secondary { background:transparent; color:#1A3C2E; border:1px solid #1A3C2E; }
+        .lp-cta-secondary:hover { background:#F0FDF4; }
+        /* LEN-11 — optional Document details panel (screen only; never printed) */
+        .lp-doc-details {
+            max-width: 980px; margin: 0 auto 14px; padding: 0 4px;
+            border: 1px solid #E5E7EB; border-radius: 10px; background: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .lp-doc-details > summary {
+            list-style: none; cursor: pointer; padding: 12px 14px;
+            font-size: 12px; font-weight: 800; color: #111827; letter-spacing: 0.01em;
+        }
+        .lp-doc-details > summary::-webkit-details-marker { display: none; }
+        .lp-doc-details > summary::before { content: "+ "; color: #1A3C2E; font-weight: 900; }
+        .lp-doc-details[open] > summary::before { content: "– "; }
+        .lp-doc-details > summary span { color: #6B7280; font-weight: 500; }
+        .lp-doc-details-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px;
+            padding: 4px 14px 16px;
+        }
+        .lp-doc-details-grid label {
+            display: flex; flex-direction: column; gap: 4px;
+            font-size: 10px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .lp-doc-details-grid input {
+            padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 7px;
+            font-size: 13px; font-weight: 500; color: #111827; text-transform: none; letter-spacing: 0;
+            font-family: inherit; background: #fff;
+        }
+        .lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
+        .lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
+        @media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+        /* LEN-147 — deal-context overrides (replaces .lp-context + uppercase title band) */
+        #deal-context [data-lp-compliance-host] { margin: 0 !important; }
+        #deal-context [data-lp-compliance-host] > div { align-items: flex-start !important; }
+        #deal-context .lp-doc-details { max-width: 100%; margin: 0; }
+        /* LEN-11 — broker/deal context block injected into the captured body at print time */
+        .lp-doc-context { display: none; }
+        body.pdf-export-mode .lp-doc-context {
+            display: block; margin: 0 0 14px; padding: 11px 15px;
+            border: 1px solid #E5E7EB; border-radius: 10px; background: #F9FAFB;
+            -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .lp-doc-context .dc-for { font-size: 15px; font-weight: 800; color: #111827; word-break: break-word; }
+        .lp-doc-context .dc-meta { font-size: 11px; color: #6B7280; margin-top: 3px; }
+        .lp-doc-context .dc-by { font-size: 11px; color: #374151; margin-top: 2px; }
         .lp-copy-btn {
             background-color: var(--lp-green); color: white; padding: 18px; border: none; border-radius: 10px;
             font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;
@@ -360,7 +458,21 @@
         body.is-embedded .lp-container { border: none; box-shadow: none; border-radius: 0; max-width: 100%; }
 
         .panel { display: none; }
-        .panel.active { display: block; }
+        /* Two-column calculator body (CALCULATORS.md §4): inputs left (~45%), results right (~55%) */
+        .panel.active {
+            display: grid;
+            grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+            align-items: start;
+            gap: 0;
+        }
+        .panel.active .lp-results {
+            border-top: none;
+            border-left: 1px solid var(--lp-border);
+        }
+        @media (max-width: 760px) {
+            .panel.active { grid-template-columns: 1fr; }
+            .panel.active .lp-results { border-left: none; border-top: 1px solid var(--lp-border); }
+        }
 
         @media (max-width: 420px) { .grid-2 { grid-template-columns: 1fr; } }
 
@@ -430,7 +542,7 @@
         border-top: 0.5pt solid #E5E7EB;
         padding-top: 6px;
     }
-    .lp-print-footer a { color: #14532D; font-weight: 700; text-decoration: none; }
+    .lp-print-footer a { color: #1A3C2E; font-weight: 700; text-decoration: none; }
     .lp-print-footer .lp-print-footer-disclaimer { font-size: 5.5pt; color: #9CA3AF; }
 }
 /* Hidden in screen view */
@@ -439,7 +551,7 @@
 
         @media print {
             body { background: white !important; }
-            .no-print, header, .modal-header, .lp-actions, .lp-pill-btn, .remove-card-btn, .lp-disclaimer, .tooltip-icon, .lp-howto, .lp-tab-sub, .shared-strip { display: none !important; }
+            .no-print, header, .modal-header, .lp-actions, .lp-pill-btn, .remove-card-btn, .lp-disclaimer, .tooltip-icon, .lp-howto, .lp-tab-sub, .lp-funding-shared { display: none !important; }
             .print-header-content { display: block !important; text-align: center; margin-bottom: 32px; padding-top: 20px; }
             .print-header-content img { height: 32px; margin: 0 auto 12px auto; }
             .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
@@ -465,7 +577,7 @@
         body.pdf-export-mode .tooltip-icon, 
         body.pdf-export-mode .lp-howto,
         body.pdf-export-mode .lp-tab-sub,
-        body.pdf-export-mode .shared-strip,
+        body.pdf-export-mode .lp-funding-shared,
         body.pdf-export-mode .calc-card-header,
         body.pdf-export-mode .lp-tabs { display: none !important; }
         
@@ -482,6 +594,11 @@
         body.pdf-export-mode .print-footer-legal { display: none !important; }
         body.pdf-export-mode .print-watermark { display: none !important; }
         body.pdf-export-mode .tk-eyebrow { display: none !important; }
+        /* LEN-141: never surface the competitor waterfall / "view lenders" CTAs in a
+           borrower-facing PDF — these sell from broker/lender TO borrower, not to the
+           competition. (A general a[href*="waterfall"] guard also lives in pdf-calm.css.) */
+        body.pdf-export-mode #wf-context,
+        body.pdf-export-mode #wf-cta { display: none !important; }
     </style>
 </head>
 <body>
@@ -490,18 +607,18 @@
 
 <header class="modal-header">
     <svg class="modal-logo" width="124" height="22" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
-      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
         <path d="M4 4v16h11l5-5V4H4z"/>
-        <path d="M15 20v-5h5"/>
+        <path d="M15 20v-5h5" stroke-linecap="butt"/>
         <path d="M9 9v6"/>
         <path d="M9 15h4"/>
       </svg>
       <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
-        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#14532D">.</tspan>
+        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#1A3C2E">.</tspan>
       </text>
     </svg>
     <div class="modal-title">
-        <span class="modal-title-main">Fundability</span>
+        <span class="modal-title-main">Position & Net</span>
         <span class="modal-title-sub">Borrower Readiness Report</span>
     </div>
 </header>
@@ -509,52 +626,71 @@
 <div class="lp-main">
     <div class="print-header-content">
         <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
-        <h1>Fundability Assessment</h1>
+        <h1>Position & Net</h1>
     </div>
     <div class="lp-container">
         <div class="calc-card-header">
-            <div class="calc-card-header-title">Fundability</div>
+            <div class="calc-card-header-title">Position & Net<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
             <div class="calc-card-header-sub">Borrower Readiness Report</div>
         </div>
         <!-- Tabs -->
         <div class="lp-tabs">
-            <button class="lp-tab active" id="tab_net" onclick="switchTab('net')">
-                Net Requirement
-                <span class="lp-tab-sub">Cash to the borrower</span>
-            </button>
-            <button class="lp-tab" id="tab_risk" onclick="switchTab('risk')">
+            <!-- LEN-156 — Position leads (the differentiated half) and is the default tab. -->
+            <button class="lp-tab active" id="tab_risk" onclick="switchTab('risk')">
                 Position Risk
                 <span class="lp-tab-sub">Can they carry it?</span>
             </button>
-        </div>
-
-        <!-- Panel howto / intro copy — sits ABOVE the inputs so the instruction is read first -->
-        <div class="lp-howto" id="howto_net">
-            Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
-        </div>
-        <div class="lp-howto" id="howto_risk" style="display:none">
-            Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
-        </div>
-
-        <!-- Shared funding amount -->
-        <div class="shared-strip">
-            <label for="funding_amt">New funding under review</label>
-            <div class="input-wrap">
-                <div class="input-prefix">$</div>
-                <input type="number" id="funding_amt" class="input-field" value="50000" oninput="runAll()">
-            </div>
+            <button class="lp-tab" id="tab_net" onclick="switchTab('net')">
+                Net Requirement
+                <span class="lp-tab-sub">Cash to the borrower</span>
+            </button>
         </div>
 
         <!-- ============ PANEL: NET REQUIREMENT ============ -->
-        <div class="panel active" id="panel_net">
+        <div class="panel" id="panel_net">
             <div class="lp-inputs">
-                <label for="net_pct">Net Requirement <span class="tooltip-icon" data-tip="Percentage of the new funding that must go directly to the borrower.">📎</span></label>
+                <!-- LEN-156 — intro howto atop the left column (mint box, dismissible). One per
+                     panel so it carries the tab-specific copy; hidden via the shared dismiss key. -->
+                <div class="lp-howto" id="howto_net" data-lp-dismiss="fund_howto">
+                    Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
+                </div>
+                <!-- LEN-156 — shared "new funding" field. A normal field in the active panel's
+                     left column (NOT a full-width strip); relocated on tab switch by mountFunding()
+                     like #deal-context, so it inherits the column width and can't overhang. Authored
+                     here, but mountFunding() moves it into the default Position panel on load. -->
+                <div class="lp-funding-shared" id="funding-shared">
+                    <label for="funding_amt">New funding under review</label>
+                    <div class="input-wrap">
+                        <div class="input-prefix">$</div>
+                        <input type="number" id="funding_amt" class="input-field" value="50000" oninput="runAll()">
+                    </div>
+                </div>
+                <label for="net_pct">Net Requirement <span class="tooltip-icon" data-tip="Percentage of the new funding that must go directly to the borrower."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                 <div class="input-wrap">
                     <div class="input-prefix">%</div>
                     <input type="number" id="net_pct" class="input-field" value="50" oninput="runNetCalc()">
                 </div>
+
+                <!-- LEN-136/139 — shared deal-context: borrower state (drives compliance) + optional PDF document
+                     details. Lives in the left input column; relocated to the active panel on tab switch. -->
+                <div class="lp-deal-context no-print" id="deal-context">
+                    <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
+                    <div data-lp-compliance-host></div>
+                    <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
+                    <details id="pdfDocDetails" class="lp-doc-details">
+                        <summary>Document details <span>— optional, appears on the PDF</span></summary>
+                        <div class="lp-doc-details-grid">
+                            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+                            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+                            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+                            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
+                            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+                        </div>
+                        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
+                    </details>
+                </div>
             </div>
-            
+
             <div class="lp-results">
                 <div class="hero-grid">
                     <div class="hero-output">
@@ -562,7 +698,7 @@
                         <div id="hero_val" class="hero-value">$25,000</div>
                     </div>
                     <div class="hero-output">
-                        <div class="hero-label">Max payoff <span class="tooltip-icon" data-tip="Total amount available to pay off existing debt or liens.">📎</span></div>
+                        <div class="hero-label">Max payoff <span class="tooltip-icon" data-tip="Total amount available to pay off existing debt or liens."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                         <div id="res_payoff" class="hero-value">$25,000</div>
                     </div>
                 </div>
@@ -570,24 +706,28 @@
                     <span class="tk-eyebrow">What you tell the borrower</span>
                 </div>
                 <div class="lp-actions">
-                    <button class="lp-copy-btn" onclick="copyNet()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy
-                    </button>
-                    <button class="lp-print-btn" onclick="handleLendPaperSavePDF()">
+                    <button class="lp-cta-primary" onclick="handleLendPaperSavePDF()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        Save as PDF
+                        Save Estimate as PDF
+                    </button>
+                    <button class="lp-cta-secondary" onclick="copyNet()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy results
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- ============ PANEL: POSITION RISK ============ -->
-        <div class="panel" id="panel_risk">
+        <!-- ============ PANEL: POSITION RISK ============ (default tab — LEN-156) -->
+        <div class="panel active" id="panel_risk">
             <div class="lp-inputs">
+                <!-- LEN-156 — intro howto atop the left column (mint box, dismissible) -->
+                <div class="lp-howto" id="howto_risk" data-lp-dismiss="fund_howto">
+                    Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
+                </div>
                 <div class="lp-section-label">Revenue</div>
                 <div class="lp-group" style="margin-bottom: 0;">
-                    <label for="monthly_rev">Average monthly revenue <span class="tooltip-icon" data-tip="Gross monthly deposits / sales. Use a true monthly average from bank statements.">📎</span></label>
+                    <label for="monthly_rev">Average monthly revenue <span class="tooltip-icon" data-tip="Gross monthly deposits / sales. Use a true monthly average from bank statements."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                     <div class="input-wrap">
                         <div class="input-prefix">$</div>
                         <input type="number" id="monthly_rev" class="input-field" value="120000" oninput="runRiskCalc()">
@@ -607,13 +747,13 @@
 
                 <div class="lp-section-label">New funding terms</div>
                 <div class="lp-group">
-                    <label for="factor">Factor rate / total payback multiple <span class="tooltip-icon" data-tip="Total payback multiple. e.g. 1.40 means $50,000 funded is repaid as $70,000. For an interest loan, enter total payback ÷ principal.">📎</span></label>
+                    <label for="factor">Factor rate / total payback multiple <span class="tooltip-icon" data-tip="Total payback multiple. e.g. 1.40 means $50,000 funded is repaid as $70,000. For an interest loan, enter total payback ÷ principal."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                     <div class="input-wrap">
                         <input type="number" step="0.01" id="factor" class="input-field" value="1.40" oninput="runRiskCalc()">
                     </div>
                 </div>
                 <div class="lp-group" style="margin-bottom: 0;">
-                    <label for="term_val">Term <span class="tooltip-icon" data-tip="Repayment length. Choose the unit that matches the product: business days for daily-ACH advances, weeks for weekly remits, or months for a term loan.">📎</span></label>
+                    <label for="term_val">Term <span class="tooltip-icon" data-tip="Repayment length. Choose the unit that matches the product: business days for daily-ACH advances, weeks for weekly remits, or months for a term loan."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                     <div class="input-wrap">
                         <input type="number" id="term_val" class="input-field" value="120" oninput="runRiskCalc()">
                         <select class="unit-select" id="term_unit" onchange="runRiskCalc()">
@@ -633,7 +773,7 @@
                 </button>
                 <div class="lp-collapse" id="exp_collapse" hidden>
                     <div class="lp-group" style="margin: 14px 0 0;">
-                        <label for="open_bal">Total outstanding balance on existing positions <span class="tooltip-icon" data-tip="Combined remaining payback across all current obligations. Powers the total-exposure ratio (typically capped near 1.0x–1.5x of monthly revenue).">📎</span></label>
+                        <label for="open_bal">Total outstanding balance on existing positions <span class="tooltip-icon" data-tip="Combined remaining payback across all current obligations. Powers the total-exposure ratio (typically capped near 1.0x–1.5x of monthly revenue)."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                         <div class="input-wrap">
                             <div class="input-prefix">$</div>
                             <input type="number" id="open_bal" class="input-field" placeholder="0" oninput="runRiskCalc()">
@@ -661,7 +801,7 @@
 
                 <div class="hero-grid">
                     <div class="hero-output">
-                        <div class="hero-label">Debt-service ratio <span class="tooltip-icon" data-tip="Total monthly debt service (all positions + new) divided by monthly revenue. The primary position-risk signal.">📎</span></div>
+                        <div class="hero-label">Debt-service ratio <span class="tooltip-icon" data-tip="Total monthly debt service (all positions + new) divided by monthly revenue. The primary position-risk signal."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                         <div id="hero_dsr" class="hero-value">—</div>
                     </div>
                     <div class="hero-output">
@@ -676,7 +816,7 @@
 
                 <div class="result-grid">
                     <div class="result-item">
-                        <div class="result-label">Combined daily debt service <span class="tooltip-icon" data-tip="All positions plus the new funding, normalized to a daily-equivalent across ~21.7 business days/month.">📎</span></div>
+                        <div class="result-label">Combined daily debt service <span class="tooltip-icon" data-tip="All positions plus the new funding, normalized to a daily-equivalent across ~21.7 business days/month."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                         <div id="res_daily" class="result-val">—</div>
                     </div>
                     <div class="result-item">
@@ -688,7 +828,7 @@
                         <div id="res_remaining" class="result-val">—</div>
                     </div>
                     <div class="result-item hidden" id="row_exposure">
-                        <div class="result-label">Total exposure vs revenue <span class="tooltip-icon" data-tip="Total outstanding + new payback, as a multiple of monthly revenue. Responsible funders typically cap this near 1.0x–1.5x.">📎</span></div>
+                        <div class="result-label">Total exposure vs revenue <span class="tooltip-icon" data-tip="Total outstanding + new payback, as a multiple of monthly revenue. Responsible funders typically cap this near 1.0x–1.5x."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                         <div id="res_exposure" class="result-val">—</div>
                     </div>
                 </div>
@@ -702,13 +842,13 @@
                 </div>
 
                 <div class="lp-actions">
-                    <button class="lp-copy-btn" onclick="copyRisk()">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy
-                    </button>
-                    <button class="lp-print-btn" onclick="handleLendPaperSavePDF()">
+                    <button class="lp-cta-primary" onclick="handleLendPaperSavePDF()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        Save as PDF
+                        Save Estimate as PDF
+                    </button>
+                    <button class="lp-cta-secondary" onclick="copyRisk()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy results
                     </button>
                 </div>
             </div>
@@ -748,12 +888,46 @@
             toast = document.createElement('div');
             toast.id = 'lp-toast';
             toast.textContent = 'Copied!';
-            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#14532D;color:#fff;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;opacity:0;transition:opacity 150ms;pointer-events:none;z-index:9999;';
+            toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1A3C2E;color:#fff;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;opacity:0;transition:opacity 150ms;pointer-events:none;z-index:9999;';
             document.body.appendChild(toast);
         }
         toast.style.opacity = '1';
         setTimeout(() => { toast.style.opacity = '0'; }, 2000);
     }
+    // LEN-11 — read the optional Document-details fields
+    function pdfDocContext() {
+        const v = id => (document.getElementById(id)?.value || '').trim();
+        const name = v('pdfPreparedBy'), company = v('pdfPreparedByCompany');
+        return {
+            preparedBy: [name, company].filter(Boolean).join(' · '),
+            preparedFor: v('pdfPreparedFor'),
+            dealName: v('pdfDealName'),
+            lender: v('pdfLender')
+        };
+    }
+    // LEN-11 — inject the broker/deal context into the captured body. The print header is
+    // overwritten by generatePDF → initPrintLayout, so this block must live in the body.
+    function mountDocContext(element) {
+        const c = pdfDocContext();
+        if (!c.preparedBy && !c.preparedFor && !c.dealName && !c.lender) return null;
+        const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+        const rows = [];
+        if (c.preparedFor) rows.push(`<div class="dc-for">Prepared for ${esc(c.preparedFor)}</div>`);
+        const meta = [];
+        if (c.dealName) meta.push(esc(c.dealName));
+        if (c.lender) meta.push(esc(c.lender));
+        if (meta.length) rows.push(`<div class="dc-meta">${meta.join(' · ')}</div>`);
+        if (c.preparedBy) rows.push(`<div class="dc-by">Prepared by ${esc(c.preparedBy)}</div>`);
+        if (!rows.length) return null;
+        const node = document.createElement('div');
+        node.className = 'lp-doc-context';
+        node.innerHTML = rows.join('');
+        const hdr = element.querySelector('.print-header-content');
+        if (hdr) hdr.insertAdjacentElement('afterend', node);
+        else element.insertAdjacentElement('afterbegin', node);
+        return node;
+    }
+
     async function handleLendPaperSavePDF() {
         const btn = event.currentTarget;
         const origText = btn.innerHTML;
@@ -790,7 +964,7 @@
         }
 
         // Setup custom print header band dynamically per plan tier
-        window.PDF_HELPER.initPrintLayout("FUNDABILITY ESTIMATE");
+        window.PDF_HELPER.initPrintLayout("POSITION & NET");
 
         const cards = document.querySelectorAll('[id^="card-"]');
         if (cards.length > 1) {
@@ -798,11 +972,33 @@
         }
 
         const element = document.querySelector('.lp-main');
-        const filename = `LendPaper_Fundability_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
+        const filename = `LendPaper_NetPosition_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
+        let _docCtxNode = null;
         try {
-            await window.PDF_HELPER.generatePDF(element, "FUNDABILITY ESTIMATE", filename, btn, origText);
+            _docCtxNode = mountDocContext(element);
+            await window.PDF_HELPER.generatePDF(element, "POSITION & NET", filename, btn, origText);
+            // Quote Log (LEN-123)
+            try {
+                window.saveEstimate && window.saveEstimate({
+                    calculator_type: 'fundability',
+                    params: {
+                        amount: fundAmt || null,
+                        monthly_revenue: monthlyRev || null,
+                        factor: factor || null,
+                        term_val: termVal || null,
+                        term_unit: (document.getElementById('term_unit') && document.getElementById('term_unit').value) || null,
+                        net_pct: cleanNumericInput(document.getElementById('net_pct') && document.getElementById('net_pct').value),
+                        dsr: (document.getElementById('hero_dsr') && document.getElementById('hero_dsr').innerText) || null,
+                        verdict: (document.getElementById('verdict_headline') && document.getElementById('verdict_headline').innerText) || null,
+                        borrower_state: (window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState()) || ''
+                    },
+                    pdf_generated: true,
+                    prepared_for: document.getElementById('pdfPreparedFor')?.value?.trim() || null
+                });
+            } catch (e) { /* logging must never block the export */ }
         } finally {
+            if (_docCtxNode) _docCtxNode.remove();
             document.body.classList.remove('multi-scenario');
             btn.innerHTML = origText;
             btn.disabled = false;
@@ -815,9 +1011,57 @@
         document.getElementById('tab_risk').classList.toggle('active', which === 'risk');
         document.getElementById('panel_net').classList.toggle('active', which === 'net');
         document.getElementById('panel_risk').classList.toggle('active', which === 'risk');
-        // Toggle the corresponding intro/howto block (moved out of panels so it sits ABOVE the inputs)
-        document.getElementById('howto_net').style.display = (which === 'net') ? '' : 'none';
-        document.getElementById('howto_risk').style.display = (which === 'risk') ? '' : 'none';
+        // Show the active tab's intro (unless the user dismissed it — LEN-139)
+        updateIntroVisibility();
+        // LEN-156 — keep the single shared "new funding" field at the top of the active
+        // panel's left column; LEN-139 — and the deal-context block at the bottom.
+        mountFunding(which);
+        mountDealContext(which);
+    }
+
+    // LEN-147 — dismissible howto banners. Per-calc key: lp_dismiss_fund_howto.
+    // Honors both the active tab AND the dismissed flag so switchTab can't re-show it.
+    function updateIntroVisibility() {
+        const dismissed = localStorage.getItem('lp_dismiss_fund_howto') === '1';
+        const netActive = document.getElementById('panel_net').classList.contains('active');
+        document.getElementById('howto_net').style.display = (!dismissed && netActive) ? '' : 'none';
+        document.getElementById('howto_risk').style.display = (!dismissed && !netActive) ? '' : 'none';
+        document.querySelectorAll('.lp-intro-toggle-btn').forEach(el => { el.style.display = dismissed ? 'inline-flex' : 'none'; });
+    }
+    function dismissIntro() { localStorage.setItem('lp_dismiss_fund_howto', '1'); updateIntroVisibility(); }
+    function showIntro() {
+        localStorage.removeItem('lp_dismiss_fund_howto');
+        updateIntroVisibility();
+        PDF_HELPER.initDismissibles();
+        rewireFundHowto();
+    }
+    // After initDismissibles injects × on .lp-howto, wire clicks to updateIntroVisibility
+    // so both panels' banners hide immediately (not just the clicked one).
+    function rewireFundHowto() {
+        document.querySelectorAll('.lp-howto [data-lp-dismiss-btn]').forEach(function(btn) {
+            if (btn.dataset.rewired) return;
+            btn.dataset.rewired = '1';
+            btn.addEventListener('click', updateIntroVisibility);
+        });
+    }
+
+    // LEN-139 — one shared deal-context node (borrower state + doc details); move it
+    // into whichever panel's input column is showing so it's always visible/editable.
+    function mountDealContext(which) {
+        const ctx = document.getElementById('deal-context');
+        const col = document.querySelector('#panel_' + which + ' .lp-inputs');
+        if (ctx && col && ctx.parentElement !== col) col.appendChild(ctx);
+    }
+
+    // LEN-156 — one shared "new funding under review" field; keep it as the FIRST field
+    // in whichever panel's input column is showing (same relocate pattern as deal-context).
+    function mountFunding(which) {
+        const f = document.getElementById('funding-shared');
+        const col = document.querySelector('#panel_' + which + ' .lp-inputs');
+        if (!f || !col || f.parentElement === col) return;
+        // Sit just below the panel's intro howto (if present), else at the top of the column.
+        const howto = col.querySelector(':scope > .lp-howto');
+        if (howto) howto.after(f); else col.insertBefore(f, col.firstChild);
     }
 
     // Tooltips
@@ -871,6 +1115,20 @@
         Object.entries(dataPairs).forEach(([l, v]) => { payload += `${l.padEnd(20)}: ${v}\n`; });
         payload += `${borderLine}\n${WATERMARK_FOOTER}`;
         navigator.clipboard.writeText(payload).then(showToast);
+        // Quote Log (LEN-123)
+        try {
+            window.saveEstimate && window.saveEstimate({
+                calculator_type: 'fundability',
+                params: {
+                    amount: loanAmt || null, net_pct: netPct,
+                    min_to_borrower: document.getElementById('hero_val').innerText,
+                    max_payoff: document.getElementById('res_payoff').innerText,
+                    view: 'net_requirement',
+                    borrower_state: (window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState()) || ''
+                },
+                pdf_generated: false
+            });
+        } catch (e) {}
     }
 
     // ---------- POSITION RISK ----------
@@ -1030,19 +1288,15 @@
         }
     }
 
+    // LEN-156 — verdict card is always brand-green (Steve: on-brand, text-only). Risk level
+    // is communicated by the headline text + the band legend, not by coloring the card.
+    // `band` is retained in the signature for callers but no longer drives color.
     function setVerdictColor(box, head, sub, eyebrow, band) {
-        const map = {
-            low:  ['--risk-low-bg',  '--risk-low-bd',  '--risk-low-tx'],
-            mod:  ['--risk-mod-bg',  '--risk-mod-bd',  '--risk-mod-tx'],
-            high: ['--risk-high-bg', '--risk-high-bd', '--risk-high-tx'],
-            sev:  ['--risk-sev-bg',  '--risk-sev-bd',  '--risk-sev-tx'],
-        };
-        const [bg, bd, tx] = map[band];
-        const css = getComputedStyle(document.documentElement);
-        box.style.background = css.getPropertyValue(bg);
-        box.style.borderColor = css.getPropertyValue(bd);
-        const txc = css.getPropertyValue(tx);
-        head.style.color = txc; sub.style.color = txc; eyebrow.style.color = txc;
+        box.style.background = '#fff';
+        box.style.borderLeftColor = '';   // fall back to .verdict (brand-green accent)
+        head.style.color = '';            // fall back to .verdict-headline (brand green)
+        eyebrow.style.color = '';
+        sub.style.color = '';
     }
 
     function copyRisk() {
@@ -1066,6 +1320,21 @@
         Object.entries(dataPairs).forEach(([l, v]) => { payload += `${l.padEnd(26)}: ${v}\n`; });
         payload += `${borderLine}\n${WATERMARK_FOOTER}`;
         navigator.clipboard.writeText(payload).then(showToast);
+        // Quote Log (LEN-123)
+        try {
+            window.saveEstimate && window.saveEstimate({
+                calculator_type: 'fundability',
+                params: {
+                    amount: cleanNumericInput(document.getElementById('funding_amt').value),
+                    monthly_revenue: monthlyRev,
+                    dsr: document.getElementById('hero_dsr').innerText,
+                    verdict: document.getElementById('verdict_headline').innerText,
+                    view: 'position_risk',
+                    borrower_state: (window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState()) || ''
+                },
+                pdf_generated: false
+            });
+        } catch (e) {}
     }
 
     function toggleExposure() {
@@ -1083,12 +1352,57 @@
 
     function runAll() { runNetCalc(); runRiskCalc(); }
 
+    function lpRestoreBanner() {
+        if (document.getElementById('lp-restore-banner')) return;
+        const main = document.querySelector('.lp-main') || document.body;
+        const b = document.createElement('div');
+        b.id = 'lp-restore-banner'; b.className = 'no-print';
+        b.style.cssText = 'display:flex;align-items:center;gap:8px;max-width:1000px;margin:0 auto 12px;padding:9px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:12px;color:#92400E;';
+        b.textContent = 'Restored from your Estimate Log — review the figures before generating a new PDF.';
+        main.insertBefore(b, main.firstChild);
+    }
+
     window.onload = () => {
         addPosition(450, 'daily');
         bindTips();
+        PDF_HELPER.initDismissibles();
+        rewireFundHowto();
+        PDF_HELPER.persistFields('fund', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor','pdfDealName','pdfLender']);
+        // LEN-156 — Position is the default tab; pull the shared funding + deal-context nodes
+        // (authored in the Net panel) into the Position column on load so they're visible.
+        mountFunding('risk');
+        mountDealContext('risk');
+        updateIntroVisibility();
         runAll();
+        // Deal Read handoff: prefill the new-position fields from URL params (no PII).
+        // Param names mirror the field ids: funding_amt / monthly_rev / factor / term_val / term_unit.
+        try {
+            const qp = new URLSearchParams(window.location.search);
+            if (qp.has('funding_amt') || qp.has('monthly_rev') || qp.has('factor') || qp.has('term_val')) {
+                const sv = (id, v) => { const e = document.getElementById(id); if (e && v != null && v !== '') e.value = v; };
+                sv('funding_amt', qp.get('funding_amt'));
+                sv('monthly_rev', qp.get('monthly_rev'));
+                sv('factor', qp.get('factor'));
+                sv('term_val', qp.get('term_val'));
+                const tu = (qp.get('term_unit') || '').toLowerCase();
+                const sel = document.getElementById('term_unit');
+                if (tu && sel) { Array.from(sel.options).forEach(o => { if (o.value.toLowerCase() === tu) sel.value = o.value; }); }
+                runAll();
+            }
+        } catch (e) { /* prefill is best-effort */ }
+        // Quote Log restore (LEN-123)
+        try {
+            const rec = window.LPQuoteLog && window.LPQuoteLog.consumeRestorePayload('fundability');
+            if (rec && rec.params) {
+                const p = rec.params, sv = (id, v) => { const e = document.getElementById(id); if (e && v != null && v !== '') e.value = v; };
+                sv('funding_amt', p.amount); sv('net_pct', p.net_pct); sv('monthly_rev', p.monthly_revenue);
+                sv('factor', p.factor); sv('term_val', p.term_val); sv('term_unit', p.term_unit);
+                runAll();
+                lpRestoreBanner();
+            }
+        } catch (e) { /* restore is best-effort */ }
         if (typeof window.PDF_HELPER !== 'undefined') {
-            window.PDF_HELPER.initPrintLayout("FUNDABILITY ESTIMATE");
+            window.PDF_HELPER.initPrintLayout("POSITION & NET");
         }
         if (window.self !== window.top) {
             document.body.classList.add('is-embedded');

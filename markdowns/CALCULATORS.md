@@ -82,21 +82,53 @@ Primary: SMB alt-finance sales reps and brokers — on a live call with a borrow
 
 ## 5. Required Components
 
-### Definition card (every calculator, no exceptions)
-Appears at top of input panel. Explains what the calculator does.
+### Intro / definition banner (every calculator, no exceptions)
+Appears **atop the left input column** (inside the card). Explains what the calculator
+does in one or two sentences. **Standard treatment is the mint-green filled box** — the
+Amortization calculator is the canonical reference (LEN-156, supersedes the LEN-147
+left-accent style):
 ```css
-.lp-definition {
-  background: transparent;
-  border: none;
-  border-left: 3px solid var(--lp-green, #14532D);
-  color: #64748b;
-  font-size: 11px;
+.lp-definition, .lp-howto {
+  background-color: #F0FDF4;          /* mint tint */
+  border-radius: 12px;
+  padding: 16px 34px 16px 18px;       /* right pad leaves room for the × */
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
   line-height: 1.6;
-  padding-left: 10px;
-  margin-bottom: 16px;
+  margin: 0 0 20px;
+  position: relative;                 /* required for injected × button */
 }
+strong { color: #1A3C2E; font-weight: 800; }
 ```
-No gray box. No full border. Left accent only.
+- Brand green is `#1A3C2E` (never `#14532D`).
+- **Always dismissible** — see "Intro / how-to banner — must be dismissible" below.
+- **Sweep status (LEN-156):** all calculators now use the mint box — Amortization,
+  Position & Net, DSCR, Payment Fit, and SBA Fees (the last left-accent holdout,
+  converted 6/9). The LEN-147 left-accent style is fully retired.
+
+### Document details + borrower state placement standard (LEN-147)
+The compliance host (`[data-lp-compliance-host]`) and document-details panel
+(`#pdfDocDetails`) **must live at the bottom of the left input column**, inside the
+card, wrapped in a `<div class="lp-deal-context no-print">`. They must never float
+above the card in `.lp-main` (which uses flex-row layout and would render siblings
+as a centered row).
+
+Placement in the HTML (inside `.lp-inputs` or the left column, after all user inputs):
+```html
+<div class="lp-deal-context no-print">
+  <div data-lp-compliance-host></div>
+  <details id="pdfDocDetails" class="lp-doc-details">
+    <summary>+ Document details</summary>
+    <!-- five standard fields (pdfPreparedBy, pdfPreparedByCompany,
+         pdfPreparedFor, pdfDealName, pdfLender) -->
+  </details>
+</div>
+```
+
+Fields should be persisted to localStorage via `PDF_HELPER.persistFields(scopeKey, ids[])`.
+Call it on DOMContentLoaded with `['borrowerState','pdfPreparedBy','pdfPreparedByCompany',
+'pdfPreparedFor','pdfDealName','pdfLender']` (include whatever IDs exist in that calc).
 
 ### Tooltip icon
 Lowercase `i` only. No circles, question marks, or other shapes.
@@ -136,23 +168,77 @@ If user is on variant 4 and unchecks pre-pay: snap back to variant 1 silently.
 
 ### Amortization table
 - Hint text: `Click any row to quantify the pre-pay discount`
-- Clickable rows: inject a detail row directly below the selected row
-  - `colspan` spans all columns
-  - Same green bg as selected row (`#e8f5ec`)
-  - Same left accent (`box-shadow: inset 2px 0 0 #0a4d2c`)
-  - Text: italic, 12px, green — `↳ Borrower saves $X,XXX.XX by paying off here · buyout $X,XXX.XX`
-- Pre-pay disabled: row still highlights; no detail row; never show "saves $0"
-- Only one detail row at a time
+- Clickable rows: inject a detail row directly below the selected row (`colspan` spans
+  all columns; only one detail row open at a time)
+- **Pre-pay enabled → payoff panel** (the LEN-110 redesign, see BRANDING.md §12):
+  - `Early payoff` eyebrow + a green valid-through **date pill**
+  - **Three parallel-grammar tiles**, all white-backed: `Early payoff quote`
+    (action — green left-accent) / `Run-to-term cost` (muted) / `Total savings`
+    (green border + green numerals). Identical internal structure: `eyebrow → big
+    number → one-line sub → divider → same stat rows`.
+  - A labeled **"To date"** band beneath the tiles (Paid so far / Payments made /
+    Contract progress / Payment amount) — backward-looking facts only.
+  - `Copy payoff quote` button → paste-ready plain-text quote (no-print).
+  - Container may carry a light-green "savings-zone" tint; the tiles stay white.
+- **Pre-pay disabled (deal offers no discount) → degraded grammar:** same tile
+  system, but render **only** a single muted `Run-to-term cost` tile + the "To date"
+  band, on a **neutral** (gray) container with a gray date pill. Never show an
+  "Early payoff" tile or a "saves $0" line.
+- Hierarchy comes from borders + type, never from colored tile fills (BRANDING.md §12.6).
 
 ### Modals
 - Vertically centered in viewport, minimal dead space
 - `align-items: center` on main flex container
 
 ### Action buttons (exact labels — deviation is a bug)
-- `Copy` — solid dark green fill (#14532D), white text
-- `Save PDF` — dark green outline (#14532D), transparent background
-- `Save PDF` is **always present** — never skip it
-- `Copy` above `Save PDF`, always
+**Updated standard (LEN-123, supersedes the old "Copy on top" rule; consistency pass LEN-11).**
+Identical on **every** calculator. CTA stack, top to bottom, inside
+`.action-buttons.flex.flex-col.gap-3`:
+- Primary: `Save Estimate as PDF` — class `lp-cta-primary`, solid brand-dark fill (`#1A3C2E`),
+  white text, full width, leading **printer SVG** icon
+- Secondary: `Copy Scenario` — class `lp-cta-secondary`, brand-dark outline, transparent fill,
+  full width, leading **copy SVG** icon
+- Footer row (subtle text links): `+ Compare scenarios` (left) · `🕐 Estimate Log` (right)
+
+`Save Estimate as PDF` is **always present** — never skip it. Both the PDF save and
+`Copy Scenario` fire `saveEstimate()` (see §15 Estimate Log).
+
+**Exact label copy** — do not paraphrase: `Save Estimate as PDF`, `Copy Scenario`.
+- **Only exception:** single-result tools with no scenarios (e.g. Fundability) use
+  `Copy results` instead of `Copy Scenario`. Everything else stays verbatim.
+- Never use the compact `lp-print-btn` / `lp-copy-btn` icon-button variant or the bare
+  labels `Save as PDF` / `Copy` / `Copy Results` — those are pre-LEN-11 drift.
+- Copy-button **icons are SVG only** — never an emoji (no 📋 / 📎). The banned-paperclip
+  rule extends to all clipboard glyphs on buttons.
+
+### Document details panel (PDF branding — LEN-11)
+Optional broker/deal metadata that personalizes the exported PDF. **Identical on every
+calculator** (single shared pattern, no per-calc drift).
+
+- Collapsible panel placed above the cards container, `no-print`:
+  `<details id="pdfDocDetails" class="lp-doc-details no-print">` with summary
+  `Document details — optional, appears on the PDF`.
+- **Five fields, exact ids + labels** (all optional, blank degrades gracefully):
+
+  | Label | id | Placeholder |
+  |---|---|---|
+  | Prepared by | `pdfPreparedBy` | `Your name` |
+  | Company | `pdfPreparedByCompany` | `Your company` |
+  | Prepared for | `pdfPreparedFor` | `Merchant / borrower name` |
+  | Deal name | `pdfDealName` | `e.g. Q3 Working Capital` |
+  | Lender / program | `pdfLender` | `e.g. Northline Capital` |
+
+- Read with a `*Context()` helper: `preparedBy = [pdfPreparedBy, pdfPreparedByCompany]`
+  joined ` · `; `preparedFor`, `dealName`, `lender` passed through trimmed.
+- **Rendering rule (critical):** `PDF_HELPER.generatePDF()` calls `initPrintLayout()`
+  internally, which **overwrites `.print-header-content`** — so anything written to the
+  tier header before export is wiped. Render the prepared-by/for block into the **captured
+  body** (`.lp-doc-context` prepended into `.lp-main`, or the hidden print template),
+  **never** the page header. Tear the injected node down in `finally`.
+- `pdfPreparedFor` flows to `saveEstimate({ prepared_for })` (see §15). Hide empty fields
+  on the PDF; never print a blank "Prepared for —" line.
+- DSCR keeps its stricter gate (requires Prepared-for + Deal name before Save enables);
+  all other calcs treat the five fields as optional.
 
 ### Copy output format
 ```
@@ -168,6 +254,68 @@ Powered by LendPaper | hello@lendpaper.com | lendpaper.com — Custom branding a
 - Side-by-side cards must show a delta line beneath monthly payment when 2+ scenarios active
 - Format: `Scenario B costs $X,XXX more/less/mo` — updates reactively
 
+### Intro / how-to banner — must be dismissible (LEN-139, updated LEN-147)
+The intro banner at the top of a calculator (`.lp-howto`, `.lp-definition`, `.lp-intro`) is
+**always dismissible**. A banner with no close affordance reads as a permanent nag.
+
+**Standard mechanism (LEN-147):** Add `data-lp-dismiss="<calc>_<slug>"` to the banner element
+and call `PDF_HELPER.initDismissibles()` on DOMContentLoaded. The helper auto-injects a `×`
+button top-right, hides the element on click, and persists the state to
+`localStorage['lp_dismiss_<calc>_<slug>']`. The element stays hidden on subsequent loads.
+
+Example:
+```html
+<div class="lp-definition" data-lp-dismiss="dscr_intro">
+  <strong>What this calculator does.</strong> One or two sentences.
+</div>
+```
+```javascript
+document.addEventListener('DOMContentLoaded', function() {
+  PDF_HELPER.initDismissibles();
+});
+```
+
+- A small restore `i` button in the card header (`class="lp-intro-toggle-btn"`) calls
+  `showIntro()` — shown only while the banner is dismissed.
+- Tab-switching must **not** re-show a dismissed banner. Route visibility through a
+  single `updateIntroVisibility()` that ANDs the active-tab check with the dismiss flag;
+  never set `.lp-howto` `display` directly in a tab handler.
+- Per-banner localStorage keys (`lp_dismiss_<calc>_<slug>`) replace the old site-wide
+  `lendpaper_intro_dismissed` key. The AmoScheduleCalculator uses the old key and is
+  exempt from migration.
+
+### Constrained shared inputs — no orphan tinted band (LEN-139)
+When an input is constrained narrower than its container (e.g. a shared "amount"
+field capped to the left-column width so it doesn't bleed into the results column),
+its strip must **not** keep a full-width tinted (`#f8fafc`) fill. The empty tinted
+area beside a short field reads as a layout bug. Use the card color (`#fff`) for the
+strip and let the field define its footprint; separate with a border only, not a fill.
+
+**A shared input belongs INSIDE the input column — never in a full-width strip
+above the grid (LEN-156).** A field placed in its own full-width band above a
+two-column panel has no column to inherit width from, so its width must be
+hand-matched to the left column — a fragile coupling that re-breaks at some viewport
+on every attempt (a fixed `max-width` overhangs everywhere but its tuned width; even
+a grid that mirrors the panel drifts under embedding/print). This was the root cause
+of the recurring Fundability "new funding row expands too far right" bug.
+
+**The permanent pattern:** if an input is shared across tabs/panels, keep it as a
+single node and *relocate* it into the active panel's `.lp-inputs` column on tab
+switch — the same way `#deal-context` is moved by `mountDealContext()`. As a normal
+field in the column it inherits the column width automatically, exactly like every
+other calculator's primary input, and **structurally cannot overhang**. There is no
+width logic to maintain.
+```js
+function mountFunding(which) {                       // call from switchTab()
+  const f = document.getElementById('funding-shared');
+  const col = document.querySelector('#panel_' + which + ' .lp-inputs');
+  if (f && col && f.parentElement !== col) col.insertBefore(f, col.firstChild); // top of column
+}
+```
+Style it as a plain field group (`.lp-funding-shared` = bottom border + margin to set
+it apart), not a strip. Never reintroduce a full-width input band above a two-column
+panel.
+
 ---
 
 ## 6. Field Naming Standards
@@ -180,6 +328,23 @@ Powered by LendPaper | hello@lendpaper.com | lendpaper.com — Custom branding a
 | Pre-pay | "Model pre-pay discount" | Exact label |
 
 **Cost per dollar display:** If fractional part is zero (25.0¢) → `25¢`. If meaningful (25.3¢) → up to 2 decimals, strip trailing zeros.
+
+---
+
+## 6a. Canonical Tool Names (LEN-143 — deviation is a bug)
+
+One name per tool, identical across **tile (`tools.js`) · page `<title>` · on-screen header · PDF doc-title**. Rule of thumb: plain-English job-to-be-done name; keep an acronym only where brokers use it daily (DSCR, SBA, NAICS); never name a tool after an optional feature.
+
+| Tool id | Canonical name | PDF doc-title | Slug (frozen) | Notes |
+|---|---|---|---|---|
+| `amo` | **Amortization** | `AMORTIZATION` | `/tools/payment-breakdown` | Was "Payment Breakdown". Pre-pay/payoff is a feature → subtitle, never the name. Slug frozen for SEO. `logUsage('amortization')` unchanged. |
+| `deal-read` | **Deal Analysis** | (memo) | `/tools/deal-read` | Was "Deal Read". Not "File Analysis" — takes typed inputs, no file upload. *(Lands via the launch branch.)* |
+| `affordability` | **Payment Fit** | `PAYMENT FIT` | `/tools/affordability` | Was "Affordability Check" (LEN-150). Names the primary carry gate; subtitle "Payment & Return Read" carries the ROI half. Slug + `logUsage('affordability')` + `calculator_type:'affordability'` frozen for continuity. Optional upside module is **"Net Upside"** (was "ROI Assumptions") — it outputs `$net/mo`, not a return %. |
+| `fundability` | **Position & Net** | `POSITION & NET` | `/tools/fundability` | Was "Fundability". Names its two outputs (net requirement + stacking position); separates it from DSCR. `'fundability'` analytics keys + slug kept for continuity. |
+| `dscr` | **DSCR** | `DSCR ANALYSIS` | `/tools/dscr` | og:title keeps "DSCR Calculator" for search. |
+| `sba-rates` | **SBA Fees** | `SBA 7(a) RATES & FEES` | `/tools/sba-fees` | Was "SBA Scenario Builder"/"SBA rates & fees". Formal PDF/H1 title stays "SBA 7(a) Rates & Fees". |
+
+**Frozen:** slugs and `logUsage`/`calculator_type` keys never change on a rename (SEO + analytics continuity). Display strings only.
 
 ---
 
@@ -245,7 +410,7 @@ function showLendPaperToast() {
 
 ---
 
-## 8. Payment Breakdown — Formula Reference
+## 8. Amortization — Formula Reference
 
 | Output | Formula |
 |---|---|
@@ -355,3 +520,155 @@ This is the canonical style guide. Check your work against it for layout, spacin
 | Verifying print layout or PDF output | `Payment Breakdown Save as PDF page.png` |
 
 All files: `~/Desktop/Payment breakdown calculator screenshots/`
+
+---
+
+## State Compliance Layer — see LEGAL.md
+
+Calculators participate in the compliance engine (LEN-88). Regulatory content
+lives in `markdowns/LEGAL.md` only — reference, don't copy:
+
+- State disclosure rules surfaced in calculators → LEGAL.md §10 + §13 (matrix)
+- Engine + data: `public/assets/js/compliance.js` + `compliance-rules.js`,
+  loaded after `pdf-helper.js` in every calculator
+- Every calculator includes `<div data-lp-compliance-host>` (after the
+  `print-header-content` block) — the engine renders a borrower-state selector
+  there and stays silent unless the selected state has a rule
+- State selection persists across calculators (`lp_borrower_state`) and fires
+  `lp:compliance:statechange` — new calculators get this for free by including
+  the two scripts + host div
+- Never hardcode state-specific notes in a calculator; add them to
+  `compliance-rules.js` (and LEGAL.md §13) instead
+
+---
+
+## 14. Display Terminology Standards (LEN-123)
+
+Apply these display terms consistently across **all** calculators going forward.
+Canonicalized from the Payment Breakdown handoff (2026-06-08).
+
+| Use this | Not this |
+|---|---|
+| Buyout amount | Payoff, Payoff amount |
+| Finance charge | Interest, Interest charge |
+| Maturity | Maturity date, End date |
+| Funded | Loan amount, Principal |
+| Total payback | Total repayment, Total cost |
+| Factor rate | Multiplier, Cost per dollar (in labels) |
+| Borrower state | State, Location |
+| Prepared by | Submitted by, From |
+| Estimate | Quote (use *Estimate* everywhere — nav, CTAs, and document disclaimers) |
+| Estimate Log | Quote Log, Quotes, History, Saved deals (the saved-estimates surface) |
+
+Notes:
+- **"Finance charge"** is the chosen display label (it replaces the old "Total
+  interest"). It is a TILA/Reg-Z term of art; this is a deliberate copy decision,
+  not a claim that an MCA is a loan. The §3 compliance rule still holds: never
+  pitch an MCA's cost as "interest" or call the product a "loan."
+- **Borrower State** field: optional, lighter styling, `[i]` tooltip
+  ("Will check for state-specific disclosure requirements …"). It drives the
+  compliance engine via `LPCompliance.setState()` + `_renderAllHosts()`; the
+  engine's own host selector is hidden (the field is the single entry point).
+- **Prepared by**: single free-text field, green-tinted block at the bottom of the
+  input column. Feeds the PDF deal-summary; if blank, the line is omitted (no
+  broken layout). Placeholder: `e.g. John Smith · ABC Funding Solutions`.
+
+### Payoff banner (output column)
+Between the secondary metrics row and the talk track. Line 1: tag icon +
+`Save $X with early payoff by <date>` then a muted plain-text `···` affordance
+(not a button/pill) that opens the **Payoff Points modal**. Line 2:
+`Buyout amount: $X` + `[i]` tooltip. Do not repeat Maturity here (it lives in the
+secondary metrics row).
+
+---
+
+## 15. Estimate Log (cross-tool, LEN-123)
+
+A cross-tool log of every estimate generated on the site (Payment Breakdown, DSCR,
+Fundability, NAICS, Deal Read, future calculators). Page: `/quote-log`. Nav: left
+panel, below the tool links.
+
+**Every calculator must fire `saveEstimate()`** on PDF generation **and** on
+"Copy Scenario". The shared utility is `js/quote-log.js` — import it as a module
+(`<script type="module" src="../js/quote-log.js"></script>`); it exposes
+`window.saveEstimate` / `window.LPQuoteLog`.
+
+```javascript
+saveEstimate({
+  calculator_type: 'payment_breakdown',   // own string per calculator
+  params: { /* everything needed to restore calculator state */ },
+  pdf_generated: true,                     // false for Copy Scenario
+  prepared_for: "Joe's Landscaping"        // optional
+});
+```
+
+- `params` is **schemaless per calculator** — each calculator owns its own shape;
+  no migration when a new calculator is added.
+- Records persist to Supabase (`estimates`, tied to `user_id`) and are mirrored to
+  `localStorage` so the log works offline / logged-out / before the table exists.
+- **Restore** re-fills the calculator from `params` via `sessionStorage` —
+  **never the URL** (no PII in URLs, §9). Calculators call
+  `LPQuoteLog.consumeRestorePayload('<type>')` on load; wired in all shipped
+  calculators (Payment Breakdown, DSCR, Fundability, SBA Fees). When fields can't
+  be fully restored (e.g. an estimate saved before a field existed), show a
+  "review before generating a new PDF" banner. Module-script calculators (DSCR)
+  must run restore on `load`, not at parse time, so `window.LPQuoteLog` exists.
+- **Freemium:** Free shows the last 10 (display cap only — all rows are retained
+  in the DB for Pro eligibility). Pro: full history, deal naming, shareable links,
+  CSV export.
+- **Soft-gated (LEN-127):** `/quote-log` never hard-redirects. Logged-out users
+  see their `localStorage` quotes + a "Sign in to sync" banner; signed-in free
+  users hitting the 10 cap see the "Upgrade to Pro" note. Use `getProfile()`,
+  not `requireApprovedUser()`, on this page.
+- Schema + RLS migration: `supabase/estimates.sql`.
+
+---
+
+## 16. Output Column Hierarchy (canonical — all calculators)
+
+Reference build: Payment Breakdown (`calculators/AmoScheduleCalculator.html`).
+Replicate this top-to-bottom order so every calculator reads the same way:
+
+1. **Hero number** — the one figure the rep needs in 10s. `42px`, weight 700/900,
+   brand-dark, monospace numerals. Secondary equivalent (e.g. `≈ $X/mo`) muted,
+   below, never inline with the hero.
+2. **Deal-math row** — three equal cells: `Funded` / `Total payback` / `Finance
+   charge`. They form an identity the borrower can verify (Funded + Finance charge
+   = Total payback). The `Finance charge` cell stays subdued — a faint `#F4F8F5`
+   tint + muted value — so it reads as the derived cost without a full-width strip.
+   (Earlier 2-up + full-width strip was retired 6/8 — looked unbalanced.)
+3. **Secondary metrics row** — exactly **4 equal cells**, small monospace values,
+   tiny uppercase labels (`Factor rate` / `Est. APR` / `Cost per dollar` / `Maturity`).
+   Carry the `pdf-stats-grid` class so print styling applies. APR always `*`-footnoted.
+   The `≈ $X/mo` hero sub-figure is right-aligned within the card.
+4. **Payoff / savings banner** — see §14. Green-tinted, brand left-accent.
+5. **Talk track** — "What you tell the borrower," collapsible (∧/∨), scrollable body
+   (`max-height:80px`); secondary footer holds the APR `*` note. See §5.
+6. **CTA stack** — Save Estimate as PDF (primary) / Copy Scenario (secondary) /
+   footer text links. See §5.
+
+### Component tokens (reuse, don't reinvent)
+- **Metric label:** `10px`, weight 700, uppercase, `0.04em` tracking, `#64748B`.
+- **Metric value:** `16px` weight 800 (`#111827`); secondary-row values `13px`
+  weight 700, `font-variant-numeric: tabular-nums`.
+- **Charge strip / tinted block:** `#F4F8F5` bg, `8px` radius.
+- **Optional input** (e.g. Borrower State): lighter border `#EEF2EF`, `#FAFCFA`
+  bg, `— optional` suffix in `#9CA3AF`, lowercase circle-`i` tooltip (never a
+  paperclip, never a status dot).
+- **Prepared-by block:** `#F4F8F5` bg, `#E3EFE8` border, `12px` radius; the
+  section label is brand-dark; sub-note `10.5px` `#6B7280`.
+
+## 17. Modal Standard (Payoff Points, Compare, future)
+
+All calculator modals share one shell so they look identical:
+- **Backdrop** `rgba(15,23,42,0.45)`, flex-centered (`align-items:center` — no dead
+  space, BRANDING §12). Toggle a single `.open` class; close on backdrop click and
+  on `Escape`.
+- **Card** white, `16px` radius, `max-width:520px` (`760px` for side-by-side like
+  Compare), `max-height:88vh` scroll. Header = title (16/800) + `×` close.
+- **Instructional context** uses the **amber tile** (`#FFFBEB` bg, `#FDE68A`
+  border) — the only place amber appears in calculator UI besides compliance flags.
+- **Mode switches** use the **pill-tab** pattern (`.lp-tab`, active = brand-dark
+  fill). Selectable options use **pills** (`.lp-pill`); multi-select accents go
+  green → blue → purple in that order.
+- Modals never carry computed-output color rules from §4 onto their own chrome.

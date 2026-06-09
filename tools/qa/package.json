@@ -1,0 +1,19 @@
+{
+  "name": "lendpaper-qa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pre-release QA harness: math oracle, smoke, and regression tests for LendPaper calculators (LEN-129).",
+  "scripts": {
+    "test": "playwright test",
+    "test:math": "playwright test math.spec",
+    "test:golden": "playwright test golden.spec",
+    "test:smoke": "playwright test smoke.spec",
+    "test:regress": "playwright test regressions.spec",
+    "test:visual": "QA_VISUAL=1 playwright test visual.spec --project=chromium",
+    "verify:sources": "node verify-compliance-sources.js",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

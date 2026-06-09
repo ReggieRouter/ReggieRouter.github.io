@@ -72,11 +72,11 @@ window.PDF_HELPER = {
                         <div style="display: flex !important; align-items: center !important; gap: 6px !important;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
                                 <path d="M4 4v16h11l5-5V4H4z"/>
-                                <path d="M15 20v-5h5"/>
+                                <path d="M15 20v-5h5" stroke-linecap="butt"/>
                                 <path d="M9 9v6"/>
                                 <path d="M9 15h4"/>
                             </svg>
-                            <span style="font-size: 16px !important; font-weight: 800 !important; color: #111827 !important; letter-spacing: -0.02em !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">lend<span style="font-weight: 300 !important; color: #6B7280 !important;">paper</span><span style="color: #14532D !important;">.</span></span>
+                            <span style="font-size: 16px !important; font-weight: 800 !important; color: #111827 !important; letter-spacing: -0.02em !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">lend<span style="font-weight: 300 !important; color: #6B7280 !important;">paper</span><span style="color: #1A3C2E !important;">.</span></span>
                         </div>
                         <span style="font-size: 9px !important; color: #6B7280 !important; margin-top: 2px !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">· Scenario Modeling Engine</span>
                     </div>
@@ -86,7 +86,7 @@ window.PDF_HELPER = {
             headerHTML = `
                 <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 0 10px 0 !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
                     <div class="print-header-left" style="display: flex !important; align-items: center !important; gap: 8px !important;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #14532D !important;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #1A3C2E !important;">
                             <polygon points="12 2 2 7 12 12 22 7 12 2"/>
                             <polyline points="2 17 12 22 22 17"/>
                             <polyline points="2 12 12 17 22 12"/>
@@ -96,7 +96,7 @@ window.PDF_HELPER = {
                     <div class="print-header-right" style="text-align: right !important; display: flex !important; align-items: center !important; gap: 6px !important; color: #6B7280 !important;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
                             <path d="M4 4v16h11l5-5V4H4z"/>
-                            <path d="M15 20v-5h5"/>
+                            <path d="M15 20v-5h5" stroke-linecap="butt"/>
                             <path d="M9 9v6"/>
                             <path d="M9 15h4"/>
                         </svg>
@@ -135,7 +135,24 @@ window.PDF_HELPER = {
         
         headerEl.innerHTML = headerHTML;
     },
-    
+
+    // Calm "Estimate only" notice (LEN-141) inserted at the top of the captured body so
+    // every calculator's PDF opens with the same amber banner. Styled by pdf-calm.css.
+    // Skipped for calculators that render their own calm-native notice (Payment Breakdown,
+    // which owns #pdf-document). Removed after the print dialog closes.
+    mountEstimateNotice: function(element) {
+        if (!element || document.getElementById('pdf-document')) return null;
+        if (element.querySelector('.lp-pdf-notice')) return null;
+        var note = document.createElement('div');
+        note.className = 'lp-pdf-notice';
+        note.id = 'lp-estimate-notice';
+        note.innerHTML = '<strong>Estimate only.</strong> For planning and discussion. Final approval, pricing, fees, and payoff quotes come from the lender and may differ. lendpaper.com/legal/estimates';
+        var hdr = element.querySelector('.print-header-content');
+        if (hdr) hdr.insertAdjacentElement('afterend', note);
+        else element.insertAdjacentElement('afterbegin', note);
+        return note;
+    },
+
     resetScroll: async function(delayMs) {
         // 1. Reset local window scroll offsets
         window.scrollTo(0, 0);
@@ -269,7 +286,7 @@ window.PDF_HELPER = {
                 let seg1Width = pdf.getTextWidth(seg1);
                 startX += seg1Width;
                 
-                pdf.setTextColor(20, 83, 45); // #14532D
+                pdf.setTextColor(20, 83, 45); // #1A3C2E
                 pdf.setFont("helvetica", "bold");
                 try {
                     pdf.textWithLink("lendpaper.com", startX, y1, { url: "https://lendpaper.com" });
@@ -369,7 +386,7 @@ window.PDF_HELPER = {
         }
     },
 
-    generatePDF: async function(element, title, filename, btn, origText, isMultiScenario = false) {
+    generatePDF: async function(element, title, filename, btn, origText, isMultiScenario = false, quoteId = null) {
         const self = this;
 
         // STEP 1 — Show one-time educational modal (returns false if user cancels)
@@ -389,8 +406,10 @@ window.PDF_HELPER = {
             document.body.classList.add('multi-scenario');
         }
 
-        // STEP 3 — Generate a human-readable Quote ID for this document
-        var _quoteId = this.generateQuoteId();
+        // STEP 3 — Quote ID for this document. Callers may pass a pre-generated ID so the
+        // same forensic ID can also be printed inside the document body (e.g. the redesigned
+        // borrower PDF's prepared-for block + footer). Falls back to a fresh ID when omitted.
+        var _quoteId = quoteId || this.generateQuoteId();
 
         // STEP 4 — Build the print header dynamically per tier (includes Doc # + date)
         this.initPrintLayout(title, _quoteId);
@@ -451,6 +470,21 @@ window.PDF_HELPER = {
         _fpDiv.textContent = _fpPayload;
         document.body.appendChild(_fpDiv);
 
+        // STEP 7.5 — State-triggered compliance disclosures (LEN-88).
+        // Fires automatically off the borrower state; renders nothing when no
+        // state is selected or the state has no PDF rules. Canonical rules:
+        // markdowns/LEGAL.md Part II via compliance.js (optional dependency).
+        if (window.LPCompliance) {
+            var _compBlock = window.LPCompliance.buildPdfBlock();
+            if (_compBlock) {
+                (element || document.body).appendChild(_compBlock);
+            }
+        }
+
+        // STEP 7.6 — Calm "Estimate only" notice at the top of the captured body (LEN-141).
+        // No-op for Payment Breakdown, which renders its own calm-native notice.
+        this.mountEstimateNotice(element);
+
         window.addEventListener('afterprint', () => self._handlePdfSaveSuccess(), { once: true });
 
         try {
@@ -471,6 +505,10 @@ window.PDF_HELPER = {
                 if (ps) ps.parentNode.removeChild(ps);
                 var fp = document.getElementById('lp-doc-fingerprint');
                 if (fp) fp.parentNode.removeChild(fp);
+                var cb = document.getElementById('lp-compliance-print-block');
+                if (cb) cb.parentNode.removeChild(cb);
+                var en = document.getElementById('lp-estimate-notice');
+                if (en) en.parentNode.removeChild(en);
             }, 1500);
 
             if (btn) {
@@ -603,22 +641,24 @@ window.PDF_HELPER = {
                 +   '<div class="lpm-sprog"><div class="lpm-sprog-fill" id="lpm-spfill"></div></div>'
                 + '</div>'
                 + '<div class="lpm-foot">'
-                +   '<div class="lpm-dsa-wrap" id="lpm-dsa-wrap"><input type="checkbox" id="lpm-dsa-cb"/><label for="lpm-dsa-cb">Don\'t show again</label></div>'
+                +   '<div class="lpm-dsa-wrap" id="lpm-dsa-wrap"><input type="checkbox" id="lpm-dsa-cb"/><label for="lpm-dsa-cb">Never show this again</label></div>'
                 +   '<button class="lpm-btn-cancel" id="lpm-cancel-btn">Cancel</button>'
                 +   '<button class="lpm-btn-proceed lpm-locked" id="lpm-proceed-btn">Open print menu →</button>'
                 + '</div>'
                 + '</div>';
             document.body.appendChild(overlay);
 
-            // Show DSA checkbox if user has earned it
+            // Returning users who've already seen it get the opt-out immediately on open;
+            // first-time users get it the moment they finish watching once (see unlock block below).
             const saveCount = parseInt(localStorage.getItem(KEY_SAVE_COUNT) || '0', 10);
             if (saveCount >= DSA_AFTER_SAVES) {
                 document.getElementById('lpm-dsa-wrap').classList.add('lpm-visible');
             }
 
             function dismiss(result) {
+                // Honor "Never show this again" whether they proceed OR cancel out of the modal.
                 const dsaCb = document.getElementById('lpm-dsa-cb');
-                if (dsaCb && dsaCb.checked && result) {
+                if (dsaCb && dsaCb.checked) {
                     localStorage.setItem(KEY_DSA, '1');
                 }
                 animRunning = false;
@@ -752,13 +792,15 @@ window.PDF_HELPER = {
                     sv.className = 'lpm-d-save';
                     await wait(720); if (!animRunning) return;
 
-                    // Unlock CTA after first complete loop
+                    // Unlock CTA after first complete loop — and surface "Never show this again"
+                    // at the same moment, so even a first-ever viewer can opt out once they've watched once.
                     if (!unlocked) {
                         unlocked = true;
                         const btn = document.getElementById('lpm-proceed-btn');
                         btn.classList.remove('lpm-locked');
                         btn.classList.add('lpm-unlocking');
                         setTimeout(() => btn.classList.remove('lpm-unlocking'), 560);
+                        document.getElementById('lpm-dsa-wrap').classList.add('lpm-visible');
                     }
                 } catch (e) { return; }
                 animate();
@@ -772,6 +814,78 @@ window.PDF_HELPER = {
                 dismiss(true);
             });
             document.getElementById('lpm-cancel-btn').addEventListener('click', () => dismiss(false));
+        });
+    },
+
+    /**
+     * Auto-wire dismissible banners.
+     * Any element with data-lp-dismiss="<key>" gets an injected × button.
+     * State persists to localStorage['lp_dismiss_<key>']; hidden on reload if set.
+     */
+    initDismissibles: function() {
+        var self = this;
+        document.querySelectorAll('[data-lp-dismiss]').forEach(function(el) {
+            var key = 'lp_dismiss_' + el.getAttribute('data-lp-dismiss');
+            if (localStorage.getItem(key) === '1') {
+                el.style.display = 'none';
+                // Surface any lp-intro-toggle-btn in the same card on load
+                var card = el.closest('.lp-container, .lp-card, .sc, .card');
+                if (card) {
+                    var toggle = card.querySelector('.lp-intro-toggle-btn');
+                    if (toggle) toggle.style.display = '';
+                }
+                return;
+            }
+            // Guard against double-injection when initDismissibles is called again (e.g. after restore)
+            if (el.querySelector('[data-lp-dismiss-btn]')) return;
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.setAttribute('aria-label', 'Dismiss');
+            btn.setAttribute('data-lp-dismiss-btn', '1');
+            btn.style.cssText = 'position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;font-size:15px;line-height:1;color:#94a3b8;padding:2px 4px;border-radius:3px;';
+            btn.textContent = '×';
+            btn.addEventListener('mouseenter', function() { btn.style.color = '#1A3C2E'; });
+            btn.addEventListener('mouseleave', function() { btn.style.color = '#94a3b8'; });
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                el.style.display = 'none';
+                localStorage.setItem(key, '1');
+                // Surface any lp-intro-toggle-btn in the same card
+                var card = el.closest('.lp-container, .lp-card, .sc, .card');
+                if (card) {
+                    var toggle = card.querySelector('.lp-intro-toggle-btn');
+                    if (toggle) toggle.style.display = '';
+                }
+            });
+            // Ensure element is relatively positioned so button sits top-right
+            var pos = window.getComputedStyle(el).position;
+            if (pos === 'static') el.style.position = 'relative';
+            el.appendChild(btn);
+        });
+    },
+
+    /**
+     * Two-way bind a list of input IDs to localStorage under a scoped key.
+     * Restores values on load; writes on every input event.
+     * @param {string} scopeKey  - e.g. 'dscr', 'sba'
+     * @param {string[]} ids     - array of element IDs to persist
+     */
+    persistFields: function(scopeKey, ids) {
+        ids.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            var lsKey = 'lp_field_' + scopeKey + '_' + id;
+            var saved = localStorage.getItem(lsKey);
+            if (saved !== null && saved !== undefined) {
+                el.value = saved;
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            el.addEventListener('change', function() {
+                localStorage.setItem(lsKey, el.value);
+            });
+            el.addEventListener('input', function() {
+                localStorage.setItem(lsKey, el.value);
+            });
         });
     }
 };

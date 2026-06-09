@@ -1,0 +1,1285 @@
+[
+  {
+    "name": "1STOPCAP",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.1stopcap.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": 6,
+        "rev_min_monthly": 62500,
+        "max_amount": 250000,
+        "max_term_months": 24,
+        "notes": "$750K annual rev; terms 3-24mo; bad credit OK; no collateral"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": 6,
+        "rev_min_monthly": 62500,
+        "max_amount": 250000,
+        "max_term_months": 24,
+        "notes": "Same requirements; $10K-$250K; same-day funding"
+      }
+    ]
+  },
+  {
+    "name": "Ameris Bank Equipment Finance",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.amerisbank.com/business/equipment-finance",
+    "product_criteria": [
+      {
+        "product": "Finance",
+        "loc_type": null,
+        "fico_min": 620,
+        "tib_min_months": 24,
+        "rev_min_monthly": null,
+        "max_amount": 5000000,
+        "max_term_months": null,
+        "notes": "Equipment, tech & vehicle finance; $8B+ funded"
+      },
+      {
+        "product": "SBA",
+        "loc_type": null,
+        "fico_min": 620,
+        "tib_min_months": 24,
+        "rev_min_monthly": null,
+        "max_amount": 5000000,
+        "max_term_months": null,
+        "notes": "SBA loans $400K-$5M nationwide"
+      }
+    ]
+  },
+  {
+    "name": "Backd",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.backd.com",
+    "product_criteria": [
+      {
+        "product": "LOC",
+        "loc_type": "revolving",
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 20000,
+        "max_amount": 1000000,
+        "max_term_months": null,
+        "notes": "Draw anytime; $50K-$1M; soft credit pull"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 20000,
+        "max_amount": 250000,
+        "max_term_months": 24,
+        "notes": "$50K-$250K; daily/weekly/semi-monthly payments"
+      }
+    ]
+  },
+  {
+    "name": "BHG Financial",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.bhgfinancial.com",
+    "product_criteria": [
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 680,
+        "tib_min_months": 24,
+        "rev_min_monthly": null,
+        "max_amount": 500000,
+        "max_term_months": 120,
+        "notes": "Typical $20K-$250K; up to $500K well-qualified; up to 10-yr terms"
+      }
+    ]
+  },
+  {
+    "name": "Bitty",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.bittyadvance.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 5000,
+        "max_amount": null,
+        "max_term_months": null,
+        "notes": "Revenue-based; 24-hr approvals; personalized terms"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 5000,
+        "max_amount": null,
+        "max_term_months": null,
+        "notes": "Same eligibility as MCA"
+      }
+    ]
+  },
+  {
+    "name": "Bluevine",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.bluevine.com",
+    "product_criteria": [
+      {
+        "product": "LOC",
+        "loc_type": "revolving",
+        "fico_min": null,
+        "tib_min_months": null,
+        "rev_min_monthly": null,
+        "max_amount": 250000,
+        "max_term_months": null,
+        "notes": "Revolving line; one application for both products"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": null,
+        "rev_min_monthly": null,
+        "max_amount": 500000,
+        "max_term_months": 24,
+        "notes": "Via partner lenders; up to $500K"
+      }
+    ]
+  },
+  {
+    "name": "Byzfunder",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.byzfunder.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 300,
+        "tib_min_months": 12,
+        "rev_min_monthly": 20000,
+        "max_amount": 500000,
+        "max_term_months": 15,
+        "notes": "OK <499 credit accepted; approved in minutes"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 300,
+        "tib_min_months": 12,
+        "rev_min_monthly": 20000,
+        "max_amount": 500000,
+        "max_term_months": 15,
+        "notes": "ByzFlex brand; same eligibility"
+      },
+      {
+        "product": "LOC",
+        "loc_type": null,
+        "fico_min": 300,
+        "tib_min_months": 12,
+        "rev_min_monthly": 20000,
+        "max_amount": 500000,
+        "max_term_months": 15,
+        "notes": "Same eligibility"
+      }
+    ]
+  },
+  {
+    "name": "CAN Capital",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.cancapital.com",
+    "product_criteria": [
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 5000,
+        "max_amount": 250000,
+        "max_term_months": 72,
+        "notes": "Working capital; flexible short-term"
+      },
+      {
+        "product": "Finance",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 5000,
+        "max_amount": 250000,
+        "max_term_months": 72,
+        "notes": "Equipment financing"
+      }
+    ]
+  },
+  {
+    "name": "Celtic Bank",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.celticbank.com",
+    "product_criteria": [
+      {
+        "product": "SBA",
+        "loc_type": null,
+        "fico_min": 600,
+        "tib_min_months": 24,
+        "rev_min_monthly": null,
+        "max_amount": 5000000,
+        "max_term_months": 300,
+        "notes": "SBA 7(a) $350K-$5M/25yr; SBA 504; USDA B&I up to $10M"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 600,
+        "tib_min_months": 24,
+        "rev_min_monthly": null,
+        "max_amount": 350000,
+        "max_term_months": 120,
+        "notes": "Celtic Express $25K-$150K/10yr; Advantage $150K-$350K"
+      },
+      {
+        "product": "Finance",
+        "loc_type": null,
+        "fico_min": 600,
+        "tib_min_months": 24,
+        "rev_min_monthly": null,
+        "max_amount": 3000000,
+        "max_term_months": 84,
+        "notes": "Equipment $100K-$3M; up to 7-yr terms"
+      },
+      {
+        "product": "LOC",
+        "loc_type": null,
+        "fico_min": 600,
+        "tib_min_months": 24,
+        "rev_min_monthly": null,
+        "max_amount": 350000,
+        "max_term_months": 120,
+        "notes": "Working capital/supply chain $50K-$1M; up to 10yr"
+      }
+    ]
+  },
+  {
+    "name": "CFG",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.cfgmerchantsolutions.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": null,
+        "max_term_months": null,
+        "notes": "Revenue-based; credit not primary factor; $10K-$25K/mo rev"
+      }
+    ]
+  },
+  {
+    "name": "Everest Business Funding",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.everestbusinessfunding.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 300,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 2000000,
+        "max_term_months": null,
+        "notes": "RBF; very lenient credit; fast hassle-free funding"
+      }
+    ]
+  },
+  {
+    "name": "Expansion Capital Group",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.expansioncapitalgroup.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": null,
+        "max_term_months": 12,
+        "notes": "3-12 month terms; 700+ industries; 4-hr approvals"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": null,
+        "max_term_months": 12,
+        "notes": "Same structure as MCA"
+      }
+    ]
+  },
+  {
+    "name": "Fenix Capital Funding",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.fenixcapitalfunding.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 200000,
+        "max_term_months": 12,
+        "notes": "Hours pre-approval; same/next-day funding"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 200000,
+        "max_term_months": 12,
+        "notes": "3 months bank statements required"
+      }
+    ]
+  },
+  {
+    "name": "FinTap",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.fintap.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": null,
+        "rev_min_monthly": null,
+        "max_amount": 750000,
+        "max_term_months": 12,
+        "notes": "6/9/12-mo terms; all credit accepted; RBF structure"
+      }
+    ]
+  },
+  {
+    "name": "Fora Financial",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.forafinancial.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 15000,
+        "max_amount": 1500000,
+        "max_term_months": 18,
+        "notes": "Revenue Advance; daily/weekly % of receipts; no hard pull"
+      },
+      {
+        "product": "LOC",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 15000,
+        "max_amount": 100000,
+        "max_term_months": 12,
+        "notes": "$5K-$100K; weekly or monthly payments; 12-mo terms"
+      }
+    ]
+  },
+  {
+    "name": "Forward Financing",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.forwardfinancing.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 500000,
+        "max_term_months": 18,
+        "notes": "RBF product; 92K+ businesses funded; $4.8B+"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 500000,
+        "max_term_months": 18,
+        "notes": "Flexible products for any business purpose"
+      }
+    ]
+  },
+  {
+    "name": "Fox",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://foxbusinessfunding.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 12,
+        "rev_min_monthly": 50000,
+        "max_amount": 1000000,
+        "max_term_months": null,
+        "notes": "FL-based direct funder; daily or weekly ACH; founded 2012"
+      }
+    ]
+  },
+  {
+    "name": "FundKite",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.fundkite.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 20000,
+        "max_amount": 2000000,
+        "max_term_months": null,
+        "notes": "Purchases of A/R; not loans; 4-hr approvals; 24-48hr funding"
+      }
+    ]
+  },
+  {
+    "name": "FundThrough",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.fundthrough.com",
+    "product_criteria": [
+      {
+        "product": "Factor",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 50000,
+        "max_amount": null,
+        "max_term_months": null,
+        "notes": "100% invoice value less flat fee; no min funding after 1st invoice"
+      }
+    ]
+  },
+  {
+    "name": "Giggle Advance",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.gigglefinance.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": 3,
+        "rev_min_monthly": 1500,
+        "max_amount": 10000,
+        "max_term_months": null,
+        "notes": "For 1099/gig workers; no credit score required; 24/7 platform"
+      }
+    ]
+  },
+  {
+    "name": "Grasshopper Bank",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.grasshopper.bank",
+    "product_criteria": [
+      {
+        "product": "SBA",
+        "loc_type": null,
+        "fico_min": 660,
+        "tib_min_months": 12,
+        "rev_min_monthly": null,
+        "max_amount": 5000000,
+        "max_term_months": 300,
+        "notes": "SBA Preferred Lender; ~$100K annual rev; soft pre-qual"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 660,
+        "tib_min_months": 12,
+        "rev_min_monthly": null,
+        "max_amount": 5000000,
+        "max_term_months": null,
+        "notes": "Small business term loans; direct banker model"
+      }
+    ]
+  },
+  {
+    "name": "Greenbox Capital",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.greenboxcapital.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 3,
+        "rev_min_monthly": 5000,
+        "max_amount": 500000,
+        "max_term_months": null,
+        "notes": "$3K-$500K; 1 business day; low credit OK"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 3,
+        "rev_min_monthly": 5000,
+        "max_amount": 500000,
+        "max_term_months": null,
+        "notes": "Same eligibility as MCA"
+      },
+      {
+        "product": "LOC",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 3,
+        "rev_min_monthly": 5000,
+        "max_amount": 500000,
+        "max_term_months": null,
+        "notes": "Business line of credit"
+      },
+      {
+        "product": "Finance",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 3,
+        "rev_min_monthly": 5000,
+        "max_amount": 500000,
+        "max_term_months": null,
+        "notes": "Equipment financing"
+      },
+      {
+        "product": "Factor",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 3,
+        "rev_min_monthly": 5000,
+        "max_amount": 500000,
+        "max_term_months": null,
+        "notes": "Invoice factoring"
+      }
+    ]
+  },
+  {
+    "name": "Kapitus",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.kapitus.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 36,
+        "notes": "Full suite; soft pull"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 36,
+        "notes": "Same base requirements"
+      },
+      {
+        "product": "LOC",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 36,
+        "notes": "Line of credit"
+      },
+      {
+        "product": "SBA",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 36,
+        "notes": "SBA loans available"
+      },
+      {
+        "product": "Finance",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 36,
+        "notes": "Equipment finance"
+      },
+      {
+        "product": "Factor",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 36,
+        "notes": "Invoice factoring"
+      }
+    ]
+  },
+  {
+    "name": "Libertas Funding",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.libertasfunding.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 20000,
+        "max_amount": 10000000,
+        "max_term_months": null,
+        "notes": "$500K-$10M; can be as low as $100K; short-term RBF"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 20000,
+        "max_amount": 10000000,
+        "max_term_months": null,
+        "notes": "Business term loans via WebBank"
+      }
+    ]
+  },
+  {
+    "name": "Live Oak Bank",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.liveoakbank.com",
+    "product_criteria": [
+      {
+        "product": "SBA",
+        "loc_type": null,
+        "fico_min": 680,
+        "tib_min_months": 24,
+        "rev_min_monthly": null,
+        "max_amount": 15000000,
+        "max_term_months": 300,
+        "notes": "America's Premier SBA Lender; SBA/USDA/conventional"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 680,
+        "tib_min_months": 24,
+        "rev_min_monthly": null,
+        "max_amount": 15000000,
+        "max_term_months": null,
+        "notes": "Custom business loans; no branch/commission model"
+      }
+    ]
+  },
+  {
+    "name": "Mantis Funding",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.mantisfunding.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 500000,
+        "max_term_months": 6,
+        "notes": "RBF; $5K-$500K; daily or weekly ACH"
+      }
+    ]
+  },
+  {
+    "name": "Mulligan Funding",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.mulliganfunding.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 625,
+        "tib_min_months": 6,
+        "rev_min_monthly": 62500,
+        "max_amount": 5000000,
+        "max_term_months": 24,
+        "notes": "$750K annual rev; terms 3-24mo; no open bankruptcies"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 625,
+        "tib_min_months": 6,
+        "rev_min_monthly": 62500,
+        "max_amount": 5000000,
+        "max_term_months": 24,
+        "notes": "Max 1 daily debit loan; all 50 states + DC"
+      }
+    ]
+  },
+  {
+    "name": "National Funding",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.nationalfunding.com",
+    "product_criteria": [
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 20833,
+        "max_amount": 500000,
+        "max_term_months": null,
+        "notes": "$250K+ annual sales req; $5K-$500K"
+      },
+      {
+        "product": "Finance",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 20833,
+        "max_amount": 150000,
+        "max_term_months": null,
+        "notes": "Equipment financing up to $150K"
+      }
+    ]
+  },
+  {
+    "name": "OnDeck",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.ondeck.com",
+    "product_criteria": [
+      {
+        "product": "LOC",
+        "loc_type": "revolving",
+        "fico_min": 625,
+        "tib_min_months": 12,
+        "rev_min_monthly": 8333,
+        "max_amount": 200000,
+        "max_term_months": 24,
+        "notes": "$6K-$200K; 12/18/24-mo terms; $100K annual rev req"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 625,
+        "tib_min_months": 12,
+        "rev_min_monthly": 8333,
+        "max_amount": 400000,
+        "max_term_months": 24,
+        "notes": "$5K-$400K; no hard credit pull; not available in ND"
+      }
+    ]
+  },
+  {
+    "name": "PayPal",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.paypal.com/us/business/financial-services/working-capital",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": 3,
+        "rev_min_monthly": null,
+        "max_amount": 200000,
+        "max_term_months": null,
+        "notes": "Based on PayPal account history; no personal credit check; $300K repeat borrowers"
+      }
+    ]
+  },
+  {
+    "name": "PEAC Solutions",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://peacsolutions.com",
+    "product_criteria": [
+      {
+        "product": "Finance",
+        "loc_type": null,
+        "fico_min": 650,
+        "tib_min_months": 24,
+        "rev_min_monthly": 15000,
+        "max_amount": 250000,
+        "max_term_months": 24,
+        "notes": "Equipment from Marlin Leasing; may hard pull for <5yr biz"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 650,
+        "tib_min_months": 24,
+        "rev_min_monthly": 15000,
+        "max_amount": 250000,
+        "max_term_months": 24,
+        "notes": "Working capital from WebBank; soft pull; prepay anytime"
+      }
+    ]
+  },
+  {
+    "name": "Pearl Capital",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.pearlcapital.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": 3,
+        "rev_min_monthly": null,
+        "max_amount": 1000000,
+        "max_term_months": null,
+        "notes": "Any FICO accepted; ISO-driven; credit-challenged merchants OK"
+      }
+    ]
+  },
+  {
+    "name": "QuickBridge",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.quickbridge.com",
+    "product_criteria": [
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 20834,
+        "max_amount": 500000,
+        "max_term_months": null,
+        "notes": "$250K+ annual sales; early payoff discounts; soft pull"
+      }
+    ]
+  },
+  {
+    "name": "Reliant Funding",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.reliantfunding.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 300,
+        "tib_min_months": 6,
+        "rev_min_monthly": 5000,
+        "max_amount": 2000000,
+        "max_term_months": null,
+        "notes": "Approvals in 30 min; funding in 1 day; flexible credit"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 300,
+        "tib_min_months": 6,
+        "rev_min_monthly": 5000,
+        "max_amount": 2000000,
+        "max_term_months": null,
+        "notes": "Same eligibility"
+      }
+    ]
+  },
+  {
+    "name": "Riviera Finance",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.rivierafinance.com",
+    "product_criteria": [
+      {
+        "product": "Factor",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 0,
+        "rev_min_monthly": 5000,
+        "max_amount": null,
+        "max_term_months": 6,
+        "notes": "Invoice factoring since 1969; 24-hr funding guaranteed"
+      }
+    ]
+  },
+  {
+    "name": "Shopify Capital",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.shopify.com/capital",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": 3,
+        "rev_min_monthly": null,
+        "max_amount": 2000000,
+        "max_term_months": 18,
+        "notes": "Shopify merchants only; repay % of daily sales; no personal credit check"
+      }
+    ]
+  },
+  {
+    "name": "Small Business Funding",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.smallbusinessfunding.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": null,
+        "max_amount": 5000000,
+        "max_term_months": 24,
+        "notes": "Various advance programs; no obligation to change processor"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": null,
+        "max_amount": 5000000,
+        "max_term_months": 24,
+        "notes": "Same eligibility as MCA"
+      },
+      {
+        "product": "Factor",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": null,
+        "max_amount": 5000000,
+        "max_term_months": 24,
+        "notes": "Invoice factoring product"
+      }
+    ]
+  },
+  {
+    "name": "Spartan Capital Group",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.spartancapitaladvisors.com",
+    "product_criteria": [
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 500000,
+        "max_term_months": 36,
+        "notes": "3-36mo fixed payments; same-day approval available"
+      },
+      {
+        "product": "LOC",
+        "loc_type": "revolving",
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 250000,
+        "max_term_months": null,
+        "notes": "Revolving; interest on draws only; auto-replenishes"
+      },
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 500000,
+        "max_term_months": null,
+        "notes": "RBF; flexible repayment; zero hard credit pull"
+      }
+    ]
+  },
+  {
+    "name": "Stripe Capital",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://stripe.com/capital",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 600,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": null,
+        "max_term_months": null,
+        "notes": "Stripe merchants only; one flat fee; auto % deducted from sales"
+      }
+    ]
+  },
+  {
+    "name": "SuperG Capital",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.supergcapital.com",
+    "product_criteria": [
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 12,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 48,
+        "notes": "ISO residual portfolio loans only; $100K-$5M; 12-48mo"
+      }
+    ]
+  },
+  {
+    "name": "The Smarter Merchant",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.thesmartermerchant.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 500000,
+        "max_term_months": null,
+        "notes": "Direct MCA funder NYC since 2013; $5K-$500K; daily & weekly"
+      }
+    ]
+  },
+  {
+    "name": "TimePayment",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://timepayment.com",
+    "product_criteria": [
+      {
+        "product": "Finance",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 0,
+        "rev_min_monthly": null,
+        "max_amount": 1500000,
+        "max_term_months": 60,
+        "notes": "Equipment leasing; 550-Excellent FICO; wide industry coverage"
+      }
+    ]
+  },
+  {
+    "name": "Total Merchant Resources",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.totalmerchantresources.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": 3,
+        "rev_min_monthly": 10000,
+        "max_amount": null,
+        "max_term_months": null,
+        "notes": "4-mo bank statements; ACH or CC split; 1-2 day funding"
+      }
+    ]
+  },
+  {
+    "name": "Triumph",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.triumph.io",
+    "product_criteria": [
+      {
+        "product": "Factor",
+        "loc_type": null,
+        "fico_min": 450,
+        "tib_min_months": 6,
+        "rev_min_monthly": 5000,
+        "max_amount": null,
+        "max_term_months": null,
+        "notes": "TBK Bank FDIC; freight/carrier/broker focused; 24-hr A/R"
+      }
+    ]
+  },
+  {
+    "name": "TVT Capital",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://tvtcapital.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": 3,
+        "rev_min_monthly": 75000,
+        "max_amount": 25000000,
+        "max_term_months": 24,
+        "notes": "Bridge loans; 1st & 2nd lien; $100K-$25M; covenant light"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": null,
+        "tib_min_months": 3,
+        "rev_min_monthly": 75000,
+        "max_amount": 25000000,
+        "max_term_months": 24,
+        "notes": "Working/growth/acquisition capital; 3-24mo terms"
+      }
+    ]
+  },
+  {
+    "name": "United Capital Source",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://unitedcapitalsource.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 300,
+        "notes": "75+ lender marketplace; $1.6B+ funded"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 300,
+        "notes": "Same eligibility"
+      },
+      {
+        "product": "LOC",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 300,
+        "notes": "Business line of credit"
+      },
+      {
+        "product": "SBA",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 300,
+        "notes": "SBA loans"
+      },
+      {
+        "product": "Finance",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 300,
+        "notes": "Equipment financing"
+      },
+      {
+        "product": "Factor",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 6,
+        "rev_min_monthly": 10000,
+        "max_amount": 5000000,
+        "max_term_months": 300,
+        "notes": "Invoice/receivables factoring"
+      }
+    ]
+  },
+  {
+    "name": "Velocity Capital Group",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.velocitycg.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 500,
+        "tib_min_months": 3,
+        "rev_min_monthly": 20000,
+        "max_amount": 2000000,
+        "max_term_months": null,
+        "notes": "Data-driven RBF; same-day working capital; 3-mo stmts req"
+      }
+    ]
+  },
+  {
+    "name": "VOX Funding",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.voxfunding.com",
+    "product_criteria": [
+      {
+        "product": "MCA",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 15000,
+        "max_amount": 1500000,
+        "max_term_months": 36,
+        "notes": "Revenue Advance; payments adapt to cash flow"
+      },
+      {
+        "product": "Factor",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 15000,
+        "max_amount": 1500000,
+        "max_term_months": 36,
+        "notes": "Invoice factoring via VOX Factor"
+      },
+      {
+        "product": "LOC",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 15000,
+        "max_amount": 1500000,
+        "max_term_months": 36,
+        "notes": "Line of credit via Chedr"
+      },
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 15000,
+        "max_amount": 1500000,
+        "max_term_months": 36,
+        "notes": "Amortizing loan via Chedr"
+      }
+    ]
+  },
+  {
+    "name": "World Business Lenders",
+    "scraped_at": "2026-06-08T00:00:00Z",
+    "source_url": "https://www.worldbusinesslenders.com",
+    "product_criteria": [
+      {
+        "product": "Term",
+        "loc_type": null,
+        "fico_min": 550,
+        "tib_min_months": 6,
+        "rev_min_monthly": 25000,
+        "max_amount": null,
+        "max_term_months": null,
+        "notes": "Real-estate secured business loans; under-served SMBs"
+      }
+    ]
+  }
+]

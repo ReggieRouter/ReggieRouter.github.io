@@ -27,6 +27,16 @@ wordmark on generated documents. Not required on all surfaces.
 ### LendPaper Fit
 **Perfect.** Lean sales and underwriting desks are facing crushing transaction volumes. They are actively hunting for tools to eliminate manual calculation errors, speed up deal structuring, and maximize throughput per employee without adding W2 overhead.
 
+### Canonical Product Terms
+Write these exactly; do not coin synonyms.
+- **Estimate Log** — the cross-tool record of saved estimates (nav, sidebar, page
+  titles). Two words, capital E, capital L. Never "Quote Log," "Quotes," "History,"
+  "Saved deals." See `CALCULATORS.md §15`.
+- **Estimate** — what a calculator produces (document disclaimers say "Estimate")
+  *and* the product-surface word in nav/labels ("Estimate Log"). The legacy term
+  *Quote* is retired; use **Estimate** everywhere. Display-term standards:
+  `CALCULATORS.md §14`.
+
 ---
 
 ## 2. Color System
@@ -305,3 +315,105 @@ This shows the full calculator: two-column layout, input panel, hero payment, st
 | Verifying print layout or PDF output | `Payment Breakdown Save as PDF page.png` |
 
 All files are in: `~/Desktop/Payment breakdown calculator screenshots/`
+
+---
+
+## 12. Comparison & Decision UI Principles
+
+These govern any UI where the user compares options or weighs a decision (payoff
+summaries, scenario tiles, side-by-side outputs). Established with the Payment
+Breakdown payoff-summary redesign (LEN-110).
+
+1. **Parallel tile grammar.** When tiles are meant to be compared, give them
+   identical internal structure — same fields, in the same order, in the same
+   positions. Comparison should happen by reading *across* aligned rows, not by
+   re-learning each tile. (Reference implementation: the three payoff tiles in
+   `AmoScheduleCalculator.html` — Early payoff quote / Run-to-term cost / Total
+   savings — each `eyebrow → big number → one-line sub → divider → the same stat rows`.)
+2. **One home per number.** A headline figure appears in exactly one tile. Never
+   duplicate a value as both a tag and a hero number — it creates "which number is
+   real?" friction.
+3. **Forward vs. backward zoning.** Separate decision/option content
+   (forward-looking) from current-state/history (backward-looking) with a labeled
+   band — e.g. the "To date" band beneath the payoff tiles. Keep each zone's
+   contents consistent with its label: only historical/current-state facts go in a
+   "To date" zone; only options/outcomes go in the decision zone.
+4. **Broker vocabulary over merchant vocabulary** in B2B tools: "run to term,"
+   "buy out," "factor rate," "payments eliminated" — not "save money," "interest,"
+   "remaining balance." ("Balance" reads to merchants as the payoff amount;
+   "remittance" is jargon.)
+5. **Don't assert third-party terms.** Quote expiry, payoff timing, etc. are the
+   lender's terms — surface the date (e.g. a valid-through pill), don't editorialize
+   the deadline ("expires end of day"). Carry approximate financial figures with a
+   `~` tilde (APR, factor) since we don't assert an exact APR on a factor-rate
+   product.
+6. **Hierarchy through accents, not fills.** Comparison tiles share a **white**
+   background. Emphasis comes from borders and type — a green left-accent on the
+   action tile, a green outline + green numerals on the "winner" tile — never from
+   colored background fills. Filling every tile with its own tint flattens the
+   comparison (the eye can't tell which tile is the action), reads as
+   "AI-generated," and wastes ink in print. *Color the zone, not the cards:* a
+   light-green container behind the tiles can signal "savings available," but the
+   cards themselves stay white. (Reference: the three payoff tiles are all white;
+   only the savings tile carries a green border + green numbers.)
+7. **Degrade the grammar, don't fabricate the option.** When an option doesn't
+   exist for a deal (e.g. a deal with **no pre-pay discount**), reuse the same tile
+   grammar but render only the tiles that carry a real number — a single
+   `Run-to-term cost` tile plus the To-date band. Never show an empty "Early
+   payoff" tile or a "saves $0" line. Drop the green "savings-zone" container to a
+   neutral surface and the date pill to gray, so color still honestly signals
+   *whether a savings opportunity exists at all.* (Reference: the no-pre-pay branch
+   of `renderDetailRow` in `AmoScheduleCalculator.html`.)
+
+---
+
+## 13. Calculator UI Components (canonical — LEN-123)
+
+Shared component language so every calculator looks like one product. Full
+behavioral spec + the output-column order live in `CALCULATORS.md §16–17`; this is
+the visual token reference.
+
+### Surfaces & accents
+| Component | Background | Border / accent | Radius |
+|---|---|---|---|
+| Tinted strip / charge / prepared-by | `#F4F8F5` | `#E3EFE8` (when bordered) | `8–12px` |
+| Savings / payoff banner | `#F0FDF4` | `4px` brand-dark left accent + `#BBF7D0` | `12px` |
+| Modal card | `#FFFFFF` | shadow `0 24px 60px rgba(0,0,0,.25)` | `16px` |
+| Instructional tile (modals) | `#FFFBEB` | `#FDE68A` | `10px` |
+
+- **Amber** (`#FFFBEB`/`#FDE68A`/`#92400E`) is reserved for *instructional* and
+  *compliance* moments only — never for computed values or decoration.
+- **Selection accent order** for multi-select pills: green → blue → purple. Single
+  selection is always green. (Blue/purple appear *only* here, never elsewhere in
+  calculator UI — they remain banned for outputs and chrome per §2 color rules.)
+
+### Buttons (calculator CTA hierarchy — supersedes "Copy on top")
+- **Primary** (`Save Estimate as PDF`): solid `--color-brand-dark` fill, white text,
+  full width, `10px` radius.
+- **Secondary** (`Copy Scenario`): brand-dark outline, transparent fill, full width.
+- **Tertiary**: plain text links (`#6B7280`, hover `--color-brand-mid`) in a footer
+  row — used for `+ Compare scenarios` and `🕐 Estimate Log`.
+
+### Type tokens
+- Metric label: `10px`/700/uppercase/`0.04em`/`#64748B`.
+- Hero number: `42px`/700–900/brand-dark/mono numerals.
+- Tabular numbers everywhere money or rates align in a grid
+  (`font-variant-numeric: tabular-nums`).
+
+### Modals
+Vertically centered (`align-items:center`, no dead space), single `.open` toggle,
+close on backdrop-click + `Escape`. Pill-tabs for mode switches. (Reference shells:
+`#payoffModal`, `#compareModal` in `AmoScheduleCalculator.html`.)
+
+---
+
+## Compliance & Legal Copy — see LEGAL.md
+
+Regulatory content is **never** duplicated here. For anything compliance-related
+in copy or visuals, reference `markdowns/LEGAL.md`:
+
+- Prohibited words/phrases in any copy → LEGAL.md §5 + §9.1 (No Absolutes)
+- Misrepresentation rules (product/rate/term/timing) → LEGAL.md §9.2
+- Outreach copy (SMS/email/calls, opt-out language) → LEGAL.md §8
+- The canonical "not legal advice" disclaimer → LEGAL.md §14 (auto-injected by
+  `compliance.js` — never hardcode it in a layout)

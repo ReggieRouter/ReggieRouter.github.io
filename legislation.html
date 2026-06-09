@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compliance Desk — LendPaper</title>
+
+<!-- Favicon (inline SVG, same on every page) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
+
+<!-- Open Graph / Twitter -->
+<meta property="og:title" content="Compliance Desk — LendPaper" />
+<meta property="og:description" content="State-by-state and federal commercial financing disclosure legislation, mapped. Questions? Email hello@lendpaper.com" />
+<meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+<meta property="og:url" content="https://lendpaper.com/compliance" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #FFFFFF;
+  --bg-alt: #F9FAFB;
+  --text: #111827;
+  --text-muted: #6B7280;
+  --accent: #1A3C2E;       /* brand green */
+  --accent-hover: #142E23;
+  --accent-mid: #2D6A4F;
+  --accent-soft: rgba(26, 60, 46, 0.08);
+  --border: #E5E7EB;
+  --radius: 14px;
+  --radius-sm: 9px;
+  /* Choropleth scale (brand-green progression) */
+  --leg-enacted: #1A3C2E;
+  --leg-effective-soon: #2D6A4F;
+  --leg-pending: #74A892;
+  --leg-none: #E8EBE9;
+  --leg-none-stroke: rgba(17,24,39,0.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg-alt); color: var(--text); font-family: 'Figtree', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px 64px; }
+
+/* Top bar */
+.topnav { display: flex; align-items: center; justify-content: space-between; height: 60px; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+.back-link { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; color: var(--text-muted); text-decoration: none; }
+.back-link:hover { color: var(--text); }
+.brand { display: inline-flex; align-items: baseline; font-weight: 800; letter-spacing: -0.02em; font-size: 16px; }
+.brand .l { color: var(--text); } .brand .p { color: var(--text-muted); font-weight: 300; } .brand .d { color: var(--accent); }
+
+/* Header */
+.page-head { padding: 22px 0 18px; }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--accent-mid); }
+.page-title { font-size: clamp(26px, 4vw, 38px); font-weight: 800; letter-spacing: -0.025em; margin: 6px 0 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.beta-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 4px 9px; border-radius: 999px; }
+.page-sub { font-size: 15px; color: var(--text-muted); max-width: 720px; line-height: 1.5; }
+
+/* Federal panel — deliberately distinct from the state cards */
+.federal {
+  margin-top: 22px; border-radius: var(--radius); overflow: hidden;
+  background: linear-gradient(135deg, #1A3C2E 0%, #21503C 100%);
+  color: #fff; box-shadow: 0 8px 26px rgba(26,60,46,0.22);
+}
+.federal-inner { padding: 22px 26px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 26px; }
+.federal-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #BFE3D2; }
+.federal-eyebrow .star { width: 15px; height: 15px; }
+.federal h2 { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; margin: 10px 0 8px; }
+.federal p { font-size: 13.5px; line-height: 1.55; color: rgba(255,255,255,0.85); }
+.federal-items { display: flex; flex-direction: column; gap: 12px; }
+.fed-item { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 11px; padding: 12px 14px; }
+.fed-item h3 { font-size: 13.5px; font-weight: 700; margin-bottom: 3px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fed-item .fed-status { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+.fed-status.final { background: #BFE3D2; color: #14342A; }
+.fed-status.proposed { background: rgba(255,255,255,0.18); color: #fff; }
+.fed-item p { font-size: 12px; color: rgba(255,255,255,0.78); }
+
+/* View toggle */
+.controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 28px 0 14px; flex-wrap: wrap; }
+.seg { display: inline-flex; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+.seg button { border: none; background: transparent; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--text-muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; transition: all .12s ease; }
+.seg button.active { background: var(--accent); color: #fff; }
+.updated { font-size: 12px; color: var(--text-muted); }
+
+/* Map view */
+.map-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 20px; align-items: start; }
+.map-card, .detail-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); }
+.map-card { padding: 8px 8px 14px; }
+#map-svg { width: 100%; height: auto; display: block; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 6px 14px 4px; }
+.legend-item { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
+.legend-swatch { width: 13px; height: 13px; border-radius: 4px; }
+
+/* state paths — fills only, no stroke (RR pattern) */
+.state-path { stroke: none; cursor: pointer; transition: fill 0.18s ease; }
+.state-border { fill: none; stroke: rgba(17,24,39,0.14); stroke-width: 0.7; stroke-linejoin: round; pointer-events: none; }
+.state-hover-stroke { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linejoin: round; pointer-events: none; }
+.state-label { font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600; fill: rgba(255,255,255,0.92); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.state-label.dark { fill: rgba(17,24,39,0.55); }
+
+/* detail panel */
+.detail-card { padding: 20px 22px; min-height: 360px; position: sticky; top: 18px; }
+.detail-empty { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+.detail-state { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+.status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; margin-top: 8px; }
+.status-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+.status-enacted { background: var(--accent-soft); color: var(--accent); }
+.status-effective-soon { background: rgba(45,106,79,0.12); color: var(--accent-mid); }
+.status-pending { background: rgba(116,168,146,0.18); color: #4a7c63; }
+.status-none { background: var(--bg-alt); color: var(--text-muted); }
+.bill { border-top: 1px solid var(--border); padding: 14px 0 4px; }
+.bill:first-of-type { border-top: none; }
+.bill-name { font-size: 14.5px; font-weight: 700; }
+.bill-meta { font-size: 12px; color: var(--text-muted); margin: 4px 0 8px; display: flex; flex-wrap: wrap; gap: 10px; }
+.bill-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.bill-desc { font-size: 13px; line-height: 1.55; color: #374151; }
+.bill-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; margin-top: 9px; }
+.bill-link:hover { text-decoration: underline; }
+
+/* enacted chips (always-clickable, fixes small-state map targets) */
+.chips-head { font-size: 12px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; margin: 18px 4px 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 4px; }
+.chip { font-size: 12px; font-weight: 600; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; transition: all .12s ease; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip .cdot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+/* Talk-track nudge — subtle, plain text (no badge/dot per design language) */
+.tt-note { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0 2px; padding: 11px 14px; font-size: 13px; line-height: 1.5; color: #374151; background: var(--accent-soft); border-left: 3px solid var(--accent-mid); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.tt-note svg { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 1px; color: var(--accent-mid); }
+.tt-note strong { color: var(--accent); font-weight: 700; }
+
+/* Table view (the "current"/raw view) */
+.table-view { display: none; }
+.table-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.filter-chips { display: inline-flex; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
+.filter-chips button { border: none; background: transparent; font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--text-muted); padding: 6px 13px; border-radius: 999px; cursor: pointer; transition: all .12s ease; white-space: nowrap; }
+.filter-chips button.active { background: var(--accent); color: #fff; }
+.table-search { flex: 1 1 200px; min-width: 160px; max-width: 320px; font-family: inherit; font-size: 13px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); background: var(--bg); }
+.table-search:focus { outline: none; border-color: var(--accent-mid); box-shadow: 0 0 0 3px var(--accent-soft); }
+.table-count { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+.table-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.table-scroll { overflow-x: auto; }
+table.leg { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+table.leg thead th { position: sticky; top: 0; background: var(--bg-alt); text-align: left; font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); padding: 0; border-bottom: 1px solid var(--border); white-space: nowrap; }
+table.leg thead th.sortable button { width: 100%; display: inline-flex; align-items: center; gap: 5px; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; background: none; border: none; cursor: pointer; padding: 11px 14px; }
+table.leg thead th.sortable button:hover { color: var(--accent); }
+table.leg thead th.static { padding: 11px 14px; }
+.sort-arrow { font-size: 9px; opacity: 0; transition: opacity .12s ease; }
+table.leg thead th.sorted .sort-arrow { opacity: 1; color: var(--accent); }
+table.leg thead th.sortable button:hover .sort-arrow { opacity: .5; }
+table.leg tbody td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.leg tbody tr:last-child td { border-bottom: none; }
+table.leg tbody tr:hover { background: var(--bg-alt); }
+.td-status { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
+.td-penalty { white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 600; }
+.td-penalty .pen-sub { display: block; font-weight: 400; font-size: 11px; color: var(--text-muted); white-space: normal; max-width: 220px; }
+.td-penalty.pen-na { color: var(--text-muted); font-weight: 500; }
+.eff-soon { color: var(--accent-mid); font-weight: 700; }
+.eff-pending { color: #4a7c63; font-weight: 600; border-bottom: 1px dotted #9bbdae; cursor: help; }
+.bill-trigger { background: none; border: none; padding: 0; font: inherit; color: var(--accent); font-weight: 700; text-align: left; cursor: pointer; }
+.bill-trigger:hover { text-decoration: underline; }
+.cite-sub { display: block; color: var(--text-muted); font-weight: 400; font-size: 11.5px; margin-top: 2px; }
+.empty-row td { text-align: center; color: var(--text-muted); padding: 26px 14px; font-size: 13px; }
+.disclaimer { margin-top: 22px; font-size: 12px; color: var(--text-muted); line-height: 1.6; background: var(--bg); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
+.disclaimer strong { color: var(--text); }
+
+/* News + statute source links (detail panel + modal) */
+.src-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 9px; }
+.src-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
+.src-link.news { color: var(--accent-mid); }
+.src-link:hover { text-decoration: underline; }
+
+/* Bill modal */
+.modal-scrim { position: fixed; inset: 0; background: rgba(17,24,39,0.46); display: none; align-items: center; justify-content: center; padding: 22px; z-index: 1000; }
+.modal-scrim.open { display: flex; }
+.modal { background: var(--bg); border-radius: var(--radius); max-width: 560px; width: 100%; max-height: 88vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(17,24,39,0.3); }
+.modal-head { padding: 20px 22px 0; }
+.modal-head .modal-state { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+.modal-head h2 { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin: 5px 0 8px; line-height: 1.25; }
+.modal-body { padding: 4px 22px 8px; }
+.modal-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 12.5px; color: var(--text-muted); margin: 6px 0 12px; }
+.modal-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.modal-row { font-size: 13px; line-height: 1.55; margin-bottom: 11px; }
+.modal-row b { color: var(--text); font-weight: 700; }
+.modal-desc { font-size: 13.5px; line-height: 1.6; color: #374151; }
+.modal-foot { padding: 14px 22px 20px; border-top: 1px solid var(--border); margin-top: 6px; }
+.modal-foot .modal-disclaimer { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; margin-top: 12px; }
+.modal-close { position: sticky; top: 0; float: right; background: var(--bg); border: none; font-size: 22px; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 14px 16px; }
+.modal-close:hover { color: var(--text); }
+
+@media (max-width: 880px) {
+  .federal-inner { grid-template-columns: 1fr; gap: 18px; }
+  .map-grid { grid-template-columns: 1fr; }
+  .detail-card { position: static; min-height: 0; }
+  .table-count { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- Shared LendPaper libraries: config (Supabase) + hard auth gate -->
+<script src="js/config.js"></script>
+<script type="importmap">{ "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }</script>
+<!-- Hard auth gate (LEN-68, re-applied for launch): requireApprovedUser() redirects logged-out/unapproved users to /login.html. Never add a bare top-level return (ES-module parse error). -->
+<script type="module">
+  import { requireApprovedUser, logUsage } from './js/auth.js';
+  const profile = await requireApprovedUser();
+  if (profile) {
+    window.lpProfile = profile;
+    logUsage('legislation', 'view');
+  }
+</script>
+
+<nav class="topnav">
+  <a class="back-link" href="/index.html">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    All tools
+  </a>
+  <span class="brand"><span class="l">Lend</span><span class="p">Paper</span><span class="d">.</span></span>
+</nav>
+
+<div class="wrap">
+  <header class="page-head">
+    <div class="eyebrow">Regulatory intelligence</div>
+    <h1 class="page-title">Compliance Desk <span class="beta-tag">Beta</span></h1>
+    <p class="page-sub">Commercial financing disclosure law across the United States — federal action and a state-by-state map of what's enacted, taking effect, and pending. Built for brokers and funders who need to know where disclosure rules bite.</p>
+  </header>
+
+  <!-- FEDERAL — distinct, prominent -->
+  <section class="federal">
+    <div class="federal-inner">
+      <div>
+        <div class="federal-eyebrow">
+          <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.6 9.3l-4.8 4.68L18 21l-6-3.27L6 21l1.2-7.02L2.4 9.3l6.7-1.04z"/></svg>
+          Federal
+        </div>
+        <h2 id="fed-title">No federal commercial-financing disclosure law — yet</h2>
+        <p id="fed-blurb">There is currently no single federal statute requiring APR-style disclosure on commercial financing (TILA governs consumer, not business, credit). The action below is the federal activity most likely to reshape the landscape.</p>
+      </div>
+      <div class="federal-items" id="fedItems"></div>
+    </div>
+  </section>
+
+  <!-- Talk-track nudge — subtle reminder these map to rep talk tracks (LEN-27) -->
+  <div class="tt-note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <div><strong>Use these on calls.</strong> Each item here can be dropped into a rep talk track — e.g. <em>"New York now requires an APR on your offer, so the number you're seeing is the real cost."</em> Turning disclosure rules into plain-language trust beats hiding from them.</div>
+  </div>
+
+  <!-- View controls -->
+  <div class="controls">
+    <div class="seg" role="tablist">
+      <button id="btn-map" class="active" onclick="setView('map')">Map view</button>
+      <button id="btn-table" onclick="setView('table')">Table view</button>
+    </div>
+    <div class="updated" id="updatedLabel"></div>
+  </div>
+
+  <!-- MAP VIEW -->
+  <div class="map-view" id="mapView">
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--leg-enacted)"></span>Enacted &amp; in effect</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--leg-effective-soon)"></span>Enacted — effective soon</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--leg-pending)"></span>Pending / introduced</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--leg-none);border:1px solid var(--leg-none-stroke)"></span>No specific law</span>
+    </div>
+    <div class="map-grid">
+      <div class="map-card">
+        <svg id="map-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid meet" aria-label="US map of commercial financing legislation">
+          <g id="states-g"></g>
+          <g id="borders-g"></g>
+          <g id="hover-g"></g>
+          <g id="labels-g"></g>
+        </svg>
+      </div>
+      <aside class="detail-card" id="detailCard">
+        <div class="detail-empty" id="detailEmpty">
+          <strong>Select a state</strong> on the map (or a chip below) to see its commercial-financing legislation, citations, effective dates, and scope.
+          <div class="chips-head">Jurisdictions with activity</div>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div id="detailBody" style="display:none;"></div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- TABLE VIEW (the raw / current view) -->
+  <div class="table-view" id="tableView">
+    <div class="table-tools">
+      <div class="filter-chips" id="statusFilter" role="group" aria-label="Filter by status">
+        <button data-status="all" class="active">All</button>
+        <button data-status="enacted">Enacted</button>
+        <button data-status="effective-soon">Effective soon</button>
+        <button data-status="pending">Pending</button>
+      </div>
+      <input type="search" id="tableSearch" class="table-search" placeholder="Search state, bill, citation…" aria-label="Search the table">
+      <span class="table-count" id="tableCount"></span>
+    </div>
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="leg">
+          <thead>
+            <tr>
+              <th class="sortable" data-key="name"><button type="button" onclick="sortBy('name')">Jurisdiction <span class="sort-arrow"></span></button></th>
+              <th class="sortable" data-key="status"><button type="button" onclick="sortBy('status')">Status <span class="sort-arrow"></span></button></th>
+              <th class="static">Statute / Bill</th>
+              <th class="sortable" data-key="effective"><button type="button" onclick="sortBy('effective')">Effective <span class="sort-arrow"></span></button></th>
+              <th class="sortable" data-key="penalty"><button type="button" onclick="sortBy('penalty')">Max penalty <span class="sort-arrow"></span></button></th>
+              <th class="static">Scope</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BILL MODAL -->
+  <div class="modal-scrim" id="billModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <button class="modal-close" aria-label="Close" onclick="closeBillModal()">&times;</button>
+      <div class="modal-head">
+        <div class="modal-state" id="modalState"></div>
+        <h2 id="modalTitle"></h2>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Seed data — verify before relying on it.</strong> This beta is preloaded with a representative set of commercial-financing disclosure laws and bills for demonstration. Citations, effective dates, and scope thresholds are approximate and must be confirmed against the official statute and current legislative status before use. Not legal advice. Source registry to be wired to <code>markdowns/LEGAL.md</code> Part II.
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="public/assets/js/legislation-data.js?v=2026.06.09.0002"></script>
+<script>
+/* ── Legislation Tracker UI ─────────────────────────────────────────────── */
+var FIPS = {
+  "01":"AL","02":"AK","04":"AZ","05":"AR","06":"CA","08":"CO","09":"CT","10":"DE","11":"DC",
+  "12":"FL","13":"GA","15":"HI","16":"ID","17":"IL","18":"IN","19":"IA","20":"KS","21":"KY",
+  "22":"LA","23":"ME","24":"MD","25":"MA","26":"MI","27":"MN","28":"MS","29":"MO","30":"MT",
+  "31":"NE","32":"NV","33":"NH","34":"NJ","35":"NM","36":"NY","37":"NC","38":"ND","39":"OH",
+  "40":"OK","41":"OR","42":"PA","44":"RI","45":"SC","46":"SD","47":"TN","48":"TX","49":"UT",
+  "50":"VT","51":"VA","53":"WA","54":"WV","55":"WI","56":"WY"
+};
+var STATUS_META = {
+  'enacted':         { fill: 'var(--leg-enacted)',         label: 'Enacted & in effect',  cls: 'status-enacted',         dot: '#1A3C2E', dark: false },
+  'effective-soon':  { fill: 'var(--leg-effective-soon)',  label: 'Effective soon',       cls: 'status-effective-soon',  dot: '#2D6A4F', dark: false },
+  'pending':         { fill: 'var(--leg-pending)',         label: 'Pending / introduced', cls: 'status-pending',         dot: '#74A892', dark: false },
+  'none':            { fill: 'var(--leg-none)',            label: 'No specific law',      cls: 'status-none',            dot: '#cbd5d1', dark: true  }
+};
+function statusOf(abbr){ var d = LEG_DATA[abbr]; return (d && d.status) || 'none'; }
+
+/* ---- Shared formatting helpers (LEN-159) ---- */
+var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var NOW_ISO = '2026-06-09'; // pinned "today" — date APIs unavailable in some build contexts
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s){ return esc(s).replace(/'/g,'&#39;'); }
+/* Returns {text, cls, sort} for a bill's effective date. Dated → "Mon YYYY"
+   (future dates flagged effective-soon); pending → "As soon as …" w/ hover. */
+function effInfo(b){
+  if (b && b.effISO){
+    var p = b.effISO.split('-'); var mo = MONTHS[parseInt(p[1],10)-1] || ''; var yr = p[0];
+    var future = b.effISO > NOW_ISO;
+    return { text: mo + ' ' + yr, cls: future ? 'eff-soon' : '', sort: b.effISO, future: future };
+  }
+  if (b && b.asSoonAs){
+    return { text: 'As soon as ' + b.asSoonAs, cls: 'eff-pending', tip: b.asSoonAsExplain || '', sort: '9999', future: true };
+  }
+  return { text: '—', cls: '', sort: '5000' }; // undated enacted → mid so it doesn't sort to either extreme
+}
+/* Returns {text, sub, val, na} for a bill's penalty. val drives sorting. */
+function penInfo(b){
+  if (!b || (b.penaltyMax == null && !b.penaltyText)) return { text: '—', val: -1, na: true };
+  if (b.penaltyMax == null) return { text: 'Injunctive / restitution', sub: b.penaltyText || '', val: 0, na: true };
+  var v = b.penaltyMax;
+  var disp = v >= 1000 ? '$' + (v/1000) + 'k' : '$' + v;
+  return { text: disp + ' / viol.', sub: b.penaltyText || '', val: v, na: false };
+}
+
+/* ---- Bill modal (statute + news links) ---- */
+function openBillModal(abbr, idx){
+  var d = LEG_DATA[abbr]; if (!d) return;
+  var b = (d.bills && d.bills[idx]) || (d.bills && d.bills[0]); if (!b) return;
+  var m = STATUS_META[d.status] || STATUS_META['none'];
+  var eff = effInfo(b); var pen = penInfo(b);
+  document.getElementById('modalState').textContent = (d.name || abbr);
+  document.getElementById('modalTitle').textContent = b.name || (d.name + ' commercial financing');
+  var effLine = b.effISO ? (eff.future ? 'Effective ' : 'In effect since ') + eff.text
+                         : (b.asSoonAs ? 'Pending — as soon as ' + b.asSoonAs : 'Status varies');
+  var rows = ''
+    + '<div class="modal-meta">'
+      + '<span><span class="status-pill '+m.cls+'" style="margin:0"><span class="dot" style="background:'+m.dot+'"></span>'+m.label+'</span></span>'
+    + '</div>'
+    + '<div class="modal-row"><b>'+ (b.effISO ? 'Effective' : 'Timing') +':</b> '+ esc(effLine)
+      + (!b.effISO && b.asSoonAsExplain ? ' — <span style="color:var(--text-muted)">'+esc(b.asSoonAsExplain)+'</span>' : '') +'</div>'
+    + (b.citation ? '<div class="modal-row"><b>Citation:</b> '+esc(b.citation)+'</div>' : '')
+    + (b.scope ? '<div class="modal-row"><b>Scope:</b> '+esc(b.scope)+'</div>' : '')
+    + (b.penaltyText ? '<div class="modal-row"><b>Penalty exposure:</b> '+esc(b.penaltyText)+'</div>' : '')
+    + (b.desc ? '<div class="modal-desc">'+esc(b.desc)+'</div>' : '');
+  var links = '<div class="src-links">'
+    + (b.url ? '<a class="src-link" href="'+escAttr(b.url)+'" target="_blank" rel="noopener">📜 Read the statute ↗</a>' : '')
+    + (b.newsUrl ? '<a class="src-link news" href="'+escAttr(b.newsUrl)+'" target="_blank" rel="noopener">📰 '+esc(b.newsTitle || 'News coverage')+' ↗</a>' : '')
+    + '</div>';
+  document.getElementById('modalBody').innerHTML = rows
+    + '<div class="modal-foot">' + links
+    + '<div class="modal-disclaimer">Seed data — verify against the official statute and current legislative status before relying on it. Not legal advice.</div></div>';
+  document.getElementById('billModal').classList.add('open');
+}
+function closeBillModal(){ document.getElementById('billModal').classList.remove('open'); }
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeBillModal(); });
+document.getElementById('billModal').addEventListener('click', function(e){ if (e.target === this) closeBillModal(); });
+
+/* ---- Federal panel ---- */
+(function renderFederal(){
+  var host = document.getElementById('fedItems');
+  host.innerHTML = LEG_FEDERAL.items.map(function(it){
+    var src = it.url ? '<a href="'+it.url+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:7px;font-size:11.5px;font-weight:600;color:#BFE3D2;text-decoration:none;">Source ↗</a>' : '';
+    return '<div class="fed-item"><h3>'+it.name+'<span class="fed-status '+it.statusClass+'">'+it.statusLabel+'</span></h3><p>'+it.desc+'</p>'+src+'</div>';
+  }).join('');
+  document.getElementById('updatedLabel').textContent = 'Seed data · last reviewed ' + LEG_META.updated;
+})();
+
+/* ---- Detail panel ---- */
+function showState(abbr){
+  var d = LEG_DATA[abbr];
+  var name = (d && d.name) || (window.STATE_NAMES && STATE_NAMES[abbr]) || abbr;
+  var empty = document.getElementById('detailEmpty');
+  var body = document.getElementById('detailBody');
+  empty.style.display = 'none';
+  body.style.display = 'block';
+  if (!d || d.status === 'none' || !d.bills || !d.bills.length){
+    var m = STATUS_META['none'];
+    body.innerHTML = '<div class="detail-state">'+name+'</div>'
+      + '<span class="status-pill '+m.cls+'"><span class="dot" style="background:'+m.dot+'"></span>'+m.label+'</span>'
+      + '<p class="bill-desc" style="margin-top:16px">No commercial-financing disclosure statute or active bill on file for '+name+' in this seed dataset. Check the source registry before concluding none exists.</p>'
+      + '<a class="bill-link" href="#" onclick="clearState();return false;">← Back</a>';
+    return;
+  }
+  var m = STATUS_META[d.status] || STATUS_META['none'];
+  var html = '<div class="detail-state">'+name+'</div>'
+    + '<span class="status-pill '+m.cls+'"><span class="dot" style="background:'+m.dot+'"></span>'+m.label+'</span>';
+  html += d.bills.map(function(b, i){
+    var eff = effInfo(b); var pen = penInfo(b);
+    var effSpan = '<span'+(eff.tip?' class="'+eff.cls+'" title="'+escAttr(eff.tip)+'"':(eff.cls?' class="'+eff.cls+'"':''))+'>📅 '+esc(eff.text)+'</span>';
+    return '<div class="bill">'
+      + '<div class="bill-name"><button type="button" class="bill-trigger" onclick="openBillModal(\''+abbr+'\','+i+')">'+esc(b.name)+'</button></div>'
+      + '<div class="bill-meta">'
+        + (b.citation ? '<span>📜 '+esc(b.citation)+'</span>' : '')
+        + effSpan
+        + (!pen.na ? '<span>⚖️ '+esc(pen.text)+'</span>' : '')
+        + (b.scope ? '<span>🎯 '+esc(b.scope)+'</span>' : '')
+      + '</div>'
+      + '<div class="bill-desc">'+esc(b.desc)+'</div>'
+      + '<div class="src-links">'
+        + (b.url ? '<a class="src-link" href="'+escAttr(b.url)+'" target="_blank" rel="noopener">📜 Statute ↗</a>' : '')
+        + (b.newsUrl ? '<a class="src-link news" href="'+escAttr(b.newsUrl)+'" target="_blank" rel="noopener">📰 News ↗</a>' : '')
+        + '<button type="button" class="src-link" style="background:none;border:none;cursor:pointer;font:inherit" onclick="openBillModal(\''+abbr+'\','+i+')">Details ↗</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+  html += '<a class="bill-link" href="#" onclick="clearState();return false;" style="margin-top:14px;">← Back</a>';
+  body.innerHTML = html;
+}
+function clearState(){
+  document.getElementById('detailBody').style.display = 'none';
+  document.getElementById('detailEmpty').style.display = 'block';
+}
+
+/* ---- Chips (always-clickable jurisdiction list) ---- */
+(function renderChips(){
+  var host = document.getElementById('chips');
+  var order = { 'enacted':0, 'effective-soon':1, 'pending':2 };
+  var list = Object.keys(LEG_DATA)
+    .filter(function(a){ return statusOf(a) !== 'none'; })
+    .sort(function(a,b){ return (order[statusOf(a)] - order[statusOf(b)]) || a.localeCompare(b); });
+  host.innerHTML = list.map(function(a){
+    var m = STATUS_META[statusOf(a)];
+    return '<button class="chip" onclick="showState(\''+a+'\')"><span class="cdot" style="background:'+m.dot+'"></span>'+(LEG_DATA[a].name||a)+'</button>';
+  }).join('');
+})();
+
+/* ---- Table view: sortable + filterable (LEN-159) ---- */
+var STATUS_RANK = { 'enacted':0, 'effective-soon':1, 'pending':2, 'none':3 };
+var SORT_DEFAULT_DIR = { name:'asc', status:'asc', effective:'desc', penalty:'desc' };
+var tableState = { status:'all', q:'', sortKey:'status', sortDir:'asc' };
+
+function tableRowData(){
+  return Object.keys(LEG_DATA)
+    .filter(function(a){ return statusOf(a) !== 'none'; })
+    .map(function(a){
+      var d = LEG_DATA[a]; var b = (d.bills && d.bills[0]) || {};
+      return { abbr:a, name:d.name||a, status:d.status, bill:b, eff:effInfo(b), pen:penInfo(b) };
+    });
+}
+function sortBy(key){
+  if (tableState.sortKey === key){ tableState.sortDir = (tableState.sortDir === 'asc') ? 'desc' : 'asc'; }
+  else { tableState.sortKey = key; tableState.sortDir = SORT_DEFAULT_DIR[key] || 'asc'; }
+  renderTable();
+}
+function renderTable(){
+  var rows = tableRowData();
+  // filter: status
+  if (tableState.status !== 'all') rows = rows.filter(function(r){ return r.status === tableState.status; });
+  // filter: search
+  var q = tableState.q.trim().toLowerCase();
+  if (q) rows = rows.filter(function(r){
+    var hay = [r.name, r.bill.name, r.bill.citation, r.bill.scope, r.bill.penaltyText].join(' ').toLowerCase();
+    return hay.indexOf(q) !== -1;
+  });
+  // sort
+  var key = tableState.sortKey, dir = (tableState.sortDir === 'desc') ? -1 : 1;
+  rows.sort(function(x, y){
+    var c = 0;
+    if (key === 'name')        c = x.name.localeCompare(y.name);
+    else if (key === 'status') c = (STATUS_RANK[x.status]-STATUS_RANK[y.status]) || x.name.localeCompare(y.name);
+    else if (key === 'effective') c = (x.eff.sort < y.eff.sort ? -1 : x.eff.sort > y.eff.sort ? 1 : 0) || x.name.localeCompare(y.name);
+    else if (key === 'penalty')   c = (x.pen.val - y.pen.val) || x.name.localeCompare(y.name);
+    return c * dir;
+  });
+  // header indicators
+  var arrow = (tableState.sortDir === 'desc') ? '▼' : '▲';
+  document.querySelectorAll('table.leg thead th.sortable').forEach(function(th){
+    var on = th.getAttribute('data-key') === key;
+    th.classList.toggle('sorted', on);
+    th.querySelector('.sort-arrow').textContent = on ? arrow : '';
+  });
+  // body
+  var tbody = document.getElementById('tableBody');
+  if (!rows.length){
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No jurisdictions match this filter.</td></tr>';
+  } else {
+    tbody.innerHTML = rows.map(function(r){
+      var m = STATUS_META[r.status]; var b = r.bill; var eff = r.eff; var pen = r.pen;
+      var effCell = '<span'+(eff.cls?' class="'+eff.cls+'"':'')+(eff.tip?' title="'+escAttr(eff.tip)+'"':'')+'>'+esc(eff.text)+'</span>';
+      var penCell = pen.na
+        ? '<td class="td-penalty pen-na">'+esc(pen.text)+(pen.sub?'<span class="pen-sub">'+esc(pen.sub)+'</span>':'')+'</td>'
+        : '<td class="td-penalty">'+esc(pen.text)+(pen.sub?'<span class="pen-sub">'+esc(pen.sub)+'</span>':'')+'</td>';
+      return '<tr>'
+        + '<td><strong>'+esc(r.name)+'</strong></td>'
+        + '<td><span class="td-status" style="color:'+m.dot+'">'+m.label+'</span></td>'
+        + '<td><button type="button" class="bill-trigger" onclick="openBillModal(\''+r.abbr+'\',0)">'+esc(b.name||'—')+'</button>'
+          + (b.citation? '<span class="cite-sub">'+esc(b.citation)+'</span>':'')+'</td>'
+        + '<td>'+effCell+'</td>'
+        + penCell
+        + '<td>'+esc(b.scope||'—')+'</td>'
+        + '</tr>';
+    }).join('');
+  }
+  document.getElementById('tableCount').textContent = rows.length + (rows.length === 1 ? ' jurisdiction' : ' jurisdictions');
+}
+// wire controls
+document.getElementById('statusFilter').addEventListener('click', function(e){
+  var btn = e.target.closest('button'); if (!btn) return;
+  tableState.status = btn.getAttribute('data-status');
+  this.querySelectorAll('button').forEach(function(b){ b.classList.toggle('active', b === btn); });
+  renderTable();
+});
+document.getElementById('tableSearch').addEventListener('input', function(){ tableState.q = this.value; renderTable(); });
+renderTable();
+
+function setView(v){
+  var map = v === 'map';
+  document.getElementById('mapView').style.display = map ? 'block' : 'none';
+  document.getElementById('tableView').style.display = map ? 'none' : 'block';
+  document.getElementById('btn-map').classList.toggle('active', map);
+  document.getElementById('btn-table').classList.toggle('active', !map);
+}
+
+/* ---- The map (adapted from the registry-route US map; brand-green choropleth) ---- */
+var SMALL_STATES = { 'RI':1,'DE':1,'CT':1,'NJ':1,'DC':1,'MD':1,'MA':1,'NH':1,'VT':1 };
+async function initMap(){
+  try {
+    var res = await fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
+    var us = await res.json();
+    var projection = d3.geoAlbersUsa().scale(1180).translate([480, 300]);
+    var path = d3.geoPath().projection(projection);
+    var features = topojson.feature(us, us.objects.states).features;
+    var code = function(d){ return FIPS[String(d.id).padStart(2,'0')]; };
+
+    var gStates = d3.select('#states-g'), gBorders = d3.select('#borders-g'),
+        gHover = d3.select('#hover-g'), gLabels = d3.select('#labels-g');
+    var featureByCode = {}; features.forEach(function(f){ var c = code(f); if (c) featureByCode[c] = f; });
+
+    function hover(abbr, on){
+      d3.selectAll('.state-path').classed('state-hovered', false);
+      gHover.selectAll('*').remove();
+      if (on && abbr){
+        d3.select('#path-'+abbr).classed('state-hovered', true);
+        var feat = featureByCode[abbr];
+        if (feat) gHover.append('path').attr('class','state-hover-stroke').attr('d', path(feat)); // NO transform — see CSS note
+      }
+    }
+
+    gStates.selectAll('path').data(features).enter().append('path')
+      .attr('class','state-path')
+      .attr('id', function(d){ return 'path-'+code(d); })
+      .attr('d', path)
+      .attr('fill', function(d){ var c = code(d); return STATUS_META[statusOf(c)].fill; })
+      .on('mouseenter', function(e,d){ hover(code(d), true); })
+      .on('mouseleave', function(e,d){ hover(code(d), false); })
+      .on('click', function(e,d){ showState(code(d)); });
+
+    gBorders.selectAll('path').data(features).enter().append('path')
+      .attr('class','state-border').attr('d', path);
+
+    gLabels.selectAll('text').data(features.filter(function(d){ return !SMALL_STATES[code(d)]; }))
+      .enter().append('text')
+      .attr('class', function(d){ return 'state-label' + (statusOf(code(d))==='none' ? ' dark':''); })
+      .attr('x', function(d){ var c = path.centroid(d); return c[0]||-1000; })
+      .attr('y', function(d){ var c = path.centroid(d); return c[1]||-1000; })
+      .text(function(d){ return code(d); });
+  } catch (err){
+    document.getElementById('map-svg').outerHTML =
+      '<p style="padding:40px;text-align:center;color:var(--text-muted)">Map could not load. Use the table view or the chips on the right.</p>';
+  }
+}
+initMap();
+</script>
+</body>
+</html>

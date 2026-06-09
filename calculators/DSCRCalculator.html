@@ -32,7 +32,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DSCR Calculator | LendPaper</title>
+<title>DSCR | LendPaper</title>
 <meta property="og:title" content="DSCR Calculator — LendPaper" />
 <meta property="og:description" content="Calculate debt-service coverage ratios instantly to qualify commercial real estate deals. Questions? Email hello@lendpaper.com" />
 <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
@@ -54,17 +54,35 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
+<link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
 <script src="../public/assets/js/calculator-app.js"></script>
 <script src="../public/assets/js/pdf-helper.js"></script>
+<script src="../public/assets/js/compliance-rules.js"></script>
+<script src="../public/assets/js/compliance.js"></script>
+<!-- Quote Log bootstrap (LEN-123): config + supabase importmap + shared util -->
+<script src="../js/config.js"></script>
+<script type="importmap">
+  { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+</script>
+<!-- Hard auth gate (LEN-68, re-applied for launch): requireApprovedUser() redirects logged-out/unapproved users to /login.html. Never add a bare top-level return (ES-module parse error). -->
+<script type="module">
+  import { requireApprovedUser, logUsage } from '../js/auth.js';
+  const profile = await requireApprovedUser();
+  if (profile) {
+    window.lpProfile = profile;
+    logUsage('dscr', 'view');
+  }
+</script>
+<script type="module" src="../js/quote-log.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 :root {
   /* DSCR specific colors */
-  --pass-bg: #f0fdf4; --pass-tx: #14532D;
+  --pass-bg: #f0fdf4; --pass-tx: #1A3C2E;
   --fail-bg: #fee2e2; --fail-tx: #991b1b;
-  --tax-pass: #14532D;
-  --tax-pass-bg: rgba(20, 83, 45, 0.12);
+  --tax-pass: #1A3C2E;
+  --tax-pass-bg: rgba(26, 60, 46, 0.12);
   --tax-dbl: #9b85b9;
   --tax-dbl-bg: rgba(155, 133, 185, 0.12);
   --lp-green-light: #f0fdf4;
@@ -77,7 +95,7 @@
 /* -- Section card -- */
 .sc { background: #fff; border: 1px solid var(--lp-border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
 .sc-hd { padding: 14px 16px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.sc-num { width: 22px; height: 22px; border-radius: 50%; background: var(--lp-green); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sc-num { width: 22px; height: 22px; border-radius: 5px; background: var(--lp-green); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .sc-title { font-size: 13px; font-weight: 700; color: var(--lp-dark); flex: 1; }
 .sc-sub { font-size: 11px; color: var(--lp-text-muted); margin-left: 8px; font-weight: 400; }
 .sc-body { padding: 16px; }
@@ -118,7 +136,7 @@
 .unified-tax-card.pass {
   background-color: #F0FDF4; /* Soft green, matches lp-howto exactly */
   border: 1px solid #BBF7D0;
-  border-left: 4px solid #14532D;
+  border-left: 4px solid #1A3C2E;
 }
 .unified-tax-card.dbl {
   background-color: #F5F3FF; /* Soft purple */
@@ -139,7 +157,7 @@
 .gated-msg { background: var(--lp-dark); color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,.15); }
 
 /* -- Form Reference Badges -- */
-.form-ref-badge { display: inline-block; background: var(--lp-green-light); border: 1px solid var(--lp-border); color: var(--lp-green); font-family: monospace; font-size: 11px; padding: 2px 8px; border-radius: 99px; }
+.form-ref-badge { display: inline-block; background: var(--lp-green-light); border: 1px solid var(--lp-border); color: var(--lp-green); font-family: inherit; font-variant-numeric: tabular-nums; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 5px; }
 .helper-text { font-size: 11px; color: var(--lp-text-muted) !important; font-weight: 400; display: block; margin-top: 4px; line-height: 1.4; text-transform: none; }
 .pers-ref { font-size: 10px; color: var(--lp-green); font-weight: 600; display: block; margin-top: 2px; }
 
@@ -299,9 +317,59 @@
 .save-field label { display: block; font-size: 11px; font-weight: 800; color: var(--lp-text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
 .save-field input { width: 100%; padding: 12px; border: 2px solid var(--lp-border); border-radius: 8px; font-size: 14px; font-weight: 600; font-family: inherit; outline: none; }
 .save-field input:focus { border-color: var(--lp-green); }
+/* LEN-11 — standard action-button CTAs (matches Payment Breakdown) */
+.action-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.lp-cta-primary, .lp-cta-secondary { display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:12px 16px; border-radius:10px; font-size:13px; font-weight:700;
+    letter-spacing:0.02em; cursor:pointer; transition:all 120ms; font-family:inherit; }
+.lp-cta-primary { background:#1A3C2E; color:#fff; border:1px solid #1A3C2E; }
+.lp-cta-primary:hover { background:#2D6A4F; }
+.lp-cta-primary:disabled { opacity:0.55; cursor:not-allowed; }
+.lp-cta-secondary { background:transparent; color:#1A3C2E; border:1px solid #1A3C2E; }
+.lp-cta-secondary:hover { background:#F0FDF4; }
+/* LEN-11 — optional Document details panel (screen only; never printed) */
+.lp-doc-details {
+    max-width: 980px; margin: 0 auto 14px; padding: 0 4px;
+    border: 1px solid #E5E7EB; border-radius: 10px; background: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.lp-doc-details > summary {
+    list-style: none; cursor: pointer; padding: 12px 14px;
+    font-size: 12px; font-weight: 800; color: #111827; letter-spacing: 0.01em;
+}
+.lp-doc-details > summary::-webkit-details-marker { display: none; }
+.lp-doc-details > summary::before { content: "+ "; color: #1A3C2E; font-weight: 900; }
+.lp-doc-details[open] > summary::before { content: "– "; }
+.lp-doc-details > summary span { color: #6B7280; font-weight: 500; }
+.lp-doc-details-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px;
+    padding: 4px 14px 16px;
+}
+.lp-doc-details-grid label {
+    display: flex; flex-direction: column; gap: 4px;
+    font-size: 10px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.lp-doc-details-grid input {
+    padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 7px;
+    font-size: 13px; font-weight: 500; color: #111827; text-transform: none; letter-spacing: 0;
+    font-family: inherit; background: #fff;
+}
+.lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
+.lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
+@media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+/* LEN-11 — broker/deal context block injected into the captured body at print time */
+.lp-doc-context { display: none; }
+body.pdf-export-mode .lp-doc-context {
+    display: block; margin: 0 0 14px; padding: 11px 15px;
+    border: 1px solid #E5E7EB; border-radius: 10px; background: #F9FAFB;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.lp-doc-context .dc-for { font-size: 15px; font-weight: 800; color: #111827; word-break: break-word; }
+.lp-doc-context .dc-meta { font-size: 11px; color: #6B7280; margin-top: 3px; }
+.lp-doc-context .dc-by { font-size: 11px; color: #374151; margin-top: 2px; }
 .pdf-btn { width: 100%; padding: 16px; background: var(--lp-green); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: all .2s; }
 .pdf-btn:hover { background: #166534; }
-.pdf-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.pdf-btn:disabled { opacity: 0.72; cursor: not-allowed; }
 
 /* -- Lender Context modal -- */
 .lc-modal { display: none; position: fixed; inset: 0; background: rgba(51,66,67,0.6); z-index: 9998; align-items: center; justify-content: center; padding: 24px; }
@@ -375,7 +443,7 @@
         border-top: 0.5pt solid #E5E7EB;
         padding-top: 6px;
     }
-    .lp-print-footer a { color: #14532D; font-weight: 700; text-decoration: none; }
+    .lp-print-footer a { color: #1A3C2E; font-weight: 700; text-decoration: none; }
     .lp-print-footer .lp-print-footer-disclaimer { font-size: 5.5pt; color: #9CA3AF; }
 }
 /* Hidden in screen view */
@@ -395,6 +463,11 @@
     .sc-body { display: block !important; }
     .sc.collapsed .sc-body { display: block !important; }
     .sc.pdf-hide { display: none !important; }
+    .sc.save-area { background: #fff !important; }
+    .sc.save-area .sc-hd { background: #fff !important; border-bottom-color: #e5e7eb !important; }
+    .sc.save-area .sc-title { color: #111827 !important; }
+    .sc.save-area .sc-sub { color: #6b7280 !important; }
+    .sc.save-area .save-field label { color: #6b7280 !important; }
     .gated-section.is-locked .sc-body { opacity: 1 !important; filter: none !important; }
     
     .inp { border: none !important; padding-left: 18px !important; font-weight: 700 !important; }
@@ -462,7 +535,105 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     line-height: 1.6;
     margin-bottom: 24px;
 }
-.lp-definition strong { color: #14532D; font-weight: 800; }
+.lp-definition strong { color: #1A3C2E; font-weight: 800; }
+
+/* Dismissible intro banner — sits above Step 1, sets expectations */
+.lp-intro {
+    position: relative;
+    background-color: #F0FDF4;
+    border: 1px solid #DCFCE7;
+    border-radius: 12px;
+    padding: 18px 44px 18px 20px;
+    margin-bottom: 16px;
+}
+.lp-intro-def {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #334155;
+    line-height: 1.6;
+}
+.lp-intro-def strong { color: #1A3C2E; font-weight: 800; }
+.lp-intro-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(26, 60, 46, 0.18);
+}
+.lp-intro-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #1A3C2E;
+}
+.lp-intro-step .n {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    background: var(--lp-green);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.lp-intro-arrow { color: #86C99B; font-size: 13px; font-weight: 700; }
+/* Flash the first step to pull the eye to where to start */
+@keyframes stepFlash {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); background: var(--lp-green); }
+    50%      { box-shadow: 0 0 0 4px rgba(34,197,94,0.45); background: #22C55E; }
+}
+.lp-intro-step.step-attn .n { animation: stepFlash 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+    .lp-intro-step.step-attn .n { animation: none; }
+}
+.lp-intro-x {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    background: transparent;
+    color: #94A3B8;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+}
+.lp-intro-x:hover { background: rgba(26, 60, 46, 0.08); color: #1A3C2E; }
+/* LEN-139 — restore "i" toggle in the header (matches the dismissible-intro standard) */
+.lp-intro-toggle-btn {
+    width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
+    font-size: 9.5px; font-weight: 800; background: #fff; cursor: pointer;
+    margin-left: 8px; vertical-align: middle; transition: all 0.15s; padding: 0;
+}
+.lp-intro-toggle-btn:hover { border-color: #1A3C2E; color: #1A3C2E; }
+
+/* Save area — standalone, not a numbered step */
+.save-area .sc-num { display: none; }
+/* Terminal action: full dark-green block; inputs stay light, CTA inverts to pop */
+.sc.save-area { background: #1A3C2E; border-color: #1A3C2E; }
+.sc.save-area .sc-hd { background: transparent; border-bottom-color: rgba(255,255,255,0.14); }
+.sc.save-area .sc-title { color: #fff; }
+.sc.save-area .sc-sub { color: rgba(255,255,255,0.72); }
+.sc.save-area .sc-collapse { color: rgba(255,255,255,0.85); }
+.sc.save-area .save-field label { color: rgba(255,255,255,0.82); }
+.sc.save-area .save-field input { background: #fff; border-color: transparent; color: #111827; }
+.sc.save-area .save-field input:focus { border-color: #86C99B; box-shadow: 0 0 0 3px rgba(134,201,155,0.30); }
+.sc.save-area .pdf-btn { background: #fff; color: #1A3C2E; }
+.sc.save-area .pdf-btn:hover { background: #ECFDF3; }
+.sc.save-area .pdf-btn:disabled { opacity: 0.55; }
 
 .live-indicator-pill {
   font-size: 10px;
@@ -486,18 +657,18 @@ body.pdf-export-mode .print-watermark { display: none !important; }
 
 <header class="modal-header">
     <svg class="modal-logo" width="124" height="22" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
-      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+      <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
         <path d="M4 4v16h11l5-5V4H4z"/>
-        <path d="M15 20v-5h5"/>
+        <path d="M15 20v-5h5" stroke-linecap="butt"/>
         <path d="M9 9v6"/>
         <path d="M9 15h4"/>
       </svg>
       <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
-        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#14532D">.</tspan>
+        <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#1A3C2E">.</tspan>
       </text>
     </svg>
     <div class="modal-title">
-        <span class="modal-title-main">DSCR Calculator</span>
+        <span class="modal-title-main">DSCR</span>
         <span class="modal-title-sub">Cash Flow Analysis Engine</span>
     </div>
 </header>
@@ -509,11 +680,24 @@ body.pdf-export-mode .print-watermark { display: none !important; }
     </div>
     <div class="lp-container">
         <div class="calc-card-header">
-            <div class="calc-card-header-title">DSCR Calculator</div>
+            <div class="calc-card-header-title">DSCR<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
             <div class="calc-card-header-sub">Cash Flow Analysis Engine</div>
         </div>
 
         <div class="lp-body">
+            <div class="lp-intro no-print" id="lpIntro" data-lp-dismiss="dscr_intro">
+                <div class="lp-intro-def">
+                    The <strong>Debt Service Coverage Ratio (DSCR)</strong> measures a business's ability to cover its debt obligations with its available cash flow, providing a critical indicator of funding serviceability.
+                </div>
+                <div class="lp-intro-steps">
+                    <span class="lp-intro-step step-attn"><span class="n">1</span> Entity &amp; tax form</span>
+                    <span class="lp-intro-arrow">&rarr;</span>
+                    <span class="lp-intro-step"><span class="n">2</span> EBIDA &amp; financials</span>
+                    <span class="lp-intro-arrow">&rarr;</span>
+                    <span class="lp-intro-step"><span class="n">3</span> Run your numbers</span>
+                </div>
+            </div>
+
             <div class="sc" data-sc-collapsible data-pdf-sec="entity">
                 <div class="sc-hd">
                     <span class="sc-num">1</span>
@@ -521,10 +705,6 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                     <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
                 </div>
                 <div class="sc-body">
-                    <div class="lp-definition">
-                        The <strong>Debt Service Coverage Ratio (DSCR)</strong> measures a business's ability to cover its debt obligations with its available cash flow, providing a critical indicator of funding serviceability.
-                    </div>
-                    
                     <div class="ent-toggle-bar">
                         <button class="ent-toggle-btn active" id="btnEntMode" onclick="setEntMode('entity')">By entity</button>
                         <button class="ent-toggle-btn" id="btnFormMode" onclick="setEntMode('form')">By tax form</button>
@@ -653,19 +833,32 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                 </div>
             </div>
 
-            <div class="sc" data-sc-collapsible data-pdf-sec="save">
-                <div class="sc-hd">
-                    <span class="sc-num">4</span>
-                    <span class="sc-title">Save this analysis<span class="sc-sub">Download PDF for your records</span></span>
-                    <button class="sc-collapse" onclick="toggleSc(this)" title="Collapse section">&#9650;</button>
-                </div>
-                <div class="sc-body">
-                    <div class="save-row">
-                        <div class="save-field"><label>Business name</label><input type="text" id="pdfBizName" placeholder="e.g. Acme Plumbing" oninput="updPdfBtnState()"></div>
-                        <div class="save-field"><label>Deal name</label><input type="text" id="pdfDealName" placeholder="e.g. Working Capital Q3" oninput="updPdfBtnState()"></div>
+            <!-- LEN-11 — standard action-button stack -->
+            <div class="action-buttons no-print">
+                <button class="lp-cta-primary" id="pdfBtn" onclick="runPDF()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    Save Estimate as PDF
+                </button>
+                <button class="lp-cta-secondary" onclick="copyDscr()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy Scenario
+                </button>
+            </div>
+
+            <!-- LEN-147: borrower state + doc details at bottom of input column -->
+            <div class="lp-deal-context no-print">
+                <div data-lp-compliance-host></div>
+                <details id="pdfDocDetails" class="lp-doc-details">
+                    <summary>Document details <span>— optional, appears on the PDF</span></summary>
+                    <div class="lp-doc-details-grid">
+                        <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+                        <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+                        <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+                        <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
+                        <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
                     </div>
-                    <button class="pdf-btn" id="pdfBtn" onclick="runPDF()" disabled>Save as PDF</button>
-                </div>
+                    <p class="lp-doc-details-hint">These appear on the saved PDF. Borrower state drives compliance disclosures.</p>
+                </details>
             </div>
         </div>
 
@@ -682,22 +875,6 @@ body.pdf-export-mode .print-watermark { display: none !important; }
             DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
         </div>
 
-        <!-- SBA Rates & Fees teaser -->
-        <div class="no-print" style="margin-top:16px; padding:14px 16px; background:#F9FAFB; border:1px solid #E5E7EB; border-radius:10px; display:flex; align-items:center; gap:14px;">
-          <div style="width:36px; height:36px; min-width:36px; background:#F0FDF4; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#15803D;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-          </div>
-          <div style="flex:1; min-width:0;">
-            <div style="display:flex; align-items:center; gap:6px; margin-bottom:2px;">
-              <span style="font-size:13px; font-weight:700; color:#1F2937;">SBA Rates &amp; Fees</span>
-              <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB; padding:1px 6px; border-radius:99px;">Coming soon</span>
-            </div>
-            <div style="font-size:12px; color:#6B7280; line-height:1.4;">Dynamic SBA 7(a) scenario builder with guarantee fee logic — the natural next step after DSCR.</div>
-          </div>
-          <a href="mailto:hello@lendpaper.com?subject=Feature%20request%3A%20SBA%20Rates%20%26%20Fees&body=Hi%20LendPaper%2C%0A%0AI%E2%80%99d%20love%20to%20see%20the%20SBA%20Rates%20%26%20Fees%20tool%20added%20to%20LendPaper.%0A%0AFeel%20free%20to%20loop%20me%20in%20when%20it%20ships.%0A%0A%E2%80%94%20" style="flex-shrink:0; display:inline-flex; align-items:center; gap:5px; padding:7px 12px; background:#1A3C2E; color:#fff; border-radius:6px; font-size:12px; font-weight:600; text-decoration:none; white-space:nowrap;">
-            Notify me →
-          </a>
-        </div>
     </div>
 </div>
 
@@ -817,7 +994,7 @@ function renderEntities(mode = 'entity') {
     // Dynamic EBIDA hint badge in Step 2 Title (Static pill, no distracting infinite pulse)
     const hintEl = document.getElementById('ebidaFormHint');
     if (hintEl) {
-      hintEl.innerHTML = '<span class="live-indicator-pill" style="background:#14532D; margin-left:8px;">Auto-Populated [' + ent.form + ']</span>';
+      hintEl.innerHTML = '<span class="live-indicator-pill" style="background:#1A3C2E; margin-left:8px;">Auto-Populated [' + ent.form + ']</span>';
       hintEl.style.display = 'inline-block';
     }
 
@@ -940,7 +1117,7 @@ function updDebt(id,f,v){ S.debts.forEach(d => { if(d.id===id) d[f] = (f==='cred
 function togRefi(id){ S.debts.forEach(d => { if(d.id===id) d.refi = !d.refi; }); renderDebts(); updScenarioDisplays(); renderSummaries(); }
 function updDebtTotals(){
   var nonRefi = S.debts.filter(d => !d.refi).reduce((s,d)=>s+d.mp, 0) * 12;
-  document.getElementById('debtTotals').innerHTML = '<div class="tot-bar tot-muted"><span class="tot-label">Existing Annual Debt</span><span class="tot-val">'+fmt(nonRefi)+'</span></div>';
+  document.getElementById('debtTotals').innerHTML = '<div class="tot-bar tot-muted"><span class="tot-label">Annual Debt Service</span><span class="tot-val">'+fmt(nonRefi)+'</span></div>';
 }
 
 function renderOwners() {
@@ -1135,18 +1312,107 @@ function renderLenderModal() {
 }
 
 function toggleSc(btn){ var sc=btn.closest('.sc'); sc.classList.toggle('collapsed'); btn.innerHTML=sc.classList.contains('collapsed')?'&#9660;':'&#9650;'; }
+// LEN-147 — dismissible intro via shared PDF_HELPER.initDismissibles() (data-lp-dismiss="dscr_intro")
+function applyIntroState(){
+    var dismissed = localStorage.getItem('lp_dismiss_dscr_intro') === '1';
+    var el=document.getElementById('lpIntro'); if(el) el.style.display = dismissed ? 'none' : '';
+    document.querySelectorAll('.lp-intro-toggle-btn').forEach(function(b){ b.style.display = dismissed ? 'inline-flex' : 'none'; });
+}
+function showIntro(){
+    localStorage.removeItem('lp_dismiss_dscr_intro');
+    applyIntroState();
+    // Re-inject × button if not already present (e.g. after restore on a previously-dismissed load)
+    if (typeof PDF_HELPER !== 'undefined') PDF_HELPER.initDismissibles();
+}
+document.addEventListener('DOMContentLoaded', function(){
+    PDF_HELPER.initDismissibles();
+    PDF_HELPER.persistFields('dscr', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor','pdfDealName','pdfLender']);
+    applyIntroState();
+});
 function toggleAddbacks(){ document.getElementById('addbacksContent').classList.toggle('show'); }
 function openLenderCtx(){ document.getElementById('lenderCtxModal').classList.add('open'); }
 function closeLenderCtx(){ document.getElementById('lenderCtxModal').classList.remove('open'); }
 
 function updPdfBtnState(){
-  var bn = document.getElementById('pdfBizName').value.trim();
-  var dn = document.getElementById('pdfDealName').value.trim();
-  document.getElementById('pdfBtn').disabled = !(bn && dn);
+  // LEN-141: Prepared-for / Deal-name are OPTIONAL document details — never gate Save
+  // on them (matches the other calculators). The real render gate (valid DSCR inputs)
+  // lives in runPDF(), which toasts "Complete your inputs" when the analysis is empty.
+  document.getElementById('pdfBtn').disabled = false;
+}
+
+// LEN-11 — read the optional Document-details fields
+function pdfDocContext() {
+    const v = id => (document.getElementById(id)?.value || '').trim();
+    const name = v('pdfPreparedBy'), company = v('pdfPreparedByCompany');
+    return {
+        preparedBy: [name, company].filter(Boolean).join(' · '),
+        preparedFor: v('pdfPreparedFor'),
+        dealName: v('pdfDealName'),
+        lender: v('pdfLender')
+    };
+}
+// LEN-11 — inject the broker/deal context into the captured body. The print header is
+// overwritten by generatePDF → initPrintLayout, so this block must live in the body.
+function mountDocContext(element) {
+    const c = pdfDocContext();
+    if (!c.preparedBy && !c.preparedFor && !c.dealName && !c.lender) return null;
+    const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    const rows = [];
+    if (c.preparedFor) rows.push(`<div class="dc-for">Prepared for ${esc(c.preparedFor)}</div>`);
+    const meta = [];
+    if (c.dealName) meta.push(esc(c.dealName));
+    if (c.lender) meta.push(esc(c.lender));
+    if (meta.length) rows.push(`<div class="dc-meta">${meta.join(' · ')}</div>`);
+    if (c.preparedBy) rows.push(`<div class="dc-by">Prepared by ${esc(c.preparedBy)}</div>`);
+    if (!rows.length) return null;
+    const node = document.createElement('div');
+    node.className = 'lp-doc-context';
+    node.innerHTML = rows.join('');
+    const hdr = element.querySelector('.print-header-content');
+    if (hdr) hdr.insertAdjacentElement('afterend', node);
+    else element.insertAdjacentElement('afterbegin', node);
+    return node;
+}
+
+// LEN-11 — Copy Scenario for DSCR (net-new; mirrors the PDF Quote Log payload)
+function copyDscr() {
+    const biz = document.getElementById('pdfPreparedFor').value.trim();
+    const deal = document.getElementById('pdfDealName').value.trim();
+    const cd = getCalcData();
+    const sc0 = (S.scenarios && S.scenarios[0]) || {};
+    const mp0 = sc0.amount ? calcPmt(sc0.amount, sc0.rate, sc0.term) : 0;
+    const bdscr = (mp0 * 12 + cd.bObl) > 0 ? cd.ebida / (mp0 * 12 + cd.bObl) : null;
+    const gdscr = (mp0 * 12 + cd.gObl) > 0 ? cd.global / (mp0 * 12 + cd.gObl) : null;
+    const activeEntity = S.entity ? ENTITIES.find(x => x.id === S.entity) : null;
+    const lines = ['DSCR Analysis — LendPaper'];
+    if (biz || deal) lines.push([biz, deal].filter(Boolean).join(' · '));
+    lines.push('');
+    if (activeEntity) lines.push('Entity: ' + activeEntity.name);
+    lines.push('Total EBIDA: ' + fmt(cd.ebida));
+    if (sc0.amount) lines.push('Scenario: ' + fmt(sc0.amount) + ' @ ' + sc0.rate + '% / ' + sc0.term + ' mo  ·  ' + fmt(mp0) + '/mo');
+    if (bdscr != null) lines.push('Business DSCR: ' + bdscr.toFixed(2) + 'x');
+    if (gdscr != null) lines.push('Global DSCR: ' + gdscr.toFixed(2) + 'x');
+    lines.push('');
+    lines.push('Estimate only — not a financing offer or a required disclosure.');
+    navigator.clipboard.writeText(lines.join('\n'));
+    window.PDF_HELPER && window.PDF_HELPER.showToast && window.PDF_HELPER.showToast('Scenario copied');
+    try {
+        window.saveEstimate && window.saveEstimate({
+            calculator_type: 'dscr',
+            params: {
+                amount: sc0.amount ?? null, rate: sc0.rate ?? null, term: sc0.term ?? null,
+                entity: S.entity, mode: S.mode, dscr: S.mode === 'gdscr' ? gdscr : bdscr, bdscr, gdscr,
+                scenarios: S.scenarios, ebida: S.ebida, debts: S.debts, owners: S.owners,
+                borrower_state: (window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState()) || ''
+            },
+            pdf_generated: false,
+            prepared_for: biz || null
+        });
+    } catch (e) { /* logging must never block the copy */ }
 }
 
 async function runPDF() {
-    const biz = document.getElementById('pdfBizName').value.trim();
+    const biz = document.getElementById('pdfPreparedFor').value.trim();
     const deal = document.getElementById('pdfDealName').value.trim();
     const btn = document.getElementById('pdfBtn');
     const origText = btn.innerHTML;
@@ -1207,7 +1473,7 @@ async function runPDF() {
                 dscrResultsHTML += `
                     <div style="text-align: center; background: ${db >= 1.15 ? '#F0FDF4' : '#FEF2F2'}; border: 1px solid ${db >= 1.15 ? '#BBF7D0' : '#FCA5A5'}; padding: 10px; border-radius: 8px; flex: 1;">
                         <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #4B5563;">BDSCR</div>
-                        <div style="font-size: 20px; font-weight: 800; color: ${db >= 1.15 ? '#14532D' : '#991B1B'};">${db.toFixed(2)}</div>
+                        <div style="font-size: 20px; font-weight: 800; color: ${db >= 1.15 ? '#1A3C2E' : '#991B1B'};">${db.toFixed(2)}</div>
                         <div style="font-size: 9px; color: #6B7280; margin-top: 2px;">min 1.15x</div>
                     </div>
                 `;
@@ -1216,7 +1482,7 @@ async function runPDF() {
                 dscrResultsHTML += `
                     <div style="text-align: center; background: ${dg >= 1.0 ? '#F0FDF4' : '#FEF2F2'}; border: 1px solid ${dg >= 1.0 ? '#BBF7D0' : '#FCA5A5'}; padding: 10px; border-radius: 8px; flex: 1;">
                         <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #4B5563;">GDSCR</div>
-                        <div style="font-size: 20px; font-weight: 800; color: ${dg >= 1.0 ? '#14532D' : '#991B1B'};">${dg.toFixed(2)}</div>
+                        <div style="font-size: 20px; font-weight: 800; color: ${dg >= 1.0 ? '#1A3C2E' : '#991B1B'};">${dg.toFixed(2)}</div>
                         <div style="font-size: 9px; color: #6B7280; margin-top: 2px;">min 1.00x</div>
                     </div>
                 `;
@@ -1236,7 +1502,7 @@ async function runPDF() {
                     <div style="display: flex; gap: 12px; margin-bottom: 14px;">
                         ${dscrResultsHTML}
                     </div>
-                    <div style="font-size: 12.5px; color: ${pass ? '#14532D' : '#991B1B'}; font-weight: 600; padding: 8px 12px; background: ${pass ? '#F0FDF4' : '#FEF2F2'}; border-radius: 6px; border: 1px solid ${pass ? '#BBF7D0' : '#FCA5A5'};">
+                    <div style="font-size: 12.5px; color: ${pass ? '#1A3C2E' : '#991B1B'}; font-weight: 600; padding: 8px 12px; background: ${pass ? '#F0FDF4' : '#FEF2F2'}; border-radius: 6px; border: 1px solid ${pass ? '#BBF7D0' : '#FCA5A5'};">
                         ${pass ? '✔ PASS - Likely to approve.' : '✘ FAIL - Below lender DSCR thresholds.'}
                     </div>
                 </div>
@@ -1247,8 +1513,8 @@ async function runPDF() {
             <div style="margin-bottom: 24px; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 20px;">
                 <div>
                     <h3 style="font-size: 12px; font-weight: 800; color: #111827; margin-top: 0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Entity & Tax Form Information</h3>
-                    <div style="font-size: 13px; color: #111827; font-weight: 600; margin-bottom: 6px;">Entity Type: <span style="font-weight: 700; color: #14532D;">${entityName}</span></div>
-                    <div style="font-size: 13px; color: #111827; font-weight: 600; margin-bottom: 12px;">Tax Form: <span style="font-weight: 700; color: #14532D;">${taxForm}</span></div>
+                    <div style="font-size: 13px; color: #111827; font-weight: 600; margin-bottom: 6px;">Entity Type: <span style="font-weight: 700; color: #1A3C2E;">${entityName}</span></div>
+                    <div style="font-size: 13px; color: #111827; font-weight: 600; margin-bottom: 12px;">Tax Form: <span style="font-weight: 700; color: #1A3C2E;">${taxForm}</span></div>
                     <h4 style="font-size: 11px; font-weight: 700; color: #6B7280; margin-top: 0; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Required Tax Documents</h4>
                     ${reqDocs}
                 </div>
@@ -1259,7 +1525,7 @@ async function runPDF() {
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: 14px; padding-top: 10px; border-top: 1.5px solid #E5E7EB; font-weight: 800; font-size: 13px;">
                         <span style="color: #111827;">Total EBIDA</span>
-                        <span style="color: #14532D;">${fmt(totalEbida)}</span>
+                        <span style="color: #1A3C2E;">${fmt(totalEbida)}</span>
                     </div>
                 </div>
             </div>
@@ -1276,14 +1542,9 @@ async function runPDF() {
     }
 
     // Setup custom print header band dynamically per plan tier
+    // (broker/deal context renders into the captured body via mountDocContext below —
+    //  the print header is overwritten by initPrintLayout, so it can't live there)
     window.PDF_HELPER.initPrintLayout("DSCR ANALYSIS");
-    const headerEl = document.querySelector('.print-header-content');
-    if (headerEl && (biz || deal)) {
-        const sub = document.createElement('div');
-        sub.style.cssText = 'text-align:center;margin-top:-8px;margin-bottom:12px;font-size:12px;color:#6B7280;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;';
-        sub.textContent = [biz, deal].filter(Boolean).join(' · ');
-        headerEl.appendChild(sub);
-    }
 
     const cards = document.querySelectorAll('[id^="card-"]');
     if (cards.length > 1) {
@@ -1293,9 +1554,32 @@ async function runPDF() {
     const element = document.querySelector('.lp-main');
     const filename = `LendPaper_DSCR_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
+    let _docCtxNode = null;
     try {
+        _docCtxNode = mountDocContext(element);
         await window.PDF_HELPER.generatePDF(element, "DSCR ANALYSIS", filename, btn, origText);
+        // Quote Log (LEN-123)
+        try {
+            const cdQL = getCalcData();
+            const sc0 = (S.scenarios && S.scenarios[0]) || {};
+            const mp0 = sc0.amount ? calcPmt(sc0.amount, sc0.rate, sc0.term) : 0;
+            const bdscr = (mp0 * 12 + cdQL.bObl) > 0 ? cdQL.ebida / (mp0 * 12 + cdQL.bObl) : null;
+            const gdscr = (mp0 * 12 + cdQL.gObl) > 0 ? cdQL.global / (mp0 * 12 + cdQL.gObl) : null;
+            window.saveEstimate && window.saveEstimate({
+                calculator_type: 'dscr',
+                params: {
+                    amount: sc0.amount ?? null, rate: sc0.rate ?? null, term: sc0.term ?? null,
+                    entity: S.entity, mode: S.mode,
+                    dscr: S.mode === 'gdscr' ? gdscr : bdscr, bdscr, gdscr,
+                    scenarios: S.scenarios, ebida: S.ebida, debts: S.debts, owners: S.owners,
+                    borrower_state: (window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState()) || ''
+                },
+                pdf_generated: true,
+                prepared_for: (document.getElementById('pdfPreparedFor') && document.getElementById('pdfPreparedFor').value) || null
+            });
+        } catch (e) { /* logging must never block the export */ }
     } finally {
+        if (_docCtxNode) _docCtxNode.remove();
         if (printView) printView.innerHTML = '';
         document.body.classList.remove('multi-scenario');
         btn.innerHTML = origText;
@@ -1352,7 +1636,7 @@ const COMPANY_NAMES = [
 ];
 
 function setRandomBusinessPlaceholder() {
-  const input = document.getElementById('pdfBizName');
+  const input = document.getElementById('pdfPreparedFor');
   if (!input) return;
   const name = COMPANY_NAMES[Math.floor(Math.random() * COMPANY_NAMES.length)];
   input.placeholder = "e.g. " + name;
@@ -1368,6 +1652,36 @@ if (typeof window.PDF_HELPER !== 'undefined') window.PDF_HELPER.initPrintLayout(
 if (window.self !== window.top) {
     document.body.classList.add('is-embedded');
 }
+
+// ── Quote Log restore (LEN-123) ──────────────────────────────────────────────
+// Deferred to load so the quote-log.js module (window.LPQuoteLog) has executed.
+function lpRestoreBanner(partial) {
+    if (document.getElementById('lp-restore-banner')) return;
+    const main = document.querySelector('.lp-main') || document.body;
+    const b = document.createElement('div');
+    b.id = 'lp-restore-banner'; b.className = 'no-print';
+    b.style.cssText = 'display:flex;align-items:center;gap:8px;max-width:1000px;margin:0 auto 12px;padding:9px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:12px;color:#92400E;';
+    b.textContent = partial
+        ? 'Restored from your Estimate Log — some fields could not be restored, please review before generating a new PDF.'
+        : 'Restored from your Estimate Log — review the figures before generating a new PDF.';
+    main.insertBefore(b, main.firstChild);
+}
+window.addEventListener('load', () => {
+    try {
+        const rec = window.LPQuoteLog && window.LPQuoteLog.consumeRestorePayload('dscr');
+        if (!rec || !rec.params) return;
+        const p = rec.params; let partial = false;
+        if (p.entity) S.entity = p.entity;
+        if (p.mode) S.mode = p.mode;
+        if (p.ebida) S.ebida = p.ebida; else partial = true; // older estimates lack EBIDA
+        if (Array.isArray(p.debts)) S.debts = p.debts;
+        if (Array.isArray(p.owners) && p.owners.length) S.owners = p.owners;
+        if (Array.isArray(p.scenarios) && p.scenarios.length) S.scenarios = p.scenarios;
+        if (p.borrower_state && window.LPCompliance && window.LPCompliance.setState) window.LPCompliance.setState(p.borrower_state);
+        renderEntities(); renderMode(); renderEbida(); renderDebts(); renderOwners(); renderScenarios(); renderSummaries();
+        lpRestoreBanner(partial);
+    } catch (e) { /* restore is best-effort */ }
+});
 </script>
 <style>
     body.is-embedded { background: transparent; }
@@ -1385,7 +1699,7 @@ if (window.self !== window.top) {
         font-size: 18pt;
         font-weight: 600;
         letter-spacing: 0.06em;
-        color: rgba(20, 83, 45, 0.07);
+        color: rgba(26, 60, 46, 0.07);
         z-index: 99997;
         pointer-events: none;
         white-space: nowrap;

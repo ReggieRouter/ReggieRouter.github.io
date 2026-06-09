@@ -32,8 +32,8 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SBA Scenario Builder | LendPaper</title>
-<meta property="og:title" content="SBA Scenario Builder — LendPaper" />
+<title>SBA Fees | LendPaper</title>
+<meta property="og:title" content="SBA Fees — LendPaper" />
 <meta property="og:description" content="Model SBA loan scenarios, fees, and payment structures to find the optimal deal structure. Questions? Email hello@lendpaper.com" />
 <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
 <meta property="og:url" content="https://lendpaper.com/calculators/SBAFeesCalculator" />
@@ -48,12 +48,30 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
+<link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
 <script src="../public/assets/js/calculator-app.js"></script>
 <script src="../public/assets/js/pdf-helper.js"></script>
+<script src="../public/assets/js/compliance-rules.js"></script>
+<script src="../public/assets/js/compliance.js"></script>
+<!-- Quote Log bootstrap (LEN-123): config + supabase importmap + shared util -->
+<script src="../js/config.js"></script>
+<script type="importmap">
+  { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+</script>
+<!-- Hard auth gate (LEN-68, re-applied for launch): requireApprovedUser() redirects logged-out/unapproved users to /login.html. Never add a bare top-level return (ES-module parse error). -->
+<script type="module">
+  import { requireApprovedUser, logUsage } from '../js/auth.js';
+  const profile = await requireApprovedUser();
+  if (profile) {
+    window.lpProfile = profile;
+    logUsage('sba-fees', 'view');
+  }
+</script>
+<script type="module" src="../js/quote-log.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
-  --lp-green: #14532D;
+  --lp-green: #1A3C2E;
   --lp-green-light: #f0fdf4;
 }
 
@@ -353,6 +371,54 @@ label {
 }
 
 .lp-actions { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
+/* LEN-11 — standard action-button CTAs (matches Payment Breakdown) */
+.lp-cta-primary, .lp-cta-secondary { display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; padding:12px 16px; border-radius:10px; font-size:13px; font-weight:700;
+    letter-spacing:0.02em; cursor:pointer; transition:all 120ms; }
+.lp-cta-primary { background:#1A3C2E; color:#fff; border:1px solid #1A3C2E; }
+.lp-cta-primary:hover { background:#2D6A4F; }
+.lp-cta-secondary { background:transparent; color:#1A3C2E; border:1px solid #1A3C2E; }
+.lp-cta-secondary:hover { background:#F0FDF4; }
+/* LEN-11 — optional Document details panel (screen only; never printed) */
+.lp-doc-details {
+    max-width: 980px; margin: 0 auto 14px; padding: 0 4px;
+    border: 1px solid #E5E7EB; border-radius: 10px; background: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.lp-doc-details > summary {
+    list-style: none; cursor: pointer; padding: 12px 14px;
+    font-size: 12px; font-weight: 800; color: #111827; letter-spacing: 0.01em;
+}
+.lp-doc-details > summary::-webkit-details-marker { display: none; }
+.lp-doc-details > summary::before { content: "+ "; color: #1A3C2E; font-weight: 900; }
+.lp-doc-details[open] > summary::before { content: "– "; }
+.lp-doc-details > summary span { color: #6B7280; font-weight: 500; }
+.lp-doc-details-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px;
+    padding: 4px 14px 16px;
+}
+.lp-doc-details-grid label {
+    display: flex; flex-direction: column; gap: 4px;
+    font-size: 10px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.lp-doc-details-grid input {
+    padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 7px;
+    font-size: 13px; font-weight: 500; color: #111827; text-transform: none; letter-spacing: 0;
+    font-family: inherit; background: #fff;
+}
+.lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
+.lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
+@media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+/* LEN-11 — broker/deal context block injected into the captured body at print time */
+.lp-doc-context { display: none; }
+body.pdf-export-mode .lp-doc-context {
+    display: block; margin: 0 0 14px; padding: 11px 15px;
+    border: 1px solid #E5E7EB; border-radius: 10px; background: #F9FAFB;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.lp-doc-context .dc-for { font-size: 15px; font-weight: 800; color: #111827; word-break: break-word; }
+.lp-doc-context .dc-meta { font-size: 11px; color: #6B7280; margin-top: 3px; }
+.lp-doc-context .dc-by { font-size: 11px; color: #374151; margin-top: 2px; }
 .lp-copy-btn {
     background-color: var(--lp-green);
     color: white;
@@ -393,20 +459,29 @@ label {
 }
 .lp-print-btn:hover { background-color: var(--lp-green-light); }
 
-/* Override global lp-definition to match lp-howto green-tinted style */
+/* LEN-147 — left-accent style for definition/intro banners */
+/* LEN-156 — mint-green filled intro box (Amortization standard; CALCULATORS.md §5).
+   Was the LEN-147 left-accent style. */
 .lp-definition {
     background-color: #F0FDF4;
     border-radius: 12px;
-    border-left: none;
-    padding: 20px;
-    padding-left: 20px;
-    font-size: 13.5px;
+    padding: 16px 34px 16px 18px;   /* right pad leaves room for the × */
+    font-size: 13px;
     font-weight: 500;
     color: #334155;
     line-height: 1.6;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
+    position: relative;
 }
-.lp-definition strong { color: #14532D; font-weight: 800; }
+.lp-definition strong { color: #1A3C2E; font-weight: 800; }
+.lp-intro-toggle-btn {
+    width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
+    font-size: 9.5px; font-weight: 800; background: #fff; cursor: pointer;
+    margin-left: 8px; vertical-align: middle; transition: all 0.15s; padding: 0;
+    pointer-events: auto; /* clickable inside the pointer-events:none centered title */
+}
+.lp-intro-toggle-btn:hover { border-color: #1A3C2E; color: #1A3C2E; }
 
 .lp-disclaimer {
     font-size: 10px;
@@ -483,7 +558,7 @@ label {
         border-top: 0.5pt solid #E5E7EB;
         padding-top: 6px;
     }
-    .lp-print-footer a { color: #14532D; font-weight: 700; text-decoration: none; }
+    .lp-print-footer a { color: #1A3C2E; font-weight: 700; text-decoration: none; }
     .lp-print-footer .lp-print-footer-disclaimer { font-size: 5.5pt; color: #9CA3AF; }
 }
 /* Hidden in screen view */
@@ -531,6 +606,14 @@ body.pdf-export-mode .print-footer-legal { display: none !important; }
 body.pdf-export-mode .print-watermark { display: none !important; }
 body.pdf-export-mode .tk-eyebrow { display: none !important; }
 body.pdf-export-mode .card-center-title { display: none !important; }
+/* LEN-141: a single scenario needs no "Scenario A" label — collapse the whole (now
+   empty) card header so the top doesn't leave a void. Show the label only when comparing. */
+body.pdf-export-mode .card-header { display: none !important; }
+body.pdf-export-mode.multi-scenario .card-header { display: block !important; margin-bottom: 8px !important; }
+body.pdf-export-mode.multi-scenario .card-title-input {
+    display: inline-block !important;
+    border: none !important; background: transparent !important; padding: 0 !important;
+}
 </style>
 </head>
 <body>
@@ -539,18 +622,18 @@ body.pdf-export-mode .card-center-title { display: none !important; }
 
 <header class="modal-header">
 <svg class="modal-logo" width="124" height="22" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
-  <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#14532D" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+  <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
     <path d="M4 4v16h11l5-5V4H4z"/>
-    <path d="M15 20v-5h5"/>
+    <path d="M15 20v-5h5" stroke-linecap="butt"/>
     <path d="M9 9v6"/>
     <path d="M9 15h4"/>
   </svg>
   <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
-    <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#14532D">.</tspan>
+    <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#1A3C2E">.</tspan>
   </text>
 </svg>
 <div class="modal-title">
-    <span class="modal-title-main">SBA Scenario Builder</span>
+    <span class="modal-title-main">SBA Fees</span>
     <span class="modal-title-sub">Fee &amp; Payment Estimator</span>
 </div>
 </header>
@@ -560,12 +643,28 @@ body.pdf-export-mode .card-center-title { display: none !important; }
         <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
         <h1>SBA 7(a) Rates & Fees</h1>
     </div>
-    <div class="flex justify-end mb-8 no-print">
+    <div class="flex justify-end no-print" style="margin-bottom:16px;">
         <button class="lp-pill-btn" onclick="addCard()">+ Compare</button>
     </div>
     
     <div id="cardsContainer" class="cards-container">
         <!-- Cards injected via JS -->
+    </div>
+
+    <!-- LEN-147: borrower state + doc details at bottom of layout -->
+    <div class="lp-deal-context no-print" style="max-width:1000px;margin:0 auto;width:100%;">
+        <div data-lp-compliance-host></div>
+        <details id="pdfDocDetails" class="lp-doc-details">
+            <summary>Document details <span>— optional, appears on the PDF</span></summary>
+            <div class="lp-doc-details-grid">
+                <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+                <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+                <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+                <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
+                <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+            </div>
+            <p class="lp-doc-details-hint">These appear on the saved PDF. Borrower state drives compliance disclosures.</p>
+        </details>
     </div>
 
     <!-- Unified Footer Section -->
@@ -616,6 +715,40 @@ function bindTips() {
     });
 }
 
+// LEN-11 — read the optional Document-details fields
+function pdfDocContext() {
+    const v = id => (document.getElementById(id)?.value || '').trim();
+    const name = v('pdfPreparedBy'), company = v('pdfPreparedByCompany');
+    return {
+        preparedBy: [name, company].filter(Boolean).join(' · '),
+        preparedFor: v('pdfPreparedFor'),
+        dealName: v('pdfDealName'),
+        lender: v('pdfLender')
+    };
+}
+// LEN-11 — inject the broker/deal context into the captured body. The print header is
+// overwritten by generatePDF → initPrintLayout, so this block must live in the body.
+function mountDocContext(element) {
+    const c = pdfDocContext();
+    if (!c.preparedBy && !c.preparedFor && !c.dealName && !c.lender) return null;
+    const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    const rows = [];
+    if (c.preparedFor) rows.push(`<div class="dc-for">Prepared for ${esc(c.preparedFor)}</div>`);
+    const meta = [];
+    if (c.dealName) meta.push(esc(c.dealName));
+    if (c.lender) meta.push(esc(c.lender));
+    if (meta.length) rows.push(`<div class="dc-meta">${meta.join(' · ')}</div>`);
+    if (c.preparedBy) rows.push(`<div class="dc-by">Prepared by ${esc(c.preparedBy)}</div>`);
+    if (!rows.length) return null;
+    const node = document.createElement('div');
+    node.className = 'lp-doc-context';
+    node.innerHTML = rows.join('');
+    const hdr = element.querySelector('.print-header-content');
+    if (hdr) hdr.insertAdjacentElement('afterend', node);
+    else element.insertAdjacentElement('afterbegin', node);
+    return node;
+}
+
 async function handleLendPaperSavePDF() {
     const btn = event.currentTarget;
     const origText = btn.innerHTML;
@@ -661,9 +794,34 @@ async function handleLendPaperSavePDF() {
     const element = document.querySelector('.lp-main');
     const filename = `LendPaper_SBA_Fees_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
+    let _docCtxNode = null;
     try {
+        _docCtxNode = mountDocContext(element);
         await window.PDF_HELPER.generatePDF(element, "SBA 7(a) RATES & FEES", filename, btn, origText);
+        // Quote Log (LEN-123) — one record per scenario card
+        try {
+            cards.forEach(card => {
+                const cid = card.id.split('-')[1];
+                const amt = cleanNumericInput(document.getElementById(`loanAmount-${cid}`)?.value);
+                if (!amt) return;
+                window.saveEstimate && window.saveEstimate({
+                    calculator_type: 'sba_fees',
+                    params: {
+                        amount: amt,
+                        term: cleanNumericInput(document.getElementById(`termYears-${cid}`)?.value),
+                        rate_spread: cleanNumericInput(document.getElementById(`rateSpread-${cid}`)?.value),
+                        packaging_fee: cleanNumericInput(document.getElementById(`pkgFee-${cid}`)?.value),
+                        closing_fee: cleanNumericInput(document.getElementById(`closeFee-${cid}`)?.value),
+                        monthly_payment: document.getElementById(`res-monthly-pmt-${cid}`)?.innerText,
+                        total_fees: document.getElementById(`res-total-fees-${cid}`)?.innerText
+                    },
+                    pdf_generated: true,
+                    prepared_for: document.getElementById('pdfPreparedFor')?.value?.trim() || null
+                });
+            });
+        } catch (e) { /* logging must never block the export */ }
     } finally {
+        if (_docCtxNode) _docCtxNode.remove();
         document.body.classList.remove('multi-scenario');
         btn.innerHTML = origText;
         btn.disabled = false;
@@ -725,14 +883,14 @@ function addCard() {
         <div class="card-header">
             <input type="text" class="card-title-input" value="${scenarioName}">
             <div class="card-center-title">
-                <div class="card-center-title-main">SBA Scenario Builder</div>
+                <div class="card-center-title-main">SBA Fees<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
                 <div class="card-center-title-sub">Fee &amp; Payment Estimator</div>
             </div>
             <button class="remove-card-btn" onclick="removeCard(${id})">&times;</button>
         </div>
         <div class="card-body-flex">
             <div class="lp-inputs">
-                <div class="lp-definition">
+                <div class="lp-definition" data-lp-dismiss="sba_intro">
                     Enter the loan amount and term. You'll see the full fee picture and monthly payment — and what to tell your borrower about total cost.
                 </div>
                 <div class="lp-group">
@@ -750,21 +908,21 @@ function addCard() {
                     </div>
                 </div>
                 <div class="lp-group">
-                    <label>Rate Spread <span class="tooltip-icon" data-tip="Added to WSJ Prime (Assumed 6.75%).">📎</span></label>
+                    <label>Rate Spread <span class="tooltip-icon" data-tip="Added to WSJ Prime (Assumed 6.75%)."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                     <div class="input-wrap">
                         <input type="number" id="rateSpread-${id}" class="input-field" value="2.75" step="0.1" oninput="calculate(${id})">
                         <div class="input-suffix">%</div>
                     </div>
                 </div>
                 <div class="lp-group">
-                    <label>Packaging Fee <span class="tooltip-icon" data-tip="Lender processing costs. Usually ranges from $500 to $3,000.">📎</span></label>
+                    <label>Packaging Fee <span class="tooltip-icon" data-tip="Lender processing costs. Usually ranges from $500 to $3,000."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                     <div class="input-wrap">
                         <div class="input-prefix">$</div>
                         <input type="number" id="pkgFee-${id}" class="input-field" value="2500" oninput="calculate(${id})">
                     </div>
                 </div>
                 <div class="lp-group">
-                    <label>Search & Closing <span class="tooltip-icon" data-tip="Title, UCC, and legal counsel costs.">📎</span></label>
+                    <label>Search & Closing <span class="tooltip-icon" data-tip="Title, UCC, and legal counsel costs."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
                     <div class="input-wrap">
                         <div class="input-prefix">$</div>
                         <input type="number" id="closeFee-${id}" class="input-field" value="3000" oninput="calculate(${id})">
@@ -773,16 +931,16 @@ function addCard() {
             </div>
             <div class="lp-results">
                 <div class="hero-output">
-                    <div class="hero-label">Total Upfront Fees <span class="tooltip-icon" data-tip="Estimated out-of-pocket costs before funding.">📎</span></div>
+                    <div class="hero-label">Total Upfront Fees <span class="tooltip-icon" data-tip="Estimated out-of-pocket costs before funding."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                     <div id="res-total-fees-${id}" class="hero-value">$0</div>
                 </div>
                 <div class="lp-result-grid">
                     <div class="lp-res-item">
-                        <div class="lp-res-label">EST. MONTHLY PAYMENT <span class="tooltip-icon" data-tip="Fully amortized principal + interest, excluding any servicing fees.">📎</span></div>
+                        <div class="lp-res-label">EST. MONTHLY PAYMENT <span class="tooltip-icon" data-tip="Fully amortized principal + interest, excluding any servicing fees."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                         <div id="res-monthly-pmt-${id}" class="lp-res-val">$0</div>
                     </div>
                     <div class="lp-res-item">
-                        <div class="lp-res-label">TOTAL INTEREST COST <span class="tooltip-icon" data-tip="Total interest paid over the full loan term.">📎</span></div>
+                        <div class="lp-res-label">TOTAL INTEREST COST <span class="tooltip-icon" data-tip="Total interest paid over the full loan term."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></div>
                         <div id="res-interest-cost-${id}" class="lp-res-val">$0</div>
                     </div>
                     <div class="lp-res-item">
@@ -799,13 +957,13 @@ function addCard() {
                     <span id="takeaway-content-${id}"></span>
                 </div>
                 <div class="lp-actions no-print">
-                    <button class="lp-copy-btn" onclick="copyResults(${id})">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        Copy Results
-                    </button>
-                    <button class="lp-print-btn" onclick="handleLendPaperSavePDF()">
+                    <button class="lp-cta-primary" onclick="handleLendPaperSavePDF()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        Save as PDF
+                        Save Estimate as PDF
+                    </button>
+                    <button class="lp-cta-secondary" onclick="copyResults(${id})">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy Scenario
                     </button>
                 </div>
             </div>
@@ -816,6 +974,29 @@ function addCard() {
     document.getElementById('cardsContainer').insertAdjacentHTML('beforeend', cardHtml);
     bindTips();
     calculate(id);
+    applyIntroState();
+    PDF_HELPER.initDismissibles();
+    rewireDefinitionDismiss();
+}
+
+// LEN-147 — dismissible intro. Multi-card: dismiss/restore acts on every card's intro.
+// Per-calc key: lp_dismiss_sba_intro.
+function applyIntroState() {
+    const dismissed = localStorage.getItem('lp_dismiss_sba_intro') === '1';
+    document.querySelectorAll('.lp-definition').forEach(el => { el.style.display = dismissed ? 'none' : ''; });
+    document.querySelectorAll('.lp-intro-toggle-btn').forEach(b => { b.style.display = dismissed ? 'inline-flex' : 'none'; });
+}
+function dismissIntro() { localStorage.setItem('lp_dismiss_sba_intro', '1'); applyIntroState(); }
+function showIntro() { localStorage.removeItem('lp_dismiss_sba_intro'); applyIntroState(); PDF_HELPER.initDismissibles(); rewireDefinitionDismiss(); }
+
+// After initDismissibles injects × buttons on .lp-definition, wire them to also
+// call applyIntroState so ALL cards' definitions hide immediately (not just the clicked one).
+function rewireDefinitionDismiss() {
+    document.querySelectorAll('.lp-definition [data-lp-dismiss-btn]').forEach(function(btn) {
+        if (btn.dataset.rewired) return;
+        btn.dataset.rewired = '1';
+        btn.addEventListener('click', applyIntroState);
+    });
 }
 
 function removeCard(id) {
@@ -841,6 +1022,19 @@ function copyResults(id) {
     text += `----------------\n${WATERMARK_FOOTER}`;
     
     navigator.clipboard.writeText(text).then(() => {
+        // Quote Log (LEN-123)
+        try {
+            window.saveEstimate && window.saveEstimate({
+                calculator_type: 'sba_fees',
+                params: {
+                    amount: cleanNumericInput(loan),
+                    term: cleanNumericInput(document.getElementById(`termYears-${id}`)?.value),
+                    rate_spread: cleanNumericInput(document.getElementById(`rateSpread-${id}`)?.value),
+                    monthly_payment: pmt, total_fees: fees, total_interest: interest, scenario_name: name
+                },
+                pdf_generated: false
+            });
+        } catch (e) {}
         // Simple visual feedback
         const btn = event.currentTarget;
         const origText = btn.innerHTML;
@@ -849,11 +1043,35 @@ function copyResults(id) {
     });
 }
 
+function lpRestoreBanner() {
+    if (document.getElementById('lp-restore-banner')) return;
+    const main = document.querySelector('.lp-main') || document.body;
+    const b = document.createElement('div');
+    b.id = 'lp-restore-banner'; b.className = 'no-print';
+    b.style.cssText = 'display:flex;align-items:center;gap:8px;max-width:1000px;margin:0 auto 12px;padding:9px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:12px;color:#92400E;';
+    b.textContent = 'Restored from your Estimate Log — review the figures before generating a new PDF.';
+    main.insertBefore(b, main.firstChild);
+}
+
 window.onload = () => {
     addCard();
+    PDF_HELPER.initDismissibles();
+    rewireDefinitionDismiss();
+    PDF_HELPER.persistFields('sba', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor','pdfDealName','pdfLender']);
     if (typeof window.PDF_HELPER !== 'undefined') {
         window.PDF_HELPER.initPrintLayout("SBA 7(a) RATES & FEES");
     }
+    // Quote Log restore (LEN-123)
+    try {
+        const rec = window.LPQuoteLog && window.LPQuoteLog.consumeRestorePayload('sba_fees');
+        if (rec && rec.params) {
+            const p = rec.params, id = 1, sv = (k, v) => { const e = document.getElementById(`${k}-${id}`); if (e && v != null && v !== '') e.value = v; };
+            sv('loanAmount', p.amount); sv('termYears', p.term); sv('rateSpread', p.rate_spread);
+            sv('pkgFee', p.packaging_fee); sv('closeFee', p.closing_fee);
+            if (typeof calculate === 'function') calculate(id);
+            lpRestoreBanner();
+        }
+    } catch (e) { /* restore is best-effort */ }
     if (window.self !== window.top) {
         document.body.classList.add('is-embedded');
     }

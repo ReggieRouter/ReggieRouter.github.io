@@ -6,8 +6,8 @@
 var TOOLS = [
   { 
     id: "amo", 
-    name: "Payment Breakdown", 
-    desc: "Full payment breakdown by period with multi-scenario prepay logic.",
+    name: "Amortization",
+    desc: "Full payment schedule with pre-pay & buyout scenarios.",
     status: "live", 
     group: "deal-math", 
     icon: "chart", 
@@ -16,6 +16,19 @@ var TOOLS = [
     presentation: "page",
     path: "/calculators/AmoScheduleCalculator.html",
     kw: "amortization schedule prepay payoff buyout mca payment deal desk"
+  },
+  {
+    id: "deal-read",
+    name: "Deal Analysis",
+    desc: "Read any deal in seconds — industry, credit, and revenue become a product stack, funding range, and talk track.",
+    status: "live",
+    group: "deal-math",
+    icon: "search",
+    color: "green",
+    slug: "/tools/deal-read",
+    presentation: "page",
+    path: "/calculators/deal-read/index.html",
+    kw: "deal read fundability naics industry credit fico revenue product stack talk track lender underwriting affordability"
   },
   /*
   { 
@@ -48,7 +61,7 @@ var TOOLS = [
   },
   {
     id: "dscr",
-    name: "DSCR calculator",
+    name: "DSCR",
     desc: "Debt service coverage ratio and payment-to-revenue benchmarking.",
     status: "live",
     group: "risk",
@@ -74,7 +87,7 @@ var TOOLS = [
   },
   {
     id: "fundability",
-    name: "Fundability",
+    name: "Position & Net",
     desc: "Combined net requirement and stacking risk assessment.",
     status: "live",
     group: "deal-math",
@@ -87,8 +100,8 @@ var TOOLS = [
   },
   {
     id: "sba-rates",
-    name: "SBA rates & fees",
-    desc: "Dynamic SBA 7(a) scenario builder with guarantee fee logic.",
+    name: "SBA Fees",
+    desc: "Dynamic SBA 7(a) guarantee-fee & rate scenarios.",
     status: "hidden",
     group: "deal-math",
     icon: "flag",
@@ -98,51 +111,33 @@ var TOOLS = [
     path: "/calculators/SBAFeesCalculator.html",
     kw: "sba fees rates scenario builder 7a guarantee packaging search closing"
   },
+  // NAICS Search retired as a standalone tool — NAICS lookup now lives inside
+  // Deal Analysis (search any industry or 6-digit code, with restricted-industry flags).
   {
-    id: "naics",
-    name: "NAICS Search",
-    desc: "Look up NAICS and SIC codes by industry — fast reference for restricted industry checks.",
-    status: "soon",
+    id: "legislation",
+    name: "Compliance Desk",
+    desc: "State + federal commercial financing disclosure law, mapped. Know where disclosure rules bite.",
+    status: "live",
     group: "data",
-    icon: "search",
+    icon: "flag",
     color: "green",
-    slug: "/tools/naics",
+    slug: "/compliance",
     presentation: "page",
-    path: "/calculators/NAICSSearch.html",
-    kw: "naics sic code industry search lookup classification restricted"
+    path: "/legislation.html",
+    kw: "legislation law regulation disclosure commercial financing state federal cfpb 1071 cfdl map tracker compliance bill statute"
   },
   {
-    id: "roi",
-    name: "ROI Analysis", 
-    desc: "Identify the break even point.",
-    status: "soon", 
-    group: "deal-math", 
-    icon: "lineChart", 
+    id: "affordability",
+    name: "Payment Fit",
+    desc: "See if the borrower can handle the payment — and whether the capital pays for itself.",
+    status: "live",
+    group: "deal-math",
+    icon: "lineChart",
     color: "green",
-    href: "#",
-    kw: "roi break even profit investment"
-  },
-  { 
-    id: "uw-analysis", 
-    name: "UW analysis", 
-    desc: "Comprehensive deal health and credit scoring metrics.",
-    status: "soon", 
-    group: "risk", 
-    icon: "grid", 
-    color: "amber",
-    href: "#",
-    kw: "underwriting analysis credit scoring health"
-  },
-  { 
-    id: "compliance", 
-    name: "Compliance", 
-    desc: "State-specific disclosure and regulation check.",
-    status: "soon", 
-    group: "risk", 
-    icon: "stack", 
-    color: "amber",
-    href: "#",
-    kw: "legal compliance regulation disclosure check"
+    slug: "/tools/affordability",
+    presentation: "page",
+    path: "/calculators/AffordabilityCalculator.html",
+    kw: "payment fit affordability roi break even payment load deposits cash cushion qualify borrower upside net"
   },
   /*
   { 
