@@ -111,24 +111,13 @@ var TOOLS = [
     path: "/calculators/SBAFeesCalculator.html",
     kw: "sba fees rates scenario builder 7a guarantee packaging search closing"
   },
-  {
-    id: "naics",
-    name: "NAICS Search",
-    desc: "Look up NAICS and SIC codes by industry — fast reference for restricted industry checks.",
-    status: "soon",
-    group: "data",
-    icon: "search",
-    color: "green",
-    slug: "/tools/naics",
-    presentation: "page",
-    path: "/calculators/NAICSSearch.html",
-    kw: "naics sic code industry search lookup classification restricted"
-  },
+  // NAICS Search retired as a standalone tool — NAICS lookup now lives inside
+  // Deal Analysis (search any industry or 6-digit code, with restricted-industry flags).
   {
     id: "legislation",
     name: "Compliance Desk",
     desc: "State + federal commercial financing disclosure law, mapped. Know where disclosure rules bite.",
-    status: "soon",
+    status: "live",
     group: "data",
     icon: "flag",
     color: "green",
@@ -160,17 +149,6 @@ var TOOLS = [
     color: "amber",
     href: "#",
     kw: "underwriting analysis credit scoring health"
-  },
-  { 
-    id: "compliance", 
-    name: "Compliance", 
-    desc: "State-specific disclosure and regulation check.",
-    status: "soon", 
-    group: "risk", 
-    icon: "stack", 
-    color: "amber",
-    href: "#",
-    kw: "legal compliance regulation disclosure check"
   },
   /*
   { 

@@ -196,7 +196,7 @@ function fieldIndustry(){
       <span class="in-tag"><button class="tg tg-btn" onclick="event.stopPropagation();openLever('product')" title="See what this affects"><span class="d" style="background:${DOT[tier]}"></span>${toneTag(tier)}<span class="tg-go">${I.dn}</span></button></span>
     </div>`;
   }
-  return `<div class="field"><label>Industry</label>${inner}</div>`;
+  return `<div class="field"><label>Industry / NAICS</label>${inner}</div>`;
 }
 function irRow(m){
   const tier=TIER[m.c]||'g'; const tc=TC[tier];
