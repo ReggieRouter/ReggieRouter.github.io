@@ -173,6 +173,13 @@
         document.getElementById('loadingOverlay').classList.remove('visible');
         showErr(error.message);
       } else {
+        // LEN-175: the invite Role is the onboarding JTBD persona. Seed it so the home
+        // dashboard + tour are tailored from first login (index.html reads lp_persona;
+        // it validates the key against PERSONA_TOOLS, so legacy/unknown values no-op).
+        const PERSONA_KEYS = ['dealmath','placement','diligence','sba','compliance'];
+        if (invite && PERSONA_KEYS.includes(invite.role)) {
+          try { localStorage.setItem('lp_persona', invite.role); } catch (e) { /* storage off — skip */ }
+        }
         if (invite) await supabase.from('invites').update({ accepted_at: new Date().toISOString() }).eq('id', invite.id);
         window.location.href = invite ? '/index.html' : '/pending.html';
       }

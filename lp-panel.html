@@ -534,6 +534,12 @@ header {
 .mem-pill.iso { background: #EDE9FE; color: #6D28D9; }
 .mem-pill.lender { background: var(--amber-light); color: var(--amber); }
 .mem-pill.other { background: var(--bg); color: var(--muted); }
+/* LEN-175 persona pills */
+.mem-pill.placement { background: #DBEAFE; color: #1D4ED8; }
+.mem-pill.dealmath { background: #DCFCE7; color: #15803D; }
+.mem-pill.diligence { background: #EDE9FE; color: #6D28D9; }
+.mem-pill.sba { background: var(--amber-light); color: var(--amber); }
+.mem-pill.compliance { background: #E0F2FE; color: #0369A1; }
 .mem-badge { display: inline-block; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; }
 .mem-badge.pending { background: var(--amber-light); color: var(--amber); }
 .mem-badge.approved { background: var(--green-light); color: var(--green); }
@@ -551,6 +557,7 @@ header {
 .inv-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); margin: 12px 0 4px; }
 .inv-input { width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; background: var(--white); color: var(--text); outline: none; }
 .inv-input:focus { border-color: var(--green-mid); }
+.inv-hint { font-size: 11.5px; color: var(--muted); margin: 6px 2px 0; line-height: 1.4; }
 .inv-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; color: var(--text); margin-bottom: 14px; max-height: 220px; overflow-y: auto; }
 
 /* ── RECRUITER PANEL */
@@ -935,13 +942,19 @@ header {
       <label class="inv-label" for="inv-company">Company</label>
       <input type="text" id="inv-company" class="inv-input" placeholder="Company (optional)" />
       <label class="inv-label" for="inv-role">Role</label>
+      <!-- LEN-175: Role = the onboarding JTBD persona. Values are the canonical persona
+           keys the home dashboard reads (PERSONA_TOOLS in index.html). Picking one here
+           seeds the invitee's persona so their dashboard + tour are tailored from first
+           login and the onboarding "what do you do most" step is pre-filled. -->
       <select id="inv-role" class="inv-input">
-        <option value="">Select role (optional)</option>
-        <option value="broker">Broker</option>
-        <option value="iso">ISO</option>
-        <option value="lender">Lender</option>
-        <option value="other">Other</option>
+        <option value="">What do they do most? (optional)</option>
+        <option value="placement">Placing deals with lenders (broker / ISO)</option>
+        <option value="dealmath">Structuring &amp; pricing deals</option>
+        <option value="diligence">Underwriting &amp; due diligence</option>
+        <option value="sba">SBA lending</option>
+        <option value="compliance">Compliance &amp; licensing</option>
       </select>
+      <p class="inv-hint">Tailors their home dashboard and guided tour from day one — they can change it anytime.</p>
       <div class="modal-actions" style="margin-top:18px">
         <button class="btn-cancel" onclick="closeInviteModal()">Cancel</button>
         <button class="btn-mem-approve" style="padding:8px 16px;font-size:13px" id="inv-submit" onclick="inviteSubmit()">Add &amp; compose</button>
@@ -2889,10 +2902,11 @@ async function renderMembersPanel() {
         <input type="text" class="mem-search" id="mem-search" placeholder="Search name, company, email…" oninput="memRenderTable()" />
         <select class="mem-select" id="mem-role" onchange="memRenderTable()">
           <option value="">All roles</option>
-          <option value="broker">Broker</option>
-          <option value="iso">ISO</option>
-          <option value="lender">Lender</option>
-          <option value="other">Other</option>
+          <option value="placement">Placement</option>
+          <option value="dealmath">Deal structuring</option>
+          <option value="diligence">Underwriting</option>
+          <option value="sba">SBA</option>
+          <option value="compliance">Compliance</option>
         </select>
         <select class="mem-select" id="mem-status" onchange="memRenderTable()" style="display:none">
           <option value="">All statuses</option>
@@ -2974,7 +2988,18 @@ function memShowTab(name) {
 function memInitials(name) { return (name || '').split(' ').slice(0,2).map(w => w[0] || '').join('').toUpperCase() || '?'; }
 
 function memRolePill(role) {
-  const map = { broker:['broker','Broker'], iso:['iso','ISO'], lender:['lender','Lender'] };
+  // LEN-175: role now carries the onboarding JTBD persona key. Legacy invites
+  // may still hold the old entity-type values (broker/iso/lender) — keep them mapped.
+  const map = {
+    placement:  ['placement',  'Placement'],
+    dealmath:   ['dealmath',   'Deal structuring'],
+    diligence:  ['diligence',  'Underwriting'],
+    sba:        ['sba',        'SBA'],
+    compliance: ['compliance', 'Compliance'],
+    broker:     ['broker',     'Broker'],
+    iso:        ['iso',        'ISO'],
+    lender:     ['lender',     'Lender'],
+  };
   const [cls, label] = map[role] || ['other', role || 'Other'];
   return `<span class="mem-pill ${cls}">${esc(label)}</span>`;
 }
