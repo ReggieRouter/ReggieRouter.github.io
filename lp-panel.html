@@ -1571,7 +1571,7 @@ const FIELD_TYPE_MAP = {
 };
 
 const FIELD_ENUM_OPTIONS = {
-  lender_type: ['Direct Lender', 'Direct+', 'Marketplace'],
+  lender_type: ['Direct Lender', 'Direct+', 'Marketplace', 'Broker'],
 };
 
 function openFieldEdit(field) {
@@ -1773,7 +1773,7 @@ function renderFieldsTab() {
   const groups = [
     { title: 'Identity', fields: [
       { key: 'has_captcha', label: 'Has CAPTCHA (scraper must handle)', type: 'bool' },
-      { key: 'lender_type', label: 'Lender Type', type: 'enum', options: ['Direct Lender', 'Direct+', 'Marketplace'] },
+      { key: 'lender_type', label: 'Lender Type', type: 'enum', options: ['Direct Lender', 'Direct+', 'Marketplace', 'Broker'] },
       { key: 'lender_logo_url', label: 'Logo URL', type: 'text' },
       { key: 'source_url', label: 'Source URL', type: 'text' },
       { key: 'application_submission_url', label: 'Application URL', type: 'text' },
