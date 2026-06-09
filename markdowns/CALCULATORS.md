@@ -198,10 +198,10 @@ Identical on **every** calculator. CTA stack, top to bottom, inside
   white text, full width, leading **printer SVG** icon
 - Secondary: `Copy Scenario` — class `lp-cta-secondary`, brand-dark outline, transparent fill,
   full width, leading **copy SVG** icon
-- Footer row (subtle text links): `+ Compare scenarios` (left) · `🕐 Estimate Log` (right)
+- Footer row (subtle text links): `+ Compare scenarios` (left) · `🕐 Deal Log` (right)
 
 `Save Estimate as PDF` is **always present** — never skip it. Both the PDF save and
-`Copy Scenario` fire `saveEstimate()` (see §15 Estimate Log).
+`Copy Scenario` fire `saveEstimate()` (see §15 Deal Log).
 
 **Exact label copy** — do not paraphrase: `Save Estimate as PDF`, `Copy Scenario`.
 - **Only exception:** single-result tools with no scenarios (e.g. Fundability) use
@@ -558,7 +558,7 @@ Canonicalized from the Payment Breakdown handoff (2026-06-08).
 | Borrower state | State, Location |
 | Prepared by | Submitted by, From |
 | Estimate | Quote (use *Estimate* everywhere — nav, CTAs, and document disclaimers) |
-| Estimate Log | Quote Log, Quotes, History, Saved deals (the saved-estimates surface) |
+| Deal Log | Estimate Log, Quote Log, Quotes, History, Saved deals (the saved-estimates surface) |
 
 Notes:
 - **"Finance charge"** is the chosen display label (it replaces the old "Total
@@ -582,7 +582,7 @@ secondary metrics row).
 
 ---
 
-## 15. Estimate Log (cross-tool, LEN-123)
+## 15. Deal Log (cross-tool, LEN-123)
 
 A cross-tool log of every estimate generated on the site (Payment Breakdown, DSCR,
 Fundability, NAICS, Deal Read, future calculators). Page: `/quote-log`. Nav: left

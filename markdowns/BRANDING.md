@@ -29,11 +29,11 @@ wordmark on generated documents. Not required on all surfaces.
 
 ### Canonical Product Terms
 Write these exactly; do not coin synonyms.
-- **Estimate Log** — the cross-tool record of saved estimates (nav, sidebar, page
-  titles). Two words, capital E, capital L. Never "Quote Log," "Quotes," "History,"
-  "Saved deals." See `CALCULATORS.md §15`.
+- **Deal Log** — the cross-tool record of saved estimates (nav, sidebar, page
+  titles). Two words, capital D, capital L. Never "Estimate Log," "Quote Log,"
+  "Quotes," "History," "Saved deals." See `CALCULATORS.md §15`.
 - **Estimate** — what a calculator produces (document disclaimers say "Estimate")
-  *and* the product-surface word in nav/labels ("Estimate Log"). The legacy term
+  *and* the product-surface word in nav/labels ("Save Estimate as PDF"). The legacy term
   *Quote* is retired; use **Estimate** everywhere. Display-term standards:
   `CALCULATORS.md §14`.
 
@@ -403,7 +403,7 @@ the visual token reference.
   full width, `10px` radius.
 - **Secondary** (`Copy Scenario`): brand-dark outline, transparent fill, full width.
 - **Tertiary**: plain text links (`#6B7280`, hover `--color-brand-mid`) in a footer
-  row — used for `+ Compare scenarios` and `🕐 Estimate Log`.
+  row — used for `+ Compare scenarios` and `🕐 Deal Log`.
 
 ### Type tokens
 - Metric label: `10px`/700/uppercase/`0.04em`/`#64748B`.
