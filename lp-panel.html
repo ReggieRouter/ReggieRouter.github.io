@@ -403,6 +403,32 @@ header {
 .dash-card.warn .dash-card-num { color: var(--amber); }
 .dash-card.bad .dash-card-num { color: var(--red); }
 .dash-card.good .dash-card-num { color: var(--green-mid); }
+/* ── Adoption tab (LEN-57) ── */
+.ado-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; min-width: 80px; }
+.ado-bar > span { display: block; height: 100%; background: var(--green-mid); border-radius: 4px; }
+.ado-bar.warn > span { background: var(--amber); }
+.ado-bar.bad  > span { background: var(--red); }
+.ado-pill { display: inline-block; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.ado-pill.invited { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.ado-pill.engaged { background: #DBEAFE; color: #1D4ED8; }
+.ado-pill.adopted { background: var(--green-light); color: var(--green); }
+.ado-pill.power   { background: #EDE9FE; color: #6D28D9; }
+.ado-rec { font-size: 11px; font-weight: 600; }
+.ado-rec.active { color: var(--green-mid); }
+.ado-rec.risk   { color: var(--amber); }
+.ado-rec.dormant{ color: var(--muted); }
+.ado-goal { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; background: var(--white); }
+.ado-goal-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.ado-goal-label { font-weight: 600; font-size: 14px; }
+.ado-goal-scope { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.ado-goal-prog { display: flex; align-items: center; gap: 10px; }
+.ado-goal-val { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.ado-goal-badge { font-size: 11px; font-weight: 700; border-radius: 4px; padding: 1px 7px; }
+.ado-goal-badge.ontrack { background: var(--green-light); color: var(--green); }
+.ado-goal-badge.behind  { background: var(--amber-light); color: var(--amber); }
+.ado-goal-badge.atrisk  { background: var(--red-light); color: var(--red); }
+.ado-goalform { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.ado-goalform select, .ado-goalform input { padding: 7px 9px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; background: var(--white); color: var(--text); }
 .stale-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .stale-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); padding: 0 10px 8px; border-bottom: 1px solid var(--border); }
 .stale-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
@@ -594,6 +620,7 @@ header {
       <span id="user-email"></span>
       <button class="btn-ghost" onclick="showMainView('dashboard')">Dashboard</button>
       <button class="btn-ghost" onclick="showMainView('members')">Members</button>
+      <button class="btn-ghost" onclick="showMainView('adoption')">Adoption</button>
       <button class="btn-ghost" onclick="showMainView('recruiter')">Recruiter</button>
       <button class="btn-ghost" onclick="showMainView('registry')">Registry</button>
       <button class="btn-ghost" id="compliance-nav-btn" onclick="showMainView('compliance')">Compliance</button>
@@ -631,6 +658,7 @@ header {
       <div id="empty-state"><p>Select a lender to review</p></div>
       <div id="dashboard-view" style="display:none"></div>
       <div id="members-view" style="display:none"></div>
+      <div id="adoption-view" style="display:none"></div>
       <div id="recruiter-view" style="display:none"></div>
       <div id="registry-view" style="display:none"></div>
       <div id="compliance-view" style="display:none"></div>
@@ -1060,11 +1088,13 @@ function showMainView(view) {
   document.getElementById('dashboard-view').style.display = view==='dashboard' ? 'block' : 'none';
   document.getElementById('lender-detail').style.display = view==='detail' ? 'block' : 'none';
   document.getElementById('members-view').style.display = view==='members' ? 'block' : 'none';
+  document.getElementById('adoption-view').style.display = view==='adoption' ? 'block' : 'none';
   document.getElementById('recruiter-view').style.display = view==='recruiter' ? 'block' : 'none';
   document.getElementById('registry-view').style.display = view==='registry' ? 'block' : 'none';
   document.getElementById('compliance-view').style.display = view==='compliance' ? 'block' : 'none';
   if (view === 'dashboard') renderDashboard();
   if (view === 'members') renderMembersPanel();
+  if (view === 'adoption') renderAdoptionPanel();
   if (view === 'recruiter') renderRecruiterPanel();
   if (view === 'registry') renderRegistryPanel();
   if (view === 'compliance') renderCompliancePanel();
@@ -2675,6 +2705,427 @@ function memExportCSV() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `lendpaper-members-${memTab}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── Adoption Panel (LEN-57) ───────────────────────────────
+// Engagement vs adoption are distinct lifecycle stages, each with its own
+// signal: Invited (account only) → Engaged (logged in / opened a tool) →
+// Adopted (recurring estimates) → Power user (recurring + multi-tool). A
+// recency overlay (active/at-risk/dormant) runs alongside the stage. All
+// metrics are computed client-side from first-party Supabase data.
+const ADO_ACTIVE_DAYS = 7, ADO_RISK_DAYS = 30, ADO_ADOPT_30D_MIN = 3, ADO_POWER_TOOLS_MIN = 2;
+const ADO_HISTORY_DAYS = 90;            // raw activity pulled once, windows filtered in JS
+const ADO_METRICS = {
+  estimates_count: { label: 'Estimates created', unit: '' },
+  pct_engaged:     { label: '% members engaged', unit: '%' },
+  pct_adopted:     { label: '% members adopted', unit: '%' },
+  engaged_members: { label: 'Engaged members',   unit: '' },
+  adopted_members: { label: 'Adopted members',   unit: '' },
+  power_members:   { label: 'Power users',        unit: '' },
+  distinct_tools:  { label: 'Distinct tools used', unit: '' },
+};
+let adoProfiles = [], adoEvents = [], adoEstimates = [], adoGoals = [];
+let adoPeople = [], adoCompanies = [], adoFunnel = null;
+let adoTab = 'people', adoWindow = 30, adoCompanyFilter = null;
+let adoLoadError = null, adoGoalsMissing = false;
+
+function adoV(id) { const e = document.getElementById(id); return e ? e.value : ''; }
+function adoCompanyKey(c) { const t = (c || '').trim(); return t ? t.toLowerCase() : '__none__'; }
+function adoCompanyLabel(c) { const t = (c || '').trim(); return t || '— No company —'; }
+function adoPersonName(id) { const p = adoProfiles.find(x => x.id === id); return p ? (p.full_name || p.email || id) : id; }
+
+// ISO-week key (UTC) so "estimates in 2+ distinct weeks" is timezone-stable.
+function adoIsoWeek(iso) {
+  const d = new Date(iso);
+  d.setUTCHours(0, 0, 0, 0);
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const wk = Math.ceil((((d - yStart) / 864e5) + 1) / 7);
+  return d.getUTCFullYear() + '-W' + wk;
+}
+
+async function renderAdoptionPanel() {
+  const view = document.getElementById('adoption-view');
+  view.innerHTML = `
+    <div class="dash-header">
+      <div><h1>Adoption</h1><p>Engagement &amp; adoption by person and company — live from Supabase</p></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <select id="ado-window" class="mem-select" onchange="adoSetWindow(this.value)">
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+        <a class="btn-ghost" style="text-decoration:none;display:inline-block" href="https://analytics.google.com/" target="_blank" rel="noopener" title="Opens Google Analytics (GA4 property G-S3YBZV6RF9)">Open GA4 ↗</a>
+        <button class="btn-ghost" onclick="adoExportCSV()">Export CSV</button>
+        <button class="btn-ghost" onclick="loadAdoption()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="dash-section" id="ado-funnel"><div style="color:var(--muted);font-size:13px">Loading…</div></div>
+    <div class="dash-section">
+      <div class="tabs" style="margin-bottom:14px">
+        <button class="tab active" id="ado-tabbtn-people" onclick="adoShowTab('people')">People <span class="tab-count" id="ado-count-people" style="display:none"></span></button>
+        <button class="tab" id="ado-tabbtn-companies" onclick="adoShowTab('companies')">Companies <span class="tab-count" id="ado-count-companies" style="display:none"></span></button>
+        <button class="tab" id="ado-tabbtn-goals" onclick="adoShowTab('goals')">Goals <span class="tab-count" id="ado-count-goals" style="display:none"></span></button>
+      </div>
+      <div class="mem-toolbar" id="ado-people-toolbar">
+        <input type="text" class="mem-search" id="ado-search" placeholder="Search name, company, email…" oninput="adoRenderPeople()" />
+        <select class="mem-select" id="ado-stage" onchange="adoRenderPeople()">
+          <option value="">All stages</option>
+          <option value="invited">Invited</option>
+          <option value="engaged">Engaged</option>
+          <option value="adopted">Adopted</option>
+          <option value="power">Power user</option>
+        </select>
+        <select class="mem-select" id="ado-rec" onchange="adoRenderPeople()">
+          <option value="">Any recency</option>
+          <option value="active">Active (≤7d)</option>
+          <option value="risk">At-risk (≤30d)</option>
+          <option value="dormant">Dormant (30d+)</option>
+        </select>
+        <span id="ado-cofilter" style="display:none;font-size:12px;color:var(--muted)"></span>
+      </div>
+      <div id="ado-table-wrap" style="color:var(--muted);font-size:13px">Loading…</div>
+    </div>`;
+  adoTab = 'people';
+  adoCompanyFilter = null;
+  const winSel = document.getElementById('ado-window');
+  if (winSel) winSel.value = String(adoWindow);
+  await loadAdoption();
+}
+
+async function loadAdoption() {
+  const histStart = new Date(Date.now() - ADO_HISTORY_DAYS * 864e5).toISOString();
+  const [profRes, evRes, estRes, goalRes] = await Promise.all([
+    sb.from('profiles').select('id, email, full_name, company, role, status, created_at, last_seen, invite_credits, invites_sent, is_admin'),
+    sb.from('usage_events').select('user_id, tool, event, created_at').gte('created_at', histStart),
+    sb.from('estimates').select('user_id, created_at').gte('created_at', histStart),
+    sb.from('adoption_goals').select('*').eq('active', true).order('created_at', { ascending: true }),
+  ]);
+  adoLoadError = null;
+  adoGoalsMissing = false;
+  if (profRes.error) {
+    const el = document.getElementById('ado-funnel');
+    if (el) el.innerHTML = `<span style="color:var(--red)">Error loading profiles: ${esc(profRes.error.message)}</span>`;
+    return;
+  }
+  adoProfiles = (profRes.data || []).filter(p => !p.is_admin);
+  if (evRes.error || estRes.error) adoLoadError = (evRes.error || estRes.error).message;
+  adoEvents = evRes.data || [];
+  adoEstimates = estRes.data || [];
+  if (goalRes.error) { adoGoalsMissing = true; adoGoals = []; } else { adoGoals = goalRes.data || []; }
+  adoCompute();
+  adoRenderFunnel();
+  adoRenderTabsCounts();
+  adoRenderTab();
+}
+
+function adoCompute() {
+  const now = Date.now();
+  const d30 = now - 30 * 864e5, actT = now - ADO_ACTIVE_DAYS * 864e5, riskT = now - ADO_RISK_DAYS * 864e5;
+  const winStart = now - adoWindow * 864e5;
+  const evByUser = {}, estByUser = {};
+  for (const e of adoEvents) (evByUser[e.user_id] = evByUser[e.user_id] || []).push(e);
+  for (const e of adoEstimates) (estByUser[e.user_id] = estByUser[e.user_id] || []).push(e);
+
+  adoPeople = adoProfiles.map(p => {
+    const evs = evByUser[p.id] || [], ests = estByUser[p.id] || [];
+    const lastSeen = p.last_seen ? Date.parse(p.last_seen) : 0;
+    const lastEv = evs.reduce((m, e) => Math.max(m, Date.parse(e.created_at)), 0);
+    const lastEst = ests.reduce((m, e) => Math.max(m, Date.parse(e.created_at)), 0);
+    const lastActivity = Math.max(lastSeen, lastEv, lastEst);
+    const distinctTools = new Set(evs.map(e => e.tool)).size;
+    const est30 = ests.filter(e => Date.parse(e.created_at) >= d30).length;
+    const weeks = new Set(ests.map(e => adoIsoWeek(e.created_at))).size;
+    const estWin = ests.filter(e => Date.parse(e.created_at) >= winStart).length;
+    const usageWin = evs.filter(e => Date.parse(e.created_at) >= winStart).length;
+    const adopted = (weeks >= 2) || (est30 >= ADO_ADOPT_30D_MIN);
+    const engaged = (lastSeen > 0) || evs.length > 0 || ests.length > 0;
+    const power = adopted && distinctTools >= ADO_POWER_TOOLS_MIN && lastEst >= actT;
+    const stage = power ? 'power' : adopted ? 'adopted' : engaged ? 'engaged' : 'invited';
+    let rec = 'dormant';
+    if (lastActivity >= actT) rec = 'active'; else if (lastActivity >= riskT) rec = 'risk';
+    return { p, stage, rec, distinctTools, est30, weeks, estWin, usageWin, lastActivity };
+  });
+
+  const total = adoPeople.length;
+  const engagedPlus = adoPeople.filter(x => x.stage !== 'invited').length;
+  const adoptedPlus = adoPeople.filter(x => x.stage === 'adopted' || x.stage === 'power').length;
+  const cnt = s => adoPeople.filter(x => x.stage === s).length;
+  adoFunnel = {
+    total, invited: cnt('invited'), engaged: cnt('engaged'), adopted: cnt('adopted'), power: cnt('power'),
+    pctEngaged: total ? Math.round(engagedPlus / total * 100) : 0,
+    pctAdopted: total ? Math.round(adoptedPlus / total * 100) : 0,
+  };
+
+  const byCo = {};
+  for (const r of adoPeople) {
+    const key = adoCompanyKey(r.p.company);
+    if (!byCo[key]) byCo[key] = { key, label: adoCompanyLabel(r.p.company), members: [], estWin: 0 };
+    byCo[key].members.push(r);
+    byCo[key].estWin += r.estWin;
+  }
+  adoCompanies = Object.values(byCo).map(c => {
+    const ids = new Set(c.members.map(m => m.p.id));
+    const tools = new Set();
+    for (const e of adoEvents) if (ids.has(e.user_id)) tools.add(e.tool);
+    const memberCount = c.members.length;
+    const engagedCount = c.members.filter(m => m.stage !== 'invited').length;
+    const adoptedCount = c.members.filter(m => m.stage === 'adopted' || m.stage === 'power').length;
+    const powerCount = c.members.filter(m => m.stage === 'power').length;
+    return {
+      key: c.key, label: c.label, memberCount, engagedCount, adoptedCount, powerCount,
+      estWin: c.estWin, tools: tools.size,
+      pctEngaged: memberCount ? Math.round(engagedCount / memberCount * 100) : 0,
+      pctAdopted: memberCount ? Math.round(adoptedCount / memberCount * 100) : 0,
+    };
+  }).sort((a, b) => b.memberCount - a.memberCount || b.adoptedCount - a.adoptedCount);
+}
+
+function adoSetWindow(v) {
+  adoWindow = parseInt(v, 10) || 30;
+  adoCompute();
+  adoRenderFunnel();
+  adoRenderTabsCounts();
+  adoRenderTab();
+}
+
+function adoShowTab(name) {
+  adoTab = name;
+  ['people', 'companies', 'goals'].forEach(t => {
+    const b = document.getElementById('ado-tabbtn-' + t);
+    if (b) b.className = 'tab' + (t === name ? ' active' : '');
+  });
+  const tb = document.getElementById('ado-people-toolbar');
+  if (tb) tb.style.display = name === 'people' ? '' : 'none';
+  adoRenderTab();
+}
+
+function adoRenderTab() {
+  if (adoTab === 'people') adoRenderPeople();
+  else if (adoTab === 'companies') adoRenderCompanies();
+  else adoRenderGoals();
+}
+
+function adoRenderTabsCounts() {
+  const set = (id, n) => { const e = document.getElementById(id); if (!e) return; e.textContent = n; e.style.display = n > 0 ? 'inline-flex' : 'none'; };
+  set('ado-count-people', adoPeople.length);
+  set('ado-count-companies', adoCompanies.length);
+  set('ado-count-goals', adoGoals.length);
+}
+
+function adoRenderFunnel() {
+  const el = document.getElementById('ado-funnel');
+  if (!el) return;
+  const f = adoFunnel || { total: 0, invited: 0, engaged: 0, adopted: 0, power: 0, pctEngaged: 0, pctAdopted: 0 };
+  const err = adoLoadError
+    ? `<p style="color:var(--red);font-size:13px;margin-bottom:12px">Couldn’t read activity (${esc(adoLoadError)}). Run <code>supabase/adoption_setup.sql</code> to grant admin read access — counts stay 0 until then.</p>`
+    : '';
+  el.innerHTML = `${err}
+    <div class="dash-section-title">Adoption funnel · ${adoWindow}d</div>
+    <div class="dash-cards">
+      <div class="dash-card"><div class="dash-card-num">${f.invited}</div><div class="dash-card-label">Invited</div></div>
+      <div class="dash-card"><div class="dash-card-num">${f.engaged}</div><div class="dash-card-label">Engaged</div></div>
+      <div class="dash-card good"><div class="dash-card-num">${f.adopted}</div><div class="dash-card-label">Adopted</div></div>
+      <div class="dash-card good"><div class="dash-card-num">${f.power}</div><div class="dash-card-label">Power users</div></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:10px">${f.total} members · <strong style="color:var(--text)">${f.pctEngaged}%</strong> engaged · <strong style="color:var(--text)">${f.pctAdopted}%</strong> adopted</p>`;
+}
+
+function adoStagePill(stage) {
+  const map = { invited: 'Invited', engaged: 'Engaged', adopted: 'Adopted', power: 'Power user' };
+  return `<span class="ado-pill ${stage}">${map[stage] || stage}</span>`;
+}
+function adoRecLabel(rec) { return rec === 'active' ? 'Active' : rec === 'risk' ? 'At-risk' : 'Dormant'; }
+function adoLastActive(ts) {
+  if (!ts) return 'Never';
+  const d = Math.floor((Date.now() - ts) / 864e5);
+  return d <= 0 ? 'Today' : d === 1 ? 'Yesterday' : d + 'd ago';
+}
+
+function adoFocusCompany(i) { const c = adoCompanies[i]; if (!c) return; adoCompanyFilter = c.key; adoShowTab('people'); }
+function adoClearCompany() { adoCompanyFilter = null; adoRenderPeople(); }
+
+function adoRenderPeople() {
+  const wrap = document.getElementById('ado-table-wrap');
+  if (!wrap) return;
+  const q = (adoV('ado-search') || '').toLowerCase();
+  const sf = adoV('ado-stage'), rf = adoV('ado-rec');
+  let rows = adoPeople.slice();
+  if (adoCompanyFilter) rows = rows.filter(r => adoCompanyKey(r.p.company) === adoCompanyFilter);
+  if (sf) rows = rows.filter(r => r.stage === sf);
+  if (rf) rows = rows.filter(r => r.rec === rf);
+  if (q) rows = rows.filter(r => [r.p.full_name, r.p.email, r.p.company].join(' ').toLowerCase().includes(q));
+  rows.sort((a, b) => b.lastActivity - a.lastActivity);
+
+  const chip = document.getElementById('ado-cofilter');
+  if (chip) {
+    if (adoCompanyFilter) {
+      const lbl = (adoCompanies.find(c => c.key === adoCompanyFilter) || {}).label || adoCompanyFilter;
+      chip.style.display = '';
+      chip.innerHTML = `Company: <strong>${esc(lbl)}</strong> · <a href="#" onclick="adoClearCompany();return false" style="color:var(--green-mid)">clear</a>`;
+    } else chip.style.display = 'none';
+  }
+
+  if (!rows.length) { wrap.innerHTML = '<p style="color:var(--muted);font-size:13px">No members match.</p>'; return; }
+  wrap.innerHTML = `<table class="mem-table">
+    <thead><tr><th>User</th><th>Company</th><th>Stage</th><th>Recency</th><th>Tools</th><th>Estimates</th><th>Invites</th><th>Last active</th></tr></thead>
+    <tbody>${rows.map(r => `<tr>
+      <td><div class="mem-user"><span class="mem-avatar">${esc(memInitials(r.p.full_name))}</span><div><div class="mem-name">${esc(r.p.full_name || '—')}</div><div class="mem-email">${esc(r.p.email || '')}</div></div></div></td>
+      <td style="color:var(--muted)">${esc(adoCompanyLabel(r.p.company))}</td>
+      <td>${adoStagePill(r.stage)}</td>
+      <td><span class="ado-rec ${r.rec}">${adoRecLabel(r.rec)}</span></td>
+      <td>${r.distinctTools}</td>
+      <td>${r.estWin}</td>
+      <td style="color:var(--muted)">${r.p.invites_sent || 0}/${r.p.invite_credits ?? 5}</td>
+      <td style="color:var(--muted)">${adoLastActive(r.lastActivity)}</td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+function adoRenderCompanies() {
+  const wrap = document.getElementById('ado-table-wrap');
+  if (!wrap) return;
+  if (!adoCompanies.length) { wrap.innerHTML = '<p style="color:var(--muted);font-size:13px">No companies yet.</p>'; return; }
+  wrap.innerHTML = `<table class="mem-table">
+    <thead><tr><th>Company</th><th>Members</th><th>Engaged</th><th>Adopted</th><th>% Adopted</th><th>Estimates</th><th>Tools</th></tr></thead>
+    <tbody>${adoCompanies.map((c, i) => {
+      const cls = c.pctAdopted >= 70 ? '' : c.pctAdopted >= 40 ? 'warn' : 'bad';
+      return `<tr>
+        <td><a href="#" onclick="adoFocusCompany(${i});return false" style="font-weight:600;color:var(--green)">${esc(c.label)}</a></td>
+        <td>${c.memberCount}</td>
+        <td>${c.engagedCount}</td>
+        <td>${c.adoptedCount}</td>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="ado-bar ${cls}" style="width:90px"><span style="width:${c.pctAdopted}%"></span></div><span style="font-size:12px;color:var(--muted)">${c.pctAdopted}%</span></div></td>
+        <td>${c.estWin}</td>
+        <td>${c.tools}</td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function adoGoalCurrent(g) {
+  const now = Date.now();
+  const wStart = now - (g.window_days || 30) * 864e5;
+  let members;
+  if (g.scope === 'global') members = adoPeople;
+  else if (g.scope === 'company') members = adoPeople.filter(m => adoCompanyKey(m.p.company) === adoCompanyKey(g.scope_value));
+  else members = adoPeople.filter(m => m.p.id === g.scope_value);
+  const ids = new Set(members.map(m => m.p.id));
+  const mc = members.length;
+  switch (g.metric) {
+    case 'estimates_count': return adoEstimates.filter(e => ids.has(e.user_id) && Date.parse(e.created_at) >= wStart).length;
+    case 'distinct_tools': { const t = new Set(); for (const e of adoEvents) if (ids.has(e.user_id) && Date.parse(e.created_at) >= wStart) t.add(e.tool); return t.size; }
+    case 'engaged_members': return members.filter(m => m.stage !== 'invited').length;
+    case 'adopted_members': return members.filter(m => m.stage === 'adopted' || m.stage === 'power').length;
+    case 'power_members': return members.filter(m => m.stage === 'power').length;
+    case 'pct_engaged': return mc ? Math.round(members.filter(m => m.stage !== 'invited').length / mc * 100) : 0;
+    case 'pct_adopted': return mc ? Math.round(members.filter(m => m.stage === 'adopted' || m.stage === 'power').length / mc * 100) : 0;
+    default: return 0;
+  }
+}
+
+function adoGoalCard(g) {
+  const cur = adoGoalCurrent(g);
+  const tgt = Number(g.target) || 0;
+  const ratio = tgt > 0 ? cur / tgt : 0;
+  const pct = Math.min(ratio, 1) * 100;
+  const barCls = ratio >= 1 ? '' : ratio >= 0.7 ? 'warn' : 'bad';
+  const badge = ratio >= 1 ? ['ontrack', 'On track'] : ratio >= 0.7 ? ['behind', 'Behind'] : ['atrisk', 'At risk'];
+  const m = ADO_METRICS[g.metric] || { label: g.metric, unit: '' };
+  const scopeTxt = g.scope === 'global' ? 'Portfolio'
+    : g.scope === 'company' ? 'Company · ' + (g.scope_value || '—')
+    : 'Person · ' + adoPersonName(g.scope_value);
+  return `<div class="ado-goal">
+    <div class="ado-goal-head">
+      <div><div class="ado-goal-label">${esc(g.label || m.label)}</div><div class="ado-goal-scope">${esc(scopeTxt)} · ${g.window_days || 30}d window</div></div>
+      <button class="btn-ghost" style="font-size:11px;padding:2px 8px" onclick="adoDeleteGoal('${g.id}')">Remove</button>
+    </div>
+    <div class="ado-goal-prog">
+      <div class="ado-bar ${barCls}" style="flex:1"><span style="width:${pct}%"></span></div>
+      <span class="ado-goal-val">${cur}${m.unit} / ${tgt}${m.unit}</span>
+      <span class="ado-goal-badge ${badge[0]}">${badge[1]}</span>
+    </div>
+  </div>`;
+}
+
+function adoGoalFormHTML() {
+  const companies = [...new Set(adoProfiles.map(p => (p.company || '').trim()).filter(Boolean))].sort();
+  const people = adoProfiles.slice().sort((a, b) => (a.full_name || a.email || '').localeCompare(b.full_name || b.email || ''));
+  const metricOpts = Object.entries(ADO_METRICS).map(([k, v]) => `<option value="${k}">${esc(v.label)}</option>`).join('');
+  return `<div class="ado-goalform">
+    <select id="ado-g-scope" onchange="adoGoalScopeChange()">
+      <option value="global">Portfolio</option>
+      <option value="company">Company</option>
+      <option value="person">Person</option>
+    </select>
+    <span id="ado-g-vwrap" style="display:none">
+      <input id="ado-g-company" list="ado-companies" placeholder="Company name" style="display:none" />
+      <select id="ado-g-person" style="display:none">${people.map(p => `<option value="${p.id}">${esc(p.full_name || p.email || p.id)}</option>`).join('')}</select>
+      <datalist id="ado-companies">${companies.map(c => `<option value="${esc(c)}"></option>`).join('')}</datalist>
+    </span>
+    <select id="ado-g-metric">${metricOpts}</select>
+    <input id="ado-g-target" type="number" min="0" step="1" placeholder="Target" style="width:90px" />
+    <input id="ado-g-window" type="number" min="1" max="90" value="30" title="Measurement window (days)" style="width:70px" />
+    <input id="ado-g-label" type="text" placeholder="Label (optional)" style="flex:1;min-width:140px" />
+    <button class="btn-save" onclick="adoAddGoal()">Add goal</button>
+  </div>`;
+}
+
+function adoGoalScopeChange() {
+  const s = document.getElementById('ado-g-scope');
+  if (!s) return;
+  const v = s.value;
+  const wrap = document.getElementById('ado-g-vwrap');
+  const co = document.getElementById('ado-g-company'), pe = document.getElementById('ado-g-person');
+  if (v === 'global') { wrap.style.display = 'none'; }
+  else { wrap.style.display = ''; co.style.display = v === 'company' ? '' : 'none'; pe.style.display = v === 'person' ? '' : 'none'; }
+}
+
+function adoRenderGoals() {
+  const wrap = document.getElementById('ado-table-wrap');
+  if (!wrap) return;
+  const hint = adoGoalsMissing
+    ? `<p style="color:var(--amber);font-size:13px;margin-bottom:12px">No <code>adoption_goals</code> table yet — run <code>supabase/adoption_setup.sql</code> to save goals. (Progress still computes against live data.)</p>`
+    : '';
+  const cards = adoGoals.length ? adoGoals.map(adoGoalCard).join('') : `<p style="color:var(--muted);font-size:13px">No goals yet. Add one below.</p>`;
+  wrap.innerHTML = hint + cards + adoGoalFormHTML();
+  adoGoalScopeChange();
+}
+
+async function adoAddGoal() {
+  const scope = adoV('ado-g-scope');
+  let scope_value = null;
+  if (scope === 'company') { scope_value = (adoV('ado-g-company') || '').trim(); if (!scope_value) { toast('Enter a company name'); return; } }
+  if (scope === 'person') { scope_value = adoV('ado-g-person'); if (!scope_value) { toast('Pick a person'); return; } }
+  const metric = adoV('ado-g-metric');
+  const target = parseFloat(adoV('ado-g-target'));
+  if (isNaN(target) || target < 0) { toast('Enter a valid target'); return; }
+  const window_days = Math.max(1, Math.min(90, parseInt(adoV('ado-g-window'), 10) || 30));
+  const label = (adoV('ado-g-label') || '').trim() || null;
+  const { error } = await sb.from('adoption_goals').insert({ scope, scope_value, metric, target, window_days, label });
+  if (error) { toast('Save failed: ' + error.message); return; }
+  toast('Goal added');
+  await loadAdoption();
+}
+
+async function adoDeleteGoal(id) {
+  const { error } = await sb.from('adoption_goals').delete().eq('id', id);
+  if (error) { toast('Delete failed: ' + error.message); return; }
+  await loadAdoption();
+}
+
+function adoExportCSV() {
+  const headers = ['Name', 'Email', 'Company', 'Stage', 'Recency', 'Distinct tools', `Estimates (${adoWindow}d)`, 'Invites sent', 'Invite credits', 'Last active (days)'];
+  const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const lines = [headers.join(','), ...adoPeople.map(r => [
+    cell(r.p.full_name), cell(r.p.email), cell(adoCompanyLabel(r.p.company)), cell(r.stage), cell(r.rec),
+    r.distinctTools, r.estWin, r.p.invites_sent || 0, r.p.invite_credits ?? 5,
+    r.lastActivity ? Math.floor((Date.now() - r.lastActivity) / 864e5) : '',
+  ].join(','))];
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'lendpaper-adoption.csv';
   a.click();
   URL.revokeObjectURL(a.href);
 }

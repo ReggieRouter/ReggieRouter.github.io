@@ -139,6 +139,35 @@ Cross-tool log of every estimate. Full spec: `markdowns/CALCULATORS.md §15`.
 - Display terminology standards (Buyout amount / Finance charge / Funded / etc.):
   `CALCULATORS.md §14`. Canonical product term "Estimate Log": `BRANDING.md §1`.
 
+## Adoption & Goals (LEN-57)
+
+Admin **Adoption** tab in `lp-panel.html` (header nav, between Members and
+Recruiter). Tracks engagement vs adoption — **distinct lifecycle stages**, each
+with its own signal — by person and by company, with admin-set goals.
+
+- **Lifecycle (highest reached wins):** Invited (account only) → Engaged
+  (logged in / opened a tool: `last_seen` or any `usage_events`) → Adopted
+  (recurring estimates: estimates in 2+ distinct ISO weeks **or** ≥3 in 30d) →
+  Power user (Adopted + ≥2 distinct tools + a recent estimate). A recency
+  overlay (active ≤7d / at-risk ≤30d / dormant) runs alongside the stage.
+  Thresholds are JS constants (`ADO_ACTIVE_DAYS` etc.) at the top of the
+  Adoption block — tune there.
+- **Data:** computed **client-side** from first-party Supabase — `profiles`
+  (incl. `last_seen`, `company`), `usage_events`, `estimates`. One 90-day pull
+  of activity; the 7/30/90d window filters in JS (UTC math against
+  `timestamptz`). Goals persist in `adoption_goals` (scope person/company/global).
+- **DB setup (run once, Supabase SQL editor):** `supabase/adoption_setup.sql` —
+  creates `adoption_goals` + RLS, **and adds admin-SELECT policies to
+  `usage_events` and `estimates`** (otherwise the admin's RLS returns 0 rows and
+  every metric reads 0 — the funnel shows a red banner until it's run).
+- **Google Analytics:** link-out only for v1 (GA4 property `G-S3YBZV6RF9`). The
+  GA Data API needs a server-side service-account key, which a static
+  GitHub-Pages site can't hold and the API won't CORS-allow from a browser —
+  so a serverless proxy (Netlify/Supabase Edge Function) is the phase-2 path.
+- All UI lives in the `lp-panel.html` inline `<script>` (`renderAdoptionPanel`
+  and `ado*` helpers); reuses the Members `.mem-table` / `.dash-card` / `.tabs`
+  patterns and the global `sb` client + `esc()`.
+
 ## PDF exports
 Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules, and known failure modes are in `PDF.md`.
 
