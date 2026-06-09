@@ -1878,12 +1878,35 @@ function updateGreeting() {
   }
 }
 
-/* ---- Tool usage tracking (LEN-51 Phase 0: behavioral dashboard ordering) ----
-   localStorage-only, zero-friction. No data → grid renders the global default,
-   identical to before. Supabase-backed pins/persona (Phase 1/2) slot into
-   resolveFeaturedIds() later, ahead of the behavioral signal. */
+/* ---- Dashboard personalization (LEN-51) ----
+   Zero-friction and localStorage-backed, so it works before any Supabase
+   migration (mirror pattern, like the Estimate Log). The featured top row is
+   resolved from three signals, in priority order, then backfilled:
+     1. pins      — tools the user explicitly pinned                 (lp_pinned)
+     2. usage     — their most-opened tools; behavior overrides persona fast (lp_tool_usage)
+     3. persona   — login-1 seed from their job-to-be-done, set at onboarding (lp_persona)
+     4. default   — the global fallback (today's three)
+   No usage + no persona + no pins  ->  renders identically to before. */
 var LP_USAGE_KEY = 'lp_tool_usage';
 var LP_LAST_TOOL_KEY = 'lp_last_tool';
+var LP_PERSONA_KEY = 'lp_persona';
+var LP_PINNED_KEY = 'lp_pinned';
+var FEATURED_MAX = 3;
+var defaultFeaturedIds = ['amo', 'registry', 'waterfall'];
+
+// Persona -> the tools that segment reaches for first (job-to-be-done, chosen at
+// onboarding). Every id must be live; SBA Fees stays out until it's un-hidden.
+var PERSONA_TOOLS = {
+  dealmath:   ['amo', 'dscr', 'fundability'],
+  placement:  ['waterfall', 'deal-read', 'amo'],
+  sba:        ['dscr', 'registry', 'amo'],
+  compliance: ['legislation', 'deal-read', 'dscr'],
+  diligence:  ['registry', 'deal-read', 'dscr']
+};
+
+function liveToolIds() {
+  return TOOLS.filter(function(t){ return t.status === 'live'; }).map(function(t){ return t.id; });
+}
 
 function getToolUsage() {
   try { return JSON.parse(localStorage.getItem(LP_USAGE_KEY)) || {}; }
@@ -1903,45 +1926,73 @@ function recordToolUsage(id) {
   } catch (e) { /* localStorage unavailable — degrade silently */ }
 }
 
-/* Resolution order: explicit pins → persona default → behavioral usage → global
-   default. Phase 0 implements the last two; the first two slot in above `used`. */
-var defaultFeaturedIds = ['amo', 'registry', 'waterfall'];
+function getPersona() {
+  try { var p = localStorage.getItem(LP_PERSONA_KEY) || ''; return PERSONA_TOOLS[p] ? p : ''; }
+  catch (e) { return ''; }
+}
+
+// Explicit user customization — pin tools to the top row. Capped at the row size.
+function getPinned() {
+  try { var a = JSON.parse(localStorage.getItem(LP_PINNED_KEY)); return Array.isArray(a) ? a : []; }
+  catch (e) { return []; }
+}
+function isPinned(id) { return getPinned().indexOf(id) !== -1; }
+function togglePin(id) {
+  var pins = getPinned();
+  var i = pins.indexOf(id);
+  if (i !== -1) pins.splice(i, 1);
+  else { if (pins.length >= FEATURED_MAX) pins.shift(); pins.push(id); }  // drop oldest, cap at row size
+  try { localStorage.setItem(LP_PINNED_KEY, JSON.stringify(pins)); } catch (e) {}
+  renderHome();
+}
 
 function resolveFeaturedIds() {
   var usage = getToolUsage();
-  var liveIds = TOOLS.filter(function(t){ return t.status === 'live'; })
-                     .map(function(t){ return t.id; });
+  var liveIds = liveToolIds();
 
+  var pins = getPinned().filter(function(id){ return liveIds.indexOf(id) !== -1; });
   // The user's actually-opened tools, most-used first (ties broken by recency).
   var used = Object.keys(usage).filter(function(id){ return liveIds.indexOf(id) !== -1; });
   used.sort(function(a, b){
     if (usage[b].count !== usage[a].count) return usage[b].count - usage[a].count;
     return (usage[b].last || 0) - (usage[a].last || 0);
   });
+  var persona = getPersona() ? PERSONA_TOOLS[getPersona()] : [];
 
-  // Lead with the user's top tools, backfill with the global default, dedup, cap at 3.
+  // pins -> usage -> persona -> global default; dedup, live-only, cap at the row size.
   var ids = [];
-  used.concat(defaultFeaturedIds).forEach(function(id){
-    if (ids.length < 3 && ids.indexOf(id) === -1 && liveIds.indexOf(id) !== -1) ids.push(id);
+  pins.concat(used, persona, defaultFeaturedIds).forEach(function(id){
+    if (ids.length < FEATURED_MAX && ids.indexOf(id) === -1 && liveIds.indexOf(id) !== -1) ids.push(id);
   });
   return ids;
 }
 
+// Slot-0 kicker, honest about why that tool leads — never claims "Most used"
+// before the user has actually used anything.
+function primaryFeaturedLabel(firstId) {
+  if (isPinned(firstId)) return 'Pinned';
+  var liveIds = liveToolIds();
+  var hasUsage = Object.keys(getToolUsage()).some(function(id){ return liveIds.indexOf(id) !== -1; });
+  if (hasUsage) return 'Most used';
+  if (getPersona()) return 'Suggested';
+  return 'Most used';   // no data, no persona -> preserves the pre-personalization label
+}
+
 /* ---- Featured card renderer ---- */
-// Slot 0 is always labeled "Most used" (positional) — it's the user's #1 tool,
-// or the global default for users with no usage yet.
+// Slot 0's kicker is computed by primaryFeaturedLabel() (Pinned / Most used /
+// Suggested). Other slots use these static kickers.
 var featuredLabels = {
   'amo': 'Deal math', 'registry': 'Due diligence', 'waterfall': 'Lender match',
   'sba-rates': 'SBA 7(a)', 'dscr': 'Risk & coverage', 'fundability': 'Net & position',
   'deal-read': 'Read a deal', 'affordability': 'Payment fit', 'legislation': 'Compliance'
 };
 
-function featuredCardHTML(t, i, isPrimary) {
+function featuredCardHTML(t, i, isPrimary, primaryLabel) {
   var href = ' href="'+t.slug+'"';
   var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
   var cls = 'featured-card' + (isPrimary ? ' is-featured-primary' : '');
   var onclick = ' onclick="handleToolClick(event, \''+t.id+'\')"';
-  var label = isPrimary ? 'Most used' : (featuredLabels[t.id] || '');
+  var label = isPrimary ? (primaryLabel || 'Most used') : (featuredLabels[t.id] || '');
   var iconCls = t.color === 'green' ? 'green' : '';
   var delayStyle = isPrimary ? '' : ' style="animation-delay:'+(i*80)+'ms"';
   return '<a'+href+target+' class="'+cls+'"'+onclick+delayStyle+'>'
@@ -1973,8 +2024,9 @@ function renderHome() {
           + ' <span class="resume-chip-arrow">&rarr;</span></button>';
   }
 
+  var pLabel = primaryFeaturedLabel(featuredIds[0]);
   html += '<div class="featured-grid">';
-  featured.forEach(function(t, i){ html += featuredCardHTML(t, i, i === 0); });
+  featured.forEach(function(t, i){ html += featuredCardHTML(t, i, i === 0, pLabel); });
   html += '</div>';
 
   if (liveRest.length) {
