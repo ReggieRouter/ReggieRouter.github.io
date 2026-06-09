@@ -250,46 +250,32 @@
     // ── First-run tour (LEN-190) ──────────────────────────────────────────────
     const TOUR_SEEN_KEY = 'lp_deallog_tour_seen';
 
+    // Three tight steps, focused on the payoff: resurface a deal and resend its PDF.
     function buildTourSteps(state) {
-      const steps = [{
-        el: null, kicker: 'Deal Log',
-        title: 'This is your Deal Log',
-        body: 'Every estimate you run in any calculator lands here automatically — named, dated, and ready to reopen. Here’s the 20-second tour.',
-      }, {
-        el: '.ql-tiles',
-        title: 'Your pipeline at a glance',
-        body: 'Deals this month, your average deal size, and PDFs generated — totals update as you work.',
-      }];
-      if (state.hasRows) {
-        steps.push({
-          el: '#rows tr:first-child', pad: 4,
-          title: 'Every deal, its own row',
-          body: state.sampleMode
-            ? 'Each saved estimate becomes a row. These are sample deals to show the ropes — yours replace them the moment you save one.'
-            : 'Each saved estimate becomes a row — deal name, amount, rate, term, and state at a glance.',
-        }, {
+      if (!state.hasRows) {
+        return [{
+          el: null, kicker: 'Deal Log',
+          title: 'Every deal lands here',
+          body: 'Run a calculation, save the PDF, and it shows up here to resurface and resend.',
+        }];
+      }
+      return [
+        {
+          el: null, kicker: 'Deal Log',
+          title: 'Every deal lands here',
+          body: 'Reopen any deal and resend its PDF — no re-keying.',
+        },
+        {
           el: '#rows tr:first-child .act[data-mode="restore"]', pad: 4,
-          title: 'Pick up where you left off',
-          body: 'Restore reopens any deal in its original calculator with every input intact — no re-keying.',
-        }, {
+          title: 'Resurface a deal',
+          body: 'Restore reopens it right where you left off.',
+        },
+        {
           el: '#rows tr:first-child .act.pdf', pad: 4,
-          title: 'Borrower-ready in one click',
-          body: 'Or pull the polished, branded PDF straight from the log.',
-        });
-      }
-      if (!signedIn) {
-        steps.push({
-          el: '#signinBanner',
-          title: 'Keep your log everywhere',
-          body: 'Right now these live on this device. Sign in to sync your deals across every browser and keep your full history.',
-        });
-      }
-      steps.push({
-        el: null, kicker: 'You’re set',
-        title: 'Go close something',
-        body: 'Run a calculation, hit Save PDF or Copy Scenario, and it shows up here. Replay this anytime with “Take a tour.”',
-      });
-      return steps;
+          title: 'Send the PDF',
+          body: 'Pull the borrower-ready PDF in one click.',
+        },
+      ];
     }
 
     (async () => {
