@@ -1052,6 +1052,22 @@ input { font-family: inherit; }
 .resume-chip-label { color: var(--text-muted); font-weight: 700; }
 .resume-chip-arrow { color: var(--accent); }
 
+/* ==================== Customize / pin picker (LEN-51) ==================== */
+.featured-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.featured-head-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
+.customize-btn { font-family: inherit; font-size: 12px; font-weight: 600; color: var(--text-muted); background: none; border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; cursor: pointer; transition: border-color var(--transition), color var(--transition); }
+.customize-btn:hover { border-color: var(--border-hover); color: var(--text); }
+.customize-panel { border: 1px solid var(--border); border-radius: 10px; background: var(--bg-alt); padding: 14px 16px; margin-bottom: 14px; animation: fadeUp 200ms ease both; }
+.cz-head { font-size: 12.5px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+.cz-count { font-variant-numeric: tabular-nums; color: var(--text-faint); }
+.cz-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 16px; }
+.cz-opt { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--text); cursor: pointer; padding: 4px 0; }
+.cz-opt.is-disabled { color: var(--text-faint); cursor: not-allowed; }
+.cz-opt input { accent-color: var(--accent); width: 15px; height: 15px; cursor: inherit; }
+.cz-reset { margin-top: 12px; font-family: inherit; font-size: 12px; font-weight: 600; color: var(--text-muted); background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; }
+.cz-reset:hover { color: var(--text); }
+@media (max-width: 600px) { .cz-grid { grid-template-columns: 1fr; } }
+
 @media (max-width: 900px) {
   .featured-grid { grid-template-columns: repeat(2, 1fr); }
   .soon-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1893,6 +1909,8 @@ var LP_PERSONA_KEY = 'lp_persona';
 var LP_PINNED_KEY = 'lp_pinned';
 var FEATURED_MAX = 3;
 var defaultFeaturedIds = ['amo', 'registry', 'waterfall'];
+var REFERENCE_IDS = ['legislation'];   // look-it-up material — gets its own home section
+var customizeOpen = false;             // is the pin picker expanded?
 
 // Persona -> the tools that segment reaches for first (job-to-be-done, chosen at
 // onboarding). Every id must be live; SBA Fees stays out until it's un-hidden.
@@ -2006,10 +2024,34 @@ function featuredCardHTML(t, i, isPrimary, primaryLabel) {
     +'</a>';
 }
 
+/* ---- Customize: let users pin their own top row ---- */
+function toggleCustomize() { customizeOpen = !customizeOpen; renderHome(); }
+function clearPins() { try { localStorage.removeItem(LP_PINNED_KEY); } catch (e) {} renderHome(); }
+
+function customizePanelHTML() {
+  var pins = getPinned();
+  var full = pins.length >= FEATURED_MAX;
+  var rows = TOOLS.filter(function(t){ return t.status === 'live'; }).map(function(t){
+    var checked = pins.indexOf(t.id) !== -1;
+    var disabled = !checked && full;          // when full, you must unpin one to swap
+    return '<label class="cz-opt'+(disabled ? ' is-disabled' : '')+'">'
+      + '<input type="checkbox"'+(checked ? ' checked' : '')+(disabled ? ' disabled' : '')
+      + ' onchange="togglePin(\''+t.id+'\')"><span>'+t.name+'</span></label>';
+  }).join('');
+  return '<div class="customize-panel">'
+    + '<div class="cz-head"><span>Pin the tools you want up top</span>'
+    + '<span class="cz-count">'+pins.length+'/'+FEATURED_MAX+'</span></div>'
+    + '<div class="cz-grid">'+rows+'</div>'
+    + (pins.length ? '<button type="button" class="cz-reset" onclick="clearPins()">Reset to suggested</button>' : '')
+    + '</div>';
+}
+
 function renderHome() {
   var featuredIds = resolveFeaturedIds();
   var featured = featuredIds.map(function(id){ return TOOLS.find(function(x){ return x.id === id; }); }).filter(Boolean);
-  var liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1; });
+  var isRef = function(t){ return REFERENCE_IDS.indexOf(t.id) !== -1; };
+  var liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && !isRef(t); });
+  var reference = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && isRef(t); });
   var soon = TOOLS.filter(function(t){ return t.status === 'soon'; });
 
   var html = '';
@@ -2024,6 +2066,12 @@ function renderHome() {
           + ' <span class="resume-chip-arrow">&rarr;</span></button>';
   }
 
+  html += '<div class="featured-head">'
+        + '<span class="featured-head-label">Your tools</span>'
+        + '<button type="button" class="customize-btn" onclick="toggleCustomize()">'
+        + (customizeOpen ? 'Done' : 'Customize') + '</button></div>';
+  if (customizeOpen) html += customizePanelHTML();
+
   var pLabel = primaryFeaturedLabel(featuredIds[0]);
   html += '<div class="featured-grid">';
   featured.forEach(function(t, i){ html += featuredCardHTML(t, i, i === 0, pLabel); });
@@ -2032,6 +2080,12 @@ function renderHome() {
   if (liveRest.length) {
     html += '<div class="home-section-label">More Tools</div><div class="live-tools-grid">';
     liveRest.forEach(function(t, i){ html += cardHTML(t, i); });
+    html += '</div>';
+  }
+
+  if (reference.length) {
+    html += '<div class="home-section-label">Reference</div><div class="live-tools-grid">';
+    reference.forEach(function(t, i){ html += cardHTML(t, i); });
     html += '</div>';
   }
 
