@@ -82,21 +82,26 @@ Primary: SMB alt-finance sales reps and brokers — on a live call with a borrow
 
 ## 5. Required Components
 
-### Definition card (every calculator, no exceptions)
-Appears at top of input panel. Explains what the calculator does.
+### Intro / definition banner (every calculator, no exceptions)
+Appears at the top of the input panel (or above the columns). Explains what the
+calculator does in one or two sentences. **Standard treatment is the mint-green
+tinted banner** — unified across all calculators (LEN-142):
 ```css
-.lp-definition {
-  background: transparent;
-  border: none;
-  border-left: 3px solid var(--lp-green, #14532D);
-  color: #64748b;
-  font-size: 11px;
+.lp-definition, .lp-howto {   /* same look; .lp-intro is the DSCR variant w/ steps */
+  background-color: #F0FDF4;   /* mint tint */
+  border-radius: 12px;
+  padding: 18px 20px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #334155;
   line-height: 1.6;
-  padding-left: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
+strong { color: #1A3C2E; font-weight: 800; }
 ```
-No gray box. No full border. Left accent only.
+- Brand green is `#1A3C2E` (never `#14532D`).
+- **Always dismissible** — see "Intro / how-to banner — must be dismissible" below.
+  (The old "transparent, left-accent only, no box" treatment is retired.)
 
 ### Tooltip icon
 Lowercase `i` only. No circles, question marks, or other shapes.
