@@ -100,7 +100,7 @@
             .lp-main { padding: 16px 12px; }
             .lp-tab { padding: 16px 8px; font-size: 11px; }
             .lp-tab-sub { font-size: 8px; }
-            .lp-inputs, .shared-strip, .lp-results { padding: 20px; }
+            .lp-inputs, .lp-results { padding: 20px; }
             .lp-howto { padding: 16px; margin-bottom: 24px; }
             .hero-grid { gap: 16px; }
             .hero-value { font-size: 24px; }
@@ -162,13 +162,22 @@
         /* Inputs */
         /* LEN-139 — the funding field is constrained to the left-column width, so the
            strip must NOT carry a full-width tinted fill: the empty area to the right of
-           a constrained input reads as a layout bug. White (card color) instead. */
+           a constrained input reads as a layout bug. White (card color) instead.
+           LEN-156 — the strip mirrors the panel's grid columns so the funding input
+           tracks the left column at every width. A hardcoded max-width (was 380px) only
+           aligns at one viewport and overhangs to the right everywhere narrower. */
         .shared-strip {
-            padding: 24px;
+            padding: 24px 0;
             background: #fff;
             border-bottom: 1px solid var(--lp-border);
+            display: grid;
+            grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+            gap: 0;
         }
-        .shared-strip .input-wrap { max-width: 380px; }
+        /* Gutter lives on the cell (not the grid container) so the columns divide the
+           full strip width — identical to the panel's .lp-inputs (24px pad inside an
+           0.82fr cell). This makes the funding input the exact width of the left column. */
+        .shared-strip > * { grid-column: 1; min-width: 0; margin-left: 24px; margin-right: 24px; }
         .lp-inputs { padding: 24px; background: #fff; }
         /* LEN-147 — left-accent style for howto banners */
         .lp-howto {
@@ -460,6 +469,8 @@
         @media (max-width: 760px) {
             .panel.active { grid-template-columns: 1fr; }
             .panel.active .lp-results { border-left: none; border-top: 1px solid var(--lp-border); }
+            /* LEN-156 — collapse the shared strip to match the single-column panel */
+            .shared-strip { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 420px) { .grid-2 { grid-template-columns: 1fr; } }

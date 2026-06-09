@@ -283,8 +283,24 @@ When an input is constrained narrower than its container (e.g. a shared "amount"
 field capped to the left-column width so it doesn't bleed into the results column),
 its strip must **not** keep a full-width tinted (`#f8fafc`) fill. The empty tinted
 area beside a short field reads as a layout bug. Use the card color (`#fff`) for the
-strip and let the field's own `max-width` define its footprint; separate with a
-border only, not a fill.
+strip and let the field define its footprint; separate with a border only, not a fill.
+
+**Match the panel grid — never hardcode a px width (LEN-156).** A full-width strip
+that sits *above* a two-column panel must mirror the panel's grid columns so its
+field tracks the left column at **every** viewport. A fixed `max-width` (e.g. the old
+`380px`) only aligns at the one width it was tuned for and overhangs to the right at
+every narrower two-column width — the recurring "row expands too far right" bug.
+Pattern:
+```css
+.shared-strip { display: grid; grid-template-columns: minmax(0,0.82fr) minmax(0,1fr); }
+.shared-strip > * { grid-column: 1; margin-left: 24px; margin-right: 24px; } /* gutter on the cell */
+@media (max-width: 760px) { .shared-strip { grid-template-columns: 1fr; } }   /* collapse with the panel */
+```
+Put the gutter on the cell as `margin` (not container `padding`, which narrows the
+grid, and not input `padding`, which sits inside the bordered field) so the columns
+divide the full strip width exactly like `.lp-inputs`. Verify alignment headlessly
+across 1280→380px: the strip field's left/right edges must match the left-column
+field's to the pixel.
 
 ---
 
