@@ -5,7 +5,7 @@
 // its job. The 📎 tooltip icon is a standing-banned regression (reverted 4×) that
 // is currently live in Fundability + SBA. Fix those, and this goes green.
 // LEN-129.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../lib/test');
 const { readSource } = require('../lib/helpers');
 
 const CALC_FILES = [

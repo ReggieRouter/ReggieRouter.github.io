@@ -21,6 +21,12 @@ async function getProfile() {
 
 // Call at top of any gated page. Redirects if not logged in or not approved.
 async function requireApprovedUser(redirectTo = '/login.html') {
+  // Test-only bypass: the QA harness (LEN-129) sets this window flag via
+  // addInitScript so gated pages render headless. Never set in production —
+  // client gates are UX only; data is protected server-side by Supabase RLS.
+  if (typeof window !== 'undefined' && window.__LP_QA_BYPASS__) {
+    return { id: 'qa-bypass', status: 'approved', full_name: 'QA Harness' };
+  }
   const profile = await getProfile();
   if (!profile) {
     sessionStorage.setItem('redirectAfterLogin', window.location.pathname);

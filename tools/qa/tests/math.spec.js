@@ -6,7 +6,7 @@
 // already caught a wrong hand-calc ($5,297 vs the correct $6,469.88 SBA payment).
 //
 // LEN-129.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../lib/test');
 const { CALC, readNum, setField, expectClose } = require('../lib/helpers');
 
 test.describe('AmoSchedule — factor-rate amortization', () => {

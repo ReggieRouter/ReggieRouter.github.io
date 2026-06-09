@@ -8,7 +8,7 @@
 // External CDN / font / analytics noise is allowlisted — none of it is required
 // for the math, which runs inline. A failed LOCAL include still fails the test.
 // LEN-129.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../lib/test');
 const { CALC, isAllowedNoise } = require('../lib/helpers');
 
 // Per-calculator: a selector that must exist once loaded, and a "live value"

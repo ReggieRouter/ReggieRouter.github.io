@@ -6,7 +6,7 @@
 // Opt-in: `npm run test:visual` (sets QA_VISUAL=1). Output: screenshots/ (gitignored).
 // LEN-129.
 const path = require('path');
-const { test } = require('@playwright/test');
+const { test } = require('../lib/test');
 const { CALC, setField } = require('../lib/helpers');
 
 const OUT = path.join(__dirname, '..', 'screenshots');

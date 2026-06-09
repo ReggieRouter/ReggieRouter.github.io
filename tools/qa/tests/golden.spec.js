@@ -9,7 +9,7 @@
 //
 // Regenerate the fixture from the workbook: fixtures/extract-peac.py
 // LEN-129.
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../lib/test');
 const { CALC, readNum, setField } = require('../lib/helpers');
 const golden = require('../fixtures/peac-amortization.json');
 
