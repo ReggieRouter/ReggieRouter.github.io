@@ -842,7 +842,9 @@ window.PDF_HELPER = {
             btn.type = 'button';
             btn.setAttribute('aria-label', 'Dismiss');
             btn.setAttribute('data-lp-dismiss-btn', '1');
-            btn.style.cssText = 'position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;font-size:15px;line-height:1;color:#94a3b8;padding:2px 4px;border-radius:3px;';
+            // LEN-160 — real 30x30 hit target (not a tiny glyph). Hosts must reserve
+            // right padding (≥34px) so guidance text never runs underneath it.
+            btn.style.cssText = 'position:absolute;top:6px;right:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.75);border:none;cursor:pointer;font-size:20px;font-weight:800;line-height:1;color:#64748b;padding:0;border-radius:8px;';
             btn.textContent = '×';
             btn.addEventListener('mouseenter', function() { btn.style.color = '#1A3C2E'; });
             btn.addEventListener('mouseleave', function() { btn.style.color = '#94a3b8'; });

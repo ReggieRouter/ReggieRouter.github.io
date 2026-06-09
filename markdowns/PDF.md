@@ -105,6 +105,45 @@ Never allow a blank or default-state document to be downloaded.
 
 ---
 
+## 3A. Optional Document Metadata — PDF Details footer module (LEN-160)
+
+Every calculator carries one optional metadata module (`#pdfDocDetails`,
+`.lp-doc-details`) that personalizes the saved PDF. It is the **single source of
+truth** for the PDF's prepared-header fields. It is screen-only chrome (`no-print`)
+and **must never change PDF math, validation, watermarking, compliance, or
+Estimate Log behavior.**
+
+### UI contract (the footer module)
+
+- Lives at the **bottom of the input column**, visually secondary to the financing
+  inputs — **not** a full-width floating bar above the inputs. (Multi-card calcs —
+  Amortization, SBA — render the single module below the cards, left-aligned.)
+- Collapsed state (mockup `lendpaper-doc-details-footer-module-mockup.svg`): a small
+  document icon, the kicker `PDF DETAILS`, the title `Prepared for the saved estimate`,
+  the helper line `Prepared by · Company · Prepared for`, and an `Edit` + `+`/`–`
+  affordance. It is a `<details>`/`<summary>` disclosure.
+- Mint guidance / how-to boxes use a real **30×30 close target** with reserved right
+  padding so text never runs under it (injected by `PDF_HELPER.initDismissibles`;
+  Amortization's per-card intro box matches the same size).
+
+### The three optional fields — exactly these, nothing else
+
+| Field | id | Meaning | Blank behavior |
+|---|---|---|---|
+| Prepared by | `pdfPreparedBy` | Person preparing the estimate | Omit the prepared-by line if blank |
+| Company | `pdfPreparedByCompany` | Preparer / company name | Combined into the prepared-by line (`Prepared by Jane · Northline Capital`) |
+| Prepared for | `pdfPreparedFor` | Borrower / merchant — may include use of funds | Omit the prepared-for line if blank |
+
+Rules:
+
+- All three are optional; export is never gated on them.
+- `Prepared for` may carry borrower name **plus** use of funds on one line.
+- **Never print an empty metadata shell** such as `Prepared for —` or `Prepared by —`.
+- Do not reintroduce `Deal name` / `Lender / program` fields — they were removed in
+  LEN-160; the PDF no longer renders a deal-name subtitle or a lender/program cell.
+
+---
+
 ## 4. Print Stylesheet (Standard — All Calculators)
 
 All calculators share this base. Drop into a `print.css` or global `@media print` block.
