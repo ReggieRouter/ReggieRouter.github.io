@@ -237,6 +237,9 @@ body.pdf-export-mode * {
   letter-spacing: normal !important; /* Fixes html2canvas horizontal text shift bug! */
 }
 
+/* Hide all screen-only elements in capture mode */
+body.pdf-export-mode .no-print { display: none !important; }
+
 /* Force standard full width on captured main layouts to match windowWidth: 800 */
 body.pdf-export-mode main,
 body.pdf-export-mode .lp-main {
