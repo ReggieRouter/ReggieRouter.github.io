@@ -296,9 +296,9 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 /* ── Talk track ───────────────────────────────────────────── */
 .result-block { margin-bottom: 26px; }
 .result-block > .section-label { margin-bottom: 10px; }
-.af-talk { border: 1px solid var(--lp-border); border-radius: 12px; background: #fff; overflow: hidden; }
-.af-talk-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--lp-border); background: #f9fafb; }
-.af-talk-head strong { display: block; margin-top: 3px; color: #111827; font-size: 15px; }
+.af-talk { border: 1px solid var(--lp-border); border-left: 4px solid var(--lp-green); border-radius: 12px; background: #fff; overflow: hidden; }
+.af-talk-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--lp-border); background: #fff; }
+.af-talk-head strong { display: block; margin-top: 3px; color: #111827; font-size: 14px; }
 .tabs { display: flex; gap: 6px; }
 .tab {
   min-height: 32px; padding: 0 11px; border: 1px solid var(--lp-border); border-radius: 8px;
@@ -306,7 +306,7 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
   text-transform: uppercase; cursor: pointer; font-family: inherit;
 }
 .tab.active { border-color: var(--lp-green); background: var(--lp-green); color: #fff; }
-.af-talk-body { max-height: 260px; overflow: auto; padding: 18px; font-size: 15px; line-height: 1.6; white-space: pre-line; color: #1e293b; }
+.af-talk-body { max-height: 260px; overflow: auto; padding: 18px; font-size: 14px; line-height: 1.6; white-space: pre-line; color: #1e293b; }
 .af-talk-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 16px; border-top: 1px solid var(--lp-border); flex-wrap: wrap; }
 .stepper { display: flex; align-items: center; gap: 8px; color: var(--lp-text-muted); font-size: 12px; font-weight: 800; }
 .af-talk-foot .foot-actions { display: flex; gap: 8px; }
@@ -360,15 +360,16 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 .lp-cta-secondary { background: transparent; color: #1A3C2E; border: 1px solid #1A3C2E; }
 .lp-cta-secondary:hover { background: #F0FDF4; }
 
-/* ── Definition banner (LEN-147 left-accent style) ───────── */
+/* ── Definition banner — x-out-able light-green box (matches DSCR/lp-howto) ── */
 .lp-definition {
-  border-left: 3px solid #1A3C2E;
-  padding: 4px 8px 4px 12px;
-  font-size: 12px; color: #334155;
+  background-color: #F0FDF4;
+  border-radius: 12px;
+  padding: 14px 40px 14px 16px;
+  font-size: 13.5px; font-weight: 500; color: #334155;
   line-height: 1.6; margin-bottom: 20px;
   position: relative;
 }
-.lp-definition strong { color: #1A3C2E; font-weight: 700; }
+.lp-definition strong { color: #1A3C2E; font-weight: 800; }
 .lp-intro-toggle-btn {
   width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
   border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
@@ -789,10 +790,13 @@ body.is-embedded .lp-main { padding-top: 16px; }
                     <div class="note" id="roiNote">This is a projection, not a guarantee.</div>
                 </div>
 
-                <!-- 7. Disclosures -->
+                <!-- 7. Disclosures (collapsible — collapsed by default) -->
                 <div class="result-block" style="margin-bottom:0;">
-                    <div class="af-disclosures">
-                        <span class="section-label" style="color:#6B7280;">Required Disclosures</span>
+                    <details class="af-qual-details af-disclosures">
+                        <summary class="section-label" style="cursor:pointer;list-style:none;user-select:none;color:#6B7280;">
+                            Required Disclosures
+                            <span style="float:right;font-size:10px;color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;">expand ▸</span>
+                        </summary>
                         <ul>
                             <li>Payment estimates are illustrative. Actual terms are set by the lender at time of funding.</li>
                             <li>For MCA / RBF: this is a purchase of future receivables, not a loan. The payment schedule is based on a factor rate applied to projected receivables and may vary.</li>
@@ -800,7 +804,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
                             <li>CA / NY: APR disclosure required at point of sale.</li>
                         </ul>
                         <div class="af-state-disclosure" id="stateDisclosure">CA / NY disclosure is flagged for this conversation. Provide the required APR disclosure at point of sale before the borrower signs.</div>
-                    </div>
+                    </details>
                 </div>
 
                 <!-- Main actions -->
