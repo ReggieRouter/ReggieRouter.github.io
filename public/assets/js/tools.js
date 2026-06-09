@@ -132,7 +132,7 @@ var TOOLS = [
     group: "data",
     icon: "flag",
     color: "green",
-    slug: "/tools/legislation",
+    slug: "/compliance",
     presentation: "page",
     path: "/legislation.html",
     kw: "legislation law regulation disclosure commercial financing state federal cfpb 1071 cfdl map tracker compliance bill statute"
