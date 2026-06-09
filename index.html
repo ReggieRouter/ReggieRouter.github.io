@@ -116,6 +116,22 @@
 <link rel="canonical" href="https://lendpaper.com/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@125,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Logged-out landing: pre-paint decision (sync) to avoid a dashboard/landing flash. LEN-153. -->
+<script>
+(function(){
+  try {
+    var p = new URLSearchParams(location.search).get('p');
+    var onToolRoute = (p && /tools|compliance|quote-log/.test(p)) || /^\/(tools|compliance|quote-log)\//.test(location.pathname);
+    var hasSession = false;
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1 && localStorage.getItem(k)) { hasSession = true; break; }
+    }
+    if (!hasSession && !onToolRoute) document.documentElement.classList.add('pre-landing');
+  } catch(e){}
+})();
+</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
 
 <!-- Open Graph / Facebook -->
@@ -1174,9 +1190,129 @@ input { font-family: inherit; }
 #suggest-success span { font-size: 12px; color: var(--text-muted); }
 #suggest-error { display: none; font-size: 12px; color: var(--danger); margin-top: -6px; }
 </style>
+<!-- Landing styles in their own sheet: the main sheet above has a pre-existing unclosed @media that auto-closes at the sheet boundary and would otherwise swallow these rules (LEN-153). -->
+<style id="lp-landing-css">
+/* ============================================================
+   Logged-out brand landing (LEN-153) — minimalist front door.
+   Shown only to logged-out visitors on the bare home view.
+   ============================================================ */
+#landing { display: none; }
+html.pre-landing .shell { display: none !important; }
+html.pre-landing #landing { display: flex; }
+/* Hide app-only fixed widgets (Suggest FAB + panel) on the logged-out landing. */
+html.pre-landing #suggest-btn,
+html.pre-landing #suggest-panel { display: none !important; }
+#landing {
+  position: fixed; inset: 0; z-index: 60;
+  flex-direction: column;
+  background: #F8FAF7; color: #111827;
+  overflow: hidden;
+  font-family: var(--font);
+}
+#landing::before {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(26,60,46,0.032) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(26,60,46,0.032) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+#landing .glow {
+  position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+  width: 620px; height: 340px; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse, rgba(52,168,120,0.10) 0%, transparent 68%);
+}
+#waveBg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.lp-land-top {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 32px;
+}
+.lp-land-top img { height: 26px; display: block; }
+.lp-land-login {
+  font-size: 13px; font-weight: 600; color: var(--accent);
+  text-decoration: none; padding: 8px 16px; border-radius: 999px;
+  border: 1px solid rgba(26,60,46,0.18); transition: background var(--transition), border-color var(--transition);
+}
+.lp-land-login:hover { background: rgba(26,60,46,0.05); border-color: rgba(26,60,46,0.32); }
+.lp-land-hero {
+  position: relative; z-index: 2; flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 24px 24px 64px;
+}
+.lp-land-eyebrow {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 22px;
+}
+.lp-land-h1 {
+  font-family: 'Figtree', var(--font); font-weight: 700;
+  font-size: clamp(33px, 5.4vw, 56px); line-height: 1.05; letter-spacing: -0.025em;
+  color: #0F231A; max-width: 16ch; margin: 0 0 20px;
+}
+.lp-land-h1 em { font-style: normal; color: var(--accent); }
+.lp-land-sub {
+  font-size: clamp(15px, 1.7vw, 18px); line-height: 1.6; color: #3D5445;
+  max-width: 540px; margin: 0 0 34px;
+}
+.lp-land-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 52px; }
+.lp-land-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 14px; font-weight: 600; text-decoration: none;
+  padding: 13px 26px; border-radius: 999px; transition: transform var(--transition), background var(--transition), border-color var(--transition);
+}
+.lp-land-btn.primary { background: var(--accent); color: #fff; }
+.lp-land-btn.primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.lp-land-btn.ghost { color: var(--accent); border: 1px solid rgba(26,60,46,0.20); }
+.lp-land-btn.ghost:hover { background: rgba(26,60,46,0.05); border-color: rgba(26,60,46,0.34); }
+.lp-land-quote {
+  margin: 0; max-width: 440px;
+  background: #fff; border: 1px solid rgba(0,0,0,0.07); border-radius: 16px;
+  padding: 24px 26px; box-shadow: 0 4px 28px rgba(15,35,26,0.05);
+}
+.lp-land-quote blockquote {
+  margin: 0 0 14px; font-size: 15.5px; line-height: 1.55; color: #1F2A24; font-weight: 500;
+}
+.lp-land-quote figcaption { font-size: 12.5px; color: var(--text-muted); }
+.lp-land-quote figcaption strong { display: block; color: #0F231A; font-weight: 700; margin-bottom: 1px; }
+.lp-land-foot {
+  position: relative; z-index: 2; text-align: center;
+  padding: 18px; font-size: 12px; color: var(--text-faint);
+}
+.lp-land-foot a { color: var(--text-muted); text-decoration: none; }
+.lp-land-foot a:hover { color: var(--accent); }
+@media (max-width: 560px) {
+  .lp-land-top { padding: 18px 20px; }
+  .lp-land-hero { padding: 16px 20px 48px; }
+  .lp-land-cta { width: 100%; }
+  .lp-land-btn { flex: 1; justify-content: center; }
+}
+</style>
 </head>
 <body>
 <h1 class="seo-heading" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">LendPaper - Commercial Lending Calculators & Broker Tools</h1>
+
+<!-- Logged-out brand landing (LEN-153). Visibility controlled by html.pre-landing. -->
+<div id="landing" aria-hidden="true">
+  <canvas id="waveBg"></canvas>
+  <div class="glow"></div>
+  <header class="lp-land-top">
+    <a href="/" aria-label="LendPaper home"><img src="/public/assets/brand/logo-lockup-light.svg" alt="LendPaper"></a>
+    <a class="lp-land-login" href="/login.html">Log in</a>
+  </header>
+  <main class="lp-land-hero">
+    <div class="lp-land-eyebrow">Invite-only · Early access</div>
+    <h1 class="lp-land-h1">You're not just closing deals.<br><em>You're opening doors.</em></h1>
+    <p class="lp-land-sub">LendPaper is the commercial lending desk in one place — calculators, lender intelligence, and deal tools that help brokers and ISOs close faster. Built by someone who worked the desk.</p>
+    <div class="lp-land-cta">
+      <a class="lp-land-btn primary" href="/early-access.html">Request access →</a>
+      <a class="lp-land-btn ghost" href="/login.html">I have an account</a>
+    </div>
+    <figure class="lp-land-quote">
+      <blockquote>"The amortization calc alone saves me 20 minutes a deal."</blockquote>
+      <figcaption><strong>Justin Friedman</strong>PEAC</figcaption>
+    </figure>
+  </main>
+  <footer class="lp-land-foot">© 2026 LendPaper · <a href="mailto:hello@lendpaper.com">hello@lendpaper.com</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></footer>
+</div>
+
 <div class="shell">
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -1536,6 +1672,43 @@ input { font-family: inherit; }
 <script src="js/config.js"></script>
 <script type="module">
   import { getSession, getProfile, signOut } from './js/auth.js';
+
+  // ── Logged-out brand landing (LEN-153) ──────────────────────────────
+  const _html = document.documentElement;
+  function _isToolRoute() {
+    const p = new URLSearchParams(location.search).get('p');
+    return (p && /tools|compliance|quote-log/.test(p)) || /^\/(tools|compliance|quote-log)\//.test(location.pathname);
+  }
+  let _waveStarted = false;
+  function _startWave() {
+    if (_waveStarted) return; _waveStarted = true;
+    const cv = document.getElementById('waveBg'); if (!cv) return;
+    const ctx = cv.getContext('2d'); let f = 0, raf;
+    function rsz(){ cv.width = window.innerWidth; cv.height = window.innerHeight; } rsz();
+    window.addEventListener('resize', rsz);
+    // Calm wave band hugging the bottom edge (lifted from login.html, favicon-flavored).
+    const WS = [{yF:.88,amp:.020,freq:.0075,spd:.16,a:.05},{yF:.93,amp:.016,freq:.011,spd:-.12,a:.04},{yF:.975,amp:.012,freq:.006,spd:.10,a:.03}];
+    function draw(){
+      const W = cv.width, H = cv.height; ctx.clearRect(0,0,W,H); const t = f*.018;
+      WS.forEach(w => { ctx.beginPath(); ctx.strokeStyle = `rgba(26,60,46,${w.a})`; ctx.lineWidth = .9;
+        for (let x=0;x<=W;x+=3){ const y = w.yF*H + Math.sin(x*w.freq + t*w.spd)*w.amp*H; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y); } ctx.stroke(); });
+      f++; raf = requestAnimationFrame(draw);
+    }
+    draw();
+    document.addEventListener('visibilitychange', () => { if (document.hidden) cancelAnimationFrame(raf); else { f = 0; draw(); } });
+  }
+  function _showLanding() {
+    _html.classList.add('pre-landing');
+    const el = document.getElementById('landing'); if (el) el.setAttribute('aria-hidden', 'false');
+    _startWave();
+  }
+  function _hideLanding() {
+    _html.classList.remove('pre-landing');
+    const el = document.getElementById('landing'); if (el) el.setAttribute('aria-hidden', 'true');
+  }
+  // Sync pre-paint hint already decided initial state; if it chose landing, animate now.
+  if (_html.classList.contains('pre-landing')) { _showLanding(); }
+
   (async function initTopbarAuth() {
     const loginBtn = document.getElementById('loginBtn');
     const account  = document.getElementById('authAccount');
@@ -1545,7 +1718,12 @@ input { font-family: inherit; }
     if (!loginBtn) return;
     let session = null;
     try { session = await getSession(); } catch (e) { session = null; }
-    if (!session) return; // logged out → leave "Log in" button visible
+    if (!session) {
+      // Logged out → minimalist brand landing on the bare home view (tool deep-links still route).
+      if (!_isToolRoute()) _showLanding();
+      return; // leave "Log in" button visible
+    }
+    _hideLanding(); // Logged in → reconcile to the dashboard (covers a stale sync hint).
     // Logged in: swap to the account control.
     let label = session.user && session.user.email ? session.user.email : 'Account';
     try {
