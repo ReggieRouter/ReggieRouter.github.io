@@ -77,6 +77,17 @@ Write these exactly; do not coin synonyms.
   - Dark orange (High, 20–30%): `#EA580C`
   - Red (Severe, >30%): `#DC2626`
 
+### Form Field States (interactive UI)
+- **Focus/hover on an input shows ONE clean outline** — a solid 2px border in
+  `--color-brand-dark` `#1A3C2E`, and nothing else. **Never add a `box-shadow`
+  focus ring on top of the border** (the border + double-ring look reads as busy
+  / AI-generated). Canonical reference: the Amortization calc's
+  `.lp-input-group:focus-within { border-color: var(--brand-accent); }`.
+  Applies to every calculator and surface. (LEN-151, 2026-06-09.)
+- Inline unit swaps (e.g. daily/weekly/monthly, `%`/`$`, `mos`/`wks`) live as a
+  subtle trailing button inside the field — muted `#94A3B8` label + `⇄` glyph,
+  `1px` left divider, greens on hover. Mirrors the Amortization `% ⇄` control.
+
 ---
 
 ## 3. Typography
