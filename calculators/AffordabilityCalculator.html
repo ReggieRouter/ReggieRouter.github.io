@@ -96,12 +96,22 @@
   padding: 0 24px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   border-bottom: 1px solid var(--lp-border);
   background: #fff;
   position: relative;
 }
-.card-center-title { text-align: center; }
+.card-center-title { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; }
+.back-link {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 0; background: transparent; cursor: pointer; padding: 4px 6px; margin-left: -6px;
+  color: var(--lp-green); font-family: inherit; font-size: 11px; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase; border-radius: 6px; transition: background 0.15s;
+}
+.back-link:hover { background: var(--lp-green-light); }
+.back-link svg { width: 15px; height: 15px; }
+@media (max-width: 640px) { .back-link span { display: none; } }
 .card-center-title-main {
   font-size: 15px;
   font-weight: 800;
@@ -499,6 +509,10 @@ body.is-embedded .lp-main { padding-top: 16px; }
 
     <div class="lp-card">
         <div class="card-header">
+            <button class="back-link no-print" type="button" id="backLink" title="Back to Deal Read">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                <span>Back to Deal Read</span>
+            </button>
             <div class="card-center-title">
                 <div class="card-center-title-main">Affordability Check</div>
                 <div class="card-center-title-sub">Payment &amp; Return Read</div>
@@ -1118,22 +1132,15 @@ async function handleSavePDF(btn) {
   const element = document.querySelector('.lp-main');
   const filename = `LendPaper_Affordability_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
-  let _docCtxNode = null, _complianceNode = null;
+  // NOTE: PDF_HELPER.generatePDF injects the state compliance block (LEN-88) and the
+  // 3-layer watermark itself — do NOT inject the compliance block here or it duplicates.
+  let _docCtxNode = null;
   try {
     _docCtxNode = mountDocContext(element);
-    // State-specific compliance disclosures + canonical "not legal advice" block (LEN-88)
-    if (window.LPCompliance && typeof window.LPCompliance.buildPdfBlock === 'function') {
-      _complianceNode = window.LPCompliance.buildPdfBlock();
-      if (_complianceNode) {
-        const disc = element.querySelector('.af-disclosures');
-        if (disc) disc.appendChild(_complianceNode); else element.appendChild(_complianceNode);
-      }
-    }
     await window.PDF_HELPER.generatePDF(element, "AFFORDABILITY CHECK", filename, btn, origText);
     logEstimate(true);
   } finally {
     if (_docCtxNode) _docCtxNode.remove();
-    if (_complianceNode && _complianceNode.parentNode) _complianceNode.remove();
     btn.innerHTML = origText;
     btn.disabled = false;
   }
@@ -1245,6 +1252,15 @@ document.querySelector("#copySummaryBtn").addEventListener("click", async (e) =>
 });
 document.querySelector("#savePdfBtn").addEventListener("click", (e) => handleSavePDF(e.currentTarget));
 document.querySelector("#inlineSaveBtn").addEventListener("click", (e) => handleSavePDF(e.currentTarget));
+
+/* Back to Deal Read — works embedded (route the SPA top window) or standalone */
+document.querySelector("#backLink").addEventListener("click", () => {
+  try {
+    if (window.self !== window.top) { window.top.location.href = "/?p=tools/deal-read"; return; }
+  } catch (e) { /* cross-origin embed — fall through */ }
+  if (window.history.length > 1) window.history.back();
+  else window.location.href = "/?p=tools/deal-read";
+});
 
 /* ── URL hydration ────────────────────────────────────────── */
 function hydrateFromParams() {
