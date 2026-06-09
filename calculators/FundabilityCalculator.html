@@ -107,7 +107,7 @@
 
         .lp-container {
             width: 100%;
-            max-width: 680px;
+            max-width: 960px;
             background: #ffffff;
             border: 1px solid var(--lp-border);
             border-radius: 20px;
@@ -159,11 +159,15 @@
         }
 
         /* Inputs */
+        /* LEN-139 — the funding field is constrained to the left-column width, so the
+           strip must NOT carry a full-width tinted fill: the empty area to the right of
+           a constrained input reads as a layout bug. White (card color) instead. */
         .shared-strip {
             padding: 24px;
-            background: #f8fafc;
+            background: #fff;
             border-bottom: 1px solid var(--lp-border);
         }
+        .shared-strip .input-wrap { max-width: 380px; }
         .lp-inputs { padding: 24px; background: #fff; }
         .lp-howto {
             font-size: 14px;
@@ -176,6 +180,23 @@
             line-height: 1.6;
         }
         .lp-howto strong { color: #1A3C2E; font-weight: 800; }
+        /* LEN-139 — the intro/how-to banner must be dismissible (× to close, restore "i"
+           in the header). Persisted site-wide via localStorage 'lendpaper_intro_dismissed'. */
+        .lp-howto { position: relative; padding-right: 44px; }
+        .lp-howto-x {
+            position: absolute; top: 14px; right: 14px;
+            background: transparent; border: none; cursor: pointer; padding: 0;
+            color: #6B7280; font-weight: 800; font-size: 18px; line-height: 1;
+            transition: color 0.15s;
+        }
+        .lp-howto-x:hover { color: var(--lp-green); }
+        .lp-intro-toggle-btn {
+            width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
+            border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
+            font-size: 9.5px; font-weight: 800; background: #fff; cursor: pointer;
+            margin-left: 8px; vertical-align: middle; transition: all 0.15s; padding: 0;
+        }
+        .lp-intro-toggle-btn:hover { border-color: var(--lp-green); color: var(--lp-green); }
 
         .takeaway {
             background: #fff;
@@ -305,13 +326,18 @@
         }
         .add-pos-btn:hover { border-color: var(--lp-green); color: var(--lp-green); background: var(--lp-green-light); }
 
+        /* LEN-139 — verdict as a clean, mostly-white "main field" hero (matches
+           Payment Breakdown's label + big number). Risk band shows as a slim left
+           accent + headline color instead of a saturated full-card fill. */
         .verdict {
-            border: 2px solid var(--risk-low-bd); background: var(--risk-low-bg);
-            border-radius: 16px; padding: 16px; margin-bottom: 20px; text-align: center;
+            background: #fff;
+            border: 1px solid var(--lp-border);
+            border-left: 5px solid var(--lp-green);
+            border-radius: 14px; padding: 18px 20px; margin-bottom: 20px; text-align: left;
         }
-        .verdict-eyebrow { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; margin-bottom: 6px; }
-        .verdict-headline { font-size: 24px; font-weight: 900; letter-spacing: -0.01em; line-height: 1.1; }
-        .verdict-sub { font-size: 13px; font-weight: 500; margin-top: 10px; line-height: 1.5; }
+        .verdict-eyebrow { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 6px; }
+        .verdict-headline { font-size: 30px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.1; color: var(--lp-green); }
+        .verdict-sub { font-size: 13px; font-weight: 500; margin-top: 8px; line-height: 1.5; color: #475569; }
 
         .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .hero-output { text-align: center; }
@@ -375,6 +401,27 @@
         .lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
         .lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
         @media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+        /* LEN-136/139 — shared deal-context (borrower state + document details).
+           Lives at the bottom of the left input column (relocated per active tab),
+           styled as a section to match Revenue / Positions / Terms. */
+        .lp-context {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--lp-border);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .lp-context-title {
+            font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--lp-green); margin: 0 0 2px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .lp-context-title::after { content: ""; flex: 1; height: 1px; background: var(--lp-border); }
+        .lp-context [data-lp-compliance-host] { margin: 0 !important; }
+        /* host wrapper is right-aligned for its legacy top-right slot; left-align it inside the band */
+        .lp-context [data-lp-compliance-host] > div { align-items: flex-start !important; }
+        .lp-context .lp-doc-details { max-width: 100%; margin: 0; }
         /* LEN-11 — broker/deal context block injected into the captured body at print time */
         .lp-doc-context { display: none; }
         body.pdf-export-mode .lp-doc-context {
@@ -425,7 +472,21 @@
         body.is-embedded .lp-container { border: none; box-shadow: none; border-radius: 0; max-width: 100%; }
 
         .panel { display: none; }
-        .panel.active { display: block; }
+        /* Two-column calculator body (CALCULATORS.md §4): inputs left (~45%), results right (~55%) */
+        .panel.active {
+            display: grid;
+            grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+            align-items: start;
+            gap: 0;
+        }
+        .panel.active .lp-results {
+            border-top: none;
+            border-left: 1px solid var(--lp-border);
+        }
+        @media (max-width: 760px) {
+            .panel.active { grid-template-columns: 1fr; }
+            .panel.active .lp-results { border-left: none; border-top: 1px solid var(--lp-border); }
+        }
 
         @media (max-width: 420px) { .grid-2 { grid-template-columns: 1fr; } }
 
@@ -576,23 +637,9 @@
         <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
         <h1>Fundability Assessment</h1>
     </div>
-    <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
-    <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
-    <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
-    <details id="pdfDocDetails" class="lp-doc-details no-print">
-        <summary>Document details <span>— optional, appears on the PDF</span></summary>
-        <div class="lp-doc-details-grid">
-            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
-            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
-            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
-            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
-            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
-        </div>
-        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
-    </details>
     <div class="lp-container">
         <div class="calc-card-header">
-            <div class="calc-card-header-title">Fundability</div>
+            <div class="calc-card-header-title">Fundability<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
             <div class="calc-card-header-sub">Borrower Readiness Report</div>
         </div>
         <!-- Tabs -->
@@ -609,9 +656,11 @@
 
         <!-- Panel howto / intro copy — sits ABOVE the inputs so the instruction is read first -->
         <div class="lp-howto" id="howto_net">
+            <button class="lp-howto-x no-print" onclick="dismissIntro()" aria-label="Dismiss">&times;</button>
             Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
         </div>
         <div class="lp-howto" id="howto_risk" style="display:none">
+            <button class="lp-howto-x no-print" onclick="dismissIntro()" aria-label="Dismiss">&times;</button>
             Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
         </div>
 
@@ -632,8 +681,28 @@
                     <div class="input-prefix">%</div>
                     <input type="number" id="net_pct" class="input-field" value="50" oninput="runNetCalc()">
                 </div>
+
+                <!-- LEN-136/139 — shared deal-context: borrower state (drives compliance) + optional PDF document
+                     details. Lives in the left input column; relocated to the active panel on tab switch. -->
+                <div class="lp-context no-print" id="deal-context">
+                    <p class="lp-context-title">Deal context &amp; document details</p>
+                    <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
+                    <div data-lp-compliance-host></div>
+                    <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
+                    <details id="pdfDocDetails" class="lp-doc-details">
+                        <summary>Document details <span>— optional, appears on the PDF</span></summary>
+                        <div class="lp-doc-details-grid">
+                            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+                            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+                            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+                            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
+                            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+                        </div>
+                        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
+                    </details>
+                </div>
             </div>
-            
+
             <div class="lp-results">
                 <div class="hero-grid">
                     <div class="hero-output">
@@ -950,9 +1019,30 @@
         document.getElementById('tab_risk').classList.toggle('active', which === 'risk');
         document.getElementById('panel_net').classList.toggle('active', which === 'net');
         document.getElementById('panel_risk').classList.toggle('active', which === 'risk');
-        // Toggle the corresponding intro/howto block (moved out of panels so it sits ABOVE the inputs)
-        document.getElementById('howto_net').style.display = (which === 'net') ? '' : 'none';
-        document.getElementById('howto_risk').style.display = (which === 'risk') ? '' : 'none';
+        // Show the active tab's intro (unless the user dismissed it — LEN-139)
+        updateIntroVisibility();
+        // LEN-139 — keep the single deal-context block in the active panel's left column
+        mountDealContext(which);
+    }
+
+    // LEN-139 — dismissible intro banner (site-wide flag, shared with the other calcs).
+    // Honors both the active tab AND the dismissed flag so switchTab can't re-show it.
+    function updateIntroVisibility() {
+        const dismissed = localStorage.getItem('lendpaper_intro_dismissed') === 'true';
+        const netActive = document.getElementById('panel_net').classList.contains('active');
+        document.getElementById('howto_net').style.display = (!dismissed && netActive) ? '' : 'none';
+        document.getElementById('howto_risk').style.display = (!dismissed && !netActive) ? '' : 'none';
+        document.querySelectorAll('.lp-intro-toggle-btn').forEach(el => { el.style.display = dismissed ? 'inline-flex' : 'none'; });
+    }
+    function dismissIntro() { localStorage.setItem('lendpaper_intro_dismissed', 'true'); updateIntroVisibility(); }
+    function showIntro() { localStorage.removeItem('lendpaper_intro_dismissed'); updateIntroVisibility(); }
+
+    // LEN-139 — one shared deal-context node (borrower state + doc details); move it
+    // into whichever panel's input column is showing so it's always visible/editable.
+    function mountDealContext(which) {
+        const ctx = document.getElementById('deal-context');
+        const col = document.querySelector('#panel_' + which + ' .lp-inputs');
+        if (ctx && col && ctx.parentElement !== col) col.appendChild(ctx);
     }
 
     // Tooltips
@@ -1188,10 +1278,12 @@
         };
         const [bg, bd, tx] = map[band];
         const css = getComputedStyle(document.documentElement);
-        box.style.background = css.getPropertyValue(bg);
-        box.style.borderColor = css.getPropertyValue(bd);
-        const txc = css.getPropertyValue(tx);
-        head.style.color = txc; sub.style.color = txc; eyebrow.style.color = txc;
+        // LEN-139 — band color is a slim left accent + headline tint; card stays white.
+        box.style.background = '#fff';
+        box.style.borderLeftColor = css.getPropertyValue(bd);
+        head.style.color = css.getPropertyValue(tx);
+        eyebrow.style.color = '';
+        sub.style.color = '';
     }
 
     function copyRisk() {
@@ -1260,6 +1352,7 @@
     window.onload = () => {
         addPosition(450, 'daily');
         bindTips();
+        updateIntroVisibility();
         runAll();
         // Deal Read handoff: prefill the new-position fields from URL params (no PII).
         // Param names mirror the field ids: funding_amt / monthly_rev / factor / term_val / term_unit.

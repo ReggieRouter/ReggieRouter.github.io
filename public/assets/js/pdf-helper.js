@@ -369,7 +369,7 @@ window.PDF_HELPER = {
         }
     },
 
-    generatePDF: async function(element, title, filename, btn, origText, isMultiScenario = false) {
+    generatePDF: async function(element, title, filename, btn, origText, isMultiScenario = false, quoteId = null) {
         const self = this;
 
         // STEP 1 — Show one-time educational modal (returns false if user cancels)
@@ -389,8 +389,10 @@ window.PDF_HELPER = {
             document.body.classList.add('multi-scenario');
         }
 
-        // STEP 3 — Generate a human-readable Quote ID for this document
-        var _quoteId = this.generateQuoteId();
+        // STEP 3 — Quote ID for this document. Callers may pass a pre-generated ID so the
+        // same forensic ID can also be printed inside the document body (e.g. the redesigned
+        // borrower PDF's prepared-for block + footer). Falls back to a fresh ID when omitted.
+        var _quoteId = quoteId || this.generateQuoteId();
 
         // STEP 4 — Build the print header dynamically per tier (includes Doc # + date)
         this.initPrintLayout(title, _quoteId);

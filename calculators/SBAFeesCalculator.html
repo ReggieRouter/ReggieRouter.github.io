@@ -472,6 +472,22 @@ body.pdf-export-mode .lp-doc-context {
     margin-bottom: 24px;
 }
 .lp-definition strong { color: #1A3C2E; font-weight: 800; }
+/* LEN-142 — dismissible intro standard (× to close, restore "i" in the card header) */
+.lp-definition { position: relative; padding-right: 44px; }
+.lp-howto-x {
+    position: absolute; top: 16px; right: 14px;
+    background: transparent; border: none; cursor: pointer; padding: 0;
+    color: #6B7280; font-weight: 800; font-size: 18px; line-height: 1; transition: color 0.15s;
+}
+.lp-howto-x:hover { color: #1A3C2E; }
+.lp-intro-toggle-btn {
+    width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
+    border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
+    font-size: 9.5px; font-weight: 800; background: #fff; cursor: pointer;
+    margin-left: 8px; vertical-align: middle; transition: all 0.15s; padding: 0;
+    pointer-events: auto; /* clickable inside the pointer-events:none centered title */
+}
+.lp-intro-toggle-btn:hover { border-color: #1A3C2E; color: #1A3C2E; }
 
 .lp-disclaimer {
     font-size: 10px;
@@ -863,7 +879,7 @@ function addCard() {
         <div class="card-header">
             <input type="text" class="card-title-input" value="${scenarioName}">
             <div class="card-center-title">
-                <div class="card-center-title-main">SBA Scenario Builder</div>
+                <div class="card-center-title-main">SBA Scenario Builder<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
                 <div class="card-center-title-sub">Fee &amp; Payment Estimator</div>
             </div>
             <button class="remove-card-btn" onclick="removeCard(${id})">&times;</button>
@@ -871,6 +887,7 @@ function addCard() {
         <div class="card-body-flex">
             <div class="lp-inputs">
                 <div class="lp-definition">
+                    <button class="lp-howto-x no-print" onclick="dismissIntro()" aria-label="Dismiss">&times;</button>
                     Enter the loan amount and term. You'll see the full fee picture and monthly payment — and what to tell your borrower about total cost.
                 </div>
                 <div class="lp-group">
@@ -954,7 +971,19 @@ function addCard() {
     document.getElementById('cardsContainer').insertAdjacentHTML('beforeend', cardHtml);
     bindTips();
     calculate(id);
+    applyIntroState(); // LEN-142 — new cards respect the current dismiss state
 }
+
+// LEN-142 — dismissible intro standard. Multi-card: dismiss/restore acts on every
+// card's intro; persisted site-wide via the shared 'lendpaper_intro_dismissed' key.
+function applyIntroState() {
+    let dismissed = false;
+    try { dismissed = localStorage.getItem('lendpaper_intro_dismissed') === 'true'; } catch (e) {}
+    document.querySelectorAll('.lp-definition').forEach(el => { el.style.display = dismissed ? 'none' : ''; });
+    document.querySelectorAll('.lp-intro-toggle-btn').forEach(b => { b.style.display = dismissed ? 'inline-flex' : 'none'; });
+}
+function dismissIntro() { try { localStorage.setItem('lendpaper_intro_dismissed', 'true'); } catch (e) {} applyIntroState(); }
+function showIntro() { try { localStorage.removeItem('lendpaper_intro_dismissed'); } catch (e) {} applyIntroState(); }
 
 function removeCard(id) {
     if (document.querySelectorAll('.lp-card').length > 1) {

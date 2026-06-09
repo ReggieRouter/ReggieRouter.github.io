@@ -105,12 +105,22 @@
   padding: 0 24px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   border-bottom: 1px solid var(--lp-border);
   background: #fff;
   position: relative;
 }
-.card-center-title { text-align: center; }
+.card-center-title { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; }
+.back-link {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 0; background: transparent; cursor: pointer; padding: 4px 6px; margin-left: -6px;
+  color: var(--lp-green); font-family: inherit; font-size: 11px; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase; border-radius: 6px; transition: background 0.15s;
+}
+.back-link:hover { background: var(--lp-green-light); }
+.back-link svg { width: 15px; height: 15px; }
+@media (max-width: 640px) { .back-link span { display: none; } }
 .card-center-title-main {
   font-size: 15px;
   font-weight: 800;
@@ -356,6 +366,22 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
   line-height: 1.6; margin-bottom: 24px;
 }
 .lp-definition strong { color: #1A3C2E; font-weight: 800; }
+/* LEN-142 — dismissible intro standard (× to close, restore "i" in the card header) */
+.lp-definition { position: relative; padding-right: 44px; }
+.lp-howto-x {
+  position: absolute; top: 14px; right: 14px;
+  background: transparent; border: none; cursor: pointer; padding: 0;
+  color: #6B7280; font-weight: 800; font-size: 18px; line-height: 1; transition: color 0.15s;
+}
+.lp-howto-x:hover { color: #1A3C2E; }
+.lp-intro-toggle-btn {
+  width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
+  border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
+  font-size: 9.5px; font-weight: 800; background: #fff; cursor: pointer;
+  margin-left: 8px; vertical-align: middle; transition: all 0.15s; padding: 0;
+  pointer-events: auto; /* clickable inside the pointer-events:none centered title */
+}
+.lp-intro-toggle-btn:hover { border-color: #1A3C2E; color: #1A3C2E; }
 
 /* ── Document details (LEN-11) ────────────────────────────── */
 .lp-doc-details {
@@ -508,8 +534,12 @@ body.is-embedded .lp-main { padding-top: 16px; }
 
     <div class="lp-card">
         <div class="card-header">
+            <button class="back-link no-print" type="button" id="backLink" title="Back to Deal Read">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                <span>Back to Deal Read</span>
+            </button>
             <div class="card-center-title">
-                <div class="card-center-title-main">Affordability Check</div>
+                <div class="card-center-title-main">Affordability Check<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
                 <div class="card-center-title-sub">Payment &amp; Return Read</div>
             </div>
         </div>
@@ -517,6 +547,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
             <!-- ── Inputs ─────────────────────────────────────── -->
             <aside class="lp-inputs">
                 <div class="lp-definition">
+                    <button class="lp-howto-x no-print" onclick="dismissIntro()" aria-label="Dismiss">&times;</button>
                     Answer the two questions that come up before close: <strong>can the borrower handle the payment</strong>, and <strong>does the capital have a clear path to pay for itself?</strong>
                 </div>
 
@@ -1127,22 +1158,15 @@ async function handleSavePDF(btn) {
   const element = document.querySelector('.lp-main');
   const filename = `LendPaper_Affordability_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
 
-  let _docCtxNode = null, _complianceNode = null;
+  // NOTE: PDF_HELPER.generatePDF injects the state compliance block (LEN-88) and the
+  // 3-layer watermark itself — do NOT inject the compliance block here or it duplicates.
+  let _docCtxNode = null;
   try {
     _docCtxNode = mountDocContext(element);
-    // State-specific compliance disclosures + canonical "not legal advice" block (LEN-88)
-    if (window.LPCompliance && typeof window.LPCompliance.buildPdfBlock === 'function') {
-      _complianceNode = window.LPCompliance.buildPdfBlock();
-      if (_complianceNode) {
-        const disc = element.querySelector('.af-disclosures');
-        if (disc) disc.appendChild(_complianceNode); else element.appendChild(_complianceNode);
-      }
-    }
     await window.PDF_HELPER.generatePDF(element, "AFFORDABILITY CHECK", filename, btn, origText);
     logEstimate(true);
   } finally {
     if (_docCtxNode) _docCtxNode.remove();
-    if (_complianceNode && _complianceNode.parentNode) _complianceNode.remove();
     btn.innerHTML = origText;
     btn.disabled = false;
   }
@@ -1255,6 +1279,15 @@ document.querySelector("#copySummaryBtn").addEventListener("click", async (e) =>
 document.querySelector("#savePdfBtn").addEventListener("click", (e) => handleSavePDF(e.currentTarget));
 document.querySelector("#inlineSaveBtn").addEventListener("click", (e) => handleSavePDF(e.currentTarget));
 
+/* Back to Deal Read — works embedded (route the SPA top window) or standalone */
+document.querySelector("#backLink").addEventListener("click", () => {
+  try {
+    if (window.self !== window.top) { window.top.location.href = "/?p=tools/deal-read"; return; }
+  } catch (e) { /* cross-origin embed — fall through */ }
+  if (window.history.length > 1) window.history.back();
+  else window.location.href = "/?p=tools/deal-read";
+});
+
 /* ── URL hydration ────────────────────────────────────────── */
 function hydrateFromParams() {
   const params = new URLSearchParams(window.location.search);
@@ -1311,11 +1344,23 @@ function restoreFromQuoteLog() {
   } catch (e) { /* best-effort */ }
 }
 
+// LEN-142 — dismissible intro standard (× to close, restore "i" in the header);
+// persisted site-wide via the shared 'lendpaper_intro_dismissed' key.
+function applyIntroState() {
+  let dismissed = false;
+  try { dismissed = localStorage.getItem('lendpaper_intro_dismissed') === 'true'; } catch (e) {}
+  document.querySelectorAll('.lp-definition').forEach(el => { el.style.display = dismissed ? 'none' : ''; });
+  document.querySelectorAll('.lp-intro-toggle-btn').forEach(b => { b.style.display = dismissed ? 'inline-flex' : 'none'; });
+}
+function dismissIntro() { try { localStorage.setItem('lendpaper_intro_dismissed', 'true'); } catch (e) {} applyIntroState(); }
+function showIntro() { try { localStorage.removeItem('lendpaper_intro_dismissed'); } catch (e) {} applyIntroState(); }
+
 window.addEventListener('load', () => {
   if (typeof window.PDF_HELPER !== 'undefined') window.PDF_HELPER.initPrintLayout("AFFORDABILITY CHECK");
   hydrateFromParams();
   restoreFromQuoteLog();
   bindTips();
+  applyIntroState();
   update();
   if (window.self !== window.top) document.body.classList.add('is-embedded');
 });
