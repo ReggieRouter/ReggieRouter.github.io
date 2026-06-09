@@ -604,6 +604,14 @@ body.pdf-export-mode .print-footer-legal { display: none !important; }
 body.pdf-export-mode .print-watermark { display: none !important; }
 body.pdf-export-mode .tk-eyebrow { display: none !important; }
 body.pdf-export-mode .card-center-title { display: none !important; }
+/* LEN-141: a single scenario needs no "Scenario A" label — collapse the whole (now
+   empty) card header so the top doesn't leave a void. Show the label only when comparing. */
+body.pdf-export-mode .card-header { display: none !important; }
+body.pdf-export-mode.multi-scenario .card-header { display: block !important; margin-bottom: 8px !important; }
+body.pdf-export-mode.multi-scenario .card-title-input {
+    display: inline-block !important;
+    border: none !important; background: transparent !important; padding: 0 !important;
+}
 </style>
 </head>
 <body>

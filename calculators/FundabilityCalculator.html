@@ -600,6 +600,11 @@
         body.pdf-export-mode .print-footer-legal { display: none !important; }
         body.pdf-export-mode .print-watermark { display: none !important; }
         body.pdf-export-mode .tk-eyebrow { display: none !important; }
+        /* LEN-141: never surface the competitor waterfall / "view lenders" CTAs in a
+           borrower-facing PDF — these sell from broker/lender TO borrower, not to the
+           competition. (A general a[href*="waterfall"] guard also lives in pdf-calm.css.) */
+        body.pdf-export-mode #wf-context,
+        body.pdf-export-mode #wf-cta { display: none !important; }
     </style>
 </head>
 <body>

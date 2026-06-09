@@ -55,6 +55,11 @@ body.pdf-export-mode .print-watermark {
     color: var(--pdf-ink);
 }
 
+/* Never surface the competitor lender waterfall in a borrower-facing PDF — these
+   documents sell from a broker/lender TO a borrower and must not advertise the
+   competition. General guard; calculators may also hide their own CTA containers. */
+body.pdf-export-mode a[href*="waterfall"] { display: none !important; }
+
 /* Estimate notice — injected at the top of the captured body by
    PDF_HELPER.mountEstimateNotice() for calculators that don't render their own
    calm-native notice (Payment Breakdown renders its own inside #pdf-document). */

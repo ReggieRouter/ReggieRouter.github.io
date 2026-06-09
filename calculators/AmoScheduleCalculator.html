@@ -1851,8 +1851,10 @@
                 const options = getPdfOptions(id);
                 const freq = PDF_FREQ[c.freq] || PDF_FREQ.monthly;
                 if (i > 0) body += '<div class="pdf-page-break"></div>';
-                // Scenario label rides in the hero eyebrow (e.g. "Scenario A", or a custom name).
-                const eyebrow = getScenarioName(id, i);
+                // Scenario label rides in the hero eyebrow only when comparing — a single
+                // scenario needs no "Scenario A" tag. A custom scenario name still shows.
+                const customName = (scenarioNames[id] || '').trim();
+                const eyebrow = (ids.length > 1) ? getScenarioName(id, i) : customName;
                 body += pdfScenarioPage1(c, options, eyebrow);
                 body += pdfScenarioSchedule(c, options, freq);
             });
