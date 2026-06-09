@@ -3,15 +3,19 @@
    Reads shared global S. Loaded after talk.js, before read.js.
    ════════════════════════════════════════════════════════════ */
 
-// ── RBF/MCA relabel ───────────────────────────────────────────
-function prodDisplay(label){ if(!label) return label; if(label==='MCA'||label==='RBF') return 'RBF/MCA'; return label; }
+// ── Short-Term Financing surface label (LEN-162) ──────────────
+// Broker-facing umbrella for the MCA/RBF product. The structural split
+// (MCA = Receivables Purchase Agreement + performance guarantee · STL/BLA =
+// Business Loan Agreement + personal guarantee) is surfaced in the product
+// modal. Client-facing copy still says "Revenue-Based Financing" (see talk.js).
+function prodDisplay(label){ if(!label) return label; if(label==='MCA'||label==='RBF') return 'Short-Term Financing'; return label; }
 
 // ── Requested-product options (what the borrower asked for) ───
 const REQ_PRODUCTS=[
-  ['','No preference'],['mca','RBF/MCA'],['loc','Line of credit'],
+  ['','No preference'],['mca','Short-Term Financing'],['loc','Line of credit'],
   ['term','Term loan'],['sba','SBA / longer term'],['equip','Equipment'],['factor','Factoring'],
 ];
-const REQ_LABEL={mca:'RBF/MCA',rbf:'RBF/MCA',loc:'a line of credit',term:'a term loan',sba:'an SBA / longer-term loan',equip:'equipment financing',factor:'invoice factoring',cre:'a CRE loan',bridge:'a bridge loan'};
+const REQ_LABEL={mca:'Short-Term Financing',rbf:'Short-Term Financing',loc:'a line of credit',term:'a term loan',sba:'an SBA / longer-term loan',equip:'equipment financing',factor:'invoice factoring',cre:'a CRE loan',bridge:'a bridge loan'};
 const PROD_REQ={
   sba:'roughly 660+ credit minimum (680+ recommended — score can shift during underwriting) and two years in business',
   loc:'around 640+ credit and steady, bankable revenue',

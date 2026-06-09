@@ -154,8 +154,8 @@ button{font-family:var(--font)}
 .exp-toggle:hover{border-color:var(--green)}
 .exp-toggle .et-plus{width:24px;height:24px;border-radius:7px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:16px;font-weight:600;line-height:1}
 .exp-toggle .et-main{min-width:0;flex:1}
-.exp-toggle .et-t{font-size:13px;font-weight:700;color:var(--green-dk);line-height:1.2}
-.exp-toggle .et-h{font-size:11px;color:#4e7a60;margin-top:2px;font-weight:500}
+.exp-toggle .et-t{display:block;font-size:13px;font-weight:700;color:var(--green-dk);line-height:1.2}
+.exp-toggle .et-h{display:block;font-size:11px;color:#4e7a60;margin-top:2px;font-weight:500}
 .exp-toggle .et-count{font-size:10px;font-weight:700;color:#fff;background:var(--green);border-radius:999px;padding:2px 8px;flex:0 0 auto}
 .exp-toggle .fac-chev{color:var(--green);flex:0 0 auto}
 .exp-panel{display:none;margin-top:13px;padding:16px;border:1px solid var(--line);border-radius:var(--r);background:var(--bg)}
@@ -856,28 +856,144 @@ button{font-family:var(--font)}
 /* ── Product keynote — hero above the metric tiles ── */
 .kn-wrap{margin-bottom:14px}
 .kn-eyebrow{margin-bottom:9px}
-.kn-row{display:flex;flex-wrap:wrap;gap:10px}
-.kn-card{flex:1;min-width:100px;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:13px 14px 11px;cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s;font-family:var(--font)}
+/* Uniform responsive grid: tiles stay equal-width and wrap cleanly. auto-fill (not
+   auto-fit) keeps empty tracks so a lone trailing product — e.g. LOC as the 5th —
+   stays tile-sized instead of ballooning to full width (LEN-155). */
+.kn-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.kn-card{min-width:0;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:13px 14px 11px;cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s;font-family:var(--font)}
 .kn-card:hover{border-color:var(--green-line);box-shadow:0 2px 8px rgba(20,60,30,.07)}
 .kn-lead{border-color:var(--green-line);background:var(--green-wash)}
 .kn-card-top{min-height:18px;margin-bottom:5px}
 .kn-lead-badge{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:rgba(21,102,60,.12);border-radius:999px;padding:2px 8px}
-.kn-name{font-size:20px;font-weight:800;letter-spacing:-.025em;color:var(--ink);line-height:1.15;margin-bottom:7px}
+.kn-name{font-size:18px;font-weight:800;letter-spacing:-.025em;color:var(--ink);line-height:1.15;margin-bottom:7px;overflow-wrap:anywhere;hyphens:auto}
 .kn-status{display:flex;align-items:center;gap:6px}
 .kn-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
 .kn-word{font-size:11.5px;font-weight:700}
 .kn-caution{display:flex;align-items:flex-start;gap:5px;margin-top:7px;font-size:10.5px;font-weight:600;color:var(--t3);line-height:1.4}
 .kn-caution svg{flex:0 0 auto;margin-top:1px;color:var(--t3)}
-/* offer-metrics: keep 2x2 via existing .offer-grid 1fr 1fr */
+/* offer-metrics now holds only the full-width Funding range tile (amount-tile spans
+   grid-column 1/-1); Term/Rate/Payment tiles were removed in LEN-155. */
+
+/* ════════ Add underwriting detail — bottom-left panel (Group C, LEN-155) ════════ */
+.uw-wrap{margin-top:20px}
+.uw-hdr{display:flex;align-items:stretch;gap:8px}
+.uw-toggle{flex:1;display:flex;align-items:center;gap:11px;background:var(--green-wash);border:1px solid var(--green-line);border-radius:var(--r);padding:12px 14px;cursor:pointer;text-align:left;font-family:var(--font);transition:border-color .15s}
+.uw-toggle:hover{border-color:var(--green)}
+.uw-tg-ico{width:24px;height:24px;flex:0 0 auto;border-radius:7px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;line-height:1}
+.uw-tg-main{min-width:0;flex:1}
+.uw-tg-t{display:block;font-size:13px;font-weight:700;color:var(--green-dk);line-height:1.2}
+.uw-tg-h{display:block;font-size:11px;color:#4e7a60;margin-top:2px;font-weight:500}
+.uw-count{font-size:10px;font-weight:700;color:#fff;background:var(--green);border-radius:999px;padding:2px 8px;flex:0 0 auto}
+.uw-toggle .fac-chev{color:var(--green);flex:0 0 auto}
+.uw-mode-btn{flex:0 0 auto;font-size:11px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:var(--r-sm);padding:0 12px;background:var(--bg);cursor:pointer;font-family:var(--font);transition:all .14s}
+.uw-mode-btn:hover{border-color:var(--green);color:var(--green)}
+.uw-mode-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+.uw-panel{display:none;margin-top:12px}
+.uw-panel.open{display:block}
+.uw-all{display:flex;flex-direction:column;gap:9px}
+.uw-card{border:1px solid var(--line);border-radius:var(--r);padding:12px 13px;background:var(--bg-2)}
+.uw-ch{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.uw-icon{width:20px;height:20px;flex:0 0 auto;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.uw-name{font-size:12.5px;font-weight:700;color:var(--ink);flex:1;min-width:0}
+.uw-hint{font-size:11px;line-height:1.5;color:var(--ink-2);margin-bottom:9px}
+.uw-source{font-size:10.5px;font-weight:600;color:var(--green);cursor:pointer;text-decoration:underline;text-underline-offset:2px;margin-top:8px;display:inline-block}
+.uw-wt{position:relative;display:inline-flex;align-items:center;cursor:help}
+.uw-dots{display:flex;gap:3px;align-items:center}
+.uw-dot{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.uw-dot.on{background:var(--green)}
+.uw-wt-tip{position:absolute;bottom:calc(100% + 7px);right:0;width:178px;background:var(--ink);color:#fff;font-size:10.5px;font-weight:500;line-height:1.5;border-radius:7px;padding:7px 10px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:30}
+.uw-wt-tip::after{content:'';position:absolute;top:100%;right:9px;border:5px solid transparent;border-top-color:var(--ink)}
+.uw-wt:hover .uw-wt-tip{opacity:1}
+.uw-ctrl{border:1.5px solid var(--line);border-radius:var(--r-sm);padding:8px 10px;font-size:13px;font-family:var(--font);color:var(--ink);background:var(--bg);outline:none;font-weight:600}
+.uw-ctrl:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-wash)}
+.uw-ctrl::-webkit-outer-spin-button,.uw-ctrl::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+select.uw-ctrl{cursor:pointer}
+.uw-num{display:inline-flex;align-items:center;gap:6px}
+.uw-affix{font-size:12.5px;font-weight:600;color:var(--muted)}
+.uw-swipe{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.uw-sw-pg{padding:12px 14px 0;display:flex;align-items:center;justify-content:space-between}
+.uw-sw-count{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.uw-sw-nav{display:flex;gap:6px}
+.uw-sw-nav button{border:1px solid var(--line);background:var(--bg);border-radius:var(--r-sm);padding:5px 11px;font-size:11px;font-weight:600;font-family:var(--font);color:var(--muted);cursor:pointer;transition:all .14s}
+.uw-sw-nav button:hover{border-color:var(--green);color:var(--green)}
+.uw-sw-nav button.pri{background:var(--green);color:#fff;border-color:var(--green)}
+.uw-sw-nav button:disabled{opacity:.35;cursor:default}
+.uw-sw-body{padding:13px 14px 4px}
+.uw-sw-name{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px}
+.uw-sw-nm{flex:1;min-width:0}
+.uw-sw-sub{font-size:11.5px;line-height:1.55;color:var(--ink-2);margin-bottom:11px}
+.uw-sw-source-btn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 11px;font-size:11px;font-weight:600;font-family:var(--font);color:var(--muted);background:var(--bg);cursor:pointer;margin-bottom:12px;transition:all .14s}
+.uw-sw-source-btn:hover{border-color:var(--green);color:var(--green)}
+.uw-sw-source-btn svg{flex:0 0 auto}
+.uw-sw-ctrl{margin-bottom:2px}
+.uw-sw-dots{display:flex;gap:5px;justify-content:center;padding:12px 14px 14px}
+.uw-sw-dot{width:6px;height:6px;border-radius:50%;background:var(--line);cursor:pointer;transition:all .16s}
+.uw-sw-dot.on{background:var(--green);width:17px;border-radius:3px}
+.uw-src-body{font-size:12.5px;line-height:1.62;color:var(--ink-2);margin-top:10px}
+
+/* ════════ File read (1 strength + 2 limits) ════════ */
+.file-read{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--bg);padding:14px 16px;margin-top:14px}
+.fr-eyebrow{margin-bottom:11px}
+.fr-rows{display:flex;flex-direction:column;gap:10px}
+.fr-row{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:var(--ink-2)}
+.fr-row .fr-ico{flex:0 0 auto;margin-top:1px}
+.fr-row.pos .fr-ico{color:var(--t1)}
+.fr-row.neg .fr-ico{color:var(--t3)}
+.fr-row b{color:var(--ink);font-weight:700}
+.fr-thin{display:flex;gap:7px;align-items:flex-start;margin-top:11px;padding-top:11px;border-top:1px solid var(--line-2);font-size:11px;color:var(--muted)}
+.fr-thin svg{flex:0 0 auto;margin-top:1px;color:var(--faint)}
+
+/* ════════ Risk-factor chips (slide up beside the profile) ════════ */
+.uw-chips{margin-top:14px}
+.uw-chips.uw-anim{animation:uwSlideUp .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes uwSlideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.uw-chips-lbl{font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.uw-chips-row{display:flex;flex-wrap:wrap;gap:7px}
+.uw-chip{display:inline-flex;align-items:center;gap:6px;background:var(--green-wash);border:1px solid var(--green-line);border-radius:999px;padding:5px 11px 5px 9px;cursor:pointer;font-family:var(--font);transition:border-color .14s}
+.uw-chip:hover{border-color:var(--green)}
+.uw-chip-ico{display:flex;align-items:center;color:var(--green);flex:0 0 auto}
+.uw-chip-ico svg{width:13px;height:13px}
+.uw-chip-l{font-size:11px;font-weight:600;color:var(--green-dk)}
+.uw-chip-v{font-size:11px;font-weight:700;color:var(--ink);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ════════ First-use intro pop (over the talk box) ════════ */
+.intro-pop{position:relative;margin:0 0 14px;background:var(--green-dk);color:#fff;border-radius:var(--r);padding:13px 38px 13px 15px;box-shadow:var(--shadow-lg)}
+.intro-pop.intro-anim{animation:introPop .34s cubic-bezier(.2,.8,.2,1)}
+@keyframes introPop{from{opacity:0;transform:translateY(-9px) scale(.98)}to{opacity:1;transform:none}}
+.intro-h{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-bottom:5px}
+.intro-h svg{color:#fff}
+.intro-b{font-size:12.5px;line-height:1.55;color:#fff}
+.intro-b b{color:#fff;font-weight:700}
+.intro-x{position:absolute;top:8px;right:9px;background:none;border:none;color:rgba(255,255,255,.7);font-size:17px;cursor:pointer;line-height:1;padding:2px 6px;border-radius:5px}
+.intro-x:hover{background:rgba(255,255,255,.16);color:#fff}
+
+/* ════════ "Coming soon" tooltip (Underwriter mode) ════════ */
+.soon-pop{position:fixed;transform:translateX(-50%) translateY(-4px);background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:6px 11px;border-radius:7px;z-index:200;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;white-space:nowrap}
+.soon-pop.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.soon-pop::after{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-bottom-color:var(--ink)}
+
+/* ════════ Short-Term Financing (LEN-162) ════════ */
+.kn-sub{font-size:10.5px;font-weight:600;color:var(--muted);margin:-3px 0 8px}
+.stf-split{font-size:12.5px;line-height:1.55;color:var(--ink-2)}
+.stf-lead{margin-bottom:11px}
+.stf-lead b{color:var(--ink);font-weight:700}
+.stf-opt{border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;background:var(--bg-2);margin-bottom:9px}
+.stf-h{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.stf-tag{font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--green);background:var(--green-wash);border:1px solid var(--green-line);border-radius:4px;padding:1px 6px}
+.stf-b{font-size:12px;line-height:1.55}
+.stf-b b{color:var(--ink);font-weight:700}
+.stf-rule{display:flex;gap:7px;align-items:flex-start;margin-top:4px;padding:9px 11px;background:var(--green-wash);border-radius:var(--r-sm);font-size:11.5px;line-height:1.5;color:var(--green-dk)}
+.stf-rule svg{flex:0 0 auto;margin-top:1px;color:var(--green)}
+.stf-rule b{color:var(--green-dk);font-weight:700}
 </style>
 </head>
 <body data-mode="broker" data-density="regular">
 
 <header class="top">
-  <a href="#" class="brand">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect width="24" height="24" rx="5" fill="#1A3C2E"/><path d="M4 4v16h11l5-5V4H4z" stroke="white" stroke-width="2.4" fill="none"/><path d="M15 20v-5h5" stroke="white" stroke-width="2.4" fill="none"/></svg>
-    <span class="wordmark">Lend<span>Paper</span></span>
-  </a>
+  <!-- Brand lockup intentionally omitted: this calc runs inside the SPA shell, which
+       already shows the LendPaper logo at the top of the left toolbar (LEN-155). Empty
+       spacer keeps the 1fr/auto/1fr grid balanced so the title stays centered. -->
+  <div class="brand" aria-hidden="true"></div>
   <div class="top-title">
     <div class="tt-main">Deal Analysis</div>
     <div class="tt-sub">Four-Factor Underwriting Engine</div>
@@ -885,7 +1001,7 @@ button{font-family:var(--font)}
   <div class="top-right">
     <div class="modeseg" id="modeseg">
       <button data-mode="broker" class="on" onclick="setMode('broker')"><span class="dot"></span>Sales rep</button>
-      <button data-mode="underwriter" onclick="setMode('underwriter')"><span class="dot"></span>Underwriter</button>
+      <button data-mode="underwriter" onclick="underwriterSoon(this)"><span class="dot"></span>Underwriter</button>
     </div>
   </div>
 </header>

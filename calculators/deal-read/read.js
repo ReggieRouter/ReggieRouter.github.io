@@ -12,7 +12,7 @@ const S = {
   deposits:{}, depOpen:false, depCount:4, aprOpen:false, tibUnit:'mo', affOpen:false, modal:null, prodIdx:0,
   amtOpen:false, rateMode:null, cmpGates:[3,6,12], cmpLocApr:null,
   lang:'en', tipHidden:false,
-  facOpen:{}, lendersOpen:false,
+  facOpen:{}, uwOpen:false, uwMode:'all', uwIdx:0, uw:{},
   pdfScope:'combined',
   tweaks:{ accent:'forest', density:'regular', disclosures:'show', deltas:'on' },
 };
@@ -22,7 +22,7 @@ function save(){ try{ localStorage.setItem(LS, JSON.stringify({
   reqProduct:S.reqProduct, expTerm:S.expTerm, expPayFreq:S.expPayFreq, state:S.state, stateConfirmed:S.stateConfirmed, expOpen:S.expOpen,
   deposits:S.deposits, depOpen:S.depOpen, depCount:S.depCount, aprOpen:S.aprOpen, tibUnit:S.tibUnit, affOpen:S.affOpen,
   amtOpen:S.amtOpen, rateMode:S.rateMode, cmpGates:S.cmpGates, cmpLocApr:S.cmpLocApr,
-  lang:S.lang, tipHidden:S.tipHidden, facOpen:S.facOpen, lendersOpen:S.lendersOpen, tweaks:S.tweaks
+  lang:S.lang, tipHidden:S.tipHidden, facOpen:S.facOpen, uwOpen:S.uwOpen, uwMode:S.uwMode, uwIdx:S.uwIdx, uw:S.uw, tweaks:S.tweaks
 })); }catch(e){} }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(LS)||'{}');
   if(d.selected) S.selected=d.selected; if(d.q) S.q=d.q; if(d.mode) S.mode=d.mode;
@@ -33,7 +33,8 @@ function load(){ try{ const d=JSON.parse(localStorage.getItem(LS)||'{}');
   S.amtOpen=!!d.amtOpen; S.rateMode=(d.rateMode==='apr'||d.rateMode==='cents')?d.rateMode:null;
   if(Array.isArray(d.cmpGates)&&d.cmpGates.length) S.cmpGates=d.cmpGates; if(d.cmpLocApr!=null) S.cmpLocApr=d.cmpLocApr;
   if(d.lang) S.lang=d.lang; S.tipHidden=!!d.tipHidden;
-  if(d.facOpen) S.facOpen=d.facOpen; S.lendersOpen=!!d.lendersOpen;
+  if(d.facOpen) S.facOpen=d.facOpen;
+  S.uwOpen=!!d.uwOpen; S.uwMode=d.uwMode==='swipe'?'swipe':'all'; S.uwIdx=d.uwIdx||0; if(d.uw&&typeof d.uw==='object') S.uw=d.uw;
   if(d.tweaks) S.tweaks={...S.tweaks,...d.tweaks};
 }catch(e){} }
 
@@ -113,8 +114,10 @@ function renderInputs(){
        ${fieldNum('rev')}
        ${depositsPanel()}
      </div>
+     <div id="uwChipsHost">${uwChips()}</div>
      <div style="height:20px"></div>
-     ${expectationsPanel()}`;
+     ${expectationsPanel()}
+     ${uwPanel()}`;
   if(S.indEditing){ const i=document.getElementById('indSearch'); if(i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); } }
 }
 function expectationsPanel(){
@@ -284,7 +287,7 @@ function depositsPanel(){
     <div class="dep-panel ${open?'open':''}" id="depPanel">
       <div class="dep-row">${cells}</div>
       <div class="dep-actions"><button class="dep-more" onclick="depMore()" ${S.depCount>=12?'disabled':''}>+ older month</button>${depAvgNote()}</div>
-      <div class="dep-note">Most lenders want <b>3–4 months</b>; SBA often <b>6–12</b>. The most recent month carries the most weight. <b>Seasonal business?</b> Add more months — a fuller year smooths out the slow stretch and makes a stronger case with underwriters. These are generalizations and requirements vary by lender.</div>
+      <div class="dep-note">Most underwriters want <b>3–4 months</b>; SBA often <b>6–12</b>. The most recent month carries the most weight. <b>Seasonal business?</b> Add more months — a fuller year smooths out the slow stretch and makes a stronger case with underwriters. These are generalizations and requirements vary by lender.</div>
     </div>
   </div>`;
 }
@@ -302,6 +305,256 @@ function onDeposit(key,val){
 }
 
 // ════════════════════════════════════════════════════════════
+//  ADD UNDERWRITING DETAIL — bottom-left panel (Group C, LEN-155)
+//  Optional broker context for tricky files. Two views: all-at-once and
+//  one-field-at-a-time "swipe". Values persist in S.uw; they are internal
+//  context only — never surfaced in the read, the PDF, or Copy Results.
+// ════════════════════════════════════════════════════════════
+const UW_ICON={
+  card:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
+  bank:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 2 7 22 7"/></svg>',
+  trend:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+  file:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  dollar:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  brief:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>',
+};
+const UW_FIELDS=[
+  { key:'util', icon:'card', name:'Credit Utilization %', weight:3,
+    hint:'If 30%+, this is a talk track: financing can lower utilization — and that’s 30% of the FICO score. Worth knowing before the call.',
+    type:'num', suffix:'%', width:110, ph:'e.g. 42',
+    source:{title:'How to find credit utilization', body:'Pull the borrower’s credit report summary. Look for “Revolving Credit Utilization” or “Credit Used / Credit Available.” Experian, Equifax, and TransUnion all report it. If the borrower shares a Nav or CreditWise screenshot, it’s usually on the front page. Formula: Total Balances ÷ Total Credit Limits = Utilization %.'} },
+  { key:'depcount', icon:'bank', name:'Avg. Deposit Count / Month', weight:2,
+    hint:'≤5 deposits/mo → nearly unfundable. 5–15 → pricing worsens. 15+ → underwriting is comfortable. Count unique deposits, not transfers.',
+    type:'num', width:110, ph:'e.g. 22',
+    source:{title:'How to source deposit count', body:'Pull 2–3 months of bank statements. Count the number of distinct deposit entries per month — not the dollar amount, the transaction count. Wire transfers and ACH receipts count. Payroll reversals and inter-account transfers don’t. Most underwriting runs this itself — knowing it ahead of time frames the conversation.'} },
+  { key:'trend', icon:'trend', name:'Most Recent Month Trend', weight:3,
+    hint:'If the most recent month is 15%+ below the prior 3-month average, underwriting tightens — sometimes significantly. Always know this before you quote.',
+    type:'select', options:['','Up or flat vs. prior avg','Down 1–14%','Down 15%+ (significant)'],
+    source:{title:'How to assess the trend', body:'Pull the last 3 months of bank statements. Total deposits for each month. Take the average of months 2 and 3 (the older months). Compare to month 1 (the most recent). If month 1 is 15%+ below that average, flag it. The most recent month is often weighted 2–3× more than older months. A sharp dip — even for a legitimate reason — will affect pricing and approvals.'} },
+  { key:'liens', icon:'file', name:'Liens · Litigation · Bankruptcy', weight:3,
+    hint:'Any of these can stop a deal or shift the available products entirely. Ask directly — easier now than at due diligence.',
+    type:'select', options:['','None','Active lien(s)','Pending litigation','Prior bankruptcy (discharged)','Active bankruptcy'],
+    source:{title:'How to uncover liens and legal issues', body:'Ask the borrower directly: “Before we submit, are there any outstanding liens, judgments, or legal matters on the business or personally?” For verification: search the UCC filing registry for the borrower’s state (most are free online). Tax liens appear on the credit report. Federal cases via PACER. These surface in due diligence — knowing first lets you frame it proactively.'} },
+  { key:'nrd', icon:'dollar', name:'Non-Refundable Deposits (NRDs)', weight:1,
+    hint:'NRDs are upfront fees paid before funding. Rare but worth flagging — they reduce effective proceeds and must be disclosed.',
+    type:'num', prefix:'$', width:140, ph:'amount if known',
+    source:{title:'What NRDs are and how to find them', body:'Non-refundable deposits are fees charged upfront — before the deal funds. Look for language in any LOI or commitment letter referencing “deposit,” “underwriting fee,” or “processing fee” due before funding. If present, disclose to the borrower upfront — failure to do so creates legal and trust risk.'} },
+  { key:'biz-hist', icon:'brief', name:'Prior Business Financing', weight:1,
+    hint:'Prior financing history is a positive signal if clean. Stacked positions, defaults, or recent settlements all affect appetite.',
+    type:'select', options:['','No prior financing','Prior financing — paid off cleanly','Active position(s) — current','Active position(s) — late','Prior default or settlement'],
+    source:{title:'How to assess financing history', body:'Ask the borrower: “Have you had any business financing before — advances, loans, lines of credit?” Pull a DataMerch or SBFE check if available (these track advance history outside the traditional bureaus). For bank products, the credit report shows trade lines. Active positions matter — stacking limits are typically 1–2 positions max.'} },
+];
+function uwIcon(t){ return UW_ICON[t]||''; }
+function uwCountFilled(){ return UW_FIELDS.filter(f=>{ const v=S.uw[f.key]; return v!=null && String(v).trim()!==''; }).length; }
+function uwDots(w){
+  const tips=['Low weight — useful context but rarely decisive on its own','Medium weight — one of several factors; can tip the balance','High weight — significantly affects approval, pricing, or both'];
+  return `<span class="uw-wt"><span class="uw-dots">${[1,2,3].map(i=>`<span class="uw-dot${i<=w?' on':''}"></span>`).join('')}</span><span class="uw-wt-tip">${tips[w-1]||''}</span></span>`;
+}
+function uwCtrl(f){
+  const v=S.uw[f.key]!=null?S.uw[f.key]:'';
+  if(f.type==='select'){
+    return `<select class="uw-ctrl" style="width:100%" onchange="setUW('${f.key}',this.value)">`
+      + f.options.map(o=>`<option value="${ttEsc(o)}" ${String(v)===o?'selected':''}>${o===''?'Select…':ttEsc(o)}</option>`).join('')
+      + `</select>`;
+  }
+  const pre=f.prefix?`<span class="uw-affix">${f.prefix}</span>`:'';
+  const suf=f.suffix?`<span class="uw-affix">${f.suffix}</span>`:'';
+  return `<span class="uw-num">${pre}<input class="uw-ctrl" type="number" inputmode="numeric" placeholder="${ttEsc(f.ph||'')}" value="${ttEsc(v)}" style="width:${f.width||110}px" oninput="setUW('${f.key}',this.value)">${suf}</span>`;
+}
+function uwCard(f){
+  return `<div class="uw-card">
+    <div class="uw-ch"><span class="uw-icon">${uwIcon(f.icon)}</span><span class="uw-name">${f.name}</span>${uwDots(f.weight)}</div>
+    <div class="uw-hint">${f.hint}</div>
+    ${uwCtrl(f)}
+    <div><span class="uw-source" onclick="openUWSource('${f.key}')">How to find this →</span></div>
+  </div>`;
+}
+function uwSwipeCard(f){
+  return `<div class="uw-sw-name"><span class="uw-icon">${uwIcon(f.icon)}</span><span class="uw-sw-nm">${f.name}</span>${uwDots(f.weight)}</div>
+    <div class="uw-sw-sub">${f.hint}</div>
+    <button class="uw-sw-source-btn" onclick="openUWSource('${f.key}')">${I.info}<span>How to find this</span></button>
+    <div class="uw-sw-ctrl">${uwCtrl(f)}</div>`;
+}
+function uwPanel(){
+  const open=S.uwOpen, swipe=S.uwMode==='swipe', n=uwCountFilled();
+  const last=S.uwIdx===UW_FIELDS.length-1;
+  return `<div class="uw-wrap">
+    <div class="uw-hdr">
+      <button class="uw-toggle" onclick="toggleUW()">
+        <span class="uw-tg-ico">${open?'–':'+'}</span>
+        <span class="uw-tg-main"><span class="uw-tg-t">Add underwriting detail</span><span class="uw-tg-h">Optional — for tricky files</span></span>
+        ${n?`<span class="uw-count">${n}</span>`:''}
+        <span class="fac-chev" style="${open?'transform:rotate(180deg)':''}">${I.dn}</span>
+      </button>
+      <button class="uw-mode-btn${swipe?' active':''}" id="uwModeBtn" style="${open?'':'display:none'}" onclick="toggleUWMode()">${swipe?'See all':'Swipe'}</button>
+    </div>
+    <div class="uw-panel ${open?'open':''}" id="uwPanel">
+      <div id="uwAll" class="uw-all" style="${swipe?'display:none':''}">${UW_FIELDS.map(uwCard).join('')}</div>
+      <div id="uwSwipe" style="${swipe?'':'display:none'}">
+        <div class="uw-swipe">
+          <div class="uw-sw-pg">
+            <span class="uw-sw-count" id="uwSwCount">${S.uwIdx+1} OF ${UW_FIELDS.length}</span>
+            <div class="uw-sw-nav">
+              <button id="uwSwBack" onclick="swipeUW(-1)" ${S.uwIdx===0?'disabled':''}>← Back</button>
+              <button class="pri" id="uwSwNext" onclick="${last?'toggleUW()':'swipeUW(1)'}">${last?'Done ✓':'Next →'}</button>
+            </div>
+          </div>
+          <div class="uw-sw-body" id="uwSwBody">${uwSwipeCard(UW_FIELDS[S.uwIdx]||UW_FIELDS[0])}</div>
+          <div class="uw-sw-dots" id="uwSwDots">${UW_FIELDS.map((_,i)=>`<span class="uw-sw-dot${i===S.uwIdx?' on':''}" onclick="swipeUWTo(${i})"></span>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function toggleUW(){
+  S.uwOpen=!S.uwOpen; save();
+  const p=document.getElementById('uwPanel'); if(p) p.classList.toggle('open',S.uwOpen);
+  const tog=document.querySelector('.uw-toggle');
+  if(tog){ const ic=tog.querySelector('.uw-tg-ico'); if(ic) ic.textContent=S.uwOpen?'–':'+'; const ch=tog.querySelector('.fac-chev'); if(ch) ch.style.transform=S.uwOpen?'rotate(180deg)':''; }
+  const mb=document.getElementById('uwModeBtn'); if(mb) mb.style.display=S.uwOpen?'':'none';
+}
+function toggleUWMode(){
+  S.uwMode=S.uwMode==='all'?'swipe':'all'; save();
+  const mb=document.getElementById('uwModeBtn'); if(mb){ mb.textContent=S.uwMode==='swipe'?'See all':'Swipe'; mb.classList.toggle('active',S.uwMode==='swipe'); }
+  const all=document.getElementById('uwAll'), sw=document.getElementById('uwSwipe');
+  if(all) all.style.display=S.uwMode==='all'?'':'none';
+  if(sw) sw.style.display=S.uwMode==='swipe'?'':'none';
+  if(S.uwMode==='swipe'){ S.uwIdx=0; save(); renderUWSwipe(); }
+}
+function swipeUW(d){ S.uwIdx=Math.max(0,Math.min(UW_FIELDS.length-1,S.uwIdx+d)); save(); renderUWSwipe(); }
+function swipeUWTo(i){ S.uwIdx=Math.max(0,Math.min(UW_FIELDS.length-1,i)); save(); renderUWSwipe(); }
+function renderUWSwipe(){
+  const f=UW_FIELDS[S.uwIdx]; if(!f) return; const total=UW_FIELDS.length, last=S.uwIdx===total-1;
+  const cnt=document.getElementById('uwSwCount'); if(cnt) cnt.textContent=`${S.uwIdx+1} OF ${total}`;
+  const back=document.getElementById('uwSwBack'); if(back) back.disabled=S.uwIdx===0;
+  const next=document.getElementById('uwSwNext'); if(next){ next.textContent=last?'Done ✓':'Next →'; next.onclick=last?()=>toggleUW():()=>swipeUW(1); }
+  const body=document.getElementById('uwSwBody'); if(body) body.innerHTML=uwSwipeCard(f);
+  const dots=document.getElementById('uwSwDots'); if(dots) dots.innerHTML=UW_FIELDS.map((_,i)=>`<span class="uw-sw-dot${i===S.uwIdx?' on':''}" onclick="swipeUWTo(${i})"></span>`).join('');
+}
+function setUW(key,val){
+  if(val==null||String(val).trim()==='') delete S.uw[key]; else S.uw[key]=val;
+  save();
+  // live-update the filled-count badge on the toggle (no rebuild → input keeps focus)
+  const tog=document.querySelector('.uw-toggle');
+  if(tog){
+    const n=uwCountFilled(); let badge=tog.querySelector('.uw-count');
+    if(n){ if(!badge){ badge=document.createElement('span'); badge.className='uw-count'; tog.querySelector('.fac-chev').before(badge); } badge.textContent=n; }
+    else if(badge){ badge.remove(); }
+  }
+  // a selected risk factor "slides up" to join the 4 main categories
+  refreshUWChips();
+}
+// Filled UW factors surface as chips beside the borrower profile, sliding up the
+// first time the set grows (no animation on subsequent value edits).
+function uwChips(){
+  const filled=UW_FIELDS.filter(f=>{ const v=S.uw[f.key]; return v!=null && String(v).trim()!==''; });
+  if(!filled.length) return '';
+  return `<div class="uw-chips"><div class="uw-chips-lbl">Risk factors added</div><div class="uw-chips-row">${filled.map(uwChip).join('')}</div></div>`;
+}
+function uwChip(f){
+  return `<button class="uw-chip" onclick="jumpToUW('${f.key}')" title="Edit this factor"><span class="uw-chip-ico">${uwIcon(f.icon)}</span><span class="uw-chip-l">${uwChipLabel(f)}</span><span class="uw-chip-v">${ttEsc(uwChipVal(f))}</span></button>`;
+}
+function uwChipLabel(f){ return ({util:'Utilization',depcount:'Deposits/mo',trend:'Trend',liens:'Liens / legal',nrd:'NRDs','biz-hist':'Prior financing'})[f.key]||f.name; }
+function uwChipVal(f){
+  let v=String(S.uw[f.key]);
+  if(f.type==='num'){ const n=Number(v); if(!isNaN(n)){ v=(f.prefix==='$'?'$'+n.toLocaleString():String(n))+(f.suffix||''); } }
+  else if(v.length>24){ v=v.slice(0,22)+'…'; }
+  return v;
+}
+function refreshUWChips(){
+  const host=document.getElementById('uwChipsHost'); if(!host) return;
+  const had=!!host.querySelector('.uw-chips');
+  host.innerHTML=uwChips();
+  const blk=host.querySelector('.uw-chips');
+  if(blk && !had) blk.classList.add('uw-anim'); // animate only when newly appearing
+}
+function jumpToUW(key){
+  if(!S.uwOpen) toggleUW();
+  if(S.uwMode==='swipe'){ const i=UW_FIELDS.findIndex(x=>x.key===key); if(i>=0){ S.uwIdx=i; save(); renderUWSwipe(); } }
+  const el=document.querySelector('.uw-wrap'); if(el){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} }
+}
+
+// ── First-use intro: what this tool gives you (over the talk box) ─────
+// Shows once the read is active and the user has entered a factor. Gated to
+// first use, and re-shows if it hasn't been seen in ~30 days.
+// Eligible once the read is active and a factor is entered; gated to first use,
+// re-shows if not seen in ~30 days. Rendered into the template so it survives the
+// per-keystroke re-render; animates only on the render where it first appears.
+function introEligible(){
+  if(!S.selected) return false;
+  const cnt=(S.fico!=null?1:0)+(S.tib!=null?1:0)+(S.rev!=null?1:0);
+  if(cnt<1) return false;
+  try{ const ts=parseInt(localStorage.getItem('lp_dr_intro')||'0',10); if(ts && (Date.now()-ts)<30*86400000) return false; }catch(e){}
+  return true;
+}
+function introMarkup(anim){
+  return `<div class="intro-pop${anim?' intro-anim':''}">
+    <button class="intro-x" onclick="dismissIntro()" aria-label="Dismiss">×</button>
+    <div class="intro-h">${I.lift}<span>What you’ll get</span></div>
+    <div class="intro-b">Plans to help borrowers understand the strength of their file today, set realistic expectations, and build a financial plan going forward. <b>Scroll down for the talk tracks.</b></div>
+  </div>`;
+}
+function dismissIntro(){ S._introState='dismissed'; const p=document.querySelector('#read .intro-pop'); if(p) p.remove(); }
+
+// ── File read: 1 strength + 2 limits (set expectations w/ silver linings) ──
+function fileAssessment(d){
+  if(!d.code) return null;
+  const e=NAICS_DB.find(n=>n.c===d.code);
+  const indName=e?e.d.replace(/\s*\(.*?\)\s*/g,' ').trim():'This industry';
+  const items=[];
+  items.push({tone:d.tier||'g',
+    up:`<b>${indName}</b> is a fundable category — it sets the product stack you can work with.`,
+    down: d.tier==='n'?`<b>${indName}</b> is commonly restricted — confirm the exact NAICS before relying on this read.`:`<b>${indName}</b> draws extra underwriting scrutiny — expect a narrower set of options.`});
+  if(d.fico!=null){ const b=factorRead('fico',d.fico); if(b) items.push({tone:b.tone,
+    up:`Credit (<b>${d.fico}</b>) is a strength to lead with — it anchors pricing and keeps better programs open.`,
+    down:`Credit (<b>${d.fico}</b>) is the heaviest limit — it lifts the rate and holds the lowest-cost programs back for now.`}); }
+  if(d.tib!=null){ const b=factorRead('tib',d.tib); if(b) items.push({tone:b.tone,
+    up:`<b>${d.tib} months</b> in business is real history to point to — it supports the term you quote.`,
+    down:`<b>${d.tib} months</b> in business is short — it caps the term and keeps bank &amp; SBA options out for now.`}); }
+  if(d.rev!=null){ const b=factorRead('rev',d.rev); if(b) items.push({tone:b.tone,
+    up:`<b>$${d.rev.toLocaleString()}/mo</b> in deposits is the engine — it sizes the amount you can offer.`,
+    down:`Revenue (<b>$${d.rev.toLocaleString()}/mo</b>) caps the amount — size conservatively until deposits grow.`}); }
+  const rank={g:0,w:1,r:2,n:3};
+  const positive=items.slice().sort((a,b)=>rank[a.tone]-rank[b.tone])[0];
+  const negatives=items.filter(x=>x!==positive).sort((a,b)=>rank[b.tone]-rank[a.tone]).slice(0,2);
+  return {positive, negatives, count:items.length};
+}
+function fileReadHTML(d){
+  if(!d.code) return '';
+  const a=fileAssessment(d); if(!a) return '';
+  const rows=[];
+  if(a.positive) rows.push(`<div class="fr-row pos"><span class="fr-ico">${I.lift}</span><span>${a.positive.up}</span></div>`);
+  a.negatives.forEach(n=>rows.push(`<div class="fr-row neg"><span class="fr-ico">${I.warn}</span><span>${n.down}</span></div>`));
+  let thin='';
+  if(a.count<3){
+    const missing=[]; if(d.fico==null)missing.push('FICO'); if(d.tib==null)missing.push('time in business'); if(d.rev==null)missing.push('monthly revenue');
+    if(missing.length) thin=`<div class="fr-thin">${I.info}<span>Add ${missing.join(' &amp; ')} to sharpen the read.</span></div>`;
+  }
+  return `<div class="file-read"><div class="fr-eyebrow eyebrow">The file at a glance</div><div class="fr-rows">${rows.join('')}</div>${thin}</div>`;
+}
+// Underwriter mode is not built yet — clicking the toggle shows a "coming soon"
+// note and never switches mode (LEN-155, Steve).
+function underwriterSoon(btn){
+  let pop=document.getElementById('uwSoonPop');
+  if(!pop){ pop=document.createElement('div'); pop.id='uwSoonPop'; pop.className='soon-pop'; pop.textContent='Coming soon'; document.body.appendChild(pop); }
+  try{ const r=btn.getBoundingClientRect(); pop.style.top=(r.bottom+9)+'px'; pop.style.left=(r.left+r.width/2)+'px'; }catch(e){}
+  pop.classList.add('show');
+  clearTimeout(window._soonT); window._soonT=setTimeout(()=>{ pop.classList.remove('show'); },1700);
+}
+function openUWSource(key){
+  const f=UW_FIELDS.find(x=>x.key===key); if(!f) return;
+  S.modal='uwsrc';
+  const wrap=document.getElementById('leverModal'); if(!wrap) return;
+  wrap.innerHTML=`<div class="lm-backdrop" onclick="closeLever()"></div>
+    <div class="lm-card" role="dialog" aria-modal="true">
+      <button class="lm-x" onclick="closeLever()" aria-label="Close">×</button>
+      <div class="lm-title">${ttEsc(f.source.title)}</div>
+      <div class="uw-src-body">${ttEsc(f.source.body)}</div>
+    </div>`;
+  wrap.classList.add('open'); document.body.style.overflow='hidden';
+}
+
+// ════════════════════════════════════════════════════════════
 //  RENDER — read column (combined)
 // ════════════════════════════════════════════════════════════
 let _prevProxy={};
@@ -309,6 +562,9 @@ function renderRead(){
   const el=document.getElementById('read');
   if(!S.selected){ el.innerHTML=readEmpty(); return; }
   const d=currentDeal(); const lv=leversForProduct(d, selProdLabel(d));
+  let introNew=false;
+  if(S._introState==null && introEligible()){ S._introState='show'; introNew=true; try{ localStorage.setItem('lp_dr_intro', String(Date.now())); }catch(e){} }
+  const introMk = S._introState==='show' ? introMarkup(introNew) : '';
 
   el.innerHTML =
     catchAllBanner(d) +
@@ -316,6 +572,8 @@ function renderRead(){
      ${offerBox(d,lv)}
      ${aprBlockHTML(d, lv)}
      ${affordHTML(d, lv)}
+     ${fileReadHTML(d)}
+     ${introMk}
      ${talkTrackHTML(d)}
      <div class="read-acts">
        <button class="btn btn-primary" id="copyResultsBtn" onclick="copyResults()">${I.copy}<span>Copy results</span></button>
@@ -387,7 +645,7 @@ function relatedTools(d, lv){
 
 // ── the offer box (light green, mirrors the affordability card) ──
 function offerHeadline(d, lv){
-  if(d.tier==='n') return {tone:'r', text:`Most lenders restrict this industry. Confirm the exact NAICS first — a neighboring code can change the picture.`};
+  if(d.tier==='n') return {tone:'r', text:`This industry is commonly restricted. Confirm the exact NAICS first — a neighboring code can change the picture.`};
   if(!lv) return {tone:'x', text:`Add monthly revenue and the offer sizes itself — amount, term, rate, and payment.`};
   if(S.reqProduct){
     const g=gapForLever(d,lv,'product');
@@ -564,9 +822,11 @@ function offerBox(d, lv){
   const head=h?`<div class="offer-head"><span class="oh-txt">${h.text}</span></div>`:'';
   let grid='';
   if(lv){
+    // Term / Rate / Payment tiles removed (LEN-155, Steve) — the read leads with the
+    // product stack + funding range; pricing lives in the CA/NY APR block, the factor
+    // tags, and the (opt-in) cost comparison, not as headline estimate tiles.
     grid=`${prodKeynote(d)}
-    <div class="offer-grid offer-metrics">${amountTile(d,lv)}${termTile(d,lv)}${rateTile(d,lv)}${offTile('payment','Payment',lv.pay)}</div>
-    ${lv.atr.rate.kind==='factor'?`<div class="mca-note">MCAs are not loans — this is total repayment, not interest.</div>`:''}
+    <div class="offer-grid offer-metrics">${amountTile(d,lv)}</div>
     ${compareBtn(d,lv)}
     <div class="offer-hint">${I.info}<span>Tap any tile to see what it means &amp; how to explain it</span></div>`;
   } else if((d.prods||[]).length){
@@ -594,14 +854,34 @@ function prodKeynote(d){
     const label=p[0]; const q=productQualify(label,d); const display=prodDisplay(label);
     const isLead=i===0; const dotColor=DOT[q.dot]||DOT.x;
     const statusColor=q.dot==='g'?'var(--t1)':q.dot==='w'?'var(--t2)':q.dot==='r'?'var(--t4)':'var(--muted)';
+    const sub=prodSubline(label);
     return `<button class="kn-card${isLead?' kn-lead':''}" onclick="openLever('product')">
       <div class="kn-card-top">${isLead?`<span class="kn-lead-badge">Lead pick</span>`:''}</div>
       <div class="kn-name">${ttEsc(display)}</div>
+      ${sub?`<div class="kn-sub">${sub}</div>`:''}
       <div class="kn-status"><span class="kn-dot" style="background:${dotColor}"></span><span class="kn-word" style="color:${statusColor}">${q.word}</span></div>
       ${q.caution?`<div class="kn-caution">${I.warn}<span>${q.caution}</span></div>`:''}
     </button>`;
   }).join('');
   return `<div class="kn-wrap"><div class="kn-eyebrow eyebrow">Eligible products</div><div class="kn-row">${cards}</div></div>`;
+}
+// Quiet subline under the surface label. "Short-Term Financing" carries the
+// broker shorthand so the umbrella stays legible.
+function prodSubline(label){ const fam=prodFamily(label); return (fam==='mca'||fam==='rbf')?'typically MCA / RBF':''; }
+// Structural split, shown on demand in the product modal (LEN-162).
+function stfStructureHTML(){
+  return `<div class="stf-split">
+    <p class="stf-lead"><b>“Short-Term Financing”</b> is the simple umbrella — under it sit two legally distinct structures. Know which one the borrower is actually signing.</p>
+    <div class="stf-opt">
+      <div class="stf-h">Revenue-Based Financing <span class="stf-tag">MCA</span></div>
+      <div class="stf-b">A <b>Receivables Purchase Agreement</b> — the funder buys a slice of future sales, so repayment flexes as a percentage of revenue with no fixed end date. Backed by a <b>performance guarantee</b>, not a personal one.</div>
+    </div>
+    <div class="stf-opt">
+      <div class="stf-h">Short-Term Loan <span class="stf-tag">BLA</span></div>
+      <div class="stf-b">A <b>Business Loan Agreement</b> with a <b>personal guarantee</b> — fixed daily/weekly payments and a fixed term. Higher bar, often <b>625–640+ FICO</b> (lenders like OnDeck, Credibly).</div>
+    </div>
+    <div class="stf-rule">${I.info}<span>Client-facing, always call the MCA structure <b>“Revenue-Based Financing”</b> — never “MCA.” A short-term loan on a BLA is <b>never</b> “RBF.”</span></div>
+  </div>`;
 }
 function renderProdTile(d){
   const list=d.prods||[]; const idx=S.prodIdx||0; const cur=list.length?list[idx][0]:null;
@@ -670,7 +950,7 @@ function toggleApr(){ if(S.state==='NY'||S.state==='CA') return; S.aprOpen=!S.ap
 let _constraints=[], ccIndex=0;
 function collectConstraints(deal){
   if(!deal.code) return [];
-  if(deal.tier==='n') return [{title:'This industry is restricted.',lead:'Most lenders decline it outright.',unlock:'Verify the exact NAICS before declining — a neighboring code can change everything.'}];
+  if(deal.tier==='n') return [{title:'This industry is restricted.',lead:'It is declined outright in most underwriting.',unlock:'Verify the exact NAICS before declining — a neighboring code can change everything.'}];
   const pool=matchPool(deal.code,deal.tier).pool;
   const toneRank={g:0,w:1,r:2,n:3}; const out=[];
   ['fico','tib','rev'].forEach(kind=>{
@@ -724,7 +1004,7 @@ function driverLine(lever, d){
     product:`Primarily shaped by <b>industry</b>, then by credit, time in business and revenue — together they set which stack leads.`,
     term:`Primarily shaped by <b>time in business</b>, then by product type and overall file strength.`,
     rate:`Primarily shaped by <b>credit (FICO)</b>, then by industry risk, tenure and revenue stability.`,
-    payment:`Set by the <b>product structure</b> — daily/weekly remittance for RBF/MCA, fixed monthly for term and SBA.`,
+    payment:`Set by the <b>product structure</b> — daily/weekly remittance for Short-Term Financing, fixed monthly for term and SBA.`,
   };
   return `<div class="lm-driver">${m[lever]} <span class="lm-driver-note">One factor leads; the real decision weighs 25+.</span></div>`;
 }
@@ -760,8 +1040,12 @@ function leverTeasers(lever, d, lv){
   }
   const depth=leverDepth(lever,d,lv);
   if(depth){
-    const dt={amount:'How lenders size this', rate:(lv&&lv.atr.rate.kind==='factor')?'Factor rate vs. APR':'What moves the rate', term:'About the term'}[lever]||'More detail';
+    const dt={amount:'How this is sized', rate:(lv&&lv.atr.rate.kind==='factor')?'Factor rate vs. APR':'What moves the rate', term:'About the term'}[lever]||'More detail';
     rows.push(teaser('depth', dt, `<div class="lm-logic">${depth}</div>`));
+  }
+  if(lever==='product' && lv){
+    const fam=prodFamily(lv.product);
+    if(fam==='mca'||fam==='rbf') rows.push(teaser('structure', 'What “Short-Term Financing” actually is', stfStructureHTML()));
   }
   if(lever==='product'||lever==='payment'||lever==='amount'){
     const cmp=costCompareHTML(d,lv);
@@ -808,7 +1092,7 @@ function leverVerdict(lever, d, lv){
 }
 function leverDepth(lever, d, lv){
   if(!lv) return null;
-  if(lever==='amount') return `Lenders size advances at <b>75%–150%</b> of monthly deposits depending on consistency. 3+ months of statements tighten this range significantly.`;
+  if(lever==='amount') return `Advances are sized at <b>75%–150%</b> of monthly deposits depending on consistency. 3+ months of statements tighten this range significantly.`;
   if(lever==='rate'){
     if(lv.atr.rate.kind==='factor'){ const mid=((lv.atr.rate.lo+lv.atr.rate.hi)/2).toFixed(2); return `Factor rate measures <b>total repayment</b>, not annual interest. ${mid}x means $${mid} back per $1 borrowed — not the same as an APR.`; }
     return `Pricing weighs credit, industry risk, tenure and revenue stability together. A stronger file on any of these can move the rate.`;
@@ -836,14 +1120,14 @@ function leverMeaning(lever, d, lv){
     const note = d.fico>=680 ? `the file clears the <b>680</b> recommended mark for SBA, so the lowest-cost options — bank term loans and SBA — are in range.`
       : d.fico>=660 ? `the file meets the <b>660</b> SBA minimum, but <b>680+</b> is recommended — scores can shift during underwriting and stronger credit locks in better pricing.`
       : d.fico>=600 ? `the file is above non-bank minimums but under the <b>660</b> SBA minimum, so pricing sits toward the <b>higher end</b>. Improving credit opens lower-cost options — but any future offer depends on underwriting at that time.`
-      : `this is <b>higher-risk</b> pricing — mostly RBF/MCA, near the top of the cost range. Improving credit generally helps the price over time, though any future offer depends on performance and underwriting at that point.`;
+      : `this is <b>higher-risk</b> pricing — mostly Short-Term Financing, near the top of the cost range. Improving credit generally helps the price over time, though any future offer depends on performance and underwriting at that point.`;
     return `The rate (<b>${rv}${unit}</b>) is set mostly by <b>credit</b>. At a <b>${d.fico}</b> score, ${note}`;
   }
   if(lever==='term'){
     if(d.tib==null) return `Term length is driven by <b>time in business</b>. Add it and this sharpens.`;
     const note = d.tib>=24 ? `the business is past the <b>24-month</b> mark banks and SBA look for, so longer terms — and lower-cost products — are in range.`
-      : d.tib>=12 ? `the business is past 12 months, so non-bank lenders will extend the term; banks and SBA generally look for <b>24</b> before going longer.`
-      : `the business is early, so most lenders keep the term short until it crosses <b>12 months</b>. A shorter term means a larger payment for the same dollars.`;
+      : d.tib>=12 ? `the business is past 12 months, so non-bank options extend the term; banks and SBA generally look for <b>24</b> before going longer.`
+      : `the business is early, so the term stays short until it crosses <b>12 months</b>. A shorter term means a larger payment for the same dollars.`;
     return `The term (<b>${lv.term}</b>) tracks how long the business has been open. At <b>${d.tib} months</b>, ${note}`;
   }
   if(lever==='amount'){
@@ -1122,11 +1406,12 @@ const FAC_META={
 function renderBand(){
   const el=document.getElementById('band');
   if(!S.selected){ el.innerHTML=''; el.style.display='none'; return; }
-  el.style.display='block';
-  const d=currentDeal();
-  el.innerHTML =
-    gwarnHTML(d) +
-    lendersHTML(d);
+  // Lender-pool surface removed (Steve, LEN-155): no named-lender list / match counts on
+  // the Deal Analysis page. The band now only carries the catch-all NAICS warning (with
+  // sibling-code chips) when the code is generic; otherwise it's hidden.
+  const html=gwarnHTML(currentDeal());
+  el.innerHTML=html;
+  el.style.display=html?'block':'none';
 }
 function facCard(kind, d){
   const meta=FAC_META[kind]; const lv=computeLevers(d);
@@ -1219,34 +1504,6 @@ function copyFacTalk(kind){
     const b=document.getElementById('facCopy-'+kind); if(!b)return; b.innerHTML=I.copy+'Copied'; b.classList.add('ok'); setTimeout(()=>{b.innerHTML=I.copy+'Copy';b.classList.remove('ok');},1500);
   });
 }
-
-// lenders (compact, collapsible)
-function lendersHTML(d){
-  if(d.tier==='n') return '';
-  const m=matchPool(d.code,d.tier);
-  const pool=m.pool; const qual=fitCount(pool,S.fico,S.tib,S.rev);
-  const profile=!!(S.fico||S.tib||S.rev);
-  const count=profile?`${qual} fit · ${pool.length} match`:`${pool.length} match`;
-  const open=S.lendersOpen?' open':'';
-  return `<div class="lenders-sec${open}" id="lendersSec">
-    <button class="lenders-head" onclick="toggleLenders()"><span class="lh-t">Lenders that fund this</span><span class="lh-c">${count}</span><span class="fac-chev">${I.dn}</span></button>
-    <div class="lenders-body">
-      ${m.specialty.length?`<div class="lg"><div class="lg-lbl spec">★ Industry specialists<span class="c">${m.specialty.length}</span></div>${m.specialty.map(l=>lrow(l,true,false)).join('')}</div>`:''}
-      ${m.productMatch.length?`<div class="lg"><div class="lg-lbl prod">Product match<span class="c">${m.productMatch.length}</span></div>${m.productMatch.slice(0,8).map(l=>lrow(l,false,false)).join('')}${m.productMatch.length>8?`<div style="font-size:11px;color:var(--muted);margin-top:6px">+${m.productMatch.length-8} more</div>`:''}</div>`:''}
-      ${m.restricted.length?`<div class="lg"><div class="lg-lbl rest">✗ Restrict this industry<span class="c">${m.restricted.length}</span></div>${m.restricted.slice(0,5).map(l=>lrow(l,false,true)).join('')}</div>`:''}
-    </div></div>`;
-}
-function lrow(l,spec,rest){
-  const profile=!!(S.fico||S.tib||S.rev);
-  const qual=lenderQualifies(l,S.fico,S.tib,S.rev);
-  let cls='lr'; if(spec)cls+=' spec'; if(rest)cls+=' rest'; else if(profile&&qual)cls+=' fit'; else if(profile&&!qual)cls+=' below';
-  if(rest) return `<div class="${cls}"><div class="lr-name">${ttEsc(l.name)}</div><div class="lr-prods"></div><span class="lr-rest-note">Declines this</span></div>`;
-  const prods=[...new Set((l.products||[]).map(normProd))].slice(0,3).map(p=>`<span class="lr-chip">${p}</span>`).join('');
-  let reqs=''; if(l.fico>0)reqs+=`${l.fico}+`; if(l.tib>0)reqs+=(reqs?' · ':'')+`${l.tib}mo`;
-  const tag=profile?(qual?`<span class="lr-tag fit">Fits</span>`:`<span class="lr-tag below">Below min</span>`):'';
-  return `<div class="${cls}"><div class="lr-name">${spec?'★ ':''}${ttEsc(l.name)}</div><div class="lr-prods">${prods}</div>${reqs?`<span class="lr-req">${reqs}</span>`:''}${tag}</div>`;
-}
-function toggleLenders(){ S.lendersOpen=!S.lendersOpen; save(); document.getElementById('lendersSec').classList.toggle('open',S.lendersOpen); }
 
 // generic warning
 function gwarnHTML(d){

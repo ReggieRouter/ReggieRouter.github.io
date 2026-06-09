@@ -13,7 +13,10 @@ const PROD_NARR = {
   'Equipment': {short:'equipment financing',         rank:3, credit:true,  why:'the equipment itself secures the deal, so it funds faster and costs less'},
   'Bridge':    {short:'a bridge loan',               rank:2, credit:true,  why:'short-term capital to move now while permanent financing comes together'},
   'Factoring': {short:'invoice factoring',           rank:2, credit:false, why:'cash for your unpaid invoices today instead of waiting 30–90 days to get paid'},
-  'MCA':       {short:'a merchant cash advance',     rank:1, credit:false, why:'fast working capital advanced against your daily sales, with minimal paperwork'},
+  // HARD RULE (LEN-162): client-facing copy never says "MCA" / "merchant cash
+  // advance" — always "revenue-based financing." The legal term lives only in
+  // the disclaimer block (the purchase-of-receivables definition), not the script.
+  'MCA':       {short:'revenue-based financing',     rank:1, credit:false, why:'capital that flexes with your sales, repaid as a small share of revenue'},
   'RBF':       {short:'revenue-based financing',     rank:1, credit:false, why:'capital that flexes with your sales, repaid as a small share of revenue'},
 };
 function pn(label){ return PROD_NARR[label] || {short:label.toLowerCase(), rank:3, credit:true, why:'capital structured around your situation'}; }
@@ -89,7 +92,7 @@ function buildCombinedTracks(code, tier, prods, industry){
 
   const discl =
     (hasMCA ? 'A merchant cash advance is a purchase of future receivables, not a loan, and does not build business credit. ' : '') +
-    'Future funding is never guaranteed — it depends on your business’s performance and each lender’s underwriting, which varies by lender and changes over time. Nothing here is a commitment or offer to lend.';
+    'Nothing here is guaranteed — final terms always depend on your business’s performance, broader market and economic conditions, and each lender’s underwriting at the time, all of which change. Nothing here is a commitment or offer to lend.';
 
   if(!lead){
     const talk =
@@ -137,7 +140,7 @@ Happy to walk through any of it.
     : `You already qualify for strong capital. From here we protect your profile and cash flow so every future round gets cheaper.`;
 
   const angleA =
-`Here’s the shape of it. For a business like yours, the strongest fit right now is ⟦${lead.short}⟧ — ${lead.why}.
+`For a business like yours, the strongest fit right now is ⟦${lead.short}⟧ — ${lead.why}.
 
 ${why}
 
