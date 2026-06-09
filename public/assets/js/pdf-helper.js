@@ -823,15 +823,25 @@ window.PDF_HELPER = {
      * State persists to localStorage['lp_dismiss_<key>']; hidden on reload if set.
      */
     initDismissibles: function() {
+        var self = this;
         document.querySelectorAll('[data-lp-dismiss]').forEach(function(el) {
             var key = 'lp_dismiss_' + el.getAttribute('data-lp-dismiss');
             if (localStorage.getItem(key) === '1') {
                 el.style.display = 'none';
+                // Surface any lp-intro-toggle-btn in the same card on load
+                var card = el.closest('.lp-container, .lp-card, .sc, .card');
+                if (card) {
+                    var toggle = card.querySelector('.lp-intro-toggle-btn');
+                    if (toggle) toggle.style.display = '';
+                }
                 return;
             }
+            // Guard against double-injection when initDismissibles is called again (e.g. after restore)
+            if (el.querySelector('[data-lp-dismiss-btn]')) return;
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.setAttribute('aria-label', 'Dismiss');
+            btn.setAttribute('data-lp-dismiss-btn', '1');
             btn.style.cssText = 'position:absolute;top:6px;right:8px;background:none;border:none;cursor:pointer;font-size:15px;line-height:1;color:#94a3b8;padding:2px 4px;border-radius:3px;';
             btn.textContent = '×';
             btn.addEventListener('mouseenter', function() { btn.style.color = '#1A3C2E'; });
