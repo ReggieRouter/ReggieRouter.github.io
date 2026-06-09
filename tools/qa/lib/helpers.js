@@ -9,6 +9,7 @@ const CALC = {
   dscr: '/calculators/DSCRCalculator.html',
   fund: '/calculators/FundabilityCalculator.html',
   sba: '/calculators/SBAFeesCalculator.html',
+  afford: '/calculators/AffordabilityCalculator.html',
 };
 
 // Read the raw source of a repo file (for static regression assertions).
