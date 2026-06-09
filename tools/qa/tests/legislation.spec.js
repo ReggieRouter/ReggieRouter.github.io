@@ -1,4 +1,4 @@
-// legislation.spec.js — Legislation Tracker (Beta) smoke.
+// legislation.spec.js — Compliance Desk (Beta, formerly "Legislation Tracker") smoke.
 //
 // The map itself fetches us-atlas from a CDN (allowlisted, and the page degrades
 // gracefully if it fails), so this test asserts the parts that render from the

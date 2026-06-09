@@ -126,7 +126,7 @@ var TOOLS = [
   },
   {
     id: "legislation",
-    name: "Legislation Tracker",
+    name: "Compliance Desk",
     desc: "State + federal commercial financing disclosure law, mapped. Know where disclosure rules bite.",
     status: "live",
     group: "data",
