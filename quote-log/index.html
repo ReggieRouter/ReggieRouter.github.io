@@ -51,6 +51,21 @@
   .backlink { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--lp-label);
     text-decoration:none; margin-bottom:18px; }
   .backlink:hover { color:var(--lp-dark); }
+  /* Header row: title + replay-tour affordance (LEN-190) */
+  .ql-headrow { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+  .tour-btn { flex:none; display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600;
+    color:var(--lp-dark); background:#fff; border:1px solid var(--lp-border); border-radius:8px;
+    padding:7px 12px; cursor:pointer; }
+  .tour-btn:hover { background:var(--lp-light); border-color:#BBF7D0; }
+  /* Lead a row with the deal name (samples; future real deals via LEN-137) */
+  .deal-name { font-weight:700; font-size:13px; color:var(--lp-text); margin-bottom:2px; }
+  .doc.sample-tag { display:inline-block; font-size:9px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.05em; color:#92400E; background:#FEF3C7; border:1px solid #FDE68A;
+    border-radius:999px; padding:1px 7px; }
+  /* Sample-mode banner (LEN-190): shown only when the user has no real estimates */
+  .sample-banner { display:flex; align-items:center; gap:9px; margin-bottom:18px; padding:11px 15px;
+    background:#FFFBEB; border:1px solid #FDE68A; border-radius:12px; font-size:13px; color:#92400E; }
+  .sample-banner svg { flex:none; }
 </style>
 <script src="/js/config.js"></script>
 <script type="importmap">
@@ -62,8 +77,20 @@
   <div class="wrap">
     <a class="backlink" href="/" target="_top">← Back to LendPaper</a>
     <div class="ql-head">
-      <h1>Deal Log</h1>
+      <div class="ql-headrow">
+        <h1>Deal Log</h1>
+        <button class="tour-btn" id="tourBtn" type="button" title="Replay the quick tour">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          Take a tour
+        </button>
+      </div>
       <p class="ql-sub">Your saved estimates — restore any deal or download the PDF.</p>
+    </div>
+
+    <!-- Sample-mode banner (LEN-190): only while the user has zero real estimates -->
+    <div id="sampleBanner" class="sample-banner" style="display:none">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <span>These are <strong>sample deals</strong> to show you around. Save a PDF or copy a scenario in any calculator and your real deals take their place.</span>
     </div>
 
     <!-- Soft-gate sign-in upsell (LEN-127): shown only when logged out -->
@@ -101,6 +128,10 @@
   <script type="module">
     import { getProfile } from '/js/auth.js';
     import { fetchEstimates, computeStats, restoreEstimate, calcLabel, FREE_DISPLAY_LIMIT } from '/js/quote-log.js';
+    import { SAMPLE_DEALS } from '/js/deal-log-samples.js';
+    import { runTour } from '/js/deal-log-tour.js';
+
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
 
     // Soft gate (LEN-127): never redirect. Logged-out users see their localStorage
     // quotes + a sign-in/sync upsell — consistent with saveEstimate() working
@@ -148,8 +179,13 @@
       const p = r.params || {};
       const type = r.calculator_type;
       const rec = encodeURIComponent(JSON.stringify(r));
+      const name = p.deal_name || r.prepared_for || '';
+      const lead = name
+        ? `<div class="deal-name">${esc(name)}</div>` +
+          (r._sample ? '<span class="doc sample-tag">Sample</span>' : `<span class="doc">${esc(r.doc_id || '')}</span>`)
+        : `<span class="doc">${esc(r.doc_id || '—')}</span>`;
       return `<tr>
-        <td><span class="doc">${r.doc_id || '—'}</span></td>
+        <td>${lead}</td>
         <td>${fmtDate(r.created_at)}</td>
         <td><span class="calc-pill">${calcLabel(type)}</span></td>
         <td class="num">${amountOf(p)}</td>
@@ -165,12 +201,22 @@
     }
 
     async function render() {
-      const rows = await fetchEstimates({ pro: isPro });
-      const all = await fetchEstimates({ pro: true });
+      const realRows = await fetchEstimates({ pro: isPro });
+      const realAll = await fetchEstimates({ pro: true });
+
+      // Sample mode (LEN-190): user has no real estimates yet → show fun demo
+      // rows so the log never opens empty. Samples never touch storage or DB.
+      const sampleMode = realAll.length === 0;
+      const rows = sampleMode ? SAMPLE_DEALS.slice(0, FREE_DISPLAY_LIMIT) : realRows;
+      const all = sampleMode ? SAMPLE_DEALS : realAll;
+
       const stats = computeStats(all);
       document.getElementById('statMonth').textContent = stats.estimatesThisMonth;
       document.getElementById('statAvg').textContent = stats.avgDealSize != null ? fmtUsd0.format(stats.avgDealSize) : '—';
       document.getElementById('statPdfs').textContent = stats.pdfsGenerated;
+
+      const sb = document.getElementById('sampleBanner');
+      if (sb) sb.style.display = sampleMode ? 'flex' : 'none';
 
       const body = document.getElementById('rows');
       if (!rows.length) {
@@ -181,8 +227,9 @@
 
       // Freemium "Upgrade to Pro" note — only for signed-in free users hitting the
       // cap. Logged-out users get the sign-in/sync banner instead (LEN-127).
+      // Never in sample mode (the count isn't real).
       const note = document.getElementById('freemiumNote');
-      if (signedIn && !isPro && all.length > FREE_DISPLAY_LIMIT) {
+      if (!sampleMode && signedIn && !isPro && all.length > FREE_DISPLAY_LIMIT) {
         document.getElementById('freemiumText').innerHTML =
           `Showing your last ${FREE_DISPLAY_LIMIT} of ${all.length} estimates. <a href="/?p=upgrade" target="_top">Upgrade to Pro</a> for full history, deal naming, shareable links, and CSV export.`;
         note.style.display = 'flex';
@@ -196,9 +243,67 @@
           restoreEstimate(rec, { autoPdf: btn.dataset.mode === 'pdf' });
         });
       });
+
+      return { sampleMode, hasRows: rows.length > 0 };
     }
 
-    render();
+    // ── First-run tour (LEN-190) ──────────────────────────────────────────────
+    const TOUR_SEEN_KEY = 'lp_deallog_tour_seen';
+
+    function buildTourSteps(state) {
+      const steps = [{
+        el: null, kicker: 'Deal Log',
+        title: 'This is your Deal Log',
+        body: 'Every estimate you run in any calculator lands here automatically — named, dated, and ready to reopen. Here’s the 20-second tour.',
+      }, {
+        el: '.ql-tiles',
+        title: 'Your pipeline at a glance',
+        body: 'Deals this month, your average deal size, and PDFs generated — totals update as you work.',
+      }];
+      if (state.hasRows) {
+        steps.push({
+          el: '#rows tr:first-child', pad: 4,
+          title: 'Every deal, its own row',
+          body: state.sampleMode
+            ? 'Each saved estimate becomes a row. These are sample deals to show the ropes — yours replace them the moment you save one.'
+            : 'Each saved estimate becomes a row — deal name, amount, rate, term, and state at a glance.',
+        }, {
+          el: '#rows tr:first-child .act[data-mode="restore"]', pad: 4,
+          title: 'Pick up where you left off',
+          body: 'Restore reopens any deal in its original calculator with every input intact — no re-keying.',
+        }, {
+          el: '#rows tr:first-child .act.pdf', pad: 4,
+          title: 'Borrower-ready in one click',
+          body: 'Or pull the polished, branded PDF straight from the log.',
+        });
+      }
+      if (!signedIn) {
+        steps.push({
+          el: '#signinBanner',
+          title: 'Keep your log everywhere',
+          body: 'Right now these live on this device. Sign in to sync your deals across every browser and keep your full history.',
+        });
+      }
+      steps.push({
+        el: null, kicker: 'You’re set',
+        title: 'Go close something',
+        body: 'Run a calculation, hit Save PDF or Copy Scenario, and it shows up here. Replay this anytime with “Take a tour.”',
+      });
+      return steps;
+    }
+
+    (async () => {
+      const state = await render();
+      const startTour = () => runTour(buildTourSteps(state), {
+        onDone: () => { try { localStorage.setItem(TOUR_SEEN_KEY, '1'); } catch (e) {} },
+      });
+      const tourBtn = document.getElementById('tourBtn');
+      if (tourBtn) tourBtn.addEventListener('click', startTour);
+
+      let seen = false;
+      try { seen = localStorage.getItem(TOUR_SEEN_KEY) === '1'; } catch (e) {}
+      if (!seen) setTimeout(startTour, 450); // let the table paint first
+    })();
   </script>
 </body>
 </html>
