@@ -101,7 +101,7 @@
             .lp-tab { padding: 16px 8px; font-size: 11px; }
             .lp-tab-sub { font-size: 8px; }
             .lp-inputs, .lp-results { padding: 20px; }
-            .lp-howto { padding: 16px; margin-bottom: 24px; }
+            .lp-howto { padding: 16px 34px 16px 18px; margin-bottom: 24px; }
             .hero-grid { gap: 16px; }
             .hero-value { font-size: 24px; }
         }
@@ -176,17 +176,21 @@
             border-bottom: 1px solid var(--lp-border);
         }
         .lp-inputs { padding: 24px; background: #fff; }
-        /* LEN-147 — left-accent style for howto banners */
+        /* LEN-156 — intro banner matches the Amortization calc standard: a soft mint-green
+           filled box (no left-accent bar), sitting atop the active panel's left column.
+           Dismissible (× injected by PDF_HELPER.initDismissibles into this relative box). */
         .lp-howto {
-            border-left: 3px solid var(--lp-green);
-            padding: 4px 8px 4px 12px;
-            font-size: 12px;
+            background-color: #F0FDF4;
+            border-radius: 12px;
+            padding: 16px 34px 16px 18px;   /* right pad leaves room for the × */
+            font-size: 13px;
+            font-weight: 500;
             color: #334155;
             line-height: 1.6;
-            margin-bottom: 20px;
+            margin: 0 0 20px;
             position: relative;
         }
-        .lp-howto strong { color: #1A3C2E; font-weight: 700; }
+        .lp-howto strong { color: #1A3C2E; font-weight: 800; }
         .lp-intro-toggle-btn {
             width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
             border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
@@ -323,14 +327,15 @@
         }
         .add-pos-btn:hover { border-color: var(--lp-green); color: var(--lp-green); background: var(--lp-green-light); }
 
-        /* LEN-139 — verdict as a clean, mostly-white "main field" hero (matches
-           Payment Breakdown's label + big number). Risk band shows as a slim left
-           accent + headline color instead of a saturated full-card fill. */
+        /* LEN-156 — verdict is an on-brand card (Steve: brand-green, text only; standard =
+           Amortization calc). White card, brand-green left accent, 12px radius. Risk level
+           is conveyed by the headline text ("Moderate risk") + the band legend below — NOT
+           by amber/orange/red on the card. setVerdictColor() no longer tints per band. */
         .verdict {
             background: #fff;
             border: 1px solid var(--lp-border);
             border-left: 5px solid var(--lp-green);
-            border-radius: 14px; padding: 18px 20px; margin-bottom: 20px; text-align: left;
+            border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; text-align: left;
         }
         .verdict-eyebrow { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 6px; }
         .verdict-headline { font-size: 30px; font-weight: 900; letter-spacing: -0.02em; line-height: 1.1; color: var(--lp-green); }
@@ -343,14 +348,14 @@
 
         .result-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; margin-bottom: 20px; }
         .result-item {
-            background: #fff; padding: 16px 20px; border-radius: 14px; border: 1px solid var(--lp-border);
+            background: #fff; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--lp-border);
             display: flex; justify-content: space-between; align-items: center;
         }
         .result-label { font-size: 13px; font-weight: 600; color: #64748b; display: flex; align-items: center; }
         .result-val { font-size: 16px; font-weight: 800; color: #1e293b; }
         .result-item.hidden { display: none; }
 
-        .legend { background: #f8fafc; border: 1px solid var(--lp-border); border-radius: 14px; padding: 16px; margin-bottom: 20px; }
+        .legend { background: #f8fafc; border: 1px solid var(--lp-border); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
         .legend-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 14px; }
         .legend-row { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 10px; }
         .legend-row:last-child { margin-bottom: 0; }
@@ -412,7 +417,6 @@
         .lp-doc-context .dc-for { font-size: 15px; font-weight: 800; color: #111827; word-break: break-word; }
         .lp-doc-context .dc-meta { font-size: 11px; color: #6B7280; margin-top: 3px; }
         .lp-doc-context .dc-by { font-size: 11px; color: #374151; margin-top: 2px; }
-        .panel > .lp-howto { margin: 20px 24px 0; }
         .lp-copy-btn {
             background-color: var(--lp-green); color: white; padding: 18px; border: none; border-radius: 10px;
             font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;
@@ -639,21 +643,18 @@
             </button>
         </div>
 
-        <!-- Panel howto / intro copy — sits ABOVE the inputs so the instruction is read first -->
-        <div class="lp-howto" id="howto_net" data-lp-dismiss="fund_howto">
-            Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
-        </div>
-        <div class="lp-howto" id="howto_risk" style="display:none" data-lp-dismiss="fund_howto">
-            Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
-        </div>
-
         <!-- ============ PANEL: NET REQUIREMENT ============ -->
         <div class="panel active" id="panel_net">
             <div class="lp-inputs">
-                <!-- LEN-156 — shared "new funding" field. A normal first field in the active
-                     panel's left column (NOT a full-width strip); relocated on tab switch by
-                     mountFunding() like #deal-context, so it inherits the column width and
-                     can't overhang. Starts here because Net Requirement is the default tab. -->
+                <!-- LEN-156 — intro howto atop the left column (mint box, dismissible). One per
+                     panel so it carries the tab-specific copy; hidden via the shared dismiss key. -->
+                <div class="lp-howto" id="howto_net" data-lp-dismiss="fund_howto">
+                    Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
+                </div>
+                <!-- LEN-156 — shared "new funding" field. A normal field in the active panel's
+                     left column (NOT a full-width strip); relocated on tab switch by mountFunding()
+                     like #deal-context, so it inherits the column width and can't overhang. Sits
+                     just below the intro; starts here because Net Requirement is the default tab. -->
                 <div class="lp-funding-shared" id="funding-shared">
                     <label for="funding_amt">New funding under review</label>
                     <div class="input-wrap">
@@ -717,6 +718,10 @@
         <!-- ============ PANEL: POSITION RISK ============ -->
         <div class="panel" id="panel_risk">
             <div class="lp-inputs">
+                <!-- LEN-156 — intro howto atop the left column (mint box, dismissible) -->
+                <div class="lp-howto" id="howto_risk" data-lp-dismiss="fund_howto">
+                    Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
+                </div>
                 <div class="lp-section-label">Revenue</div>
                 <div class="lp-group" style="margin-bottom: 0;">
                     <label for="monthly_rev">Average monthly revenue <span class="tooltip-icon" data-tip="Gross monthly deposits / sales. Use a true monthly average from bank statements."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span></label>
@@ -1050,7 +1055,10 @@
     function mountFunding(which) {
         const f = document.getElementById('funding-shared');
         const col = document.querySelector('#panel_' + which + ' .lp-inputs');
-        if (f && col && f.parentElement !== col) col.insertBefore(f, col.firstChild);
+        if (!f || !col || f.parentElement === col) return;
+        // Sit just below the panel's intro howto (if present), else at the top of the column.
+        const howto = col.querySelector(':scope > .lp-howto');
+        if (howto) howto.after(f); else col.insertBefore(f, col.firstChild);
     }
 
     // Tooltips
@@ -1277,19 +1285,13 @@
         }
     }
 
+    // LEN-156 — verdict card is always brand-green (Steve: on-brand, text-only). Risk level
+    // is communicated by the headline text + the band legend, not by coloring the card.
+    // `band` is retained in the signature for callers but no longer drives color.
     function setVerdictColor(box, head, sub, eyebrow, band) {
-        const map = {
-            low:  ['--risk-low-bg',  '--risk-low-bd',  '--risk-low-tx'],
-            mod:  ['--risk-mod-bg',  '--risk-mod-bd',  '--risk-mod-tx'],
-            high: ['--risk-high-bg', '--risk-high-bd', '--risk-high-tx'],
-            sev:  ['--risk-sev-bg',  '--risk-sev-bd',  '--risk-sev-tx'],
-        };
-        const [bg, bd, tx] = map[band];
-        const css = getComputedStyle(document.documentElement);
-        // LEN-139 — band color is a slim left accent + headline tint; card stays white.
         box.style.background = '#fff';
-        box.style.borderLeftColor = css.getPropertyValue(bd);
-        head.style.color = css.getPropertyValue(tx);
+        box.style.borderLeftColor = '';   // fall back to .verdict (brand-green accent)
+        head.style.color = '';            // fall back to .verdict-headline (brand green)
         eyebrow.style.color = '';
         sub.style.color = '';
     }
