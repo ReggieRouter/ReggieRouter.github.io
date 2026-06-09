@@ -87,7 +87,7 @@ var TOOLS = [
   },
   {
     id: "fundability",
-    name: "Net & Position",
+    name: "Position & Net",
     desc: "Combined net requirement and stacking risk assessment.",
     status: "live",
     group: "deal-math",

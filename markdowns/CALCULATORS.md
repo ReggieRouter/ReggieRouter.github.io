@@ -83,23 +83,29 @@ Primary: SMB alt-finance sales reps and brokers — on a live call with a borrow
 ## 5. Required Components
 
 ### Intro / definition banner (every calculator, no exceptions)
-Appears at the top of the input panel. Explains what the calculator does in one or
-two sentences. **Standard treatment is left-accent style** — no filled background
-(LEN-147, supersedes mint-green filled treatment from LEN-142):
+Appears **atop the left input column** (inside the card). Explains what the calculator
+does in one or two sentences. **Standard treatment is the mint-green filled box** — the
+Amortization calculator is the canonical reference (LEN-156, supersedes the LEN-147
+left-accent style):
 ```css
 .lp-definition, .lp-howto {
-  border-left: 3px solid var(--lp-green);   /* --lp-green: #1A3C2E */
-  padding-left: 12px;
-  font-size: 12px;
+  background-color: #F0FDF4;          /* mint tint */
+  border-radius: 12px;
+  padding: 16px 34px 16px 18px;       /* right pad leaves room for the × */
+  font-size: 13px;
+  font-weight: 500;
   color: #334155;
   line-height: 1.6;
-  margin-bottom: 20px;
-  position: relative;  /* required for injected × button */
+  margin: 0 0 20px;
+  position: relative;                 /* required for injected × button */
 }
-strong { color: #1A3C2E; font-weight: 700; }
+strong { color: #1A3C2E; font-weight: 800; }
 ```
 - Brand green is `#1A3C2E` (never `#14532D`).
 - **Always dismissible** — see "Intro / how-to banner — must be dismissible" below.
+- **Sweep status (LEN-156):** all calculators now use the mint box — Amortization,
+  Position & Net, DSCR, Payment Fit, and SBA Fees (the last left-accent holdout,
+  converted 6/9). The LEN-147 left-accent style is fully retired.
 
 ### Document details + borrower state placement standard (LEN-147)
 The compliance host (`[data-lp-compliance-host]`) and document-details panel
@@ -283,8 +289,32 @@ When an input is constrained narrower than its container (e.g. a shared "amount"
 field capped to the left-column width so it doesn't bleed into the results column),
 its strip must **not** keep a full-width tinted (`#f8fafc`) fill. The empty tinted
 area beside a short field reads as a layout bug. Use the card color (`#fff`) for the
-strip and let the field's own `max-width` define its footprint; separate with a
-border only, not a fill.
+strip and let the field define its footprint; separate with a border only, not a fill.
+
+**A shared input belongs INSIDE the input column — never in a full-width strip
+above the grid (LEN-156).** A field placed in its own full-width band above a
+two-column panel has no column to inherit width from, so its width must be
+hand-matched to the left column — a fragile coupling that re-breaks at some viewport
+on every attempt (a fixed `max-width` overhangs everywhere but its tuned width; even
+a grid that mirrors the panel drifts under embedding/print). This was the root cause
+of the recurring Fundability "new funding row expands too far right" bug.
+
+**The permanent pattern:** if an input is shared across tabs/panels, keep it as a
+single node and *relocate* it into the active panel's `.lp-inputs` column on tab
+switch — the same way `#deal-context` is moved by `mountDealContext()`. As a normal
+field in the column it inherits the column width automatically, exactly like every
+other calculator's primary input, and **structurally cannot overhang**. There is no
+width logic to maintain.
+```js
+function mountFunding(which) {                       // call from switchTab()
+  const f = document.getElementById('funding-shared');
+  const col = document.querySelector('#panel_' + which + ' .lp-inputs');
+  if (f && col && f.parentElement !== col) col.insertBefore(f, col.firstChild); // top of column
+}
+```
+Style it as a plain field group (`.lp-funding-shared` = bottom border + margin to set
+it apart), not a strip. Never reintroduce a full-width input band above a two-column
+panel.
 
 ---
 
@@ -310,7 +340,7 @@ One name per tool, identical across **tile (`tools.js`) · page `<title>` · on-
 | `amo` | **Amortization** | `AMORTIZATION` | `/tools/payment-breakdown` | Was "Payment Breakdown". Pre-pay/payoff is a feature → subtitle, never the name. Slug frozen for SEO. `logUsage('amortization')` unchanged. |
 | `deal-read` | **Deal Analysis** | (memo) | `/tools/deal-read` | Was "Deal Read". Not "File Analysis" — takes typed inputs, no file upload. *(Lands via the launch branch.)* |
 | `affordability` | **Payment Fit** | `PAYMENT FIT` | `/tools/affordability` | Was "Affordability Check" (LEN-150). Names the primary carry gate; subtitle "Payment & Return Read" carries the ROI half. Slug + `logUsage('affordability')` + `calculator_type:'affordability'` frozen for continuity. Optional upside module is **"Net Upside"** (was "ROI Assumptions") — it outputs `$net/mo`, not a return %. |
-| `fundability` | **Net & Position** | `NET & POSITION` | `/tools/fundability` | Was "Fundability". Names its two outputs (net requirement + stacking position); separates it from DSCR. `'fundability'` analytics keys + slug kept for continuity. |
+| `fundability` | **Position & Net** | `POSITION & NET` | `/tools/fundability` | Was "Fundability". Names its two outputs (net requirement + stacking position); separates it from DSCR. `'fundability'` analytics keys + slug kept for continuity. |
 | `dscr` | **DSCR** | `DSCR ANALYSIS` | `/tools/dscr` | og:title keeps "DSCR Calculator" for search. |
 | `sba-rates` | **SBA Fees** | `SBA 7(a) RATES & FEES` | `/tools/sba-fees` | Was "SBA Scenario Builder"/"SBA rates & fees". Formal PDF/H1 title stays "SBA 7(a) Rates & Fees". |
 
