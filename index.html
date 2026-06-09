@@ -1039,6 +1039,19 @@ input { font-family: inherit; }
 /* ==================== Coming soon grid (3-col) ==================== */
 .soon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
+/* ==================== Resume chip (LEN-51: pick up where you left off) ==================== */
+.resume-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-bottom: 14px; padding: 7px 13px;
+  border: 1px solid var(--border); border-radius: 999px;
+  background: var(--bg); color: var(--text);
+  font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: border-color var(--transition), transform var(--transition);
+}
+.resume-chip:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+.resume-chip-label { color: var(--text-muted); font-weight: 700; }
+.resume-chip-arrow { color: var(--accent); }
+
 @media (max-width: 900px) {
   .featured-grid { grid-template-columns: repeat(2, 1fr); }
   .soon-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1630,6 +1643,7 @@ function handleToolClick(e, id) {
 
 function openTool(t, push, urlOverride) {
   if (!t) return;
+  recordToolUsage(t.id);
   var path = urlOverride || (t.path + window.location.search);
   
   // Append current version to path to prevent iframe / modal caching
@@ -1864,11 +1878,62 @@ function updateGreeting() {
   }
 }
 
+/* ---- Tool usage tracking (LEN-51 Phase 0: behavioral dashboard ordering) ----
+   localStorage-only, zero-friction. No data → grid renders the global default,
+   identical to before. Supabase-backed pins/persona (Phase 1/2) slot into
+   resolveFeaturedIds() later, ahead of the behavioral signal. */
+var LP_USAGE_KEY = 'lp_tool_usage';
+var LP_LAST_TOOL_KEY = 'lp_last_tool';
+
+function getToolUsage() {
+  try { return JSON.parse(localStorage.getItem(LP_USAGE_KEY)) || {}; }
+  catch (e) { return {}; }
+}
+
+function recordToolUsage(id) {
+  if (!id) return;
+  try {
+    var usage = getToolUsage();
+    var entry = usage[id] || { count: 0, last: 0 };
+    entry.count += 1;
+    entry.last = Date.now();
+    usage[id] = entry;
+    localStorage.setItem(LP_USAGE_KEY, JSON.stringify(usage));
+    localStorage.setItem(LP_LAST_TOOL_KEY, id);
+  } catch (e) { /* localStorage unavailable — degrade silently */ }
+}
+
+/* Resolution order: explicit pins → persona default → behavioral usage → global
+   default. Phase 0 implements the last two; the first two slot in above `used`. */
+var defaultFeaturedIds = ['amo', 'registry', 'waterfall'];
+
+function resolveFeaturedIds() {
+  var usage = getToolUsage();
+  var liveIds = TOOLS.filter(function(t){ return t.status === 'live'; })
+                     .map(function(t){ return t.id; });
+
+  // The user's actually-opened tools, most-used first (ties broken by recency).
+  var used = Object.keys(usage).filter(function(id){ return liveIds.indexOf(id) !== -1; });
+  used.sort(function(a, b){
+    if (usage[b].count !== usage[a].count) return usage[b].count - usage[a].count;
+    return (usage[b].last || 0) - (usage[a].last || 0);
+  });
+
+  // Lead with the user's top tools, backfill with the global default, dedup, cap at 3.
+  var ids = [];
+  used.concat(defaultFeaturedIds).forEach(function(id){
+    if (ids.length < 3 && ids.indexOf(id) === -1 && liveIds.indexOf(id) !== -1) ids.push(id);
+  });
+  return ids;
+}
+
 /* ---- Featured card renderer ---- */
-var featuredIds = ['amo', 'registry', 'waterfall'];
+// Slot 0 is always labeled "Most used" (positional) — it's the user's #1 tool,
+// or the global default for users with no usage yet.
 var featuredLabels = {
-  'amo': 'Most used', 'registry': 'Due diligence', 'waterfall': 'Lender match',
-  'sba-rates': 'SBA 7(a)', 'dscr': 'Risk & coverage', 'fundability': 'Deal math'
+  'amo': 'Deal math', 'registry': 'Due diligence', 'waterfall': 'Lender match',
+  'sba-rates': 'SBA 7(a)', 'dscr': 'Risk & coverage', 'fundability': 'Net & position',
+  'deal-read': 'Read a deal', 'affordability': 'Payment fit', 'legislation': 'Compliance'
 };
 
 function featuredCardHTML(t, i, isPrimary) {
@@ -1876,7 +1941,7 @@ function featuredCardHTML(t, i, isPrimary) {
   var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
   var cls = 'featured-card' + (isPrimary ? ' is-featured-primary' : '');
   var onclick = ' onclick="handleToolClick(event, \''+t.id+'\')"';
-  var label = featuredLabels[t.id] || '';
+  var label = isPrimary ? 'Most used' : (featuredLabels[t.id] || '');
   var iconCls = t.color === 'green' ? 'green' : '';
   var delayStyle = isPrimary ? '' : ' style="animation-delay:'+(i*80)+'ms"';
   return '<a'+href+target+' class="'+cls+'"'+onclick+delayStyle+'>'
@@ -1891,11 +1956,24 @@ function featuredCardHTML(t, i, isPrimary) {
 }
 
 function renderHome() {
+  var featuredIds = resolveFeaturedIds();
   var featured = featuredIds.map(function(id){ return TOOLS.find(function(x){ return x.id === id; }); }).filter(Boolean);
   var liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1; });
   var soon = TOOLS.filter(function(t){ return t.status === 'soon'; });
 
-  var html = '<div class="featured-grid">';
+  var html = '';
+
+  // "Resume where you left off" — only after the user has opened a (still-live) tool.
+  var lastId = '';
+  try { lastId = localStorage.getItem(LP_LAST_TOOL_KEY) || ''; } catch (e) {}
+  var lastTool = lastId ? TOOLS.find(function(x){ return x.id === lastId && x.status === 'live'; }) : null;
+  if (lastTool) {
+    html += '<button type="button" class="resume-chip" onclick="handleToolClick(event, \''+lastTool.id+'\')">'
+          + '<span class="resume-chip-label">Resume</span> ' + lastTool.name
+          + ' <span class="resume-chip-arrow">&rarr;</span></button>';
+  }
+
+  html += '<div class="featured-grid">';
   featured.forEach(function(t, i){ html += featuredCardHTML(t, i, i === 0); });
   html += '</div>';
 
