@@ -1951,7 +1951,10 @@
     position: fixed;
     bottom: 24px;
     left: 50%;
-    transform: translateX(-50%) translateY(120%);
+    /* Hidden state must travel its full height + the 24px bottom offset + shadow
+       clearance, else the bar peeks above the fold when nothing is selected.
+       translateY(120%) only moved ~64px for a 53px bar — left a ~13px sliver. */
+    transform: translateX(-50%) translateY(calc(100% + 48px));
     background: var(--color-brand-dark);
     color: #fff;
     padding: 12px 18px;
