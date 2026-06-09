@@ -16,7 +16,9 @@ const { CALC, isAllowedNoise } = require('../lib/helpers');
 const PAGES = [
   { key: 'amo',  url: CALC.amo,  ready: '#valPmt-1',        live: '#valPmt-1' },
   { key: 'dscr', url: CALC.dscr, ready: '.scen-card',       live: '.dscr-val' },
-  { key: 'fund', url: CALC.fund, ready: '#hero_val',        live: '#hero_val' },
+  // fund defaults to the Position Risk tab (LEN-156), so probe its hero (#hero_dsr),
+  // not the Net panel's #hero_val (hidden until you switch tabs).
+  { key: 'fund', url: CALC.fund, ready: '#hero_dsr',        live: '#hero_dsr' },
   { key: 'sba',  url: CALC.sba,  ready: '#res-total-fees-1', live: '#res-total-fees-1' },
   // Affordability has no default numeric inputs (tiles read $0 cold), so the
   // "did it fire?" probe is the borrower talk track, which update() always builds.

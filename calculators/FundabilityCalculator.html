@@ -32,8 +32,8 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Net & Position | LendPaper</title>
-    <meta property="og:title" content="Net & Position — LendPaper" />
+    <title>Position & Net | LendPaper</title>
+    <meta property="og:title" content="Position & Net — LendPaper" />
     <meta property="og:description" content="Net requirement & stacking-position risk — score a borrower's fundability and find the right lender tier instantly. Questions? Email hello@lendpaper.com" />
     <meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
     <meta property="og:url" content="https://lendpaper.com/calculators/FundabilityCalculator" />
@@ -616,7 +616,7 @@
       </text>
     </svg>
     <div class="modal-title">
-        <span class="modal-title-main">Net & Position</span>
+        <span class="modal-title-main">Position & Net</span>
         <span class="modal-title-sub">Borrower Readiness Report</span>
     </div>
 </header>
@@ -624,27 +624,28 @@
 <div class="lp-main">
     <div class="print-header-content">
         <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
-        <h1>Net & Position</h1>
+        <h1>Position & Net</h1>
     </div>
     <div class="lp-container">
         <div class="calc-card-header">
-            <div class="calc-card-header-title">Net & Position<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
+            <div class="calc-card-header-title">Position & Net<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
             <div class="calc-card-header-sub">Borrower Readiness Report</div>
         </div>
         <!-- Tabs -->
         <div class="lp-tabs">
-            <button class="lp-tab active" id="tab_net" onclick="switchTab('net')">
-                Net Requirement
-                <span class="lp-tab-sub">Cash to the borrower</span>
-            </button>
-            <button class="lp-tab" id="tab_risk" onclick="switchTab('risk')">
+            <!-- LEN-156 — Position leads (the differentiated half) and is the default tab. -->
+            <button class="lp-tab active" id="tab_risk" onclick="switchTab('risk')">
                 Position Risk
                 <span class="lp-tab-sub">Can they carry it?</span>
+            </button>
+            <button class="lp-tab" id="tab_net" onclick="switchTab('net')">
+                Net Requirement
+                <span class="lp-tab-sub">Cash to the borrower</span>
             </button>
         </div>
 
         <!-- ============ PANEL: NET REQUIREMENT ============ -->
-        <div class="panel active" id="panel_net">
+        <div class="panel" id="panel_net">
             <div class="lp-inputs">
                 <!-- LEN-156 — intro howto atop the left column (mint box, dismissible). One per
                      panel so it carries the tab-specific copy; hidden via the shared dismiss key. -->
@@ -653,8 +654,8 @@
                 </div>
                 <!-- LEN-156 — shared "new funding" field. A normal field in the active panel's
                      left column (NOT a full-width strip); relocated on tab switch by mountFunding()
-                     like #deal-context, so it inherits the column width and can't overhang. Sits
-                     just below the intro; starts here because Net Requirement is the default tab. -->
+                     like #deal-context, so it inherits the column width and can't overhang. Authored
+                     here, but mountFunding() moves it into the default Position panel on load. -->
                 <div class="lp-funding-shared" id="funding-shared">
                     <label for="funding_amt">New funding under review</label>
                     <div class="input-wrap">
@@ -715,8 +716,8 @@
             </div>
         </div>
 
-        <!-- ============ PANEL: POSITION RISK ============ -->
-        <div class="panel" id="panel_risk">
+        <!-- ============ PANEL: POSITION RISK ============ (default tab — LEN-156) -->
+        <div class="panel active" id="panel_risk">
             <div class="lp-inputs">
                 <!-- LEN-156 — intro howto atop the left column (mint box, dismissible) -->
                 <div class="lp-howto" id="howto_risk" data-lp-dismiss="fund_howto">
@@ -961,7 +962,7 @@
         }
 
         // Setup custom print header band dynamically per plan tier
-        window.PDF_HELPER.initPrintLayout("NET & POSITION");
+        window.PDF_HELPER.initPrintLayout("POSITION & NET");
 
         const cards = document.querySelectorAll('[id^="card-"]');
         if (cards.length > 1) {
@@ -974,7 +975,7 @@
         let _docCtxNode = null;
         try {
             _docCtxNode = mountDocContext(element);
-            await window.PDF_HELPER.generatePDF(element, "NET & POSITION", filename, btn, origText);
+            await window.PDF_HELPER.generatePDF(element, "POSITION & NET", filename, btn, origText);
             // Quote Log (LEN-123)
             try {
                 window.saveEstimate && window.saveEstimate({
@@ -1365,6 +1366,10 @@
         PDF_HELPER.initDismissibles();
         rewireFundHowto();
         PDF_HELPER.persistFields('fund', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor','pdfDealName','pdfLender']);
+        // LEN-156 — Position is the default tab; pull the shared funding + deal-context nodes
+        // (authored in the Net panel) into the Position column on load so they're visible.
+        mountFunding('risk');
+        mountDealContext('risk');
         updateIntroVisibility();
         runAll();
         // Deal Read handoff: prefill the new-position fields from URL params (no PII).
@@ -1395,7 +1400,7 @@
             }
         } catch (e) { /* restore is best-effort */ }
         if (typeof window.PDF_HELPER !== 'undefined') {
-            window.PDF_HELPER.initPrintLayout("NET & POSITION");
+            window.PDF_HELPER.initPrintLayout("POSITION & NET");
         }
         if (window.self !== window.top) {
             document.body.classList.add('is-embedded');
