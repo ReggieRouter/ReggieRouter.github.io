@@ -63,6 +63,14 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-text { font-weight: 600; font-size: 15px; color: var(--text); }
     .loading-sub { font-size: 13px; color: var(--muted); }
+    .jtbd-opts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .jtbd-opt { position: relative; text-align: left; width: 100%; padding: 13px 15px; background: var(--bg); border: 1px solid var(--border-mid); border-radius: 11px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600; cursor: pointer; transition: border-color .16s, background .16s, transform .1s; }
+    .jtbd-opt:hover { border-color: var(--brand-light); background: #fff; transform: translateY(-1px); }
+    .jtbd-opt .jtbd-sub { display: block; font-size: 12px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+    .jtbd-opt.is-suggested { border-color: var(--brand-light); box-shadow: 0 0 0 3px rgba(52,168,120,0.1); }
+    .jtbd-opt.is-suggested::after { content: 'Suggested'; position: absolute; top: 13px; right: 14px; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--brand-mid); }
+    .btn-skip { display: block; width: 100%; text-align: center; background: none; border: none; color: var(--muted); font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; padding: 4px; }
+    .btn-skip:hover { color: var(--text); }
   </style>
 </head>
 <body>
@@ -77,6 +85,7 @@
       <div class="progress">
         <div class="dot active" id="dot-0"></div>
         <div class="dot" id="dot-1"></div>
+        <div class="dot" id="dot-2"></div>
       </div>
       <div id="message" class="msg"></div>
       <div class="steps-viewport">
@@ -92,7 +101,20 @@
             <h1>Where do you work?</h1>
             <p class="subtitle">Your company or brokerage name.</p>
             <input type="text" id="inputCompany" placeholder="Acme Capital LLC" autocomplete="organization" />
-            <button class="btn-next" id="nextFromCompany">Let's go →</button>
+            <button class="btn-next" id="nextFromCompany">Continue →</button>
+          </div>
+          <div class="step" id="step-2">
+            <button class="btn-back" id="backToCompany">← Back</button>
+            <h1>What do you spend most time on?</h1>
+            <p class="subtitle">We'll set your dashboard up around it. You can change this anytime.</p>
+            <div class="jtbd-opts" id="jtbdOpts">
+              <button type="button" class="jtbd-opt" data-persona="dealmath">Running deal math<span class="jtbd-sub">Calculators — payments, coverage, net</span></button>
+              <button type="button" class="jtbd-opt" data-persona="placement">Placing deals with lenders<span class="jtbd-sub">Lender waterfall, deal analysis</span></button>
+              <button type="button" class="jtbd-opt" data-persona="sba">SBA lending<span class="jtbd-sub">DSCR, Secretary of State</span></button>
+              <button type="button" class="jtbd-opt" data-persona="compliance">Compliance &amp; file review<span class="jtbd-sub">Compliance Desk, deal analysis</span></button>
+              <button type="button" class="jtbd-opt" data-persona="diligence">Due diligence &amp; lookups<span class="jtbd-sub">Secretary of State, deal analysis</span></button>
+            </div>
+            <button type="button" class="btn-skip" id="skipJtbd">Skip for now</button>
           </div>
         </div>
       </div>
@@ -126,10 +148,21 @@
     if (existing) { window.location.replace('/auth-callback.html'); throw new Error('profile exists — redirecting'); }
 
     const track = document.getElementById('track');
-    const dots = [0,1].map(i => document.getElementById(`dot-${i}`));
+    const dots = [0,1,2].map(i => document.getElementById(`dot-${i}`));
     const msg = document.getElementById('message');
     let currentStep = 0;
     setTimeout(() => document.getElementById('inputName').focus(), 100);
+
+    // Pre-seed the suggested job-to-be-done from the role captured at early access.
+    const ROLE_TO_PERSONA = { broker: 'placement', iso: 'placement', lender: 'dealmath' };
+    try {
+      const { data: wl } = await supabase.from('waitlist').select('role').eq('email', session.user.email).maybeSingle();
+      const suggested = wl && ROLE_TO_PERSONA[(wl.role || '').toLowerCase()];
+      if (suggested) {
+        const el = document.querySelector('.jtbd-opt[data-persona="' + suggested + '"]');
+        if (el) el.classList.add('is-suggested');
+      }
+    } catch (e) { /* no waitlist row / RLS — fine, user picks manually */ }
 
     function goToStep(n) {
       currentStep = n;
@@ -152,26 +185,40 @@
       if (!v) { showErr('Please enter your name.'); return; }
       goToStep(1);
     }
-    async function submitProfile() {
+    function advanceCompany() {
       const v = document.getElementById('inputCompany').value.trim();
       if (!v) { showErr('Please enter your company name.'); return; }
+      goToStep(2);
+    }
+    async function submitProfile(persona) {
       document.getElementById('loadingOverlay').classList.add('visible');
+      // Drive the dashboard immediately (same browser); durable copy is best-effort below.
+      try { if (persona) localStorage.setItem('lp_persona', persona); } catch (e) {}
       const { error } = await supabase.from('profiles').insert({
         id: session.user.id, email: session.user.email,
         full_name: document.getElementById('inputName').value.trim(),
-        company: v,
+        company: document.getElementById('inputCompany').value.trim(),
         status: 'pending', invite_credits: 5, invites_sent: 0
       });
       if (error) {
         document.getElementById('loadingOverlay').classList.remove('visible');
         showErr(error.message);
-      } else { window.location.href = '/pending.html'; }
+        return;
+      }
+      // Persist persona durably — a no-op until profiles.persona exists
+      // (supabase/profiles_persona.sql), so it never blocks onboarding.
+      if (persona) { try { await supabase.from('profiles').update({ persona }).eq('id', session.user.id); } catch (e) {} }
+      window.location.href = '/pending.html';
     }
     document.getElementById('nextFromName').addEventListener('click', advanceName);
-    document.getElementById('nextFromCompany').addEventListener('click', submitProfile);
+    document.getElementById('nextFromCompany').addEventListener('click', advanceCompany);
     document.getElementById('backToName').addEventListener('click', () => goToStep(0));
+    document.getElementById('backToCompany').addEventListener('click', () => goToStep(1));
     document.getElementById('inputName').addEventListener('keydown', e => { if (e.key === 'Enter') advanceName(); });
-    document.getElementById('inputCompany').addEventListener('keydown', e => { if (e.key === 'Enter') submitProfile(); });
+    document.getElementById('inputCompany').addEventListener('keydown', e => { if (e.key === 'Enter') advanceCompany(); });
+    document.querySelectorAll('.jtbd-opt').forEach(btn =>
+      btn.addEventListener('click', () => submitProfile(btn.getAttribute('data-persona'))));
+    document.getElementById('skipJtbd').addEventListener('click', () => submitProfile(''));
     function showErr(text) { msg.textContent = text; msg.className = 'msg error'; }
   </script>
 </body>
