@@ -28,6 +28,13 @@ async function populate(page, key) {
     await page.waitForSelector('#ebidaInputs input:not([disabled])');
     await setField(page, '#ebidaInputs input >> nth=0', 200000);
     await setField(page, '.scen-card[data-scen-id="1"] input[type="number"] >> nth=0', 500000);
+  } else if (key === 'afford') {
+    await setField(page, '#paymentInput', 929);
+    await setField(page, '#frequencyInput', 'monthly', 'change');
+    await setField(page, '#depositsInput', 16000);
+    await setField(page, '#paybackInput', 44611);
+    await setField(page, '#upsideInput', 3000);
+    await setField(page, '#expensesInput', 9000);
   }
   // fund + sba populate from their on-load defaults.
 }

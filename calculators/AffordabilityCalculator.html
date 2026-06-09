@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) with IFrame Safeguard -->
+<script>
+  const hostname = window.location.hostname;
+  const isProduction = hostname === 'lendpaper.com' || hostname === 'www.lendpaper.com';
+
+  let isSelfEmbedded = false;
+  try {
+    isSelfEmbedded = window.self !== window.top && window.top.location.hostname === hostname;
+  } catch (e) {
+    isSelfEmbedded = false;
+  }
+
+  if (!isProduction || isSelfEmbedded) {
+    window['ga-disable-G-S3YBZV6RF9'] = true;
+    console.log('[GA4] Dev or Self-embedded mode detected. Tracking disabled to prevent double-counting.');
+  }
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S3YBZV6RF9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-S3YBZV6RF9');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Affordability Check | LendPaper</title>
+<link rel="canonical" href="https://lendpaper.com/calculators/AffordabilityCalculator">
+<meta property="og:title" content="Affordability Check — LendPaper" />
+<meta property="og:description" content="See if the borrower can handle the payment and whether the capital pays for itself. Questions? Email hello@lendpaper.com" />
+<meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+<meta property="og:url" content="https://lendpaper.com/calculators/AffordabilityCalculator" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
+<script src="../public/assets/js/calculator-app.js"></script>
+<script src="../public/assets/js/pdf-helper.js"></script>
+<script src="../public/assets/js/compliance-rules.js"></script>
+<script src="../public/assets/js/compliance.js"></script>
+<!-- Quote Log bootstrap (LEN-123): config + supabase importmap + shared util -->
+<script src="../js/config.js"></script>
+<script type="importmap">
+  { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
+</script>
+<script type="module" src="../js/quote-log.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root {
+  --lp-green: #1A3C2E;
+  --lp-green-mid: #2D6A4F;
+  --lp-green-light: #f0fdf4;
+  --lp-green-soft: #ecfdf3;
+  --lp-amber-soft: #fffbeb;
+  --lp-amber-line: #fcd34d;
+  --lp-amber-ink: #92400e;
+  --lp-danger: #991b1b;
+}
+
+.lp-main {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+@media (max-width: 640px) {
+  .lp-main { padding: 16px 12px; }
+  .card-header { height: auto; padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .lp-inputs, .lp-results { padding: 20px !important; }
+}
+
+.lp-card {
+  background: #ffffff;
+  border: 1px solid var(--lp-border);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.card-header {
+  height: 64px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-bottom: 1px solid var(--lp-border);
+  background: #fff;
+  position: relative;
+}
+.card-center-title { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; }
+.back-link {
+  position: relative; z-index: 1;
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 0; background: transparent; cursor: pointer; padding: 4px 6px; margin-left: -6px;
+  color: var(--lp-green); font-family: inherit; font-size: 11px; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase; border-radius: 6px; transition: background 0.15s;
+}
+.back-link:hover { background: var(--lp-green-light); }
+.back-link svg { width: 15px; height: 15px; }
+@media (max-width: 640px) { .back-link span { display: none; } }
+.card-center-title-main {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.card-center-title-sub {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 2px;
+}
+
+.card-body-flex { display: flex; flex-direction: column; }
+@media (min-width: 880px) {
+  .card-body-flex { flex-direction: row; align-items: stretch; }
+}
+
+/* Left Panel: Inputs */
+.lp-inputs { flex: 0 0 42%; padding: 32px; background: #fff; }
+@media (min-width: 880px) { .lp-inputs { border-right: 1px solid var(--lp-border); } }
+
+/* Right Panel: Results */
+.lp-results { flex: 1; padding: 32px; background-color: #f9fafb; display: flex; flex-direction: column; }
+
+/* ── Inputs ───────────────────────────────────────────────── */
+.lp-group { margin-bottom: 22px; }
+.lp-group:last-child { margin-bottom: 0; }
+.section-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+label.field-label {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--lp-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 8px;
+}
+.field-pair { display: grid; grid-template-columns: 1fr 132px; gap: 12px; }
+@media (max-width: 480px) { .field-pair { grid-template-columns: 1fr; } }
+
+.input-wrap {
+  display: flex;
+  align-items: stretch;
+  border: 2px solid var(--lp-border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.input-wrap:focus-within { border-color: var(--lp-green); box-shadow: 0 0 0 2px white, 0 0 0 4px var(--lp-green); }
+.input-prefix {
+  background: #f8fafc;
+  border-right: 1px solid var(--lp-border);
+  padding: 0 14px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--lp-text-muted); font-size: 14px; font-weight: 600;
+}
+.input-field {
+  border: none; padding: 12px; font-size: 16px; font-weight: 600;
+  color: var(--lp-dark); width: 100%; outline: none; font-family: inherit; background: #fff;
+}
+select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer; padding-right: 14px; }
+.helper { margin-top: 8px; color: var(--lp-text-muted); font-size: 12px; line-height: 1.45; }
+
+/* Use-of-funds cycler */
+.cycler { display: flex; gap: 8px; align-items: stretch; }
+.cycler .input-wrap { flex: 1; }
+.icon-btn {
+  flex: 0 0 auto; width: 40px;
+  display: inline-grid; place-items: center;
+  border: 2px solid var(--lp-border); border-radius: 8px; background: #fff;
+  color: var(--lp-green); font-size: 18px; line-height: 1; cursor: pointer; transition: all 0.15s;
+}
+.icon-btn:hover { background: var(--lp-green-light); border-color: var(--lp-green); }
+
+/* Optional ROI group — single light-gray block */
+.optional-group {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+.optional-group .section-label { color: #94a3b8; }
+
+/* CA/NY disclosure toggle */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 12px 0; border-top: 1px solid #eef2f7; border-bottom: 1px solid #eef2f7;
+}
+.toggle-row label { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.025em; }
+.toggle-row input { width: 18px; height: 18px; accent-color: var(--lp-green); cursor: pointer; }
+
+/* Tooltips (circle-i) */
+.tooltip-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; cursor: pointer; margin-left: 6px; opacity: 0.6;
+  transition: opacity 0.15s; vertical-align: middle; color: var(--lp-green);
+}
+.tooltip-icon:hover { opacity: 1; }
+#tt {
+  position: fixed; z-index: 9999; background: #fff; color: #111827;
+  border: 1px solid #e5e7eb; font-size: 12px; padding: 10px 14px; border-radius: 8px;
+  max-width: 250px; pointer-events: none; opacity: 0; transition: opacity 0.15s;
+  font-weight: 400; line-height: 1.5; box-shadow: 0 4px 12px rgba(17,24,39,0.08), 0 1px 3px rgba(17,24,39,0.04);
+}
+#tt.show { opacity: 1; }
+
+/* ── Hero verdict ─────────────────────────────────────────── */
+.af-hero {
+  display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: stretch;
+  padding-bottom: 18px; border-bottom: 1px solid var(--lp-border); margin-bottom: 18px;
+}
+.af-hero-label, .af-metric-label {
+  font-size: 10px; font-weight: 800; color: var(--lp-green);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.af-metric-label { color: #6B7280; }
+.af-verdict-value {
+  margin-top: 8px; color: var(--lp-green);
+  font-size: clamp(40px, 5.2vw, 60px); font-weight: 900; line-height: 0.96; letter-spacing: -0.01em;
+}
+.af-verdict-value.warning { color: #b45309; }
+.af-verdict-value.danger { color: var(--lp-danger); }
+.af-verdict-value.pending { color: #334155; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.05; font-weight: 800; }
+.af-hero-subline { margin-top: 10px; color: #334155; font-size: 15px; font-weight: 700; }
+
+.af-cushion {
+  min-width: 188px; padding: 14px 16px; border: 1px solid var(--lp-border);
+  border-radius: 12px; background: #fff;
+}
+.af-cushion strong { display: block; margin-top: 7px; color: var(--lp-green); font-size: 26px; line-height: 1; font-weight: 900; }
+.af-cushion .note { display: block; margin-top: 6px; color: var(--lp-text-muted); font-size: 11px; }
+.af-cushion .status { display: block; margin-top: 8px; color: #334155; font-size: 12px; font-weight: 700; }
+
+/* ── Payment-load meter ───────────────────────────────────── */
+.af-meter { border: 1px solid var(--lp-border); border-radius: 12px; background: #fff; padding: 12px 14px; margin-bottom: 18px; }
+.af-meter summary { cursor: pointer; list-style: none; }
+.af-meter summary::-webkit-details-marker { display: none; }
+.af-meter-top { display: flex; justify-content: space-between; gap: 12px; color: #334155; font-size: 12px; font-weight: 800; }
+.af-bar { position: relative; height: 7px; margin-top: 10px; border-radius: 999px;
+  background: linear-gradient(90deg, #fee2e2 0 25%, #fef3c7 45% 64%, #dcfce7 82% 100%); }
+.af-marker {
+  position: absolute; top: 50%; left: 100%; width: 13px; height: 13px;
+  border: 2px solid #fff; border-radius: 999px; background: var(--lp-green-mid);
+  box-shadow: 0 2px 8px rgba(15,23,42,0.22); transform: translate(-50%, -50%); transition: left 180ms ease;
+}
+.af-bar-axis { display: none; grid-template-columns: repeat(3, 1fr); color: var(--lp-text-muted); font-size: 11px; font-weight: 700; margin-top: 8px; }
+.af-meter[open] .af-bar-axis { display: grid; }
+.af-bar-axis span:nth-child(2) { text-align: center; }
+.af-bar-axis span:nth-child(3) { text-align: right; }
+
+/* ── Tiles ────────────────────────────────────────────────── */
+.af-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 26px; }
+@media (max-width: 560px) { .af-tiles { grid-template-columns: 1fr; } }
+.af-tile { min-height: 88px; padding: 13px 14px; border: 1px solid var(--lp-border); border-radius: 12px; background: #fff; }
+.af-tile.primary { border-color: #bbf7d0; background: var(--lp-green-soft); }
+.af-tile-value { margin-top: 7px; font-size: 21px; font-weight: 900; line-height: 1; color: #334243; }
+.af-tile-note { margin-top: 6px; color: var(--lp-text-muted); font-size: 11px; line-height: 1.35; }
+
+/* ── Talk track ───────────────────────────────────────────── */
+.result-block { margin-bottom: 26px; }
+.result-block > .section-label { margin-bottom: 10px; }
+.af-talk { border: 1px solid var(--lp-border); border-radius: 12px; background: #fff; overflow: hidden; }
+.af-talk-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--lp-border); background: #f9fafb; }
+.af-talk-head strong { display: block; margin-top: 3px; color: #111827; font-size: 15px; }
+.tabs { display: flex; gap: 6px; }
+.tab {
+  min-height: 32px; padding: 0 11px; border: 1px solid var(--lp-border); border-radius: 8px;
+  background: #fff; color: #334155; font-size: 11px; font-weight: 800; letter-spacing: 0.05em;
+  text-transform: uppercase; cursor: pointer; font-family: inherit;
+}
+.tab.active { border-color: var(--lp-green); background: var(--lp-green); color: #fff; }
+.af-talk-body { max-height: 260px; overflow: auto; padding: 18px; font-size: 15px; line-height: 1.6; white-space: pre-line; color: #1e293b; }
+.af-talk-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 16px; border-top: 1px solid var(--lp-border); flex-wrap: wrap; }
+.stepper { display: flex; align-items: center; gap: 8px; color: var(--lp-text-muted); font-size: 12px; font-weight: 800; }
+.af-talk-foot .foot-actions { display: flex; gap: 8px; }
+.btn-sm {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 0 14px;
+  border-radius: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  cursor: pointer; font-family: inherit; border: 1px solid var(--lp-green); transition: all 0.15s;
+}
+.btn-sm.primary { background: var(--lp-green); color: #fff; }
+.btn-sm.primary:hover { background: var(--lp-green-mid); }
+.btn-sm.secondary { background: #fff; color: var(--lp-green); }
+.btn-sm.secondary:hover { background: var(--lp-green-light); }
+
+/* ── Qualification read ───────────────────────────────────── */
+.af-qual { border: 1px solid var(--lp-border); border-radius: 12px; background: #fff; padding: 18px; }
+.af-qual .body { margin-top: 8px; color: #1e293b; font-size: 14px; line-height: 1.6; }
+.af-qual .body strong { color: var(--lp-green); }
+.af-hurdle { margin-top: 12px; padding-top: 12px; border-top: 1px solid #eef2f7; color: #334155; font-size: 13px; line-height: 1.5; }
+.af-hurdle strong { color: var(--lp-green); }
+.af-insights { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 14px; }
+@media (max-width: 560px) { .af-insights { grid-template-columns: 1fr; } }
+.af-insight { min-height: 86px; padding: 12px; border: 1px solid var(--lp-border); border-radius: 10px; background: #f8fafc; }
+.af-insight strong { display: block; margin-top: 5px; color: var(--lp-green); font-size: 18px; line-height: 1.1; font-weight: 900; }
+.af-insight .note { margin-top: 6px; color: var(--lp-text-muted); font-size: 11px; line-height: 1.35; }
+
+/* ── ROI panel (optional) ─────────────────────────────────── */
+.af-roi { border: 1px solid #bbf7d0; border-radius: 12px; background: var(--lp-green-soft); padding: 18px; margin-bottom: 26px; }
+.af-roi[hidden] { display: none; }
+.af-roi-line { margin-top: 8px; color: var(--lp-green); font-size: 22px; font-weight: 900; line-height: 1.2; }
+.af-roi .note { margin-top: 8px; color: var(--lp-text-muted); font-size: 12px; }
+
+/* ── Disclosures ──────────────────────────────────────────── */
+.af-disclosures { border: 1px solid var(--lp-border); border-radius: 12px; background: #fff; padding: 16px 18px; color: var(--lp-text-muted); font-size: 11px; line-height: 1.5; }
+.af-disclosures ul { margin: 8px 0 0; padding-left: 18px; }
+.af-disclosures li { margin-bottom: 4px; }
+.af-state-disclosure {
+  display: none; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--lp-amber-line);
+  border-radius: 8px; background: var(--lp-amber-soft); color: var(--lp-amber-ink); font-weight: 700;
+}
+.af-state-disclosure.active { display: block; }
+
+/* ── Main actions ─────────────────────────────────────────── */
+.lp-actions { display: flex; flex-direction: column; gap: 12px; margin-top: auto; padding-top: 8px; }
+.lp-cta-primary, .lp-cta-secondary {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  padding: 14px 16px; border-radius: 10px; font-size: 13px; font-weight: 800;
+  letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; transition: all 120ms; font-family: inherit;
+}
+.lp-cta-primary { background: #1A3C2E; color: #fff; border: 1px solid #1A3C2E; }
+.lp-cta-primary:hover { background: #2D6A4F; }
+.lp-cta-secondary { background: transparent; color: #1A3C2E; border: 1px solid #1A3C2E; }
+.lp-cta-secondary:hover { background: #F0FDF4; }
+
+/* ── Definition card (green-tinted, LEN-11 style) ─────────── */
+.lp-definition {
+  background-color: #F0FDF4; border-radius: 12px; border-left: none;
+  padding: 18px 20px; font-size: 13.5px; font-weight: 500; color: #334155;
+  line-height: 1.6; margin-bottom: 24px;
+}
+.lp-definition strong { color: #1A3C2E; font-weight: 800; }
+
+/* ── Document details (LEN-11) ────────────────────────────── */
+.lp-doc-details {
+  max-width: 1040px; margin: 0 auto 14px; padding: 0 4px;
+  border: 1px solid #E5E7EB; border-radius: 10px; background: #fff;
+}
+.lp-doc-details > summary { list-style: none; cursor: pointer; padding: 12px 14px; font-size: 12px; font-weight: 800; color: #111827; }
+.lp-doc-details > summary::-webkit-details-marker { display: none; }
+.lp-doc-details > summary::before { content: "+ "; color: #1A3C2E; font-weight: 900; }
+.lp-doc-details[open] > summary::before { content: "– "; }
+.lp-doc-details > summary span { color: #6B7280; font-weight: 500; }
+.lp-doc-details-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px; padding: 4px 14px 16px; }
+.lp-doc-details-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 10px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em; }
+.lp-doc-details-grid input { padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 7px; font-size: 13px; font-weight: 500; color: #111827; font-family: inherit; background: #fff; }
+.lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
+.lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
+@media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+
+/* Broker/deal context injected into the captured body at print time */
+.lp-doc-context { display: none; }
+body.pdf-export-mode .lp-doc-context {
+  display: block; margin: 0 0 14px; padding: 11px 15px; border: 1px solid #E5E7EB;
+  border-radius: 10px; background: #F9FAFB; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.lp-doc-context .dc-for { font-size: 15px; font-weight: 800; color: #111827; word-break: break-word; }
+.lp-doc-context .dc-meta { font-size: 11px; color: #6B7280; margin-top: 3px; }
+.lp-doc-context .dc-by { font-size: 11px; color: #374151; margin-top: 2px; }
+
+.lp-disclaimer { font-size: 10px; font-weight: 600; text-align: center; padding: 24px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Print-only elements hidden by default on screen */
+.print-header-content, .print-footer-legal, .print-watermark { display: none !important; }
+
+/* ===== Native-print engine (universal) ===== */
+@page { size: letter portrait; margin: 0.45in 0.55in 0.85in 0.55in; }
+@page :first { margin-top: 0.35in; }
+@page { @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 7pt; color: #9CA3AF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding-bottom: 0.15in; } }
+
+@media print {
+  html, body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background: white !important; margin: 0 !important; padding: 0 !important; }
+  body.pdf-export-mode > *:not(.lp-main):not(main):not(.lp-print-footer):not(#lp-print-modal-overlay):not(#tt) { display: none !important; }
+  body.pdf-export-mode .af-tile, body.pdf-export-mode .af-meter, body.pdf-export-mode .af-talk,
+  body.pdf-export-mode .af-qual, body.pdf-export-mode .af-roi, body.pdf-export-mode .af-hero,
+  body.pdf-export-mode .af-cushion, body.pdf-export-mode .af-disclosures, body.pdf-export-mode .af-insight { page-break-inside: avoid !important; break-inside: avoid !important; }
+  body.pdf-export-mode div.hidden { display: none !important; }
+  body.pdf-export-mode sup { display: none !important; }
+  body.pdf-export-mode .tooltip-icon { display: none !important; }
+  .lp-print-footer { display: block !important; position: fixed; bottom: 0.2in; left: 0.55in; right: 0.55in; font-size: 5.5pt; line-height: 1.45; color: #9CA3AF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .lp-print-footer .lp-print-footer-top { font-size: 7pt; color: #6B7280; margin-bottom: 4px; border-top: 0.5pt solid #E5E7EB; padding-top: 6px; }
+  .lp-print-footer a { color: #1A3C2E; font-weight: 700; text-decoration: none; }
+  .lp-print-footer .lp-print-footer-disclaimer { font-size: 5.5pt; color: #9CA3AF; }
+}
+.lp-print-footer { display: none; }
+/* ===== End native-print block ===== */
+
+@media print {
+  body { background: white !important; }
+  .no-print, header, .modal-header, .lp-actions, .lp-disclaimer, .tooltip-icon, .lp-definition,
+  .tabs, .af-talk-foot, .toggle-row { display: none !important; }
+  .print-header-content { display: block !important; text-align: center; margin-bottom: 28px; padding-top: 16px; }
+  .print-header-content img { height: 30px; margin: 0 auto 12px auto; }
+  .print-header-content h1 { font-size: 22px; font-weight: 800; color: #111827; margin: 0; text-transform: uppercase; }
+  .lp-main { padding: 0 !important; display: block !important; }
+  .lp-card { border: none !important; box-shadow: none !important; break-inside: avoid; width: 100% !important; max-width: 100% !important; }
+  .card-header { display: none !important; }
+  .card-body-flex { display: block !important; }
+  .lp-inputs { display: none !important; }
+  .lp-results { background: white !important; padding: 0 !important; display: block !important; }
+  .af-talk-body { max-height: none !important; overflow: visible !important; }
+  .print-footer-legal { display: block !important; margin-top: 36px !important; padding-top: 20px !important; border-top: 1px solid #e5e7eb !important; font-size: 10px !important; color: #94a3b8 !important; text-align: center !important; text-transform: uppercase !important; line-height: 1.5 !important; }
+}
+
+/* Direct PDF Export Styles - Rigorous Hiding (html2pdf path) */
+body.pdf-export-mode { background: white !important; display: block !important; min-height: 0 !important; height: auto !important; }
+body.pdf-export-mode .no-print,
+body.pdf-export-mode header,
+body.pdf-export-mode .modal-header,
+body.pdf-export-mode .lp-actions,
+body.pdf-export-mode .lp-disclaimer,
+body.pdf-export-mode .tooltip-icon,
+body.pdf-export-mode .lp-definition,
+body.pdf-export-mode .tabs,
+body.pdf-export-mode .af-talk-foot,
+body.pdf-export-mode .toggle-row,
+body.pdf-export-mode .card-header,
+body.pdf-export-mode .lp-inputs { display: none !important; }
+
+body.pdf-export-mode .print-header-content { display: block !important; margin-bottom: 20px !important; padding-top: 0 !important; }
+body.pdf-export-mode .print-header-content img { display: none !important; }
+body.pdf-export-mode .print-header-content h1 { display: none !important; }
+
+body.pdf-export-mode .lp-main { display: block !important; max-width: 100% !important; margin: 0 auto !important; padding: 0 !important; width: 100% !important; }
+body.pdf-export-mode .lp-card { border: none !important; box-shadow: none !important; overflow: visible !important; break-inside: avoid; width: 100% !important; max-width: 100% !important; display: block !important; }
+body.pdf-export-mode .card-body-flex { display: block !important; width: 100% !important; }
+body.pdf-export-mode .lp-results { background: white !important; padding: 0 !important; display: block !important; width: 100% !important; }
+body.pdf-export-mode .af-talk-body { max-height: none !important; overflow: visible !important; }
+body.pdf-export-mode .lp-footer-container { display: block !important; width: 100% !important; margin-top: 36px !important; }
+body.pdf-export-mode .print-footer-legal { display: none !important; }
+body.pdf-export-mode .print-watermark { display: none !important; }
+
+/* Embedded (inside index.html SPA iframe) */
+body.is-embedded { background: transparent; }
+body.is-embedded .modal-header { display: none !important; }
+body.is-embedded .lp-main { padding-top: 16px; }
+</style>
+</head>
+<body>
+
+<div id="tt"></div>
+
+<header class="modal-header">
+<svg class="modal-logo" width="124" height="22" viewBox="0 0 224 40" xmlns="http://www.w3.org/2000/svg">
+  <svg x="0" y="6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M4 4v16h11l5-5V4H4z"/>
+    <path d="M15 20v-5h5" stroke-linecap="butt"/>
+    <path d="M9 9v6"/>
+    <path d="M9 15h4"/>
+  </svg>
+  <text x="38" y="31" font-family="Inter, sans-serif" font-size="30" style="letter-spacing:-0.6px">
+    <tspan font-weight="800" fill="#111827">lend</tspan><tspan font-weight="300" fill="#6B7280">paper</tspan><tspan font-weight="800" fill="#1A3C2E">.</tspan>
+  </text>
+</svg>
+<div class="modal-title">
+    <span class="modal-title-main">Affordability Check</span>
+    <span class="modal-title-sub">Payment &amp; Return Read</span>
+</div>
+</header>
+
+<div class="lp-main">
+    <div class="print-header-content">
+        <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
+        <h1>Affordability Check</h1>
+    </div>
+
+    <!-- Compliance: borrower-state selector (LEN-88) — engine renders here; silent unless a rule applies -->
+    <div data-lp-compliance-host class="no-print" style="margin:0 0 10px;"></div>
+
+    <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
+    <details id="pdfDocDetails" class="lp-doc-details no-print">
+        <summary>Document details <span>— optional, appears on the PDF</span></summary>
+        <div class="lp-doc-details-grid">
+            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
+            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Equipment offer"></label>
+            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+        </div>
+        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
+    </details>
+
+    <div class="lp-card">
+        <div class="card-header">
+            <button class="back-link no-print" type="button" id="backLink" title="Back to Deal Read">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                <span>Back to Deal Read</span>
+            </button>
+            <div class="card-center-title">
+                <div class="card-center-title-main">Affordability Check</div>
+                <div class="card-center-title-sub">Payment &amp; Return Read</div>
+            </div>
+        </div>
+        <div class="card-body-flex">
+            <!-- ── Inputs ─────────────────────────────────────── -->
+            <aside class="lp-inputs">
+                <div class="lp-definition">
+                    Answer the two questions that come up before close: <strong>can the borrower handle the payment</strong>, and <strong>does the capital have a clear path to pay for itself?</strong>
+                </div>
+
+                <div class="lp-group">
+                    <div class="section-label">Financing Terms</div>
+
+                    <div class="field-pair" style="margin-bottom:18px;">
+                        <div>
+                            <label class="field-label">Estimated payment</label>
+                            <div class="input-wrap">
+                                <div class="input-prefix">$</div>
+                                <input id="paymentInput" class="input-field" inputmode="decimal" placeholder="929">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="field-label">Frequency</label>
+                            <div class="input-wrap">
+                                <select id="frequencyInput" class="input-field">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly" selected>Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:18px;">
+                        <label class="field-label">Use of funds</label>
+                        <div class="cycler">
+                            <button class="icon-btn" type="button" id="prevProduct" aria-label="Previous use of funds">‹</button>
+                            <div class="input-wrap">
+                                <select id="productInput" class="input-field">
+                                    <option value="working-capital">Working capital</option>
+                                    <option value="equipment">Equipment</option>
+                                    <option value="inventory">Inventory</option>
+                                    <option value="payroll">Payroll</option>
+                                    <option value="marketing">Marketing</option>
+                                    <option value="expansion">Expansion</option>
+                                    <option value="bridge">Bridge capital</option>
+                                    <option value="debt-refinance">Debt refinance</option>
+                                    <option value="emergency-repair">Emergency repair</option>
+                                </select>
+                            </div>
+                            <button class="icon-btn" type="button" id="nextProduct" aria-label="Next use of funds">›</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:18px;">
+                        <label class="field-label">Expected monthly deposits
+                            <span class="tooltip-icon" data-tip="Use 3 months of bank deposits, weight the most recent, and adjust for seasonality."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
+                        </label>
+                        <div class="input-wrap">
+                            <div class="input-prefix">$</div>
+                            <input id="depositsInput" class="input-field" inputmode="decimal" placeholder="16,000">
+                        </div>
+                    </div>
+
+                    <div class="field-pair" style="margin-bottom:18px;">
+                        <div>
+                            <label class="field-label">Full-term cost
+                                <span class="tooltip-icon" data-tip="Total dollars paid if the financing is held to term."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
+                            </label>
+                            <div class="input-wrap">
+                                <div class="input-prefix">$</div>
+                                <input id="paybackInput" class="input-field" inputmode="decimal" placeholder="44,611">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="field-label">Cost source</label>
+                            <div class="input-wrap">
+                                <select id="paybackModeInput" class="input-field">
+                                    <option value="deal" selected>From deal</option>
+                                    <option value="entered">Entered manually</option>
+                                    <option value="estimate">Estimate from payment</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="field-label">Term months</label>
+                        <div class="input-wrap">
+                            <input id="termInput" class="input-field" inputmode="numeric" placeholder="12">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROI Assumptions — single optional group -->
+                <div class="optional-group">
+                    <div class="section-label">ROI Assumptions · Optional</div>
+                    <div style="margin-bottom:14px;">
+                        <label class="field-label">Expected monthly upside from this capital
+                            <span class="tooltip-icon" data-tip="Only enter if the use of funds has a clear, measurable return."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
+                        </label>
+                        <div class="input-wrap">
+                            <div class="input-prefix">$</div>
+                            <input id="upsideInput" class="input-field" inputmode="decimal" placeholder="3,000">
+                        </div>
+                        <div class="helper">Use this to prove expensive capital is worth it.</div>
+                    </div>
+                    <div class="field-pair" style="margin-bottom:14px;">
+                        <div>
+                            <label class="field-label">Days until upside starts</label>
+                            <div class="input-wrap">
+                                <input id="timingInput" class="input-field" inputmode="numeric" placeholder="14">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="field-label">Payment timing</label>
+                            <div class="input-wrap">
+                                <select id="timingRiskInput" class="input-field">
+                                    <option value="steady" selected>Steady</option>
+                                    <option value="frontloaded">Front-loaded</option>
+                                    <option value="delayed">Delayed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="field-label">Business expenses / mo
+                            <span class="tooltip-icon" data-tip="Normal monthly obligations. This is a cushion check, not a full P&amp;L."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
+                        </label>
+                        <div class="input-wrap">
+                            <div class="input-prefix">$</div>
+                            <input id="expensesInput" class="input-field" inputmode="decimal" placeholder="Optional">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disclosures toggle -->
+                <div class="lp-group" style="margin-top:22px;">
+                    <div class="section-label">Disclosures</div>
+                    <div class="toggle-row">
+                        <label for="stateToggle">CA / NY APR disclosure required at point of sale</label>
+                        <input id="stateToggle" type="checkbox">
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ── Results ────────────────────────────────────── -->
+            <section class="lp-results">
+                <!-- 1. Affordability verdict hero -->
+                <div class="af-hero">
+                    <div>
+                        <div class="af-hero-label">Affordability Verdict</div>
+                        <div class="af-verdict-value pending" id="heroVerdict">Ready for terms</div>
+                        <div class="af-hero-subline" id="heroSubline">Add payment and expected deposits when you're ready.</div>
+                    </div>
+                    <div class="af-cushion">
+                        <span class="af-metric-label">Cash Cushion</span>
+                        <strong id="heroPayment">$0</strong>
+                        <span class="note">After payment and listed expenses</span>
+                        <span class="status" id="cashStatus">Awaiting deal terms</span>
+                    </div>
+                </div>
+
+                <!-- 2. Payment-load meter -->
+                <details class="af-meter" id="paymentLoadDetails">
+                    <summary>
+                        <div class="af-meter-top">
+                            <span>Payment load</span>
+                            <span id="barShare">0% of expected deposits</span>
+                        </div>
+                        <div class="af-bar" aria-hidden="true">
+                            <div class="af-marker" id="barMarker"></div>
+                        </div>
+                    </summary>
+                    <div class="af-bar-axis">
+                        <span>High load</span>
+                        <span>20%</span>
+                        <span>Low load</span>
+                    </div>
+                </details>
+
+                <!-- 3. Key tiles -->
+                <div class="af-tiles">
+                    <div class="af-tile">
+                        <span class="af-metric-label">Expected Deposits</span>
+                        <div class="af-tile-value" id="tileDeposits">$0</div>
+                        <div class="af-tile-note">Forward-looking monthly deposits</div>
+                    </div>
+                    <div class="af-tile">
+                        <span class="af-metric-label">Left After Payment</span>
+                        <div class="af-tile-value" id="tileLeft">$0</div>
+                        <div class="af-tile-note">Expected deposits minus payment</div>
+                    </div>
+                    <div class="af-tile">
+                        <span class="af-metric-label">Full-Term Cost</span>
+                        <div class="af-tile-value" id="tilePayback">$0</div>
+                        <div class="af-tile-note" id="tilePaybackNote">Total paid if held to term</div>
+                    </div>
+                </div>
+
+                <!-- 4. What you tell the borrower -->
+                <div class="result-block">
+                    <div class="section-label">What You Tell The Borrower</div>
+                    <div class="af-talk">
+                        <div class="af-talk-head">
+                            <div>
+                                <span class="af-metric-label">Scenario</span>
+                                <strong id="scenarioTitle">Comfortable</strong>
+                            </div>
+                            <div class="tabs no-print">
+                                <button class="tab active" type="button" data-tab="talk">Talk</button>
+                                <button class="tab" type="button" data-tab="text">Text</button>
+                                <button class="tab" type="button" data-tab="email">Email</button>
+                            </div>
+                        </div>
+                        <div class="af-talk-body" id="talkBody"></div>
+                        <div class="af-talk-foot no-print">
+                            <div class="stepper">
+                                <button class="icon-btn" type="button" id="prevScenario" aria-label="Previous scenario" style="width:34px;height:34px;">‹</button>
+                                <span id="scenarioCount">1 / 3</span>
+                                <button class="icon-btn" type="button" id="nextScenario" aria-label="Next scenario" style="width:34px;height:34px;">›</button>
+                            </div>
+                            <div class="foot-actions">
+                                <button class="btn-sm primary" type="button" id="copyScenarioBtn">Copy Scenario</button>
+                                <button class="btn-sm secondary" type="button" id="inlineSaveBtn">Save as PDF</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Qualification read -->
+                <div class="result-block">
+                    <div class="af-qual">
+                        <span class="section-label">Qualification Read</span>
+                        <div class="body" id="qualificationText"></div>
+                        <div class="af-hurdle" id="breakevenText"></div>
+                        <div class="af-insights">
+                            <div class="af-insight">
+                                <span class="af-metric-label">Daily Pressure</span>
+                                <strong id="dailyPressure">$0/day</strong>
+                                <div class="note">Monthly payment spread over operating days</div>
+                            </div>
+                            <div class="af-insight">
+                                <span class="af-metric-label">WOW Coverage</span>
+                                <strong id="weeklyCoverage">0x</strong>
+                                <div class="note">Weekly deposit run-rate vs. weekly payment load</div>
+                            </div>
+                            <div class="af-insight">
+                                <span class="af-metric-label">Expense Cushion</span>
+                                <strong id="expenseCushion">Not entered</strong>
+                                <div class="note">Deposits after expenses and payment</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. ROI panel (optional — only with upside data) -->
+                <div class="af-roi" id="roiPanel" hidden>
+                    <span class="section-label">Projected Net Gain If Capital Performs As Expected</span>
+                    <div class="af-roi-line" id="roiLine"></div>
+                    <div class="note" id="roiNote">This is a projection, not a guarantee.</div>
+                </div>
+
+                <!-- 7. Disclosures -->
+                <div class="result-block" style="margin-bottom:0;">
+                    <div class="af-disclosures">
+                        <span class="section-label" style="color:#6B7280;">Required Disclosures</span>
+                        <ul>
+                            <li>Payment estimates are illustrative. Actual terms are set by the lender at time of funding.</li>
+                            <li>For MCA / RBF: this is a purchase of future receivables, not a loan. The payment schedule is based on a factor rate applied to projected receivables and may vary.</li>
+                            <li>Nothing here is a commitment or offer to lend.</li>
+                            <li>CA / NY: APR disclosure required at point of sale.</li>
+                        </ul>
+                        <div class="af-state-disclosure" id="stateDisclosure">CA / NY disclosure is flagged for this conversation. Provide the required APR disclosure at point of sale before the borrower signs.</div>
+                    </div>
+                </div>
+
+                <!-- Main actions -->
+                <div class="lp-actions no-print">
+                    <button class="lp-cta-primary" type="button" id="savePdfBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        Save Estimate as PDF
+                    </button>
+                    <button class="lp-cta-secondary" type="button" id="copySummaryBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy Summary
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Unified Footer Section -->
+    <div class="lp-footer-container">
+        <div class="lp-disclaimer no-print">
+            DISCLAIMER: ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL TERMS DETERMINED BY LENDER UPON FINAL REVIEW.
+        </div>
+        <div class="print-footer-legal">
+            THESE FIGURES ARE ESTIMATES FOR INFORMATIONAL PURPOSES ONLY. ACTUAL LOAN TERMS, RATES, AND FEES WILL BE DETERMINED BY THE LENDER UPON FINAL REVIEW.
+        </div>
+        <div class="print-watermark">
+            Powered by LendPaper | hello@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.
+        </div>
+    </div>
+</div>
+
+<script>
+const WATERMARK_FOOTER = "Powered by LendPaper | hello@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.";
+
+const els = {
+  payment: document.querySelector("#paymentInput"),
+  frequency: document.querySelector("#frequencyInput"),
+  deposits: document.querySelector("#depositsInput"),
+  payback: document.querySelector("#paybackInput"),
+  paybackMode: document.querySelector("#paybackModeInput"),
+  term: document.querySelector("#termInput"),
+  upside: document.querySelector("#upsideInput"),
+  timing: document.querySelector("#timingInput"),
+  timingRisk: document.querySelector("#timingRiskInput"),
+  expenses: document.querySelector("#expensesInput"),
+  product: document.querySelector("#productInput"),
+  stateToggle: document.querySelector("#stateToggle"),
+  heroVerdict: document.querySelector("#heroVerdict"),
+  heroPayment: document.querySelector("#heroPayment"),
+  heroSubline: document.querySelector("#heroSubline"),
+  cashStatus: document.querySelector("#cashStatus"),
+  tileDeposits: document.querySelector("#tileDeposits"),
+  tileLeft: document.querySelector("#tileLeft"),
+  tilePayback: document.querySelector("#tilePayback"),
+  tilePaybackNote: document.querySelector("#tilePaybackNote"),
+  barShare: document.querySelector("#barShare"),
+  barMarker: document.querySelector("#barMarker"),
+  breakevenText: document.querySelector("#breakevenText"),
+  qualificationText: document.querySelector("#qualificationText"),
+  dailyPressure: document.querySelector("#dailyPressure"),
+  weeklyCoverage: document.querySelector("#weeklyCoverage"),
+  expenseCushion: document.querySelector("#expenseCushion"),
+  roiPanel: document.querySelector("#roiPanel"),
+  roiLine: document.querySelector("#roiLine"),
+  roiNote: document.querySelector("#roiNote"),
+  scenarioTitle: document.querySelector("#scenarioTitle"),
+  scenarioCount: document.querySelector("#scenarioCount"),
+  talkBody: document.querySelector("#talkBody"),
+  stateDisclosure: document.querySelector("#stateDisclosure")
+};
+
+const scenarios = [
+  { key: "comfortable", title: "Comfortable", max: 15 },
+  { key: "tight", title: "Workable but tight", max: 30 },
+  { key: "stretching", title: "Stretching", max: Infinity }
+];
+
+const productOptions = [
+  { value: "working-capital", label: "Working capital", proof: "cash-flow room, faster turns, or a specific operating need" },
+  { value: "equipment", label: "Equipment", proof: "added capacity, reduced downtime, or work the business can now accept" },
+  { value: "inventory", label: "Inventory", proof: "inventory turns, margin, and how quickly stock converts back into deposits" },
+  { value: "payroll", label: "Payroll", proof: "labor coverage tied to jobs, delivery, production, or retention" },
+  { value: "marketing", label: "Marketing", proof: "lead flow, close rate, and payback timing from booked revenue" },
+  { value: "expansion", label: "Expansion", proof: "new location, added service line, or capacity that can be measured against deposits" },
+  { value: "bridge", label: "Bridge capital", proof: "the receivable, contract, or event that clears the bridge" },
+  { value: "debt-refinance", label: "Debt refinance", proof: "payment relief, payoff savings, or a cleaner repayment stack" },
+  { value: "emergency-repair", label: "Emergency repair", proof: "reopening revenue, avoiding downtime, or protecting existing deposits" }
+];
+
+let activeTab = "talk";
+let manualScenarioIndex = null;
+
+const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+
+function cleanNumericInput(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const parsed = parseFloat(value.toString().replace(/,/g, ''));
+  return isNaN(parsed) || !isFinite(parsed) ? null : parsed;
+}
+function parseMoney(value) { return Number(String(value || "").replace(/[^0-9.-]/g, "")) || 0; }
+function formatMoney(value) { return money.format(Math.round(value || 0)); }
+function formatPercent(value) { if (!Number.isFinite(value)) return "0%"; return `${Math.round(value)}%`; }
+function formatMultiple(value) { if (!Number.isFinite(value) || value <= 0) return "0x"; return `${value.toFixed(value >= 10 ? 0 : 1)}x`; }
+
+function normalizeProduct(value) {
+  const normalized = String(value || "working-capital").toLowerCase().replace(/[\s_]+/g, "-");
+  return productOptions.some((p) => p.value === normalized) ? normalized : "working-capital";
+}
+function productMeta(value = els.product.value) {
+  const normalized = normalizeProduct(value);
+  return productOptions.find((p) => p.value === normalized) || productOptions[0];
+}
+function setProduct(value) { els.product.value = productMeta(value).value; update(); }
+
+function monthlyPayment(amount, frequency) {
+  if (frequency === "daily") return amount * 21.67;
+  if (frequency === "weekly") return amount * 4.333;
+  return amount;
+}
+function fullTermCost(payment, frequency, enteredPayback, termMonths, mode) {
+  if (mode === "estimate") return monthlyPayment(payment, frequency) * (termMonths || 12);
+  return enteredPayback;
+}
+function verdictFor(share) {
+  if (!Number.isFinite(share) || share <= 0) return "Pending";
+  if (share < 15) return "Affordable";
+  if (share < 30) return "Workable";
+  return "Stretching";
+}
+function cashStatusFor(values) {
+  if (values.monthly <= 0 || values.deposits <= 0) return "Not qualified yet";
+  const cushion = values.expenses > 0 ? values.afterExpenses : values.left;
+  return cushion >= 0 ? "In the black" : "Shortfall";
+}
+function paybackModeLabel(mode) {
+  if (mode === "estimate") return "Estimated from payment and term";
+  if (mode === "entered") return "Entered manually";
+  return "Picked up from deal";
+}
+function scenarioIndexFor(share) {
+  if (!Number.isFinite(share) || share <= 0) return 0;
+  return scenarios.findIndex((s) => share < s.max);
+}
+
+function currentValues() {
+  const payment = parseMoney(els.payment.value);
+  const deposits = parseMoney(els.deposits.value);
+  const enteredPayback = parseMoney(els.payback.value);
+  const termMonths = Math.max(0, parseMoney(els.term.value));
+  const upside = parseMoney(els.upside.value);
+  const timingDays = Math.max(0, parseMoney(els.timing.value));
+  const expenses = parseMoney(els.expenses.value);
+  const product = productMeta();
+  const monthly = monthlyPayment(payment, els.frequency.value);
+  const payback = fullTermCost(payment, els.frequency.value, enteredPayback, termMonths, els.paybackMode.value);
+  const share = deposits > 0 ? (monthly / deposits) * 100 : 0;
+  const left = deposits - monthly;
+  const afterExpenses = deposits - expenses - monthly;
+  const dailyPayment = monthly / 21.67;
+  const weeklyPayment = monthly / 4.333;
+  const weeklyDeposits = deposits / 4.333;
+  const weeklyCoverage = weeklyPayment > 0 ? weeklyDeposits / weeklyPayment : 0;
+  return {
+    payment, deposits, payback, enteredPayback, paybackMode: els.paybackMode.value,
+    termMonths, upside, timingDays, timingRisk: els.timingRisk.value, expenses, product,
+    monthly, share, left, afterExpenses, dailyPayment, weeklyPayment, weeklyDeposits, weeklyCoverage
+  };
+}
+
+function timingLabel(values) {
+  if (!values.upside) return "No upside entered";
+  if (values.timingDays === 0) return "Immediate upside";
+  if (values.timingDays <= 14) return "Fast upside";
+  if (values.timingDays <= 30) return "Near-term upside";
+  return "Delayed upside";
+}
+
+function qualificationCopy(values, verdict) {
+  if (verdict === "Pending") {
+    return "Add the estimated payment and expected monthly deposits to qualify the payment. Upside, timing, use of funds, and expenses deepen the read once the core payment load is known.";
+  }
+  const pressure = values.timingDays > 30 || values.timingRisk === "delayed"
+    ? "The return starts late enough that the first few payment cycles need their own coverage plan."
+    : values.timingRisk === "frontloaded"
+      ? "The payment load shows up early, so confirm the first payment cycle is covered before relying on the upside."
+      : "The timing looks usable as long as daily and weekly deposits stay near the expected run-rate.";
+  const expenseLine = values.expenses > 0
+    ? `After listed expenses and the payment, the borrower has about <strong>${formatMoney(values.afterExpenses)}/mo</strong> of cushion.`
+    : "Expenses are not entered, so this is a deposits-only qualification read.";
+  const fit = verdict === "Affordable"
+    ? "This is a clean qualification story if the stated use of funds is real."
+    : verdict === "Workable"
+      ? "This can qualify, but it needs a clear use of funds and tighter payment-day monitoring."
+      : "This is a stretch. It should be right-sized or backed by a specific, near-term return.";
+  return `${fit} ${expenseLine} ${pressure}`;
+}
+
+function talkTrack(kind, values, scenario) {
+  const payment = formatMoney(values.monthly);
+  const share = formatPercent(values.share);
+  const left = formatMoney(values.left);
+  const deposits = formatMoney(values.deposits);
+  const breakeven = formatMoney(values.monthly);
+  const timing = timingLabel(values);
+  const proof = values.product.proof;
+  const useLower = values.product.label.toLowerCase();
+
+  const base = {
+    comfortable: {
+      talk: `At ${payment} a month, you're looking at about ${share} of expected monthly deposits going to this payment. That leaves over ${left} coming in every month after it's covered.\n\nThe real question isn't whether you can afford it. It's what you're going to do with the capital. For ${useLower}, the proof point is ${proof}. If it helps you bring in even one extra job a month, it pays for itself before the first statement closes. ${timing} is the timing note we want to keep in view.`,
+      text: `The payment pencils at ${payment}/mo, about ${share} of expected monthly deposits. That leaves roughly ${left}/mo after the payment. For ${useLower}, we want proof around ${proof}. If the capital helps create at least ${breakeven}/mo in new gross profit, it is paying for itself.`,
+      email: `Subject: Affordability check\n\nBased on the estimated payment of ${payment}/mo and expected monthly deposits of ${deposits}, the payment is about ${share} of deposits. That leaves approximately ${left}/mo after the payment.\n\nFor ${useLower}, the proof point is ${proof}. The break-even line is simple: if the capital generates at least ${breakeven}/mo in new gross profit, the payment is covered.`
+    },
+    tight: {
+      talk: `The payment is ${payment} a month, about ${share} of expected monthly deposits. That's workable, but it means you need a plan for what this capital is going to do.\n\nFor ${useLower}, we need to see ${proof}. The math that matters: if this funding helps you generate ${breakeven} more in new business each month, it's already paying for itself. We want to make sure the use of funds, timing, and payment-day coverage are clear before we move forward.`,
+      text: `The estimated payment is ${payment}/mo, about ${share} of deposits. It can work, but the use of funds needs to be clear. For ${useLower}, validate ${proof}. If this creates at least ${breakeven}/mo in new gross profit, it covers the payment.`,
+      email: `Subject: Affordability check\n\nThe estimated payment is ${payment}/mo, which is about ${share} of expected monthly deposits. That is workable, but tighter, so the plan for using the capital matters.\n\nFor ${useLower}, we should validate ${proof}. The key hurdle is ${breakeven}/mo in new gross profit. If the funding can reasonably create that, the payment has a clear path to cover itself.`
+    },
+    stretching: {
+      talk: `I want to be straight with you. At ${payment} a month, we're looking at ${share} of expected monthly deposits going to this payment. That's the upper edge of what's manageable.\n\nFor ${useLower}, we need a hard answer on ${proof}. I'm not telling you not to do it. I'm telling you we need to be very clear about how you're putting this capital to work and how soon it starts helping. If it's general working capital without a clear plan, we might want to right-size the amount.`,
+      text: `At ${payment}/mo, the payment is about ${share} of expected monthly deposits. That is a stretch. For ${useLower}, this only makes sense if ${proof} can produce at least ${breakeven}/mo in new gross profit.`,
+      email: `Subject: Affordability check\n\nAt an estimated ${payment}/mo, this payment is about ${share} of expected monthly deposits. That puts it near the upper edge of what is manageable.\n\nFor ${useLower}, we need to validate ${proof}. Before moving forward, we should be very clear about how the capital will be used, when the return starts, and whether that use can generate at least ${breakeven}/mo in new gross profit. If not, it may be better to right-size the amount.`
+    }
+  };
+  return base[scenario.key][kind];
+}
+
+function update() {
+  const values = currentValues();
+  const hasCoreInputs = values.monthly > 0 && values.deposits > 0;
+  const shareText = hasCoreInputs ? formatPercent(values.share) : "0%";
+  const verdict = hasCoreInputs ? verdictFor(values.share) : "Pending";
+  const verdictText = verdict === "Pending" ? "Ready for terms" : verdict;
+  const cashStatus = cashStatusFor(values);
+  const selectedScenarioIndex = manualScenarioIndex ?? scenarioIndexFor(values.share);
+  const scenario = scenarios[selectedScenarioIndex];
+
+  els.heroVerdict.textContent = verdictText;
+  els.heroVerdict.classList.toggle("pending", verdict === "Pending");
+  els.heroVerdict.classList.toggle("warning", verdict === "Workable");
+  els.heroVerdict.classList.toggle("danger", verdict === "Stretching" || cashStatus === "Shortfall");
+
+  const cushionValue = values.expenses > 0 ? values.afterExpenses : values.left;
+  els.heroPayment.textContent = hasCoreInputs ? formatMoney(cushionValue) : "$0";
+  els.heroSubline.textContent = hasCoreInputs
+    ? `${cashStatus} · ${shareText} of expected deposits`
+    : "Add payment and expected deposits when you're ready.";
+  els.cashStatus.textContent = hasCoreInputs ? `${formatMoney(values.monthly)}/mo est. payment` : "Awaiting deal terms";
+
+  els.tileDeposits.textContent = formatMoney(values.deposits);
+  els.tileLeft.textContent = formatMoney(values.left);
+  els.tilePayback.textContent = formatMoney(values.payback);
+  els.tilePaybackNote.textContent = paybackModeLabel(values.paybackMode);
+
+  els.barShare.textContent = `${shareText} of expected deposits`;
+  const markerPosition = 100 - Math.max(0, Math.min((values.share / 40) * 100, 100));
+  els.barMarker.style.left = `${markerPosition}%`;
+
+  els.breakevenText.innerHTML = `Break-even hurdle: <strong>${formatMoney(values.monthly)}/mo</strong> in new gross profit. For <strong>${values.product.label.toLowerCase()}</strong>, sell against ${values.product.proof}.`;
+  els.qualificationText.innerHTML = qualificationCopy(values, verdict);
+  els.dailyPressure.textContent = `${formatMoney(values.dailyPayment)}/day`;
+  els.weeklyCoverage.textContent = formatMultiple(values.weeklyCoverage);
+  els.expenseCushion.textContent = values.expenses > 0 ? formatMoney(values.afterExpenses) : "Not entered";
+
+  if (values.upside > 0) {
+    const net = values.upside - values.monthly;
+    const annual = net * 12;
+    const timingText = values.timingDays > 0 ? ` · starts in ${Math.round(values.timingDays)} days` : "";
+    const expenseText = values.expenses > 0 ? ` Cushion after expenses and payment: ${formatMoney(values.afterExpenses)}/mo.` : "";
+    els.roiLine.textContent = `${formatMoney(values.upside)} expected upside − ${formatMoney(values.monthly)} payment = ${formatMoney(net)}/mo net · ${formatMoney(annual)}/yr${timingText}`;
+    els.roiNote.textContent = `This is a projection, not a guarantee.${expenseText}`;
+    els.roiPanel.hidden = false;
+  } else {
+    els.roiPanel.hidden = true;
+  }
+
+  els.scenarioTitle.textContent = scenario.title;
+  els.scenarioCount.textContent = `${selectedScenarioIndex + 1} / ${scenarios.length}`;
+  els.talkBody.textContent = talkTrack(activeTab, values, scenario);
+  els.stateDisclosure.classList.toggle("active", els.stateToggle.checked);
+}
+
+/* ── Tooltips (circle-i, #tt) ─────────────────────────────── */
+const tt = document.getElementById('tt');
+function bindTips() {
+  document.querySelectorAll('.tooltip-icon').forEach(el => {
+    if (el.dataset.bound) return;
+    el.dataset.bound = "1";
+    el.addEventListener('mouseenter', e => { tt.textContent = el.dataset.tip; tt.classList.add('show'); });
+    el.addEventListener('mousemove', e => {
+      const m = 12; let x = e.clientX + m, y = e.clientY + m;
+      if (x + tt.offsetWidth > window.innerWidth) x = e.clientX - tt.offsetWidth - m;
+      if (y + tt.offsetHeight > window.innerHeight) y = e.clientY - tt.offsetHeight - m;
+      tt.style.left = x + 'px'; tt.style.top = y + 'px';
+    });
+    el.addEventListener('mouseleave', () => tt.classList.remove('show'));
+  });
+}
+
+/* ── PDF document context (LEN-11) ────────────────────────── */
+function pdfDocContext() {
+  const v = id => (document.getElementById(id)?.value || '').trim();
+  const name = v('pdfPreparedBy'), company = v('pdfPreparedByCompany');
+  return { preparedBy: [name, company].filter(Boolean).join(' · '), preparedFor: v('pdfPreparedFor'), dealName: v('pdfDealName'), lender: v('pdfLender') };
+}
+function mountDocContext(element) {
+  const c = pdfDocContext();
+  if (!c.preparedBy && !c.preparedFor && !c.dealName && !c.lender) return null;
+  const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const rows = [];
+  if (c.preparedFor) rows.push(`<div class="dc-for">Prepared for ${esc(c.preparedFor)}</div>`);
+  const meta = [];
+  if (c.dealName) meta.push(esc(c.dealName));
+  if (c.lender) meta.push(esc(c.lender));
+  if (meta.length) rows.push(`<div class="dc-meta">${meta.join(' · ')}</div>`);
+  if (c.preparedBy) rows.push(`<div class="dc-by">Prepared by ${esc(c.preparedBy)}</div>`);
+  if (!rows.length) return null;
+  const node = document.createElement('div');
+  node.className = 'lp-doc-context';
+  node.innerHTML = rows.join('');
+  const hdr = element.querySelector('.print-header-content');
+  if (hdr) hdr.insertAdjacentElement('afterend', node);
+  else element.insertAdjacentElement('afterbegin', node);
+  return node;
+}
+
+/* ── Save as PDF (routes through PDF_HELPER — 3-layer watermark) ── */
+async function handleSavePDF(btn) {
+  const values = currentValues();
+  // Render gate (BRANDING §7 / PDF.md §3): require payment + deposits
+  if (!(values.monthly > 0 && values.deposits > 0)) {
+    if (window.PDF_HELPER) window.PDF_HELPER.showToast("Complete your inputs to generate this document.", true);
+    return;
+  }
+  const origText = btn.innerHTML;
+  btn.innerHTML = "Generating...";
+  btn.disabled = true;
+
+  window.PDF_HELPER.initPrintLayout("AFFORDABILITY CHECK");
+  const element = document.querySelector('.lp-main');
+  const filename = `LendPaper_Affordability_estimate_${new Date().toISOString().slice(0,10)}.pdf`;
+
+  // NOTE: PDF_HELPER.generatePDF injects the state compliance block (LEN-88) and the
+  // 3-layer watermark itself — do NOT inject the compliance block here or it duplicates.
+  let _docCtxNode = null;
+  try {
+    _docCtxNode = mountDocContext(element);
+    await window.PDF_HELPER.generatePDF(element, "AFFORDABILITY CHECK", filename, btn, origText);
+    logEstimate(true);
+  } finally {
+    if (_docCtxNode) _docCtxNode.remove();
+    btn.innerHTML = origText;
+    btn.disabled = false;
+  }
+}
+
+/* ── Quote Log (LEN-123) ──────────────────────────────────── */
+function logEstimate(pdfGenerated) {
+  try {
+    const v = currentValues();
+    const verdict = (v.monthly > 0 && v.deposits > 0) ? verdictFor(v.share) : "Pending";
+    window.saveEstimate && window.saveEstimate({
+      calculator_type: 'affordability',
+      params: {
+        deal_name: (document.getElementById('pdfDealName')?.value || '').trim() || null,
+        payment: v.payment,
+        frequency: els.frequency.value,
+        monthly_payment: Math.round(v.monthly),
+        use_of_funds: v.product.value,
+        expected_deposits: v.deposits,
+        full_term_cost: Math.round(v.payback),
+        cost_source: v.paybackMode,
+        term_months: v.termMonths || null,
+        share_of_deposits: Math.round(v.share) + '%',
+        verdict: verdict,
+        left_after_payment: Math.round(v.left),
+        expected_upside: v.upside || null,
+        upside_starts_days: v.timingDays || null,
+        payment_timing: v.timingRisk,
+        business_expenses: v.expenses || null
+      },
+      pdf_generated: !!pdfGenerated,
+      prepared_for: document.getElementById('pdfPreparedFor')?.value?.trim() || null
+    });
+  } catch (e) { /* logging must never block */ }
+}
+
+/* ── Copy helpers ─────────────────────────────────────────── */
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); return true; }
+  const ta = document.createElement("textarea");
+  ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.left = "-9999px";
+  document.body.appendChild(ta); ta.select();
+  const ok = document.execCommand("copy"); ta.remove(); return ok;
+}
+function flash(btn, label) {
+  const orig = btn.textContent;
+  btn.textContent = label;
+  setTimeout(() => { btn.textContent = orig; }, 1400);
+}
+function summaryText() {
+  const v = currentValues();
+  const verdict = (v.monthly > 0 && v.deposits > 0) ? verdictFor(v.share) : "Pending";
+  const border = "─────────────────────────────";
+  const rows = {
+    "Affordability": verdict,
+    "Est. payment": `${formatMoney(v.monthly)}/mo`,
+    "Share of deposits": formatPercent(v.share),
+    "Expected deposits": formatMoney(v.deposits),
+    "Left after payment": formatMoney(v.left),
+    "Full-term cost": formatMoney(v.payback)
+  };
+  if (v.upside > 0) rows["Net upside"] = `${formatMoney(v.upside - v.monthly)}/mo`;
+  let out = `[Affordability Check] — LendPaper\n${border}\n`;
+  Object.entries(rows).forEach(([k, val]) => { out += `${k.padEnd(20)}: ${val}\n`; });
+  out += `${border}\n${WATERMARK_FOOTER}`;
+  return out;
+}
+
+/* ── Events ───────────────────────────────────────────────── */
+document.querySelectorAll("#paymentInput, #frequencyInput, #depositsInput, #paybackInput, #paybackModeInput, #termInput, #upsideInput, #timingInput, #timingRiskInput, #expensesInput, #productInput, #stateToggle").forEach((input) => {
+  input.addEventListener("input", () => { if (input !== els.stateToggle) manualScenarioIndex = null; update(); });
+  input.addEventListener("change", update);
+});
+
+document.querySelectorAll(".tab").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeTab = button.dataset.tab;
+    document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
+    update();
+  });
+});
+
+function cycleProduct(direction) {
+  const currentIndex = productOptions.findIndex((p) => p.value === els.product.value);
+  const nextIndex = (currentIndex + direction + productOptions.length) % productOptions.length;
+  setProduct(productOptions[nextIndex].value);
+}
+document.querySelector("#prevProduct").addEventListener("click", () => cycleProduct(-1));
+document.querySelector("#nextProduct").addEventListener("click", () => cycleProduct(1));
+
+document.querySelector("#prevScenario").addEventListener("click", () => {
+  const current = manualScenarioIndex ?? scenarioIndexFor(currentValues().share);
+  manualScenarioIndex = (current + scenarios.length - 1) % scenarios.length; update();
+});
+document.querySelector("#nextScenario").addEventListener("click", () => {
+  const current = manualScenarioIndex ?? scenarioIndexFor(currentValues().share);
+  manualScenarioIndex = (current + 1) % scenarios.length; update();
+});
+
+document.querySelector("#copyScenarioBtn").addEventListener("click", async (e) => {
+  const ok = await copyText(els.talkBody.textContent);
+  flash(e.currentTarget, ok ? "Copied" : "Select text");
+  logEstimate(false);
+});
+document.querySelector("#copySummaryBtn").addEventListener("click", async (e) => {
+  const ok = await copyText(summaryText());
+  if (window.PDF_HELPER) window.PDF_HELPER.showToast(ok ? "Copied!" : "Copy failed", !ok);
+  logEstimate(false);
+});
+document.querySelector("#savePdfBtn").addEventListener("click", (e) => handleSavePDF(e.currentTarget));
+document.querySelector("#inlineSaveBtn").addEventListener("click", (e) => handleSavePDF(e.currentTarget));
+
+/* Back to Deal Read — works embedded (route the SPA top window) or standalone */
+document.querySelector("#backLink").addEventListener("click", () => {
+  try {
+    if (window.self !== window.top) { window.top.location.href = "/?p=tools/deal-read"; return; }
+  } catch (e) { /* cross-origin embed — fall through */ }
+  if (window.history.length > 1) window.history.back();
+  else window.location.href = "/?p=tools/deal-read";
+});
+
+/* ── URL hydration ────────────────────────────────────────── */
+function hydrateFromParams() {
+  const params = new URLSearchParams(window.location.search);
+  const map = {
+    payment: els.payment, freq: els.frequency, deposits: els.deposits, payback: els.payback,
+    paybackMode: els.paybackMode, term: els.term, upside: els.upside, timing: els.timing,
+    timingRisk: els.timingRisk, product: els.product, expenses: els.expenses
+  };
+  Object.entries(map).forEach(([key, el]) => { const value = params.get(key); if (value !== null) el.value = value; });
+
+  const dealName = params.get("deal") || params.get("dealName");
+  if (dealName) { const f = document.getElementById('pdfDealName'); if (f) f.value = dealName; }
+
+  if (params.get("product") !== null) setProduct(params.get("product"));
+
+  const state = String(params.get("state") || "").toLowerCase();
+  if (state === "ca" || state === "ny" || params.get("disclosure") === "true") els.stateToggle.checked = true;
+
+  // If a borrower state was set via the compliance host, reflect CA/NY in the toggle
+  try {
+    const cs = window.LPCompliance && window.LPCompliance.getState && window.LPCompliance.getState();
+    if (cs === 'CA' || cs === 'NY') els.stateToggle.checked = true;
+  } catch (e) {}
+}
+
+/* Compliance host drives the CA/NY callout automatically (LEN-88) */
+document.addEventListener('lp:compliance:statechange', (e) => {
+  const code = e.detail && e.detail.state;
+  if (code === 'CA' || code === 'NY') { els.stateToggle.checked = true; update(); }
+});
+
+/* ── Restore from Quote Log (LEN-123) ─────────────────────── */
+function lpRestoreBanner() {
+  if (document.getElementById('lp-restore-banner')) return;
+  const main = document.querySelector('.lp-main') || document.body;
+  const b = document.createElement('div');
+  b.id = 'lp-restore-banner'; b.className = 'no-print';
+  b.style.cssText = 'display:flex;align-items:center;gap:8px;max-width:1040px;margin:0 auto 12px;padding:9px 13px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:12px;color:#92400E;';
+  b.textContent = 'Restored from your Quote Log — review the figures before generating a new PDF.';
+  main.insertBefore(b, main.firstChild);
+}
+function restoreFromQuoteLog() {
+  try {
+    const rec = window.LPQuoteLog && window.LPQuoteLog.consumeRestorePayload('affordability');
+    if (!rec || !rec.params) return;
+    const p = rec.params, sv = (el, val) => { if (el && val != null && val !== '') el.value = val; };
+    sv(els.payment, p.payment); sv(els.frequency, p.frequency); sv(els.deposits, p.expected_deposits);
+    sv(els.payback, p.full_term_cost); sv(els.paybackMode, p.cost_source); sv(els.term, p.term_months);
+    sv(els.upside, p.expected_upside); sv(els.timing, p.upside_starts_days); sv(els.timingRisk, p.payment_timing);
+    sv(els.expenses, p.business_expenses);
+    if (p.use_of_funds) setProduct(p.use_of_funds);
+    if (p.deal_name) { const f = document.getElementById('pdfDealName'); if (f) f.value = p.deal_name; }
+    lpRestoreBanner();
+  } catch (e) { /* best-effort */ }
+}
+
+window.addEventListener('load', () => {
+  if (typeof window.PDF_HELPER !== 'undefined') window.PDF_HELPER.initPrintLayout("AFFORDABILITY CHECK");
+  hydrateFromParams();
+  restoreFromQuoteLog();
+  bindTips();
+  update();
+  if (window.self !== window.top) document.body.classList.add('is-embedded');
+});
+</script>
+
+<!-- Print-only footer rendered by the browser's native print engine on every page -->
+<div class="lp-print-footer">
+    <div class="lp-print-footer-top">
+        Generated via LendPaper  |  <a href="https://lendpaper.com">lendpaper.com</a>
+        &nbsp;·&nbsp;
+        White-label and custom branding available  -  <a href="mailto:hello@lendpaper.com">hello@lendpaper.com</a>
+    </div>
+    <div class="lp-print-footer-disclaimer">
+        ESTIMATES ONLY — NOT FINANCIAL ADVICE. These figures are preliminary estimates generated by the user (lender, broker, or ISO) using LendPaper software. LendPaper is a software provider only — not a lender, broker, financial advisor, or institution. LendPaper does not verify inputs, guarantee calculations, or determine final loan terms. Actual terms are subject to lender underwriting and final approval.
+        Full terms: <a href="https://lendpaper.com/legal/estimates">lendpaper.com/legal/estimates</a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -13,6 +13,7 @@ const CALC_FILES = [
   'calculators/DSCRCalculator.html',
   'calculators/FundabilityCalculator.html',
   'calculators/SBAFeesCalculator.html',
+  'calculators/AffordabilityCalculator.html',
 ];
 
 test.describe('Recurring regressions', () => {
