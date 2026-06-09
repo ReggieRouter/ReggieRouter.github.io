@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>/* Full-screen takeover: never render inside the SPA tool iframe */
+  if (window.self !== window.top) { try { window.top.location.href = window.location.href; } catch (e) {} }</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>You're on the List — LendPaper</title>
@@ -13,7 +15,7 @@
   <meta name="twitter:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
   <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@125,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -42,7 +44,7 @@
     .clock-minute { stroke: var(--brand-light); stroke-linecap: round; transform-origin: 18px 18px; animation: tickMin 8s linear infinite; }
     .clock-center { fill: var(--brand-light); }
     @keyframes tickMin { to { transform: rotate(360deg); } }
-    h1 { font-family: 'Anybody', sans-serif; font-stretch: 125%; font-weight: 700; font-size: 26px; letter-spacing: -0.01em; color: var(--text); margin-bottom: 8px; }
+    h1 { font-family: 'Figtree', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.01em; color: var(--text); margin-bottom: 8px; }
     .body-text { font-size: 14px; color: var(--muted2); line-height: 1.65; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
     .divider { height: 1px; background: var(--border); margin: 0 0 22px; }
@@ -119,7 +121,8 @@
   (function(){
     const cv=document.getElementById('waveBg'),ctx=cv.getContext('2d');let f=0,raf;
     function rsz(){cv.width=window.innerWidth;cv.height=window.innerHeight;}rsz();window.addEventListener('resize',rsz);
-    const WS=[{yF:.58,amp:.055,freq:.007,spd:.20,a:.030},{yF:.70,amp:.040,freq:.010,spd:-.17,a:.021},{yF:.44,amp:.050,freq:.006,spd:.13,a:.025},{yF:.80,amp:.030,freq:.012,spd:.28,a:.015},{yF:.36,amp:.044,freq:.008,spd:-.11,a:.019}];
+    // Calm wave band hugging the bottom edge (not a haze across the whole page).
+    const WS=[{yF:.88,amp:.020,freq:.0075,spd:.16,a:.03},{yF:.93,amp:.016,freq:.011,spd:-.12,a:.022},{yF:.975,amp:.012,freq:.006,spd:.10,a:.016}];
     function draw(){const W=cv.width,H=cv.height;ctx.clearRect(0,0,W,H);const t=f*.018;WS.forEach(w=>{ctx.beginPath();ctx.strokeStyle=`rgba(26,60,46,${w.a})`;ctx.lineWidth=.9;for(let x=0;x<=W;x+=3){const y=w.yF*H+Math.sin(x*w.freq+t*w.spd)*w.amp*H;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();});f++;raf=requestAnimationFrame(draw);}
     draw();document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelAnimationFrame(raf);else{f=0;draw();}});
     const lc=document.getElementById('logoMark');if(lc){const lx=lc.getContext('2d');let lf=0;(function ld(){const S=28;lx.clearRect(0,0,S,S);lx.save();lx.beginPath();const r=7;lx.moveTo(r,0);lx.lineTo(S-r,0);lx.quadraticCurveTo(S,0,S,r);lx.lineTo(S,S-r);lx.quadraticCurveTo(S,S,S-r,S);lx.lineTo(r,S);lx.quadraticCurveTo(0,S,0,S-r);lx.lineTo(0,r);lx.quadraticCurveTo(0,0,r,0);lx.closePath();lx.clip();const g=lx.createLinearGradient(0,0,0,S);g.addColorStop(0,'#01170e');g.addColorStop(1,'#043220');lx.fillStyle=g;lx.fillRect(0,0,S,S);const t2=lf*.025;[[.485,.12,1,'rgba(8,48,32,.95)'],[.547,.15,-.85,'rgba(16,80,56,.85)'],[.422,.18,1.35,'rgba(52,168,120,.7)']].forEach(([yf,fr,spd,col],i)=>{lx.fillStyle=col;lx.beginPath();lx.moveTo(0,S);for(let x=0;x<=S;x++)lx.lineTo(x,S*yf+Math[i===1?'cos':'sin'](x*fr+t2*spd)*S*.138);lx.lineTo(S,S);lx.fill();});lx.restore();lx.save();const bob=Math.sin(lf*.08)*.6;lx.translate(0,bob);const sc=S/24;lx.scale(sc,sc);lx.shadowColor='rgba(0,0,0,.35)';lx.shadowBlur=1.5;lx.shadowOffsetY=.5;lx.strokeStyle='rgba(255,255,255,.52)';lx.lineWidth=1.7;lx.lineCap='round';lx.lineJoin='round';lx.beginPath();lx.moveTo(4,4);lx.lineTo(4,20);lx.lineTo(15,20);lx.lineTo(20,15);lx.lineTo(20,4);lx.closePath();lx.stroke();lx.beginPath();lx.moveTo(15,20);lx.lineTo(15,15);lx.lineTo(20,15);lx.stroke();lx.beginPath();lx.moveTo(9,9);lx.lineTo(9,15);lx.lineTo(14,15);lx.stroke();lx.restore();lf++;requestAnimationFrame(ld);})();}

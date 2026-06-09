@@ -19,6 +19,23 @@ async function getProfile() {
   return data;
 }
 
+// Gated calculators run inside the SPA tool <iframe> (index.html). A plain
+// window.location redirect would only navigate that iframe, leaving the app
+// sidebar/header visible around the login page. These helpers escape to the
+// top window so login/pending/waitlist take over the whole screen.
+function navTop(path) {
+  try {
+    if (window.self !== window.top) { window.top.location.href = path; return; }
+  } catch (e) { /* cross-origin top: fall through */ }
+  window.location.href = path;
+}
+function currentTopPath() {
+  try {
+    if (window.self !== window.top) return window.top.location.pathname;
+  } catch (e) { /* cross-origin top: fall through */ }
+  return window.location.pathname;
+}
+
 // Call at top of any gated page. Redirects if not logged in or not approved.
 async function requireApprovedUser(redirectTo = '/login.html') {
   // Test-only bypass: the QA harness (LEN-129) sets this window flag via
@@ -29,17 +46,17 @@ async function requireApprovedUser(redirectTo = '/login.html') {
   }
   const profile = await getProfile();
   if (!profile) {
-    sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
-    window.location.href = redirectTo;
+    sessionStorage.setItem('redirectAfterLogin', currentTopPath());
+    navTop(redirectTo);
     return null;
   }
   if (profile.status === 'pending') {
-    window.location.href = '/pending.html';
+    navTop('/pending.html');
     return null;
   }
   if (profile.status === 'denied' || profile.status === 'waitlist') {
     // denied.html is intentionally unrouted — both land on the waitlist soft landing
-    window.location.href = '/waitlist.html';
+    navTop('/waitlist.html');
     return null;
   }
   // Update last_seen
@@ -63,7 +80,7 @@ async function logUsage(tool, event = 'view') {
 
 async function signOut() {
   await supabase.auth.signOut();
-  window.location.href = '/index.html';
+  navTop('/index.html');
 }
 
 export { supabase, getSession, getProfile, requireApprovedUser, logUsage, signOut };
