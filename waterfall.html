@@ -1261,6 +1261,11 @@
     color: #475569;
     border: 1px solid #94A3B8;
   }
+  .lp-type-badge.broker {
+    background: transparent;
+    color: #92400E;
+    border: 1px solid #D4A056;
+  }
 
   /* ----- ROW: position dots for stacking ----- */
   .lp-pos-dots {
@@ -2333,6 +2338,7 @@
               <div class="lp-mf-chips" id="lendertype-chips">
                 <button type="button" class="lp-mf-chip active" data-ltype="direct">Direct</button>
                 <button type="button" class="lp-mf-chip active" data-ltype="marketplace">Marketplace</button>
+                <button type="button" class="lp-mf-chip active" data-ltype="broker">Broker</button>
               </div>
             </div>
             <div class="lp-mf-section">
@@ -7431,6 +7437,9 @@
     if (l.lender_type === 'Direct+')        l.lender_type = 'direct_plus';
     if (l.lender_type === 'Direct Lender')  l.lender_type = 'direct';
     if (l.lender_type === 'Marketplace')    l.lender_type = 'marketplace';
+    // Brokers / ISOs (don't fund directly — place deals with funders). Case-insensitive,
+    // also catches 'Broker/ISO' and bare 'ISO'.
+    if (/^(broker|iso|broker\/iso)$/i.test(l.lender_type || '')) l.lender_type = 'broker';
   });
   // De-dup guard: keep the entry with the most populated fields when names collide.
   // Prevents duplicate rows if future data imports add a same-named lender twice.
@@ -7627,7 +7636,7 @@
     earlyPayoff: false,
     directOnly: false,    // hide pure broker/marketplace aggregators
     hasContact: false,    // has support_phone OR support_email
-    lenderTypes: new Set(['direct', 'direct_plus', 'marketplace']) // all visible by default
+    lenderTypes: new Set(['direct', 'direct_plus', 'marketplace', 'broker']) // all visible by default
   };
 
   let sortColumn = 'name'; // default: alphabetical A→Z
@@ -7675,7 +7684,7 @@
   const renderFooterCount = () => {
     resultsCount.innerHTML =
       `<span style="font-weight:500;color:var(--color-text-primary);font-size:13px;">${lenderData.length}</span>` +
-      `<span style="color:var(--color-text-secondary);font-size:13px;"> verified lenders</span>` +
+      `<span style="color:var(--color-text-secondary);font-size:13px;"> verified providers</span>` +
       `<span style="color:var(--color-border);margin:0 7px;font-size:13px;">·</span>` +
       `<a href="#" id="submit-lender-link" style="font-size:13px;color:var(--color-brand-mid);font-weight:500;text-decoration:none;" ` +
       `onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">+ Submit yours</a>`;
@@ -7780,7 +7789,7 @@
       if (activeFilters.earlyPayoff && !l.early_payment_discount) return false;
       if (activeFilters.directOnly) {
         const lt = l.lender_type || (l.all_risk ? 'marketplace' : 'direct');
-        if (lt === 'marketplace') return false;
+        if (lt === 'marketplace' || lt === 'broker') return false;
       }
       if (activeFilters.hasContact && !l.support_phone && !l.support_email) return false;
       if (activeFilters.minTerm > 0) {
@@ -7793,7 +7802,7 @@
       }
 
       // Lender type inclusion filter (all on by default; user unchecks to hide a type)
-      if (activeFilters.lenderTypes.size < 3) {
+      if (activeFilters.lenderTypes.size < 4) {
         const lt = l.lender_type || 'direct';
         if (!activeFilters.lenderTypes.has(lt)) return false;
       }
@@ -7915,6 +7924,7 @@
         if (lender.hard_collateral) signalsHtml += `<span class="lp-signal collat" data-label="Hard collateral required">${SIG_ICONS.collat}</span>`;
       }
       if (lender.lender_type === 'marketplace') signalsHtml += `<span class="lp-type-badge marketplace" data-label="Matches deals across a network of funders. Requirements, rates, and terms are set by the matched funder at the time of submission.">Marketplace</span>`;
+      if (lender.lender_type === 'broker') signalsHtml += `<span class="lp-type-badge broker" data-label="Broker / ISO — places your deal with third-party funders rather than funding directly. Final requirements, rates, and terms are set by the funder they submit to.">Broker</span>`;
       const signalsRow = signalsHtml ? `<div class="lp-signal-row">${signalsHtml}</div>` : '';
 
       // Get logo or fallback initials
@@ -8421,7 +8431,7 @@
     if (activeFilters.earlyPayoff) n++;
     if (activeFilters.directOnly) n++;
     if (activeFilters.hasContact) n++;
-    if (activeFilters.lenderTypes.size < 3) n += (3 - activeFilters.lenderTypes.size);
+    if (activeFilters.lenderTypes.size < 4) n += (4 - activeFilters.lenderTypes.size);
     return n;
   };
   const syncMoreBtn = () => {
@@ -8538,7 +8548,7 @@
     activeFilters.directOnly = false;
     activeFilters.hasContact = false;
     activeFilters.industry = '';
-    activeFilters.lenderTypes = new Set(['direct', 'direct_plus', 'marketplace']);
+    activeFilters.lenderTypes = new Set(['direct', 'direct_plus', 'marketplace', 'broker']);
     maxfundSlider.value = 0;
     maxfundVal.textContent = 'Any';
     if (mintermSlider) { mintermSlider.value = 0; mintermVal.textContent = 'Any'; }
@@ -8608,7 +8618,7 @@
     activeFilters.freqs = [];
     activeFilters.earlyPayoff = false;
     activeFilters.directOnly = false;
-    activeFilters.lenderTypes = new Set(['direct', 'direct_plus', 'marketplace']);
+    activeFilters.lenderTypes = new Set(['direct', 'direct_plus', 'marketplace', 'broker']);
     if (maxfundSlider) { maxfundSlider.value = 0; maxfundVal.textContent = 'Any'; }
     freqChips.forEach(c => c.classList.remove('active'));
     otherChips.forEach(c => c.classList.remove('active'));
@@ -8753,7 +8763,8 @@
   if (lenderTypeLegendHost) {
     const LTYPE_LEGEND = [
       { badge: '<span class="lp-type-badge marketplace" style="cursor:default;">Marketplace</span>', label: 'Matches deals across a network of funders.' },
-      { badge: '<span style="display:inline-flex;align-items:center;font-size:9.5px;font-weight:500;font-style:italic;letter-spacing:0.02em;border-radius:4px;padding:1px 5px;line-height:1.4;white-space:nowrap;color:#9CA3AF;border:1px dashed #D1D5DB;cursor:default;">No badge</span>', label: 'If there\'s no Marketplace badge, then it\'s a direct lender.' },
+      { badge: '<span class="lp-type-badge broker" style="cursor:default;">Broker</span>', label: 'Broker / ISO — places your deal with third-party funders rather than funding directly.' },
+      { badge: '<span style="display:inline-flex;align-items:center;font-size:9.5px;font-weight:500;font-style:italic;letter-spacing:0.02em;border-radius:4px;padding:1px 5px;line-height:1.4;white-space:nowrap;color:#9CA3AF;border:1px dashed #D1D5DB;cursor:default;">No badge</span>', label: 'No badge = a direct lender (funds with its own capital).' },
     ];
     lenderTypeLegendHost.innerHTML = LTYPE_LEGEND.map(s =>
       `<div style="margin-bottom:8px;">${s.badge}<div style="font-size:11px;color:var(--color-text-secondary);line-height:1.5;margin-top:3px;">${s.label}</div></div>`
