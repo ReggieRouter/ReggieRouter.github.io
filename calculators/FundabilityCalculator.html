@@ -150,13 +150,14 @@
         }
 
         /* Inputs */
+        /* LEN-139 — the funding field is constrained to the left-column width, so the
+           strip must NOT carry a full-width tinted fill: the empty area to the right of
+           a constrained input reads as a layout bug. White (card color) instead. */
         .shared-strip {
             padding: 24px;
-            background: #f8fafc;
+            background: #fff;
             border-bottom: 1px solid var(--lp-border);
         }
-        /* LEN-139 — keep the funding field in the left (inputs) column footprint;
-           don't let it stretch into the results column's horizontal space. */
         .shared-strip .input-wrap { max-width: 380px; }
         .lp-inputs { padding: 24px; background: #fff; }
         .lp-howto {
@@ -170,6 +171,23 @@
             line-height: 1.6;
         }
         .lp-howto strong { color: #1A3C2E; font-weight: 800; }
+        /* LEN-139 — the intro/how-to banner must be dismissible (× to close, restore "i"
+           in the header). Persisted site-wide via localStorage 'lendpaper_intro_dismissed'. */
+        .lp-howto { position: relative; padding-right: 44px; }
+        .lp-howto-x {
+            position: absolute; top: 14px; right: 14px;
+            background: transparent; border: none; cursor: pointer; padding: 0;
+            color: #6B7280; font-weight: 800; font-size: 18px; line-height: 1;
+            transition: color 0.15s;
+        }
+        .lp-howto-x:hover { color: var(--lp-green); }
+        .lp-intro-toggle-btn {
+            width: 16px; height: 16px; display: none; align-items: center; justify-content: center;
+            border-radius: 50%; border: 1px solid #6B7280; color: #6B7280;
+            font-size: 9.5px; font-weight: 800; background: #fff; cursor: pointer;
+            margin-left: 8px; vertical-align: middle; transition: all 0.15s; padding: 0;
+        }
+        .lp-intro-toggle-btn:hover { border-color: var(--lp-green); color: var(--lp-green); }
 
         .takeaway {
             background: #fff;
@@ -612,7 +630,7 @@
     </div>
     <div class="lp-container">
         <div class="calc-card-header">
-            <div class="calc-card-header-title">Fundability</div>
+            <div class="calc-card-header-title">Fundability<button class="lp-intro-toggle-btn no-print" onclick="showIntro()" title="Restore introduction">i</button></div>
             <div class="calc-card-header-sub">Borrower Readiness Report</div>
         </div>
         <!-- Tabs -->
@@ -629,9 +647,11 @@
 
         <!-- Panel howto / intro copy — sits ABOVE the inputs so the instruction is read first -->
         <div class="lp-howto" id="howto_net">
+            <button class="lp-howto-x no-print" onclick="dismissIntro()" aria-label="Dismiss">&times;</button>
             Enter the deal size and net %. You'll see exactly how much <strong>cash your borrower keeps</strong> — and how much is left to clear their existing debt.
         </div>
         <div class="lp-howto" id="howto_risk" style="display:none">
+            <button class="lp-howto-x no-print" onclick="dismissIntro()" aria-label="Dismiss">&times;</button>
             Add the merchant's revenue and any current positions. You'll see whether they can <strong>safely carry this funding</strong> — and exactly what to flag in the conversation.
         </div>
 
@@ -990,12 +1010,23 @@
         document.getElementById('tab_risk').classList.toggle('active', which === 'risk');
         document.getElementById('panel_net').classList.toggle('active', which === 'net');
         document.getElementById('panel_risk').classList.toggle('active', which === 'risk');
-        // Toggle the corresponding intro/howto block (moved out of panels so it sits ABOVE the inputs)
-        document.getElementById('howto_net').style.display = (which === 'net') ? '' : 'none';
-        document.getElementById('howto_risk').style.display = (which === 'risk') ? '' : 'none';
+        // Show the active tab's intro (unless the user dismissed it — LEN-139)
+        updateIntroVisibility();
         // LEN-139 — keep the single deal-context block in the active panel's left column
         mountDealContext(which);
     }
+
+    // LEN-139 — dismissible intro banner (site-wide flag, shared with the other calcs).
+    // Honors both the active tab AND the dismissed flag so switchTab can't re-show it.
+    function updateIntroVisibility() {
+        const dismissed = localStorage.getItem('lendpaper_intro_dismissed') === 'true';
+        const netActive = document.getElementById('panel_net').classList.contains('active');
+        document.getElementById('howto_net').style.display = (!dismissed && netActive) ? '' : 'none';
+        document.getElementById('howto_risk').style.display = (!dismissed && !netActive) ? '' : 'none';
+        document.querySelectorAll('.lp-intro-toggle-btn').forEach(el => { el.style.display = dismissed ? 'inline-flex' : 'none'; });
+    }
+    function dismissIntro() { localStorage.setItem('lendpaper_intro_dismissed', 'true'); updateIntroVisibility(); }
+    function showIntro() { localStorage.removeItem('lendpaper_intro_dismissed'); updateIntroVisibility(); }
 
     // LEN-139 — one shared deal-context node (borrower state + doc details); move it
     // into whichever panel's input column is showing so it's always visible/editable.
@@ -1312,6 +1343,7 @@
     window.onload = () => {
         addPosition(450, 'daily');
         bindTips();
+        updateIntroVisibility();
         runAll();
         // Quote Log restore (LEN-123)
         try {

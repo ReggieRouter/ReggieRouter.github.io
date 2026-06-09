@@ -222,6 +222,28 @@ Powered by LendPaper | hello@lendpaper.com | lendpaper.com — Custom branding a
 - Side-by-side cards must show a delta line beneath monthly payment when 2+ scenarios active
 - Format: `Scenario B costs $X,XXX more/less/mo` — updates reactively
 
+### Intro / how-to banner — must be dismissible (LEN-139)
+The mint-green intro banner at the top of a calculator (`.lp-howto`) is **always
+dismissible**. A banner with no close affordance reads as a permanent nag.
+- An `×` button sits top-right inside the banner → `dismissIntro()`.
+- A small restore `i` button lives in the card header → `showIntro()`; shown only
+  while the banner is dismissed.
+- State persists **site-wide** via `localStorage 'lendpaper_intro_dismissed'`
+  (shared key across all calculators — dismiss once, stays dismissed everywhere).
+- Tab-switching must **not** re-show a dismissed banner. Route visibility through a
+  single `updateIntroVisibility()` that ANDs the active-tab check with the flag;
+  never set `.lp-howto` `display` directly in a tab handler.
+- Canonical implementation: `AmoScheduleCalculator.html` (Tailwind) and
+  `FundabilityCalculator.html` (plain CSS — `.lp-howto-x` / `.lp-intro-toggle-btn`).
+
+### Constrained shared inputs — no orphan tinted band (LEN-139)
+When an input is constrained narrower than its container (e.g. a shared "amount"
+field capped to the left-column width so it doesn't bleed into the results column),
+its strip must **not** keep a full-width tinted (`#f8fafc`) fill. The empty tinted
+area beside a short field reads as a layout bug. Use the card color (`#fff`) for the
+strip and let the field's own `max-width` define its footprint; separate with a
+border only, not a fill.
+
 ---
 
 ## 6. Field Naming Standards
