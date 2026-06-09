@@ -155,13 +155,15 @@
       document.getElementById('loadingOverlay').classList.add('visible');
       // LEN-105: admin-invited emails skip the approval queue
       const { data: invite } = await supabase.from('invites')
-        .select('id').eq('email', (session.user.email || '').toLowerCase()).maybeSingle();
+        .select('id, role').eq('email', (session.user.email || '').toLowerCase()).maybeSingle();
       const profile = {
         id: session.user.id, email: session.user.email,
         full_name: document.getElementById('inputName').value.trim(),
         company: v,
         status: invite ? 'approved' : 'pending', invite_credits: 5, invites_sent: 0
       };
+      // LEN-105: carry the admin-assigned role onto the new profile (onboarding doesn't ask for it)
+      if (invite && invite.role) profile.role = invite.role;
       if (invite) profile.approved_at = new Date().toISOString();
       const { error } = await supabase.from('profiles').insert(profile);
       if (error) {

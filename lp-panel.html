@@ -833,6 +833,16 @@ header {
       <input type="text" id="inv-name" class="inv-input" placeholder="First Last (optional)" />
       <label class="inv-label" for="inv-email">Email</label>
       <input type="email" id="inv-email" class="inv-input" placeholder="name@company.com" />
+      <label class="inv-label" for="inv-company">Company</label>
+      <input type="text" id="inv-company" class="inv-input" placeholder="Company (optional)" />
+      <label class="inv-label" for="inv-role">Role</label>
+      <select id="inv-role" class="inv-input">
+        <option value="">Select role (optional)</option>
+        <option value="broker">Broker</option>
+        <option value="iso">ISO</option>
+        <option value="lender">Lender</option>
+        <option value="other">Other</option>
+      </select>
       <div class="modal-actions" style="margin-top:18px">
         <button class="btn-cancel" onclick="closeInviteModal()">Cancel</button>
         <button class="btn-mem-approve" style="padding:8px 16px;font-size:13px" id="inv-submit" onclick="inviteSubmit()">Add &amp; compose</button>
@@ -2518,7 +2528,7 @@ async function loadMembers() {
   memProfiles = data || [];
   // LEN-105: admin-initiated invites (table may not exist until the migration runs)
   const { data: inv, error: invErr } = await sb.from('invites')
-    .select('id, email, full_name, created_at, accepted_at')
+    .select('id, email, full_name, company, role, created_at, accepted_at')
     .order('created_at', { ascending: false });
   memInvites = inv || [];
   memInvitesError = invErr ? invErr.message : null;
@@ -2667,16 +2677,18 @@ function memRenderInvitedTable(wrap) {
   }
   const q = (document.getElementById('mem-search')?.value || '').toLowerCase();
   let rows = memInvites;
-  if (q) rows = rows.filter(i => [i.full_name, i.email].join(' ').toLowerCase().includes(q));
+  if (q) rows = rows.filter(i => [i.full_name, i.email, i.company].join(' ').toLowerCase().includes(q));
   if (!rows.length) {
     wrap.innerHTML = `<p style="color:var(--muted);font-size:13px">${q ? 'No invites match your search.' : 'No invites sent yet — click + Invite to send the first one.'}</p>`;
     return;
   }
   const fmt = d => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
   wrap.innerHTML = `<table class="mem-table">
-    <thead><tr><th>Invitee</th><th>Invited</th><th>Status</th><th>Actions</th></tr></thead>
+    <thead><tr><th>Invitee</th><th>Company</th><th>Role</th><th>Invited</th><th>Status</th><th>Actions</th></tr></thead>
     <tbody>${rows.map(i => `<tr>
       <td><div class="mem-user"><span class="mem-avatar">${esc(memInitials(i.full_name || i.email))}</span><div><div class="mem-name">${esc(i.full_name || '—')}</div><div class="mem-email">${esc(i.email)}</div></div></div></td>
+      <td style="color:var(--muted)">${esc(i.company || '—')}</td>
+      <td>${i.role ? memRolePill(i.role) : '<span style="color:var(--muted)">—</span>'}</td>
       <td style="color:var(--muted)">${fmt(i.created_at)}</td>
       <td>${i.accepted_at ? `<span class="mem-badge approved">Accepted ${fmt(i.accepted_at)}</span>` : '<span class="mem-badge invited">Awaiting sign-in</span>'}</td>
       <td style="white-space:nowrap">
@@ -2691,6 +2703,8 @@ function openInviteModal() {
   invCurrent = null;
   document.getElementById('inv-name').value = '';
   document.getElementById('inv-email').value = '';
+  document.getElementById('inv-company').value = '';
+  document.getElementById('inv-role').value = '';
   document.getElementById('invite-step-form').style.display = '';
   document.getElementById('invite-step-send').style.display = 'none';
   document.getElementById('invite-modal').style.display = 'flex';
@@ -2700,13 +2714,15 @@ function openInviteModal() {
 function closeInviteModal() { document.getElementById('invite-modal').style.display = 'none'; }
 
 async function inviteSubmit() {
-  const name  = document.getElementById('inv-name').value.trim();
-  const email = document.getElementById('inv-email').value.trim().toLowerCase();
+  const name    = document.getElementById('inv-name').value.trim();
+  const email   = document.getElementById('inv-email').value.trim().toLowerCase();
+  const company = document.getElementById('inv-company').value.trim();
+  const role    = document.getElementById('inv-role').value;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Enter a valid email address'); return; }
   const btn = document.getElementById('inv-submit');
   btn.disabled = true; btn.textContent = '…';
   const { data: { user } } = await sb.auth.getUser();
-  const { error } = await sb.from('invites').insert({ email, full_name: name || null, invited_by: user?.id });
+  const { error } = await sb.from('invites').insert({ email, full_name: name || null, company: company || null, role: role || null, invited_by: user?.id });
   btn.disabled = false; btn.textContent = 'Add & compose';
   if (error && error.code === '23505') {
     toast('Already invited — reopening the message');
@@ -2763,8 +2779,8 @@ function memExportCSV() {
   const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   let lines;
   if (memTab === 'invited') {
-    lines = [['Name','Email','Invited','Accepted'].join(','), ...memInvites.map(i => [
-      cell(i.full_name), cell(i.email),
+    lines = [['Name','Email','Company','Role','Invited','Accepted'].join(','), ...memInvites.map(i => [
+      cell(i.full_name), cell(i.email), cell(i.company), cell(i.role),
       cell(i.created_at ? new Date(i.created_at).toLocaleDateString() : ''),
       cell(i.accepted_at ? new Date(i.accepted_at).toLocaleDateString() : '')
     ].join(','))];
