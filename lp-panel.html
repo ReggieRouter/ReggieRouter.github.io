@@ -485,19 +485,24 @@ header {
 .override-count-badge { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 99px; background: var(--amber-light); color: var(--amber); font-size: 11px; font-weight: 700; }
 
 /* ── SPOT CHECK MODAL ────────────────────────────── */
-.sc-item { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+.sc-item { display: flex; align-items: flex-start; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--border); gap: 12px; }
 .sc-item:last-child { border-bottom: none; }
 .sc-item-left { flex: 1; min-width: 0; }
-.sc-item-name { font-size: 14px; font-weight: 600; }
-.sc-item-url { font-size: 12px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sc-item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.btn-sc-visit { background: var(--green-pale); color: var(--green); border: 1px solid #86EFAC; border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
-.btn-sc-visit:hover { background: var(--green-light); }
-.btn-sc-visit.visited { opacity: 0.55; }
+.sc-item-name { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.sc-field { font-family: monospace; font-size: 11px; font-weight: 500; color: var(--muted); background: var(--green-light); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; }
+.sc-diff { font-size: 13px; margin-top: 4px; line-height: 1.5; word-break: break-word; }
+.sc-arrow { color: var(--muted); margin: 0 5px; }
+.sc-src { display: inline-block; margin-top: 4px; font-size: 11px; color: var(--muted); text-decoration: none; }
+.sc-src:hover { color: var(--green); text-decoration: underline; }
+.sc-item-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.sc-resolved { font-size: 12px; font-weight: 600; color: var(--green-mid); white-space: nowrap; }
+.sc-resolved.reverted { color: var(--muted); }
 .sc-check { font-size: 15px; color: var(--green-mid); display: none; }
 .sc-check.show { display: inline; }
 .sc-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 .sc-progress-txt { font-size: 13px; color: var(--muted); }
+.btn-sc-keepall { background: none; border: none; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0; }
+.btn-sc-keepall:hover { color: var(--green); }
 .btn-proceed { background: var(--green); color: var(--white); border: none; border-radius: 7px; padding: 9px 18px; font-size: 13px; font-weight: 700; cursor: pointer; }
 .btn-proceed:hover { background: var(--green-mid); }
 .btn-proceed:disabled { background: #94A3B8; cursor: not-allowed; }
@@ -890,11 +895,14 @@ header {
 <!-- SPOT CHECK MODAL -->
 <div class="modal-overlay" id="spotcheck-modal" style="display:none">
   <div class="modal-box" style="width:560px">
-    <h3>Spot Check — Verify Live Sites</h3>
+    <h3>Spot Check — Review Edits</h3>
     <p id="sc-modal-desc" style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px"></p>
     <div id="sc-items"></div>
     <div class="sc-footer">
-      <span class="sc-progress-txt" id="sc-progress-txt"></span>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span class="sc-progress-txt" id="sc-progress-txt"></span>
+        <button id="sc-keepall-btn" class="btn-sc-keepall" onclick="scKeepAll()">Keep all remaining</button>
+      </div>
       <div style="display:flex;gap:10px">
         <button id="sc-proceed-btn" class="btn-proceed" onclick="proceedAfterSpotCheck()" disabled>Looks Good — Publish →</button>
       </div>
@@ -969,7 +977,7 @@ let allScrapeRuns = [];
 let allPendingChanges = [];
 let selectedChangeIds = new Set();   // LEN-179 Part B: review-queue multi-select
 let scSample = [];
-let scVisited = new Set();
+let scResolved = new Set();   // LEN-188: indices of sampled edits the reviewer has kept/reverted
 const SPOTCHECK_REQUIRED = 1;
 const PENDING_REVIEW_MAX = 5;
 const STALE_WARN_THRESHOLD = 0.20;
@@ -2272,34 +2280,37 @@ function openPublishModal() {
     if (!confirm(`${staleApproved.length} of your approved lenders haven't been updated in 90+ days (${Math.round(staleApproved.length/approvedLenders.length*100)}%). Publish anyway?`)) return;
   }
 
-  const changed = allLenders.filter(l => l._pendingCount>0 || (l.review_status==='pending'&&l.previous_data));
-  const pool = changed.length >= 3 ? changed : [...allLenders].sort(()=>Math.random()-0.5);
-  const n = Math.max(3, Math.min(8, Math.ceil(Math.sqrt(Math.max(pool.length, 1)))));
-  scSample = [...pool].sort(()=>Math.random()-0.5).slice(0, Math.min(n, pool.length));
-  scVisited.clear();
-  scSample.forEach((l,i) => { if (!l.source_url && !l.application_submission_url) scVisited.add(i); });
+  // LEN-188: spot-check a sample of the ACTUAL scraped edits (pending_changes),
+  // not a click-out to each lender's live site. Riskiest (zero/blank) edits first.
+  const pool = [...allPendingChanges];
+  if (!pool.length) { showPublishCommand(); return; }   // nothing to review → straight to publish
+  const susp = pool.filter(isSuspiciousChange).sort(()=>Math.random()-0.5);
+  const safe = pool.filter(c => !isSuspiciousChange(c)).sort(()=>Math.random()-0.5);
+  scSample = [...susp, ...safe].slice(0, Math.min(10, pool.length));
+  scResolved.clear();
 
-  if (!scSample.length || scSample.every(l => !l.source_url && !l.application_submission_url)) {
-    showPublishCommand(); return;
-  }
+  let desc = `Review <strong>${scSample.length} scraped edit${scSample.length!==1?'s':''}</strong> before going live — keep the ones that look right, revert anything off. Approved edits publish; reverted ones roll back.`;
+  if (pool.length > scSample.length) desc += ` <span style="color:var(--muted)">(${scSample.length} of ${pool.length} pending, riskiest first)</span>`;
+  document.getElementById('sc-modal-desc').innerHTML = desc;
 
-  document.getElementById('sc-modal-desc').innerHTML =
-    `Visit <strong>${scSample.length} lender site${scSample.length!==1?'s':''}</strong> to confirm scraped data looks accurate before going live. ` +
-    `(Sample of √N lenders ≈ 95% confidence in data quality.)`;
-  document.getElementById('sc-items').innerHTML = scSample.map((l,i) => {
-    const name = esc(l.display_name||l.lender_name);
-    const url = l.source_url || l.application_submission_url || '';
-    const noUrl = !url;
-    return `<div class="sc-item">
+  document.getElementById('sc-items').innerHTML = scSample.map((c,i) => {
+    const lender = allLenders.find(l => l.id === c.lender_id);
+    const name = esc(lender ? (lender.display_name||lender.lender_name) : 'Unknown lender');
+    const field = esc(SC_FIELD_LABELS[c.field_name] || c.field_name);
+    const oldFmt = esc(formatValue(c.old_value)) || '—';
+    const newFmt = esc(formatValue(c.new_value)) || '—';
+    const susBadge = isSuspiciousChange(c) ? '<span class="suspicious-badge">⚠ ZERO/BLANK</span>' : '';
+    const url = lender ? (lender.source_url || lender.application_submission_url || '') : '';
+    const srcLink = url ? `<a class="sc-src" href="${esc(url)}" target="_blank" rel="noopener">↗ Source</a>` : '';
+    return `<div class="sc-item" id="sc-row-${i}">
       <div class="sc-item-left">
-        <div class="sc-item-name">${name}</div>
-        <div class="sc-item-url">${noUrl?'<em>No URL on file — auto-skipped</em>':esc(url)}</div>
+        <div class="sc-item-name">${name} <span class="sc-field">${field}</span>${susBadge}</div>
+        <div class="sc-diff"><span class="val-old">${oldFmt}</span><span class="sc-arrow">→</span><span class="val-new">${newFmt}</span></div>
+        ${srcLink}
       </div>
-      <div class="sc-item-right">
-        ${noUrl
-          ? `<span class="sc-check show">✓</span>`
-          : `<button class="btn-sc-visit" id="sc-btn-${i}" onclick="visitSC(${i},'${url.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">Visit →</button><span class="sc-check" id="sc-chk-${i}">✓</span>`
-        }
+      <div class="sc-item-right" id="sc-act-${i}">
+        <button class="btn-approve" onclick="scResolve(${i},'keep')">Keep</button>
+        <button class="btn-reject" onclick="scResolve(${i},'revert')">Revert</button>
       </div>
     </div>`;
   }).join('');
@@ -2307,21 +2318,55 @@ function openPublishModal() {
   document.getElementById('spotcheck-modal').style.display = 'flex';
 }
 
-function visitSC(i, url) {
-  window.open(url, '_blank');
-  scVisited.add(i);
-  const btn = document.getElementById('sc-btn-'+i);
-  if (btn) btn.classList.add('visited');
-  const chk = document.getElementById('sc-chk-'+i);
-  if (chk) chk.classList.add('show');
+// LEN-188: field labels for the spot-check modal (renderDashboard has its own
+// function-scoped copy — kept in sync here for the pre-publish review).
+const SC_FIELD_LABELS = {
+  min_fico:'Min FICO', min_tib_months:'Min TIB', min_monthly_revenue:'Min Revenue',
+  max_funding_amount:'Max Funding', max_term_months:'Max Term',
+  max_position_stacking:'Max Position', product_types:'Products',
+  payment_frequencies:'Payment Freq.', preferred_industries:'Preferred Ind.',
+  restricted_industries:'Restricted Ind.', restricted_states:'Restricted States',
+  soft_pull_only:'Soft Pull', requires_hard_collateral:'Hard Collateral',
+  requires_bank_verification:'Bank Verification', min_bank_statements_months:'Bank Statements',
+  requires_personal_guarantee:'Personal Guarantee', early_payment_discount:'Early Pay Disc.',
+  has_flex_line_of_credit:'Flex LOC', hq_state:'HQ State', hq_address:'HQ Address',
+  broker_support_email:'Broker Email', broker_support_phone:'Broker Phone',
+  source_url:'Source URL', application_submission_url:'App URL', lender_logo_url:'Logo URL',
+};
+
+async function scResolve(i, action) {
+  if (scResolved.has(i)) return;
+  const change = scSample[i];
+  if (!change) return;
+  const act = document.getElementById('sc-act-'+i);
+  const original = act ? act.innerHTML : '';
+  if (act) act.innerHTML = '<span class="sc-resolved reverted">saving…</span>';
+  if (action === 'keep') await approvePendingById(change.id);
+  else await rejectPendingById(change.id);
+  // approve/reject drop the change from allPendingChanges on success. If it's
+  // still there, the reviewer cancelled a confirm prompt — restore the buttons.
+  if (allPendingChanges.some(c => c.id === change.id)) {
+    if (act) act.innerHTML = original;
+    return;
+  }
+  scResolved.add(i);
+  if (act) act.innerHTML = `<span class="sc-resolved${action==='keep'?'':' reverted'}">✓ ${action==='keep'?'Kept':'Reverted'}</span>`;
   updateSCProgress();
+}
+
+async function scKeepAll() {
+  for (let i = 0; i < scSample.length; i++) {
+    if (!scResolved.has(i)) await scResolve(i, 'keep');
+  }
 }
 
 function updateSCProgress() {
   const total = scSample.length;
-  const visited = scVisited.size;
-  document.getElementById('sc-progress-txt').textContent = `${visited} of ${total} verified`;
-  document.getElementById('sc-proceed-btn').disabled = visited < total;
+  const done = scResolved.size;
+  document.getElementById('sc-progress-txt').textContent = `${done} of ${total} reviewed`;
+  document.getElementById('sc-proceed-btn').disabled = done < total;
+  const keepAll = document.getElementById('sc-keepall-btn');
+  if (keepAll) keepAll.style.display = (done < total && total > 1) ? '' : 'none';
 }
 
 function closeSpotCheckModal() {
