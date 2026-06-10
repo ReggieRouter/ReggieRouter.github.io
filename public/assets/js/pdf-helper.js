@@ -526,6 +526,7 @@ window.PDF_HELPER = {
     showPrintEducationModal: function() {
         return new Promise((resolve) => {
             const LOOP_MS          = 5400;
+            const UNLOCK_MS        = 5000;  // first-timers: countdown before "Open print menu" unlocks
             const RESET_AFTER_DAYS = 30;
             const DSA_AFTER_SAVES  = 2;
             const KEY_SAVE_COUNT   = 'lp_pdf_save_count';
@@ -601,7 +602,8 @@ window.PDF_HELPER = {
                 '#lp-print-modal-overlay .lpm-dsa-wrap label{font-size:11px;color:#888;text-transform:uppercase;font-weight:600;letter-spacing:0.04em;line-height:1.3;cursor:pointer;}',
                 '#lp-print-modal-overlay .lpm-btn-cancel{font-size:12.5px;color:#aaa;background:transparent;border:0.5px solid #e0e0e0;padding:9px 18px;border-radius:7px;cursor:pointer;font-family:inherit;}',
                 '#lp-print-modal-overlay .lpm-btn-proceed{font-size:13px;font-weight:700;padding:11px 22px;border-radius:8px;border:none;font-family:inherit;cursor:pointer;color:#fff;background:#2d6a2d;white-space:nowrap;transition:background 0.2s;}',
-                '#lp-print-modal-overlay .lpm-btn-proceed.lpm-locked{background:#c4c4c4;cursor:not-allowed;}',
+                '#lp-print-modal-overlay .lpm-btn-proceed{font-variant-numeric:tabular-nums;}',
+                '#lp-print-modal-overlay .lpm-btn-proceed.lpm-locked{background:#e3e5e3;color:#9a9d9a;cursor:not-allowed;}',
                 '#lp-print-modal-overlay .lpm-btn-proceed.lpm-unlocking{animation:lpmBtnPulse 0.55s ease-out;}',
                 '@keyframes lpmBtnPulse{0%{transform:scale(1);}40%{transform:scale(1.08);background:#3c8c3c;}100%{transform:scale(1);}}',
                 '#lp-print-modal-overlay .lpm-btn-proceed:not(.lpm-locked):not(.lpm-unlocking):hover{background:#245524;}'
@@ -792,24 +794,48 @@ window.PDF_HELPER = {
                     sv.className = 'lpm-d-save';
                     await wait(720); if (!animRunning) return;
 
-                    // Unlock CTA after first complete loop — and surface "Never show this again"
-                    // at the same moment, so even a first-ever viewer can opt out once they've watched once.
-                    if (!unlocked) {
-                        unlocked = true;
-                        const btn = document.getElementById('lpm-proceed-btn');
-                        btn.classList.remove('lpm-locked');
-                        btn.classList.add('lpm-unlocking');
-                        setTimeout(() => btn.classList.remove('lpm-unlocking'), 560);
-                        document.getElementById('lpm-dsa-wrap').classList.add('lpm-visible');
-                    }
+                    // Belt-and-suspenders: the countdown timer normally unlocks first; if the
+                    // animation finishes its loop before then, unlock here too (idempotent).
+                    if (!unlocked) unlock();
                 } catch (e) { return; }
                 animate();
+            }
+
+            // Shared unlock: enables "Open print menu", surfaces the opt-out, ends the countdown.
+            const PROCEED_LABEL = 'Open print menu →';
+            let countdownTimer = null;
+            function unlock() {
+                if (unlocked) return;
+                unlocked = true;
+                if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+                const btn = document.getElementById('lpm-proceed-btn');
+                btn.classList.remove('lpm-locked');
+                btn.classList.add('lpm-unlocking');
+                btn.textContent = PROCEED_LABEL;
+                setTimeout(() => btn.classList.remove('lpm-unlocking'), 560);
+                document.getElementById('lpm-dsa-wrap').classList.add('lpm-visible');
+            }
+
+            // Returning users (already saved a PDF before) skip the watch-once gate — the button
+            // is live immediately. First-timers get a visible countdown so the locked state reads
+            // as "wait a moment", not "broken", then it unlocks on its own.
+            const proceedBtn = document.getElementById('lpm-proceed-btn');
+            if (saveCount >= 1) {
+                unlock();
+            } else {
+                let remain = Math.ceil(UNLOCK_MS / 1000);
+                proceedBtn.textContent = PROCEED_LABEL + '  (' + remain + 's)';
+                countdownTimer = setInterval(() => {
+                    remain -= 1;
+                    if (remain <= 0) { unlock(); return; }
+                    if (!unlocked) proceedBtn.textContent = PROCEED_LABEL + '  (' + remain + 's)';
+                }, 1000);
             }
 
             resetDialog();
             setTimeout(animate, 300);
 
-            document.getElementById('lpm-proceed-btn').addEventListener('click', function() {
+            proceedBtn.addEventListener('click', function() {
                 if (this.classList.contains('lpm-locked')) return;
                 dismiss(true);
             });
