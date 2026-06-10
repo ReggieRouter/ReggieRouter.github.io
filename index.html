@@ -1053,6 +1053,43 @@ input { font-family: inherit; }
 /* ==================== Coming soon grid (3-col) ==================== */
 .soon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
+/* ==================== Resume chip (LEN-51: pick up where you left off) ==================== */
+.resume-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  margin-bottom: 14px; padding: 7px 13px;
+  border: 1px solid var(--border); border-radius: 999px;
+  background: var(--bg); color: var(--text);
+  font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: border-color var(--transition), transform var(--transition);
+}
+.resume-chip:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+.resume-chip-label { color: var(--text-muted); font-weight: 700; }
+.resume-chip-arrow { color: var(--accent); }
+
+/* ==================== Customize / pin picker (LEN-51) ==================== */
+.featured-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.featured-head-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
+.customize-btn { font-family: inherit; font-size: 12px; font-weight: 600; color: var(--text-muted); background: none; border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; cursor: pointer; transition: border-color var(--transition), color var(--transition); }
+.customize-btn:hover { border-color: var(--border-hover); color: var(--text); }
+.customize-panel { border: 1px solid var(--border); border-radius: 10px; background: var(--bg-alt); padding: 14px 16px; margin-bottom: 14px; animation: fadeUp 200ms ease both; }
+.cz-head { font-size: 12.5px; font-weight: 600; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+.cz-count { font-variant-numeric: tabular-nums; color: var(--text-faint); }
+.cz-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 16px; }
+.cz-opt { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--text); cursor: pointer; padding: 4px 0; }
+.cz-opt.is-disabled { color: var(--text-faint); cursor: not-allowed; }
+.cz-opt input { accent-color: var(--accent); width: 15px; height: 15px; cursor: inherit; }
+.cz-reset { margin-top: 12px; font-family: inherit; font-size: 12px; font-weight: 600; color: var(--text-muted); background: none; border: none; padding: 0; cursor: pointer; text-decoration: underline; }
+.cz-reset:hover { color: var(--text); }
+@media (max-width: 600px) { .cz-grid { grid-template-columns: 1fr; } }
+
+/* Viewed-tool relax (LEN-51): untried calculators stay vivid; explored ones
+   settle back (muted name + softened icon) so the unopened ones quietly draw the
+   eye. Re-lights on hover. No data = nothing relaxed = identical to before. */
+.card.is-viewed .card-icon { opacity: 0.5; transition: opacity var(--transition); }
+.card.is-viewed .card-name { color: var(--text-muted); }
+.card.is-viewed:hover .card-icon { opacity: 1; }
+.card.is-viewed:hover .card-name { color: var(--text); }
+
 @media (max-width: 900px) {
   .featured-grid { grid-template-columns: repeat(2, 1fr); }
   .soon-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1618,7 +1655,8 @@ function cardHTML(t, i) {
   var tag = dis ? 'div' : 'a';
   var href = dis ? '' : ' href="'+t.slug+'"';
   var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
-  var cls = 'card' + (dis ? ' is-disabled' : '') + (t.id === 'amo' ? ' card-amo-glisten' : '');
+  var cls = 'card' + (dis ? ' is-disabled' : '') + (t.id === 'amo' ? ' card-amo-glisten' : '')
+          + (!dis && isViewed(t.id) ? ' is-viewed' : '');
   var pillCls = t.status==='live' ? 'pill-live' : t.status==='new' ? 'pill-new' : (t.status==='soon'||t.status==='inquire') ? 'pill-soon' : '';
   var pillTxt = t.status==='live' ? 'Live' : t.status==='new' ? 'New' : t.status==='soon' ? 'Soon' : t.status==='inquire' ? 'Inquire' : '';
   
@@ -1629,7 +1667,7 @@ function cardHTML(t, i) {
     metaHTML += '<span class="pill pill-paid" style="margin-left: 4px;">Paid</span>';
   }
 
-  return '<'+tag+href+target+' class="'+cls+'" '+onclick+' data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
+  return '<'+tag+href+target+' class="'+cls+'" '+onclick+' data-id="'+t.id+'" data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
     +'<div class="card-icon '+t.color+'">'+ICO[t.icon]+'</div>'
     +'<div class="card-body"><div class="card-name">'+t.name+'</div><div class="card-desc">'+t.desc+'</div></div>'
     +'<div class="card-meta">'+metaHTML
@@ -1640,7 +1678,7 @@ function cardHTML(t, i) {
 function handleToolClick(e, id) {
   var t = TOOLS.find(function(x){ return x.id === id; });
   if (!t || t.status === 'soon' || t.status === 'inquire') return;
-  if (t.presentation === 'external') return; // Let default link behavior happen
+  if (t.presentation === 'external') { recordToolUsage(id); return; } // count the visit, then let the link open
 
   e.preventDefault();
   openTool(t, true);
@@ -1648,6 +1686,7 @@ function handleToolClick(e, id) {
 
 function openTool(t, push, urlOverride) {
   if (!t) return;
+  recordToolUsage(t.id);
   var path = urlOverride || (t.path + window.location.search);
   
   // Append current version to path to prevent iframe / modal caching
@@ -1882,19 +1921,136 @@ function updateGreeting() {
   }
 }
 
-/* ---- Featured card renderer ---- */
-var featuredIds = ['amo', 'registry', 'waterfall'];
-var featuredLabels = {
-  'amo': 'Most used', 'registry': 'Due diligence', 'waterfall': 'Lender match',
-  'sba-rates': 'SBA 7(a)', 'dscr': 'Risk & coverage', 'fundability': 'Deal math'
+/* ---- Dashboard personalization (LEN-51) ----
+   Zero-friction and localStorage-backed, so it works before any Supabase
+   migration (mirror pattern, like the Estimate Log). The featured top row is
+   resolved from three signals, in priority order, then backfilled:
+     1. pins      — tools the user explicitly pinned                 (lp_pinned)
+     2. usage     — their most-opened tools; behavior overrides persona fast (lp_tool_usage)
+     3. persona   — login-1 seed from their job-to-be-done, set at onboarding (lp_persona)
+     4. default   — the global fallback (today's three)
+   No usage + no persona + no pins  ->  renders identically to before. */
+var LP_USAGE_KEY = 'lp_tool_usage';
+var LP_LAST_TOOL_KEY = 'lp_last_tool';
+var LP_PERSONA_KEY = 'lp_persona';
+var LP_PINNED_KEY = 'lp_pinned';
+var FEATURED_MAX = 3;
+var defaultFeaturedIds = ['amo', 'registry', 'waterfall'];
+var REFERENCE_IDS = ['legislation'];   // look-it-up material — gets its own home section
+var customizeOpen = false;             // is the pin picker expanded?
+
+// Persona -> the tools that segment reaches for first (job-to-be-done, chosen at
+// onboarding). Every id must be live; SBA Fees stays out until it's un-hidden.
+var PERSONA_TOOLS = {
+  dealmath:   ['amo', 'dscr', 'fundability'],
+  placement:  ['waterfall', 'deal-read', 'amo'],
+  sba:        ['dscr', 'registry', 'amo'],
+  compliance: ['legislation', 'deal-read', 'dscr'],
+  diligence:  ['registry', 'deal-read', 'dscr']
 };
 
-function featuredCardHTML(t, i, isPrimary) {
+function liveToolIds() {
+  return TOOLS.filter(function(t){ return t.status === 'live'; }).map(function(t){ return t.id; });
+}
+
+function getToolUsage() {
+  try { return JSON.parse(localStorage.getItem(LP_USAGE_KEY)) || {}; }
+  catch (e) { return {}; }
+}
+
+function recordToolUsage(id) {
+  if (!id) return;
+  try {
+    var usage = getToolUsage();
+    var entry = usage[id] || { count: 0, last: 0 };
+    entry.count += 1;
+    entry.last = Date.now();
+    usage[id] = entry;
+    localStorage.setItem(LP_USAGE_KEY, JSON.stringify(usage));
+    localStorage.setItem(LP_LAST_TOOL_KEY, id);
+  } catch (e) { /* localStorage unavailable — degrade silently */ }
+}
+
+function isViewed(id) { var u = getToolUsage(); return !!(u[id] && u[id].count > 0); }
+
+// Update the viewed-relax state on home cards in place (no re-render, no
+// re-animation) — so a tool settles the moment you come back from using it.
+function refreshViewedRelax() {
+  var host = document.getElementById('homeTools');
+  if (!host) return;
+  host.querySelectorAll('.card[data-id]').forEach(function(c){
+    if (c.classList.contains('is-disabled')) return;
+    c.classList.toggle('is-viewed', isViewed(c.getAttribute('data-id')));
+  });
+}
+
+function getPersona() {
+  try { var p = localStorage.getItem(LP_PERSONA_KEY) || ''; return PERSONA_TOOLS[p] ? p : ''; }
+  catch (e) { return ''; }
+}
+
+// Explicit user customization — pin tools to the top row. Capped at the row size.
+function getPinned() {
+  try { var a = JSON.parse(localStorage.getItem(LP_PINNED_KEY)); return Array.isArray(a) ? a : []; }
+  catch (e) { return []; }
+}
+function isPinned(id) { return getPinned().indexOf(id) !== -1; }
+function togglePin(id) {
+  var pins = getPinned();
+  var i = pins.indexOf(id);
+  if (i !== -1) pins.splice(i, 1);
+  else { if (pins.length >= FEATURED_MAX) pins.shift(); pins.push(id); }  // drop oldest, cap at row size
+  try { localStorage.setItem(LP_PINNED_KEY, JSON.stringify(pins)); } catch (e) {}
+  renderHome();
+}
+
+function resolveFeaturedIds() {
+  var usage = getToolUsage();
+  var liveIds = liveToolIds();
+
+  var pins = getPinned().filter(function(id){ return liveIds.indexOf(id) !== -1; });
+  // The user's actually-opened tools, most-used first (ties broken by recency).
+  var used = Object.keys(usage).filter(function(id){ return liveIds.indexOf(id) !== -1; });
+  used.sort(function(a, b){
+    if (usage[b].count !== usage[a].count) return usage[b].count - usage[a].count;
+    return (usage[b].last || 0) - (usage[a].last || 0);
+  });
+  var persona = getPersona() ? PERSONA_TOOLS[getPersona()] : [];
+
+  // pins -> usage -> persona -> global default; dedup, live-only, cap at the row size.
+  var ids = [];
+  pins.concat(used, persona, defaultFeaturedIds).forEach(function(id){
+    if (ids.length < FEATURED_MAX && ids.indexOf(id) === -1 && liveIds.indexOf(id) !== -1) ids.push(id);
+  });
+  return ids;
+}
+
+// Slot-0 kicker, honest about why that tool leads — never claims "Most used"
+// before the user has actually used anything.
+function primaryFeaturedLabel(firstId) {
+  if (isPinned(firstId)) return 'Pinned';
+  var liveIds = liveToolIds();
+  var hasUsage = Object.keys(getToolUsage()).some(function(id){ return liveIds.indexOf(id) !== -1; });
+  if (hasUsage) return 'Most used';
+  if (getPersona()) return 'Suggested';
+  return 'Most used';   // no data, no persona -> preserves the pre-personalization label
+}
+
+/* ---- Featured card renderer ---- */
+// Slot 0's kicker is computed by primaryFeaturedLabel() (Pinned / Most used /
+// Suggested). Other slots use these static kickers.
+var featuredLabels = {
+  'amo': 'Deal math', 'registry': 'Due diligence', 'waterfall': 'Lender match',
+  'sba-rates': 'SBA 7(a)', 'dscr': 'Risk & coverage', 'fundability': 'Net & position',
+  'deal-read': 'Read a deal', 'affordability': 'Payment fit', 'legislation': 'Compliance'
+};
+
+function featuredCardHTML(t, i, isPrimary, primaryLabel) {
   var href = ' href="'+t.slug+'"';
   var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
   var cls = 'featured-card' + (isPrimary ? ' is-featured-primary' : '');
   var onclick = ' onclick="handleToolClick(event, \''+t.id+'\')"';
-  var label = featuredLabels[t.id] || '';
+  var label = isPrimary ? (primaryLabel || 'Most used') : (featuredLabels[t.id] || '');
   var iconCls = t.color === 'green' ? 'green' : '';
   var delayStyle = isPrimary ? '' : ' style="animation-delay:'+(i*80)+'ms"';
   return '<a'+href+target+' class="'+cls+'"'+onclick+delayStyle+'>'
@@ -1908,19 +2064,69 @@ function featuredCardHTML(t, i, isPrimary) {
     +'</a>';
 }
 
+/* ---- Customize: let users pin their own top row ---- */
+function toggleCustomize() { customizeOpen = !customizeOpen; renderHome(); }
+function clearPins() { try { localStorage.removeItem(LP_PINNED_KEY); } catch (e) {} renderHome(); }
+
+function customizePanelHTML() {
+  var pins = getPinned();
+  var full = pins.length >= FEATURED_MAX;
+  var rows = TOOLS.filter(function(t){ return t.status === 'live'; }).map(function(t){
+    var checked = pins.indexOf(t.id) !== -1;
+    var disabled = !checked && full;          // when full, you must unpin one to swap
+    return '<label class="cz-opt'+(disabled ? ' is-disabled' : '')+'">'
+      + '<input type="checkbox"'+(checked ? ' checked' : '')+(disabled ? ' disabled' : '')
+      + ' onchange="togglePin(\''+t.id+'\')"><span>'+t.name+'</span></label>';
+  }).join('');
+  return '<div class="customize-panel">'
+    + '<div class="cz-head"><span>Pin the tools you want up top</span>'
+    + '<span class="cz-count">'+pins.length+'/'+FEATURED_MAX+'</span></div>'
+    + '<div class="cz-grid">'+rows+'</div>'
+    + (pins.length ? '<button type="button" class="cz-reset" onclick="clearPins()">Reset to suggested</button>' : '')
+    + '</div>';
+}
+
 function renderHome() {
+  var featuredIds = resolveFeaturedIds();
   var featured = featuredIds.map(function(id){ return TOOLS.find(function(x){ return x.id === id; }); }).filter(Boolean);
+  var isRef = function(t){ return REFERENCE_IDS.indexOf(t.id) !== -1; };
   // Deal Log has its own sidebar home + a tile in Data & leads — keep it out of More Tools.
   var homeHide = ['deal-log'];
-  var liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && homeHide.indexOf(t.id) === -1; });
+  var liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && homeHide.indexOf(t.id) === -1 && !isRef(t); });
+  var reference = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && isRef(t); });
 
-  var html = '<div class="featured-grid">';
-  featured.forEach(function(t, i){ html += featuredCardHTML(t, i, i === 0); });
+  var html = '';
+
+  // "Resume where you left off" — only after the user has opened a (still-live) tool.
+  var lastId = '';
+  try { lastId = localStorage.getItem(LP_LAST_TOOL_KEY) || ''; } catch (e) {}
+  var lastTool = lastId ? TOOLS.find(function(x){ return x.id === lastId && x.status === 'live'; }) : null;
+  if (lastTool) {
+    html += '<button type="button" class="resume-chip" onclick="handleToolClick(event, \''+lastTool.id+'\')">'
+          + '<span class="resume-chip-label">Resume</span> ' + lastTool.name
+          + ' <span class="resume-chip-arrow">&rarr;</span></button>';
+  }
+
+  html += '<div class="featured-head">'
+        + '<span class="featured-head-label">Your tools</span>'
+        + '<button type="button" class="customize-btn" onclick="toggleCustomize()">'
+        + (customizeOpen ? 'Done' : 'Customize') + '</button></div>';
+  if (customizeOpen) html += customizePanelHTML();
+
+  var pLabel = primaryFeaturedLabel(featuredIds[0]);
+  html += '<div class="featured-grid">';
+  featured.forEach(function(t, i){ html += featuredCardHTML(t, i, i === 0, pLabel); });
   html += '</div>';
 
   if (liveRest.length) {
     html += '<div class="home-section-label">More Tools</div><div class="live-tools-grid">';
     liveRest.forEach(function(t, i){ html += cardHTML(t, i); });
+    html += '</div>';
+  }
+
+  if (reference.length) {
+    html += '<div class="home-section-label">Reference</div><div class="live-tools-grid">';
+    reference.forEach(function(t, i){ html += cardHTML(t, i); });
     html += '</div>';
   }
 
@@ -2425,6 +2631,7 @@ function switchView(v) {
   if (nb) nb.classList.add('active');
   document.getElementById('content').scrollTop = 0;
   closeMobile();
+  if (v === 'home') refreshViewedRelax();
 
   const searchWrap = document.querySelector('.search-wrap');
   if (searchWrap) {
