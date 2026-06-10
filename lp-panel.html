@@ -3110,6 +3110,7 @@ async function renderMembersPanel() {
         <button class="tab" id="mem-tabbtn-waitlist" onclick="memShowTab('waitlist')">Waitlist <span class="tab-count" id="mem-count-waitlist" style="display:none"></span></button>
         <button class="tab" id="mem-tabbtn-invited" onclick="memShowTab('invited')">Invited <span class="tab-count" id="mem-count-invited" style="display:none"></span></button>
         <button class="tab" id="mem-tabbtn-access" onclick="memShowTab('access')">Access <span class="tab-count" id="mem-count-access" style="display:none"></span></button>
+        <button class="tab" id="mem-tabbtn-logins" onclick="memShowTab('logins')">Login issues <span class="tab-count" id="mem-count-logins" style="display:none"></span></button>
       </div>
       <div class="mem-toolbar">
         <input type="text" class="mem-search" id="mem-search" placeholder="Search name, company, email…" oninput="memRenderTable()" />
@@ -3228,12 +3229,74 @@ function memRenderStats() {
 
 function memShowTab(name) {
   memTab = name;
-  ['pending','all','waitlist','invited','access'].forEach(t => {
+  ['pending','all','waitlist','invited','access','logins'].forEach(t => {
     document.getElementById('mem-tabbtn-' + t).className = 'tab' + (t === name ? ' active' : '');
   });
   document.getElementById('mem-status').style.display = name === 'all' ? '' : 'none';
-  document.getElementById('mem-role').style.display = (name === 'invited' || name === 'access') ? 'none' : '';
+  document.getElementById('mem-role').style.display = (name === 'invited' || name === 'access' || name === 'logins') ? 'none' : '';
+  document.querySelector('.mem-toolbar').style.display = name === 'logins' ? 'none' : '';
   memRenderTable();
+}
+
+// ── Login issues (LEN-259) — failed sign-ins captured in `login_failures` ──
+// Shows WHO bounced and WHY (error code). #1 cause is corporate-email link
+// prefetch consuming the one-time magic link before the user clicks it.
+const LOGIN_STAGE_LABEL = {
+  callback: 'Link click', send: 'Sending link', exchange: 'Code exchange',
+  token_no_session: 'Session store', no_credentials: 'No credentials', timeout: 'Timed out'
+};
+async function memRenderLoginIssues(wrap) {
+  wrap.innerHTML = '<div style="color:var(--muted);font-size:13px">Loading login issues…</div>';
+  const { data, error } = await sb.from('login_failures')
+    .select('created_at, email, stage, error_code, error_description, user_agent')
+    .order('created_at', { ascending: false })
+    .limit(200);
+  if (error) {
+    const needsTable = /relation|does not exist|42P01/i.test(error.message || '');
+    wrap.innerHTML = `<div style="padding:14px;border:1px solid var(--err-bd,rgba(220,38,38,.25));background:rgba(220,38,38,.05);border-radius:10px;font-size:13px;color:var(--red,#B91C1C)">
+      ${needsTable
+        ? 'Login-issue capture isn’t live yet. Run <code>supabase/login_failures.sql</code> in the Supabase SQL editor once, then refresh.'
+        : 'Couldn’t load login issues: ' + esc(error.message)}
+    </div>`;
+    setCount('mem-count-logins', 0);
+    return;
+  }
+  const rows = data || [];
+  setCount('mem-count-logins', rows.length);
+  if (!rows.length) {
+    wrap.innerHTML = '<div style="padding:18px;color:var(--muted);font-size:13px">No failed sign-ins recorded. 🎉</div>';
+    return;
+  }
+  const fmt = ts => { try { return new Date(ts).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }); } catch (_) { return ts; } }
+  const device = ua => {
+    if (!ua) return '—';
+    if (/FBAN|FBAV|Instagram|LinkedInApp|MicroMessenger|Line\/|WhatsApp/i.test(ua)) return 'In-app browser';
+    if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+    if (/Android/i.test(ua)) return 'Android';
+    if (/Macintosh/i.test(ua)) return 'Mac';
+    if (/Windows/i.test(ua)) return 'Windows';
+    return 'Other';
+  };
+  wrap.innerHTML = `
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Most failures are corporate email <strong>link prefetch</strong> — a security scanner opens the one-time link before the user, using it up (<code>otp_expired</code> / <code>access_denied</code>). The user now lands on a recovery screen and can re-send instantly.
+    </div>
+    <div style="overflow-x:auto">
+    <table class="mem-table" style="width:100%">
+      <thead><tr>
+        <th>When</th><th>Email</th><th>Stage</th><th>Code</th><th>Reason</th><th>Device</th>
+      </tr></thead>
+      <tbody>
+        ${rows.map(r => `<tr>
+          <td style="white-space:nowrap">${esc(fmt(r.created_at))}</td>
+          <td>${r.email ? esc(r.email) : '<span style="color:var(--muted)">—</span>'}</td>
+          <td>${esc(LOGIN_STAGE_LABEL[r.stage] || r.stage || '—')}</td>
+          <td><code style="font-size:11.5px">${esc(r.error_code || '—')}</code></td>
+          <td style="max-width:280px;color:var(--muted);font-size:12.5px">${esc(r.error_description || '—')}</td>
+          <td style="white-space:nowrap">${esc(device(r.user_agent))}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table></div>`;
 }
 
 function memInitials(name) { return (name || '').split(' ').slice(0,2).map(w => w[0] || '').join('').toUpperCase() || '?'; }
@@ -3267,6 +3330,7 @@ function memRenderTable() {
   if (!wrap) return;
   if (memTab === 'invited') { memRenderInvitedTable(wrap); return; }
   if (memTab === 'access')  { memRenderAccessTable(wrap); return; }
+  if (memTab === 'logins')  { memRenderLoginIssues(wrap); return; }
   const q   = (document.getElementById('mem-search')?.value || '').toLowerCase();
   const rol = document.getElementById('mem-role')?.value || '';
   const st  = document.getElementById('mem-status')?.value || '';

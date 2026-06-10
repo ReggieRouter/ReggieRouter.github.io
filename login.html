@@ -205,6 +205,22 @@
     const { data:{ session } } = await supabase.auth.getSession();
     if (session) window.location.href = '/auth-callback.html';
     const REDIR = window.location.origin + '/auth-callback.html';
+    const EMAIL_KEY = 'lp_login_email';  // stash so auth-callback can attribute a failed click (LEN-259)
+
+    // Record a failed sign-in so admins can see who bounced and why. Best-effort.
+    async function logLoginFailure(stage, code, description, email) {
+      try {
+        await supabase.from('login_failures').insert({
+          email: (email || '').trim() || null,
+          stage,
+          error_code: code ? String(code).slice(0, 120) : null,
+          error_description: description ? String(description).slice(0, 500) : null,
+          user_agent: (navigator.userAgent || '').slice(0, 500),
+          url: window.location.origin + '/login.html',
+          meta: {}
+        });
+      } catch (_) { /* table may not exist yet / offline — non-fatal */ }
+    }
 
     // ── In-app browser detection ──────────────────────────────────────────
     // Google refuses OAuth inside embedded webviews (LinkedIn/Facebook/Instagram/
@@ -300,12 +316,14 @@
         return;
       }
       sending = true; magicBtn.disabled = true; magicBtn.textContent = 'Sending...'; clearMsg();
+      try { localStorage.setItem(EMAIL_KEY, email); } catch (_) {}  // so a failed click is attributable
       const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: REDIR } });
       sending = false;
       if (error) {
         const rateLimited = error.status === 429
           || /rate limit/i.test(error.message || '')
           || /over_email_send_rate_limit/i.test(error.code || '');
+        logLoginFailure('send', error.code || error.status || 'send_failed', error.message, email);
         if (rateLimited) {
           localStorage.setItem(cdKey(email), Date.now() + COOLDOWN_MS);
           showMsg('Demand is higher than anticipated. Your link is queued. Try again soon.', 'error');

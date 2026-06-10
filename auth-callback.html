@@ -6,84 +6,282 @@
   <title>Signing you in — LendPaper</title>
   <link rel="icon" type="image/svg+xml" href="/public/assets/brand/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="js/config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #F8FAF7; color: #0D1A10; font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
-    .spinner { width: 32px; height: 32px; border: 2px solid rgba(0,0,0,0.08); border-top-color: #2D6A4F; border-radius: 50%; animation: spin .8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    p { color: #6B7C70; font-size: 14px; }
+    :root {
+      --bg:#F8FAF7; --card:#FFFFFF; --border:rgba(0,0,0,0.08); --border-mid:rgba(0,0,0,0.12);
+      --brand:#1A3C2E; --brand-mid:#2D6A4F; --brand-light:#34A878;
+      --text:#111827; --muted:#6B7280;
+      --err-bg:rgba(220,38,38,0.05); --err-bd:rgba(220,38,38,0.18); --err-txt:#B91C1C;
+      --ok-bg:rgba(52,168,120,0.07); --ok-bd:rgba(52,168,120,0.22); --ok-txt:#1A5C3A;
+    }
+    html, body { min-height:100vh; }
+    body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+
+    /* ── Loading state ── */
+    #loading { display:flex; flex-direction:column; align-items:center; gap:16px; }
+    .spinner { width:32px; height:32px; border:2px solid rgba(0,0,0,0.08); border-top-color:var(--brand-mid); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    #loading p { color:var(--muted); font-size:14px; }
+
+    /* ── Recovery card ── */
+    .card { display:none; width:100%; max-width:430px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:36px 34px; box-shadow:0 4px 32px rgba(0,0,0,0.06); }
+    .card.show { display:block; animation:riseIn .42s cubic-bezier(.22,1,.36,1) both; }
+    @keyframes riseIn { from{opacity:0;transform:translateY(16px) scale(.99)} to{opacity:1;transform:none} }
+    .card .eyebrow { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--err-txt); background:var(--err-bg); border:1px solid var(--err-bd); padding:5px 10px; border-radius:999px; margin-bottom:16px; }
+    .card h1 { font-family:'Figtree',sans-serif; font-weight:700; font-size:23px; letter-spacing:-0.02em; line-height:1.2; margin-bottom:9px; }
+    .card .why { font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:22px; }
+    .card .why strong { color:var(--text); font-weight:600; }
+
+    .recover-label { font-size:12px; font-weight:600; color:var(--text); margin-bottom:8px; }
+    .email-row { display:flex; gap:8px; }
+    .email-row input {
+      flex:1; min-width:0; padding:11px 13px; background:var(--bg);
+      border:1px solid var(--border-mid); border-radius:9px; color:var(--text);
+      font-family:'Inter',sans-serif; font-size:14px; outline:none;
+      transition:border-color .18s, box-shadow .18s;
+    }
+    .email-row input:focus { border-color:var(--brand-light); box-shadow:0 0 0 3px rgba(52,168,120,0.1); }
+    .btn-primary {
+      padding:11px 16px; background:var(--brand); color:#fff; border:none; border-radius:9px;
+      font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;
+      white-space:nowrap; flex-shrink:0; transition:opacity .18s, box-shadow .18s;
+    }
+    .btn-primary:hover { opacity:.9; box-shadow:0 6px 20px rgba(26,60,46,0.18); }
+    .btn-primary:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
+
+    .feedback { font-size:12.5px; line-height:1.5; margin-top:10px; display:none; }
+    .feedback.ok    { color:var(--ok-txt); display:block; }
+    .feedback.error { color:var(--err-txt); display:block; }
+
+    .divider { display:flex; align-items:center; gap:12px; margin:18px 0; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
+    .divider span { font-size:11px; letter-spacing:.06em; color:var(--muted); white-space:nowrap; font-weight:500; }
+
+    .btn-google {
+      display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
+      padding:11px 16px; background:#fff; color:var(--text);
+      border:1px solid var(--border-mid); border-radius:11px;
+      font-family:'Inter',sans-serif; font-weight:600; font-size:14px; cursor:pointer;
+      transition:background .18s, border-color .18s;
+    }
+    .btn-google:hover { background:#F4F6F4; border-color:rgba(0,0,0,0.18); }
+    .btn-google svg { width:18px; height:18px; }
+
+    .help { margin-top:20px; padding-top:16px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); line-height:1.55; }
+    .help a { color:var(--brand-mid); font-weight:500; text-decoration:none; }
+    .help a:hover { text-decoration:underline; }
+    .code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; color:var(--muted); }
   </style>
 </head>
 <body>
-  <div class="spinner"></div>
-  <p>Signing you in...</p>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Signing you in…</p>
+  </div>
+
+  <div class="card" id="recover">
+    <span class="eyebrow">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 8v4m0 4h.01M10.3 3.86l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.14l-8-14a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Sign-in didn't go through
+    </span>
+    <h1 id="recover-title">That sign-in link didn't work</h1>
+    <p class="why" id="recover-why"></p>
+
+    <div class="recover-label">Get a fresh link — sent straight to your inbox</div>
+    <div class="email-row">
+      <input type="email" id="recoverEmail" placeholder="you@company.com" autocomplete="email" />
+      <button class="btn-primary" id="recoverBtn">Send link</button>
+    </div>
+    <p class="feedback" id="recoverFeedback"></p>
+
+    <div class="divider"><span>OR</span></div>
+
+    <button class="btn-google" id="recoverGoogle">
+      <svg viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="help">
+      Still stuck? Email <a href="mailto:hello@lendpaper.com?subject=Sign-in%20help">hello@lendpaper.com</a> and we'll get you in.
+      <div class="code" id="recover-code" style="margin-top:6px"></div>
+    </div>
+  </div>
+
   <script type="importmap">{"imports":{"@supabase/supabase-js":"https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"}}</script>
   <script type="module">
     import { createClient } from '@supabase/supabase-js';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const REDIR = window.location.origin + '/auth-callback.html';
+    const EMAIL_KEY = 'lp_login_email';   // stash set by login.html so we know who failed
 
-    function showError(msg) {
-      document.querySelector('.spinner').style.display = 'none';
-      const p = document.querySelector('p');
-      p.textContent = 'Sign-in hit a snag: ' + msg + ' ';
-      const a = document.createElement('a');
-      a.href = '/login.html';
-      a.textContent = '← Back to login';
-      a.style.color = '#2D6A4F';
-      p.appendChild(document.createElement('br'));
-      p.appendChild(a);
+    // Strip one-time tokens before anything is logged or stored.
+    function sanitizedUrl() {
+      try {
+        const u = new URL(window.location.href);
+        ['access_token','refresh_token','code','token','token_hash','provider_token','provider_refresh_token']
+          .forEach(k => { u.searchParams.delete(k); });
+        if (u.hash) u.hash = u.hash.replace(/(access_token|refresh_token|provider_token|provider_refresh_token)=[^&]*/g, '$1=***');
+        return u.toString();
+      } catch (_) { return location.pathname; }
     }
 
-    // Supabase reports failures as error params (query or hash) — surface them instead of bouncing
+    // Record a failed sign-in so admins can see who bounced and why (LEN-259).
+    // Best-effort: never let logging block the recovery UI.
+    async function logLoginFailure(stage, code, description, extra) {
+      try {
+        let email = '';
+        try { email = (localStorage.getItem(EMAIL_KEY) || '').trim() || null; } catch (_) { email = null; }
+        await supabase.from('login_failures').insert({
+          email,
+          stage,
+          error_code: code ? String(code).slice(0, 120) : null,
+          error_description: description ? String(description).slice(0, 500) : null,
+          user_agent: (navigator.userAgent || '').slice(0, 500),
+          url: sanitizedUrl(),
+          meta: extra || {}
+        });
+      } catch (_) { /* table may not exist yet / offline — non-fatal */ }
+    }
+
+    // ── Friendly copy per failure cause ──
+    function friendly(code, description) {
+      const blob = ((code || '') + ' ' + (description || '')).toLowerCase();
+      // Expired/consumed magic link (incl. the email-scanner prefetch case). Check
+      // the link-specific words first so a generic access_denied that's really an
+      // OAuth block doesn't get mislabeled as "link expired".
+      if (/expired|otp|magic|invalid|used|link/.test(blob)) {
+        return {
+          title: 'That sign-in link was already used or expired',
+          why: 'Sign-in links are <strong>one-time</strong> and only last a few minutes. Often an email security scanner opens the link before you do and uses it up — that’s usually what happened here. Grab a fresh one below and you’re in.'
+        };
+      }
+      if (/rate|429|too many/.test(blob)) {
+        return {
+          title: 'Too many sign-in attempts',
+          why: 'You’ve requested a few links in a short window. Wait about a minute, then send a fresh one below.'
+        };
+      }
+      // Google / OAuth provider denied or couldn't authorize (e.g. a Workspace
+      // admin policy, or the account isn't on the access list yet).
+      if (/access_denied|denied|forbidden|admin_policy|provider|oauth|google|consent|unauthorized/.test(blob)) {
+        return {
+          title: 'We couldn’t authorize that account',
+          why: 'Your Google sign-in didn’t go through — your work account’s admin may restrict third-party apps, or this account isn’t on the access list yet. Try the <strong>email sign-in link</strong> below (works with any address), or retry Google.'
+        };
+      }
+      return {
+        title: 'We couldn’t finish signing you in',
+        why: 'Something interrupted the sign-in. The quickest fix is a fresh link — send one below, or continue with Google.'
+      };
+    }
+
+    function showRecovery(stage, code, description) {
+      logLoginFailure(stage, code, description);
+      const f = friendly(code, description);
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('recover-title').textContent = f.title;
+      document.getElementById('recover-why').innerHTML = f.why;
+      if (code) document.getElementById('recover-code').textContent = 'Reference: ' + code;
+      // Pre-fill the email we stashed at login so recovery is one tap.
+      try {
+        const stashed = (localStorage.getItem(EMAIL_KEY) || '').trim();
+        if (stashed) document.getElementById('recoverEmail').value = stashed;
+      } catch (_) {}
+      document.getElementById('recover').classList.add('show');
+      wireRecovery();
+    }
+
+    let wired = false;
+    function wireRecovery() {
+      if (wired) return; wired = true;
+      const emailEl = document.getElementById('recoverEmail');
+      const btn = document.getElementById('recoverBtn');
+      const fb = document.getElementById('recoverFeedback');
+      let sending = false;
+
+      async function send() {
+        if (sending) return;
+        const email = emailEl.value.trim();
+        if (!email || !email.includes('@')) { fb.className = 'feedback error'; fb.textContent = 'Enter a valid email address.'; return; }
+        sending = true; btn.disabled = true; btn.textContent = 'Sending…'; fb.className = 'feedback';
+        try { localStorage.setItem(EMAIL_KEY, email); } catch (_) {}
+        const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: REDIR } });
+        sending = false;
+        if (error) {
+          btn.disabled = false; btn.textContent = 'Send link';
+          fb.className = 'feedback error'; fb.textContent = error.message || 'Could not send the link. Try again.';
+        } else {
+          btn.textContent = 'Sent ✓'; emailEl.disabled = true;
+          fb.className = 'feedback ok'; fb.textContent = 'Fresh link on its way — check your inbox (expires in a few minutes). Open it on this device.';
+        }
+      }
+      btn.addEventListener('click', send);
+      emailEl.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+
+      document.getElementById('recoverGoogle').addEventListener('click', async () => {
+        const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIR } });
+        if (error) { fb.className = 'feedback error'; fb.textContent = error.message; }
+      });
+    }
+
+    // ── Main routing ──
+    // Supabase reports failures as error params (query or hash) — surface them.
     const qs = new URLSearchParams(window.location.search);
     const hs = new URLSearchParams(window.location.hash.slice(1));
-    const errMsg = qs.get('error_description') || hs.get('error_description') || qs.get('error') || hs.get('error');
-    if (errMsg) { showError(decodeURIComponent(errMsg.replace(/\+/g, ' '))); throw new Error(errMsg); }
-
-    // Wait for the client to establish the session — token parsing can outlast a fixed delay
-    const session = await new Promise((resolve) => {
-      let done = false;
-      const finish = (s) => { if (!done) { done = true; resolve(s); } };
-      supabase.auth.onAuthStateChange((event, s) => { if (s) finish(s); });
-      supabase.auth.getSession().then(({ data: { session: s } }) => { if (s) finish(s); });
-      setTimeout(() => finish(null), 6000);
-    });
-    if (!session) {
-      // Diagnose: did the provider redirect even deliver credentials?
-      const code = qs.get('code');
-      const hasToken = hs.get('access_token');
-      if (code) {
-        const { error: xerr } = await supabase.auth.exchangeCodeForSession(code);
-        if (xerr) {
-          showError('Code exchange failed: ' + xerr.message);
-        } else {
-          window.location.replace('/auth-callback.html'); // session stored — re-run routing clean
-        }
-      } else if (hasToken) {
-        showError('Token arrived but the session could not be stored. Please try again.');
-      } else {
-        showError('Arrived without credentials — the sign-in redirect dropped them (no code or access_token in URL).');
-      }
+    const errCode = qs.get('error') || hs.get('error') || qs.get('error_code') || hs.get('error_code');
+    const errDesc = qs.get('error_description') || hs.get('error_description');
+    if (errCode || errDesc) {
+      const desc = errDesc ? decodeURIComponent(errDesc.replace(/\+/g, ' ')) : '';
+      showRecovery('callback', errCode || 'access_denied', desc);
     } else {
-      const { data: profile } = await supabase.from('profiles').select('id, status, is_admin').eq('id', session.user.id).single();
-      if (!profile) {
-        window.location.href = '/onboarding.html';
-      } else if (profile.is_admin) {
-        window.location.href = '/lp-panel.html'; // admin page folded into lp-panel Members tab (LEN-84)
-      } else if (profile.status === 'pending') {
-        window.location.href = '/pending.html';
-      } else if (profile.status === 'waitlist') {
-        window.location.href = '/waitlist.html';
-      } else if (profile.status === 'denied') {
-        window.location.href = '/waitlist.html'; // denied → waitlist page, soft landing
-      } else if (profile.status === 'approved') {
-        const next = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
-        sessionStorage.removeItem('redirectAfterLogin');
-        window.location.href = next;
+      // Wait for the client to establish the session — token parsing can outlast a fixed delay.
+      const session = await new Promise((resolve) => {
+        let done = false;
+        const finish = (s) => { if (!done) { done = true; resolve(s); } };
+        supabase.auth.onAuthStateChange((event, s) => { if (s) finish(s); });
+        supabase.auth.getSession().then(({ data: { session: s } }) => { if (s) finish(s); });
+        setTimeout(() => finish(null), 6000);
+      });
+
+      if (!session) {
+        const code = qs.get('code');
+        const hasToken = hs.get('access_token');
+        if (code) {
+          const { error: xerr } = await supabase.auth.exchangeCodeForSession(code);
+          if (xerr) {
+            showRecovery('exchange', xerr.code || xerr.status || 'exchange_failed', xerr.message);
+          } else {
+            window.location.replace('/auth-callback.html'); // session stored — re-run routing clean
+          }
+        } else if (hasToken) {
+          showRecovery('token_no_session', 'token_not_stored', 'Token arrived but the session could not be stored.');
+        } else {
+          showRecovery('no_credentials', 'no_credentials', 'Arrived without credentials — the sign-in redirect dropped them (no code or access_token in URL).');
+        }
       } else {
-        window.location.href = '/pending.html';
+        // Success — clear the stash and route by profile status.
+        try { localStorage.removeItem(EMAIL_KEY); } catch (_) {}
+        const { data: profile } = await supabase.from('profiles').select('id, status, is_admin').eq('id', session.user.id).single();
+        if (!profile) {
+          window.location.href = '/onboarding.html';
+        } else if (profile.is_admin) {
+          window.location.href = '/lp-panel.html'; // admin page folded into lp-panel Members tab (LEN-84)
+        } else if (profile.status === 'pending') {
+          window.location.href = '/pending.html';
+        } else if (profile.status === 'waitlist') {
+          window.location.href = '/waitlist.html';
+        } else if (profile.status === 'denied') {
+          window.location.href = '/waitlist.html'; // denied → waitlist page, soft landing
+        } else if (profile.status === 'approved') {
+          const next = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
+          sessionStorage.removeItem('redirectAfterLogin');
+          window.location.href = next;
+        } else {
+          window.location.href = '/pending.html';
+        }
       }
     }
   </script>
