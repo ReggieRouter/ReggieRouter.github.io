@@ -22,9 +22,9 @@
 <meta charset="UTF-8">
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2026.06.10.0002">
+<meta name="version" content="2026.06.10.0003">
 <script type="text/javascript">
-  window.CURRENT_VERSION = "2026.06.10.0002";
+  window.CURRENT_VERSION = "2026.06.10.0003";
 
   // Force active cleanup of legacy service workers
   if ('serviceWorker' in navigator) {
@@ -1619,10 +1619,24 @@ input { font-family: inherit; }
     if (!session) return; // logged out → leave "Log in" button visible
     // Logged in: swap to the account control.
     let label = session.user && session.user.email ? session.user.email : 'Account';
+    let realName = null; // a human name, never the email
     try {
       const profile = await getProfile();
-      if (profile && (profile.full_name || profile.name)) label = profile.full_name || profile.name;
+      if (profile && (profile.full_name || profile.name)) {
+        label = profile.full_name || profile.name;
+        realName = label;
+      }
     } catch (e) { /* fall back to email */ }
+    // Cache the first name so the greeting (LEN-164) can personalize without a
+    // flash on next load, and refresh it now that the profile has resolved.
+    if (realName) {
+      const first = realName.trim().split(/\s+/)[0];
+      if (first) {
+        window.LP_FIRST_NAME = first;
+        try { localStorage.setItem('lp_first_name', first); } catch (e) {}
+        if (window.refreshGreetingName) window.refreshGreetingName();
+      }
+    }
     avatar.textContent = (label || '?').trim().charAt(0);
     nameEl.textContent = label;
     nameEl.title = label;
@@ -1632,6 +1646,7 @@ input { font-family: inherit; }
   })();
 </script>
 <script src="public/assets/js/glossary.js?v=2026.05.28.0001"></script>
+<script src="public/assets/js/greeting-hooks.js"></script>
 
 <script>
 /* ============================================================
@@ -1824,6 +1839,41 @@ function getSubtitle() {
   return phraseBank[idx];
 }
 
+/* ---- Personalized name hooks (LEN-164) ----
+   Most sessions get a first-name hook in the bold greeting line instead of the
+   contextual greeting. {name} is swapped for the user's first name. A null sub
+   means "fall back to a random phraseBank line." */
+// Pool lives in public/assets/js/greeting-hooks.js. Fallback keeps a clean line
+// if it 404s.
+var nameGreetings = window.LP_NAME_GREETINGS || [];
+
+function getFirstName() {
+  if (window.LP_FIRST_NAME) return window.LP_FIRST_NAME;
+  try { return localStorage.getItem('lp_first_name') || null; } catch (e) { return null; }
+}
+
+// Whether THIS session shows a personalized hook — decided once, persisted so it
+// doesn't flip on the 3.5h updateGreeting tick. Usually on when a name is known.
+function usePersonalGreeting() {
+  var stored = sessionStorage.getItem('lp_personal_greeting');
+  if (stored === null) {
+    stored = Math.random() < 0.85 ? '1' : '0';
+    sessionStorage.setItem('lp_personal_greeting', stored);
+  }
+  return stored === '1';
+}
+
+// Which hook — also pinned per session.
+function getNameGreeting() {
+  var stored = sessionStorage.getItem('lp_name_greeting_idx');
+  var idx = stored !== null ? parseInt(stored, 10) : -1;
+  if (isNaN(idx) || idx < 0 || idx >= nameGreetings.length) {
+    idx = Math.floor(Math.random() * nameGreetings.length);
+    sessionStorage.setItem('lp_name_greeting_idx', idx);
+  }
+  return nameGreetings[idx];
+}
+
 function getNthWeekdayOfMonth(year, month, weekday, n) {
   var date = new Date(year, month, 1);
   var count = 0;
@@ -1930,12 +1980,33 @@ function getContextualGreeting() {
 function updateGreeting() {
   var gt = document.getElementById('greetingText');
   var gs = document.getElementById('greetingSubtitle');
-  if (gt) gt.textContent = getContextualGreeting();
+  if (!gt) return;
+
+  // Personalized hook (LEN-164) — only when we know the first name and this
+  // session was picked for it; otherwise fall through to the contextual greeting.
+  var first = getFirstName();
+  if (first && nameGreetings.length && usePersonalGreeting()) {
+    var ng = getNameGreeting();
+    gt.textContent = ng.text.replace('{name}', first);
+    if (gs) {
+      gs.textContent = ng.sub || getSubtitle();
+      gs.style.display = 'block';
+    }
+    return;
+  }
+
+  gt.textContent = getContextualGreeting();
   if (gs) {
     gs.textContent = getSubtitle();
     gs.style.display = 'block';
   }
 }
+
+// Called once the profile resolves and the first name becomes available, so a
+// fresh visit can upgrade from the contextual line to a personalized hook.
+window.refreshGreetingName = function () {
+  try { updateGreeting(); } catch (e) {}
+};
 
 /* ---- Dashboard personalization (LEN-51) ----
    Zero-friction and localStorage-backed, so it works before any Supabase
