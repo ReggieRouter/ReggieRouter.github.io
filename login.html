@@ -58,6 +58,18 @@
     .msg.error { background: var(--err-bg); border: 1px solid var(--err-bd); color: var(--err-txt); display: block; }
     .msg.ok    { background: var(--ok-bg);  border: 1px solid var(--ok-bd);  color: var(--ok-txt);  display: block; }
 
+    /* ── IN-APP BROWSER NOTICE (Google blocks OAuth in embedded webviews) ── */
+    .webview-warn { display: none; margin-bottom: 18px; padding: 12px 14px; border-radius: 10px;
+      background: #FFF7E6; border: 1px solid #F0CE8E; color: #6B4E10; font-size: 13px; line-height: 1.55; }
+    .webview-warn.show { display: block; animation: riseIn .42s cubic-bezier(.22,1,.36,1) both; }
+    .webview-warn strong { display: block; font-weight: 700; margin-bottom: 4px; color: #5A3F08; }
+    .webview-warn .ww-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .webview-warn button { padding: 8px 13px; border-radius: 8px; border: 1px solid #E2B45C;
+      background: #fff; color: #6B4E10; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12.5px;
+      cursor: pointer; transition: background .15s; }
+    .webview-warn button:hover { background: #FFF1D6; }
+    .btn-oauth.is-blocked { opacity: .45; }
+
     /* ── OAUTH BUTTONS ── */
     .oauth-stack { display: flex; flex-direction: column; gap: 10px; }
 
@@ -133,6 +145,15 @@
 
       <div id="msg" class="msg"></div>
 
+      <div id="webviewWarn" class="webview-warn">
+        <strong>You're in an in-app browser</strong>
+        Google sign-in is blocked here (it only works in a full browser). Open this page in Safari or Chrome — or just use the email sign-in link below, which works anywhere.
+        <div class="ww-actions">
+          <button type="button" id="wwCopy">Copy link</button>
+          <button type="button" id="wwEmail">Use email link instead</button>
+        </div>
+      </div>
+
       <button class="btn-oauth btn-google" id="googleBtn">
         <svg class="provider-icon" viewBox="0 0 18 18" fill="none">
           <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -185,12 +206,60 @@
     if (session) window.location.href = '/auth-callback.html';
     const REDIR = window.location.origin + '/auth-callback.html';
 
+    // ── In-app browser detection ──────────────────────────────────────────
+    // Google refuses OAuth inside embedded webviews (LinkedIn/Facebook/Instagram/
+    // Messages/etc.) → "Error 403: disallowed_useragent". We can't make Google
+    // allow it, so detect the webview and steer the user to a path that works.
+    function isInAppBrowser() {
+      const ua = navigator.userAgent || '';
+      // Known in-app browser UA tokens.
+      if (/(FBAN|FBAV|FB_IAB|Instagram|LinkedInApp|Line\/|MicroMessenger|Twitter|Snapchat|musical_ly|TikTok|Bytedance|WhatsApp|Pinterest|GSA\/)/i.test(ua)) return true;
+      const iOS = /iPhone|iPod|iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      // iOS WKWebViews omit the "Safari" token a real browser carries.
+      if (iOS && !/Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)) return true;
+      // Android in-app webviews carry the "; wv)" marker.
+      if (/Android/.test(ua) && /; wv\)/.test(ua)) return true;
+      return false;
+    }
+
+    const googleBtn = document.getElementById('googleBtn');
+    const inApp = isInAppBrowser();
+
+    if (inApp) {
+      document.getElementById('webviewWarn').classList.add('show');
+      googleBtn.classList.add('is-blocked');
+      document.getElementById('wwEmail').addEventListener('click', () => {
+        const el = document.getElementById('emailInput');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus();
+      });
+      document.getElementById('wwCopy').addEventListener('click', async () => {
+        const btn = document.getElementById('wwCopy');
+        const url = window.location.origin + '/login.html';
+        try {
+          await navigator.clipboard.writeText(url);
+          btn.textContent = 'Copied ✓';
+        } catch (_) {
+          // Clipboard API often blocked in webviews — fall back to manual select.
+          const i = document.createElement('input'); i.value = url; document.body.appendChild(i);
+          i.select(); try { document.execCommand('copy'); btn.textContent = 'Copied ✓'; } catch (e) { btn.textContent = url; }
+          i.remove();
+        }
+        setTimeout(() => { btn.textContent = 'Copy link'; }, 2500);
+      });
+    }
+
     // Google
-    document.getElementById('googleBtn').addEventListener('click', async () => {
-      const btn = document.getElementById('googleBtn');
-      btn.disabled = true; btn.textContent = 'Opening Google...'; clearMsg();
+    googleBtn.addEventListener('click', async () => {
+      // In a webview, OAuth is a guaranteed 403 — surface guidance instead.
+      if (inApp) {
+        document.getElementById('webviewWarn').classList.add('show');
+        document.getElementById('webviewWarn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showMsg('Google sign-in is blocked in in-app browsers. Open in Safari/Chrome, or use the email link below.', 'error');
+        return;
+      }
+      googleBtn.disabled = true; googleBtn.textContent = 'Opening Google...'; clearMsg();
       const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIR } });
-      if (error) { btn.disabled = false; btn.textContent = 'Continue with Google'; showMsg(error.message, 'error'); }
+      if (error) { googleBtn.disabled = false; googleBtn.textContent = 'Continue with Google'; showMsg(error.message, 'error'); }
     });
 
     // Magic link
