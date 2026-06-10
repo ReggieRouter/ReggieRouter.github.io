@@ -52,14 +52,8 @@ export const PAGE_TOURS = {
       {
         id:       'pb-save-pdf',
         title:    'Send the PDF',
-        body:     'This is the move. Run the numbers, hit save, send this. Client gets a professional breakdown \u2014 you look like you did the math.',
+        body:     'The move: run the numbers, hit save, send a clean breakdown. You look like you did the math.',
         position: 'left',
-      },
-      {
-        id:       'tt-copy-sms',
-        title:    'Copy the scenario',
-        body:     'One tap copies the full breakdown \u2014 numbers and all. Paste it into a text or email so the client sees the key figures before they open the PDF.',
-        position: 'right',
         last:     true,
       },
     ],
