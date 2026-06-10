@@ -1934,6 +1934,11 @@ var LP_PINNED_KEY = 'lp_pinned';
 var FEATURED_MAX = 3;
 var defaultFeaturedIds = ['amo', 'registry', 'waterfall'];
 var REFERENCE_IDS = ['legislation'];   // look-it-up material — gets its own home section
+// Live tools deliberately kept OFF the home dashboard (featured row, More Tools,
+// and the Customize pin list) — they still count in their category nav + render
+// on their category page. Deal Log has its own sidebar home; SBA Fees is too
+// basic to feature (Steve) — it lives only on the Deal math page + the DSCR teaser.
+var HOME_HIDE = ['deal-log', 'sba-rates'];
 var customizeOpen = false;             // is the pin picker expanded?
 
 // Persona -> the tools that segment reaches for first (job-to-be-done, chosen at
@@ -2020,7 +2025,7 @@ function resolveFeaturedIds() {
   // strongest tool, so present it first regardless of usage/persona/pins.
   if (liveIds.indexOf('amo') !== -1) ids.push('amo');
   pins.concat(used, persona, defaultFeaturedIds).forEach(function(id){
-    if (ids.length < FEATURED_MAX && ids.indexOf(id) === -1 && liveIds.indexOf(id) !== -1) ids.push(id);
+    if (ids.length < FEATURED_MAX && ids.indexOf(id) === -1 && liveIds.indexOf(id) !== -1 && HOME_HIDE.indexOf(id) === -1) ids.push(id);
   });
   return ids;
 }
@@ -2078,7 +2083,7 @@ function clearPins() { try { localStorage.removeItem(LP_PINNED_KEY); } catch (e)
 function customizePanelHTML() {
   var pins = getPinned();
   var full = pins.length >= FEATURED_MAX;
-  var rows = TOOLS.filter(function(t){ return t.status === 'live'; }).map(function(t){
+  var rows = TOOLS.filter(function(t){ return t.status === 'live' && HOME_HIDE.indexOf(t.id) === -1; }).map(function(t){
     var checked = pins.indexOf(t.id) !== -1;
     var disabled = !checked && full;          // when full, you must unpin one to swap
     return '<label class="cz-opt'+(disabled ? ' is-disabled' : '')+'">'
@@ -2097,9 +2102,9 @@ function renderHome() {
   var featuredIds = resolveFeaturedIds();
   var featured = featuredIds.map(function(id){ return TOOLS.find(function(x){ return x.id === id; }); }).filter(Boolean);
   var isRef = function(t){ return REFERENCE_IDS.indexOf(t.id) !== -1; };
-  // Deal Log has its own sidebar home + a tile in Data & leads — keep it out of More Tools.
-  var homeHide = ['deal-log'];
-  var liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && homeHide.indexOf(t.id) === -1 && !isRef(t); });
+  // Tools kept off the home dashboard (Deal Log has its own sidebar home; SBA Fees
+  // is too basic to surface here) — see HOME_HIDE. They still live on their category page.
+  var liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && HOME_HIDE.indexOf(t.id) === -1 && !isRef(t); });
   var reference = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && isRef(t); });
 
   var html = '';
