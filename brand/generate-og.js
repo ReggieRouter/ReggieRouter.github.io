@@ -1,5 +1,10 @@
 const { chromium } = require('playwright');
 const path = require('path');
+const fs = require('fs');
+
+// New wavy/fluid brand mark (replaces the old flat #14532D square).
+const logoPath = path.resolve('/Users/stevegowa/lp-worktrees/main/public/assets/brand/lendpaper-linkedin-logo-300.png');
+const logoDataUri = 'data:image/png;base64,' + fs.readFileSync(logoPath).toString('base64');
 
 const html = `<!DOCTYPE html>
 <html>
@@ -25,6 +30,8 @@ const html = `<!DOCTYPE html>
   .icon {
     width: 200px;
     height: 200px;
+    border-radius: 44px;
+    display: block;
   }
   .wordmark {
     font-size: 72px;
@@ -44,13 +51,8 @@ const html = `<!DOCTYPE html>
 </head>
 <body>
 <div class="center">
-  <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <rect width="24" height="24" rx="5" fill="#14532D"/>
-    <path d="M4 4v16h11l5-5V4H4z" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"/>
-    <path d="M15 20v-5h5" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="butt" stroke-linejoin="miter"/>
-    <path d="M9 9v6" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"/>
-    <path d="M9 15h4" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter"/>
-  </svg>
+  <img class="icon" src="${logoDataUri}" alt="LendPaper">
+
   <div class="wordmark">
     <span class="lend">lend</span><span class="paper">paper</span><span class="dot">.</span>
   </div>
@@ -65,8 +67,8 @@ const html = `<!DOCTYPE html>
   await page.setViewportSize({ width: 1200, height: 630 });
   await page.setContent(html, { waitUntil: 'networkidle' });
 
-  const out1 = path.resolve('/Users/stevegowa/Desktop/LendPaper/public/assets/brand/og-image.png');
-  const out2 = path.resolve('/Users/stevegowa/Desktop/LendPaper/brand/og-image.png');
+  const out1 = path.resolve('/Users/stevegowa/lp-worktrees/main/public/assets/brand/og-image.png');
+  const out2 = path.resolve('/Users/stevegowa/lp-worktrees/main/brand/og-image.png');
 
   await page.screenshot({ path: out1, type: 'png' });
   await page.screenshot({ path: out2, type: 'png' });
