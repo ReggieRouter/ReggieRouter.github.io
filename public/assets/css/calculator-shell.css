@@ -143,7 +143,29 @@ body.is-embedded .modal-shell { border: none; box-shadow: none; border-radius: 0
   border-color: var(--lp-green);
   background: #fff;
 }
-.lp-deal-context details summary {
+/* Borrower-state picker injected by compliance.js carries its own inline
+   right-aligned layout (column / align-items:flex-end / inline-flex label /
+   max-width select). Neutralize it so it reads as a clean stacked field —
+   uppercase kicker label above a full-width select — matching the strip.
+   !important is required to beat the inline styles. */
+.lp-deal-context [data-lp-compliance-host] > div {
+  align-items: stretch !important;
+}
+.lp-deal-context [data-lp-compliance-host] label {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 4px;
+  width: 100%;
+}
+.lp-deal-context [data-lp-compliance-host] select {
+  width: 100% !important;
+  max-width: none !important;
+}
+/* Simple deal-context disclosures only — the PDF Details box (.lp-doc-details)
+   brings its own summary styling/padding, so the leaked margin-top:12px here
+   was pushing its content off-center. */
+.lp-deal-context details:not(.lp-doc-details) summary {
   font-size: 11px;
   font-weight: 600;
   color: var(--lp-text-muted);
@@ -153,12 +175,14 @@ body.is-embedded .modal-shell { border: none; box-shadow: none; border-radius: 0
   user-select: none;
 }
 .lp-deal-context details summary::-webkit-details-marker { display: none; }
-.lp-deal-context details summary::before {
+/* The PDF Details box (.lp-doc-details) ships its own caret (.lp-dd-caret),
+   so exclude it here — otherwise it renders a duplicate '+' on the left. */
+.lp-deal-context details:not(.lp-doc-details) summary::before {
   content: '+ ';
   color: var(--lp-green);
   font-weight: 700;
 }
-.lp-deal-context details[open] summary::before { content: '− '; }
+.lp-deal-context details:not(.lp-doc-details)[open] summary::before { content: '− '; }
 .lp-deal-context details .lp-doc-fields {
   margin-top: 10px;
   display: flex;
