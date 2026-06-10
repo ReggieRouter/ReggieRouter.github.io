@@ -1297,6 +1297,15 @@
         [data-lp-compliance-host] { display:none !important; }
         .lp-state-note { margin-top:8px; }
         .lp-state-note:empty { display:none; }
+        /* Start Date + Borrower State paired row (LEN-183). Stays 2-col at ALL
+           widths so the two titles + field boxes never break top-alignment when
+           the column narrows. Uniform label height (min-height + matched margin)
+           aligns the field tops despite the two different label treatments. */
+        .lp-pair-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; margin-top:20px; }
+        .lp-pair-row > div > label { display:flex; align-items:center; gap:4px; min-height:17px; margin-bottom:8px;
+            font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.025em; color:var(--brand-primary); }
+        .lp-pair-row .lp-pair-optlabel { color:#6B7280; font-weight:600; }
+        .lp-pair-row .lp-optnote { text-transform:none; letter-spacing:0; font-weight:400; }
 
         /* Prepared by block */
 
@@ -1430,30 +1439,8 @@
             <!-- Cards injected here via JS -->
         </div>
 
-        <!-- LEN-160 — PDF Details footer module. Sits below the inputs, visually
-             secondary; single source of truth for the PDF's optional metadata
-             (Prepared by · Company · Prepared for). buildPdfDocument() omits any
-             blank field cleanly. Left-aligned to echo the input column. -->
-        <div class="no-print" style="max-width:1000px;margin:0 auto;width:100%;">
-            <details id="pdfDocDetails" class="lp-doc-details">
-                <summary>
-                    <span class="lp-dd-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
-                    <span class="lp-dd-text">
-                        <span class="lp-dd-kicker">PDF DETAILS</span>
-                        <span class="lp-dd-title">Prepared for the saved estimate</span>
-                        <span class="lp-dd-helper">Prepared by · Company · Prepared for</span>
-                    </span>
-                    <span class="lp-dd-edit">Edit</span>
-                    <span class="lp-dd-caret"></span>
-                </summary>
-                <div class="lp-doc-details-grid">
-                    <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
-                    <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
-                    <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Borrower name · use of funds"></label>
-                </div>
-                <p class="lp-doc-details-hint">Optional — appears on the saved PDF. Borrower state is set on each card and drives state-specific compliance disclosures.</p>
-            </details>
-        </div>
+        <!-- PDF Details module (#pdfDocDetails) relocated into the primary card's
+             left input column (LEN-183) — see the card template below. -->
 
         <!-- Redesigned borrower-facing document (LEN-124). Built from calculator state at
              Save time by buildPdfDocument(); hidden on screen, revealed only in pdf-export-mode. -->
@@ -2402,50 +2389,69 @@
                         <!-- Section: Schedule -->
                         <div>
                             <div class="lp-section-label">Schedule</div>
-                            <div class="grid grid-cols-2 gap-x-4 gap-y-5">
-                                <div class="col-span-2">
-                                    <label>Payment Frequency</label>
-                                    <div class="lp-input-group pr-2">
-                                        <select id="freq-${id}" class="w-full py-2.5 px-3 outline-none text-[#111827] text-[14px] font-semibold bg-transparent appearance-none cursor-pointer" onchange="calcCard(${id})">
-                                            <option value="daily">Daily</option>
-                                            <option value="weekly" selected>Weekly</option>
-                                            <option value="semimonthly">Semi-Monthly</option>
-                                            <option value="monthly">Monthly</option>
-                                        </select>
-                                    </div>
+                            <div>
+                                <label>Payment Frequency</label>
+                                <div class="lp-input-group pr-2">
+                                    <select id="freq-${id}" class="w-full py-2.5 px-3 outline-none text-[#111827] text-[14px] font-semibold bg-transparent appearance-none cursor-pointer" onchange="calcCard(${id})">
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly" selected>Weekly</option>
+                                        <option value="semimonthly">Semi-Monthly</option>
+                                        <option value="monthly">Monthly</option>
+                                    </select>
                                 </div>
+                            </div>
 
-                                <div class="col-span-2">
+                            <!-- Start Date + Borrower State paired (LEN-183): two "context" fields
+                                 (when it begins / where the borrower is). Held side by side and
+                                 top-aligned at all widths; Borrower State drives the compliance engine. -->
+                            <div class="lp-pair-row">
+                                <div>
                                     <label>Start Date</label>
                                     <div class="lp-input-group">
                                         <input type="date" id="start-${id}" value="${today}" class="lp-input font-bold" onchange="calcCard(${id})">
                                     </div>
                                 </div>
+                                <div>
+                                    <label class="lp-pair-optlabel">Borrower State
+                                        <span class="tooltip no-print">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                            <span class="tooltiptext">Will check for state-specific disclosure requirements (CA, NY, VA, UT, and others)</span>
+                                        </span>
+                                        <span class="lp-optnote">— optional</span>
+                                    </label>
+                                    <div class="lp-input-group lp-input-light pr-2">
+                                        <select id="state-${id}" class="w-full py-2 px-3 outline-none text-[#374151] text-[13px] bg-transparent appearance-none cursor-pointer" onchange="setBorrowerState(${id}, this.value)">
+                                            <option value="">Select state…</option>
+                                            ${LP_STATE_OPTIONS}
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-
-                        <!-- Borrower State (optional) — drives the compliance engine -->
-                        <div class="mt-6">
-                            <div class="lp-optlabel">
-                                Borrower State
-                                <span class="tooltip ml-1 no-print">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                                    <span class="tooltiptext">Will check for state-specific disclosure requirements (CA, NY, VA, UT, and others)</span>
-                                </span>
-                                <span class="lp-optnote">— optional</span>
-                            </div>
-                            <div class="lp-input-group lp-input-light pr-2">
-                                <select id="state-${id}" class="w-full py-2 px-3 outline-none text-[#374151] text-[13px] bg-transparent appearance-none cursor-pointer" onchange="setBorrowerState(${id}, this.value)">
-                                    <option value="">Select state…</option>
-                                    ${LP_STATE_OPTIONS}
-                                </select>
-                            </div>
-                            <!-- Compliance disclosure note, anchored to this field (LEN-126) -->
+                            <!-- Compliance disclosure note, anchored under the paired row (LEN-126) -->
                             <div id="stateNote-${id}" class="lp-state-note no-print"></div>
                         </div>
-
-                        <!-- Prepared by / document metadata lives in the #pdfDocDetails footer
-                             module below the cards (LEN-160) — single source of truth for the PDF. -->
+${id === 1 ? `
+                        <!-- PDF Details (LEN-160 / LEN-183): relocated to the foot of the input
+                             column (was stranded below the schedule table). One global instance —
+                             primary card only — since the metadata is a single set per saved PDF. -->
+                        <details id="pdfDocDetails" class="lp-doc-details no-print">
+                            <summary>
+                                <span class="lp-dd-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+                                <span class="lp-dd-text">
+                                    <span class="lp-dd-kicker">PDF DETAILS</span>
+                                    <span class="lp-dd-title">Personalize this estimate</span>
+                                    <span class="lp-dd-helper">Prepared by · Company · Prepared for</span>
+                                </span>
+                                <span class="lp-dd-edit">Edit</span>
+                                <span class="lp-dd-caret"></span>
+                            </summary>
+                            <div class="lp-doc-details-grid">
+                                <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+                                <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+                                <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Borrower name · use of funds"></label>
+                            </div>
+                            <p class="lp-doc-details-hint">Optional — appears on the saved PDF.</p>
+                        </details>` : ''}
 
                         <input type="number" id="discPct-${id}" value="25" min="0" max="100" style="display:none">
                     </div>
