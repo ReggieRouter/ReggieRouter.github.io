@@ -60,8 +60,6 @@
     .input-wrap { position: relative; margin-bottom: 14px; }
     .input-prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--muted); opacity: .55; pointer-events: none; font-family: 'Inter', sans-serif; }
     .input-wrap.has-prefix input { padding-left: 152px; margin-bottom: 0; }
-    .btn-skip { width: 100%; padding: 11px; background: none; color: var(--muted); border: none; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 13px; cursor: pointer; margin-top: 6px; }
-    .btn-skip:hover { color: var(--text); }
     .loading-overlay { display: none; position: absolute; inset: 0; background: rgba(248,250,247,0.95); border-radius: 20px; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 10; }
     .loading-overlay.visible { display: flex; }
     .spinner { width: 28px; height: 28px; border: 2px solid rgba(0,0,0,0.08); border-top-color: var(--brand-mid); border-radius: 50%; animation: spin .7s linear infinite; }
@@ -89,8 +87,9 @@
         <div class="steps-track" id="track">
           <div class="step" id="step-0">
             <h1>What's your name?</h1>
-            <p class="subtitle">Just your first and last — we'll use this on your account.</p>
-            <input type="text" id="inputName" placeholder="Jane Smith" autocomplete="name" />
+            <p class="subtitle">Your first and last — we'll use this on your account.</p>
+            <input type="text" id="inputFirstName" placeholder="First name" autocomplete="given-name" />
+            <input type="text" id="inputLastName" placeholder="Last name" autocomplete="family-name" />
             <button class="btn-next" id="nextFromName">Continue →</button>
           </div>
           <div class="step" id="step-1">
@@ -102,14 +101,13 @@
           </div>
           <div class="step" id="step-2">
             <button class="btn-back" id="backToCompany">← Back</button>
-            <h1>Add your LinkedIn?</h1>
-            <p class="subtitle">Optional — it helps us confirm you're a real broker or lender and speeds up approval. You can always add it later.</p>
+            <h1>Add your LinkedIn</h1>
+            <p class="subtitle">This helps us confirm you're a real broker or lender and speeds up approval. It's required to finish your request.</p>
             <div class="input-wrap has-prefix">
               <span class="input-prefix">linkedin.com/in/</span>
               <input type="text" id="inputLinkedIn" placeholder="yourname" autocomplete="off" />
             </div>
             <button class="btn-next" id="finishFromLinkedIn">Finish →</button>
-            <button class="btn-skip" id="skipLinkedIn">Skip for now</button>
           </div>
         </div>
       </div>
@@ -186,18 +184,24 @@
     const oauthName = (session.user.user_metadata?.full_name || session.user.user_metadata?.name || '').trim();
     const knownName = (inviteRow?.full_name || '').trim() || oauthName;
     const knownCompany = (inviteRow?.company || '').trim() || companyGuess;
+    // LEN-243: the name is now two fields — split the known full name into first + last.
+    const knownParts = knownName.split(/\s+/).filter(Boolean);
+    const knownFirst = knownParts.shift() || '';
+    const knownLast = knownParts.join(' ');
     const autoProvision = invited && !!knownName;
     if (autoProvision) {
       // loadingOverlay is already visible from first paint; reuse submitProfile() so the
       // approval / persona-seed / accepted_at / routing logic stays identical.
-      document.getElementById('inputName').value = knownName;
+      document.getElementById('inputFirstName').value = knownFirst;
+      document.getElementById('inputLastName').value = knownLast;
       document.getElementById('inputCompany').value = knownCompany || '';
       document.getElementById('inputLinkedIn').value = '';
       submitProfile();
     } else {
       // Manual path: reveal the wizard and pre-fill anything we do know.
       document.getElementById('loadingOverlay').classList.remove('visible');
-      if (knownName) document.getElementById('inputName').value = knownName;
+      if (knownFirst) document.getElementById('inputFirstName').value = knownFirst;
+      if (knownLast) document.getElementById('inputLastName').value = knownLast;
       if (knownCompany) document.getElementById('inputCompany').value = knownCompany;
     }
 
@@ -209,7 +213,7 @@
     }
     const msg = document.getElementById('message');
     let currentStep = 0;
-    setTimeout(() => document.getElementById('inputName').focus(), 100);
+    setTimeout(() => document.getElementById('inputFirstName').focus(), 100);
 
     function goToStep(n) {
       currentStep = n;
@@ -217,7 +221,7 @@
       track.style.transform = `translateX(${-n * w}px)`;
       dots.forEach((d,i) => { d.className = 'dot' + (i < n ? ' done' : i === n ? ' active' : ''); });
       msg.className = 'msg';
-      if (n === 0) setTimeout(() => document.getElementById('inputName').focus(), 380);
+      if (n === 0) setTimeout(() => document.getElementById('inputFirstName').focus(), 380);
       if (n === 1) setTimeout(() => document.getElementById('inputCompany').focus(), 380);
       if (n === 2) setTimeout(() => document.getElementById('inputLinkedIn').focus(), 380);
     }
@@ -229,8 +233,10 @@
     });
 
     function advanceName() {
-      const v = document.getElementById('inputName').value.trim();
-      if (!v) { showErr('Please enter your name.'); return; }
+      const first = document.getElementById('inputFirstName').value.trim();
+      const last = document.getElementById('inputLastName').value.trim();
+      if (!first) { showErr('Please enter your first name.'); return; }
+      if (!last) { showErr('Please enter your last name.'); return; }
       goToStep(1);
     }
     // From the company step: go to LinkedIn only when we couldn't infer a company.
@@ -277,21 +283,30 @@
 
     async function submitProfile() {
       const v = document.getElementById('inputCompany').value.trim();
+      const li = normalizeLinkedIn(document.getElementById('inputLinkedIn').value);
+      // LEN-243: organic applicants (no corporate domain, no invite) must provide LinkedIn —
+      // it's our only vetting signal for them. Block before any DB work. Invited / corporate
+      // users never reach this branch (needLinkedIn is false, the step is hidden).
+      if (needLinkedIn && !li) {
+        if (currentStep !== 2) goToStep(2);
+        showErr('Please add your LinkedIn to finish.');
+        return;
+      }
       document.getElementById('loadingOverlay').classList.add('visible');
       // LEN-105: admin-invited emails skip the approval queue
       const { data: invite } = await supabase.from('invites')
         .select('id, role').eq('email', (session.user.email || '').toLowerCase()).maybeSingle();
       const profile = {
         id: session.user.id, email: session.user.email,
-        full_name: document.getElementById('inputName').value.trim(),
+        full_name: (document.getElementById('inputFirstName').value.trim() + ' ' + document.getElementById('inputLastName').value.trim()).trim(),
         company: v || null,
         status: invite ? 'approved' : 'pending', invite_credits: 5, invites_sent: 0
       };
       // LEN-105: carry the admin-assigned role onto the new profile (onboarding doesn't ask for it)
       if (invite && invite.role) profile.role = invite.role;
       if (invite) profile.approved_at = new Date().toISOString();
-      // LEN-205: optional LinkedIn (only collected when no company could be inferred).
-      const li = normalizeLinkedIn(document.getElementById('inputLinkedIn').value);
+      // LinkedIn (collected only when no company could be inferred; LEN-243 makes it
+      // required for those organic applicants — validated above). `li` computed at top.
       if (li) profile.linkedin_url = li;
       const error = await insertProfileSafe(profile);
       if (error) {
@@ -314,8 +329,8 @@
     document.getElementById('backToName').addEventListener('click', () => goToStep(0));
     document.getElementById('backToCompany').addEventListener('click', () => goToStep(1));
     document.getElementById('finishFromLinkedIn').addEventListener('click', submitProfile);
-    document.getElementById('skipLinkedIn').addEventListener('click', () => { document.getElementById('inputLinkedIn').value = ''; submitProfile(); });
-    document.getElementById('inputName').addEventListener('keydown', e => { if (e.key === 'Enter') advanceName(); });
+    document.getElementById('inputFirstName').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('inputLastName').focus(); });
+    document.getElementById('inputLastName').addEventListener('keydown', e => { if (e.key === 'Enter') advanceName(); });
     document.getElementById('inputCompany').addEventListener('keydown', e => { if (e.key === 'Enter') advanceCompany(); });
     document.getElementById('inputLinkedIn').addEventListener('keydown', e => { if (e.key === 'Enter') submitProfile(); });
     function showErr(text) { msg.textContent = text; msg.className = 'msg error'; }
