@@ -24,19 +24,29 @@ test('legislation: federal panel, chips, detail, and table all render', async ({
   await page.waitForSelector('#fedItems .fed-card', { timeout: 10_000 });
   expect(await page.locator('#fedItems .fed-card').count()).toBeGreaterThanOrEqual(2);
 
-  // Jurisdiction chips render and are clickable → detail panel opens.
+  // Jurisdiction chips render and are clickable → state panel (fast-answer) opens (LEN-210).
   const firstChip = page.locator('#chips .chip').first();
   await firstChip.waitFor({ timeout: 10_000 });
   expect(await page.locator('#chips .chip').count()).toBeGreaterThan(5);
   await firstChip.click();
   await expect(page.locator('#detailBody .detail-state')).toBeVisible();
-  await expect(page.locator('#detailBody .bill-name').first()).toBeVisible();
+  expect(await page.locator('#detailBody .mini-stat').count()).toBeGreaterThanOrEqual(4);
+  await expect(page.locator('#detailBody .detail-action.primary')).toBeVisible();
 
-  // Table view toggle shows rows from the same data.
-  await page.locator('#btn-table').click();
+  // Map → table bridge appears on selection and jumps into a state-filtered table (LEN-210).
+  await expect(page.locator('#bridge')).toHaveClass(/show/);
+  await page.locator('#bridgeJump').click();
   await expect(page.locator('#tableView')).toBeVisible();
+  await expect(page.locator('#appliedFilters')).toHaveClass(/show/);
+  const stateRows = await page.locator('#tableBody tr').count();
+  expect(stateRows).toBeGreaterThan(0);
+
+  // Clearing the state filter restores the full table.
+  await page.locator('#jurisFilter button[data-juris="all"]').click();
+  await expect(page.locator('#appliedFilters')).not.toHaveClass(/show/);
   const allRows = await page.locator('#tableBody tr').count();
   expect(allRows).toBeGreaterThan(5);
+  expect(allRows).toBeGreaterThan(stateRows);
 
   // Federal laws are in the table + the Federal/State facet filters (LEN-168).
   await page.locator('#jurisFilter button[data-juris="federal"]').click();

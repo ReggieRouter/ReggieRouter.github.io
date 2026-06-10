@@ -53,12 +53,16 @@ a { color: inherit; }
 .brand { display: inline-flex; align-items: baseline; font-weight: 800; letter-spacing: -0.02em; font-size: 16px; }
 .brand .l { color: var(--text); } .brand .p { color: var(--text-muted); font-weight: 300; } .brand .d { color: var(--accent); }
 
-/* Header */
-.page-head { padding: 12px 0 14px; }
-.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--accent-mid); }
-.page-title { font-size: clamp(26px, 4vw, 38px); font-weight: 800; letter-spacing: -0.025em; margin: 6px 0 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.beta-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 4px 9px; border-radius: 999px; }
-.page-sub { font-size: 15px; color: var(--text-muted); max-width: 720px; line-height: 1.5; }
+/* Header — two-column: title block (left) + reviewed-date meta (right) (LEN-210) */
+.page-head { padding: 16px 0 18px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 24px; align-items: end; }
+.head-main { min-width: 0; }
+.eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-mid); }
+.page-title { font-size: clamp(30px, 4.2vw, 44px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; margin: 8px 0 10px; display: flex; align-items: center; gap: 13px; flex-wrap: wrap; }
+.beta-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: 999px; }
+.page-sub { font-size: 17px; color: var(--text-soft); max-width: 760px; line-height: 1.5; }
+.hero-meta { display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--text-muted); white-space: nowrap; padding-bottom: 4px; }
+.hero-meta .hdot { width: 4px; height: 4px; border-radius: 50%; background: var(--border); }
+@media (max-width: 760px) { .page-head { grid-template-columns: 1fr; } .hero-meta { justify-content: flex-start; } }
 
 /* ── Intel row: two compact white panels (federal • news) above the map (LEN-208) ──
    Both panels are the SAME white card, same compact height, each an internal
@@ -68,59 +72,59 @@ a { color: inherit; }
 .panel { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; min-height: 0; }
 .panel-head { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 14px; row-gap: 4px;
   text-align: left; padding: 13px 16px 11px; border-bottom: 1px solid var(--border); }
-.panel-eyebrow { grid-column: 1; display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-mid); }
-.panel-eyebrow .ic, .panel-eyebrow .star { width: 14px; height: 14px; flex: 0 0 auto; }
-.panel-title-sm { grid-column: 1; grid-row: 2; font-size: 12.5px; font-weight: 600; letter-spacing: -0.005em; line-height: 1.34; color: var(--text-muted); }
+.panel-eyebrow { grid-column: 1; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-mid); }
+.panel-eyebrow .ic, .panel-eyebrow .star { width: 15px; height: 15px; flex: 0 0 auto; }
+.panel-title-sm { grid-column: 1; grid-row: 2; font-size: 13.5px; font-weight: 600; letter-spacing: -0.005em; line-height: 1.36; color: var(--text-muted); }
 .panel-meta { grid-column: 2; grid-row: 1 / span 2; display: inline-flex; align-items: center; gap: 10px; align-self: center; }
-.panel-count { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
-.panel-body { padding: 13px 16px 14px; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.panel-count { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.panel-body { padding: 14px 16px 15px; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
 
 /* Federal panel — same white card as news, with a slim green left accent so it
    still reads as the framing/anchor tile (Steve: make it white like "in the news"). */
 .panel-federal { border-left: 3px solid var(--accent-mid); }
 
 /* Federal "top rules" — internal scroll list, ~2 rows (matches the news list) */
-.fed-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;
-  flex: 1 1 auto; min-height: 0; max-height: 158px; overflow-y: auto; padding-right: 4px; align-content: start; }
-.fed-card { text-align: left; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 5px; cursor: pointer; font-family: inherit; color: inherit; transition: background .12s ease, border-color .12s ease; }
+.fed-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 10px;
+  flex: 1 1 auto; min-height: 0; max-height: 196px; overflow-y: auto; padding-right: 4px; align-content: start; }
+.fed-card { text-align: left; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; display: flex; flex-direction: column; gap: 5px; cursor: pointer; font-family: inherit; color: inherit; transition: background .12s ease, border-color .12s ease; }
 .fed-card:hover { background: #fff; border-color: var(--accent-mid); }
-.fed-card .fc-name { font-size: 13px; font-weight: 700; line-height: 1.28; margin-top: 1px; color: var(--text); }
-.fed-card .fc-cite { font-size: 10.5px; font-weight: 600; letter-spacing: 0.01em; color: var(--accent-mid); line-height: 1.3; }
-.fed-card .fc-desc { font-size: 11px; color: var(--text-soft); line-height: 1.42; margin-top: 1px; }
-.fed-card .fed-status { align-self: flex-start; font-size: 9.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+.fed-card .fc-name { font-size: 14px; font-weight: 700; line-height: 1.3; margin-top: 1px; color: var(--text); }
+.fed-card .fc-cite { font-size: 12px; font-weight: 600; letter-spacing: 0.01em; color: var(--accent-mid); line-height: 1.3; }
+.fed-card .fc-desc { font-size: 12.5px; color: var(--text-soft); line-height: 1.45; margin-top: 1px; }
+.fed-card .fed-status { align-self: flex-start; font-size: 10px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
 .fed-status.s-enacted { background: var(--accent-soft); color: var(--accent); }
 .fed-status.s-effective-soon { background: rgba(45,106,79,0.12); color: var(--accent-mid); }
 .fed-status.s-pending { background: rgba(116,168,146,0.18); color: #4a7c63; }
-.fed-seeall { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-family: inherit; font-size: 12px; font-weight: 700; color: var(--accent); background: none; border: none; padding: 2px 0 0; cursor: pointer; transition: color .12s ease; }
+.fed-seeall { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-family: inherit; font-size: 13px; font-weight: 700; color: var(--accent); background: none; border: none; padding: 2px 0 0; cursor: pointer; transition: color .12s ease; }
 .fed-seeall:hover { color: var(--accent-hover); }
 .fed-seeall svg { width: 13px; height: 13px; }
 
 /* Regulatory & enforcement updates — internal scroll list, ~2 rows */
-.enf-list { display: flex; flex-direction: column; gap: 9px; flex: 1 1 auto; min-height: 0; max-height: 158px; overflow-y: auto; padding-right: 4px; }
-.enf-item { display: flex; flex-direction: column; gap: 6px; padding: 11px 13px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.enf-list { display: flex; flex-direction: column; gap: 9px; flex: 1 1 auto; min-height: 0; max-height: 196px; overflow-y: auto; padding-right: 4px; }
+.enf-item { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .enf-item-top { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
-.enf-status { font-size: 9.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.enf-status { font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
 .enf-status.e-settled { background: var(--accent-soft); color: var(--accent); }
 .enf-status.e-consent { background: rgba(45,106,79,0.10); color: var(--accent-mid); }
 .enf-status.e-pending { background: rgba(116,168,146,0.18); color: #4a7c63; }
 .enf-status.e-warning { background: #f1f1ef; color: #6b7280; }
-.enf-date { font-size: 11px; font-weight: 600; color: var(--text-muted); }
-.enf-party { font-size: 11px; color: var(--text-muted); margin-left: auto; }
-.enf-matter { font-size: 13.5px; font-weight: 700; color: var(--text); line-height: 1.3; }
-.enf-outcome { font-size: 11.5px; font-weight: 600; color: var(--accent); }
-.enf-summary { font-size: 12px; line-height: 1.5; color: var(--text-soft); }
+.enf-date { font-size: 12.5px; font-weight: 600; color: var(--text-muted); }
+.enf-party { font-size: 12.5px; color: var(--text-muted); margin-left: auto; }
+.enf-matter { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.enf-outcome { font-size: 13px; font-weight: 600; color: var(--accent); }
+.enf-summary { font-size: 13.5px; line-height: 1.5; color: var(--text-soft); }
 .enf-links { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
-.enf-link { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
+.enf-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
 .enf-link:hover { text-decoration: underline; }
-.enf-link svg { width: 13px; height: 13px; flex: 0 0 auto; }
-.enf-note { font-size: 11.5px; line-height: 1.5; color: var(--text-muted); margin-top: 13px; }
+.enf-link svg { width: 14px; height: 14px; flex: 0 0 auto; }
+.enf-note { font-size: 12.5px; line-height: 1.5; color: var(--text-muted); margin-top: 13px; }
 
 /* View toggle */
 .controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 18px 0 12px; flex-wrap: wrap; }
 .seg { display: inline-flex; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
-.seg button { border: none; background: transparent; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--text-muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; transition: all .12s ease; }
+.seg button { border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 650; color: var(--text-muted); padding: 8px 18px; border-radius: 999px; cursor: pointer; transition: all .12s ease; }
 .seg button.active { background: var(--accent); color: #fff; }
-.updated { font-size: 12px; color: var(--text-muted); }
+.updated { font-size: 13px; color: var(--text-muted); }
 
 /* Map view */
 .map-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 20px; align-items: start; }
@@ -139,29 +143,46 @@ a { color: inherit; }
 .state-label { font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 600; fill: rgba(255,255,255,0.92); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .state-label.dark { fill: rgba(17,24,39,0.55); }
 
-/* detail panel */
-.detail-card { padding: 20px 22px; min-height: 360px; position: sticky; top: 18px; }
-.detail-empty { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
-.detail-state { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
-.status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; margin-top: 8px; }
+/* detail / state panel — the "fast broker answer" (LEN-210):
+   kicker + big state name + status pill, one-line copy, a 2×2 mini-stat grid,
+   two actions into the table/details, then a short jurisdiction activity list.
+   Full citations + source links deliberately live in the table + modal. */
+.detail-card { padding: 22px 24px; min-height: 360px; position: sticky; top: 18px; }
+.detail-empty { color: var(--text-muted); font-size: 15px; line-height: 1.6; }
+.detail-kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-mid); }
+.detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.detail-state { font-size: 27px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; margin-top: 5px; }
+.status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; padding: 4px 11px; border-radius: 999px; margin-top: 8px; white-space: nowrap; }
+.status-pill.compact { margin-top: 0; }
 .status-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
 .status-enacted { background: var(--accent-soft); color: var(--accent); }
 .status-effective-soon { background: rgba(45,106,79,0.12); color: var(--accent-mid); }
 .status-pending { background: rgba(116,168,146,0.18); color: #4a7c63; }
 .status-none { background: var(--bg-alt); color: var(--text-muted); }
-.bill { border-top: 1px solid var(--border); padding: 14px 0 4px; }
-.bill:first-of-type { border-top: none; }
-.bill-name { font-size: 14.5px; font-weight: 700; }
-.bill-meta { font-size: 12px; color: var(--text-muted); margin: 4px 0 8px; display: flex; flex-wrap: wrap; gap: 10px; }
-.bill-meta span { display: inline-flex; align-items: center; gap: 5px; }
-.bill-desc { font-size: 13px; line-height: 1.55; color: var(--text-soft); }
-.bill-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; margin-top: 9px; }
+.detail-copy { font-size: 14.5px; line-height: 1.5; color: var(--text-muted); margin: 14px 0 16px; }
+.mini-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.mini-stat { padding: 12px 13px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-alt); }
+.mini-stat .ms-label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); }
+.mini-stat .ms-value { display: block; margin-top: 4px; font-size: 15px; font-weight: 700; line-height: 1.25; color: var(--text); }
+.detail-actions { display: flex; flex-wrap: wrap; gap: 9px; margin: 4px 0 6px; }
+.detail-action { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; font-size: 13.5px; font-weight: 700; padding: 9px 15px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--accent); cursor: pointer; transition: all .12s ease; }
+.detail-action:hover { border-color: var(--accent); }
+.detail-action.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.detail-action.primary:hover { background: var(--accent-hover); }
+.activity-head { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin: 20px 0 4px; }
+.activity-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 12px 0 11px; border-top: 1px solid var(--border); width: 100%; text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0; font-family: inherit; cursor: pointer; }
+.activity-row:hover .act-name { color: var(--accent); }
+.act-name { font-size: 14px; font-weight: 700; color: var(--text); transition: color .12s ease; }
+.act-sub { display: block; margin-top: 2px; font-size: 12.5px; font-weight: 500; color: var(--text-muted); }
+.act-badge { font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.bill-desc { font-size: 14px; line-height: 1.55; color: var(--text-soft); }
+.bill-link { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: var(--accent); text-decoration: none; margin-top: 9px; background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; }
 .bill-link:hover { text-decoration: underline; }
 
 /* enacted chips (always-clickable, fixes small-state map targets) */
 .chips-head { font-size: 12px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; margin: 18px 4px 8px; }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 4px; }
-.chip { font-size: 12px; font-weight: 600; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; transition: all .12s ease; }
+.chip { font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; transition: all .12s ease; }
 .chip:hover { border-color: var(--accent); color: var(--accent); }
 .chip .cdot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 
@@ -211,46 +232,93 @@ a { color: inherit; }
 @keyframes toolsPulse { 0%,100% { box-shadow: none; } 40% { box-shadow: 0 0 0 3px var(--accent-soft); } }
 @media (prefers-reduced-motion: reduce) { .spot-ring { transition: none; } }
 
+/* Map → table bridge (LEN-210): appears under the map once a state is selected,
+   making it obvious the map is the entry point and the table is the workbench.
+   Map-view only; hidden in table view and when no state is selected. */
+.bridge { display: none; grid-template-columns: minmax(0,1fr) auto; gap: 20px; align-items: center;
+  margin: 18px 0 4px; padding: 18px 20px; border: 1px solid rgba(45,107,80,0.22); border-radius: var(--radius);
+  background: linear-gradient(180deg, #F7FBF8, #FFFFFF); box-shadow: 0 8px 24px rgba(16,24,39,0.06); }
+.bridge.show { display: grid; }
+.bridge-kicker { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-mid); margin-bottom: 5px; }
+.bridge-title { font-size: 19px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.25; color: var(--text); }
+.bridge-copy { margin-top: 5px; font-size: 14px; line-height: 1.45; color: var(--text-muted); max-width: 620px; }
+.bridge-actions { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.bridge-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; font-size: 13.5px; font-weight: 700; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg); color: var(--accent); cursor: pointer; transition: all .12s ease; }
+.bridge-btn:hover { border-color: var(--accent); }
+.bridge-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.bridge-btn.primary:hover { background: var(--accent-hover); }
+@media (max-width: 720px) { .bridge { grid-template-columns: 1fr; } .bridge-actions { flex-wrap: wrap; } }
+
+/* Applied-filter tokens above the table (LEN-210) — reflect a map selection. */
+.applied-filters { display: none; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+.applied-filters.show { display: flex; }
+.applied-filters .af-label { font-size: 12px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.03em; }
+.filter-token { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); border: 1px solid transparent; font-family: inherit; cursor: pointer; transition: all .12s ease; }
+.filter-token:hover { border-color: rgba(26,60,46,0.25); }
+.filter-token.toggle { background: var(--bg); color: var(--text-muted); border-color: var(--border); }
+.filter-token.toggle.on { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.filter-token .tk-x { font-size: 14px; line-height: 1; opacity: 0.65; }
+.filter-token.info { cursor: default; }
+.filter-token.info:hover { border-color: transparent; }
+
+/* Compact status badge inside the Jurisdiction cell (LEN-210 — replaces the
+   dedicated Status column; long-form status stays in the state panel). */
+.td-jur-name { font-size: 16px; font-weight: 800; color: var(--text); }
+.td-jur-name.jur-fed { color: var(--accent-mid); }
+.td-badge { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.td-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+/* compact status badge colors — shared by table cells + state-panel activity rows */
+.b-enacted { background: var(--accent-soft); color: var(--accent); }
+.b-soon { background: rgba(45,106,79,0.12); color: var(--accent-mid); }
+.b-watch { background: rgba(116,168,146,0.20); color: #4a7c63; }
+.b-none { background: var(--bg-alt); color: var(--text-muted); }
+.row-source { display: inline-flex; align-items: center; gap: 5px; margin-top: 9px; font-size: 13px; font-weight: 700; color: var(--accent-mid); background: none; border: none; padding: 0; font-family: inherit; cursor: pointer; }
+.row-source:hover { color: var(--accent); text-decoration: underline; }
+.row-source svg { width: 13px; height: 13px; }
+
 /* Table view (the "current"/raw view) */
 .table-view { display: none; }
 .table-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
 .filter-chips { display: inline-flex; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
-.filter-chips button { border: none; background: transparent; font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--text-muted); padding: 6px 13px; border-radius: 999px; cursor: pointer; transition: all .12s ease; white-space: nowrap; }
+.filter-chips button { border: none; background: transparent; font-family: inherit; font-size: 13.5px; font-weight: 650; color: var(--text-muted); padding: 7px 14px; border-radius: 999px; cursor: pointer; transition: all .12s ease; white-space: nowrap; }
 .filter-chips button.active { background: var(--accent); color: #fff; }
-.table-search { flex: 1 1 200px; min-width: 160px; max-width: 320px; font-family: inherit; font-size: 13px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); background: var(--bg); }
+.table-search { flex: 1 1 220px; min-width: 180px; max-width: 360px; font-family: inherit; font-size: 14px; padding: 9px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); background: var(--bg); }
 .table-search:focus { outline: none; border-color: var(--accent-mid); box-shadow: 0 0 0 3px var(--accent-soft); }
-.table-count { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+.table-count { font-size: 13px; color: var(--text-muted); margin-left: auto; }
 
 .table-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .table-scroll { overflow-x: auto; }
-table.leg { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
-table.leg thead th { position: sticky; top: 0; background: var(--bg-alt); text-align: left; font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); padding: 0; border-bottom: 1px solid var(--border); white-space: nowrap; }
-table.leg thead th.sortable button { width: 100%; display: inline-flex; align-items: center; gap: 5px; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; background: none; border: none; cursor: pointer; padding: 11px 14px; }
+table.leg { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 15px; }
+table.leg thead th { position: sticky; top: 0; background: var(--bg-alt); text-align: left; font-weight: 800; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); padding: 0; border-bottom: 1px solid var(--border); white-space: nowrap; }
+table.leg thead th.sortable button { width: 100%; display: inline-flex; align-items: center; gap: 5px; font: inherit; color: inherit; text-transform: inherit; letter-spacing: inherit; background: none; border: none; cursor: pointer; padding: 13px 16px; }
 table.leg thead th.sortable button:hover { color: var(--accent); }
-table.leg thead th.static { padding: 11px 14px; }
+table.leg thead th.static { padding: 13px 16px; }
 .sort-arrow { font-size: 9px; opacity: 0; transition: opacity .12s ease; }
 table.leg thead th.sorted .sort-arrow { opacity: 1; color: var(--accent); }
 table.leg thead th.sortable button:hover .sort-arrow { opacity: .5; }
-table.leg tbody td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.leg tbody td { padding: 16px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
 table.leg tbody tr:last-child td { border-bottom: none; }
 table.leg tbody tr:hover { background: var(--bg-alt); }
 .td-status { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; }
-.td-penalty { white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 600; }
-.td-penalty .pen-sub { display: block; font-weight: 400; font-size: 11px; color: var(--text-muted); white-space: normal; max-width: 220px; }
-.td-penalty.pen-na { color: var(--text-muted); font-weight: 500; }
+.td-penalty { white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 800; font-size: 16px; color: var(--text); }
+.td-penalty .pen-sub { display: block; font-weight: 400; font-size: 13px; color: var(--text-muted); white-space: normal; max-width: 220px; margin-top: 3px; }
+.td-penalty.pen-na { color: var(--text-muted); font-weight: 600; font-size: 15px; }
+.td-scope { font-size: 15px; line-height: 1.35; color: var(--text); }
 .jur-fed { color: var(--accent-mid); }
 .eff-soon { color: var(--accent-mid); font-weight: 700; }
 .eff-pending { color: #4a7c63; font-weight: 600; border-bottom: 1px dotted #9bbdae; cursor: help; }
+.td-law { display: block; background: none; border: none; padding: 0; font: inherit; color: var(--accent); font-size: 16px; font-weight: 800; line-height: 1.28; text-align: left; cursor: pointer; }
+.td-law:hover { text-decoration: underline; }
 .bill-trigger { background: none; border: none; padding: 0; font: inherit; color: var(--accent); font-weight: 700; text-align: left; cursor: pointer; }
 .bill-trigger:hover { text-decoration: underline; }
-.cite-sub { display: block; color: var(--text-muted); font-weight: 400; font-size: 11.5px; margin-top: 2px; }
-.empty-row td { text-align: center; color: var(--text-muted); padding: 26px 14px; font-size: 13px; }
-.disclaimer { margin-top: 22px; font-size: 12px; color: var(--text-muted); line-height: 1.6; background: var(--bg); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
+.cite-sub { display: block; color: var(--text-muted); font-weight: 400; font-size: 13.5px; margin-top: 4px; line-height: 1.35; }
+.empty-row td { text-align: center; color: var(--text-muted); padding: 30px 16px; font-size: 15px; }
+.disclaimer { margin-top: 24px; font-size: 13px; color: var(--text-muted); line-height: 1.6; background: var(--bg); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 15px 17px; }
 .disclaimer strong { color: var(--text); }
 
 /* News + statute source links (detail panel + modal) */
 .src-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 9px; }
-.src-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
+.src-link { display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
 .src-link.news { color: var(--accent-mid); }
 .src-link:hover { text-decoration: underline; }
 
@@ -306,9 +374,12 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 
 <div class="wrap">
   <header class="page-head">
-    <div class="eyebrow">Regulatory intelligence</div>
-    <h1 class="page-title">Compliance Desk <span class="beta-tag">Beta</span></h1>
-    <p class="page-sub">Commercial financing disclosure law across the United States — federal action and a state-by-state map of what's enacted, taking effect, and pending. Built for brokers and funders who need to know where disclosure rules bite.</p>
+    <div class="head-main">
+      <div class="eyebrow">Regulatory intelligence</div>
+      <h1 class="page-title">Compliance Desk <span class="beta-tag">Beta</span></h1>
+      <p class="page-sub">Commercial financing disclosure law across the United States — federal action and a state-by-state map of what's enacted, taking effect, and pending. Built for brokers and funders who need to know where disclosure rules bite.</p>
+    </div>
+    <div class="hero-meta" id="updatedLabel"></div>
   </header>
 
   <!-- INTEL ROW — two collapsible panels: federal (left) + lender/regulator news (right) (LEN-168) -->
@@ -365,7 +436,6 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
       Take the tour
     </button>
-    <div class="updated" id="updatedLabel"></div>
   </div>
 
   <!-- MAP VIEW -->
@@ -387,7 +457,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
       </div>
       <aside class="detail-card" id="detailCard">
         <div class="detail-empty" id="detailEmpty">
-          <strong>Select a state</strong> on the map (or a chip below) to see its commercial-financing legislation, citations, effective dates, and scope.
+          <strong>Select a state</strong> on the map (or a chip below) for the fast answer — status, effective date, max penalty, and scope. The table below carries the exact citations and sources.
           <div class="chips-head">Jurisdictions with activity</div>
           <div class="chips" id="chips"></div>
         </div>
@@ -395,6 +465,20 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
       </aside>
     </div>
   </div>
+
+  <!-- MAP → TABLE BRIDGE (LEN-210): appears once a state is selected in map view;
+       makes the map the entry point and the table the workbench. -->
+  <section class="bridge" id="bridge">
+    <div>
+      <div class="bridge-kicker">Map selection → table workbench</div>
+      <div class="bridge-title" id="bridgeTitle"></div>
+      <div class="bridge-copy">Map view tells you where the risk is. The table gives the exact law, citation, effective date, penalty, source, and scope.</div>
+    </div>
+    <div class="bridge-actions">
+      <button type="button" class="bridge-btn primary" id="bridgeJump" onclick="jumpToFilteredTable()">Jump to filtered table</button>
+      <button type="button" class="bridge-btn" onclick="clearStateFilter()">Clear state filter</button>
+    </div>
+  </section>
 
   <!-- TABLE VIEW (the raw / current view) -->
   <div class="table-view" id="tableView">
@@ -413,13 +497,17 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
       <input type="search" id="tableSearch" class="table-search" placeholder="Search law, acronym, citation… (TCPA, APR)" aria-label="Search the table">
       <span class="table-count" id="tableCount"></span>
     </div>
+    <!-- Applied-filter tokens — reflect a map selection (LEN-210) -->
+    <div class="applied-filters" id="appliedFilters"></div>
     <div class="table-card">
       <div class="table-scroll">
         <table class="leg">
+          <colgroup>
+            <col style="width:18%"><col style="width:34%"><col style="width:12%"><col style="width:16%"><col style="width:20%">
+          </colgroup>
           <thead>
             <tr>
               <th class="sortable" data-key="name"><button type="button" onclick="sortBy('name')">Jurisdiction <span class="sort-arrow"></span></button></th>
-              <th class="sortable" data-key="status"><button type="button" onclick="sortBy('status')">Status <span class="sort-arrow"></span></button></th>
               <th class="static">Statute / Bill</th>
               <th class="sortable" data-key="effective"><button type="button" onclick="sortBy('effective')">Effective <span class="sort-arrow"></span></button></th>
               <th class="sortable" data-key="penalty"><button type="button" onclick="sortBy('penalty')">Max penalty <span class="sort-arrow"></span></button></th>
@@ -477,6 +565,25 @@ var STATUS_META = {
   'none':            { fill: 'var(--leg-none)',            label: 'No specific law',      cls: 'status-none',            dot: '#cbd5d1', dark: true  }
 };
 function statusOf(abbr){ var d = LEG_DATA[abbr]; return (d && d.status) || 'none'; }
+
+/* Compact status badges (LEN-210) — short labels in the table + activity rows;
+   the long-form status label stays in the state panel. */
+var COMPACT_STATUS = {
+  'enacted':        { label: 'Active', badgeCls: 'b-enacted' },
+  'effective-soon': { label: 'Soon',   badgeCls: 'b-soon' },
+  'pending':        { label: 'Watch',  badgeCls: 'b-watch' },
+  'none':           { label: 'No law', badgeCls: 'b-none' }
+};
+/* Federal rules surfaced alongside a selected state (the broker's outreach
+   workflow — calling/texting/emailing a prospect in that state). Heuristic, by
+   acronym; drives the bridge's "N federal rules likely relevant" and the
+   "Include federal rules" rows. Matches the mockup (TCPA + CAN-SPAM). */
+var FEDERAL_OUTREACH = ['TCPA', 'CAN-SPAM'];
+function outreachFederalCount(){
+  var set = {}; FEDERAL_OUTREACH.forEach(function(a){ set[a] = 1; });
+  return (LEG_FEDERAL.items || []).filter(function(it){ return set[it.acronym]; }).length;
+}
+var currentStateAbbr = null;
 
 /* ---- Shared formatting helpers (LEN-159) ---- */
 var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -588,6 +695,7 @@ var FED_CHIP = {
 })();
 /* "All federal rules →" — jump to the table, filtered to federal */
 function fedSeeAll(){
+  tableState.stateAbbr = '';   // "All federal rules" clears any map-selected state
   setView('table');
   tableState.juris = 'federal';
   var jf = document.getElementById('jurisFilter');
@@ -631,50 +739,137 @@ var ENF_CHIP = {
   if (cnt) cnt.textContent = items.length + ' on record';
 })();
 
-/* ---- Detail panel ---- */
+/* ---- Detail / state panel — the "fast broker answer" (LEN-210) ----
+   Status, effective date, max penalty, scope + a path into the table. Full
+   citations and source links live in the table + modal, not on the map. */
+function miniStat(label, value){
+  return '<div class="mini-stat"><span class="ms-label">'+label+'</span><span class="ms-value">'+value+'</span></div>';
+}
+function stateCopy(nameE, status){
+  switch (status){
+    case 'enacted':        return nameE + ' has a commercial-financing disclosure law that is enacted and in effect. The map gives the fast answer; the table below carries the exact statutes, penalty details, and scope.';
+    case 'effective-soon': return nameE + '’s disclosure law is enacted and takes effect soon. The table below carries the exact statute, effective date, penalty details, and scope.';
+    case 'pending':        return nameE + ' has introduced or pending disclosure activity — not yet in force. The table below tracks the bill, its status, and likely scope.';
+    default:               return 'No specific commercial-financing disclosure law is on file for ' + nameE + ' in this seed dataset. Federal marketing and credit rules still apply — see the table below.';
+  }
+}
+function activityHTML(){
+  var order = { 'enacted':0, 'effective-soon':1, 'pending':2 };
+  var list = Object.keys(LEG_DATA)
+    .filter(function(a){ return statusOf(a) !== 'none'; })
+    .sort(function(a,b){ return (order[statusOf(a)] - order[statusOf(b)]) || (LEG_DATA[a].name||a).localeCompare(LEG_DATA[b].name||b); })
+    .slice(0, 3);
+  if (!list.length) return '';
+  var rows = list.map(function(a){
+    var st = statusOf(a); var cs = COMPACT_STATUS[st] || COMPACT_STATUS['enacted'];
+    var b0 = (LEG_DATA[a].bills && LEG_DATA[a].bills[0]) || {};
+    var sub = b0.scope || (STATUS_META[st] || {}).label || '';
+    return '<button type="button" class="activity-row" onclick="showState(\''+a+'\')">'
+      + '<span><span class="act-name">'+esc(LEG_DATA[a].name||a)+'</span><span class="act-sub">'+esc(sub)+'</span></span>'
+      + '<span class="act-badge '+cs.badgeCls+'">'+cs.label+'</span>'
+      + '</button>';
+  }).join('');
+  return '<div class="activity-head">Other jurisdictions with activity</div>' + rows;
+}
 function showState(abbr){
   var d = LEG_DATA[abbr];
   var name = (d && d.name) || (window.STATE_NAMES && STATE_NAMES[abbr]) || abbr;
-  var empty = document.getElementById('detailEmpty');
+  var nameE = esc(name);
+  var status = (d && d.status) || 'none';
+  var m = STATUS_META[status] || STATUS_META['none'];
+  currentStateAbbr = abbr;
+  document.getElementById('detailEmpty').style.display = 'none';
   var body = document.getElementById('detailBody');
-  empty.style.display = 'none';
   body.style.display = 'block';
-  if (!d || d.status === 'none' || !d.bills || !d.bills.length){
-    var m = STATUS_META['none'];
-    body.innerHTML = '<div class="detail-state">'+name+'</div>'
-      + '<span class="status-pill '+m.cls+'"><span class="dot" style="background:'+m.dot+'"></span>'+m.label+'</span>'
-      + '<p class="bill-desc" style="margin-top:16px">No commercial-financing disclosure statute or active bill on file for '+name+' in this seed dataset. Check the source registry before concluding none exists.</p>'
-      + '<a class="bill-link" href="#" onclick="clearState();return false;">← Back</a>';
-    return;
-  }
-  var m = STATUS_META[d.status] || STATUS_META['none'];
-  var html = '<div class="detail-state">'+name+'</div>'
-    + '<span class="status-pill '+m.cls+'"><span class="dot" style="background:'+m.dot+'"></span>'+m.label+'</span>';
-  html += d.bills.map(function(b, i){
-    var eff = effInfo(b); var pen = penInfo(b);
-    var effSpan = '<span'+(eff.tip?' class="'+eff.cls+'" title="'+escAttr(eff.tip)+'"':(eff.cls?' class="'+eff.cls+'"':''))+'>'+ICON.cal+' '+esc(eff.text)+'</span>';
-    return '<div class="bill">'
-      + '<div class="bill-name"><button type="button" class="bill-trigger" onclick="openBillModal(\''+abbr+'\','+i+')">'+esc(b.name)+'</button></div>'
-      + '<div class="bill-meta">'
-        + (b.citation ? '<span>'+ICON.doc+' '+esc(b.citation)+'</span>' : '')
-        + effSpan
-        + (!pen.na ? '<span>'+ICON.scale+' '+esc(pen.text)+'</span>' : '')
-        + (b.scope ? '<span>'+ICON.target+' '+esc(b.scope)+'</span>' : '')
-      + '</div>'
-      + '<div class="bill-desc">'+esc(b.desc)+'</div>'
-      + '<div class="src-links">'
-        + (b.url ? '<a class="src-link" href="'+escAttr(b.url)+'" target="_blank" rel="noopener">'+ICON.doc+' Statute ↗</a>' : '')
-        + (b.newsUrl ? '<a class="src-link news" href="'+escAttr(b.newsUrl)+'" target="_blank" rel="noopener">'+ICON.news+' News ↗</a>' : '')
-        + '<button type="button" class="src-link" style="background:none;border:none;cursor:pointer;font:inherit" onclick="openBillModal(\''+abbr+'\','+i+')">Details ↗</button>'
-      + '</div>'
-      + '</div>';
-  }).join('');
-  html += '<a class="bill-link" href="#" onclick="clearState();return false;" style="margin-top:14px;">← Back</a>';
-  body.innerHTML = html;
+
+  var b = (d && d.bills && d.bills[0]) || null;
+  var eff = b ? effInfo(b) : null;
+  var pen = b ? penInfo(b) : null;
+  var fedN = outreachFederalCount();
+
+  var stats = miniStat('Effective', b ? esc(eff.text) : '—')
+    + miniStat('Max penalty', b ? esc(pen.text) : '—')
+    + miniStat('Applies to', (b && b.scope) ? esc(b.scope) : '—')
+    + miniStat('Federal context', fedN + ' likely rule' + (fedN === 1 ? '' : 's'));
+
+  var actions = '<div class="detail-actions">'
+    + '<button type="button" class="detail-action primary" onclick="jumpToFilteredTable()">View matching table rows</button>'
+    + (b ? '<button type="button" class="detail-action" onclick="openBillModal(\''+abbr+'\',0)">Open '+nameE+' details</button>' : '')
+    + '</div>';
+
+  body.innerHTML =
+    '<div class="detail-head">'
+      + '<div><div class="detail-kicker">Selected jurisdiction</div><div class="detail-state">'+nameE+'</div></div>'
+      + '<span class="status-pill compact '+m.cls+'"><span class="dot" style="background:'+m.dot+'"></span>'+m.label+'</span>'
+    + '</div>'
+    + '<p class="detail-copy">'+stateCopy(nameE, status)+'</p>'
+    + '<div class="mini-stat-grid">'+stats+'</div>'
+    + actions
+    + activityHTML()
+    + '<button type="button" class="bill-link" onclick="clearState();return false;" style="margin-top:14px;">← Back to all</button>';
+
+  updateBridge(name, d);
+  showBridge();
 }
 function clearState(){
+  currentStateAbbr = null;
   document.getElementById('detailBody').style.display = 'none';
   document.getElementById('detailEmpty').style.display = 'block';
+  hideBridge();
+}
+
+/* ---- Map → table bridge (LEN-210) ---- */
+function updateBridge(name, d){
+  var stateN = (d && d.bills) ? d.bills.length : 0;
+  var fedN = outreachFederalCount();
+  var stateLaw = stateN === 0 ? 'no state law on file' : stateN + ' state law' + (stateN === 1 ? '' : 's');
+  var fedLaw = fedN + ' federal rule' + (fedN === 1 ? '' : 's') + ' likely relevant';
+  var el = document.getElementById('bridgeTitle');
+  if (el) el.textContent = name + ' selected: ' + stateLaw + ', ' + fedLaw;
+}
+function showBridge(){
+  if (document.getElementById('mapView').style.display !== 'none')
+    document.getElementById('bridge').classList.add('show');
+}
+function hideBridge(){ document.getElementById('bridge').classList.remove('show'); }
+function syncSegLabel(){
+  var t = document.getElementById('btn-table');
+  if (t) t.textContent = tableState.stateAbbr ? ('Table view · ' + tableState.stateAbbr) : 'Table view';
+}
+/* Bridge "Jump to filtered table" + panel "View matching table rows" */
+function jumpToFilteredTable(){
+  if (currentStateAbbr){
+    tableState.stateAbbr = currentStateAbbr;
+    tableState.juris = 'all';
+    var jf = document.getElementById('jurisFilter');
+    if (jf) jf.querySelectorAll('button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-juris') === 'all'); });
+  }
+  setView('table');
+  renderTable();
+  var card = document.querySelector('.table-card');
+  if (card) card.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+/* Bridge "Clear state filter" + applied-filter Jurisdiction token */
+function clearStateFilter(){
+  tableState.stateAbbr = '';
+  clearState();
+  syncSegLabel();
+  renderTable();
+}
+function toggleIncludeFederal(){ tableState.includeFederal = !tableState.includeFederal; renderTable(); }
+function renderAppliedFilters(){
+  var host = document.getElementById('appliedFilters');
+  if (!host) return;
+  if (!tableState.stateAbbr){ host.className = 'applied-filters'; host.innerHTML = ''; return; }
+  var d = LEG_DATA[tableState.stateAbbr];
+  var name = (d && d.name) || tableState.stateAbbr;
+  var statusLabel = tableState.status === 'all' ? 'All statuses' : ((STATUS_META[tableState.status] || {}).label || tableState.status);
+  host.className = 'applied-filters show';
+  host.innerHTML =
+    '<span class="af-label">Filtered to map selection</span>'
+    + '<button type="button" class="filter-token" onclick="clearStateFilter()">Jurisdiction: '+esc(name)+' <span class="tk-x">×</span></button>'
+    + '<button type="button" class="filter-token toggle'+(tableState.includeFederal ? ' on' : '')+'" onclick="toggleIncludeFederal()">Include federal rules</button>'
+    + '<span class="filter-token info">Status: '+esc(statusLabel)+'</span>';
 }
 
 /* ---- Chips (always-clickable jurisdiction list) ---- */
@@ -693,7 +888,7 @@ function clearState(){
 /* ---- Table view: sortable + filterable (LEN-159) ---- */
 var STATUS_RANK = { 'enacted':0, 'effective-soon':1, 'pending':2, 'none':3 };
 var SORT_DEFAULT_DIR = { name:'asc', status:'asc', effective:'desc', penalty:'desc' };
-var tableState = { status:'all', juris:'all', q:'', sortKey:'status', sortDir:'asc' };
+var tableState = { status:'all', juris:'all', q:'', sortKey:'status', sortDir:'asc', stateAbbr:'', includeFederal:true };
 
 function tableRowData(){
   var rows = [];
@@ -718,9 +913,21 @@ function sortBy(key){
   renderTable();
 }
 function renderTable(){
+  renderAppliedFilters();
   var rows = tableRowData();
-  // filter: jurisdiction (federal vs state)
-  if (tableState.juris !== 'all') rows = rows.filter(function(r){ return r.juris === tableState.juris; });
+  // filter: map selection (a state) — show that state's bills + the curated
+  // federal outreach rules (LEN-210). Overrides the juris chip while active.
+  if (tableState.stateAbbr){
+    var outreachSet = {}; FEDERAL_OUTREACH.forEach(function(a){ outreachSet[a] = 1; });
+    var sa = tableState.stateAbbr;
+    rows = rows.filter(function(r){
+      if (r.kind === 'state') return r.abbr === sa;
+      return tableState.includeFederal && outreachSet[r.acronym];
+    });
+  } else if (tableState.juris !== 'all'){
+    // filter: jurisdiction (federal vs state)
+    rows = rows.filter(function(r){ return r.juris === tableState.juris; });
+  }
   // filter: status
   if (tableState.status !== 'all') rows = rows.filter(function(r){ return r.status === tableState.status; });
   // filter: search (full names AND acronyms are searchable — LEN-168 #1)
@@ -749,29 +956,30 @@ function renderTable(){
   // body
   var tbody = document.getElementById('tableBody');
   if (!rows.length){
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No laws match this filter.</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No laws match this filter.</td></tr>';
   } else {
     tbody.innerHTML = rows.map(function(r){
-      var m = STATUS_META[r.status]; var b = r.bill; var eff = r.eff; var pen = r.pen;
+      var b = r.bill; var eff = r.eff; var pen = r.pen;
+      var cs = COMPACT_STATUS[r.status] || COMPACT_STATUS['enacted'];
       var effCell = '<span'+(eff.cls?' class="'+eff.cls+'"':'')+(eff.tip?' title="'+escAttr(eff.tip)+'"':'')+'>'+esc(eff.text)+'</span>';
       var penCell = pen.na
         ? '<td class="td-penalty pen-na">'+esc(pen.text)+(pen.sub?'<span class="pen-sub">'+esc(pen.sub)+'</span>':'')+'</td>'
         : '<td class="td-penalty">'+esc(pen.text)+(pen.sub?'<span class="pen-sub">'+esc(pen.sub)+'</span>':'')+'</td>';
-      var jurCell = r.kind === 'federal'
-        ? '<td><strong class="jur-fed">Federal</strong></td>'
-        : '<td><strong>'+esc(r.jurLabel)+'</strong></td>';
+      var jurName = r.kind === 'federal' ? 'Federal' : r.jurLabel;
+      var jurCell = '<td><div class="td-jur-name'+(r.kind === 'federal' ? ' jur-fed' : '')+'">'+esc(jurName)+'</div>'
+        + '<span class="td-badge '+cs.badgeCls+'">'+cs.label+'</span></td>';
       var billDisp = (b.name || '—') + (r.kind === 'federal' && r.acronym ? ' (' + r.acronym + ')' : '');
       var trigger = r.kind === 'federal'
         ? 'openFedModal('+r.fedIdx+')'
         : 'openBillModal(\''+r.abbr+'\',0)';
       return '<tr>'
         + jurCell
-        + '<td><span class="td-status" style="color:'+m.dot+'">'+m.label+'</span></td>'
-        + '<td><button type="button" class="bill-trigger" onclick="'+trigger+'">'+esc(billDisp)+'</button>'
-          + (b.citation? '<span class="cite-sub">'+esc(b.citation)+'</span>':'')+'</td>'
+        + '<td><button type="button" class="td-law" onclick="'+trigger+'">'+esc(billDisp)+'</button>'
+          + (b.citation ? '<span class="cite-sub">'+esc(b.citation)+'</span>' : '')
+          + '<button type="button" class="row-source" onclick="'+trigger+'">'+ICON.doc+' Open details and sources</button></td>'
         + '<td>'+effCell+'</td>'
         + penCell
-        + '<td>'+esc(b.scope||'—')+'</td>'
+        + '<td><div class="td-scope">'+esc(b.scope||'—')+'</div></td>'
         + '</tr>';
     }).join('');
   }
@@ -781,6 +989,8 @@ function renderTable(){
 document.getElementById('jurisFilter').addEventListener('click', function(e){
   var btn = e.target.closest('button'); if (!btn) return;
   tableState.juris = btn.getAttribute('data-juris');
+  tableState.stateAbbr = '';   // picking a level drops the map-selected state pin
+  syncSegLabel();
   this.querySelectorAll('button').forEach(function(b){ b.classList.toggle('active', b === btn); });
   renderTable();
 });
@@ -799,6 +1009,9 @@ function setView(v){
   document.getElementById('tableView').style.display = map ? 'none' : 'block';
   document.getElementById('btn-map').classList.toggle('active', map);
   document.getElementById('btn-table').classList.toggle('active', !map);
+  // The bridge belongs to map view; show it only when a state is selected.
+  if (map && currentStateAbbr) showBridge(); else hideBridge();
+  syncSegLabel();
 }
 
 /* Intel panels (federal • news) are now fixed-height white cards with internal
