@@ -512,10 +512,6 @@ function factorRead(kind, v){
 // stand behind, not an offer. Driven by lead product family + the
 // borrower factors (FICO sets Rate, TIB sets Term, Revenue sets Amount).
 // ─────────────────────────────────────────────
-const ATR_AMOUNT_MULT = { // × monthly revenue → [lo, hi]
-  mca:[0.8,1.5], rbf:[0.8,1.5], term:[1,3], loc:[1,2.5], sba:[3,8],
-  cre:[4,10], equip:[1,3], factor:[1,2], bridge:[2,5], _def:[1,2.5]
-};
 const ATR_TERM = { // months [lo, hi]
   mca:[4,12], rbf:[6,15], term:[12,36], loc:[6,24], sba:[60,120],
   cre:[60,300], equip:[24,72], factor:[3,12], bridge:[6,18], _def:[6,24]
@@ -554,12 +550,19 @@ function computeATR(deal){
   if(deal.tib){ if(deal.tib>=60)q+=0.10; else if(deal.tib>=24)q+=0.05; else if(deal.tib<6)q-=0.15; else if(deal.tib<12)q-=0.06; }
   q=Math.max(0.6, Math.min(1.4, q));
 
-  // AMOUNT — revenue driven
+  // AMOUNT — deposit/revenue driven. The "Funding range" is indicative funding
+  // CAPACITY, sized off monthly deposits at 0.8–1.5× (the standard broker rule),
+  // product-agnostic — it reflects what the revenue supports, NOT the lead
+  // product's loan ceiling. (Previously multiplied by a per-product factor, so an
+  // SBA lead sized at 3–8× monthly and the tile showed ~10× deposits under a
+  // "sized on deposits" label — over-promising. LEN-267.) Credit + tenure quality
+  // decide where in the band the top lands: weak file → ~0.8×, strong file → 1.5×.
   let amount=null;
   if(deal.rev){
-    const [ml,mh]=ATR_AMOUNT_MULT[fam]||ATR_AMOUNT_MULT._def;
-    amount={ lo:roundNice(deal.rev*ml), hi:roundNice(deal.rev*mh*q) };
-    if(amount.hi<=amount.lo) amount.hi=roundNice(amount.lo*1.4);
+    const qFrac=Math.max(0,Math.min(1,(q-0.6)/0.8));   // 0 weak file → 1 strong file
+    const hiMult=0.8+0.7*qFrac;                          // 0.8× … 1.5× monthly deposits
+    amount={ lo:roundNice(deal.rev*0.8), hi:roundNice(deal.rev*hiMult) };
+    if(amount.hi<=amount.lo) amount.hi=roundNice(amount.lo*1.25);
   }
   // TERM — product + tenure
   const [tl,th]=ATR_TERM[fam]||ATR_TERM._def;
