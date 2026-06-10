@@ -27,6 +27,7 @@
   --bg-alt: #F9FAFB;
   --text: #111827;
   --text-muted: #6B7280;
+  --text-soft: #4B5563;    /* softened body copy — never stark black (LEN-208) */
   --accent: #1A3C2E;       /* brand green */
   --accent-hover: #142E23;
   --accent-mid: #2D6A4F;
@@ -48,71 +49,54 @@ a { color: inherit; }
 .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px 64px; }
 
 /* Top bar */
-.topnav { display: flex; align-items: center; justify-content: space-between; height: 60px; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
-.back-link { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; color: var(--text-muted); text-decoration: none; }
-.back-link:hover { color: var(--text); }
+.topnav { display: flex; align-items: center; justify-content: flex-start; height: 52px; max-width: 1180px; margin: 0 auto; padding: 0 24px; }
 .brand { display: inline-flex; align-items: baseline; font-weight: 800; letter-spacing: -0.02em; font-size: 16px; }
 .brand .l { color: var(--text); } .brand .p { color: var(--text-muted); font-weight: 300; } .brand .d { color: var(--accent); }
 
 /* Header */
-.page-head { padding: 22px 0 18px; }
+.page-head { padding: 12px 0 14px; }
 .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--accent-mid); }
 .page-title { font-size: clamp(26px, 4vw, 38px); font-weight: 800; letter-spacing: -0.025em; margin: 6px 0 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .beta-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 4px 9px; border-radius: 999px; }
 .page-sub { font-size: 15px; color: var(--text-muted); max-width: 720px; line-height: 1.5; }
 
-/* ── Intel row: two collapsible panels (federal • news) above the map (LEN-168) ──
-   Side-by-side + collapsible keeps the map high while still surfacing the headline
-   federal posture (top-left) and the latest lender/regulator news (top-right). */
-.intel-row { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-.panel { border-radius: var(--radius); overflow: hidden; }
-.panel-head { width: 100%; display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 14px; row-gap: 4px;
-  font-family: inherit; text-align: left; border: none; background: none; cursor: pointer; padding: 14px 17px; }
-.panel-eyebrow { grid-column: 1; display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+/* ── Intel row: two compact white panels (federal • news) above the map (LEN-208) ──
+   Both panels are the SAME white card, same compact height, each an internal
+   scroll list (~2 rows). Keeping them low and equal lets the state map land
+   above the fold on a 13" screen without the page feeling crowded. */
+.intel-row { margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+.panel { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; min-height: 0; }
+.panel-head { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 14px; row-gap: 4px;
+  text-align: left; padding: 13px 16px 11px; border-bottom: 1px solid var(--border); }
+.panel-eyebrow { grid-column: 1; display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-mid); }
 .panel-eyebrow .ic, .panel-eyebrow .star { width: 14px; height: 14px; flex: 0 0 auto; }
-.panel-title-sm { grid-column: 1; grid-row: 2; font-size: 14px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.32; }
+.panel-title-sm { grid-column: 1; grid-row: 2; font-size: 12.5px; font-weight: 600; letter-spacing: -0.005em; line-height: 1.34; color: var(--text-muted); }
 .panel-meta { grid-column: 2; grid-row: 1 / span 2; display: inline-flex; align-items: center; gap: 10px; align-self: center; }
-.panel-count { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; padding: 3px 9px; border-radius: 999px; }
-.panel-chev { width: 17px; height: 17px; flex: 0 0 auto; transition: transform .22s ease; }
-.panel:not(.peek) .panel-chev { transform: rotate(180deg); } /* points up when fully open */
-.panel-body { padding: 2px 17px 17px; }
-/* Peek (default): serve some content but stay compact so the map stays high.
-   Show a few items + a one-line headline; the chevron expands to the full list. */
-.panel.peek .fed-subhead { display: none; }
-.panel.peek .fed-strip .fed-card:nth-child(n+4) { display: none; }
-.panel.peek .enf-list .enf-item:nth-child(n+4) { display: none; }
-.panel.peek .enf-note { display: none; }
-.panel.peek .fed-seeall { margin-top: 10px; }
+.panel-count { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.panel-body { padding: 13px 16px 14px; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
 
-/* Federal panel — brand-green (Steve: "I actually think it's really nice") */
-.panel-federal { background: linear-gradient(135deg, #1A3C2E 0%, #21503C 100%); color: #fff; box-shadow: 0 8px 26px rgba(26,60,46,0.22); }
-.panel-federal .panel-eyebrow { color: #BFE3D2; }
-.panel-federal .panel-count { background: rgba(255,255,255,0.14); color: #DDF1E7; }
-.panel-federal .panel-chev { color: #BFE3D2; }
-.fed-subhead { font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.82); margin: 0 0 12px; }
-.fed-seeall { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-family: inherit; font-size: 12px; font-weight: 700; color: #14342A; background: #BFE3D2; border: none; border-radius: 999px; padding: 8px 14px; cursor: pointer; transition: background .12s ease; }
-.fed-seeall:hover { background: #d6efe2; }
+/* Federal panel — same white card as news, with a slim green left accent so it
+   still reads as the framing/anchor tile (Steve: make it white like "in the news"). */
+.panel-federal { border-left: 3px solid var(--accent-mid); }
+
+/* Federal "top rules" — internal scroll list, ~2 rows (matches the news list) */
+.fed-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;
+  flex: 1 1 auto; min-height: 0; max-height: 158px; overflow-y: auto; padding-right: 4px; align-content: start; }
+.fed-card { text-align: left; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 5px; cursor: pointer; font-family: inherit; color: inherit; transition: background .12s ease, border-color .12s ease; }
+.fed-card:hover { background: #fff; border-color: var(--accent-mid); }
+.fed-card .fc-name { font-size: 13px; font-weight: 700; line-height: 1.28; margin-top: 1px; color: var(--text); }
+.fed-card .fc-cite { font-size: 10.5px; font-weight: 600; letter-spacing: 0.01em; color: var(--accent-mid); line-height: 1.3; }
+.fed-card .fc-desc { font-size: 11px; color: var(--text-soft); line-height: 1.42; margin-top: 1px; }
+.fed-card .fed-status { align-self: flex-start; font-size: 9.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+.fed-status.s-enacted { background: var(--accent-soft); color: var(--accent); }
+.fed-status.s-effective-soon { background: rgba(45,106,79,0.12); color: var(--accent-mid); }
+.fed-status.s-pending { background: rgba(116,168,146,0.18); color: #4a7c63; }
+.fed-seeall { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-family: inherit; font-size: 12px; font-weight: 700; color: var(--accent); background: none; border: none; padding: 2px 0 0; cursor: pointer; transition: color .12s ease; }
+.fed-seeall:hover { color: var(--accent-hover); }
 .fed-seeall svg { width: 13px; height: 13px; }
 
-/* News panel — white card */
-.panel-news { background: var(--bg); border: 1px solid var(--border); }
-.panel-news .panel-eyebrow { color: var(--accent-mid); }
-.panel-news .panel-title-sm { color: var(--text-muted); font-weight: 600; font-size: 12.5px; }
-.panel-news .panel-count { background: var(--accent-soft); color: var(--accent); }
-.panel-news .panel-chev { color: var(--text-muted); }
-.fed-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 10px; margin-top: 14px; }
-.fed-card { text-align: left; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 11px 13px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; font-family: inherit; color: inherit; transition: background .12s ease, border-color .12s ease; }
-.fed-card:hover { background: rgba(255,255,255,0.13); border-color: rgba(255,255,255,0.24); }
-.fed-card .fc-name { font-size: 13px; font-weight: 700; line-height: 1.28; margin-top: 2px; }
-.fed-card .fc-cite { font-size: 10.5px; font-weight: 600; letter-spacing: 0.01em; color: rgba(191,227,210,0.85); line-height: 1.3; }
-.fed-card .fc-desc { font-size: 11px; color: rgba(255,255,255,0.74); line-height: 1.42; margin-top: 2px; }
-.fed-card .fed-status { align-self: flex-start; font-size: 9.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
-.fed-status.s-enacted { background: #BFE3D2; color: #14342A; }
-.fed-status.s-effective-soon { background: rgba(255,255,255,0.22); color: #fff; }
-.fed-status.s-pending { background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.92); }
-
-/* Regulatory & enforcement updates — scrolling list inside the news panel */
-.enf-list { display: flex; flex-direction: column; gap: 9px; max-height: 372px; overflow-y: auto; padding-right: 4px; }
+/* Regulatory & enforcement updates — internal scroll list, ~2 rows */
+.enf-list { display: flex; flex-direction: column; gap: 9px; flex: 1 1 auto; min-height: 0; max-height: 158px; overflow-y: auto; padding-right: 4px; }
 .enf-item { display: flex; flex-direction: column; gap: 6px; padding: 11px 13px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .enf-item-top { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .enf-status { font-size: 9.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
@@ -124,7 +108,7 @@ a { color: inherit; }
 .enf-party { font-size: 11px; color: var(--text-muted); margin-left: auto; }
 .enf-matter { font-size: 13.5px; font-weight: 700; color: var(--text); line-height: 1.3; }
 .enf-outcome { font-size: 11.5px; font-weight: 600; color: var(--accent); }
-.enf-summary { font-size: 12px; line-height: 1.5; color: #374151; }
+.enf-summary { font-size: 12px; line-height: 1.5; color: var(--text-soft); }
 .enf-links { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
 .enf-link { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
 .enf-link:hover { text-decoration: underline; }
@@ -132,7 +116,7 @@ a { color: inherit; }
 .enf-note { font-size: 11.5px; line-height: 1.5; color: var(--text-muted); margin-top: 13px; }
 
 /* View toggle */
-.controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 28px 0 14px; flex-wrap: wrap; }
+.controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 18px 0 12px; flex-wrap: wrap; }
 .seg { display: inline-flex; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 3px; }
 .seg button { border: none; background: transparent; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--text-muted); padding: 7px 16px; border-radius: 999px; cursor: pointer; transition: all .12s ease; }
 .seg button.active { background: var(--accent); color: #fff; }
@@ -170,7 +154,7 @@ a { color: inherit; }
 .bill-name { font-size: 14.5px; font-weight: 700; }
 .bill-meta { font-size: 12px; color: var(--text-muted); margin: 4px 0 8px; display: flex; flex-wrap: wrap; gap: 10px; }
 .bill-meta span { display: inline-flex; align-items: center; gap: 5px; }
-.bill-desc { font-size: 13px; line-height: 1.55; color: #374151; }
+.bill-desc { font-size: 13px; line-height: 1.55; color: var(--text-soft); }
 .bill-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; margin-top: 9px; }
 .bill-link:hover { text-decoration: underline; }
 
@@ -182,7 +166,7 @@ a { color: inherit; }
 .chip .cdot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 
 /* Talk-track nudge — subtle, plain text (no badge/dot per design language) */
-.tt-note { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0 2px; padding: 11px 14px; font-size: 13px; line-height: 1.5; color: #374151; background: var(--accent-soft); border-left: 3px solid var(--accent-mid); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.tt-note { display: flex; align-items: flex-start; gap: 10px; margin: 14px 0 2px; padding: 10px 14px; font-size: 12.5px; line-height: 1.5; color: var(--text-soft); background: var(--accent-soft); border-left: 3px solid var(--accent-mid); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .tt-note svg { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 1px; color: var(--accent-mid); }
 .tt-note strong { color: var(--accent); font-weight: 700; }
 /* Flash-in (LEN-168 #6): hidden until it scrolls into view, then a gentle reveal + one-time highlight. */
@@ -287,7 +271,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 .modal-meta span { display: inline-flex; align-items: center; gap: 5px; }
 .modal-row { font-size: 13px; line-height: 1.55; margin-bottom: 11px; }
 .modal-row b { color: var(--text); font-weight: 700; }
-.modal-desc { font-size: 13.5px; line-height: 1.6; color: #374151; }
+.modal-desc { font-size: 13.5px; line-height: 1.6; color: var(--text-soft); }
 .modal-foot { padding: 14px 22px 20px; border-top: 1px solid var(--border); margin-top: 6px; }
 .modal-foot .modal-disclaimer { font-size: 11.5px; color: var(--text-muted); line-height: 1.5; margin-top: 12px; }
 .modal-close { position: sticky; top: 0; float: right; background: var(--bg); border: none; font-size: 22px; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 14px 16px; }
@@ -317,11 +301,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 </script>
 
 <nav class="topnav">
-  <a class="back-link" href="/index.html">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-    All tools
-  </a>
-  <span class="brand"><span class="l">Lend</span><span class="p">Paper</span><span class="d">.</span></span>
+  <a class="brand" href="/index.html" style="text-decoration:none"><span class="l">Lend</span><span class="p">Paper</span><span class="d">.</span></a>
 </nav>
 
 <div class="wrap">
@@ -335,8 +315,8 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
   <section class="intel-row">
 
     <!-- TOP LEFT — Federal -->
-    <div class="panel panel-federal peek" id="panelFederal">
-      <button type="button" class="panel-head" aria-expanded="false" aria-controls="panelFederalBody" onclick="togglePanel('federal')">
+    <div class="panel panel-federal" id="panelFederal">
+      <div class="panel-head">
         <span class="panel-eyebrow">
           <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.6 9.3l-4.8 4.68L18 21l-6-3.27L6 21l1.2-7.02L2.4 9.3l6.7-1.04z"/></svg>
           Federal
@@ -344,11 +324,9 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
         <span class="panel-title-sm" id="fed-title">No federal APR-disclosure law — states fill the gap</span>
         <span class="panel-meta">
           <span class="panel-count" id="fedCount"></span>
-          <svg class="panel-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </span>
-      </button>
+      </div>
       <div class="panel-body" id="panelFederalBody">
-        <p class="fed-subhead">TILA's disclosure regime covers consumer credit and exempts business-purpose financing, so commercial deals have no single federal APR-disclosure law — that gap is filled by the states. But several federal regimes already bind lenders and brokers, and the moment a deal turns on the owner's personal credit, FCRA and ECOA apply.</p>
         <div class="fed-strip" id="fedItems"></div>
         <button type="button" class="fed-seeall" id="fedSeeAll" onclick="fedSeeAll()">
           <span id="fedSeeAllText">All federal rules</span>
@@ -358,8 +336,8 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
     </div>
 
     <!-- TOP RIGHT — Regulatory & enforcement news (against financing providers) -->
-    <div class="panel panel-news peek" id="panelNews">
-      <button type="button" class="panel-head" aria-expanded="false" aria-controls="panelNewsBody" onclick="togglePanel('news')">
+    <div class="panel panel-news" id="panelNews">
+      <div class="panel-head">
         <span class="panel-eyebrow">
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h13a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3z"/><line x1="7" y1="9" x2="14" y2="9"/><line x1="7" y1="13" x2="14" y2="13"/><line x1="7" y1="17" x2="11" y2="17"/></svg>
           In the news
@@ -367,9 +345,8 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
         <span class="panel-title-sm">Regulator actions against financing providers — newest first</span>
         <span class="panel-meta">
           <span class="panel-count" id="enfCount"></span>
-          <svg class="panel-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </span>
-      </button>
+      </div>
       <div class="panel-body" id="panelNewsBody">
         <div class="enf-list" id="enfList"></div>
         <p class="enf-note">Scope: public actions on the federal/state regulator record only. Private civil suits (e.g. usury or contract disputes between a provider and a borrower) are tracked separately and are not listed here.</p>
@@ -377,12 +354,6 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
     </div>
 
   </section>
-
-  <!-- Talk-track nudge — flashes in on scroll into view (LEN-168 #6), not always-on -->
-  <div class="tt-note tt-flashable" id="ttNote">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    <div><strong>How to use this desk.</strong> Every item links to the official statute or regulator action and an independent source, so finance and legal can track what's <em>in force</em>, what's <em>pending</em>, and where enforcement is heading — and brief teams on disclosure obligations before they apply.</div>
-  </div>
 
   <!-- View controls -->
   <div class="controls">
@@ -472,6 +443,13 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
       </div>
       <div class="modal-body" id="modalBody"></div>
     </div>
+  </div>
+
+  <!-- Talk-track nudge — flashes in on scroll into view (LEN-168 #6); sits below the
+       views (LEN-208) so the map + table toggle land above the fold on a 13" screen. -->
+  <div class="tt-note tt-flashable" id="ttNote">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <div><strong>How to use this desk.</strong> Every item links to the official statute or regulator action and an independent source, so finance and legal can track what's <em>in force</em>, what's <em>pending</em>, and where enforcement is heading — and brief teams on disclosure obligations before they apply.</div>
   </div>
 
   <div class="disclaimer">
@@ -588,9 +566,12 @@ var FED_CHIP = {
 };
 (function renderFederal(){
   var items = LEG_FEDERAL.items || [];
+  // Show every federal rule as a card (excluding pure scope-notes) — the strip
+  // scrolls inside the panel, mirroring the news list (LEN-208). topStory items
+  // float to the top so the headline regimes lead.
   var top = [];
-  items.forEach(function(it, i){ if (it.topStory) top.push({ it: it, i: i }); });
-  if (!top.length) items.slice(0, 4).forEach(function(it, i){ top.push({ it: it, i: i }); });
+  items.forEach(function(it, i){ if (!it.infoOnly && it.topStory) top.push({ it: it, i: i }); });
+  items.forEach(function(it, i){ if (!it.infoOnly && !it.topStory) top.push({ it: it, i: i }); });
   document.getElementById('fedItems').innerHTML = top.map(function(o){
     var it = o.it; var c = FED_CHIP[it.tableStatus || 'enacted'] || FED_CHIP.enacted;
     return '<button type="button" class="fed-card" onclick="openFedModal('+o.i+')">'
@@ -820,33 +801,13 @@ function setView(v){
   document.getElementById('btn-table').classList.toggle('active', !map);
 }
 
-/* ---- Intel panels (federal • news): peek by default, expand for the full list (LEN-168) ----
-   "Peek" serves a few items + a one-line headline so the panels announce something
-   without pushing the map down; the chevron expands to the full list. */
-var PANEL_EL  = { federal: 'panelFederal', news: 'panelNews' };
-var PANEL_KEY = { federal: 'lp_cd_fed_open', news: 'lp_cd_news_open' };
-function applyPanel(which, expanded, persist){
-  var el = document.getElementById(PANEL_EL[which]); if (!el) return;
-  el.classList.toggle('peek', !expanded);
-  var head = el.querySelector('.panel-head'); if (head) head.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-  if (persist){ try { localStorage.setItem(PANEL_KEY[which], expanded ? '1' : '0'); } catch(e){} }
-}
-function togglePanel(which){
-  var el = document.getElementById(PANEL_EL[which]); if (!el) return;
-  applyPanel(which, el.classList.contains('peek'), true); // peek → expand, expanded → peek
-}
-(function initPanels(){
-  // Default = peek (serves content, map stays high); remember the user's choice after that.
-  ['federal','news'].forEach(function(which){
-    var saved = null; try { saved = localStorage.getItem(PANEL_KEY[which]); } catch(e){}
-    applyPanel(which, saved === '1', false);
-  });
-})();
+/* Intel panels (federal • news) are now fixed-height white cards with internal
+   scroll (LEN-208) — no collapse/expand state to manage. */
 
 /* ---- Talk-track note flashes in when the controls scroll into view (#6) ---- */
 (function(){
   var tt = document.getElementById('ttNote'); if (!tt) return;
-  var anchor = document.querySelector('.controls') || tt;
+  var anchor = tt;
   if ('IntersectionObserver' in window){
     var io = new IntersectionObserver(function(entries){
       entries.forEach(function(en){ if (en.isIntersecting){ tt.classList.add('shown'); io.disconnect(); } });
@@ -863,9 +824,9 @@ function togglePanel(which){
 
   var STAR = '<svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.6 9.3l-4.8 4.68L18 21l-6-3.27L6 21l1.2-7.02L2.4 9.3l6.7-1.04z"/></svg>';
   var STEPS = [
-    { sel:'#panelFederal', open:'federal', kicker:'Tile 1 of 3', title:'Federal updates',
+    { sel:'#panelFederal', kicker:'Tile 1 of 3', title:'Federal updates',
       body:'Where the national rules actually stand — TILA\'s consumer-vs-business line, the CFPB\'s data rule, and the regimes that bind every lender and broker: <strong>TCPA, Do-Not-Call, FCRA, ECOA</strong>.' },
-    { sel:'#panelNews', open:'news', kicker:'Tile 2 of 3', title:'In the news',
+    { sel:'#panelNews', kicker:'Tile 2 of 3', title:'In the news',
       body:'Regulator actions against financing providers, newest first — each linked to the <strong>official record and independent coverage</strong>, so your team sees enforcement before it sets precedent.' },
     { sel:'#mapCard', view:'map', kicker:'Tile 3 of 3', title:'Nationwide',
       body:'Every state\'s disclosure law, color-coded. Click a state for citations, effective dates, penalties and scope — or switch to <strong>Table view</strong> to sort by penalty and filter federal vs state.' },
@@ -879,6 +840,7 @@ function togglePanel(which){
     block = document.createElement('div'); block.className = 'spot-block';
     ring  = document.createElement('div'); ring.className  = 'spot-ring';
     pop   = document.createElement('div'); pop.className   = 'spot-pop'; pop.setAttribute('role','dialog'); pop.setAttribute('aria-label','Compliance Desk tour');
+    block.addEventListener('click', end);   // click anywhere outside the card dismisses — never trap the page (LEN-208)
     document.body.appendChild(block); document.body.appendChild(ring); document.body.appendChild(pop);
   }
   function dots(n){ var s=''; for (var k=0;k<3;k++){ s += '<i class="'+(k===n?'on':'')+'"></i>'; } return '<span class="spot-dots">'+s+'</span>'; }
@@ -916,7 +878,6 @@ function togglePanel(which){
     var s = STEPS[idx];
     render(idx);
     if (s.view) setView(s.view);
-    if (s.open) applyPanel(s.open, true, false); // tour-driven open isn't persisted
     if (s.finale){
       ring.style.display = 'none'; block.classList.add('solid'); pop.classList.add('finale');
       pop.style.top = ''; pop.style.left = ''; pop.style.transform = '';
