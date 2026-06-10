@@ -437,6 +437,20 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 .af-vd-label { font-size: 12px; font-weight: 800; color: #1A3C2E; text-transform: uppercase; letter-spacing: 0.06em; }
 .af-vd-expand { font-size: 10px; font-weight: 600; color: #6B8F7E; }
 .af-viewdetails[open] .af-qual { margin-top: 8px; }
+/* ── "Add timing & expense detail" — subtle progressive-disclosure toggle inside
+   the Net Upside group; keeps the box calm until a broker wants the extra fields. */
+.af-more { margin-top: 4px; }
+.af-more > summary {
+  list-style: none; cursor: pointer; user-select: none;
+  display: inline-flex; align-items: baseline; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--lp-green); padding: 4px 0;
+}
+.af-more > summary::-webkit-details-marker { display: none; }
+.af-more > summary:hover { text-decoration: underline; }
+.af-more .af-more-sign { font-weight: 700; font-size: 13px; }
+.af-more:not([open]) .af-more-sign::before { content: "+"; }
+.af-more[open] .af-more-sign::before { content: "\2013"; }
+.af-more-body { margin-top: 12px; }
 /* Smaller box + clear separation; padding-left matches View details so labels align. */
 .af-disclosures { padding: 12px 14px; margin-top: 10px; }
 .af-disclosures > summary { margin-bottom: 0; }
@@ -741,35 +755,43 @@ body.is-embedded .lp-main { padding-top: 16px; }
                         </div>
                         <div class="helper">Recommended — this is what proves expensive capital pays for itself.</div>
                     </div>
-                    <div class="field-pair" style="margin-bottom:14px;">
-                        <div>
-                            <label class="field-label">Time to return
-                                <span class="tooltip-icon" data-tip="Lag between funding and when this capital starts producing the return above — e.g. inventory has to sell, a hire has to ramp. Ask the borrower: <strong>&quot;Once the funds land, how long before they start bringing in extra revenue?&quot;</strong>"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
-                            </label>
-                            <div class="input-wrap">
-                                <input id="timingInput" class="input-field" inputmode="numeric" placeholder="14">
+                    <details class="af-more" id="upsideMore">
+                        <summary><span class="af-more-sign"></span>Add timing &amp; expense detail</summary>
+                        <div class="af-more-body">
+                            <div class="field-pair" style="margin-bottom:14px;">
+                                <div>
+                                    <label class="field-label">Time to return
+                                        <span class="tooltip-icon" data-tip="Lag between funding and when this capital starts producing the return above — e.g. inventory has to sell, a hire has to ramp. Ask the borrower: <strong>&quot;Once the funds land, how long before they start bringing in extra revenue?&quot;</strong>"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
+                                    </label>
+                                    <div class="input-wrap">
+                                        <input id="timingInput" class="input-field" inputmode="numeric" placeholder="14">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="field-label">Cash flow shape
+                                        <span class="tooltip-icon" data-tip="How the borrower's revenue arrives over the term — steady, heavier up front, ramping later, or hard to call. Flags which payment cycles need their own coverage plan."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
+                                    </label>
+                                    <div class="input-wrap">
+                                        <select id="timingRiskInput" class="input-field">
+                                            <option value="consistent" selected>Consistent</option>
+                                            <option value="frontloaded">Front-loaded</option>
+                                            <option value="backloaded">Back-loaded</option>
+                                            <option value="uncertain">Uncertain</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="field-label">Business expenses / mo
+                                    <span class="tooltip-icon" data-tip="Normal monthly obligations. This is a cushion check, not a full P&amp;L."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
+                                </label>
+                                <div class="input-wrap">
+                                    <div class="input-prefix">$</div>
+                                    <input id="expensesInput" class="input-field" inputmode="decimal" placeholder="Optional">
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <label class="field-label">Payment timing</label>
-                            <div class="input-wrap">
-                                <select id="timingRiskInput" class="input-field">
-                                    <option value="steady" selected>Steady</option>
-                                    <option value="frontloaded">Front-loaded</option>
-                                    <option value="delayed">Delayed</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="field-label">Business expenses / mo
-                            <span class="tooltip-icon" data-tip="Normal monthly obligations. This is a cushion check, not a full P&amp;L."><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
-                        </label>
-                        <div class="input-wrap">
-                            <div class="input-prefix">$</div>
-                            <input id="expensesInput" class="input-field" inputmode="decimal" placeholder="Optional">
-                        </div>
-                    </div>
+                    </details>
                 </div>
 
                 <!-- LEN-217: borrower state + doc details at bottom of LEFT input column (matches LEN-183 cross-calc pattern) -->
@@ -1120,11 +1142,13 @@ function qualificationCopy(values, verdict) {
   if (verdict === "Pending") {
     return "Add the estimated payment and expected monthly deposits to qualify the payment. Upside, timing, use of funds, and expenses deepen the read once the core payment load is known.";
   }
-  const pressure = values.timingDays > 30 || values.timingRisk === "delayed"
-    ? "The return starts late enough that the first few payment cycles need their own coverage plan."
+  const pressure = values.timingDays > 30 || values.timingRisk === "backloaded"
+    ? "The return ramps late enough that the first few payment cycles need their own coverage plan."
     : values.timingRisk === "frontloaded"
       ? "The payment load shows up early, so confirm the first payment cycle is covered before relying on the upside."
-      : "The timing looks usable as long as daily and weekly deposits stay near the expected run-rate.";
+      : values.timingRisk === "uncertain"
+        ? "Revenue timing isn't locked in, so keep a wider cushion until the deposits prove out."
+        : "The timing looks usable as long as daily and weekly deposits stay near the expected run-rate.";
   const expenseLine = values.expenses > 0
     ? `After listed expenses and the payment, the borrower has about <strong>${formatMoney(values.afterExpenses)}/mo</strong> of cushion.`
     : "Expenses are not entered, so this is a deposits-only qualification read.";
@@ -1580,7 +1604,8 @@ function restoreFromQuoteLog() {
     const p = rec.params, sv = (el, val) => { if (el && val != null && val !== '') el.value = val; };
     sv(els.payment, p.payment); sv(els.frequency, p.frequency); sv(els.deposits, p.expected_deposits);
     sv(els.payback, p.full_term_cost); sv(els.paybackMode, p.cost_source); sv(els.term, p.term_months);
-    sv(els.upside, p.expected_upside); sv(els.timing, p.upside_starts_days); sv(els.timingRisk, p.payment_timing);
+    sv(els.upside, p.expected_upside); sv(els.timing, p.upside_starts_days);
+    sv(els.timingRisk, ({ steady: 'consistent', delayed: 'backloaded' })[p.payment_timing] || p.payment_timing);
     sv(els.expenses, p.business_expenses);
     if (p.use_of_funds) setProduct(p.use_of_funds);
     lpRestoreBanner();
@@ -1606,6 +1631,12 @@ window.addEventListener('load', () => {
   PDF_HELPER.persistFields('afford', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor']);
   hydrateFromParams();
   restoreFromQuoteLog();
+  // Auto-open the timing/expense detail if a restored or prefilled value lives inside it,
+  // so progressive disclosure never hides data the broker already has.
+  const _more = document.getElementById('upsideMore');
+  if (_more && ((els.timing.value || '').trim() || (els.expenses.value || '').trim() || (els.timingRisk.value && els.timingRisk.value !== 'consistent'))) {
+    _more.open = true;
+  }
   bindTips();
   applyIntroState();
   update();
