@@ -49,12 +49,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
 <link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
-<script src="../public/assets/js/calculator-app.js"></script>
-<script src="../public/assets/js/pdf-helper.js"></script>
-<script src="../public/assets/js/compliance-rules.js"></script>
-<script src="../public/assets/js/compliance.js"></script>
-<!-- Quote Log bootstrap (LEN-123): config + supabase importmap + shared util -->
-<script src="../js/config.js"></script>
+<!-- Local shared scripts versioned off the iframe ?v= stamp so a CURRENT_VERSION bump refetches them (LEN-222). -->
+<script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}var q=v?('?v='+encodeURIComponent(v)):'';['../public/assets/js/calculator-app.js','../public/assets/js/pdf-helper.js','../public/assets/js/compliance-rules.js','../public/assets/js/compliance.js','../js/config.js'].forEach(function(s){document.write('<scr'+'ipt src="'+s+q+'"><\/scr'+'ipt>');});})();</script>
 <script type="importmap">
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
 </script>

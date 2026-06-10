@@ -48,10 +48,8 @@
     <link rel="apple-touch-icon" href="../public/assets/brand/apple-touch-icon-180x180.png">
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css?v=2026.05.25.1000">
     <link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
-    <script src="../public/assets/js/calculator-app.js?v=2026.05.25.1000"></script>
-    <script src="../public/assets/js/pdf-helper.js?v=2026.05.25.1200"></script>
-    <script src="../public/assets/js/compliance-rules.js?v=2026.06.07.1"></script>
-    <script src="../public/assets/js/compliance.js?v=2026.06.07.1"></script>
+    <!-- Local shared scripts versioned off the iframe ?v= stamp so a CURRENT_VERSION bump refetches them (LEN-222; replaces stale hardcoded ?v= stamps). -->
+    <script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}var q=v?('?v='+encodeURIComponent(v)):'';['../public/assets/js/calculator-app.js','../public/assets/js/pdf-helper.js','../public/assets/js/compliance-rules.js','../public/assets/js/compliance.js'].forEach(function(s){document.write('<scr'+'ipt src="'+s+q+'"><\/scr'+'ipt>');});})();</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Typography & Core Variables */
@@ -1398,7 +1396,7 @@
         .lp-compare-delta .lp-delta-label { font-size:10px; text-transform:uppercase; letter-spacing:0.06em; opacity:0.85; }
         .lp-compare-delta .lp-delta-val { font-size:18px; font-weight:800; margin-top:3px; }
     </style>
-<script src="../js/config.js"></script>
+<script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}document.write('<scr'+'ipt src="../js/config.js'+(v?('?v='+encodeURIComponent(v)):'')+'"><\/scr'+'ipt>');})();</script>
 <script type="importmap">
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
 </script>
