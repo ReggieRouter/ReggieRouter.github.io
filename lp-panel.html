@@ -556,6 +556,9 @@ header {
 .btn-mem-waitlist { background: var(--white); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
 .btn-mem-waitlist:hover { color: var(--text); }
 .btn-mem-waitlist:disabled { opacity: .5; cursor: not-allowed; }
+.btn-mem-decline { background: var(--white); color: #b42318; border: 1px solid #f3c0bb; border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer; }
+.btn-mem-decline:hover { background: #fdf2f1; border-color: #e2776c; }
+.btn-mem-decline:disabled { opacity: .5; cursor: not-allowed; }
 .mem-badge.invited { background: #DBEAFE; color: #1D4ED8; }
 .inv-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); margin: 12px 0 4px; }
 .inv-input { width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; background: var(--white); color: var(--text); outline: none; }
@@ -3161,6 +3164,7 @@ function memRenderTable() {
       <td style="white-space:nowrap">
         ${u.status !== 'approved' ? `<button class="btn-mem-approve" onclick="memApprove('${u.id}', this)">Approve</button>` : ''}
         ${memTab !== 'waitlist' && u.status !== 'waitlist' ? ` <button class="btn-mem-waitlist" onclick="memWaitlist('${u.id}', this)">Waitlist</button>` : ''}
+        ${u.status !== 'denied' ? ` <button class="btn-mem-decline" onclick="memDecline('${u.id}', this)">Decline</button>` : ''}
       </td>
     </tr>`).join('')}</tbody>
   </table>`;
@@ -3182,6 +3186,19 @@ async function memWaitlist(userId, btn) {
   const { error } = await sb.from('profiles').update({ status: 'waitlist' }).eq('id', userId);
   if (error) { toast('Update failed: ' + error.message); btn.disabled = false; btn.textContent = 'Waitlist'; return; }
   toast('Moved to waitlist');
+  await loadMembers();
+}
+
+// LEN-232: hard "no" — revoke access. Whitelist gating (js/auth.js) blocks any
+// non-approved status; 'denied' routes to waitlist.html (soft landing, doesn't tip off
+// a declined competitor). Reversible: Approve re-grants access.
+async function memDecline(userId, btn) {
+  const u = memProfiles.find(p => p.id === userId);
+  if (!confirm(`Decline ${u ? (u.full_name || u.email) : 'this user'}? They'll lose access to the app. You can re-approve them later.`)) return;
+  btn.disabled = true; btn.textContent = '…';
+  const { error } = await sb.from('profiles').update({ status: 'denied' }).eq('id', userId);
+  if (error) { toast('Decline failed: ' + error.message); btn.disabled = false; btn.textContent = 'Decline'; return; }
+  toast('Declined — access revoked');
   await loadMembers();
 }
 

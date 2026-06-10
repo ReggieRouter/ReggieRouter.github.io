@@ -167,9 +167,15 @@
     const companyGuess = companyFromEmail(session.user.email);
     if (companyGuess) document.getElementById('inputCompany').value = companyGuess;
 
-    // LEN-205: only ask for LinkedIn when the email gives us no company to vet by
-    // (free-mail / unknown domain). Corporate-domain signups skip the step entirely.
-    const needLinkedIn = !companyGuess;
+    // LEN-232: an admin invite IS the vetting — invited users skip LinkedIn outright.
+    const { data: inviteRow } = await supabase.from('invites')
+      .select('id').eq('email', (session.user.email || '').toLowerCase()).maybeSingle();
+    const invited = !!inviteRow;
+
+    // LEN-205/LEN-232: only ask for LinkedIn when we can't vet the person any other way —
+    // i.e. no corporate domain to infer a company from AND no admin invite. Corporate-domain
+    // OR invited signups skip the step entirely.
+    const needLinkedIn = !companyGuess && !invited;
 
     const track = document.getElementById('track');
     const dots = [0,1,2].map(i => document.getElementById(`dot-${i}`));
@@ -225,11 +231,21 @@
     // schema yet (PGRST204) — a missing optional column must never block signup.
     async function insertProfileSafe(profile) {
       const payload = { ...profile };
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 3; i++) {
         const { error } = await supabase.from('profiles').insert(payload);
         if (!error) return null;
         const m = error.code === 'PGRST204' && /the '([^']+)' column/.exec(error.message || '');
         if (m && m[1] === 'linkedin_url' && 'linkedin_url' in payload) { delete payload.linkedin_url; continue; }
+        // LEN-232 fail-safe: if the live DB rejects the admin-assigned role via a CHECK
+        // constraint (e.g. a new persona the constraint hasn't been widened for), let the
+        // user IN without a role rather than hard-blocking signup with a red error. The
+        // persona is still seeded to localStorage from the invite below; the admin can fix
+        // the constraint and backfill the role afterward.
+        if (error.code === '23514' && /role/.test(error.message || '') && 'role' in payload) {
+          console.warn('[onboarding] profiles.role rejected by check constraint — inserting without role:', payload.role, error.message);
+          delete payload.role;
+          continue;
+        }
         return error;
       }
       return null;
