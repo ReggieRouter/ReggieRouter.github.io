@@ -135,27 +135,42 @@ function positionCallout(el, position) {
   const cw  = 252;
   const gap = 14;
   const vp  = { w: window.innerWidth, h: window.innerHeight };
+  const calloutH = calloutEl.offsetHeight || 180;
 
-  let top  = Math.max(8, r.top);
-  let left;
+  // keep the callout fully on-screen on both axes — a wide target (e.g. the
+  // full-width waterfall filter bar) can't fit a left/right callout, so without
+  // these the box runs off the right edge and its Next/Got-it button becomes
+  // unreachable, leaving the dimming overlay stuck. (LEN-268)
+  const clampX = x => Math.max(8, Math.min(x, vp.w - cw - 8));
+  const clampY = y => Math.max(8, Math.min(y, vp.h - calloutH - 8));
 
-  if (position === 'left' && r.left - cw - gap > 8) {
-    left = r.left - cw - gap;
-  } else if (position === 'right' && r.right + cw + gap < vp.w - 8) {
-    left = r.right + gap;
-  } else if (r.left - cw - gap > 8) {
-    left = r.left - cw - gap;
-  } else {
-    left = r.right + gap;
+  const fitsBelow = r.bottom + gap + calloutH < vp.h - 8;
+  const fitsAbove = r.top    - gap - calloutH > 8;
+  const fitsRight = r.right   + gap + cw < vp.w - 8;
+  const fitsLeft  = r.left    - gap - cw > 8;
+
+  let top, left;
+  if (position === 'below' && fitsBelow) {
+    top = r.bottom + gap;            left = r.left;
+  } else if (position === 'above' && fitsAbove) {
+    top = r.top - gap - calloutH;    left = r.left;
+  } else if (position === 'left' && fitsLeft) {
+    top = r.top;                     left = r.left - cw - gap;
+  } else if (position === 'right' && fitsRight) {
+    top = r.top;                     left = r.right + gap;
+  } else if (fitsRight) {            // generic fallbacks — try a side first
+    top = r.top;                     left = r.right + gap;
+  } else if (fitsLeft) {
+    top = r.top;                     left = r.left - cw - gap;
+  } else if (fitsBelow) {            // wide target → drop below it
+    top = r.bottom + gap;            left = r.left;
+  } else {                          // last resort → above it
+    top = r.top - gap - calloutH;    left = r.left;
   }
 
-  // clamp vertically so callout never goes off-screen bottom
-  const calloutH = calloutEl.offsetHeight || 180;
-  if (top + calloutH > vp.h - 8) top = vp.h - calloutH - 8;
-
   Object.assign(calloutEl.style, {
-    top:  top  + 'px',
-    left: left + 'px',
+    top:  clampY(top)  + 'px',
+    left: clampX(left) + 'px',
   });
 }
 
