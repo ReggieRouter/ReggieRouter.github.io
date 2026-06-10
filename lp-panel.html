@@ -3099,6 +3099,7 @@ async function renderMembersPanel() {
         <button class="tab" id="mem-tabbtn-all" onclick="memShowTab('all')">All Users <span class="tab-count" id="mem-count-all" style="display:none"></span></button>
         <button class="tab" id="mem-tabbtn-waitlist" onclick="memShowTab('waitlist')">Waitlist <span class="tab-count" id="mem-count-waitlist" style="display:none"></span></button>
         <button class="tab" id="mem-tabbtn-invited" onclick="memShowTab('invited')">Invited <span class="tab-count" id="mem-count-invited" style="display:none"></span></button>
+        <button class="tab" id="mem-tabbtn-access" onclick="memShowTab('access')">Access <span class="tab-count" id="mem-count-access" style="display:none"></span></button>
       </div>
       <div class="mem-toolbar">
         <input type="text" class="mem-search" id="mem-search" placeholder="Search name, company, email…" oninput="memRenderTable()" />
@@ -3211,15 +3212,17 @@ function memRenderStats() {
   setCount('mem-count-all', memProfiles.filter(u => !u.is_admin).length);
   setCount('mem-count-waitlist', waitlist);
   setCount('mem-count-invited', memInvites.filter(i => !i.accepted_at).length);
+  // LEN-252: Access tab counts everyone with elevated access (admins + scope grantees).
+  setCount('mem-count-access', memProfiles.filter(memHasAccess).length);
 }
 
 function memShowTab(name) {
   memTab = name;
-  ['pending','all','waitlist','invited'].forEach(t => {
+  ['pending','all','waitlist','invited','access'].forEach(t => {
     document.getElementById('mem-tabbtn-' + t).className = 'tab' + (t === name ? ' active' : '');
   });
   document.getElementById('mem-status').style.display = name === 'all' ? '' : 'none';
-  document.getElementById('mem-role').style.display = name === 'invited' ? 'none' : '';
+  document.getElementById('mem-role').style.display = (name === 'invited' || name === 'access') ? 'none' : '';
   memRenderTable();
 }
 
@@ -3253,6 +3256,7 @@ function memRenderTable() {
   const wrap = document.getElementById('mem-table-wrap');
   if (!wrap) return;
   if (memTab === 'invited') { memRenderInvitedTable(wrap); return; }
+  if (memTab === 'access')  { memRenderAccessTable(wrap); return; }
   const q   = (document.getElementById('mem-search')?.value || '').toLowerCase();
   const rol = document.getElementById('mem-role')?.value || '';
   const st  = document.getElementById('mem-status')?.value || '';
@@ -3330,6 +3334,54 @@ function memAccessLabel(u) {
   if (u.is_admin) return 'Admin&nbsp;&#10003;';
   const n = Array.isArray(u.permissions) ? u.permissions.length : 0;
   return n ? `Access&nbsp;(${n})` : 'Access';
+}
+// LEN-252: who counts as having elevated access (drives the Access tab).
+function memHasAccess(u) {
+  return u.is_admin === true || (Array.isArray(u.permissions) && u.permissions.length > 0);
+}
+// Human-readable scope list for a user.
+const SCOPE_LABELS = Object.fromEntries(ADMIN_SCOPES.map(s => [s.key, s.label]));
+function memAccessSummary(u) {
+  if (u.is_admin) return '<span class="mem-pill" style="background:#1A3C2E;color:#fff">Super-admin · all access</span>';
+  const perms = Array.isArray(u.permissions) ? u.permissions : [];
+  if (!perms.length) return '<span style="color:var(--muted)">—</span>';
+  return perms.map(k => `<span class="mem-pill other" style="margin:0 4px 4px 0;display:inline-block">${esc(SCOPE_LABELS[k] || k)}</span>`).join('');
+}
+// LEN-252: the control surface for changing ANYONE's access — including admins,
+// who are filtered out of every other member tab and would otherwise be
+// unreachable (the super-admin toggle was a one-way trap before this).
+function memRenderAccessTable(wrap) {
+  const q = (document.getElementById('mem-search')?.value || '').toLowerCase();
+  let rows = memProfiles.filter(memHasAccess);
+  if (q) rows = rows.filter(u => [u.full_name, u.email, u.company].join(' ').toLowerCase().includes(q));
+  rows.sort((a, b) => (b.is_admin === true) - (a.is_admin === true)); // admins first
+  if (!rows.length) {
+    wrap.innerHTML = `<p style="color:var(--muted);font-size:13px">${q ? 'No users match your filters.' : 'No one has elevated access yet. Grant access from the All Users tab.'}</p>`;
+    return;
+  }
+  wrap.innerHTML = `<table class="mem-table">
+    <thead><tr><th>User</th><th>Company</th><th>Access</th><th>Actions</th></tr></thead>
+    <tbody>${rows.map(u => `<tr>
+      <td><div class="mem-user"><span class="mem-avatar">${esc(memInitials(u.full_name))}</span><div><div class="mem-name">${esc(u.full_name || '—')}</div><div class="mem-email">${esc(u.email || '')}</div></div></div></td>
+      <td style="color:var(--muted)">${esc(u.company || '—')}</td>
+      <td>${memAccessSummary(u)}</td>
+      <td style="white-space:nowrap">
+        <button class="btn-ghost" style="font-size:11px;padding:3px 9px" onclick="openPermModal('${u.id}')" title="Change or revoke access">Edit access</button>
+        <button class="btn-mem-decline" onclick="memRevokeAccess('${u.id}', this)" title="Remove all admin access">Revoke all</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+// One-click full revoke (clears is_admin + all scopes). The per-scope modal
+// stays available via "Edit access" for partial changes.
+async function memRevokeAccess(userId, btn) {
+  const u = memProfiles.find(p => p.id === userId);
+  if (!confirm(`Remove ALL admin access for ${u ? (u.full_name || u.email) : 'this user'}? They keep their normal app login; only admin/feature access is removed.`)) return;
+  btn.disabled = true; btn.textContent = '…';
+  const { error } = await sb.from('profiles').update({ is_admin: false, permissions: [] }).eq('id', userId);
+  if (error) { toast('Revoke failed: ' + error.message); btn.disabled = false; btn.textContent = 'Revoke all'; return; }
+  toast('Access revoked');
+  await loadMembers();
 }
 function openPermModal(userId) {
   const u = memProfiles.find(p => p.id === userId);
