@@ -105,6 +105,13 @@ button{font-family:var(--font)}
 .in-box input::placeholder{color:var(--faint);font-weight:400}
 .in-box input::-webkit-outer-spin-button,.in-box input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .in-box .suf{font-size:12.5px;color:var(--muted);font-weight:600;margin-left:7px;flex:0 0 auto}
+/* Mandatory "Funding needed by" select — matches the profile fields (LEN-186 r3) */
+.fundby-box{cursor:pointer}
+.fundby-box .in-field{flex:1;min-width:0}
+.fundby-box select{appearance:none;-webkit-appearance:none;width:100%;border:none;outline:none;background:none;font-family:var(--font);font-size:16.5px;font-weight:600;color:var(--ink);cursor:pointer}
+.fundby-box .fac-chev{color:var(--faint);flex:0 0 auto;margin-left:8px}
+.fundby-box.need{border-color:var(--t3)!important;box-shadow:0 0 0 3px var(--t3-bg)}
+.req-star{color:var(--t4);font-weight:700;margin-left:1px}
 .in-tag{flex:0 0 auto;margin-left:8px}
 .tg{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
 .tg .d{width:6px;height:6px;border-radius:50%}
@@ -282,6 +289,18 @@ button{font-family:var(--font)}
 .tt-seg button{font-size:11px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;padding:5px 11px;border-radius:6px;transition:all .15s}
 .tt-seg button.on{background:var(--bg);color:var(--green);box-shadow:var(--shadow)}
 .tt-angle{font-size:10.5px;font-weight:700;color:var(--green);background:var(--green-wash);border:1px solid var(--green-line);border-radius:999px;padding:3px 10px;white-space:nowrap}
+/* First-use reminder to cycle the pager by product type (LEN-186 r3) */
+.tt-hint{display:flex;align-items:center;gap:8px;margin:0 15px 11px;padding:8px 11px;background:var(--green-wash);border:1px solid var(--green-line);border-radius:8px;font-size:11.5px;font-weight:600;color:var(--green-dk)}
+.tt-hint-ico{display:flex;color:var(--green);flex:0 0 auto}
+.tt-hint b{font-weight:800}
+.tt-hint-x{margin-left:auto;flex:0 0 auto;border:none;background:none;color:var(--muted);font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
+.tt-hint-x:hover{color:var(--green-dk)}
+.tt-pager{display:flex;align-items:center;gap:10px;margin:0 15px 12px;padding:9px 12px;background:var(--green-wash);border:1px solid var(--green-line);border-radius:9px;flex-wrap:wrap}
+.tt-pg-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--green-line);background:var(--bg);color:var(--green-dk);border-radius:7px;cursor:pointer;transition:all .14s;flex:0 0 auto}
+.tt-pg-btn:hover{border-color:var(--green);color:var(--green);background:#fff}
+.tt-pg-lbl{font-size:12.5px;font-weight:700;color:var(--green-dk)}
+.tt-pg-lbl b{font-weight:800}
+.tt-pg-hint{font-size:11px;color:var(--green);margin-left:auto}
 .tt-bodywrap{display:flex;align-items:stretch}
 .tt-body{flex:1;min-width:0;padding:0 15px}
 .tt-side{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:10px 13px;border-left:1px solid var(--line-2)}
@@ -725,22 +744,25 @@ button{font-family:var(--font)}
 .offer-hint{display:flex;align-items:center;gap:6px;font-size:11px;color:#5b7a66;margin-top:13px}
 .offer-hint svg{color:var(--green);flex:0 0 auto}
 
-/* affordability → lavender */
-.aff-wrap{border-color:var(--lav-line);background:var(--lav)}
-.aff-tg-l{color:var(--lav-ink)!important}
-.aff-toggle .fac-chev{color:var(--lav-accent)}
-.aff-cell{border-color:var(--lav-line)}
-.aff-bar{border-color:var(--lav-line)}
-.aff-be{border-color:var(--lav-line)}
-.aff-be-ico{color:var(--lav-accent)}
-.aff-conf{border-color:var(--lav-line)}
-.aff-conf .d{background:var(--lav-accent)}
-.aff-conf.warn{background:#efeafb;border-color:var(--lav-line);color:var(--lav-ink)}
-.aff-conf.warn .d{background:var(--lav-accent)}
-.aff-conf.warn b{color:var(--lav-ink)}
-.aff-empty svg{color:var(--lav-accent)}
-.aff-empty b{color:var(--lav-ink)}
-.aff-note{color:#6f6790}
+/* Cash flow check — bottom button + inline detail (LEN-186). De-lavendered: the
+   green base aff-* styling now applies. The control reuses .offer-compare. */
+/* Equal-height with the stacking button: zero the base margin-top on both and let the
+   flex row stretch them to the same height (LEN-186 r3 — cash-flow box was shorter). */
+.rel-tools{align-items:stretch}
+.rel-tools .offer-compare{margin-top:0}
+.cf-toggle .cf-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.cf-toggle .cf-verdict{font-size:11px;font-weight:700;margin-left:2px}
+.cf-toggle .fac-chev{flex:0 0 auto}
+.cf-detail{display:none;margin-top:10px;border:1px solid var(--green-line);border-radius:var(--r);background:var(--green-wash);padding:14px 16px}
+.cf-detail.open{display:block}
+/* Next steps page — forward-planning calculator nudges (LEN-186 r3) */
+.ns-list{display:flex;flex-direction:column;gap:12px}
+.ns-item{display:flex;flex-direction:column;gap:8px;padding:12px 13px;border:1px solid var(--green-line);border-radius:10px;background:var(--bg)}
+.ns-txt{font-size:12.5px;line-height:1.5;color:var(--ink-2)}
+.ns-txt b{color:var(--ink);font-weight:700}
+.ns-cta{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:11.5px;font-weight:700;color:var(--green);background:var(--green-wash);border:1px solid var(--green-line);border-radius:8px;padding:7px 12px;text-decoration:none;transition:all .14s}
+.ns-cta:hover{background:var(--green);color:#fff;border-color:var(--green)}
+.ns-cta svg{flex:0 0 auto}
 
 /* ═══════════ v4.7 — clickable factor tags + paged lever modal ═══════════ */
 /* profile tags become tappable — they explain what the factor affects */
@@ -826,10 +848,6 @@ button{font-family:var(--font)}
 .rate-apr-pill{font-size:9px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--t2);background:var(--t2-bg);border:1px solid var(--t2-line);border-radius:999px;padding:1px 6px}
 /* persistent MCA disambiguation below the rate row */
 .mca-note{font-size:11.5px;line-height:1.45;color:#5b7a66;margin-top:11px;font-weight:500;text-wrap:pretty}
-/* cash-flow-check collapsed break-even summary */
-.aff-summary{font-size:11.5px;line-height:1.45;color:var(--lav-ink);padding:0 16px 13px;margin-top:-2px;text-wrap:pretty}
-.aff-summary b{font-weight:700}
-.aff-wrap.open .aff-summary{display:none}
 /* business-state must be confirmed before export */
 .sel-box.need{border-color:var(--t3)!important;box-shadow:0 0 0 3px var(--t3-bg)}
 .state-need-note{font-size:11px;font-weight:600;color:#a9750f;margin-top:6px}
@@ -860,19 +878,24 @@ button{font-family:var(--font)}
    auto-fit) keeps empty tracks so a lone trailing product — e.g. LOC as the 5th —
    stays tile-sized instead of ballooning to full width (LEN-155). */
 .kn-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
-.kn-card{min-width:0;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:13px 14px 11px;cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s;font-family:var(--font)}
+/* Flex-column + status pinned to the bottom keeps every tile's verdict line aligned
+   regardless of optional subline/caution rows (LEN-186). No lead pick anymore. */
+.kn-card{min-width:0;display:flex;flex-direction:column;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:13px 14px 11px;cursor:pointer;text-align:left;transition:border-color .15s,box-shadow .15s;font-family:var(--font)}
 .kn-card:hover{border-color:var(--green-line);box-shadow:0 2px 8px rgba(20,60,30,.07)}
-.kn-lead{border-color:var(--green-line);background:var(--green-wash)}
-.kn-card-top{min-height:18px;margin-bottom:5px}
-.kn-lead-badge{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);background:rgba(21,102,60,.12);border-radius:999px;padding:2px 8px}
 .kn-name{font-size:18px;font-weight:800;letter-spacing:-.025em;color:var(--ink);line-height:1.15;margin-bottom:7px;overflow-wrap:anywhere;hyphens:auto}
-.kn-status{display:flex;align-items:center;gap:6px}
+.kn-status{display:flex;align-items:center;gap:6px;margin-top:auto}
 .kn-dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
 .kn-word{font-size:11.5px;font-weight:700}
 .kn-caution{display:flex;align-items:flex-start;gap:5px;margin-top:7px;font-size:10.5px;font-weight:600;color:var(--t3);line-height:1.4}
 .kn-caution svg{flex:0 0 auto;margin-top:1px;color:var(--t3)}
+.kn-hint{min-width:0;display:flex;align-items:center;gap:8px;padding:13px 14px;font-size:11px;line-height:1.45;color:var(--t3);background:transparent}
+.kn-hint svg{color:var(--green);flex:0 0 auto}
 /* offer-metrics now holds only the full-width Funding range tile (amount-tile spans
    grid-column 1/-1); Term/Rate/Payment tiles were removed in LEN-155. */
+
+/* Funding range host — sits under "Add underwriting detail" in the input column (LEN-186) */
+.fr-host:empty{display:none}
+.fr-host{margin-top:18px}
 
 /* ════════ Add underwriting detail — bottom-left panel (Group C, LEN-155) ════════ */
 .uw-wrap{margin-top:20px}
@@ -890,6 +913,11 @@ button{font-family:var(--font)}
 .uw-mode-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
 .uw-panel{display:none;margin-top:12px}
 .uw-panel.open{display:block}
+/* Category sort chips (LEN-186) */
+.uw-cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.uw-cat-chip{font-size:11px;font-weight:600;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;font-family:var(--font);transition:all .14s}
+.uw-cat-chip:hover{border-color:var(--green-line);color:var(--green)}
+.uw-cat-chip.on{background:var(--green-wash);border-color:var(--green-line);color:var(--green-dk)}
 .uw-all{display:flex;flex-direction:column;gap:9px}
 .uw-card{border:1px solid var(--line);border-radius:var(--r);padding:12px 13px;background:var(--bg-2)}
 .uw-ch{display:flex;align-items:center;gap:8px;margin-bottom:6px}
@@ -931,14 +959,19 @@ select.uw-ctrl{cursor:pointer}
 .uw-sw-dot.on{background:var(--green);width:17px;border-radius:3px}
 .uw-src-body{font-size:12.5px;line-height:1.62;color:var(--ink-2);margin-top:10px}
 
-/* ════════ File read (1 strength + 2 limits) ════════ */
+/* ════════ File at a glance — sits under the talk track inside "What you tell the borrower" (LEN-186) ════════ */
 .file-read{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--bg);padding:14px 16px;margin-top:14px}
+/* Inside the talk panel it sits flush as a tinted summary band below the talk body. */
+.tt .file-read{border:0;border-radius:0;margin:0;background:var(--green-wash);border-top:1px solid var(--green-line);padding:13px 16px}
 .fr-eyebrow{margin-bottom:11px}
+.tt .fr-eyebrow{margin-bottom:9px}
 .fr-rows{display:flex;flex-direction:column;gap:10px}
-.fr-row{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:var(--ink-2)}
+.fr-row{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:var(--ink-2)}
+.fr-cat{flex:0 0 auto;font-size:13px;line-height:1.35}
 .fr-row .fr-ico{flex:0 0 auto;margin-top:1px}
 .fr-row.pos .fr-ico{color:var(--t1)}
-.fr-row.neg .fr-ico{color:var(--t3)}
+.fr-row.neg .fr-ico{color:#d2524f}
+.fr-row.clarify .fr-ico{color:var(--muted)}
 .fr-row b{color:var(--ink);font-weight:700}
 .fr-thin{display:flex;gap:7px;align-items:flex-start;margin-top:11px;padding-top:11px;border-top:1px solid var(--line-2);font-size:11px;color:var(--muted)}
 .fr-thin svg{flex:0 0 auto;margin-top:1px;color:var(--faint)}

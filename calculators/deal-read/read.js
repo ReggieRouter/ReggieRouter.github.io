@@ -8,33 +8,33 @@
 const S = {
   selected:null, q:'', indEditing:false, mode:'broker',
   fico:null, tib:null, rev:null, reqAmt:null, ficoBad:false,
-  reqProduct:'', expTerm:null, expPayFreq:'', state:'', stateConfirmed:false, expOpen:false,
+  reqProduct:'', expTerm:null, expPayFreq:'', state:'', stateConfirmed:false, expOpen:false, fundBy:'',
   deposits:{}, depOpen:false, depCount:4, aprOpen:false, tibUnit:'mo', affOpen:false, modal:null, prodIdx:0,
   amtOpen:false, rateMode:null, cmpGates:[3,6,12], cmpLocApr:null,
   lang:'en', tipHidden:false,
-  facOpen:{}, uwOpen:false, uwMode:'all', uwIdx:0, uw:{},
+  facOpen:{}, uwOpen:false, uwMode:'swipe', uwIdx:0, uwCat:'all', uw:{},
   pdfScope:'combined',
   tweaks:{ accent:'forest', density:'regular', disclosures:'show', deltas:'on' },
 };
 const LS='lp_deal_read_v1';
 function save(){ try{ localStorage.setItem(LS, JSON.stringify({
   selected:S.selected, q:S.q, mode:S.mode, fico:S.fico, tib:S.tib, rev:S.rev, reqAmt:S.reqAmt,
-  reqProduct:S.reqProduct, expTerm:S.expTerm, expPayFreq:S.expPayFreq, state:S.state, stateConfirmed:S.stateConfirmed, expOpen:S.expOpen,
+  reqProduct:S.reqProduct, expTerm:S.expTerm, expPayFreq:S.expPayFreq, state:S.state, stateConfirmed:S.stateConfirmed, expOpen:S.expOpen, fundBy:S.fundBy,
   deposits:S.deposits, depOpen:S.depOpen, depCount:S.depCount, aprOpen:S.aprOpen, tibUnit:S.tibUnit, affOpen:S.affOpen,
   amtOpen:S.amtOpen, rateMode:S.rateMode, cmpGates:S.cmpGates, cmpLocApr:S.cmpLocApr,
-  lang:S.lang, tipHidden:S.tipHidden, facOpen:S.facOpen, uwOpen:S.uwOpen, uwMode:S.uwMode, uwIdx:S.uwIdx, uw:S.uw, tweaks:S.tweaks
+  lang:S.lang, tipHidden:S.tipHidden, facOpen:S.facOpen, uwOpen:S.uwOpen, uwMode:S.uwMode, uwIdx:S.uwIdx, uwCat:S.uwCat, uw:S.uw, tweaks:S.tweaks
 })); }catch(e){} }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(LS)||'{}');
   if(d.selected) S.selected=d.selected; if(d.q) S.q=d.q; if(d.mode) S.mode=d.mode;
   S.fico=d.fico??null; S.tib=d.tib??null; S.rev=d.rev??null; S.reqAmt=d.reqAmt??null;
-  S.reqProduct=d.reqProduct||''; S.expTerm=d.expTerm??null; S.expPayFreq=d.expPayFreq||''; S.state=d.state||''; S.stateConfirmed=!!d.stateConfirmed; S.expOpen=!!d.expOpen;
+  S.reqProduct=d.reqProduct||''; S.expTerm=d.expTerm??null; S.expPayFreq=d.expPayFreq||''; S.state=d.state||''; S.stateConfirmed=!!d.stateConfirmed; S.expOpen=!!d.expOpen; S.fundBy=d.fundBy||'';
   S.deposits=d.deposits||{}; S.depOpen=!!d.depOpen; S.depCount=d.depCount||4; S.aprOpen=!!d.aprOpen;
   S.tibUnit=d.tibUnit==='yr'?'yr':'mo'; S.affOpen=!!d.affOpen;
   S.amtOpen=!!d.amtOpen; S.rateMode=(d.rateMode==='apr'||d.rateMode==='cents')?d.rateMode:null;
   if(Array.isArray(d.cmpGates)&&d.cmpGates.length) S.cmpGates=d.cmpGates; if(d.cmpLocApr!=null) S.cmpLocApr=d.cmpLocApr;
   if(d.lang) S.lang=d.lang; S.tipHidden=!!d.tipHidden;
   if(d.facOpen) S.facOpen=d.facOpen;
-  S.uwOpen=!!d.uwOpen; S.uwMode=d.uwMode==='swipe'?'swipe':'all'; S.uwIdx=d.uwIdx||0; if(d.uw&&typeof d.uw==='object') S.uw=d.uw;
+  S.uwOpen=!!d.uwOpen; S.uwMode=d.uwMode==='all'?'all':'swipe'; S.uwIdx=d.uwIdx||0; S.uwCat=d.uwCat||'all'; if(d.uw&&typeof d.uw==='object') S.uw=d.uw;
   if(d.tweaks) S.tweaks={...S.tweaks,...d.tweaks};
 }catch(e){} }
 
@@ -55,6 +55,10 @@ const I = {
   factory:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M7 18h.01"/><path d="M12 18h.01"/><path d="M17 18h.01"/></svg>',
   info:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
   edit:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  // file-at-a-glance status icons (LEN-186): soft-green up-right (strength),
+  // red down-right (limit), question mark (needs clarification).
+  arrowDn:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7 17 17"/><path d="M17 7v10H7"/></svg>',
+  qmark:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>',
 };
 const TC={g:'1',w:'2',r:'3',n:'4'};
 const DOT={g:'#1f9d57',w:'#e0a400',r:'#d2524f',n:'#d2524f',x:'var(--faint)'};
@@ -112,12 +116,14 @@ function renderInputs(){
        ${fieldNum('fico')}
        ${fieldNum('tib')}
        ${fieldNum('rev')}
+       ${fieldFundBy()}
        ${depositsPanel()}
      </div>
      <div id="uwChipsHost">${uwChips()}</div>
      <div style="height:20px"></div>
      ${expectationsPanel()}
-     ${uwPanel()}`;
+     ${uwPanel()}
+     <div id="fundingRangeHost" class="fr-host">${fundingRangeBlock()}</div>`;
   if(S.indEditing){ const i=document.getElementById('indSearch'); if(i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); } }
 }
 function expectationsPanel(){
@@ -234,6 +240,40 @@ function fieldNum(kind){
     </div>
   </div>`;
 }
+// Mandatory "Funding needed by" — a simple time-range below Monthly Revenue (LEN-186 r3).
+// Required before export; urgency also feeds the read (fast products / Next steps).
+const FUND_BY=[['','Select…'],['asap','ASAP — within a week'],['2-4w','In 2–4 weeks'],['1-3m','In 1–3 months'],['flex','No firm deadline']];
+function fundByLabel(v){ const f=FUND_BY.find(x=>x[0]===v); return f?f[1]:''; }
+function fundByUrgent(){ return S.fundBy==='asap'||S.fundBy==='2-4w'; }
+function fieldFundBy(){
+  return `<div class="field" data-field="fundby">
+    <label>Funding needed by <span class="req-star" title="Required before export">*</span></label>
+    <div class="in-box fundby-box" id="fundByBox" onclick="this.querySelector('select').focus()">
+      <span class="in-ico">${I.cal}</span>
+      <span class="in-field"><select id="in-fundby" onchange="onFundBy(this.value)">${FUND_BY.map(([v,l])=>`<option value="${v}" ${S.fundBy===v?'selected':''}>${l}</option>`).join('')}</select></span>
+      <span class="fac-chev">${I.dn}</span>
+    </div>
+  </div>`;
+}
+function onFundBy(v){
+  S.fundBy=v; save();
+  const box=document.getElementById('fundByBox'); if(box) box.classList.remove('need');
+  const n=document.querySelector('.fundby-need-note'); if(n) n.remove();
+  renderRead(); renderBand();
+}
+// Mandatory before export — documented urgency is more useful than a blank
+function requireFundBy(){
+  if(S.fundBy) return true;
+  const box=document.getElementById('fundByBox');
+  if(box){
+    box.classList.add('need');
+    const field=box.closest('.field');
+    if(field && !field.querySelector('.fundby-need-note')){ const n=document.createElement('div'); n.className='state-need-note fundby-need-note'; n.textContent='Choose when funding is needed before exporting.'; field.appendChild(n); }
+    try{ box.querySelector('select').focus(); }catch(e){}
+    try{ box.scrollIntoView({block:'center',behavior:'smooth'}); }catch(e){}
+  }
+  return false;
+}
 function tagHTML(kind){
   if(kind==='fico'&&S.ficoBad) return `<span class="tg err"><span class="d"></span>300–850</span>`;
   const v=kind==='fico'?S.fico:kind==='tib'?S.tib:S.rev;
@@ -287,7 +327,7 @@ function depositsPanel(){
     <div class="dep-panel ${open?'open':''}" id="depPanel">
       <div class="dep-row">${cells}</div>
       <div class="dep-actions"><button class="dep-more" onclick="depMore()" ${S.depCount>=12?'disabled':''}>+ older month</button>${depAvgNote()}</div>
-      <div class="dep-note">Most underwriters want <b>3–4 months</b>; SBA often <b>6–12</b>. The most recent month carries the most weight. <b>Seasonal business?</b> Add more months — a fuller year smooths out the slow stretch and makes a stronger case with underwriters. These are generalizations and requirements vary by lender.</div>
+      <div class="dep-note">For short-term financing, deposits usually matter more than credit. <b>The most recent month usually carries the most weight.</b> Most underwriters want <b>3–4 months</b>; SBA often <b>6–12</b>. <b>Seasonal business?</b> Add more months — a fuller year smooths out the slow stretch and makes a stronger case with underwriters. These are generalizations and requirements vary by lender.</div>
     </div>
   </div>`;
 }
@@ -319,32 +359,41 @@ const UW_ICON={
   brief:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>',
 };
 const UW_FIELDS=[
-  { key:'util', icon:'card', name:'Credit Utilization %', weight:3,
+  { key:'util', cat:'credit', icon:'card', name:'Credit Utilization %', weight:3,
     hint:'If 30%+, this is a talk track: financing can lower utilization — and that’s 30% of the FICO score. Worth knowing before the call.',
     type:'num', suffix:'%', width:110, ph:'e.g. 42',
     source:{title:'How to find credit utilization', body:'Pull the borrower’s credit report summary. Look for “Revolving Credit Utilization” or “Credit Used / Credit Available.” Experian, Equifax, and TransUnion all report it. If the borrower shares a Nav or CreditWise screenshot, it’s usually on the front page. Formula: Total Balances ÷ Total Credit Limits = Utilization %.'} },
-  { key:'depcount', icon:'bank', name:'Avg. Deposit Count / Month', weight:2,
+  { key:'depcount', cat:'cashflow', icon:'bank', name:'Avg. Deposit Count / Month', weight:2,
     hint:'≤5 deposits/mo → nearly unfundable. 5–15 → pricing worsens. 15+ → underwriting is comfortable. Count unique deposits, not transfers.',
     type:'num', width:110, ph:'e.g. 22',
     source:{title:'How to source deposit count', body:'Pull 2–3 months of bank statements. Count the number of distinct deposit entries per month — not the dollar amount, the transaction count. Wire transfers and ACH receipts count. Payroll reversals and inter-account transfers don’t. Most underwriting runs this itself — knowing it ahead of time frames the conversation.'} },
-  { key:'trend', icon:'trend', name:'Most Recent Month Trend', weight:3,
+  { key:'trend', cat:'cashflow', icon:'trend', name:'Most Recent Month Trend', weight:3,
     hint:'If the most recent month is 15%+ below the prior 3-month average, underwriting tightens — sometimes significantly. Always know this before you quote.',
     type:'select', options:['','Up or flat vs. prior avg','Down 1–14%','Down 15%+ (significant)'],
     source:{title:'How to assess the trend', body:'Pull the last 3 months of bank statements. Total deposits for each month. Take the average of months 2 and 3 (the older months). Compare to month 1 (the most recent). If month 1 is 15%+ below that average, flag it. The most recent month is often weighted 2–3× more than older months. A sharp dip — even for a legitimate reason — will affect pricing and approvals.'} },
-  { key:'liens', icon:'file', name:'Liens · Litigation · Bankruptcy', weight:3,
+  { key:'liens', cat:'credit', icon:'file', name:'Liens · Litigation · Bankruptcy', weight:3,
     hint:'Any of these can stop a deal or shift the available products entirely. Ask directly — easier now than at due diligence.',
     type:'select', options:['','None','Active lien(s)','Pending litigation','Prior bankruptcy (discharged)','Active bankruptcy'],
     source:{title:'How to uncover liens and legal issues', body:'Ask the borrower directly: “Before we submit, are there any outstanding liens, judgments, or legal matters on the business or personally?” For verification: search the UCC filing registry for the borrower’s state (most are free online). Tax liens appear on the credit report. Federal cases via PACER. These surface in due diligence — knowing first lets you frame it proactively.'} },
-  { key:'nrd', icon:'dollar', name:'Non-Refundable Deposits (NRDs)', weight:1,
+  { key:'nrd', cat:'useoffunds', icon:'dollar', name:'Non-Refundable Deposits (NRDs)', weight:1,
     hint:'NRDs are upfront fees paid before funding. Rare but worth flagging — they reduce effective proceeds and must be disclosed.',
     type:'num', prefix:'$', width:140, ph:'amount if known',
     source:{title:'What NRDs are and how to find them', body:'Non-refundable deposits are fees charged upfront — before the deal funds. Look for language in any LOI or commitment letter referencing “deposit,” “underwriting fee,” or “processing fee” due before funding. If present, disclose to the borrower upfront — failure to do so creates legal and trust risk.'} },
-  { key:'biz-hist', icon:'brief', name:'Prior Business Financing', weight:1,
+  { key:'biz-hist', cat:'credit', icon:'brief', name:'Prior Business Financing', weight:1,
     hint:'Prior financing history is a positive signal if clean. Stacked positions, defaults, or recent settlements all affect appetite.',
     type:'select', options:['','No prior financing','Prior financing — paid off cleanly','Active position(s) — current','Active position(s) — late','Prior default or settlement'],
     source:{title:'How to assess financing history', body:'Ask the borrower: “Have you had any business financing before — advances, loans, lines of credit?” Pull a DataMerch or SBFE check if available (these track advance history outside the traditional bureaus). For bank products, the credit report shows trade lines. Active positions matter — stacking limits are typically 1–2 positions max.'} },
+  { key:'renewal', cat:'useoffunds', icon:'trend', name:'Early-Renewal / Refi Program', weight:1,
+    hint:'If the funder offers early renewals or refis for additional capital, flag it — it changes the forward plan (pre-pay now to unlock more, often at better terms).',
+    type:'select', options:['','Yes — early renewal / refi available','No / not sure'],
+    source:{title:'What an early-renewal program is', body:'Many short-term and revenue-based funders let a borrower “renew” — pay down or pay off the current balance early and take additional capital, often at better terms once a track record is established. Check the agreement (or ask the funder) for “renewal,” “refinance,” or “additional funding” language. If it’s available, the pre-pay math — run it in the Amortization calculator — shows exactly when it pays to renew.'} },
 ];
 function uwIcon(t){ return UW_ICON[t]||''; }
+// Category sort (LEN-186): credit / cash flow / use of funds, plus All. Swipe + see-all
+// both operate on the FILTERED list via uwVisibleFields() — every length / index read
+// routes through it so navigation stays in-bounds.
+const UW_CATS=[['all','All'],['credit','Credit'],['cashflow','Cash flow'],['useoffunds','Use of funds']];
+function uwVisibleFields(){ return S.uwCat==='all'?UW_FIELDS:UW_FIELDS.filter(f=>f.cat===S.uwCat); }
 function uwCountFilled(){ return UW_FIELDS.filter(f=>{ const v=S.uw[f.key]; return v!=null && String(v).trim()!==''; }).length; }
 function uwDots(w){
   const tips=['Low weight — useful context but rarely decisive on its own','Medium weight — one of several factors; can tip the balance','High weight — significantly affects approval, pricing, or both'];
@@ -375,9 +424,13 @@ function uwSwipeCard(f){
     <button class="uw-sw-source-btn" onclick="openUWSource('${f.key}')">${I.info}<span>How to find this</span></button>
     <div class="uw-sw-ctrl">${uwCtrl(f)}</div>`;
 }
+function uwChipRow(){
+  return `<div class="uw-cats" id="uwCats">${UW_CATS.map(([k,l])=>`<button class="uw-cat-chip${S.uwCat===k?' on':''}" onclick="changeUWCat('${k}')">${l}</button>`).join('')}</div>`;
+}
 function uwPanel(){
   const open=S.uwOpen, swipe=S.uwMode==='swipe', n=uwCountFilled();
-  const last=S.uwIdx===UW_FIELDS.length-1;
+  const vf=uwVisibleFields(); if(S.uwIdx>=vf.length) S.uwIdx=0;
+  const last=S.uwIdx===vf.length-1;
   return `<div class="uw-wrap">
     <div class="uw-hdr">
       <button class="uw-toggle" onclick="toggleUW()">
@@ -389,22 +442,36 @@ function uwPanel(){
       <button class="uw-mode-btn${swipe?' active':''}" id="uwModeBtn" style="${open?'':'display:none'}" onclick="toggleUWMode()">${swipe?'See all':'Swipe'}</button>
     </div>
     <div class="uw-panel ${open?'open':''}" id="uwPanel">
-      <div id="uwAll" class="uw-all" style="${swipe?'display:none':''}">${UW_FIELDS.map(uwCard).join('')}</div>
+      ${uwChipRow()}
+      <div id="uwAll" class="uw-all" style="${swipe?'display:none':''}">${vf.map(uwCard).join('')}</div>
       <div id="uwSwipe" style="${swipe?'':'display:none'}">
         <div class="uw-swipe">
           <div class="uw-sw-pg">
-            <span class="uw-sw-count" id="uwSwCount">${S.uwIdx+1} OF ${UW_FIELDS.length}</span>
+            <span class="uw-sw-count" id="uwSwCount">${vf.length?S.uwIdx+1:0} OF ${vf.length}</span>
             <div class="uw-sw-nav">
               <button id="uwSwBack" onclick="swipeUW(-1)" ${S.uwIdx===0?'disabled':''}>← Back</button>
               <button class="pri" id="uwSwNext" onclick="${last?'toggleUW()':'swipeUW(1)'}">${last?'Done ✓':'Next →'}</button>
             </div>
           </div>
-          <div class="uw-sw-body" id="uwSwBody">${uwSwipeCard(UW_FIELDS[S.uwIdx]||UW_FIELDS[0])}</div>
-          <div class="uw-sw-dots" id="uwSwDots">${UW_FIELDS.map((_,i)=>`<span class="uw-sw-dot${i===S.uwIdx?' on':''}" onclick="swipeUWTo(${i})"></span>`).join('')}</div>
+          <div class="uw-sw-body" id="uwSwBody">${vf.length?uwSwipeCard(vf[S.uwIdx]||vf[0]):''}</div>
+          <div class="uw-sw-dots" id="uwSwDots">${vf.map((_,i)=>`<span class="uw-sw-dot${i===S.uwIdx?' on':''}" onclick="swipeUWTo(${i})"></span>`).join('')}</div>
         </div>
       </div>
     </div>
   </div>`;
+}
+function changeUWCat(cat){
+  S.uwCat=cat; S.uwIdx=0; save();
+  const p=document.getElementById('uwPanel'); if(!p) return;
+  // rebuild the panel body in place (keeps the toggle/header + open state)
+  const vf=uwVisibleFields(), swipe=S.uwMode==='swipe', last=S.uwIdx===vf.length-1;
+  document.querySelectorAll('#uwCats .uw-cat-chip').forEach((b,i)=>b.classList.toggle('on',UW_CATS[i][0]===cat));
+  const all=document.getElementById('uwAll'); if(all) all.innerHTML=vf.map(uwCard).join('');
+  const cnt=document.getElementById('uwSwCount'); if(cnt) cnt.textContent=`${vf.length?S.uwIdx+1:0} OF ${vf.length}`;
+  const back=document.getElementById('uwSwBack'); if(back) back.disabled=true;
+  const next=document.getElementById('uwSwNext'); if(next){ next.textContent=last?'Done ✓':'Next →'; next.onclick=last?()=>toggleUW():()=>swipeUW(1); }
+  const body=document.getElementById('uwSwBody'); if(body) body.innerHTML=vf.length?uwSwipeCard(vf[0]):'';
+  const dots=document.getElementById('uwSwDots'); if(dots) dots.innerHTML=vf.map((_,i)=>`<span class="uw-sw-dot${i===0?' on':''}" onclick="swipeUWTo(${i})"></span>`).join('');
 }
 function toggleUW(){
   S.uwOpen=!S.uwOpen; save();
@@ -421,15 +488,15 @@ function toggleUWMode(){
   if(sw) sw.style.display=S.uwMode==='swipe'?'':'none';
   if(S.uwMode==='swipe'){ S.uwIdx=0; save(); renderUWSwipe(); }
 }
-function swipeUW(d){ S.uwIdx=Math.max(0,Math.min(UW_FIELDS.length-1,S.uwIdx+d)); save(); renderUWSwipe(); }
-function swipeUWTo(i){ S.uwIdx=Math.max(0,Math.min(UW_FIELDS.length-1,i)); save(); renderUWSwipe(); }
+function swipeUW(d){ const n=uwVisibleFields().length; S.uwIdx=Math.max(0,Math.min(n-1,S.uwIdx+d)); save(); renderUWSwipe(); }
+function swipeUWTo(i){ const n=uwVisibleFields().length; S.uwIdx=Math.max(0,Math.min(n-1,i)); save(); renderUWSwipe(); }
 function renderUWSwipe(){
-  const f=UW_FIELDS[S.uwIdx]; if(!f) return; const total=UW_FIELDS.length, last=S.uwIdx===total-1;
+  const vf=uwVisibleFields(); const f=vf[S.uwIdx]; if(!f) return; const total=vf.length, last=S.uwIdx===total-1;
   const cnt=document.getElementById('uwSwCount'); if(cnt) cnt.textContent=`${S.uwIdx+1} OF ${total}`;
   const back=document.getElementById('uwSwBack'); if(back) back.disabled=S.uwIdx===0;
   const next=document.getElementById('uwSwNext'); if(next){ next.textContent=last?'Done ✓':'Next →'; next.onclick=last?()=>toggleUW():()=>swipeUW(1); }
   const body=document.getElementById('uwSwBody'); if(body) body.innerHTML=uwSwipeCard(f);
-  const dots=document.getElementById('uwSwDots'); if(dots) dots.innerHTML=UW_FIELDS.map((_,i)=>`<span class="uw-sw-dot${i===S.uwIdx?' on':''}" onclick="swipeUWTo(${i})"></span>`).join('');
+  const dots=document.getElementById('uwSwDots'); if(dots) dots.innerHTML=vf.map((_,i)=>`<span class="uw-sw-dot${i===S.uwIdx?' on':''}" onclick="swipeUWTo(${i})"></span>`).join('');
 }
 function setUW(key,val){
   if(val==null||String(val).trim()==='') delete S.uw[key]; else S.uw[key]=val;
@@ -491,7 +558,7 @@ function introMarkup(anim){
   return `<div class="intro-pop${anim?' intro-anim':''}">
     <button class="intro-x" onclick="dismissIntro()" aria-label="Dismiss">×</button>
     <div class="intro-h">${I.lift}<span>What you’ll get</span></div>
-    <div class="intro-b">Plans to help borrowers understand the strength of their file today, set realistic expectations, and build a financial plan going forward. <b>Scroll down for the talk tracks.</b></div>
+    <div class="intro-b">The file’s strengths and limits — plus a talk track to walk the borrower through it.</div>
   </div>`;
 }
 function dismissIntro(){ S._introState='dismissed'; const p=document.querySelector('#read .intro-pop'); if(p) p.remove(); }
@@ -502,33 +569,45 @@ function fileAssessment(d){
   const e=NAICS_DB.find(n=>n.c===d.code);
   const indName=e?e.d.replace(/\s*\(.*?\)\s*/g,' ').trim():'This industry';
   const items=[];
-  items.push({tone:d.tier||'g',
+  items.push({cat:'industry', tone:d.tier||'g',
     up:`<b>${indName}</b> is a fundable category — it sets the product stack you can work with.`,
     down: d.tier==='n'?`<b>${indName}</b> is commonly restricted — confirm the exact NAICS before relying on this read.`:`<b>${indName}</b> draws extra underwriting scrutiny — expect a narrower set of options.`});
-  if(d.fico!=null){ const b=factorRead('fico',d.fico); if(b) items.push({tone:b.tone,
+  if(d.fico!=null){ const b=factorRead('fico',d.fico); if(b) items.push({cat:'credit', tone:b.tone,
     up:`Credit (<b>${d.fico}</b>) is a strength to lead with — it anchors pricing and keeps better programs open.`,
-    down:`Credit (<b>${d.fico}</b>) is the heaviest limit — it lifts the rate and holds the lowest-cost programs back for now.`}); }
-  if(d.tib!=null){ const b=factorRead('tib',d.tib); if(b) items.push({tone:b.tone,
+    down:`Credit (<b>${d.fico}</b>) is the heaviest factor on this file — it lifts the rate and holds the lowest-cost programs back for now.`}); }
+  if(d.tib!=null){ const b=factorRead('tib',d.tib); if(b) items.push({cat:'tib', tone:b.tone,
     up:`<b>${d.tib} months</b> in business is real history to point to — it supports the term you quote.`,
     down:`<b>${d.tib} months</b> in business is short — it caps the term and keeps bank &amp; SBA options out for now.`}); }
-  if(d.rev!=null){ const b=factorRead('rev',d.rev); if(b) items.push({tone:b.tone,
+  if(d.rev!=null){ const b=factorRead('rev',d.rev); if(b) items.push({cat:'revenue', tone:b.tone,
     up:`<b>$${d.rev.toLocaleString()}/mo</b> in deposits is the engine — it sizes the amount you can offer.`,
     down:`Revenue (<b>$${d.rev.toLocaleString()}/mo</b>) caps the amount — size conservatively until deposits grow.`}); }
   const rank={g:0,w:1,r:2,n:3};
   const positive=items.slice().sort((a,b)=>rank[a.tone]-rank[b.tone])[0];
-  const negatives=items.filter(x=>x!==positive).sort((a,b)=>rank[b.tone]-rank[a.tone]).slice(0,2);
+  let negatives=items.filter(x=>x!==positive).sort((a,b)=>rank[b.tone]-rank[a.tone]);
+  // Credit is the top item when it's a limiting factor (Steve, LEN-186).
+  const ci=negatives.findIndex(n=>n.cat==='credit'); if(ci>0){ const [c]=negatives.splice(ci,1); negatives.unshift(c); }
+  negatives=negatives.slice(0,2);
   return {positive, negatives, count:items.length};
+}
+// Two icons per row (LEN-186): a category emoji + a status arrow. Order is
+// negatives first (credit on top), then one positive.
+const FR_CAT_EMOJI={industry:'🏭', credit:'💳', tib:'📅', revenue:'📈'};
+function frRow(cat, dir, text){
+  const emoji=FR_CAT_EMOJI[cat]||'';
+  const ico = dir==='up'?I.lift : dir==='q'?I.qmark : I.arrowDn;
+  const cls = dir==='up'?'pos' : dir==='q'?'clarify' : 'neg';
+  return `<div class="fr-row ${cls}"><span class="fr-cat">${emoji}</span><span class="fr-ico">${ico}</span><span>${text}</span></div>`;
 }
 function fileReadHTML(d){
   if(!d.code) return '';
   const a=fileAssessment(d); if(!a) return '';
   const rows=[];
-  if(a.positive) rows.push(`<div class="fr-row pos"><span class="fr-ico">${I.lift}</span><span>${a.positive.up}</span></div>`);
-  a.negatives.forEach(n=>rows.push(`<div class="fr-row neg"><span class="fr-ico">${I.warn}</span><span>${n.down}</span></div>`));
+  a.negatives.forEach(n=>{ const dir=(n.cat==='industry'&&d.tier==='n')?'q':'down'; rows.push(frRow(n.cat,dir,n.down)); });
+  if(a.positive) rows.push(frRow(a.positive.cat,'up',a.positive.up));
   let thin='';
   if(a.count<3){
     const missing=[]; if(d.fico==null)missing.push('FICO'); if(d.tib==null)missing.push('time in business'); if(d.rev==null)missing.push('monthly revenue');
-    if(missing.length) thin=`<div class="fr-thin">${I.info}<span>Add ${missing.join(' &amp; ')} to sharpen the read.</span></div>`;
+    if(missing.length) thin=`<div class="fr-thin">${I.qmark}<span>Add ${missing.join(' &amp; ')} and I can sharpen this.</span></div>`;
   }
   return `<div class="file-read"><div class="fr-eyebrow eyebrow">The file at a glance</div><div class="fr-rows">${rows.join('')}</div>${thin}</div>`;
 }
@@ -571,8 +650,6 @@ function renderRead(){
     `<div class="read-eyebrow eyebrow">Indicative offer</div>
      ${offerBox(d,lv)}
      ${aprBlockHTML(d, lv)}
-     ${affordHTML(d, lv)}
-     ${fileReadHTML(d)}
      ${introMk}
      ${talkTrackHTML(d)}
      <div class="read-acts">
@@ -584,6 +661,7 @@ function renderRead(){
      ${DISCLAIMER_FOOT}`;
 
   ttBind(d);
+  refreshFundingRange();
 }
 function qchip(lever, label, val){
   const sm = String(val).length>12 ? ' sm':'';
@@ -638,9 +716,12 @@ function affordabilityHref(d, lv){
 }
 function relatedTools(d, lv){
   if(!lv) return '';
+  const open=S.affOpen;
   return `<div class="rel-tools" style="display:flex;flex-wrap:wrap;gap:9px;margin-top:14px">`
     + `<a class="offer-compare" href="${fundabilityHref(d,lv)}" target="_top" style="margin-top:0;text-decoration:none">${I.lift}<span>Check stacking &amp; net requirement</span></a>`
-    + `</div>`;
+    + cashFlowControl(d,lv)
+    + `</div>`
+    + `<div class="cf-detail${open?' open':''}" id="affPanel">${affBody(d,lv)}</div>`;
 }
 
 // ── the offer box (light green, mirrors the affordability card) ──
@@ -666,29 +747,65 @@ function offerHeadline(d, lv){
 const PROD_REQS={sba:{fico:660,tib:24,rev:15000},term:{fico:600,tib:12,rev:15000},loc:{fico:640,tib:12,rev:20000},equip:{fico:600,tib:6,rev:10000},mca:{fico:500,tib:3,rev:10000},rbf:{fico:500,tib:3,rev:10000},factor:{fico:0,tib:0,rev:0},cre:{fico:640,tib:12,rev:0},bridge:{fico:600,tib:6,rev:0}};
 // Hard minimums above; recommended thresholds for cautionary notes
 const PROD_RECOMMENDED={sba:{fico:680,note:'680+ recommended — scores can shift during underwriting'}};
+// Neutral, standardized qualification ladder (LEN-186). One config so labels +
+// colors live in a single place. dot = status-dot hex, color = label text color.
+const QUALIFY_LADDER={
+  likely:   {word:'Likely',                  dot:'#1f9d57', color:'#1f7a4d'},
+  possible: {word:'Possible',                dot:'#e0a400', color:'#a9750f'},
+  unlikely: {word:'Unlikely',                dot:'#e07b39', color:'#b5611f'},
+  vunlikely:{word:'Very unlikely',           dot:'#d2524f', color:'#c0413e'},
+  buildup:  {word:'Not yet — build up to it', dot:'#d2524f', color:'#c0413e'},
+};
+function qualifyRung(key, caution){ const r=QUALIFY_LADDER[key]||QUALIFY_LADDER.possible; return {word:r.word, dotColor:r.dot, statusColor:r.color, rung:key, caution:caution||null}; }
+// Equipment & invoice factoring aren't credit-gated — when they'd read Likely/Possible
+// the honest label is "Depends on use" (on buying equipment / having receivables). The
+// rung (and its color) stays so the page still surfaces; only the word changes (LEN-186).
+function applyUseOverride(fam, res){
+  if((fam==='equip'||fam==='factor') && (res.rung==='likely'||res.rung==='possible')) res.word='Depends on use';
+  return res;
+}
+// Verdict driven by the WORST limiting factor (not the average) — the file reads as
+// risky as its hardest constraint, matching "credit is the heaviest factor." Each
+// factor scores 0 (comfortable) → 0.08 (meets the hard floor but below the
+// recommended/"comfortable" bar) → 0.18+ (below the hard floor, scaled by depth).
+// SBA uses its RECOMMENDED 680 as the comfortable bar, so 655 reads risky (Unlikely),
+// 670 reads Possible, and 680+ reads Likely. Missing data caps at Possible.
 function productQualify(label, d){
   const fam=prodFamily(label); const req=PROD_REQS[fam]||{fico:0,tib:0,rev:0};
   const rec=PROD_RECOMMENDED[fam]||null;
-  let miss=0,total=0;
-  [['fico',d.fico],['tib',d.tib],['rev',d.rev]].forEach(([k,v])=>{ if(req[k]>0){ total++; if(v==null||v<req[k]) miss++; } });
-  // SBA caution: meets 650 hard floor but under 680 recommended
   const caution=rec&&d.fico!=null&&d.fico>=req.fico&&d.fico<rec.fico?rec.note:null;
-  if(total===0||miss===0) return {word:'Likely to qualify', dot:'g', caution};
-  if(miss===total) return {word:'Unlikely to qualify', dot:'r', caution:null};
-  return {word:'A stretch — worth a shot', dot:'w', caution};
+  const reqd=[['fico',d.fico],['tib',d.tib],['rev',d.rev]].filter(([k])=>req[k]>0);
+  if(!reqd.length) return applyUseOverride(fam, qualifyRung('likely', caution));   // no hard reqs (e.g. factoring)
+  const known=reqd.filter(([,v])=>v!=null);
+  if(!known.length) return applyUseOverride(fam, qualifyRung('possible', null));   // nothing entered yet — neutral
+  let worst=0;
+  known.forEach(([k,v])=>{
+    const floor=req[k];
+    const comf=(k==='fico'&&rec)?rec.fico:floor;                   // SBA fico: 680 is the "likely" line
+    let s;
+    if(v>=comf)       s=0;                                         // comfortable
+    else if(v>=floor) s=0.08;                                      // meets hard floor, below comfortable
+    else              s=0.18+Math.min(0.42,(floor-v)/floor*2);     // below hard floor → scaled by depth
+    if(s>worst) worst=s;
+  });
+  const unknown=reqd.length-known.length;
+  let rung;
+  if(worst===0)        rung = unknown ? 'possible' : 'likely';
+  else if(worst<=0.10) rung='possible';
+  else if(worst<=0.25) rung='unlikely';
+  else if(worst<=0.45) rung='vunlikely';
+  else                 rung='buildup';
+  return applyUseOverride(fam, qualifyRung(rung, (rung==='likely'||rung==='possible')?caution:null));
 }
 function offTile(lever,label,val){
   return `<button class="off-tile" onclick="openLever('${lever}')"><div class="ot-top"><span class="ot-l">${label}</span></div><span class="ot-v">${ttEsc(val)}</span></button>`;
 }
-// Funding Range — the lead tile, full-width. Gated on 2+ months of deposit history.
+// Funding Range — lives under "Add underwriting detail" (LEN-186). Shows only when
+// relevant: 2+ months of deposit history AND a computed amount band. Otherwise renders
+// nothing (no up-front "locked" placeholder — Steve found that confusing).
 function amountTile(d, lv){
   const months=d.depMonths||0;
-  if(months<2 || !lv || !lv.amount){
-    return `<div class="off-tile amount-tile locked">
-      <div class="ot-top"><span class="ot-l">Funding range</span></div>
-      <div class="amt-locked">Add <b>2+ months</b> of deposits to see your range.</div>
-    </div>`;
-  }
+  if(months<2 || !lv || !lv.amount) return '';
   const open=S.amtOpen;
   const tighten = months>=6 ? `<b>6+ months</b> in — this is the tightest read.` : months>=3 ? `Add <b>6+ months</b> to tighten it further.` : `Add a 3rd month to tighten this range.`;
   const detail=`Indicative range${d.rev?` · sized on <b>$${d.rev.toLocaleString()}/mo</b> in deposits`:''}. ${tighten} An estimate, not an offer.`;
@@ -700,6 +817,15 @@ function amountTile(d, lv){
     <div class="amt-detail">${detail}</div>
   </div>`;
 }
+// Funding range now renders in the LEFT input column, beneath "Add underwriting
+// detail" — a stable host (#fundingRangeHost) refreshed from renderRead() so it tracks
+// deposit changes even though it lives outside the #read column.
+function fundingRangeBlock(){
+  if(!S.selected) return '';
+  const d=currentDeal(); const lv=leversForProduct(d, selProdLabel(d));
+  return amountTile(d, lv);
+}
+function refreshFundingRange(){ const h=document.getElementById('fundingRangeHost'); if(h) h.innerHTML=fundingRangeBlock(); }
 // Passive requested-vs-modeled signal on a tile face. No color — information, not warning.
 function reqMismatchLine(d, lv, lever){
   if(!lv||!lv.atr) return '';
@@ -822,13 +948,13 @@ function offerBox(d, lv){
   const head=h?`<div class="offer-head"><span class="oh-txt">${h.text}</span></div>`:'';
   let grid='';
   if(lv){
-    // Term / Rate / Payment tiles removed (LEN-155, Steve) — the read leads with the
-    // product stack + funding range; pricing lives in the CA/NY APR block, the factor
-    // tags, and the (opt-in) cost comparison, not as headline estimate tiles.
+    // Term / Rate / Payment tiles removed (LEN-155). Funding range moved out of the
+    // offer box entirely (LEN-186) — it now lives under "Add underwriting detail" and
+    // only appears once there are 2+ months of deposits. The read leads with the
+    // product stack; pricing lives in the CA/NY APR block, factor tags, and the
+    // (opt-in) cost comparison.
     grid=`${prodKeynote(d)}
-    <div class="offer-grid offer-metrics">${amountTile(d,lv)}</div>
-    ${compareBtn(d,lv)}
-    <div class="offer-hint">${I.info}<span>Tap any tile to see what it means &amp; how to explain it</span></div>`;
+    ${compareBtn(d,lv)}`;
   } else if((d.prods||[]).length){
     grid=prodKeynote(d);
   }
@@ -844,26 +970,33 @@ function prodTile(d){
   return `<div class="off-tile prod-tile">
     <div class="ot-top"><span class="ot-l">Product</span>${multi?`<span class="prod-cyc"><button onclick="cycleProd(-1)" aria-label="Previous product">${I.up}</button><button onclick="cycleProd(1)" aria-label="Next product">${I.dn}</button></span>`:''}</div>
     <button class="ot-v-btn" onclick="openLever('product')"><span class="ot-v" id="prodVal">${ttEsc(label)}</span></button>
-    <span class="prod-q" id="prodQ"><span class="pq-dot" style="background:${DOT[q.dot]}"></span>${lead?'Lead pick · ':''}${q.word}</span>
+    <span class="prod-q" id="prodQ"><span class="pq-dot" style="background:${q.dotColor}"></span>${q.word}</span>
   </div>`;
 }
 // ── Product keynote — hero replaces the 4-panel top ──────────
+// Fixed DISPLAY order (LEN-186): Short-Term → LOC → Term → SBA → anything else.
+// This is purely how tiles are laid out — it is decoupled from best-fit. The
+// talk track, levers, and pricing still read the unsorted prods[0]. No lead pick.
+const PROD_DISPLAY_PRIORITY={mca:0, rbf:0, loc:1, term:2, sba:3};
+function displayOrderedProds(list){
+  return (list||[]).map((p,i)=>({p,i}))
+    .sort((a,b)=>{ const pa=PROD_DISPLAY_PRIORITY[prodFamily(a.p[0])]??99, pb=PROD_DISPLAY_PRIORITY[prodFamily(b.p[0])]??99; return (pa-pb)||(a.i-b.i); })
+    .map(x=>x.p);
+}
 function prodKeynote(d){
-  const list=d.prods||[]; if(!list.length) return '';
-  const cards=list.map((p,i)=>{
+  const list=displayOrderedProds(d.prods); if(!list.length) return '';
+  const cards=list.map((p)=>{
     const label=p[0]; const q=productQualify(label,d); const display=prodDisplay(label);
-    const isLead=i===0; const dotColor=DOT[q.dot]||DOT.x;
-    const statusColor=q.dot==='g'?'var(--t1)':q.dot==='w'?'var(--t2)':q.dot==='r'?'var(--t4)':'var(--muted)';
     const sub=prodSubline(label);
-    return `<button class="kn-card${isLead?' kn-lead':''}" onclick="openLever('product')">
-      <div class="kn-card-top">${isLead?`<span class="kn-lead-badge">Lead pick</span>`:''}</div>
+    return `<button class="kn-card" onclick="openLever('product')">
       <div class="kn-name">${ttEsc(display)}</div>
       ${sub?`<div class="kn-sub">${sub}</div>`:''}
-      <div class="kn-status"><span class="kn-dot" style="background:${dotColor}"></span><span class="kn-word" style="color:${statusColor}">${q.word}</span></div>
+      <div class="kn-status"><span class="kn-dot" style="background:${q.dotColor}"></span><span class="kn-word" style="color:${q.statusColor}">${q.word}</span></div>
       ${q.caution?`<div class="kn-caution">${I.warn}<span>${q.caution}</span></div>`:''}
     </button>`;
   }).join('');
-  return `<div class="kn-wrap"><div class="kn-eyebrow eyebrow">Eligible products</div><div class="kn-row">${cards}</div></div>`;
+  const hint=`<div class="kn-hint">${I.info}<span>Tap any tile to see what it means &amp; how to explain it</span></div>`;
+  return `<div class="kn-wrap"><div class="kn-eyebrow eyebrow">Eligible products</div><div class="kn-row">${cards}${hint}</div></div>`;
 }
 // Quiet subline under the surface label. "Short-Term Financing" carries the
 // broker shorthand so the umbrella stays legible.
@@ -887,7 +1020,7 @@ function renderProdTile(d){
   const list=d.prods||[]; const idx=S.prodIdx||0; const cur=list.length?list[idx][0]:null;
   const label=cur?prodDisplay(cur):'—'; const q=productQualify(cur||'',d);
   const pv=document.getElementById('prodVal'); if(pv){ pv.textContent=label; pv.className='ot-v'; }
-  const pq=document.getElementById('prodQ'); if(pq) pq.innerHTML=`<span class="pq-dot" style="background:${DOT[q.dot]}"></span>${idx===0?'Lead pick · ':''}${q.word}`;
+  const pq=document.getElementById('prodQ'); if(pq) pq.innerHTML=`<span class="pq-dot" style="background:${q.dotColor}"></span>${q.word}`;
 }
 function cycleProd(dir){ const d=currentDeal(); const n=(d.prods||[]).length; if(n<2) return; S.prodIdx=((S.prodIdx||0)+dir+n)%n; save(); renderRead(); }
 function applyDeltas(lv){
@@ -1222,83 +1355,138 @@ function affVerdict(a){
   if(a.perMonth==null) return {label:'Scales with invoices', tone:'g'};
   return {g:{label:'Affordable',tone:'g'},w:{label:'Tight',tone:'w'},r:{label:'Strained',tone:'r'}}[a.tone];
 }
-function affHeader(open, v){
+// Cash flow check — relocated to a small bottom button next to "Check stacking"
+// (LEN-186). De-lavendered: the green base styling now shows. The button carries the
+// verdict; clicking expands the full break-even detail inline below the button row.
+function cashFlowControl(deal, lv){
+  if(!lv) return '';
+  const a=affordability(deal, lv.atr); const v=affVerdict(a); const open=S.affOpen;
   const c=v.tone==='x'?'var(--muted)':DOT[v.tone];
-  return `<button class="aff-toggle" onclick="toggleAff()">
-    <span class="aff-tg-l">Cash flow check</span>
-    <span class="aff-verdict-pill" style="color:${c==='var(--muted)'?'var(--muted)':c};border-color:${v.tone==='x'?'var(--line)':'currentColor'}"><span class="d" style="background:${c}"></span>${v.label}</span>
+  return `<button class="offer-compare cf-toggle${open?' open':''}" onclick="toggleAff()">
+    <span class="cf-dot" style="background:${c}"></span><span>Cash flow check</span>
+    <span class="cf-verdict" style="color:${c==='var(--muted)'?'var(--muted)':c}">${v.label}</span>
     <span class="fac-chev" style="${open?'transform:rotate(180deg)':''}">${I.dn}</span>
   </button>`;
 }
-function affHTML(deal, lv){
+function affBody(deal, lv){
   if(!lv) return '';
-  const a=affordability(deal, lv.atr);
-  const v=affVerdict(a); const open=S.affOpen; const conf=affConfidence();
-  let body;
+  const a=affordability(deal, lv.atr); const conf=affConfidence();
   if(!a){
-    body=`<div class="aff-empty">${I.info}<div><b>No affordability case yet.</b> Enter monthly revenue — or better, 3+ months of deposits above — and this shows whether the borrower can carry the payment from cash flow, even when the rate looks high.</div></div>`;
-  } else {
-    const rev=deal.rev;
-    const cells=[];
-    cells.push(`<div class="aff-cell"><div class="ac-l">Est. payment</div><div class="ac-v tnum">${a.perPayment!=null?fmtUSD(a.perPayment)+a.perLabel:'scales'}</div>${a.perMonth!=null?`<div class="ac-s">≈ ${fmtUSD(a.perMonth)}/mo</div>`:''}</div>`);
-    if(a.pct!=null){
-      const cov=rev/a.perMonth;
-      cells.push(`<div class="aff-cell"><div class="ac-l">Share of deposits</div><div class="ac-v tnum">${Math.round(a.pct*100)}%</div><div class="ac-s">deposits cover it ${cov>=10?'10+':cov.toFixed(1)}×</div></div>`);
-      cells.push(`<div class="aff-cell"><div class="ac-l">Left after payment</div><div class="ac-v tnum">${fmtUSD(rev-a.perMonth)}</div><div class="ac-s">/mo of deposits remain</div></div>`);
-    }
-    cells.push(`<div class="aff-cell"><div class="ac-l">Cost of capital</div><div class="ac-v tnum">${fmtUSD(a.costTotal)}</div><div class="ac-s">${fmtUSD(a.paybackTotal)} total payback</div></div>`);
-    const barW=a.pct!=null?Math.min(100,a.pct/0.4*100):0;
-    const tc=TC[a.tone];
-    const bar=a.pct!=null?`<div class="aff-bar"><div class="fill" style="width:${barW}%;background:var(--t${tc})"></div></div><div class="aff-scale"><span>0%</span><span>20%</span><span>40%+ of deposits</span></div>`:'';
-    const breakeven=a.perMonth!=null?`<div class="aff-be"><span class="aff-be-ico">${I.lift}</span><div><b>Break-even hurdle.</b> Even at this rate, the advance pays for itself if it generates at least <b>${fmtUSD(a.perMonth)}/mo</b> in new gross profit — about <b>${Math.round(a.perMonth/rev*100)}%</b> on top of current deposits. That's the line to sell against.</div></div>`:'';
-    const confCls=conf.key==='high'?'ok':conf.key==='none'?'':'warn';
-    const confNote=conf.note?`<div class="aff-conf ${confCls}"><span class="d"></span><span>${conf.note}</span></div>`:'';
-    body=`<div class="aff-verdict-row" style="color:var(--t${tc})"><span class="av-dot" style="background:var(--t${tc})"></span>${a.verdict}</div>
-      <div class="aff-grid">${cells.join('')}</div>${bar}${breakeven}${confNote}
-      <div class="aff-note">Estimate using band midpoints. Affordability depends on the final amount, term, and pricing — and on the rest of the operating expenses, which this does not see.</div>
-      <a class="aff-fulllink" href="${affordabilityHref(deal,lv)}" target="_top" style="display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-size:11.5px;font-weight:600;color:var(--lav-accent);text-decoration:none;border-bottom:1px dashed var(--lav-line);padding-bottom:1px">${I.lift}<span>Open full Payment Fit</span></a>`;
+    return `<div class="aff-empty">${I.info}<div><b>No affordability case yet.</b> Enter monthly revenue — or better, 3+ months of deposits above — and this shows whether the borrower can carry the payment from cash flow, even when the rate looks high.</div></div>`;
   }
-  const beShort = (a && a.perMonth!=null && deal.rev) ? `<div class="aff-summary">Break-even — business needs ~<b>${Math.round(a.perMonth/deal.rev*100)}%</b> more gross profit to cover payments.</div>` : '';
-  return `<div class="aff-wrap${open?' open':''}">${affHeader(open,v)}${beShort}<div class="aff-panel" id="affPanel">${body}</div></div>`;
+  const rev=deal.rev;
+  const cells=[];
+  cells.push(`<div class="aff-cell"><div class="ac-l">Est. payment</div><div class="ac-v tnum">${a.perPayment!=null?fmtUSD(a.perPayment)+a.perLabel:'scales'}</div>${a.perMonth!=null?`<div class="ac-s">≈ ${fmtUSD(a.perMonth)}/mo</div>`:''}</div>`);
+  if(a.pct!=null){
+    const cov=rev/a.perMonth;
+    cells.push(`<div class="aff-cell"><div class="ac-l">Share of deposits</div><div class="ac-v tnum">${Math.round(a.pct*100)}%</div><div class="ac-s">deposits cover it ${cov>=10?'10+':cov.toFixed(1)}×</div></div>`);
+    cells.push(`<div class="aff-cell"><div class="ac-l">Left after payment</div><div class="ac-v tnum">${fmtUSD(rev-a.perMonth)}</div><div class="ac-s">/mo of deposits remain</div></div>`);
+  }
+  cells.push(`<div class="aff-cell"><div class="ac-l">Cost of capital</div><div class="ac-v tnum">${fmtUSD(a.costTotal)}</div><div class="ac-s">${fmtUSD(a.paybackTotal)} total payback</div></div>`);
+  const barW=a.pct!=null?Math.min(100,a.pct/0.4*100):0;
+  const tc=TC[a.tone];
+  const bar=a.pct!=null?`<div class="aff-bar"><div class="fill" style="width:${barW}%;background:var(--t${tc})"></div></div><div class="aff-scale"><span>0%</span><span>20%</span><span>40%+ of deposits</span></div>`:'';
+  const breakeven=a.perMonth!=null?`<div class="aff-be"><span class="aff-be-ico">${I.lift}</span><div><b>Break-even hurdle.</b> Even at this rate, the advance pays for itself if it generates at least <b>${fmtUSD(a.perMonth)}/mo</b> in new gross profit — about <b>${Math.round(a.perMonth/rev*100)}%</b> on top of current deposits. That's the line to sell against.</div></div>`:'';
+  const confCls=conf.key==='high'?'ok':conf.key==='none'?'':'warn';
+  const confNote=conf.note?`<div class="aff-conf ${confCls}"><span class="d"></span><span>${conf.note}</span></div>`:'';
+  return `<div class="aff-verdict-row" style="color:var(--t${tc})"><span class="av-dot" style="background:var(--t${tc})"></span>${a.verdict}</div>
+    <div class="aff-grid">${cells.join('')}</div>${bar}${breakeven}${confNote}
+    <div class="aff-note">Estimate using band midpoints. Affordability depends on the final amount, term, and pricing — and on the rest of the operating expenses, which this does not see.</div>
+    <a class="aff-fulllink" href="${affordabilityHref(deal,lv)}" target="_top" style="display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-size:11.5px;font-weight:600;color:var(--green);text-decoration:none;border-bottom:1px dashed var(--green-line);padding-bottom:1px">${I.lift}<span>Open full Payment Fit</span></a>`;
 }
-function toggleAff(){ S.affOpen=!S.affOpen; save(); const w=document.querySelector('.aff-wrap'); if(w){ w.classList.toggle('open',S.affOpen); const ch=w.querySelector('.aff-toggle .fac-chev'); if(ch) ch.style.transform=S.affOpen?'rotate(180deg)':''; } }
-function affordHTML(deal, lv){ return affHTML(deal, lv); }
+function toggleAff(){
+  S.affOpen=!S.affOpen; save();
+  const p=document.getElementById('affPanel'); if(p) p.classList.toggle('open',S.affOpen);
+  const t=document.querySelector('.cf-toggle'); if(t){ t.classList.toggle('open',S.affOpen); const ch=t.querySelector('.fac-chev'); if(ch) ch.style.transform=S.affOpen?'rotate(180deg)':''; }
+}
 
-// talk track — cycles through the whole deal + each entered factor
+// talk track — cycles by PRODUCT TYPE (LEN-186 r3). Overview → one page per eligible
+// product the borrower can realistically get → Next steps. A product page is hidden
+// when its verdict is Unlikely or worse, so a seller with no SBA/LOC access never gets
+// a track for capital they can't reach.
 let TTI=[], ttiIndex=0, ttActive='talk';
+// Per-product client-facing track, composed from the product narrative + verdict + cadence.
+function buildProductTrack(label, d){
+  const p=pn(label); const fam=prodFamily(label); const display=prodDisplay(label);
+  const q=productQualify(label,d); const cadence=payFreqFor(fam).toLowerCase();
+  const useDep=(fam==='equip'||fam==='factor')&&(q.rung==='likely'||q.rung==='possible');
+  const fit=useDep ? 'an option that depends on how you’ll use the funds' : ({likely:'a strong fit for you right now',possible:'a realistic option worth running',unlikely:'a stretch on today’s file',vunlikely:'unlikely on today’s file',buildup:'something to build toward, not today'}[q.rung]||'an option');
+  const talk=`${capFirst(p.short)} is ${fit} — ${p.why}. Repayment runs ${cadence}: ${payFreqWhy(fam)}.${q.caution?` Worth knowing: ${q.caution}.`:''}`;
+  const text=`${capFirst(p.short)} — ${p.why}. Repaid ${cadence}.${q.caution?` Note: ${q.caution}.`:''}`;
+  return {label:display, talk, text, email:text};
+}
+// Forward-planning nudges → cross-link the right calculator from the live signals.
+function buildNextSteps(d){
+  const lv=leversForProduct(d, selProdLabel(d));
+  const nudges=[];
+  const renewal=(S.uw&&S.uw.renewal)||'';
+  if(/^yes/i.test(renewal)){
+    nudges.push({txt:'Early-renewal program in play — run <b>Amortization</b> to build the pre-pay case: show how paying down early unlocks a renewal for more capital at better terms.', href:'/calculators/AmoScheduleCalculator.html?src=deal-read', cta:'Open Amortization'});
+  }
+  if(lv){ const a=affordability(d,lv.atr); const v=affVerdict(a); if(v&&(v.tone==='w'||v.tone==='r')){
+    nudges.push({txt:'Cash flow looks tight against this payment — run <b>Payment Fit</b> to pressure-test it against real deposits before you commit.', href:affordabilityHref(d,lv), cta:'Open Payment Fit'});
+  }}
+  const bh=(S.uw&&S.uw['biz-hist'])||'';
+  if(/active position/i.test(bh)){
+    nudges.push({txt:'There’s an active position on file — run <b>Net &amp; Position</b> to check stacking and the true net funding requirement.', href:fundabilityHref(d,lv), cta:'Open Net &amp; Position'});
+  }
+  const sbaLabel=(d.prods||[]).map(p=>p[0]).find(l=>prodFamily(l)==='sba');
+  if(sbaLabel && productQualify(sbaLabel,d).rung==='likely' && S.reqProduct==='sba'){
+    nudges.push({txt:'Strong SBA candidate and the borrower’s leaning that way — run <b>DSCR</b> to confirm the debt-service coverage SBA underwriting will want.', href:'/calculators/DSCRCalculator.html?src=deal-read', cta:'Open DSCR'});
+  }
+  if(!nudges.length) return null;
+  const html=`<div class="ns-list">`+nudges.map(n=>`<div class="ns-item"><div class="ns-txt">${n.txt}</div><a class="ns-cta" href="${n.href}" target="_top">${I.lift}<span>${n.cta}</span></a></div>`).join('')+`</div>`;
+  const plain=nudges.map(n=>'• '+n.txt.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&')).join('\n');
+  return {html, plain};
+}
 function buildTalkItems(d){
   const e=NAICS_DB.find(n=>n.c===d.code);
   const c=buildCombinedTracks(d.code,d.tier,d.prods,e?e.d:'');
   const items=[{label:'Overview', talk:c.talk[0], text:c.text, email:c.email, discl:c.discl}];
-  const fi=buildFactorTrack('industry',d); items.push({label:'Industry', talk:fi.talk, text:fi.text, email:fi.text, discl:c.discl});
-  [['fico','FICO'],['tib','Time in business'],['rev','Revenue']].forEach(([k,lab])=>{
-    if(d[k]!=null){ const f=buildFactorTrack(k,d); items.push({label:lab, talk:f.talk, text:f.text, email:f.text, discl:c.discl}); }
+  // Product-type pages in display order, gated to what the borrower can realistically get.
+  const ACCESSIBLE=new Set(['likely','possible']);
+  displayOrderedProds(d.prods).forEach(([label])=>{
+    if(!ACCESSIBLE.has(productQualify(label,d).rung)) return;
+    const pt=buildProductTrack(label,d);
+    items.push({label:pt.label, talk:pt.talk, text:pt.text, email:pt.email, discl:c.discl});
   });
+  const ns=buildNextSteps(d);
+  if(ns) items.push({label:'Next steps', kind:'nextsteps', html:ns.html, talk:ns.plain, text:ns.plain, email:ns.plain, discl:c.discl});
   return items;
 }
-function ttPane(it, tab){ const raw=tab==='talk'?it.talk:tab==='text'?it.text:it.email; return tab==='talk'?'“'+ttRender(raw)+'”':ttRender(raw); }
+function ttPane(it, tab){ if(it.kind==='nextsteps') return it.html; const raw=tab==='talk'?it.talk:tab==='text'?it.text:it.email; return tab==='talk'?'“'+ttRender(raw)+'”':ttRender(raw); }
+// Re-shows on first use and after ~30 idle days — same staleness signal as the intro.
+function ttHintEligible(){
+  try{ const ts=parseInt(localStorage.getItem('lp_dr_tt_hint')||'0',10); if(ts && (Date.now()-ts)<30*86400000) return false; }catch(e){}
+  return true;
+}
+function dismissTTHint(){ S._ttHintState='dismissed'; const p=document.querySelector('.tt-hint'); if(p) p.remove(); }
 function talkTrackHTML(d){
   TTI=buildTalkItems(d); ttiIndex=0; ttActive='talk';
   const it=TTI[0]; const multi=TTI.length>1;
   const discl = S.tweaks.disclosures==='show' ? `<div class="tt-discl">${ttEsc(it.discl)}</div>` : `<div class="tt-discl"></div>`;
+  // Always-on pager (when >1 page) makes it unmissable that tracks cycle by product type.
+  const pager = multi ? `<div class="tt-pager">
+      <button class="tt-pg-btn" onclick="ttCycle(-1)" aria-label="Previous talk track">${I.up}</button>
+      <span class="tt-pg-lbl">Talk track <b id="ttPgNum">1</b> of ${TTI.length} · <span id="ttPgName">${ttEsc(it.label)}</span></span>
+      <button class="tt-pg-btn" onclick="ttCycle(1)" aria-label="Next talk track">${I.dn}</button>
+      <span class="tt-pg-hint">one per product type — cycle through</span>
+    </div>` : '';
   return `<div class="tt">
     <div class="tt-head">
       <span class="eyebrow">What you tell the borrower</span>
       <span class="tt-angle" id="ttAngle">${it.label}</span>
       <div class="tt-seg"><button class="on" data-tt="talk" onclick="ttTab('talk')">Talk</button><button data-tt="text" onclick="ttTab('text')">Text</button><button data-tt="email" onclick="ttTab('email')">Email</button></div>
     </div>
+    ${pager}
     <div class="tt-bodywrap">
       <div class="tt-body">
         <div class="tt-pane on" id="tt-talk">${ttPane(it,'talk')}</div>
         <div class="tt-pane" id="tt-text">${ttPane(it,'text')}</div>
         <div class="tt-pane" id="tt-email">${ttPane(it,'email')}</div>
       </div>
-      <div class="tt-side" id="ttCyc" style="${multi?'':'display:none'}">
-        <button class="tt-cyc-btn" onclick="ttCycle(-1)" title="Previous factor">${I.up}</button>
-        <span class="tt-cyc-lbl" id="ttCycLbl">1/${TTI.length}</span>
-        <button class="tt-cyc-btn" onclick="ttCycle(1)" title="Next factor">${I.dn}</button>
-      </div>
     </div>
+    ${fileReadHTML(d)}
     <div class="tt-foot">
       ${discl}
       <button class="tt-copy" id="ttCopy" onclick="copyTT()">${I.copy}Copy</button>
@@ -1317,12 +1505,14 @@ function ttCycle(dir){
   document.getElementById('tt-talk').innerHTML=ttPane(it,'talk');
   document.getElementById('tt-text').innerHTML=ttPane(it,'text');
   document.getElementById('tt-email').innerHTML=ttPane(it,'email');
-  document.getElementById('ttCycLbl').textContent=`${ttiIndex+1}/${n}`;
+  const pgNum=document.getElementById('ttPgNum'); if(pgNum) pgNum.textContent=ttiIndex+1;
+  const pgName=document.getElementById('ttPgName'); if(pgName) pgName.textContent=it.label;
   document.getElementById('ttAngle').textContent=it.label;
 }
 function copyTT(){
   const it=TTI[ttiIndex];
-  const raw = ttActive==='talk' ? '“'+ttPlain(it.talk)+'”' : ttPlain(ttActive==='text'?it.text:it.email)+(S.tweaks.disclosures==='show'?`\n\n* ${it.discl}`:'');
+  const raw = it.kind==='nextsteps' ? ('NEXT STEPS\n'+it.talk)
+    : ttActive==='talk' ? '“'+ttPlain(it.talk)+'”' : ttPlain(ttActive==='text'?it.text:it.email)+(S.tweaks.disclosures==='show'?`\n\n* ${it.discl}`:'');
   const b=document.getElementById('ttCopy');
   navigator.clipboard.writeText(raw).then(()=>{ b.innerHTML=I.copy+'Copied'; b.classList.add('ok'); setTimeout(()=>{b.innerHTML=I.copy+'Copy';b.classList.remove('ok');},1600); });
 }
@@ -1554,12 +1744,14 @@ function setMode(m){
 
 // ── copy results ──────────────────────────────────────────────
 function copyResults(){
+  if(!requireFundBy()) return;
   if(!requireState()) return;
   const d=currentDeal(); const e=NAICS_DB.find(n=>n.c===d.code); const lv=computeLevers(d);
   const L=['LENDPAPER — DEAL READ'];
   L.push(`Industry: ${d.code} ${e?e.d:''} (${TIER_SHORT[d.tier]})`);
   const prof=[]; if(S.fico)prof.push(`FICO ${S.fico}`); if(S.tib)prof.push(`${S.tib}mo TIB`); if(S.rev)prof.push(`$${S.rev.toLocaleString()}/mo`);
   if(prof.length) L.push(`Profile: ${prof.join(' · ')}`);
+  if(S.fundBy) L.push(`Funding needed by: ${fundByLabel(S.fundBy)}`);
   if(lv){
     if(lv.amount) L.push(`Amount: ${lv.amount}  ·  Term: ${lv.term}  ·  Rate: ${lv.rate}`);
     L.push(`Payment: ${lv.pay}  ·  Lead product: ${prodDisplay(lv.product)}`);
@@ -1579,6 +1771,7 @@ function copyResults(){
 // ── PDF ───────────────────────────────────────────────────────
 function openPdf(scope){
   if(!S.selected) return;
+  if(!requireFundBy()) return;
   if(!requireState()) return;
   S.pdfScope=scope||'combined';
   if(!S.lang) S.lang='en';
