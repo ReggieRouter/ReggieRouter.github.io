@@ -149,12 +149,6 @@ function renderPdfDoc(){
     ${prodHtml}
     <h2>${t.path}</h2>
     <p>${pathBody(lang, lead?prodDisplay(d.prods[0][0]):'', dest?prodDisplay(dest.label):'', climbing)}</p>
-    <h2>${t.ack}</h2>
-    <div class="pd-sign">
-      <div class="sg"><div class="sg-line"></div><div class="sg-lbl">${t.sgClient}</div></div>
-      <div class="sg"><div class="sg-line"></div><div class="sg-lbl">${t.sgRep}</div></div>
-      <div class="sg" style="flex:0 0 120px"><div class="sg-line"></div><div class="sg-lbl">${t.sgDate}</div></div>
-    </div>
     <div class="pd-foot">* ${disc}<br><span style="display:inline-block;margin-top:6px">Full terms: <a href="https://lendpaper.com/legal/estimates" style="color:var(--green-dk);font-weight:600;text-decoration:none">lendpaper.com/legal/estimates</a></span></div>`;
 }
 
@@ -211,11 +205,5 @@ function factorDoc(kind, d, lang, t){
     <h2>${t.facSay}</h2>
     <p>“${pdfStrip(ft.text)}”</p>
 
-    <h2>${t.ack}</h2>
-    <div class="pd-sign">
-      <div class="sg"><div class="sg-line"></div><div class="sg-lbl">${t.sgClient}</div></div>
-      <div class="sg"><div class="sg-line"></div><div class="sg-lbl">${t.sgRep}</div></div>
-      <div class="sg" style="flex:0 0 120px"><div class="sg-line"></div><div class="sg-lbl">${t.sgDate}</div></div>
-    </div>
     <div class="pd-foot">* ${disc}<br><span style="display:inline-block;margin-top:6px">Full terms: <a href="https://lendpaper.com/legal/estimates" style="color:var(--green-dk);font-weight:600;text-decoration:none">lendpaper.com/legal/estimates</a></span></div>`;
 }

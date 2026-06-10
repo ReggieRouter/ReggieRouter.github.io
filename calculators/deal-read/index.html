@@ -1108,11 +1108,16 @@ select.uw-ctrl{cursor:pointer}
 <!-- LEN-191: page coach-mark tour engine -->
 <script type="module" src="../../js/tour-trigger.js"></script>
 
-<script src="data.js"></script>
-<script src="talk.js"></script>
-<script src="deal.js"></script>
-<script src="plan.js"></script>
-<script src="read.js"></script>
+<!-- Inherit the SPA's ?v= cache-bust stamp so a CURRENT_VERSION bump actually
+     refreshes these scripts (otherwise plain <script src> stays browser-cached). LEN-222. -->
+<script>
+(function(){
+  var v=''; try{ v=new URLSearchParams(window.location.search).get('v')||''; }catch(e){}
+  var q=v?('?v='+encodeURIComponent(v)):'';
+  var s=['data.js','talk.js','deal.js','plan.js','read.js'];
+  for(var i=0;i<s.length;i++){ document.write('<scr'+'ipt src="'+s[i]+q+'"><\/scr'+'ipt>'); }
+})();
+</script>
 <button id="lp-tour-nav-link" type="button" onclick="replayTour()" style="display:none; position:fixed; bottom:14px; left:14px; z-index:8000; background:#fff; border:0.5px solid rgba(0,0,0,.14); border-radius:8px; cursor:pointer; font-family:inherit; font-size:12px; color:#2D6A4F; padding:6px 11px; box-shadow:0 2px 8px rgba(17,24,39,.1);">Take a tour</button>
 </body>
 </html>
