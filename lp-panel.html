@@ -2944,10 +2944,13 @@ async function loadMembers() {
   }
   memProfiles = data || [];
   // LEN-105: admin-initiated invites (table may not exist until the migration runs)
+  // Select * (not a fixed column list) — the live schema has drifted across
+  // migrations and may lack accepted_at (older DBs name it used_at). Normalize
+  // the acceptance timestamp to accepted_at so the rest of the UI is uniform.
   const { data: inv, error: invErr } = await sb.from('invites')
-    .select('id, email, full_name, company, role, created_at, accepted_at')
+    .select('*')
     .order('created_at', { ascending: false });
-  memInvites = inv || [];
+  memInvites = (inv || []).map(i => ({ ...i, accepted_at: i.accepted_at ?? i.used_at ?? null }));
   memInvitesError = invErr ? invErr.message : null;
   memRenderStats();
   memRenderTable();
@@ -3185,22 +3188,24 @@ function openInviteModal() {
 
 function closeInviteModal() { document.getElementById('invite-modal').style.display = 'none'; }
 
-// Insert an invite, gracefully dropping optional columns the live schema may be
-// missing. full_name/company/role exist in invites.sql but the live DB may have
-// been created from an earlier (email-only) version, or never had the `alter
-// table` run — PostgREST then rejects the insert on the unknown key (PGRST204)
-// even when the value is null. An invite must never fail because we can't store
-// one of these; we capture them when we can.
+// Insert an invite, resilient to live-schema drift. The deployed `invites`
+// table has diverged across migrations (some DBs use invited_by/accepted_at,
+// others created_by/used_at, and full_name/company/role may be absent). When
+// PostgREST rejects the insert on an unknown key (PGRST204), drop just that
+// column and retry — `email` is the only field we truly require. An invite
+// must never fail because the live schema can't store one of the extras; we
+// capture what columns exist.
 async function invInsert(row) {
-  const OPTIONAL = ['full_name', 'company', 'role'];
   const payload = { ...row };
-  // At most one strip per optional column, plus the final attempt.
-  for (let i = 0; i <= OPTIONAL.length; i++) {
+  // Bounded by the number of optional keys (every loop strips one), plus a
+  // final attempt — so worst case is one retry per stripped column.
+  for (let i = 0; i <= Object.keys(payload).length; i++) {
     const { error } = await sb.from('invites').insert(payload);
     if (!error) return null;
     const missing = error.code === 'PGRST204' && /the '([^']+)' column/.exec(error.message || '');
-    if (missing && OPTIONAL.includes(missing[1]) && missing[1] in payload) {
-      delete payload[missing[1]];
+    const col = missing && missing[1];
+    if (col && col !== 'email' && col in payload) {
+      delete payload[col];
       continue;
     }
     return error;
