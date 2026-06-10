@@ -104,6 +104,11 @@
       Continue with Google
     </button>
 
+    <button class="btn-google" id="recoverMs" style="margin-top:10px">
+      <svg viewBox="0 0 18 18"><path d="M0 0h8.55v8.55H0z" fill="#F25022"/><path d="M9.45 0H18v8.55H9.45z" fill="#7FBA00"/><path d="M0 9.45h8.55V18H0z" fill="#00A4EF"/><path d="M9.45 9.45H18V18H9.45z" fill="#FFB900"/></svg>
+      Continue with Microsoft
+    </button>
+
     <div class="help">
       Still stuck? Email <a href="mailto:hello@lendpaper.com?subject=Sign-in%20help">hello@lendpaper.com</a> and we'll get you in.
       <div class="code" id="recover-code" style="margin-top:6px"></div>
@@ -164,17 +169,17 @@
           why: 'You’ve requested a few links in a short window. Wait about a minute, then send a fresh one below.'
         };
       }
-      // Google / OAuth provider denied or couldn't authorize (e.g. a Workspace
-      // admin policy, or the account isn't on the access list yet).
-      if (/access_denied|denied|forbidden|admin_policy|provider|oauth|google|consent|unauthorized/.test(blob)) {
+      // Google / Microsoft / OAuth provider denied or couldn't authorize (e.g. a
+      // Workspace or Entra admin policy, or the account isn't on the access list yet).
+      if (/access_denied|denied|forbidden|admin_policy|provider|oauth|google|azure|microsoft|consent|unauthorized/.test(blob)) {
         return {
           title: 'We couldn’t authorize that account',
-          why: 'Your Google sign-in didn’t go through — your work account’s admin may restrict third-party apps, or this account isn’t on the access list yet. Try the <strong>email sign-in link</strong> below (works with any address), or retry Google.'
+          why: 'Your Google or Microsoft sign-in didn’t go through — your work account’s admin may restrict third-party apps, or this account isn’t on the access list yet. Try the <strong>email sign-in link</strong> below (works with any address), or retry below.'
         };
       }
       return {
         title: 'We couldn’t finish signing you in',
-        why: 'Something interrupted the sign-in. The quickest fix is a fresh link — send one below, or continue with Google.'
+        why: 'Something interrupted the sign-in. The quickest fix is a fresh link — send one below, or retry with Google or Microsoft.'
       };
     }
 
@@ -223,6 +228,11 @@
 
       document.getElementById('recoverGoogle').addEventListener('click', async () => {
         const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIR } });
+        if (error) { fb.className = 'feedback error'; fb.textContent = error.message; }
+      });
+
+      document.getElementById('recoverMs').addEventListener('click', async () => {
+        const { error } = await supabase.auth.signInWithOAuth({ provider: 'azure', options: { redirectTo: REDIR, scopes: 'email' } });
         if (error) { fb.className = 'feedback error'; fb.textContent = error.message; }
       });
     }
