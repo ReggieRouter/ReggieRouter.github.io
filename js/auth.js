@@ -1,6 +1,22 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// LEN-244 — fix "forced to re-login every visit". Gated calculators run inside the SPA
+// tool <iframe> (index.html), and BOTH the shell and each calculator import this module —
+// so two same-origin GoTrueClient instances would each auto-refresh the SAME refresh token,
+// rotating it out from under each other and leaving an INVALID token in localStorage. The
+// next visit reads that dead token, the refresh fails, and the user lands back on /login.
+// Fix: only the top window refreshes the token. The iframe'd calculators still persist and
+// READ the shared session (and pick up the parent's refreshes via the storage event), they
+// just don't run their own refresh loop. A calculator opened as its OWN top-level page
+// (deep link / bookmark) is window.top, so it keeps autoRefresh and works standalone.
+const inIframe = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: !inIframe,
+    detectSessionInUrl: !inIframe,
+  },
+});
 
 async function getSession() {
   const { data: { session } } = await supabase.auth.getSession();
