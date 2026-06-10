@@ -3141,6 +3141,28 @@ function openInviteModal() {
 
 function closeInviteModal() { document.getElementById('invite-modal').style.display = 'none'; }
 
+// Insert an invite, gracefully dropping optional columns the live schema may be
+// missing. company/role were added to invites.sql via a later `alter table` that
+// may not have run on the live DB — PostgREST then rejects the insert on the
+// unknown key (PGRST204) even when the value is null. An invite must never fail
+// because we can't store one of these; we capture them when we can.
+async function invInsert(row) {
+  const OPTIONAL = ['company', 'role'];
+  const payload = { ...row };
+  // At most one strip per optional column, plus the final attempt.
+  for (let i = 0; i <= OPTIONAL.length; i++) {
+    const { error } = await sb.from('invites').insert(payload);
+    if (!error) return null;
+    const missing = error.code === 'PGRST204' && /the '([^']+)' column/.exec(error.message || '');
+    if (missing && OPTIONAL.includes(missing[1]) && missing[1] in payload) {
+      delete payload[missing[1]];
+      continue;
+    }
+    return error;
+  }
+  return null;
+}
+
 async function inviteSubmit() {
   const name    = document.getElementById('inv-name').value.trim();
   const email   = document.getElementById('inv-email').value.trim().toLowerCase();
@@ -3150,7 +3172,7 @@ async function inviteSubmit() {
   const btn = document.getElementById('inv-submit');
   btn.disabled = true; btn.textContent = '…';
   const { data: { user } } = await sb.auth.getUser();
-  const { error } = await sb.from('invites').insert({ email, full_name: name || null, company: company || null, role: role || null, invited_by: user?.id });
+  const error = await invInsert({ email, full_name: name || null, company: company || null, role: role || null, invited_by: user?.id });
   btn.disabled = false; btn.textContent = 'Add & compose';
   if (error && error.code === '23505') {
     toast('Already invited — reopening the message');
