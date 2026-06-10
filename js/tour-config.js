@@ -127,10 +127,10 @@ export const PAGE_TOURS = {
     storageKey: 'lp_tour_v1_fit',
     steps: [
       {
-        id:       'fit-result',
-        title:    'Does it fit?',
-        body:     'Pressure-test the payment against their deposits before you pitch.',
-        position: 'right',
+        id:       'fit-talk',
+        title:    'Create multiple talk tracks',
+        body:     'A few fields to make a business case.',
+        position: 'left',
         last:     true,
       },
     ],
