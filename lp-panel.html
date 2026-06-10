@@ -670,6 +670,7 @@ header {
       <button class="btn-ghost" onclick="showMainView('recruiter')">Recruiter</button>
       <button class="btn-ghost" onclick="showMainView('registry')">Registry</button>
       <button class="btn-ghost" id="compliance-nav-btn" onclick="showMainView('compliance')">Compliance</button>
+      <button class="btn-ghost" onclick="showMainView('staging')">Staging</button>
       <button class="btn-ghost" onclick="openOverridesReport()">Overrides</button>
       <button class="btn-ghost" onclick="toggleFAQ()">? Help</button>
       <button class="btn-ghost" onclick="doLogout()">Sign out</button>
@@ -708,6 +709,7 @@ header {
       <div id="recruiter-view" style="display:none"></div>
       <div id="registry-view" style="display:none"></div>
       <div id="compliance-view" style="display:none"></div>
+      <div id="staging-view" style="display:none"></div>
 
       <div id="lender-detail" style="display:none">
 
@@ -1186,12 +1188,77 @@ function showMainView(view) {
   document.getElementById('recruiter-view').style.display = view==='recruiter' ? 'block' : 'none';
   document.getElementById('registry-view').style.display = view==='registry' ? 'block' : 'none';
   document.getElementById('compliance-view').style.display = view==='compliance' ? 'block' : 'none';
+  document.getElementById('staging-view').style.display = view==='staging' ? 'flex' : 'none';
   if (view === 'dashboard') renderDashboard();
   if (view === 'members') renderMembersPanel();
   if (view === 'adoption') renderAdoptionPanel();
   if (view === 'recruiter') renderRecruiterPanel();
   if (view === 'registry') renderRegistryPanel();
   if (view === 'compliance') renderCompliancePanel();
+  if (view === 'staging') renderStagingPanel();
+}
+
+// ── Staging panel (LEN-204) — embeds the staging launchpad (LEN-178) ─────────
+// The launchpad (tools/staging/launchpad.py) is a LOCAL server that discovers
+// every in-flight worktree under ~/lp-worktrees/ and previews each unpublished
+// page on its own port. A static panel can't run git, so we embed the live
+// launchpad via iframe when it's reachable, and fall back to a launcher card.
+const STAGING_URL = 'http://localhost:8780/';
+function renderStagingPanel() {
+  const view = document.getElementById('staging-view');
+  view.style.cssText = 'display:flex;flex-direction:column;height:100%';
+  view.innerHTML = `
+    <div class="dash-header">
+      <div>
+        <h1>Staging</h1>
+        <p>Most-current <strong>unpublished</strong> work — every in-flight worktree under <code>~/lp-worktrees/</code>, auto-discovered. The live <code>main</code> mirror is hidden.</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <a class="btn-ghost" style="background:var(--green);text-decoration:none;display:inline-block" href="${STAGING_URL}" target="_blank" rel="noopener" title="Open the staging launchpad in a new tab">Open ↗</a>
+        <button class="btn-ghost" style="background:var(--green)" onclick="renderStagingPanel()">↻ Refresh</button>
+      </div>
+    </div>
+    <div id="staging-body" style="flex:1;min-height:0;position:relative">
+      <div style="padding:24px;color:var(--muted);font-size:13px">Checking for the launchpad at <code>${STAGING_URL}</code> …</div>
+    </div>`;
+  probeStaging();
+}
+
+function probeStaging() {
+  const body = document.getElementById('staging-body');
+  if (!body) return;
+  // no-cors probe: resolves (opaque) when the server is reachable, rejects on a
+  // network error (server down) or when blocked by mixed-content (https host).
+  fetch(STAGING_URL, { mode: 'no-cors', cache: 'no-store' })
+    .then(() => {
+      body.innerHTML = `<iframe src="${STAGING_URL}" title="Staging launchpad" style="width:100%;height:100%;border:0;display:block"></iframe>`;
+    })
+    .catch(() => stagingFallback(body));
+}
+
+function stagingFallback(body) {
+  if (!body) return;
+  const cmd = 'python3 tools/staging/launchpad.py';
+  body.innerHTML = `
+    <div class="dash-section" style="max-width:640px;margin:8px auto 0;border-bottom:none">
+      <div class="dash-section-title">Launchpad isn't running</div>
+      <p style="font-size:14px;color:var(--text);line-height:1.55;margin-bottom:16px">
+        The staging launchpad is a local server that discovers your in-flight worktrees and
+        previews each unpublished page. Start it from the repo, then refresh this panel.
+      </p>
+      <div style="display:flex;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:16px">
+        <code style="flex:1;font-size:13px;color:var(--text)">${cmd}</code>
+        <button class="btn-ghost" style="background:var(--green)" onclick="navigator.clipboard&&navigator.clipboard.writeText('${cmd}');this.textContent='Copied'">Copy</button>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-primary" onclick="renderStagingPanel()">↻ Re-check</button>
+        <a class="btn-ghost" style="background:var(--green);text-decoration:none;display:inline-block" href="${STAGING_URL}" target="_blank" rel="noopener">Open ↗</a>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:16px;line-height:1.5">
+        If this panel is open over <code>https://</code> (e.g. lendpaper.com), the browser blocks embedding a
+        local <code>http://localhost</code> page — use <strong>Open ↗</strong>, or open lp-panel locally.
+      </p>
+    </div>`;
 }
 
 // ── Actions ──────────────────────────────────────────────
