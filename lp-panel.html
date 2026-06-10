@@ -670,14 +670,14 @@ header {
     <div class="logo">&#9633; lendpaper <span>admin</span></div>
     <div class="header-right">
       <span id="user-email"></span>
-      <button class="btn-ghost" onclick="showMainView('dashboard')">Dashboard</button>
-      <button class="btn-ghost" onclick="showMainView('members')">Members</button>
-      <button class="btn-ghost" onclick="showMainView('adoption')">Adoption</button>
-      <button class="btn-ghost" onclick="showMainView('recruiter')">Recruiter</button>
-      <button class="btn-ghost" onclick="showMainView('registry')">Registry</button>
+      <button class="btn-ghost" id="nav-dashboard" onclick="showMainView('dashboard')">Dashboard</button>
+      <button class="btn-ghost" id="nav-members" onclick="showMainView('members')">Members</button>
+      <button class="btn-ghost" id="nav-adoption" onclick="showMainView('adoption')">Adoption</button>
+      <button class="btn-ghost" id="nav-recruiter" onclick="showMainView('recruiter')">Recruiter</button>
+      <button class="btn-ghost" id="nav-registry" onclick="showMainView('registry')">Registry</button>
       <button class="btn-ghost" id="compliance-nav-btn" onclick="showMainView('compliance')">Compliance</button>
-      <button class="btn-ghost" onclick="showMainView('staging')">Staging</button>
-      <button class="btn-ghost" onclick="openOverridesReport()">Overrides</button>
+      <button class="btn-ghost" id="nav-staging" onclick="showMainView('staging')">Staging</button>
+      <button class="btn-ghost" id="nav-overrides" onclick="openOverridesReport()">Overrides</button>
       <button class="btn-ghost" onclick="toggleFAQ()">? Help</button>
       <button class="btn-ghost" onclick="doLogout()">Sign out</button>
     </div>
@@ -1015,6 +1015,33 @@ header {
   </div>
 </div>
 
+<!-- LEN-249: per-person admin permissions editor (Members tab) -->
+<div class="modal-overlay" id="perm-modal" style="display:none" onclick="if(event.target===this) closePermModal()">
+  <div class="modal-box" style="width:420px">
+    <h3>Admin access</h3>
+    <p id="perm-who" style="color:var(--muted);font-size:13px;margin-bottom:14px"></p>
+    <label style="display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);font-weight:600;cursor:pointer">
+      <input type="checkbox" id="perm-superadmin" onchange="permToggleSuper(this.checked)" />
+      Super-admin <span style="font-weight:400;color:var(--muted);font-size:12px">— full access to everything</span>
+    </label>
+    <div id="perm-scope-list" style="margin-top:8px"></div>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn-cancel" onclick="closePermModal()">Cancel</button>
+      <button class="btn-mem-approve" style="padding:8px 16px;font-size:13px" id="perm-save" onclick="savePerms()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEN-249: signed in, but no admin-panel permission -->
+<div id="no-access" style="display:none;position:fixed;inset:0;background:#0f1e17;color:#fff;z-index:99999;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px">
+  <div style="max-width:440px">
+    <div style="font-size:42px;margin-bottom:10px">&#128274;</div>
+    <h2 style="margin:0 0 8px;font-size:21px;font-weight:700">You don&rsquo;t have access to this tool</h2>
+    <p style="opacity:.78;font-size:14px;line-height:1.55;margin:0 0 22px">Your account (<span id="na-email"></span>) isn&rsquo;t granted access to the admin panel. If you&rsquo;re looking for the recruiter feed, open <a href="lp-hire.html" style="color:#4ADE80">LP Hire</a>. Otherwise ask Steve to grant a permission.</p>
+    <button class="btn-ghost" onclick="doLogout()" style="background:rgba(255,255,255,.1);color:#fff">Sign out</button>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -1053,6 +1080,7 @@ async function doLogin() {
 async function doLogout() {
   await sb.auth.signOut();
   document.getElementById('app').style.display = 'none';
+  document.getElementById('no-access').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
 }
 
@@ -1061,10 +1089,76 @@ async function checkSession() {
   if (session) showApp(session.user.email);
 }
 
-function showApp(email) {
+// ── Permissions (LEN-249) ────────────────────────────────
+// Grantable admin scopes. `lp_hire` lives on the standalone lp-hire.html page,
+// NOT in this panel — so it is NOT a panel scope; an lp_hire-only user is
+// blocked here on purpose. Super-admin (is_admin) implies every scope.
+const ADMIN_SCOPES = [
+  { key: 'lp_hire',    label: 'LP Hire / Recruiter', panel: false },
+  { key: 'dashboard',  label: 'Dashboard',           panel: true  },
+  { key: 'members',    label: 'Members',             panel: true  },
+  { key: 'registry',   label: 'Lender Registry / Data Health', panel: true },
+  { key: 'compliance', label: 'Compliance',          panel: true  },
+  { key: 'adoption',   label: 'Adoption',            panel: true  },
+  { key: 'staging',    label: 'Staging',             panel: true  },
+];
+const PANEL_SCOPES = ADMIN_SCOPES.filter(s => s.panel).map(s => s.key);
+let LP_PERMS = { isAdmin: false, perms: [] };
+function lpCan(scope) { return LP_PERMS.isAdmin || LP_PERMS.perms.includes(scope); }
+
+// Hide nav/views the user isn't granted; block entirely if no panel scope.
+// Returns false (and shows the no-access screen) when the user can't enter.
+function applyPermissions(profile) {
+  LP_PERMS = {
+    isAdmin: profile?.is_admin === true,
+    perms: Array.isArray(profile?.permissions) ? profile.permissions : [],
+  };
+  const hasPanel = LP_PERMS.isAdmin || PANEL_SCOPES.some(s => LP_PERMS.perms.includes(s));
+  if (!hasPanel) {
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('no-access').style.display = 'flex';
+    return false;
+  }
+  // Header nav — show only granted scopes (super-admin sees all).
+  const navMap = {
+    'nav-dashboard': 'dashboard', 'nav-members': 'members', 'nav-adoption': 'adoption',
+    'nav-registry': 'registry', 'compliance-nav-btn': 'compliance', 'nav-staging': 'staging',
+    'nav-overrides': 'registry',
+  };
+  Object.entries(navMap).forEach(([id, scope]) => {
+    const el = document.getElementById(id); if (el) el.style.display = lpCan(scope) ? '' : 'none';
+  });
+  // Recruiter tab is a super-admin convenience; scoped recruiters use lp-hire.html.
+  const rec = document.getElementById('nav-recruiter'); if (rec) rec.style.display = LP_PERMS.isAdmin ? '' : 'none';
+  // The lender-review sidebar (Lenders / Scrape Runs / detail) is the registry tool.
+  const side = document.getElementById('sidebar'); if (side) side.style.display = lpCan('registry') ? '' : 'none';
+  return true;
+}
+
+async function showApp(email) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   if (email) document.getElementById('user-email').textContent = email;
+
+  // LEN-249: gate on the signed-in user's profile. Falls back to is_admin-only
+  // if the permissions column isn't live yet, so the super-admin is never locked out.
+  const { data: { user } } = await sb.auth.getUser();
+  if (user && !email && user.email) document.getElementById('user-email').textContent = user.email;
+  let profile = null;
+  if (user) {
+    let r = await sb.from('profiles').select('is_admin, permissions').eq('id', user.id).maybeSingle();
+    if (r.error && /permissions/.test(r.error.message || '')) {
+      r = await sb.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
+    }
+    profile = r.data;
+  }
+  if (!applyPermissions(profile)) return;   // no-access screen shown
+
+  // Land on the first granted view (registry users keep the lender-review default).
+  if (!LP_PERMS.isAdmin) {
+    const landing = ['registry', 'dashboard', 'members', 'adoption', 'compliance', 'staging'].find(lpCan);
+    if (landing && landing !== 'registry') showMainView(landing === 'registry' ? 'empty' : landing);
+  }
   loadAll();
 }
 
@@ -3044,7 +3138,12 @@ async function loadMembers() {
   // LEN-205: include linkedin_url, but fall back if the column isn't in the live
   // schema yet — selecting a non-existent column would otherwise 42703 the whole tab.
   const MEM_COLS = 'id, email, full_name, company, role, status, created_at, invite_credits, invites_sent, is_admin, approved_at';
-  let resp = await sb.from('profiles').select(MEM_COLS + ', linkedin_url').order('created_at', { ascending: false });
+  // LEN-249: also pull permissions. Progressive fallback — drop permissions, then
+  // linkedin_url — so a column not yet in the live schema can't 42703 the whole tab.
+  let resp = await sb.from('profiles').select(MEM_COLS + ', linkedin_url, permissions').order('created_at', { ascending: false });
+  if (resp.error && /permissions/.test(resp.error.message || '')) {
+    resp = await sb.from('profiles').select(MEM_COLS + ', linkedin_url').order('created_at', { ascending: false });
+  }
   if (resp.error && /linkedin_url/.test(resp.error.message || '')) {
     resp = await sb.from('profiles').select(MEM_COLS).order('created_at', { ascending: false });
   }
@@ -3176,6 +3275,7 @@ function memRenderTable() {
         ${u.status !== 'approved' ? `<button class="btn-mem-approve" onclick="memApprove('${u.id}', this)">Approve</button>` : ''}
         ${memTab !== 'waitlist' && u.status !== 'waitlist' ? ` <button class="btn-mem-waitlist" onclick="memWaitlist('${u.id}', this)">Waitlist</button>` : ''}
         ${u.status !== 'denied' ? ` <button class="btn-mem-decline" onclick="memDecline('${u.id}', this)">Decline</button>` : ''}
+        <button class="btn-ghost" style="font-size:11px;padding:3px 9px" onclick="openPermModal('${u.id}')" title="Grant admin permissions">${memAccessLabel(u)}</button>
       </td>
     </tr>`).join('')}</tbody>
   </table>`;
@@ -3210,6 +3310,51 @@ async function memDecline(userId, btn) {
   const { error } = await sb.from('profiles').update({ status: 'denied' }).eq('id', userId);
   if (error) { toast('Decline failed: ' + error.message); btn.disabled = false; btn.textContent = 'Decline'; return; }
   toast('Declined — access revoked');
+  await loadMembers();
+}
+
+// ── Permission editor (LEN-249) ──────────────────────────
+let permEditId = null;
+function memAccessLabel(u) {
+  if (u.is_admin) return 'Admin&nbsp;&#10003;';
+  const n = Array.isArray(u.permissions) ? u.permissions.length : 0;
+  return n ? `Access&nbsp;(${n})` : 'Access';
+}
+function openPermModal(userId) {
+  const u = memProfiles.find(p => p.id === userId);
+  if (!u) return;
+  permEditId = userId;
+  document.getElementById('perm-who').textContent = `${u.full_name || u.email || 'User'} — ${u.email || ''}`;
+  const isAdmin = u.is_admin === true;
+  const perms = Array.isArray(u.permissions) ? u.permissions : [];
+  document.getElementById('perm-superadmin').checked = isAdmin;
+  document.getElementById('perm-scope-list').innerHTML = ADMIN_SCOPES.map(s => `
+    <label style="display:flex;align-items:center;gap:9px;padding:8px 0;cursor:pointer">
+      <input type="checkbox" class="perm-scope" value="${s.key}" ${perms.includes(s.key) ? 'checked' : ''} ${isAdmin ? 'disabled' : ''} />
+      <span>${esc(s.label)}${s.panel ? '' : ' <span style="color:var(--muted);font-size:11px">(lp-hire.html)</span>'}</span>
+    </label>`).join('');
+  document.getElementById('perm-modal').style.display = 'flex';
+}
+function closePermModal() { document.getElementById('perm-modal').style.display = 'none'; permEditId = null; }
+// Super-admin = all scopes; disable the individual checkboxes when it's on.
+function permToggleSuper(on) {
+  document.querySelectorAll('#perm-scope-list .perm-scope').forEach(cb => { cb.disabled = on; });
+}
+async function savePerms() {
+  if (!permEditId) return;
+  const btn = document.getElementById('perm-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  const isAdmin = document.getElementById('perm-superadmin').checked;
+  const perms = isAdmin ? [] // super-admin implies all; don't double-store scope keys
+    : Array.from(document.querySelectorAll('#perm-scope-list .perm-scope:checked')).map(cb => cb.value);
+  const { error } = await sb.from('profiles').update({ is_admin: isAdmin, permissions: perms }).eq('id', permEditId);
+  if (error) {
+    // permissions column not live yet → guide to the migration
+    const msg = /permissions/.test(error.message || '') ? 'Run supabase/permissions_setup.sql first (adds profiles.permissions)' : error.message;
+    toast('Save failed: ' + msg); btn.disabled = false; btn.textContent = 'Save'; return;
+  }
+  toast('Permissions updated');
+  closePermModal();
   await loadMembers();
 }
 
