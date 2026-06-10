@@ -113,7 +113,7 @@
           </div>
         </div>
       </div>
-      <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-overlay visible" id="loadingOverlay">
         <div class="spinner"></div>
         <div class="loading-text">Setting up your account</div>
         <div class="loading-sub">Just a moment...</div>
@@ -168,14 +168,38 @@
     if (companyGuess) document.getElementById('inputCompany').value = companyGuess;
 
     // LEN-232: an admin invite IS the vetting — invited users skip LinkedIn outright.
+    // LEN-242: pull the name/company the admin already entered on the invite so we can
+    // skip re-asking for them.
     const { data: inviteRow } = await supabase.from('invites')
-      .select('id').eq('email', (session.user.email || '').toLowerCase()).maybeSingle();
+      .select('id, full_name, company, role').eq('email', (session.user.email || '').toLowerCase()).maybeSingle();
     const invited = !!inviteRow;
 
     // LEN-205/LEN-232: only ask for LinkedIn when we can't vet the person any other way —
     // i.e. no corporate domain to infer a company from AND no admin invite. Corporate-domain
     // OR invited signups skip the step entirely.
     const needLinkedIn = !companyGuess && !invited;
+
+    // LEN-242: an invited user already gave us their name + company on the invite, and
+    // Google OAuth hands us their name too. Don't make them re-type what we already know —
+    // provision the profile straight away and drop them on the dashboard. Only fall back to
+    // the wizard when we genuinely have no name to use (e.g. a nameless magic-link invite).
+    const oauthName = (session.user.user_metadata?.full_name || session.user.user_metadata?.name || '').trim();
+    const knownName = (inviteRow?.full_name || '').trim() || oauthName;
+    const knownCompany = (inviteRow?.company || '').trim() || companyGuess;
+    const autoProvision = invited && !!knownName;
+    if (autoProvision) {
+      // loadingOverlay is already visible from first paint; reuse submitProfile() so the
+      // approval / persona-seed / accepted_at / routing logic stays identical.
+      document.getElementById('inputName').value = knownName;
+      document.getElementById('inputCompany').value = knownCompany || '';
+      document.getElementById('inputLinkedIn').value = '';
+      submitProfile();
+    } else {
+      // Manual path: reveal the wizard and pre-fill anything we do know.
+      document.getElementById('loadingOverlay').classList.remove('visible');
+      if (knownName) document.getElementById('inputName').value = knownName;
+      if (knownCompany) document.getElementById('inputCompany').value = knownCompany;
+    }
 
     const track = document.getElementById('track');
     const dots = [0,1,2].map(i => document.getElementById(`dot-${i}`));
