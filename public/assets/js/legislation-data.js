@@ -25,33 +25,215 @@
 
 var LEG_META = { updated: 'Jun 2026' };
 
+/* Federal laws/regs (LEN-168). Each carries the same table schema as the state
+   bills (tableStatus, citation, scope, penaltyMax, effISO/inForce) so it can
+   render BOTH in the redesigned top panel AND as a row in the table view.
+   `topStory: true` surfaces it as a card in the compact top strip. Every item
+   carries an official .gov source + an independent news source (verify:sources). */
 var LEG_FEDERAL = {
   items: [
     {
-      name: 'CFPB §1071 — Small Business Lending Data Rule',
-      statusClass: 'final',
-      statusLabel: 'Final rule',
+      name: 'CFPB §1071 — Small Business Lending Data Rule', acronym: 'CFPB 1071',
+      tableStatus: 'effective-soon', effISO: '2028-01-01', topStory: true,
+      citation: 'Dodd-Frank Act §1071; 12 CFR 1002 (Reg B)',
+      scope: 'Covered lenders ≥ 1,000 originations/yr',
+      penaltyText: 'ECOA/Reg B enforcement — no fixed per-violation dollar figure', penaltyMax: null,
+      short: 'Revised May 2026 final rule — data collection; compliance Jan 1, 2028.',
       desc: 'Dodd-Frank §1071. Requires covered lenders to collect & report small-business credit application data. Revised final rule (May 2026): narrowed scope, single compliance date Jan 1, 2028, first filing June 2029, ≥1,000 originations/yr threshold. Applies to covered lenders, not SaaS vendors. Litigation ongoing — re-verify before building features on it.',
       url: 'https://www.consumerfinance.gov/1071-rule/',
       newsUrl: 'https://www.mayerbrown.com/en/insights/publications/2026/05/cfpb-issues-final-section-1071-rule-on-small-business-lending-data-collection',
       newsTitle: 'Mayer Brown — CFPB Issues Final Section 1071 Rule (May 2026)'
     },
     {
-      name: 'Small Business Financing Disclosure (federal proposals)',
-      statusClass: 'proposed',
-      statusLabel: 'Proposed',
-      desc: 'Periodic Congressional proposals to extend TILA-style APR / total-cost disclosure to commercial financing. None enacted to date — federal coverage remains a patchwork driven by the states below. 2025 CFPB determination: state disclosure laws are NOT preempted by TILA.',
+      name: 'Federal commercial-financing disclosure (proposals)', acronym: '',
+      tableStatus: 'pending', effISO: null, topStory: true,
+      citation: 'No bill enacted',
+      scope: 'Would extend TILA-style APR disclosure to commercial financing',
+      penaltyText: '', penaltyMax: null,
+      short: 'Periodic bills to extend APR disclosure to commercial financing — none enacted.',
+      desc: 'Periodic Congressional proposals to extend TILA-style APR / total-cost disclosure to commercial financing. None enacted to date — federal coverage remains a patchwork driven by the states. March 2023 CFPB determination: state disclosure laws are NOT preempted by TILA.',
       url: 'https://www.consumerfinance.gov/about-us/newsroom/state-disclosure-laws-business-lending-consistent-with-truth-in-lending-act/',
       newsUrl: 'https://www.womblebonddickinson.com/us/insights/alerts/commercial-financing-disclosure-laws-proposed-us-congress',
       newsTitle: 'Womble Bond Dickinson — Commercial Financing Disclosure Laws Proposed in U.S. Congress'
     },
     {
-      name: 'TILA (Truth in Lending) — scope note',
-      statusClass: 'final',
-      statusLabel: 'In force',
-      infoOnly: true,
-      desc: 'TILA governs CONSUMER credit and generally does not reach business-purpose financing. This is why state commercial-financing disclosure laws exist — verify whether a deal is consumer- or business-purpose before assuming TILA applies.',
-      url: 'https://www.consumerfinance.gov/rules-policy/regulations/1026/'
+      name: 'Telephone Consumer Protection Act', acronym: 'TCPA',
+      tableStatus: 'enacted', inForce: true, topStory: true,
+      citation: '47 U.S.C. §227; 47 CFR §64.1200',
+      scope: 'Calls & texts to prospects (autodialer / robocall)',
+      penaltyText: '$500 per call/text; up to $1,500 for willful violations (private right of action)', penaltyMax: 1500,
+      short: 'Prior express consent before robocalls/texts; honor do-not-call.',
+      desc: 'Requires prior express (written) consent before autodialed or prerecorded calls/texts and honoring do-not-call requests — governs how brokers cold-call or text prospects. The FCC one-to-one consent rule was vacated in 2024; verify current scope.',
+      url: 'https://www.ecfr.gov/current/title-47/chapter-I/subchapter-B/part-64/subpart-L/section-64.1200',
+      newsUrl: 'https://natlawreview.com/article/what-tcpa-heres-quick-background-americas-anti-robocall-statute-every-call-center',
+      newsTitle: "National Law Review — What Is the TCPA?"
+    },
+    {
+      name: 'Telemarketing Sales Rule / Do-Not-Call', acronym: 'TSR / DNC',
+      tableStatus: 'enacted', inForce: true, topStory: true,
+      citation: '16 CFR Part 310 (FTC)',
+      scope: 'Outbound telemarketing; DNC scrubbing',
+      penaltyText: 'Up to $53,088 per violation', penaltyMax: 53088,
+      short: 'DNC scrubbing, disclosures, recordkeeping; 2024 amendments reach some B2B calls.',
+      desc: 'Governs outbound telemarketing — national Do-Not-Call scrubbing, required disclosures, recordkeeping (now 5 years), and as of the 2024 amendments certain B2B calls. Directly relevant to a broker\'s telemarketing.',
+      url: 'https://www.ftc.gov/business-guidance/resources/complying-telemarketing-sales-rule',
+      newsUrl: 'https://www.crowell.com/en/insights/client-alerts/ftc-telemarketing-sales-rule',
+      newsTitle: 'Crowell & Moring — New FTC Telemarketing Sales Rule Amendments'
+    },
+    {
+      name: 'CAN-SPAM Act', acronym: 'CAN-SPAM',
+      tableStatus: 'enacted', inForce: true,
+      citation: '15 U.S.C. §7701 et seq.; 16 CFR Part 316',
+      scope: 'Commercial email marketing',
+      penaltyText: 'Up to $53,088 per email', penaltyMax: 53088,
+      short: 'Accurate headers, physical address, working opt-out within 10 business days.',
+      desc: 'Requires accurate headers and subject lines, a valid physical postal address, and a working opt-out honored within 10 business days — applies to a broker\'s marketing emails.',
+      url: 'https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business',
+      newsUrl: 'https://www.jdsupra.com/legalnews/how-to-comply-with-the-can-spam-act-37432/',
+      newsTitle: 'BCLP (JD Supra) — How to Comply with the CAN-SPAM Act'
+    },
+    {
+      name: 'FTC Act §5 — Unfair or Deceptive Acts', acronym: 'UDAP',
+      tableStatus: 'enacted', inForce: true,
+      citation: '15 U.S.C. §45',
+      scope: 'All marketing & sales conduct',
+      penaltyText: 'Up to $53,088 per violation', penaltyMax: 53088,
+      short: 'Catch-all behind FTC actions on misleading rate / term / fee claims.',
+      desc: 'Prohibits unfair or deceptive acts and practices — the catch-all behind FTC actions on misleading rate, term, or fee claims in financing marketing.',
+      url: 'https://www.ftc.gov/legal-library/browse/statutes/federal-trade-commission-act',
+      newsUrl: 'https://natlawreview.com/article/notice-procedural-overview-ftc-s-section-5-penalty-offense-authority',
+      newsTitle: "National Law Review — The FTC's Section 5 Penalty Offense Authority"
+    },
+    {
+      name: 'GLBA Safeguards Rule', acronym: 'GLBA',
+      tableStatus: 'enacted', inForce: true,
+      citation: '16 CFR Part 314',
+      scope: 'Customer financial-data security',
+      penaltyText: 'Up to $53,088 per violation', penaltyMax: 53088,
+      short: 'Written infosec program, Qualified Individual, MFA, 30-day breach notice.',
+      desc: 'Requires a written information-security program, a designated Qualified Individual, MFA, and 30-day breach notice — and expressly names finance companies and brokers as covered "financial institutions."',
+      url: 'https://www.ftc.gov/business-guidance/resources/ftc-safeguards-rule-what-your-business-needs-know',
+      newsUrl: 'https://www.hinshawlaw.com/newsroom-updates-pcad-federal-trade-commission-amendments-safeguards-rule.html',
+      newsTitle: 'Hinshaw & Culbertson — FTC Amendments to the Safeguards Rule'
+    },
+    {
+      name: 'Fair Credit Reporting Act', acronym: 'FCRA',
+      tableStatus: 'enacted', inForce: true, topStory: true,
+      citation: '15 U.S.C. §1681',
+      scope: 'Pulling owner personal credit',
+      penaltyText: '$100–$1,000 statutory per willful violation, plus actual/punitive', penaltyMax: 1000,
+      short: 'Permissible purpose + adverse-action notices when credit drives a denial.',
+      desc: 'Pulling a business owner\'s personal credit is a consumer-report use: requires a permissible purpose and authorization, and triggers adverse-action notices when credit is denied based on the report.',
+      url: 'https://www.ftc.gov/legal-library/browse/statutes/fair-credit-reporting-act',
+      newsUrl: 'https://www.consumerfinancemonitor.com/2025/08/06/regulatory-requirements-related-to-adverse-action-notifications/',
+      newsTitle: 'Ballard Spahr (Consumer Finance Monitor) — Adverse-Action Notification Requirements'
+    },
+    {
+      name: 'Equal Credit Opportunity Act / Reg B', acronym: 'ECOA',
+      tableStatus: 'enacted', inForce: true, topStory: true,
+      citation: '12 CFR Part 1002; 15 U.S.C. §1691',
+      scope: 'Business credit applicants',
+      penaltyText: 'Actual + punitive up to $10,000 (individual action)', penaltyMax: 10000,
+      short: 'No credit discrimination; adverse-action notices with specific reasons.',
+      desc: 'Prohibits credit discrimination and requires adverse-action notices with specific reasons within set timeframes — applies when a broker takes adverse action or arranges credit for a business applicant (notice required for businesses ≤ $1M gross revenue).',
+      url: 'https://www.ecfr.gov/current/title-12/chapter-X/part-1002',
+      newsUrl: 'https://www.hudsoncook.com/article/adverse-action-notices-a-compliance-issue-that-should-not-be-overlooked/',
+      newsTitle: 'Hudson Cook — Adverse Action Notices'
+    }
+  ]
+};
+
+/* ── Regulatory & enforcement updates ──────────────────────────────────────
+ * Public actions by federal/state regulators against financing providers.
+ * NEUTRAL, status-led — most recent first. Every item, like the rest of this
+ * file, carries BOTH an official government source (`url`, a .gov/AG domain)
+ * AND an independent news/trade source (`newsUrl`). The source verifier
+ * (tools/qa/verify-compliance-sources.js) checks these the same way it checks
+ * the statutes — so only matters that are on the public regulator record can
+ * appear here. Private/civil usury suits (no .gov source) are intentionally
+ * out of scope. `status`: settled | consent | pending | warning.
+ */
+var LEG_ENFORCEMENT = {
+  items: [
+    {
+      matter: 'NY AG v. Yellowstone Capital (merchant cash advance)',
+      party: 'New York Attorney General', status: 'settled',
+      dateISO: '2025-02-01', dateLabel: 'Feb 2025',
+      outcome: '$1.065B judgment; ~$534M debt cancelled, $16.1M restitution',
+      summary: 'The NY AG settled with a network of 25 companies, alleging their merchant cash advances functioned as illegal high-rate loans (rates pleaded up to ~820% APR). TVT Capital entities — listed in the waterfall — were among the settling parties.',
+      url: 'https://ag.ny.gov/press-release/2025/attorney-general-james-announces-1-billion-settlement-predatory-lender',
+      newsUrl: 'https://www.jdsupra.com/legalnews/new-york-attorney-general-secures-1b-1089704/',
+      newsTitle: 'Orrick (JD Supra) — NY AG Secures $1B Settlement on Loans Misrepresented as MCAs'
+    },
+    {
+      matter: 'DOJ / OCC v. American Express (small-business card marketing)',
+      party: 'U.S. Dept. of Justice + OCC', status: 'settled',
+      dateISO: '2025-01-16', dateLabel: 'Jan 2025',
+      outcome: '~$230M total ($108.7M DOJ civil + $138M non-prosecution agreement)',
+      summary: 'DOJ alleged AmEx deceptively marketed small-business cards (misstated rewards/fees, unauthorized credit checks, "dummy" account data) from 2014–2021. AmEx settled and said it had ended the practices.',
+      url: 'https://www.justice.gov/archives/opa/pr/american-express-agrees-pay-1087m-settle-allegations-deceptive-marketing-and-dummy-account',
+      newsUrl: 'https://www.nbcnews.com/business/business-news/american-express-pay-230-million-settle-doj-fraud-probe-deceptive-mark-rcna188031',
+      newsTitle: 'NBC News — American Express to Pay $230M to Settle DOJ Probe'
+    },
+    {
+      matter: 'DOJ v. Ameris Bank (redlining)',
+      party: 'U.S. Dept. of Justice', status: 'consent',
+      dateISO: '2023-10-19', dateLabel: 'Oct 2023',
+      outcome: '$7.5M+ loan-subsidy fund (consent order, since terminated)',
+      summary: 'DOJ alleged Ameris avoided majority-Black and Hispanic neighborhoods in Jacksonville, FL (2016–2021) in violation of ECOA and the Fair Housing Act. Resolved by consent order.',
+      url: 'https://www.justice.gov/crt/case/united-states-v-ameris-bank-md-fla',
+      newsUrl: 'https://www.consumerfinancemonitor.com/2023/10/27/doj-redlining-consent-order-with-ameris-bank/',
+      newsTitle: 'Ballard Spahr (Consumer Finance Monitor) — DOJ Redlining Consent Order with Ameris Bank'
+    },
+    {
+      matter: 'CFPB v. U.S. Bank (unauthorized accounts)',
+      party: 'Consumer Financial Protection Bureau', status: 'consent',
+      dateISO: '2022-07-28', dateLabel: 'Jul 2022',
+      outcome: '$37.5M penalty + consumer remediation',
+      summary: 'CFPB found U.S. Bank pulled credit reports and opened accounts/cards/lines without consent to meet sales goals — cited under the CFPA, FCRA, TILA and Truth in Savings Act.',
+      url: 'https://www.consumerfinance.gov/about-us/newsroom/cfpb-fines-us-bank-37-5-million-for-illegally-exploiting-personal-data-to-open-sham-accounts-for-unsuspecting-customers/',
+      newsUrl: 'https://www.americanbanker.com/news/cfpb-hits-u-s-bank-with-37-5-million-fine-for-sham-accounts',
+      newsTitle: 'American Banker — CFPB Fines U.S. Bank $37.5M for Sham Accounts'
+    },
+    {
+      matter: 'FTC v. LendingClub (undisclosed origination fees)',
+      party: 'Federal Trade Commission', status: 'settled',
+      dateISO: '2021-07-14', dateLabel: 'Jul 2021',
+      outcome: '$18M settlement; >$9.7M returned to consumers',
+      summary: 'FTC alleged LendingClub advertised "no hidden fees" while deducting an undisclosed up-front origination fee, and told some applicants they were approved when they were not.',
+      url: 'https://www.ftc.gov/news-events/news/press-releases/2021/07/lendingclub-agrees-pay-18-million-settle-ftc-charges',
+      newsUrl: 'https://www.americanbanker.com/news/lendingclub-reaches-18m-settlement-with-ftc-over-ad-claims',
+      newsTitle: 'American Banker — LendingClub Reaches $18M Settlement with FTC'
+    },
+    {
+      matter: 'FTC v. SoFi (overstated refinancing savings)',
+      party: 'Federal Trade Commission', status: 'consent',
+      dateISO: '2019-02-22', dateLabel: 'Feb 2019',
+      outcome: 'Consent order — no monetary penalty; 20-yr recordkeeping',
+      summary: 'FTC alleged SoFi advertised inflated student-loan-refinancing "savings" by excluding borrowers who would pay more. Settled by consent order barring unsupported savings claims.',
+      url: 'https://www.ftc.gov/news-events/news/press-releases/2018/10/online-student-loan-refinance-company-sofi-settles-ftc-charges-agrees-stop-making-false-claims-about',
+      newsUrl: 'https://www.cnbc.com/2018/10/31/a-popular-student-debt-lender-is-accused-of-misleading-borrowers.html',
+      newsTitle: 'CNBC — Student Debt Lender SoFi Accused of Misleading Borrowers'
+    },
+    {
+      matter: 'DOJ / OCC v. Cadence Bank (redlining)',
+      party: 'U.S. Dept. of Justice + OCC', status: 'consent',
+      dateISO: '2021-08-30', dateLabel: 'Aug 2021',
+      outcome: '$8.5M ($4.17M loan-subsidy fund + $3M OCC penalty + outreach)',
+      summary: 'DOJ alleged Cadence redlined majority-Black and Hispanic neighborhoods in the Houston metro (2013–2017). Resolved by consent order with a court-approved remediation package.',
+      url: 'https://www.justice.gov/crt/case/united-states-v-cadence-bank',
+      newsUrl: 'https://www.bankingdive.com/news/cadence-bank-to-pay-85m-to-resolve-doj-occ-redlining-claims/605848/',
+      newsTitle: 'Banking Dive — Cadence Bank to Pay $8.5M to Resolve DOJ/OCC Redlining Claims'
+    },
+    {
+      matter: 'CFPB v. PayPal (PayPal Credit deferred interest)',
+      party: 'Consumer Financial Protection Bureau', status: 'settled',
+      dateISO: '2015-05-19', dateLabel: 'May 2015',
+      outcome: '$25M ($15M redress + $10M penalty)',
+      summary: 'CFPB alleged consumers were signed up for PayPal Credit without consent and charged deferred-interest fees. Note: this concerns the consumer PayPal Credit product, not PayPal Working Capital.',
+      url: 'https://www.consumerfinance.gov/about-us/newsroom/cfpb-takes-action-against-paypal-for-illegally-signing-up-consumers-for-unwanted-online-credit/',
+      newsUrl: 'https://www.americanbanker.com/news/cfpb-brands-paypals-credit-product-as-abusive',
+      newsTitle: 'American Banker — CFPB Brands PayPal\'s Credit Product as "Abusive"'
     }
   ]
 };
@@ -220,4 +402,4 @@ var STATE_NAMES = {
   WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming'
 };
 
-if (typeof module !== 'undefined' && module.exports) { module.exports = { LEG_DATA: LEG_DATA, LEG_FEDERAL: LEG_FEDERAL, LEG_META: LEG_META, STATE_NAMES: STATE_NAMES }; }
+if (typeof module !== 'undefined' && module.exports) { module.exports = { LEG_DATA: LEG_DATA, LEG_FEDERAL: LEG_FEDERAL, LEG_ENFORCEMENT: LEG_ENFORCEMENT, LEG_META: LEG_META, STATE_NAMES: STATE_NAMES }; }

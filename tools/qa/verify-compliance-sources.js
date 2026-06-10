@@ -74,6 +74,12 @@ Object.keys(data.LEG_DATA).forEach((abbr) => {
     tokens: tokensFrom((b.name || '') + ' ' + (b.citation || '')),
   }));
 });
+// Enforcement updates — same rule: an OFFICIAL regulator (.gov/AG) record +
+// an INDEPENDENT news source. No bill number to echo, so tokens are empty.
+((data.LEG_ENFORCEMENT && data.LEG_ENFORCEMENT.items) || []).forEach((it) => items.push({
+  group: 'enforcement', label: it.matter, statuteUrl: it.url || '', newsUrl: it.newsUrl || '',
+  infoOnly: false, tokens: [],
+}));
 
 /* ── network: fetch each distinct URL once in a real browser ───────────── */
 async function fetchAll(urls) {
@@ -151,7 +157,7 @@ function reach(res) {
 
   // console output
   const ICON = { OK: '✓', WARN: '▲', FAIL: '✗' };
-  for (const group of ['federal', 'state']) {
+  for (const group of ['federal', 'enforcement', 'state']) {
     process.stdout.write(`\n${group.toUpperCase()}\n`);
     report.filter((r) => r.group === group).forEach((r) => {
       process.stdout.write(`  ${ICON[r.worst]} ${r.label}\n`);

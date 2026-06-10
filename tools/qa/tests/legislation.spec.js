@@ -20,9 +20,9 @@ test('legislation: federal panel, chips, detail, and table all render', async ({
 
   await page.goto('/legislation.html', { waitUntil: 'load' });
 
-  // Federal panel populated from local data (3 seed items).
-  await page.waitForSelector('#fedItems .fed-item', { timeout: 10_000 });
-  expect(await page.locator('#fedItems .fed-item').count()).toBeGreaterThanOrEqual(2);
+  // Federal panel: compact "top stories" cards populated from local data (LEN-168).
+  await page.waitForSelector('#fedItems .fed-card', { timeout: 10_000 });
+  expect(await page.locator('#fedItems .fed-card').count()).toBeGreaterThanOrEqual(2);
 
   // Jurisdiction chips render and are clickable → detail panel opens.
   const firstChip = page.locator('#chips .chip').first();
@@ -35,7 +35,19 @@ test('legislation: federal panel, chips, detail, and table all render', async ({
   // Table view toggle shows rows from the same data.
   await page.locator('#btn-table').click();
   await expect(page.locator('#tableView')).toBeVisible();
-  expect(await page.locator('#tableBody tr').count()).toBeGreaterThan(5);
+  const allRows = await page.locator('#tableBody tr').count();
+  expect(allRows).toBeGreaterThan(5);
+
+  // Federal laws are in the table + the Federal/State facet filters (LEN-168).
+  await page.locator('#jurisFilter button[data-juris="federal"]').click();
+  const fedRows = await page.locator('#tableBody tr').count();
+  expect(fedRows).toBeGreaterThanOrEqual(5);
+  expect(fedRows).toBeLessThan(allRows);
+  // Acronyms are searchable.
+  await page.locator('#tableSearch').fill('TCPA');
+  expect(await page.locator('#tableBody tr').count()).toBe(1);
+  await page.locator('#tableSearch').fill('');
+  await page.locator('#jurisFilter button[data-juris="all"]').click();
 
   expect(errors, `Legislation page errors:\n${errors.join('\n')}`).toEqual([]);
 });

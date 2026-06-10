@@ -61,24 +61,75 @@ a { color: inherit; }
 .beta-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 4px 9px; border-radius: 999px; }
 .page-sub { font-size: 15px; color: var(--text-muted); max-width: 720px; line-height: 1.5; }
 
-/* Federal panel — deliberately distinct from the state cards */
-.federal {
-  margin-top: 22px; border-radius: var(--radius); overflow: hidden;
-  background: linear-gradient(135deg, #1A3C2E 0%, #21503C 100%);
-  color: #fff; box-shadow: 0 8px 26px rgba(26,60,46,0.22);
-}
-.federal-inner { padding: 22px 26px; display: grid; grid-template-columns: 1.3fr 1fr; gap: 26px; }
-.federal-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #BFE3D2; }
-.federal-eyebrow .star { width: 15px; height: 15px; }
-.federal h2 { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; margin: 10px 0 8px; }
-.federal p { font-size: 13.5px; line-height: 1.55; color: rgba(255,255,255,0.85); }
-.federal-items { display: flex; flex-direction: column; gap: 12px; }
-.fed-item { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 11px; padding: 12px 14px; }
-.fed-item h3 { font-size: 13.5px; font-weight: 700; margin-bottom: 3px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.fed-item .fed-status { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
-.fed-status.final { background: #BFE3D2; color: #14342A; }
-.fed-status.proposed { background: rgba(255,255,255,0.18); color: #fff; }
-.fed-item p { font-size: 12px; color: rgba(255,255,255,0.78); }
+/* ── Intel row: two collapsible panels (federal • news) above the map (LEN-168) ──
+   Side-by-side + collapsible keeps the map high while still surfacing the headline
+   federal posture (top-left) and the latest lender/regulator news (top-right). */
+.intel-row { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.panel { border-radius: var(--radius); overflow: hidden; }
+.panel-head { width: 100%; display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 14px; row-gap: 4px;
+  font-family: inherit; text-align: left; border: none; background: none; cursor: pointer; padding: 14px 17px; }
+.panel-eyebrow { grid-column: 1; display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+.panel-eyebrow .ic, .panel-eyebrow .star { width: 14px; height: 14px; flex: 0 0 auto; }
+.panel-title-sm { grid-column: 1; grid-row: 2; font-size: 14px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.32; }
+.panel-meta { grid-column: 2; grid-row: 1 / span 2; display: inline-flex; align-items: center; gap: 10px; align-self: center; }
+.panel-count { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; padding: 3px 9px; border-radius: 999px; }
+.panel-chev { width: 17px; height: 17px; flex: 0 0 auto; transition: transform .22s ease; }
+.panel:not(.peek) .panel-chev { transform: rotate(180deg); } /* points up when fully open */
+.panel-body { padding: 2px 17px 17px; }
+/* Peek (default): serve some content but stay compact so the map stays high.
+   Show a few items + a one-line headline; the chevron expands to the full list. */
+.panel.peek .fed-subhead { display: none; }
+.panel.peek .fed-strip .fed-card:nth-child(n+4) { display: none; }
+.panel.peek .enf-list .enf-item:nth-child(n+4) { display: none; }
+.panel.peek .enf-note { display: none; }
+.panel.peek .fed-seeall { margin-top: 10px; }
+
+/* Federal panel — brand-green (Steve: "I actually think it's really nice") */
+.panel-federal { background: linear-gradient(135deg, #1A3C2E 0%, #21503C 100%); color: #fff; box-shadow: 0 8px 26px rgba(26,60,46,0.22); }
+.panel-federal .panel-eyebrow { color: #BFE3D2; }
+.panel-federal .panel-count { background: rgba(255,255,255,0.14); color: #DDF1E7; }
+.panel-federal .panel-chev { color: #BFE3D2; }
+.fed-subhead { font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.82); margin: 0 0 12px; }
+.fed-seeall { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-family: inherit; font-size: 12px; font-weight: 700; color: #14342A; background: #BFE3D2; border: none; border-radius: 999px; padding: 8px 14px; cursor: pointer; transition: background .12s ease; }
+.fed-seeall:hover { background: #d6efe2; }
+.fed-seeall svg { width: 13px; height: 13px; }
+
+/* News panel — white card */
+.panel-news { background: var(--bg); border: 1px solid var(--border); }
+.panel-news .panel-eyebrow { color: var(--accent-mid); }
+.panel-news .panel-title-sm { color: var(--text-muted); font-weight: 600; font-size: 12.5px; }
+.panel-news .panel-count { background: var(--accent-soft); color: var(--accent); }
+.panel-news .panel-chev { color: var(--text-muted); }
+.fed-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 10px; margin-top: 14px; }
+.fed-card { text-align: left; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 11px 13px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; font-family: inherit; color: inherit; transition: background .12s ease, border-color .12s ease; }
+.fed-card:hover { background: rgba(255,255,255,0.13); border-color: rgba(255,255,255,0.24); }
+.fed-card .fc-name { font-size: 13px; font-weight: 700; line-height: 1.28; margin-top: 2px; }
+.fed-card .fc-cite { font-size: 10.5px; font-weight: 600; letter-spacing: 0.01em; color: rgba(191,227,210,0.85); line-height: 1.3; }
+.fed-card .fc-desc { font-size: 11px; color: rgba(255,255,255,0.74); line-height: 1.42; margin-top: 2px; }
+.fed-card .fed-status { align-self: flex-start; font-size: 9.5px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+.fed-status.s-enacted { background: #BFE3D2; color: #14342A; }
+.fed-status.s-effective-soon { background: rgba(255,255,255,0.22); color: #fff; }
+.fed-status.s-pending { background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.92); }
+
+/* Regulatory & enforcement updates — scrolling list inside the news panel */
+.enf-list { display: flex; flex-direction: column; gap: 9px; max-height: 372px; overflow-y: auto; padding-right: 4px; }
+.enf-item { display: flex; flex-direction: column; gap: 6px; padding: 11px 13px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.enf-item-top { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.enf-status { font-size: 9.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.enf-status.e-settled { background: var(--accent-soft); color: var(--accent); }
+.enf-status.e-consent { background: rgba(45,106,79,0.10); color: var(--accent-mid); }
+.enf-status.e-pending { background: rgba(116,168,146,0.18); color: #4a7c63; }
+.enf-status.e-warning { background: #f1f1ef; color: #6b7280; }
+.enf-date { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+.enf-party { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+.enf-matter { font-size: 13.5px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.enf-outcome { font-size: 11.5px; font-weight: 600; color: var(--accent); }
+.enf-summary { font-size: 12px; line-height: 1.5; color: #374151; }
+.enf-links { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 2px; }
+.enf-link { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
+.enf-link:hover { text-decoration: underline; }
+.enf-link svg { width: 13px; height: 13px; flex: 0 0 auto; }
+.enf-note { font-size: 11.5px; line-height: 1.5; color: var(--text-muted); margin-top: 13px; }
 
 /* View toggle */
 .controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 28px 0 14px; flex-wrap: wrap; }
@@ -134,6 +185,47 @@ a { color: inherit; }
 .tt-note { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0 2px; padding: 11px 14px; font-size: 13px; line-height: 1.5; color: #374151; background: var(--accent-soft); border-left: 3px solid var(--accent-mid); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
 .tt-note svg { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 1px; color: var(--accent-mid); }
 .tt-note strong { color: var(--accent); font-weight: 700; }
+/* Flash-in (LEN-168 #6): hidden until it scrolls into view, then a gentle reveal + one-time highlight. */
+.tt-flashable { opacity: 0; }
+.tt-flashable.shown { animation: ttIn .45s ease both, ttFlash 1.1s ease .3s 1; }
+@keyframes ttIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes ttFlash { 0%, 100% { background: var(--accent-soft); } 45% { background: rgba(26,60,46,0.16); } }
+@media (prefers-reduced-motion: reduce) { .tt-flashable { opacity: 1; } .tt-flashable.shown { animation: none; } }
+
+/* First-visit spotlight tour (LEN-168): federal • news • nationwide → talk tracks.
+   A dimming block, a transparent ring that punches a hole over the highlighted
+   tile, and a tooltip card. The ring's huge box-shadow IS the dim. */
+.spot-block { position: fixed; inset: 0; z-index: 1190; background: transparent; }
+.spot-block.solid { background: rgba(17,24,39,0.62); }
+.spot-ring { position: fixed; z-index: 1200; border-radius: 13px; border: 2px solid #BFE3D2; pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(17,24,39,0.55); transition: top .26s ease, left .26s ease, width .26s ease, height .26s ease; }
+.spot-pop { position: fixed; z-index: 1210; width: 322px; max-width: calc(100vw - 32px);
+  background: var(--bg); border-radius: var(--radius); box-shadow: 0 18px 48px rgba(17,24,39,0.30); padding: 16px 18px 15px; }
+.spot-pop.finale { width: 384px; left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); border-top: 3px solid var(--accent-mid); }
+.spot-skip { position: absolute; top: 11px; right: 13px; background: none; border: none; font-size: 11.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+.spot-skip:hover { color: var(--text); }
+.spot-step { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-mid); }
+.spot-step .ic, .spot-step .star { width: 13px; height: 13px; }
+.spot-title { font-size: 17px; font-weight: 800; letter-spacing: -0.015em; margin: 7px 0 6px; }
+.spot-body { font-size: 12.5px; line-height: 1.55; color: var(--text-muted); }
+.spot-body strong { color: var(--text); font-weight: 700; }
+.spot-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 15px; }
+.spot-dots { display: inline-flex; gap: 5px; }
+.spot-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background .15s ease; }
+.spot-dots i.on { background: var(--accent); }
+.spot-btns { display: inline-flex; gap: 8px; }
+.spot-btns button { font-family: inherit; font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 7px 15px; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--text-muted); }
+.spot-btns .spot-next { background: var(--accent); color: #fff; border-color: var(--accent); }
+.spot-btns .spot-next:hover { background: var(--accent-hover); }
+.spot-btns .spot-back:hover { color: var(--text); }
+/* "Take the tour" replay link in the controls row */
+.tour-replay { display: inline-flex; align-items: center; gap: 6px; font-family: inherit; font-size: 12px; font-weight: 700; color: var(--accent-mid); background: none; border: none; cursor: pointer; padding: 4px 2px; }
+.tour-replay:hover { color: var(--accent); }
+.tour-replay .ic { width: 14px; height: 14px; }
+/* brief highlight on the table tools when "All federal rules →" jumps there */
+.table-tools.tour-pulse { animation: toolsPulse 1.6s ease 2; border-radius: var(--radius-sm); }
+@keyframes toolsPulse { 0%,100% { box-shadow: none; } 40% { box-shadow: 0 0 0 3px var(--accent-soft); } }
+@media (prefers-reduced-motion: reduce) { .spot-ring { transition: none; } }
 
 /* Table view (the "current"/raw view) */
 .table-view { display: none; }
@@ -162,6 +254,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 .td-penalty { white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 600; }
 .td-penalty .pen-sub { display: block; font-weight: 400; font-size: 11px; color: var(--text-muted); white-space: normal; max-width: 220px; }
 .td-penalty.pen-na { color: var(--text-muted); font-weight: 500; }
+.jur-fed { color: var(--accent-mid); }
 .eff-soon { color: var(--accent-mid); font-weight: 700; }
 .eff-pending { color: #4a7c63; font-weight: 600; border-bottom: 1px dotted #9bbdae; cursor: help; }
 .bill-trigger { background: none; border: none; padding: 0; font: inherit; color: var(--accent); font-weight: 700; text-align: left; cursor: pointer; }
@@ -176,6 +269,11 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 .src-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 600; color: var(--accent); text-decoration: none; }
 .src-link.news { color: var(--accent-mid); }
 .src-link:hover { text-decoration: underline; }
+
+/* Inline icons (no emojis — brand rule). Sized to sit with small meta text. */
+.ic { width: 13px; height: 13px; flex: 0 0 auto; vertical-align: -2px; }
+.bill-meta .ic { color: var(--text-muted); }
+.modal-meta .ic { color: var(--text-muted); }
 
 /* Bill modal */
 .modal-scrim { position: fixed; inset: 0; background: rgba(17,24,39,0.46); display: none; align-items: center; justify-content: center; padding: 22px; z-index: 1000; }
@@ -196,7 +294,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 .modal-close:hover { color: var(--text); }
 
 @media (max-width: 880px) {
-  .federal-inner { grid-template-columns: 1fr; gap: 18px; }
+  .intel-row { grid-template-columns: 1fr; }
   .map-grid { grid-template-columns: 1fr; }
   .detail-card { position: static; min-height: 0; }
   .table-count { margin-left: 0; }
@@ -233,25 +331,57 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
     <p class="page-sub">Commercial financing disclosure law across the United States — federal action and a state-by-state map of what's enacted, taking effect, and pending. Built for brokers and funders who need to know where disclosure rules bite.</p>
   </header>
 
-  <!-- FEDERAL — distinct, prominent -->
-  <section class="federal">
-    <div class="federal-inner">
-      <div>
-        <div class="federal-eyebrow">
+  <!-- INTEL ROW — two collapsible panels: federal (left) + lender/regulator news (right) (LEN-168) -->
+  <section class="intel-row">
+
+    <!-- TOP LEFT — Federal -->
+    <div class="panel panel-federal peek" id="panelFederal">
+      <button type="button" class="panel-head" aria-expanded="false" aria-controls="panelFederalBody" onclick="togglePanel('federal')">
+        <span class="panel-eyebrow">
           <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.6 9.3l-4.8 4.68L18 21l-6-3.27L6 21l1.2-7.02L2.4 9.3l6.7-1.04z"/></svg>
           Federal
-        </div>
-        <h2 id="fed-title">No federal commercial-financing disclosure law — yet</h2>
-        <p id="fed-blurb">There is currently no single federal statute requiring APR-style disclosure on commercial financing (TILA governs consumer, not business, credit). The action below is the federal activity most likely to reshape the landscape.</p>
+        </span>
+        <span class="panel-title-sm" id="fed-title">No federal APR-disclosure law — states fill the gap</span>
+        <span class="panel-meta">
+          <span class="panel-count" id="fedCount"></span>
+          <svg class="panel-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </button>
+      <div class="panel-body" id="panelFederalBody">
+        <p class="fed-subhead">TILA's disclosure regime covers consumer credit and exempts business-purpose financing, so commercial deals have no single federal APR-disclosure law — that gap is filled by the states. But several federal regimes already bind lenders and brokers, and the moment a deal turns on the owner's personal credit, FCRA and ECOA apply.</p>
+        <div class="fed-strip" id="fedItems"></div>
+        <button type="button" class="fed-seeall" id="fedSeeAll" onclick="fedSeeAll()">
+          <span id="fedSeeAllText">All federal rules</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
       </div>
-      <div class="federal-items" id="fedItems"></div>
     </div>
+
+    <!-- TOP RIGHT — Regulatory & enforcement news (against financing providers) -->
+    <div class="panel panel-news peek" id="panelNews">
+      <button type="button" class="panel-head" aria-expanded="false" aria-controls="panelNewsBody" onclick="togglePanel('news')">
+        <span class="panel-eyebrow">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h13a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3z"/><line x1="7" y1="9" x2="14" y2="9"/><line x1="7" y1="13" x2="14" y2="13"/><line x1="7" y1="17" x2="11" y2="17"/></svg>
+          In the news
+        </span>
+        <span class="panel-title-sm">Regulator actions against financing providers — newest first</span>
+        <span class="panel-meta">
+          <span class="panel-count" id="enfCount"></span>
+          <svg class="panel-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </button>
+      <div class="panel-body" id="panelNewsBody">
+        <div class="enf-list" id="enfList"></div>
+        <p class="enf-note">Scope: public actions on the federal/state regulator record only. Private civil suits (e.g. usury or contract disputes between a provider and a borrower) are tracked separately and are not listed here.</p>
+      </div>
+    </div>
+
   </section>
 
-  <!-- Talk-track nudge — subtle reminder these map to rep talk tracks (LEN-27) -->
-  <div class="tt-note">
+  <!-- Talk-track nudge — flashes in on scroll into view (LEN-168 #6), not always-on -->
+  <div class="tt-note tt-flashable" id="ttNote">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    <div><strong>Use these on calls.</strong> Each item here can be dropped into a rep talk track — e.g. <em>"New York now requires an APR on your offer, so the number you're seeing is the real cost."</em> Turning disclosure rules into plain-language trust beats hiding from them.</div>
+    <div><strong>How to use this desk.</strong> Every item links to the official statute or regulator action and an independent source, so finance and legal can track what's <em>in force</em>, what's <em>pending</em>, and where enforcement is heading — and brief teams on disclosure obligations before they apply.</div>
   </div>
 
   <!-- View controls -->
@@ -260,6 +390,10 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
       <button id="btn-map" class="active" onclick="setView('map')">Map view</button>
       <button id="btn-table" onclick="setView('table')">Table view</button>
     </div>
+    <button type="button" class="tour-replay" onclick="startComplianceTour()" aria-label="Take the tour">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
+      Take the tour
+    </button>
     <div class="updated" id="updatedLabel"></div>
   </div>
 
@@ -272,7 +406,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
       <span class="legend-item"><span class="legend-swatch" style="background:var(--leg-none);border:1px solid var(--leg-none-stroke)"></span>No specific law</span>
     </div>
     <div class="map-grid">
-      <div class="map-card">
+      <div class="map-card" id="mapCard">
         <svg id="map-svg" viewBox="0 0 960 600" preserveAspectRatio="xMidYMid meet" aria-label="US map of commercial financing legislation">
           <g id="states-g"></g>
           <g id="borders-g"></g>
@@ -294,13 +428,18 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
   <!-- TABLE VIEW (the raw / current view) -->
   <div class="table-view" id="tableView">
     <div class="table-tools">
+      <div class="filter-chips" id="jurisFilter" role="group" aria-label="Filter by level">
+        <button data-juris="all" class="active">All levels</button>
+        <button data-juris="federal">Federal</button>
+        <button data-juris="state">State</button>
+      </div>
       <div class="filter-chips" id="statusFilter" role="group" aria-label="Filter by status">
         <button data-status="all" class="active">All</button>
         <button data-status="enacted">Enacted</button>
         <button data-status="effective-soon">Effective soon</button>
         <button data-status="pending">Pending</button>
       </div>
-      <input type="search" id="tableSearch" class="table-search" placeholder="Search state, bill, citation…" aria-label="Search the table">
+      <input type="search" id="tableSearch" class="table-search" placeholder="Search law, acronym, citation… (TCPA, APR)" aria-label="Search the table">
       <span class="table-count" id="tableCount"></span>
     </div>
     <div class="table-card">
@@ -322,6 +461,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
     </div>
   </div>
 
+
   <!-- BILL MODAL -->
   <div class="modal-scrim" id="billModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal">
@@ -341,7 +481,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
-<script src="public/assets/js/legislation-data.js?v=2026.06.09.0002"></script>
+<script src="public/assets/js/legislation-data.js?v=2026.06.09.0003"></script>
 <script>
 /* ── Legislation Tracker UI ─────────────────────────────────────────────── */
 var FIPS = {
@@ -363,6 +503,15 @@ function statusOf(abbr){ var d = LEG_DATA[abbr]; return (d && d.status) || 'none
 /* ---- Shared formatting helpers (LEN-159) ---- */
 var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var NOW_ISO = '2026-06-09'; // pinned "today" — date APIs unavailable in some build contexts
+
+/* Inline SVG icons — brand rule: icons only, never emojis (LEN-168). */
+var ICON = {
+  doc:   '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  news:  '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h13a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3z"/><line x1="7" y1="9" x2="14" y2="9"/><line x1="7" y1="13" x2="14" y2="13"/><line x1="7" y1="17" x2="11" y2="17"/></svg>',
+  cal:   '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  scale: '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M7 21h10"/><path d="M5 7h14"/><path d="M5 7l-3 6a3 3 0 0 0 6 0z"/><path d="M19 7l-3 6a3 3 0 0 0 6 0z"/></svg>',
+  target:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/></svg>'
+};
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function escAttr(s){ return esc(s).replace(/'/g,'&#39;'); }
 /* Returns {text, cls, sort} for a bill's effective date. Dated → "Mon YYYY"
@@ -376,6 +525,9 @@ function effInfo(b){
   if (b && b.asSoonAs){
     return { text: 'As soon as ' + b.asSoonAs, cls: 'eff-pending', tip: b.asSoonAsExplain || '', sort: '9999', future: true };
   }
+  if (b && b.inForce){
+    return { text: 'In force', cls: '', sort: '0001', future: false }; // long-standing federal law — sorts oldest
+  }
   return { text: '—', cls: '', sort: '5000' }; // undated enacted → mid so it doesn't sort to either extreme
 }
 /* Returns {text, sub, val, na} for a bill's penalty. val drives sorting. */
@@ -387,15 +539,14 @@ function penInfo(b){
   return { text: disp + ' / viol.', sub: b.penaltyText || '', val: v, na: false };
 }
 
-/* ---- Bill modal (statute + news links) ---- */
-function openBillModal(abbr, idx){
-  var d = LEG_DATA[abbr]; if (!d) return;
-  var b = (d.bills && d.bills[idx]) || (d.bills && d.bills[0]); if (!b) return;
-  var m = STATUS_META[d.status] || STATUS_META['none'];
+/* ---- Bill modal (statute + news links) — shared by state bills + federal laws ---- */
+function fillBillModal(stateLabel, b, statusKey){
+  var m = STATUS_META[statusKey] || STATUS_META['none'];
   var eff = effInfo(b); var pen = penInfo(b);
-  document.getElementById('modalState').textContent = (d.name || abbr);
-  document.getElementById('modalTitle').textContent = b.name || (d.name + ' commercial financing');
+  document.getElementById('modalState').textContent = stateLabel;
+  document.getElementById('modalTitle').textContent = b.name || (stateLabel + ' commercial financing');
   var effLine = b.effISO ? (eff.future ? 'Effective ' : 'In effect since ') + eff.text
+                         : b.inForce ? 'In force'
                          : (b.asSoonAs ? 'Pending — as soon as ' + b.asSoonAs : 'Status varies');
   var rows = ''
     + '<div class="modal-meta">'
@@ -408,26 +559,95 @@ function openBillModal(abbr, idx){
     + (b.penaltyText ? '<div class="modal-row"><b>Penalty exposure:</b> '+esc(b.penaltyText)+'</div>' : '')
     + (b.desc ? '<div class="modal-desc">'+esc(b.desc)+'</div>' : '');
   var links = '<div class="src-links">'
-    + (b.url ? '<a class="src-link" href="'+escAttr(b.url)+'" target="_blank" rel="noopener">📜 Read the statute ↗</a>' : '')
-    + (b.newsUrl ? '<a class="src-link news" href="'+escAttr(b.newsUrl)+'" target="_blank" rel="noopener">📰 '+esc(b.newsTitle || 'News coverage')+' ↗</a>' : '')
+    + (b.url ? '<a class="src-link" href="'+escAttr(b.url)+'" target="_blank" rel="noopener">'+ICON.doc+' Read the statute ↗</a>' : '')
+    + (b.newsUrl ? '<a class="src-link news" href="'+escAttr(b.newsUrl)+'" target="_blank" rel="noopener">'+ICON.news+' '+esc(b.newsTitle || 'News coverage')+' ↗</a>' : '')
     + '</div>';
   document.getElementById('modalBody').innerHTML = rows
     + '<div class="modal-foot">' + links
     + '<div class="modal-disclaimer">Seed data — verify against the official statute and current legislative status before relying on it. Not legal advice.</div></div>';
   document.getElementById('billModal').classList.add('open');
 }
+function openBillModal(abbr, idx){
+  var d = LEG_DATA[abbr]; if (!d) return;
+  var b = (d.bills && d.bills[idx]) || (d.bills && d.bills[0]); if (!b) return;
+  fillBillModal(d.name || abbr, b, d.status);
+}
+function openFedModal(i){
+  var b = (LEG_FEDERAL.items || [])[i]; if (!b) return;
+  fillBillModal('Federal', b, b.tableStatus || 'enacted');
+}
 function closeBillModal(){ document.getElementById('billModal').classList.remove('open'); }
 document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeBillModal(); });
 document.getElementById('billModal').addEventListener('click', function(e){ if (e.target === this) closeBillModal(); });
 
-/* ---- Federal panel ---- */
+/* ---- Federal panel — compact "top stories" strip (LEN-168 #3/#4) ---- */
+var FED_CHIP = {
+  'enacted':        { cls: 's-enacted',        label: 'In force' },
+  'effective-soon': { cls: 's-effective-soon', label: 'Effective soon' },
+  'pending':        { cls: 's-pending',        label: 'Proposed' }
+};
 (function renderFederal(){
-  var host = document.getElementById('fedItems');
-  host.innerHTML = LEG_FEDERAL.items.map(function(it){
-    var src = it.url ? '<a href="'+it.url+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;margin-top:7px;font-size:11.5px;font-weight:600;color:#BFE3D2;text-decoration:none;">Source ↗</a>' : '';
-    return '<div class="fed-item"><h3>'+it.name+'<span class="fed-status '+it.statusClass+'">'+it.statusLabel+'</span></h3><p>'+it.desc+'</p>'+src+'</div>';
+  var items = LEG_FEDERAL.items || [];
+  var top = [];
+  items.forEach(function(it, i){ if (it.topStory) top.push({ it: it, i: i }); });
+  if (!top.length) items.slice(0, 4).forEach(function(it, i){ top.push({ it: it, i: i }); });
+  document.getElementById('fedItems').innerHTML = top.map(function(o){
+    var it = o.it; var c = FED_CHIP[it.tableStatus || 'enacted'] || FED_CHIP.enacted;
+    return '<button type="button" class="fed-card" onclick="openFedModal('+o.i+')">'
+      + '<span class="fed-status '+c.cls+'">'+c.label+'</span>'
+      + '<span class="fc-name">'+esc(it.name)+(it.acronym?' ('+esc(it.acronym)+')':'')+'</span>'
+      + (it.citation ? '<span class="fc-cite">'+esc(it.citation)+'</span>' : '')
+      + '<span class="fc-desc">'+esc(it.short || it.desc || '')+'</span>'
+      + '</button>';
   }).join('');
+  var cnt = items.filter(function(it){ return !it.infoOnly; }).length;
+  var t = document.getElementById('fedSeeAllText'); if (t) t.textContent = 'All ' + cnt + ' federal rules';
+  var fc = document.getElementById('fedCount'); if (fc) fc.textContent = cnt + ' rules';
   document.getElementById('updatedLabel').textContent = 'Seed data · last reviewed ' + LEG_META.updated;
+})();
+/* "All federal rules →" — jump to the table, filtered to federal */
+function fedSeeAll(){
+  setView('table');
+  tableState.juris = 'federal';
+  var jf = document.getElementById('jurisFilter');
+  if (jf) jf.querySelectorAll('button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-juris') === 'federal'); });
+  renderTable();
+  var tools = document.querySelector('.table-tools');
+  if (tools){ tools.scrollIntoView({ behavior:'smooth', block:'center' }); tools.classList.remove('tour-pulse'); void tools.offsetWidth; tools.classList.add('tour-pulse'); }
+}
+
+/* ---- Regulatory & enforcement updates — neutral, status-led feed ---- */
+var ENF_CHIP = {
+  settled: { cls: 'e-settled', label: 'Settled' },
+  consent: { cls: 'e-consent', label: 'Consent order' },
+  pending: { cls: 'e-pending', label: 'Pending' },
+  warning: { cls: 'e-warning', label: 'Warning' }
+};
+(function renderEnforcement(){
+  var host = document.getElementById('enfList');
+  if (!host || typeof LEG_ENFORCEMENT === 'undefined') return;
+  var items = (LEG_ENFORCEMENT.items || []).slice().sort(function(a, b){
+    return (b.dateISO || '').localeCompare(a.dateISO || '');
+  });
+  host.innerHTML = items.map(function(it){
+    var c = ENF_CHIP[it.status] || ENF_CHIP.settled;
+    return '<div class="enf-item">'
+      + '<div class="enf-item-top">'
+        + '<span class="enf-status '+c.cls+'">'+c.label+'</span>'
+        + (it.dateLabel ? '<span class="enf-date">'+esc(it.dateLabel)+'</span>' : '')
+        + (it.party ? '<span class="enf-party">'+esc(it.party)+'</span>' : '')
+      + '</div>'
+      + '<div class="enf-matter">'+esc(it.matter)+'</div>'
+      + (it.outcome ? '<div class="enf-outcome">'+esc(it.outcome)+'</div>' : '')
+      + (it.summary ? '<div class="enf-summary">'+esc(it.summary)+'</div>' : '')
+      + '<div class="enf-links">'
+        + (it.url ? '<a class="enf-link" href="'+escAttr(it.url)+'" target="_blank" rel="noopener">'+ICON.doc+' Regulator record ↗</a>' : '')
+        + (it.newsUrl ? '<a class="enf-link" href="'+escAttr(it.newsUrl)+'" target="_blank" rel="noopener">'+ICON.news+' '+esc(it.newsTitle ? 'Coverage' : 'News')+' ↗</a>' : '')
+      + '</div>'
+    + '</div>';
+  }).join('');
+  var cnt = document.getElementById('enfCount');
+  if (cnt) cnt.textContent = items.length + ' on record';
 })();
 
 /* ---- Detail panel ---- */
@@ -451,19 +671,19 @@ function showState(abbr){
     + '<span class="status-pill '+m.cls+'"><span class="dot" style="background:'+m.dot+'"></span>'+m.label+'</span>';
   html += d.bills.map(function(b, i){
     var eff = effInfo(b); var pen = penInfo(b);
-    var effSpan = '<span'+(eff.tip?' class="'+eff.cls+'" title="'+escAttr(eff.tip)+'"':(eff.cls?' class="'+eff.cls+'"':''))+'>📅 '+esc(eff.text)+'</span>';
+    var effSpan = '<span'+(eff.tip?' class="'+eff.cls+'" title="'+escAttr(eff.tip)+'"':(eff.cls?' class="'+eff.cls+'"':''))+'>'+ICON.cal+' '+esc(eff.text)+'</span>';
     return '<div class="bill">'
       + '<div class="bill-name"><button type="button" class="bill-trigger" onclick="openBillModal(\''+abbr+'\','+i+')">'+esc(b.name)+'</button></div>'
       + '<div class="bill-meta">'
-        + (b.citation ? '<span>📜 '+esc(b.citation)+'</span>' : '')
+        + (b.citation ? '<span>'+ICON.doc+' '+esc(b.citation)+'</span>' : '')
         + effSpan
-        + (!pen.na ? '<span>⚖️ '+esc(pen.text)+'</span>' : '')
-        + (b.scope ? '<span>🎯 '+esc(b.scope)+'</span>' : '')
+        + (!pen.na ? '<span>'+ICON.scale+' '+esc(pen.text)+'</span>' : '')
+        + (b.scope ? '<span>'+ICON.target+' '+esc(b.scope)+'</span>' : '')
       + '</div>'
       + '<div class="bill-desc">'+esc(b.desc)+'</div>'
       + '<div class="src-links">'
-        + (b.url ? '<a class="src-link" href="'+escAttr(b.url)+'" target="_blank" rel="noopener">📜 Statute ↗</a>' : '')
-        + (b.newsUrl ? '<a class="src-link news" href="'+escAttr(b.newsUrl)+'" target="_blank" rel="noopener">📰 News ↗</a>' : '')
+        + (b.url ? '<a class="src-link" href="'+escAttr(b.url)+'" target="_blank" rel="noopener">'+ICON.doc+' Statute ↗</a>' : '')
+        + (b.newsUrl ? '<a class="src-link news" href="'+escAttr(b.newsUrl)+'" target="_blank" rel="noopener">'+ICON.news+' News ↗</a>' : '')
         + '<button type="button" class="src-link" style="background:none;border:none;cursor:pointer;font:inherit" onclick="openBillModal(\''+abbr+'\','+i+')">Details ↗</button>'
       + '</div>'
       + '</div>';
@@ -492,15 +712,24 @@ function clearState(){
 /* ---- Table view: sortable + filterable (LEN-159) ---- */
 var STATUS_RANK = { 'enacted':0, 'effective-soon':1, 'pending':2, 'none':3 };
 var SORT_DEFAULT_DIR = { name:'asc', status:'asc', effective:'desc', penalty:'desc' };
-var tableState = { status:'all', q:'', sortKey:'status', sortDir:'asc' };
+var tableState = { status:'all', juris:'all', q:'', sortKey:'status', sortDir:'asc' };
 
 function tableRowData(){
-  return Object.keys(LEG_DATA)
-    .filter(function(a){ return statusOf(a) !== 'none'; })
-    .map(function(a){
-      var d = LEG_DATA[a]; var b = (d.bills && d.bills[0]) || {};
-      return { abbr:a, name:d.name||a, status:d.status, bill:b, eff:effInfo(b), pen:penInfo(b) };
-    });
+  var rows = [];
+  // Federal laws/regs (LEN-168 #1) — exclude pure scope notes (infoOnly)
+  (LEG_FEDERAL.items || []).forEach(function(it, i){
+    if (it.infoOnly) return;
+    rows.push({ kind:'federal', juris:'federal', fedIdx:i, jurLabel:'Federal',
+      name: it.name, acronym: it.acronym || '', status: it.tableStatus || 'enacted',
+      bill: it, eff: effInfo(it), pen: penInfo(it) });
+  });
+  // State bills
+  Object.keys(LEG_DATA).filter(function(a){ return statusOf(a) !== 'none'; }).forEach(function(a){
+    var d = LEG_DATA[a]; var b = (d.bills && d.bills[0]) || {};
+    rows.push({ kind:'state', juris:'state', abbr:a, jurLabel:(d.name||a),
+      name:d.name||a, acronym:'', status:d.status, bill:b, eff:effInfo(b), pen:penInfo(b) });
+  });
+  return rows;
 }
 function sortBy(key){
   if (tableState.sortKey === key){ tableState.sortDir = (tableState.sortDir === 'asc') ? 'desc' : 'asc'; }
@@ -509,12 +738,14 @@ function sortBy(key){
 }
 function renderTable(){
   var rows = tableRowData();
+  // filter: jurisdiction (federal vs state)
+  if (tableState.juris !== 'all') rows = rows.filter(function(r){ return r.juris === tableState.juris; });
   // filter: status
   if (tableState.status !== 'all') rows = rows.filter(function(r){ return r.status === tableState.status; });
-  // filter: search
+  // filter: search (full names AND acronyms are searchable — LEN-168 #1)
   var q = tableState.q.trim().toLowerCase();
   if (q) rows = rows.filter(function(r){
-    var hay = [r.name, r.bill.name, r.bill.citation, r.bill.scope, r.bill.penaltyText].join(' ').toLowerCase();
+    var hay = [r.jurLabel, r.name, r.acronym, r.bill.name, r.bill.citation, r.bill.scope, r.bill.penaltyText].join(' ').toLowerCase();
     return hay.indexOf(q) !== -1;
   });
   // sort
@@ -537,7 +768,7 @@ function renderTable(){
   // body
   var tbody = document.getElementById('tableBody');
   if (!rows.length){
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No jurisdictions match this filter.</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No laws match this filter.</td></tr>';
   } else {
     tbody.innerHTML = rows.map(function(r){
       var m = STATUS_META[r.status]; var b = r.bill; var eff = r.eff; var pen = r.pen;
@@ -545,10 +776,17 @@ function renderTable(){
       var penCell = pen.na
         ? '<td class="td-penalty pen-na">'+esc(pen.text)+(pen.sub?'<span class="pen-sub">'+esc(pen.sub)+'</span>':'')+'</td>'
         : '<td class="td-penalty">'+esc(pen.text)+(pen.sub?'<span class="pen-sub">'+esc(pen.sub)+'</span>':'')+'</td>';
+      var jurCell = r.kind === 'federal'
+        ? '<td><strong class="jur-fed">Federal</strong></td>'
+        : '<td><strong>'+esc(r.jurLabel)+'</strong></td>';
+      var billDisp = (b.name || '—') + (r.kind === 'federal' && r.acronym ? ' (' + r.acronym + ')' : '');
+      var trigger = r.kind === 'federal'
+        ? 'openFedModal('+r.fedIdx+')'
+        : 'openBillModal(\''+r.abbr+'\',0)';
       return '<tr>'
-        + '<td><strong>'+esc(r.name)+'</strong></td>'
+        + jurCell
         + '<td><span class="td-status" style="color:'+m.dot+'">'+m.label+'</span></td>'
-        + '<td><button type="button" class="bill-trigger" onclick="openBillModal(\''+r.abbr+'\',0)">'+esc(b.name||'—')+'</button>'
+        + '<td><button type="button" class="bill-trigger" onclick="'+trigger+'">'+esc(billDisp)+'</button>'
           + (b.citation? '<span class="cite-sub">'+esc(b.citation)+'</span>':'')+'</td>'
         + '<td>'+effCell+'</td>'
         + penCell
@@ -556,9 +794,15 @@ function renderTable(){
         + '</tr>';
     }).join('');
   }
-  document.getElementById('tableCount').textContent = rows.length + (rows.length === 1 ? ' jurisdiction' : ' jurisdictions');
+  document.getElementById('tableCount').textContent = rows.length + (rows.length === 1 ? ' law' : ' laws');
 }
 // wire controls
+document.getElementById('jurisFilter').addEventListener('click', function(e){
+  var btn = e.target.closest('button'); if (!btn) return;
+  tableState.juris = btn.getAttribute('data-juris');
+  this.querySelectorAll('button').forEach(function(b){ b.classList.toggle('active', b === btn); });
+  renderTable();
+});
 document.getElementById('statusFilter').addEventListener('click', function(e){
   var btn = e.target.closest('button'); if (!btn) return;
   tableState.status = btn.getAttribute('data-status');
@@ -575,6 +819,139 @@ function setView(v){
   document.getElementById('btn-map').classList.toggle('active', map);
   document.getElementById('btn-table').classList.toggle('active', !map);
 }
+
+/* ---- Intel panels (federal • news): peek by default, expand for the full list (LEN-168) ----
+   "Peek" serves a few items + a one-line headline so the panels announce something
+   without pushing the map down; the chevron expands to the full list. */
+var PANEL_EL  = { federal: 'panelFederal', news: 'panelNews' };
+var PANEL_KEY = { federal: 'lp_cd_fed_open', news: 'lp_cd_news_open' };
+function applyPanel(which, expanded, persist){
+  var el = document.getElementById(PANEL_EL[which]); if (!el) return;
+  el.classList.toggle('peek', !expanded);
+  var head = el.querySelector('.panel-head'); if (head) head.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  if (persist){ try { localStorage.setItem(PANEL_KEY[which], expanded ? '1' : '0'); } catch(e){} }
+}
+function togglePanel(which){
+  var el = document.getElementById(PANEL_EL[which]); if (!el) return;
+  applyPanel(which, el.classList.contains('peek'), true); // peek → expand, expanded → peek
+}
+(function initPanels(){
+  // Default = peek (serves content, map stays high); remember the user's choice after that.
+  ['federal','news'].forEach(function(which){
+    var saved = null; try { saved = localStorage.getItem(PANEL_KEY[which]); } catch(e){}
+    applyPanel(which, saved === '1', false);
+  });
+})();
+
+/* ---- Talk-track note flashes in when the controls scroll into view (#6) ---- */
+(function(){
+  var tt = document.getElementById('ttNote'); if (!tt) return;
+  var anchor = document.querySelector('.controls') || tt;
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if (en.isIntersecting){ tt.classList.add('shown'); io.disconnect(); } });
+    }, { threshold: 0.35 });
+    io.observe(anchor);
+  } else { tt.classList.add('shown'); }
+})();
+
+/* ---- First-visit spotlight tour: federal • news • nationwide → talk tracks (LEN-168) ---- */
+(function(){
+  var TOUR_KEY = 'lp_cd_tour_v2';
+  function seen(){ try { return !!localStorage.getItem(TOUR_KEY); } catch(e){ return false; } }
+  function markSeen(){ try { localStorage.setItem(TOUR_KEY, '1'); } catch(e){} }
+
+  var STAR = '<svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.6 9.3l-4.8 4.68L18 21l-6-3.27L6 21l1.2-7.02L2.4 9.3l6.7-1.04z"/></svg>';
+  var STEPS = [
+    { sel:'#panelFederal', open:'federal', kicker:'Tile 1 of 3', title:'Federal updates',
+      body:'Where the national rules actually stand — TILA\'s consumer-vs-business line, the CFPB\'s data rule, and the regimes that bind every lender and broker: <strong>TCPA, Do-Not-Call, FCRA, ECOA</strong>.' },
+    { sel:'#panelNews', open:'news', kicker:'Tile 2 of 3', title:'In the news',
+      body:'Regulator actions against financing providers, newest first — each linked to the <strong>official record and independent coverage</strong>, so your team sees enforcement before it sets precedent.' },
+    { sel:'#mapCard', view:'map', kicker:'Tile 3 of 3', title:'Nationwide',
+      body:'Every state\'s disclosure law, color-coded. Click a state for citations, effective dates, penalties and scope — or switch to <strong>Table view</strong> to sort by penalty and filter federal vs state.' },
+    { finale:true, kicker:'The payoff', title:'It all feeds your team',
+      body:'Everything on this desk flows into the <strong>talk tracks and borrower proposals</strong> your team builds in LendPaper — so the rep on the phone is always current, and every proposal is compliant by default.' }
+  ];
+
+  var block, ring, pop, active = false, idx = 0;
+  function build(){
+    if (block) return;
+    block = document.createElement('div'); block.className = 'spot-block';
+    ring  = document.createElement('div'); ring.className  = 'spot-ring';
+    pop   = document.createElement('div'); pop.className   = 'spot-pop'; pop.setAttribute('role','dialog'); pop.setAttribute('aria-label','Compliance Desk tour');
+    document.body.appendChild(block); document.body.appendChild(ring); document.body.appendChild(pop);
+  }
+  function dots(n){ var s=''; for (var k=0;k<3;k++){ s += '<i class="'+(k===n?'on':'')+'"></i>'; } return '<span class="spot-dots">'+s+'</span>'; }
+  function render(i){
+    var s = STEPS[i], last = (i === STEPS.length - 1);
+    pop.innerHTML =
+      '<button class="spot-skip" type="button" aria-label="Skip tour">Skip</button>'
+      + '<div class="spot-step">'+(s.finale ? STAR + ' ' + s.kicker : s.kicker)+'</div>'
+      + '<div class="spot-title">'+s.title+'</div>'
+      + '<div class="spot-body">'+s.body+'</div>'
+      + '<div class="spot-foot">'
+        + (s.finale ? '<span></span>' : dots(i))
+        + '<span class="spot-btns">'
+          + (i>0 ? '<button class="spot-back" type="button">Back</button>' : '')
+          + '<button class="spot-next" type="button">'+(last ? 'Done' : 'Next')+'</button>'
+        + '</span>'
+      + '</div>';
+    pop.querySelector('.spot-skip').onclick = end;
+    var bk = pop.querySelector('.spot-back'); if (bk) bk.onclick = function(){ go(idx-1); };
+    pop.querySelector('.spot-next').onclick = function(){ if (last) end(); else go(idx+1); };
+  }
+  function place(node){
+    var pad = 8, r = node.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
+    ring.style.display = 'block';
+    ring.style.top = (r.top - pad) + 'px'; ring.style.left = (r.left - pad) + 'px';
+    ring.style.width = (r.width + pad*2) + 'px'; ring.style.height = (r.height + pad*2) + 'px';
+    var ph = pop.offsetHeight || 200, pw = pop.offsetWidth || 322;
+    var below = r.bottom + 14;
+    var top = (below + ph < vh) ? below : Math.max(14, r.top - ph - 14);
+    var left = Math.min(Math.max(14, r.left), vw - pw - 14);
+    pop.style.top = top + 'px'; pop.style.left = left + 'px'; pop.style.transform = 'none';
+  }
+  function go(i){
+    idx = Math.max(0, Math.min(STEPS.length-1, i));
+    var s = STEPS[idx];
+    render(idx);
+    if (s.view) setView(s.view);
+    if (s.open) applyPanel(s.open, true, false); // tour-driven open isn't persisted
+    if (s.finale){
+      ring.style.display = 'none'; block.classList.add('solid'); pop.classList.add('finale');
+      pop.style.top = ''; pop.style.left = ''; pop.style.transform = '';
+      return;
+    }
+    block.classList.remove('solid'); pop.classList.remove('finale');
+    var node = document.querySelector(s.sel);
+    if (!node){ go(idx+1); return; }
+    node.scrollIntoView({ behavior:'smooth', block:'center' });
+    setTimeout(function(){ if (active) place(node); }, 320);
+  }
+  function reposition(){
+    if (!active) return;
+    var s = STEPS[idx]; if (s.finale) return;
+    var node = document.querySelector(s.sel); if (node) place(node);
+  }
+  function start(){
+    build(); markSeen(); active = true; idx = 0;
+    block.style.display = ring.style.display = pop.style.display = 'block';
+    go(0);
+  }
+  function end(){
+    active = false; markSeen();
+    if (block) block.style.display = 'none';
+    if (ring)  ring.style.display = 'none';
+    if (pop)   pop.style.display = 'none';
+  }
+  window.startComplianceTour = start; // replay from the "Take the tour" button, any time
+  window.addEventListener('resize', reposition);
+  window.addEventListener('scroll', reposition, { passive: true });
+  document.addEventListener('keydown', function(e){ if (active && e.key === 'Escape') end(); });
+
+  // Auto-launch once per browser on first visit
+  if (!seen()){ setTimeout(start, 700); }
+})();
 
 /* ---- The map (adapted from the registry-route US map; brand-green choropleth) ---- */
 var SMALL_STATES = { 'RI':1,'DE':1,'CT':1,'NJ':1,'DC':1,'MD':1,'MA':1,'NH':1,'VT':1 };
