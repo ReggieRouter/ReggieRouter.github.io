@@ -320,7 +320,20 @@
         if (invite && PERSONA_KEYS.includes(invite.role)) {
           try { localStorage.setItem('lp_persona', invite.role); } catch (e) { /* storage off — skip */ }
         }
-        if (invite) await supabase.from('invites').update({ accepted_at: new Date().toISOString() }).eq('id', invite.id);
+        // LEN-245: stamp invite acceptance — and don't let it fail silently. The live
+        // invites table has drifted across migrations (accepted_at vs legacy used_at) and
+        // the UPDATE is RLS-gated, so a swallowed error was leaving invitees stuck on
+        // "Awaiting sign-in". Try accepted_at, fall back to used_at on a missing-column
+        // error, and log if it still won't write. (lp-panel also derives acceptance from
+        // the profile as a safety net, and supabase/invites_accept_fix.sql hardens the DB.)
+        if (invite) {
+          const acceptedAt = new Date().toISOString();
+          let { error: accErr } = await supabase.from('invites').update({ accepted_at: acceptedAt }).eq('id', invite.id);
+          if (accErr && accErr.code === 'PGRST204' && /accepted_at/.test(accErr.message || '')) {
+            ({ error: accErr } = await supabase.from('invites').update({ used_at: acceptedAt }).eq('id', invite.id));
+          }
+          if (accErr) console.warn('[onboarding] could not stamp invite acceptance:', accErr.message);
+        }
         window.location.href = invite ? '/index.html' : '/pending.html';
       }
     }
