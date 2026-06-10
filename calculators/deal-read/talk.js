@@ -73,9 +73,21 @@ function fitCount(pool, fico, tib, rev){ return pool.filter(l=>lenderQualifies(l
 
 // ── Combined borrower talk track (call / text / email) ───────
 // Mirrors the established expectation-setting engine. Reads global S.
+// Talk-track lead product (LEN-227): the Overview script ALWAYS leads with
+// Short-Term Financing (MCA/RBF) by default, then the pager cycles the rest —
+// UNLESS the rep set a "Requested product", in which case we lead with that.
+function talkLeadLabel(prods){
+  if(!prods||!prods.length) return null;
+  const fams=prods.map(([l])=>[l, prodFamily(l)]);
+  const req=S.reqProduct;
+  if(req){ const m=fams.find(([l,f])=> f===req || (req==='mca'&&f==='rbf')); if(m) return m[0]; }
+  const mca=fams.find(([l,f])=> f==='mca'||f==='rbf'); if(mca) return mca[0];
+  return prods[0][0];
+}
 function buildCombinedTracks(code, tier, prods, industry){
   const ind = industry.replace(/\s*\(.*?\)\s*/g,' ').trim();
-  const lead = prods.length ? pn(prods[0][0]) : null;
+  const leadLabel = talkLeadLabel(prods);
+  const lead = leadLabel ? pn(leadLabel) : null;
   let dest=null;
   prods.forEach(([l])=>{ const p=pn(l); if(p.credit && (!dest || p.rank>dest.rank)) dest={...p}; });
   const climbing = !!(lead && dest && dest.rank>lead.rank);

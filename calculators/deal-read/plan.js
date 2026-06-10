@@ -72,6 +72,18 @@ function pathBody(lang, leadLabel, destLabel, climbing){
     : `You already qualify for strong, low-cost capital with ${leadLabel}. From here, the focus is protecting the credit and cash flow that got you there, so every future round is even more favorable.`;
 }
 function pdfStrip(s){ return String(s).replace(/[⟦⟧]/g,'').replace(/<[^>]+>/g,''); }
+// Personalize-this-estimate line for the PDF (LEN-227).
+function prepLine(lang){
+  const p=S.prep||{}; const by=(p.by||'').trim(), co=(p.company||'').trim(), forr=(p.forr||'').trim();
+  if(!by && !co && !forr) return '';
+  const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const byLbl=lang==='es'?'Preparado por':'Prepared by';
+  const forLbl=lang==='es'?'Preparado para':'Prepared for';
+  const parts=[];
+  if(by||co){ const who=[by,co].filter(Boolean).map(esc).join(' · '); parts.push(`<b>${byLbl}:</b> ${who}`); }
+  if(forr){ parts.push(`<b>${forLbl}:</b> ${esc(forr)}`); }
+  return `<div class="pd-prep" style="font-size:11.5px;line-height:1.5;color:var(--ink-2);margin:-14px 0 22px;padding-bottom:14px;border-bottom:1px solid var(--line)">${parts.join('&nbsp;&nbsp;·&nbsp;&nbsp;')}</div>`;
+}
 
 function renderPdfDoc(){
   const doc=document.getElementById('pdfDoc'); if(!doc) return;
@@ -114,7 +126,7 @@ function renderPdfDoc(){
   const estBanner=`<div style="border:1px solid var(--t3-line);background:#fbf4e4;border-radius:8px;padding:13px 15px;margin:18px 0 4px"><div style="font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#8a6a14;margin-bottom:4px">${t.estH}</div><div style="font-size:12px;line-height:1.55;color:#6b5310">${t.estBody}</div></div>`;
   // APR (NY/CA)
   let aprHtml='';
-  if(atr && (S.state==='NY'||S.state==='CA')){
+  if(atr && aprStateRequired(S.state)){
     const apr=approxAPR(atr);
     if(apr){ const aprTxt=`${apr.rep}%${apr.lo!==apr.hi?` (range ${apr.lo}-${apr.hi}%)`:''}`;
       let why=aprWhy(atr,lang); const af=affordability(d,atr); if(why.indexOf('$X_COST')>=0) why=why.replace('$X_COST', af?fmtUSD(af.costTotal):'the fixed fee');
@@ -137,6 +149,7 @@ function renderPdfDoc(){
     <div class="pd-eyebrow">${t.eyebrow}</div>
     <h1>${t.title}</h1>
     <div class="pd-sub">${t.sub(ind)} · ${today}</div>
+    ${prepLine(lang)}
     ${estBanner}
     ${prof.length?`<h2>${t.profile}</h2><p>${prof.join(' &nbsp;·&nbsp; ')}</p>`:''}
     <h2>${t.today}</h2>
@@ -191,6 +204,7 @@ function factorDoc(kind, d, lang, t){
     <div class="pd-eyebrow">${t.eyebrow}</div>
     <h1>${t.facTitle[kind]}</h1>
     <div class="pd-sub">${t.facSub} · ${today}</div>
+    ${prepLine(lang)}
     ${estBanner}
 
     <div class="pd-atr">

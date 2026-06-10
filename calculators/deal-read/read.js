@@ -14,6 +14,7 @@ const S = {
   lang:'en', tipHidden:false,
   facOpen:{}, uwOpen:false, uwMode:'swipe', uwIdx:0, uwCat:'all', uw:{},
   pdfScope:'combined',
+  prep:{by:'',company:'',forr:''}, persOpen:false,
   tweaks:{ accent:'forest', density:'regular', disclosures:'show', deltas:'on' },
 };
 const LS='lp_deal_read_v1';
@@ -22,7 +23,7 @@ function save(){ try{ localStorage.setItem(LS, JSON.stringify({
   reqProduct:S.reqProduct, expTerm:S.expTerm, expPayFreq:S.expPayFreq, state:S.state, stateConfirmed:S.stateConfirmed, expOpen:S.expOpen, fundBy:S.fundBy,
   deposits:S.deposits, depOpen:S.depOpen, depCount:S.depCount, aprOpen:S.aprOpen, tibUnit:S.tibUnit, affOpen:S.affOpen,
   amtOpen:S.amtOpen, rateMode:S.rateMode, cmpGates:S.cmpGates, cmpLocApr:S.cmpLocApr,
-  lang:S.lang, tipHidden:S.tipHidden, facOpen:S.facOpen, uwOpen:S.uwOpen, uwMode:S.uwMode, uwIdx:S.uwIdx, uwCat:S.uwCat, uw:S.uw, tweaks:S.tweaks
+  lang:S.lang, tipHidden:S.tipHidden, facOpen:S.facOpen, uwOpen:S.uwOpen, uwMode:S.uwMode, uwIdx:S.uwIdx, uwCat:S.uwCat, uw:S.uw, prep:S.prep, persOpen:S.persOpen, tweaks:S.tweaks
 })); }catch(e){} }
 function load(){ try{ const d=JSON.parse(localStorage.getItem(LS)||'{}');
   if(d.selected) S.selected=d.selected; if(d.q) S.q=d.q; if(d.mode) S.mode=d.mode;
@@ -35,6 +36,7 @@ function load(){ try{ const d=JSON.parse(localStorage.getItem(LS)||'{}');
   if(d.lang) S.lang=d.lang; S.tipHidden=!!d.tipHidden;
   if(d.facOpen) S.facOpen=d.facOpen;
   S.uwOpen=!!d.uwOpen; S.uwMode=d.uwMode==='all'?'all':'swipe'; S.uwIdx=d.uwIdx||0; S.uwCat=d.uwCat||'all'; if(d.uw&&typeof d.uw==='object') S.uw=d.uw;
+  if(d.prep&&typeof d.prep==='object') S.prep={by:d.prep.by||'',company:d.prep.company||'',forr:d.prep.forr||''}; S.persOpen=!!d.persOpen;
   if(d.tweaks) S.tweaks={...S.tweaks,...d.tweaks};
 }catch(e){} }
 
@@ -45,6 +47,8 @@ const I = {
   pdf:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
   up:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>',
   dn:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  cleft:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+  cright:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
   tag:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r="1"/></svg>',
   lift:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>',
   drag:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>',
@@ -109,7 +113,7 @@ function renderInputs(){
   const el=document.getElementById('inputs');
   const tip = S.tipHidden ? '' :
     `<div class="tip">Enter the four factors. The read updates live — <b>amount, term, rate, payment, and product</b> — and shows exactly which factor drives each, plus what to tell the borrower.<button class="tip-x" onclick="hideTip()" title="Dismiss">×</button></div>`;
-  el.innerHTML = tip +
+  el.innerHTML = `<div class="in-flow">` + tip +
     `<div class="in-sec-label">Borrower profile</div>
      <div class="fields">
        ${fieldIndustry()}
@@ -123,7 +127,9 @@ function renderInputs(){
      <div style="height:20px"></div>
      ${expectationsPanel()}
      ${uwPanel()}
-     <div id="fundingRangeHost" class="fr-host">${fundingRangeBlock()}</div>`;
+     <div id="fundingRangeHost" class="fr-host">${fundingRangeBlock()}</div>
+     ${dealContextPanel()}</div>` +
+     dealFooter();
   if(S.indEditing){ const i=document.getElementById('indSearch'); if(i){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); } }
 }
 function expectationsPanel(){
@@ -143,11 +149,53 @@ function expectationsPanel(){
         <div class="field"><label>Requested amount</label><div class="sel-box"><span class="pre">$</span><input type="number" id="exp-amt" placeholder="optional" value="${S.reqAmt!=null?S.reqAmt:''}" oninput="onExp('reqAmt',this.value)"></div></div>
         <div class="field"><label>Expected term</label><div class="sel-box"><input type="number" id="exp-term" placeholder="optional" value="${S.expTerm!=null?S.expTerm:''}" oninput="onExp('expTerm',this.value)"><span class="suf">mos</span></div></div>
         <div class="field"><label>Expected payment</label>${sel('exp-pay',PAY_EXP,S.expPayFreq,"onExp('expPayFreq',this.value)")}</div>
-        <div class="field"><label>Business state · for APR</label>${sel('exp-state',US_STATES,S.state,"onExp('state',this.value)")}</div>
       </div>
     </div>
   </div>`;
 }
+// ── Deal context (LEN-227) — standard bottom-left block matching the other
+// calcs: borrower state (for compliance) + the standard PDF "Personalize this
+// estimate" doc-details component. ──
+function dealContextPanel(){
+  const p=S.prep||{};
+  const stateOpts=US_STATES.map(([v,l])=>`<option value="${v}" ${S.state===v?'selected':''}>${l}</option>`).join('');
+  return `<div class="lp-deal-context">
+    <div class="lp-state-field">
+      <label class="lp-state-lbl">Borrower state <span class="lbl-i" tabindex="0" role="img" aria-label="Why state matters" title="Some states require an APR disclosure on commercial financing offers (currently ${aprStateInline().replace(/&amp;/g,'&')}). Set the state and the read flags it automatically — this list updates as new disclosure laws take effect.">${I.info}</span> <span class="lbl-note">for compliance</span></label>
+      <div class="sel-box state-sel"><select id="exp-state" onchange="onExp('state',this.value)">${stateOpts}</select><span class="chev">${I.dn}</span></div>
+    </div>
+    <details class="lp-doc-details" id="persDetails"${S.persOpen?' open':''} ontoggle="S.persOpen=this.open;save()">
+      <summary>
+        <span class="lp-dd-icon">${I.pdf}</span>
+        <span class="lp-dd-text">
+          <span class="lp-dd-kicker">PDF DETAILS</span>
+          <span class="lp-dd-title">Personalize this estimate</span>
+          <span class="lp-dd-helper">Prepared by · Company · Prepared for</span>
+        </span>
+        <span class="lp-dd-edit">Edit</span>
+        <span class="lp-dd-caret"></span>
+      </summary>
+      <div class="lp-doc-details-grid">
+        <label>Prepared by<input type="text" id="pers-by" autocomplete="off" placeholder="Your name" value="${escAttr(p.by)}" oninput="onPrep('by',this.value)"></label>
+        <label>Company<input type="text" id="pers-co" autocomplete="off" placeholder="Your company" value="${escAttr(p.company)}" oninput="onPrep('company',this.value)"></label>
+        <label>Prepared for<input type="text" id="pers-for" autocomplete="off" placeholder="Borrower name · use of funds" value="${escAttr(p.forr)}" oninput="onPrep('forr',this.value)"></label>
+      </div>
+      <p class="lp-doc-details-hint">Optional — appears on the saved PDF and the Deal Log entry.</p>
+    </details>
+  </div>`;
+}
+function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+// Standard LendPaper footer (LEN-227) — mirrors the SPA shell sidebar footer so the
+// calc carries the same design language; pinned to the bottom-left of the input column.
+function dealFooter(){
+  return `<footer class="dr-foot">
+    <p class="dr-foot-tag">Built by someone who worked the desk.</p>
+    <p>© 2026 LendPaper</p>
+    <p><a href="mailto:hello@lendpaper.com?subject=LendPaper%20%7C%20Services%20Question&body=Hi%20LendPaper%2C%20%0A%0AReaching%20out%20because%20I%20have%20a%20question%20about%20your%20services.%20Can%20you%20please%20contact%20me%20when%20you%20have%20a%20moment%3F%0A%0AThank%20you%2C">hello@lendpaper.com</a></p>
+    <p class="dr-foot-links"><a href="/privacy">Privacy</a><span class="sep" aria-hidden="true">·</span><a href="/terms">Terms</a></p>
+  </footer>`;
+}
+function onPrep(kind,val){ if(!S.prep) S.prep={by:'',company:'',forr:''}; S.prep[kind]=val; save(); }
 function toggleExp(){
   S.expOpen=!S.expOpen; save();
   const p=document.getElementById('expPanel'), tog=document.querySelector('.exp-toggle');
@@ -165,16 +213,15 @@ function onExp(kind,val){
 // Business State must be actively confirmed before exporting — documented state is more defensible than silence
 function requireState(){
   if(S.stateConfirmed) return true;
-  S.expOpen=true; renderInputs();
   const sb=document.getElementById('exp-state');
   if(sb){
     const box=sb.closest('.sel-box'); if(box) box.classList.add('need');
-    const field=sb.closest('.field');
+    const field=sb.closest('.lp-state-field');
     if(field && !field.querySelector('.state-need-note')){
-      const n=document.createElement('div'); n.className='state-need-note'; n.textContent='Confirm the business state before exporting — select it above.';
+      const n=document.createElement('div'); n.className='state-need-note'; n.textContent='Confirm the borrower state before exporting — select it above.';
       field.appendChild(n);
     }
-    try{ sb.focus(); }catch(e){}
+    try{ sb.scrollIntoView({behavior:'smooth',block:'center'}); sb.focus(); }catch(e){}
   }
   return false;
 }
@@ -649,15 +696,14 @@ function renderRead(){
     catchAllBanner(d) +
     `<div class="read-eyebrow eyebrow">Indicative offer</div>
      ${offerBox(d,lv)}
-     ${aprBlockHTML(d, lv)}
      ${introMk}
      ${talkTrackHTML(d)}
      <div class="read-acts">
-       <button class="btn btn-primary" id="copyResultsBtn" onclick="copyResults()">${I.copy}<span>Copy results</span></button>
-       <button class="btn btn-ghost" onclick="openPdf()">${I.pdf}<span>Save PDF</span></button>
+       <button class="btn btn-primary" onclick="openPdf()">${I.pdf}<span>Save Estimate as PDF</span></button>
+       <button class="btn btn-ghost" id="copyResultsBtn" onclick="copyResults()">${I.copy}<span>Copy results</span></button>
      </div>
      ${relatedTools(d, lv)}
-     ${aprToggleHTML(lv)}
+     ${complianceSection(d, lv)}
      ${DISCLAIMER_FOOT}`;
 
   ttBind(d);
@@ -708,7 +754,7 @@ function affordabilityHref(d, lv){
     p.set('freq', a.perLabel==='/day'?'daily':a.perLabel==='/wk'?'weekly':'monthly');
     if(a.termM) p.set('term', Math.round(a.termM));
   } else { const tv=handoffTerm(lv); if(tv) p.set('term', tv); }
-  if(S.state==='CA'||S.state==='NY') p.set('state', S.state);
+  if(aprStateRequired(S.state)) p.set('state', S.state);
   const e=(d && d.code)?NAICS_DB.find(n=>n.c===d.code):null;
   if(e && e.d) p.set('deal', e.d);
   p.set('src','deal-read');
@@ -763,6 +809,21 @@ function qualifyRung(key, caution){ const r=QUALIFY_LADDER[key]||QUALIFY_LADDER.
 function applyUseOverride(fam, res){
   if((fam==='equip'||fam==='factor') && (res.rung==='likely'||res.rung==='possible')) res.word='Depends on use';
   return res;
+}
+// Eligible-products pill verdict (LEN-227) — collapses the 5-rung credit ladder
+// to the 3-tier hierarchy Steve specified: Likely (clears the standard-pull bar)
+// → Unlikely (borderline / below the comfortable bar) → DN (does not qualify in a
+// standard pull). Credit-agnostic products keep their honest "Depends on use".
+const VERDICT3={
+  likely:  {word:'Likely',   dot:'#1f9d57', color:'#1f7a4d'},
+  unlikely:{word:'Unlikely', dot:'#e07b39', color:'#b5611f'},
+  dn:      {word:'DN',       dot:'#d2524f', color:'#c0413e'},
+};
+const RUNG_TO_V3={likely:'likely', possible:'unlikely', unlikely:'unlikely', vunlikely:'dn', buildup:'dn'};
+function verdict3(q){
+  if(q.word==='Depends on use') return {word:q.word, dotColor:q.dotColor, statusColor:q.statusColor};
+  const v=VERDICT3[RUNG_TO_V3[q.rung]||'unlikely'];
+  return {word:v.word, dotColor:v.dot, statusColor:v.color};
 }
 // Verdict driven by the WORST limiting factor (not the average) — the file reads as
 // risky as its hardest constraint, matching "credit is the heaviest factor." Each
@@ -876,7 +937,7 @@ function rateTile(d, lv){
   const centsTxt = c ? (c.lo===c.hi?`${c.hi}¢`:`${c.lo}–${c.hi}¢`) : atrRateText(atr.rate);
   const apr=approxAPR(atr);
   const aprTxt = apr ? (apr.lo===apr.hi?`${apr.rep}%`:`${apr.lo}–${apr.hi}%`) : null;
-  const stateOn = (S.state==='CA'||S.state==='NY');
+  const stateOn = aprStateRequired(S.state);
   const aprPill = stateOn ? `<span class="rate-apr-pill">APR disclosure applies</span>` : '';
   let primary, subs='';
   if(factorKind){
@@ -983,20 +1044,33 @@ function displayOrderedProds(list){
     .sort((a,b)=>{ const pa=PROD_DISPLAY_PRIORITY[prodFamily(a.p[0])]??99, pb=PROD_DISPLAY_PRIORITY[prodFamily(b.p[0])]??99; return (pa-pb)||(a.i-b.i); })
     .map(x=>x.p);
 }
+// Eligible products ranked best-fit first (LEN-227): Likely → Possible →
+// Unlikely → Very unlikely → build-up. Rendered as a standard pull-list — each
+// row is a product with a verdict pill and a dropdown chevron (tap to expand
+// the lever). Replaces the old card grid + "tap any tile" hint.
+const RUNG_ORDER={likely:0,possible:1,unlikely:2,vunlikely:3,buildup:4};
+function verdictOrderedProds(d){
+  return (d.prods||[]).slice().sort((a,b)=>{
+    const ra=RUNG_ORDER[productQualify(a[0],d).rung]; const rb=RUNG_ORDER[productQualify(b[0],d).rung];
+    return (ra==null?9:ra)-(rb==null?9:rb);
+  });
+}
 function prodKeynote(d){
-  const list=displayOrderedProds(d.prods); if(!list.length) return '';
-  const cards=list.map((p)=>{
-    const label=p[0]; const q=productQualify(label,d); const display=prodDisplay(label);
+  const list=verdictOrderedProds(d); if(!list.length) return '';
+  const rows=list.map((p)=>{
+    const label=p[0]; const q=productQualify(label,d); const v=verdict3(q); const display=prodDisplay(label);
     const sub=prodSubline(label);
-    return `<button class="kn-card" onclick="openLever('product')">
-      <div class="kn-name">${ttEsc(display)}</div>
-      ${sub?`<div class="kn-sub">${sub}</div>`:''}
-      <div class="kn-status"><span class="kn-dot" style="background:${q.dotColor}"></span><span class="kn-word" style="color:${q.statusColor}">${q.word}</span></div>
-      ${q.caution?`<div class="kn-caution">${I.warn}<span>${q.caution}</span></div>`:''}
+    return `<button class="kn-item" onclick="openLever('product')">
+      <span class="kn-item-main">
+        <span class="kn-item-name">${ttEsc(display)}</span>
+        ${sub?`<span class="kn-item-sub">${sub}</span>`:''}
+        ${q.caution?`<span class="kn-item-caution">${I.warn}<span>${q.caution}</span></span>`:''}
+      </span>
+      <span class="kn-pill"><span class="kn-dot" style="background:${v.dotColor}"></span><span class="kn-word" style="color:${v.statusColor}">${v.word}</span></span>
+      <span class="kn-item-chev">${I.dn}</span>
     </button>`;
   }).join('');
-  const hint=`<div class="kn-hint">${I.info}<span>Tap any tile to see what it means &amp; how to explain it</span></div>`;
-  return `<div class="kn-wrap"><div class="kn-eyebrow eyebrow">Eligible products</div><div class="kn-row">${cards}${hint}</div></div>`;
+  return `<div class="kn-wrap"><div class="kn-eyebrow eyebrow">Eligible products</div><div class="kn-list">${rows}</div></div>`;
 }
 // Quiet subline under the surface label. "Short-Term Financing" carries the
 // broker shorthand so the umbrella stays legible.
@@ -1089,14 +1163,31 @@ function catchAllBanner(d){
     </div>
   </div>`;
 }
-function aprActive(){ return S.state==='NY'||S.state==='CA'||S.aprOpen; }
-function aprToggleHTML(lv){
-  if(!lv) return '';
-  if(S.state==='NY'||S.state==='CA') return `<div class="apr-toggle req"><span class="apr-tg-dot"></span>APR disclosure required in ${S.state} — shown above.</div>`;
-  if(S.aprOpen) return `<button class="apr-toggle on" onclick="toggleApr()"><span class="apr-tg-dot"></span>APR preview shown above<span class="apr-tg-x">hide</span></button>`;
-  return `<button class="apr-toggle" onclick="toggleApr()">${I.info}<span>Operating in <b>CA or NY</b>? APR disclosure applies — click to show it</span></button>`;
+function aprActive(){ return aprStateRequired(S.state)||S.aprOpen; }
+function toggleApr(){ if(aprStateRequired(S.state)) return; S.aprOpen=!S.aprOpen; save(); renderRead(); }
+// Subdued MCA receivables disclaimer — lives in the bottom compliance section now,
+// not in the talk-track foot (LEN-227).
+function hasMCAProd(d){ return (d.prods||[]).some(([l])=>l==='MCA'||l==='RBF'); }
+function mcaComplianceHTML(d){
+  if(!hasMCAProd(d)) return '';
+  return `<div class="cmpl-note">A <b>merchant cash advance</b> is a purchase of future receivables, not a loan, and does not build business credit. Final terms always depend on the business’s performance and each lender’s underwriting — nothing here is a commitment or offer to lend.</div>`;
 }
-function toggleApr(){ if(S.state==='NY'||S.state==='CA') return; S.aprOpen=!S.aprOpen; save(); renderRead(); }
+// Bottom "Compliance & disclosures" section: the APR box now surfaces HERE
+// (lower in the read), replacing the old top placement + the blue "shown above"
+// strip. Carries the APR disclosure + the subdued MCA receivables note.
+function complianceSection(d, lv){
+  let aprHtml='', cta='';
+  if(lv){
+    if(aprActive()){ aprHtml=aprBlockHTML(d, lv); }
+    else { cta=`<button class="apr-toggle" onclick="toggleApr()">${I.info}<span>Operating in <b>${aprStateInline()}</b>? APR disclosure applies — click to preview it</span></button>`; }
+  }
+  const mca=mcaComplianceHTML(d);
+  if(!aprHtml && !cta && !mca) return '';
+  return `<div class="cmpl-sec">
+    <div class="cmpl-eyebrow eyebrow">Compliance &amp; disclosures</div>
+    ${aprHtml}${cta}${mca}
+  </div>`;
+}
 
 // ── cyclable constraints (the prominent cross-effect) ──
 let _constraints=[], ccIndex=0;
@@ -1483,18 +1574,19 @@ function dismissTTHint(){ S._ttHintState='dismissed'; const p=document.querySele
 function talkTrackHTML(d){
   TTI=buildTalkItems(d); ttiIndex=0; ttActive='talk';
   const it=TTI[0]; const multi=TTI.length>1;
-  const discl = S.tweaks.disclosures==='show' ? `<div class="tt-discl">${ttEsc(it.discl)}</div>` : `<div class="tt-discl"></div>`;
-  // Always-on pager (when >1 page) makes it unmissable that tracks cycle by product type.
+  // Disclaimers moved to the bottom Compliance section (LEN-227) — keep the foot light.
+  const discl = `<div class="tt-discl"></div>`;
+  // Compact single-line pager (LEN-227): prev / "1/N · label" / next, with the
+  // "one per product type" explainer tucked into an info tooltip to save space.
   const pager = multi ? `<div class="tt-pager">
-      <button class="tt-pg-btn" onclick="ttCycle(-1)" aria-label="Previous talk track">${I.up}</button>
-      <span class="tt-pg-lbl">Talk track <b id="ttPgNum">1</b> of ${TTI.length} · <span id="ttPgName">${ttEsc(it.label)}</span></span>
-      <button class="tt-pg-btn" onclick="ttCycle(1)" aria-label="Next talk track">${I.dn}</button>
-      <span class="tt-pg-hint">one per product type — cycle through</span>
+      <button class="tt-pg-btn" onclick="ttCycle(-1)" aria-label="Previous talk track">${I.cleft}</button>
+      <span class="tt-pg-lbl">Talk track <b id="ttPgNum">1</b>/${TTI.length} · <span id="ttPgName">${ttEsc(it.label)}</span></span>
+      <button class="tt-pg-btn" onclick="ttCycle(1)" aria-label="Next talk track">${I.cright}</button>
+      <span class="tt-pg-more">Cycle for more</span>
     </div>` : '';
   return `<div class="tt">
     <div class="tt-head">
       <span class="eyebrow">What you tell the borrower</span>
-      <span class="tt-angle" id="ttAngle">${it.label}</span>
       <div class="tt-seg"><button class="on" data-tt="talk" onclick="ttTab('talk')">Talk</button><button data-tt="text" onclick="ttTab('text')">Text</button><button data-tt="email" onclick="ttTab('email')">Email</button></div>
     </div>
     ${pager}
@@ -1526,7 +1618,6 @@ function ttCycle(dir){
   document.getElementById('tt-email').innerHTML=ttPane(it,'email');
   const pgNum=document.getElementById('ttPgNum'); if(pgNum) pgNum.textContent=ttiIndex+1;
   const pgName=document.getElementById('ttPgName'); if(pgName) pgName.textContent=it.label;
-  document.getElementById('ttAngle').textContent=it.label;
 }
 function copyTT(){
   const it=TTI[ttiIndex];
@@ -1776,7 +1867,7 @@ function copyResults(){
     L.push(`Payment: ${lv.pay}  ·  Lead product: ${prodDisplay(lv.product)}`);
     const aff=affordability(d,lv.atr);
     if(aff) L.push(`Est. payment: ${aff.perPayment!=null?fmtUSD(aff.perPayment)+aff.perLabel:'scales w/ invoices'}  ·  Total payback: ${fmtUSD(aff.paybackTotal)}  ·  Cost of capital: ${fmtUSD(aff.costTotal)}`);
-    if(S.state==='NY'||S.state==='CA'){ const apr=approxAPR(lv.atr); if(apr) L.push(`APR (${S.state}): ${apr.lo===apr.hi?apr.lo:apr.lo+'–'+apr.hi}%${apr.exact?'':' (approx — short-term product, annualized figure looks high)'}`); }
+    if(aprStateRequired(S.state)){ const apr=approxAPR(lv.atr); if(apr) L.push(`APR (${S.state}): ${apr.lo===apr.hi?apr.lo:apr.lo+'–'+apr.hi}%${apr.exact?'':' (approx — short-term product, annualized figure looks high)'}`); }
   }
   if(S.reqAmt) L.push(`Requested: $${S.reqAmt.toLocaleString()}`);
   if(anyExpectation()){ const gaps=expectationGaps(d, lv?lv.atr:null); if(gaps.length){ L.push('Expectation vs. read:'); gaps.forEach(g=>L.push(`  • ${g.lever}: wants ${g.exp} → ${g.act}`)); } }
@@ -1828,10 +1919,13 @@ function saveDealReadEstimate(pdfGenerated){
     const e=NAICS_DB.find(n=>n.c===d.code); const lv=computeLevers(d);
     const aff=lv?affordability(d,lv.atr):null;
     let apr=null;
-    if((S.state==='NY'||S.state==='CA') && lv){ const a=approxAPR(lv.atr); if(a) apr=(a.lo===a.hi?String(a.lo):a.lo+'–'+a.hi)+'%'; }
+    if(aprStateRequired(S.state) && lv){ const a=approxAPR(lv.atr); if(a) apr=(a.lo===a.hi?String(a.lo):a.lo+'–'+a.hi)+'%'; }
+    const prep=S.prep||{};
     window.saveEstimate({
       calculator_type:'deal_read',
+      prepared_for: prep.forr||'',
       params:{
+        prepared_by: prep.by||'', prepared_by_company: prep.company||'',
         naics:d.code, industry:e?e.d:'', tier:d.tier,
         fico:S.fico, tib:S.tib, monthly_revenue:S.rev, requested_amount:S.reqAmt,
         lead_product: lv?prodDisplay(lv.product):null,

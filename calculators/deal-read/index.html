@@ -73,8 +73,19 @@ button{font-family:var(--font)}
 /* ── Sheet ───────────────────────────────────────── */
 .sheet{max-width:1200px;margin:0 auto;background:var(--bg);min-height:calc(100vh - 66px);border-left:1px solid var(--line);border-right:1px solid var(--line)}
 .split{display:grid;grid-template-columns:1fr 1fr}
-.col-in{border-right:1px solid var(--line);padding:26px var(--pad) 34px}
+.col-in{border-right:1px solid var(--line);padding:26px var(--pad) 34px;display:flex;flex-direction:column}
 .col-read{padding:26px var(--pad) 34px}
+/* left-column footer (LEN-227) — standard calc design-language footer, pinned to
+   the bottom-left so it fills the empty space under a short input column */
+.in-flow{flex:0 1 auto}
+.dr-foot{margin-top:auto;padding-top:30px;font-size:11.5px;line-height:1.6;color:var(--muted)}
+.dr-foot p{margin:0 0 2px}
+.dr-foot-tag{font-style:italic;opacity:.8;margin-bottom:8px}
+.dr-foot a{color:var(--green);text-decoration:none;font-weight:600}
+.dr-foot a:hover{text-decoration:underline}
+.dr-foot-links{display:flex;gap:9px;align-items:center;margin-top:6px}
+.dr-foot-links .sep{color:var(--faint)}
+@media(max-width:880px){ .dr-foot{margin-top:26px} }
 
 /* ── intro tip ──────────────────────────────────── */
 .tip{
@@ -295,12 +306,15 @@ button{font-family:var(--font)}
 .tt-hint b{font-weight:800}
 .tt-hint-x{margin-left:auto;flex:0 0 auto;border:none;background:none;color:var(--muted);font-size:16px;line-height:1;cursor:pointer;padding:0 2px}
 .tt-hint-x:hover{color:var(--green-dk)}
-.tt-pager{display:flex;align-items:center;gap:10px;margin:0 15px 12px;padding:9px 12px;background:var(--green-wash);border:1px solid var(--green-line);border-radius:9px;flex-wrap:wrap}
-.tt-pg-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--green-line);background:var(--bg);color:var(--green-dk);border-radius:7px;cursor:pointer;transition:all .14s;flex:0 0 auto}
+/* compact single-line pager (LEN-227) */
+.tt-pager{display:flex;align-items:center;gap:7px;margin:0 15px 11px;padding:4px 8px;background:var(--green-wash);border:1px solid var(--green-line);border-radius:8px}
+.tt-pg-btn{display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border:1px solid var(--green-line);background:var(--bg);color:var(--green-dk);border-radius:7px;cursor:pointer;transition:all .14s;flex:0 0 auto}
 .tt-pg-btn:hover{border-color:var(--green);color:var(--green);background:#fff}
-.tt-pg-lbl{font-size:12.5px;font-weight:700;color:var(--green-dk)}
+.tt-pg-lbl{font-size:12px;font-weight:700;color:var(--green-dk)}
 .tt-pg-lbl b{font-weight:800}
-.tt-pg-hint{font-size:11px;color:var(--green);margin-left:auto}
+.tt-pg-tip{margin-left:auto;display:inline-flex;align-items:center;color:var(--green);opacity:.6;cursor:help;flex:0 0 auto}
+.tt-pg-tip:hover,.tt-pg-tip:focus{opacity:1;outline:none}
+.tt-pg-more{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green);opacity:.75;flex:0 0 auto;white-space:nowrap}
 .tt-bodywrap{display:flex;align-items:stretch}
 .tt-body{flex:1;min-width:0;padding:0 15px}
 .tt-side{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:10px 13px;border-left:1px solid var(--line-2)}
@@ -576,6 +590,21 @@ button{font-family:var(--font)}
 .apr-toggle.req{cursor:default}
 .apr-tg-dot{width:7px;height:7px;border-radius:50%;background:#3f6d8c;flex:0 0 auto}
 .apr-tg-x{margin-left:auto;font-weight:700;text-decoration:underline}
+/* bottom Compliance & disclosures section (LEN-227) */
+.cmpl-sec{margin-top:22px;padding-top:16px;border-top:1px solid var(--line-2)}
+.cmpl-eyebrow{margin-bottom:10px}
+.cmpl-sec .apr-block,.cmpl-sec .apr-toggle{margin-top:0}
+.cmpl-sec .apr-toggle{margin-top:12px}
+.cmpl-note{font-size:11px;line-height:1.5;color:var(--muted);margin-top:12px;text-wrap:pretty}
+.cmpl-note b{color:var(--ink-2);font-weight:600}
+/* state label info (i) + compliance sub-note (LEN-227) */
+.lbl-i{display:inline-flex;vertical-align:-1px;color:var(--faint);cursor:help;margin:0 1px}
+.lbl-i:hover,.lbl-i:focus{color:var(--green);outline:none}
+.lbl-note{font-weight:700;color:var(--faint)}
+/* personalize-this-estimate hint (LEN-227) */
+.pers-hint{font-size:10.5px;line-height:1.5;color:var(--muted);margin-top:11px}
+/* copy-results (ghost) success feedback (LEN-227) */
+.btn-ghost.ok{background:var(--t1-bg);border-color:var(--t1-line);color:var(--t1)}
 
 /* reality check (band) — constraints + gaps, subtle */
 .reality{margin-bottom:22px}
@@ -908,8 +937,48 @@ button{font-family:var(--font)}
 .kn-word{font-size:11.5px;font-weight:700}
 .kn-caution{display:flex;align-items:flex-start;gap:5px;margin-top:7px;font-size:10.5px;font-weight:600;color:var(--t3);line-height:1.4}
 .kn-caution svg{flex:0 0 auto;margin-top:1px;color:var(--t3)}
-.kn-hint{min-width:0;display:flex;align-items:center;gap:8px;padding:13px 14px;font-size:11px;line-height:1.45;color:var(--t3);background:transparent}
-.kn-hint svg{color:var(--green);flex:0 0 auto}
+.kn-hint{min-width:0;display:flex;align-items:center;gap:8px;padding:13px 14px;font-size:11px;line-height:1.45;color:var(--muted);background:transparent}
+.kn-hint svg{color:var(--faint);flex:0 0 auto}
+/* Eligible-products pull-list (LEN-227): ranked rows, verdict pill + dropdown chevron */
+.kn-list{display:flex;flex-direction:column;gap:7px}
+.kn-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:11px 13px;cursor:pointer;transition:border-color .15s,box-shadow .15s;font-family:var(--font)}
+.kn-item:hover{border-color:var(--green-line);box-shadow:0 2px 8px rgba(20,60,30,.07)}
+.kn-item-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.kn-item-name{font-size:14.5px;font-weight:800;letter-spacing:-.015em;color:var(--ink);line-height:1.2}
+.kn-item-sub{font-size:10.5px;font-weight:600;color:var(--muted)}
+.kn-item-caution{display:flex;align-items:flex-start;gap:5px;font-size:10.5px;font-weight:600;color:var(--t3);line-height:1.4}
+.kn-item-caution svg{flex:0 0 auto;margin-top:1px;color:var(--t3)}
+.kn-pill{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;background:var(--bg-2);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.kn-pill .kn-word{font-size:11px;font-weight:700}
+.kn-item-chev{flex:0 0 auto;color:var(--faint);display:flex}
+.kn-item:hover .kn-item-chev{color:var(--green)}
+/* standard PDF Details + borrower-state deal-context (LEN-227, matches other calcs) */
+.lp-deal-context{margin-top:24px;padding-top:20px;border-top:1px solid var(--line-2)}
+.lp-state-field{margin-bottom:16px}
+.lp-state-lbl{display:block;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.state-sel{max-width:none}
+.state-sel select{flex:1;min-width:0;border:none;outline:none;background:none;font-family:var(--font);font-size:15px;font-weight:600;color:var(--ink);cursor:pointer;appearance:none;-webkit-appearance:none}
+.sel-box.need{border-color:var(--t3)!important;box-shadow:0 0 0 3px var(--t3-bg)}
+.state-need-note{font-size:11px;font-weight:600;color:#a9750f;margin-top:7px}
+.lp-doc-details{margin:0;padding:0;border:1px solid #d9e7df;border-left:4px solid var(--green);border-radius:12px;background:#fbfdfc}
+.lp-doc-details>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px}
+.lp-doc-details>summary::-webkit-details-marker{display:none}
+.lp-dd-icon{flex:0 0 auto;width:32px;height:32px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;display:flex;align-items:center;justify-content:center;color:var(--green)}
+.lp-dd-text{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+.lp-dd-kicker{font-size:11px;font-weight:800;color:#64748b;letter-spacing:.12em}
+.lp-dd-title{font-size:14px;font-weight:800;color:#111827}
+.lp-dd-helper{font-size:12px;font-weight:500;color:#64748b}
+.lp-doc-details[open] .lp-dd-helper{display:none}
+.lp-dd-edit{flex:0 0 auto;font-size:12px;font-weight:800;color:var(--green);border:1px solid #d9e7df;border-radius:8px;padding:6px 12px;background:#fff}
+.lp-doc-details>summary:hover .lp-dd-edit{border-color:var(--green)}
+.lp-dd-caret{flex:0 0 auto;width:16px;text-align:center;font-size:20px;font-weight:800;color:#64748b;line-height:1}
+.lp-doc-details:not([open]) .lp-dd-caret::after{content:"+"}
+.lp-doc-details[open] .lp-dd-caret::after{content:"\2013"}
+.lp-doc-details-grid{display:grid;grid-template-columns:1fr;gap:12px;padding:2px 16px 8px}
+.lp-doc-details-grid label{display:flex;flex-direction:column;gap:4px;font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
+.lp-doc-details-grid input{padding:9px 11px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-weight:500;color:#111827;text-transform:none;letter-spacing:0;font-family:inherit;background:#fff}
+.lp-doc-details-grid input:focus{outline:none;border-color:var(--green)}
+.lp-doc-details-hint{margin:0;padding:0 16px 14px;font-size:10.5px;color:#94a3b8}
 /* offer-metrics now holds only the full-width Funding range tile (amount-tile spans
    grid-column 1/-1); Term/Rate/Payment tiles were removed in LEN-155. */
 
@@ -1079,7 +1148,7 @@ select.uw-ctrl{cursor:pointer}
         <button class="on" data-lang="en" onclick="setLang('en')">EN</button>
         <button data-lang="es" onclick="setLang('es')">ES</button>
       </div>
-      <button class="pdf-print" onclick="savePdf(this)">Save PDF</button>
+      <button class="pdf-print" onclick="savePdf(this)">Save Estimate as PDF</button>
     </div>
   </div>
   <div class="pdf-scroll"><div class="pdf-doc" id="pdfDoc"></div></div>
@@ -1094,6 +1163,10 @@ select.uw-ctrl{cursor:pointer}
 <!-- Shared LendPaper libraries: config (Supabase), PDF pipeline, Quote Log -->
 <script src="../../js/config.js"></script>
 <script src="../../public/assets/js/pdf-helper.js"></script>
+<!-- LEN-227: APR-disclosure state list is derived from the live compliance matrix
+     (mirror of LEGAL.md Part II) so it auto-updates as new laws take effect. Must
+     load before the deal-read scripts (data/talk/deal/plan/read) that read it. -->
+<script src="../../public/assets/js/compliance-rules.js"></script>
 <script type="importmap">{ "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }</script>
 <!-- Hard auth gate (LEN-68, re-applied for launch): requireApprovedUser() redirects logged-out/unapproved users to /login.html. Never add a bare top-level return (ES-module parse error). -->
 <script type="module">

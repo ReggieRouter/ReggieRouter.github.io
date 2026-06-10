@@ -27,7 +27,45 @@ const PROD_REQ={
   mca:'mainly consistent daily or weekly deposits',
 };
 const PAY_EXP=[['','No preference'],['monthly','Monthly'],['weekly','Weekly'],['daily','Daily']];
-const US_STATES=[['','Other state'],['NY','New York'],['CA','California']];
+
+// ── APR-disclosure states (LEN-227) ───────────────────────────
+// Derived from the live compliance matrix (compliance-rules.js, the machine
+// mirror of LEGAL.md Part II) so this list AUTO-UPDATES as new disclosure laws
+// take effect — no hardcoded NY/CA. A state triggers the APR surface when its
+// disclosureLaw.aprRequired === true. Falls back to NY/CA if rules unavailable.
+function aprStateCodes(){
+  try{
+    const st=window.LP_COMPLIANCE_RULES && window.LP_COMPLIANCE_RULES.states;
+    if(st){
+      const out=Object.keys(st).filter(k=>{ const dl=st[k]&&st[k].disclosureLaw; return dl&&dl.aprRequired===true; });
+      if(out.length) return out;
+    }
+  }catch(e){}
+  return ['NY','CA'];
+}
+const STATE_NAME_FALLBACK={NY:'New York',CA:'California',CT:'Connecticut',UT:'Utah',FL:'Florida',MD:'Maryland',DE:'Delaware'};
+function aprStateName(code){
+  try{ const s=window.LP_COMPLIANCE_RULES.states[code]; if(s&&s.name) return s.name; }catch(e){}
+  return STATE_NAME_FALLBACK[code]||code;
+}
+function aprStateRequired(code){ return !!code && aprStateCodes().indexOf(code)>=0; }
+// "Not NY or CA" / "Not NY, CA, or CT" — generated from the live set.
+function notAprStateLabel(){
+  const c=aprStateCodes();
+  if(c.length===1) return 'Not '+c[0];
+  if(c.length===2) return 'Not '+c[0]+' or '+c[1];
+  return 'Not '+c.slice(0,-1).join(', ')+', or '+c[c.length-1];
+}
+// Inline list of code(s) for copy, e.g. "NY & CA" or "NY, CA & CT".
+function aprStateInline(){
+  const c=aprStateCodes();
+  if(c.length===1) return c[0];
+  return c.slice(0,-1).join(', ')+' &amp; '+c[c.length-1];
+}
+function buildUSStates(){
+  return [['', notAprStateLabel()], ...aprStateCodes().map(c=>[c, aprStateName(c)])];
+}
+const US_STATES=buildUSStates();
 function capW(s){ return s? s.charAt(0).toUpperCase()+s.slice(1):s; }
 
 // ── Payment-affordability projection ──────────────────────────
@@ -82,14 +120,15 @@ function approxAPR(atr){
 // the plain-English reason APR looks the way it does
 function aprWhy(atr, lang){
   const factor = atr && atr.rate.kind==='factor';
+  const states = aprStateInline();
   if(lang==='es'){
     return factor
-      ? `El APR es una cifra <b>anualizada</b> exigida en NY y CA. Esto <b>no es un préstamo anual</b> — se paga en ~${atrTermText(atr.term)}. Anualizar un costo de corto plazo hace que el porcentaje parezca enorme aunque el costo en dólares sea modesto. El costo real es el factor <b>${atrRateText(atr.rate)}</b>.`
-      : `El APR mostrado es la tasa anual real del producto, requerida en NY y CA.`;
+      ? `El APR es una cifra <b>anualizada</b> exigida en ${states}. Esto <b>no es un préstamo anual</b> — se paga en ~${atrTermText(atr.term)}. Anualizar un costo de corto plazo hace que el porcentaje parezca enorme aunque el costo en dólares sea modesto. El costo real es el factor <b>${atrRateText(atr.rate)}</b>.`
+      : `El APR mostrado es la tasa anual real del producto, requerida en ${states}.`;
   }
   return factor
-    ? `APR is an <b>annualized</b> figure required in NY &amp; CA. This is <b>not an annual loan</b> — it is repaid in about ${atrTermText(atr.term)}. Annualizing a short, fixed cost makes the percentage look enormous even when the dollar cost is modest. The real price is the <b>${atrRateText(atr.rate)}</b> — roughly <b>$X_COST</b> on the advance.`
-    : `The APR shown is the product's true annual rate, required for disclosure in NY &amp; CA.`;
+    ? `APR is an <b>annualized</b> figure required in ${states}. This is <b>not an annual loan</b> — it is repaid in about ${atrTermText(atr.term)}. Annualizing a short, fixed cost makes the percentage look enormous even when the dollar cost is modest. The real price is the <b>${atrRateText(atr.rate)}</b> — roughly <b>$X_COST</b> on the advance.`
+    : `The APR shown is the product's true annual rate, required for disclosure in ${states}.`;
 }
 
 // ── Expectation vs. reality ───────────────────────────────────
