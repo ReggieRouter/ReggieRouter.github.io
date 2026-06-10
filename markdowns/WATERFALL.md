@@ -67,15 +67,23 @@ const a=h.slice(h.indexOf("const lenderData"));
 console.log((a.slice(0,a.indexOf("</script>")).match(/"name":/g)||[]).length,"lenders survive")'
 ```
 
-### Prevent at the source (publish/scrape pipeline)
-When the publish pipeline serializes lender rows into `waterfall.html`, it MUST
-post-process the emitted array text to escape closers:
-```python
-array_js = array_js.replace("</script", "<\\/script")  # belt-and-suspenders
-```
-Better still: **do not embed raw scraped HTML** (`source_snippet`, cookie banners, nav
-chrome) into the shipped file at all — strip/trim these fields before serialization. They
-are not displayed in the UI and only add bytes + breakage risk.
+### Prevent at the source — DONE (LEN-209)
+`publish.py` (engine repo) **already** escaped closers (`js.replace('</script>', r'<\/script>')`)
+and U+2028, and `verify_waterfall` aborts the publish on any raw `</script>` in the array.
+**So a `publish.py` run could never have shipped this.** The 6/9 break came from a **manual
+edit** to `waterfall.html` (the LEN-198 dedup, commit `1140020`) that bypassed publish.py's
+escaping entirely.
+
+The permanent fix removes the field: `publish.py` no longer emits `source_snippet` at all
+(dropped from `COL_MAP` + the Supabase select). It holds raw scraped page HTML — cookie
+banners, nav chrome, up to ~28 KB/row, ~182 KB / ~33% of the file — that the UI never
+renders and that has been the source of every blank-waterfall landmine (raw `</script>`,
+raw U+2028, both in this same field). Kept in Supabase for provenance; never shipped.
+
+⚠️ **The remaining risk vector is MANUAL edits.** Hand-edits to `waterfall.html` do NOT
+pass through publish.py's escaper. Whenever you edit the data array by hand (dedup, fixups,
+one-off corrections), you MUST run the §1 grep gate yourself before committing. publish.py
+protects only its own output.
 
 ---
 

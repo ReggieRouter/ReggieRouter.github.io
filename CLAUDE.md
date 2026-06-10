@@ -182,10 +182,7 @@ Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules,
 - **Tables:** `lender_data`, `state_registries`, `pending_changes`, `scrape_runs`, `estimates` (Deal Log — see below)
 - **Admin panel:** `lp-panel.html` — manages pending changes, scrape diffs, lender data
 - **Scraper (current):** `~/lendpaper-engine/scrape_blanks_v2.py` — writes diffs to `pending_changes` table. Use this. Do NOT use `fill_blanks.py` (deprecated — writes directly to DB).
-- **Publisher:** `~/lendpaper-engine/publish.py` — regenerates `waterfall.html` from Supabase. **Pending fix needed:** must escape source_snippets before writing to waterfall.html:
-  ```python
-  snippet = (snippet or '').replace('\n', '\\n').replace('\r', '').replace('</script>', '<\\/script>')
-  ```
+- **Publisher:** `~/lendpaper-engine/publish.py` — regenerates `waterfall.html` from Supabase. Escapes `</script>` + U+2028 and verify-aborts on raw `</script>` in the array. As of LEN-209 it **no longer emits `source_snippet`** (raw scraped HTML, never rendered, ~33% of file size, source of every blank-waterfall landmine) — kept in Supabase, stripped from the published file. **⚠️ Manual edits to `waterfall.html` bypass publish.py's escaping** — after any hand-edit to the `lenderData` array, run the guard (must return 0): `awk 'NR>=2658 && NR<=9477' waterfall.html | grep -oE '[^\\]</script' | wc -l`. Full failure-mode reference: `markdowns/WATERFALL.md`.
 - **Job scraper:** `scrapers/scrape_jobs.py` — pending change: switch lender source from waterfall.html parsing to Postgres query (`SELECT lender_name, source_url FROM underwriting_rules WHERE source_url IS NOT NULL`)
 
 ## File Integrity Rule
