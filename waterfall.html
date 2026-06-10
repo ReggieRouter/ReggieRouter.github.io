@@ -2284,17 +2284,18 @@
         </div>
       </div>
 
-      <!-- Verification chips + More filters + Reset -->
+      <!-- Provider type chips + More filters + Reset -->
       <div class="lp-chip-row">
         <span class="lp-chip-label">
-          <span class="lp-info-wrap">Verification
-            <button class="lp-info-btn" data-modal="info-signals" aria-label="About Verification">i</button>
+          <span class="lp-info-wrap">Provider type
+            <button class="lp-info-btn" data-modal="info-providertype" aria-label="About Provider Types">i</button>
           </span>
         </span>
-        <div class="lp-chip-group" id="signals-group">
-          <button class="chip-btn" data-signal="softPull">Soft pull</button>
-          <button class="chip-btn" data-signal="bankVerify">Bank verified</button>
-          <button class="chip-btn" data-signal="noCollateral">No hard collateral</button>
+        <div class="lp-chip-group" id="lendertype-chips">
+          <button class="chip-btn active" data-ltype="direct">Direct</button>
+          <button class="chip-btn active" data-ltype="direct_plus">Direct+</button>
+          <button class="chip-btn active" data-ltype="marketplace">Marketplace</button>
+          <button class="chip-btn active" data-ltype="broker">Broker</button>
         </div>
 
         <div class="lp-more-filters-wrap">
@@ -2336,11 +2337,13 @@
               </select>
             </div>
             <div class="lp-mf-section">
-              <h5>Lender Type</h5>
-              <div class="lp-mf-chips" id="lendertype-chips">
-                <button type="button" class="lp-mf-chip active" data-ltype="direct">Direct</button>
-                <button type="button" class="lp-mf-chip active" data-ltype="marketplace">Marketplace</button>
-                <button type="button" class="lp-mf-chip active" data-ltype="broker">Broker</button>
+              <h5 style="display:flex;align-items:center;gap:5px;">Verification
+                <button class="lp-info-btn" data-modal="info-signals" aria-label="About Verification">i</button>
+              </h5>
+              <div class="lp-mf-chips" id="signals-group">
+                <button type="button" class="lp-mf-chip" data-signal="softPull">Soft pull</button>
+                <button type="button" class="lp-mf-chip" data-signal="bankVerify">Bank verified</button>
+                <button type="button" class="lp-mf-chip" data-signal="noCollateral">No hard collateral</button>
               </div>
             </div>
             <div class="lp-mf-section">
@@ -2617,6 +2620,33 @@
       <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FFF5F5;border:1px solid #FECACA;">
         <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#FFF5F5;color:#E11D48;border:1px solid #FECACA;flex-shrink:0;text-transform:uppercase;margin-top:2px;">NO COLL</span>
         <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:3px;">No Hard Collateral</div><div style="font-size:12px;color:var(--color-text-secondary);">No real estate, equipment, or major assets pledged as security. Typically UCC blanket lien only — lower barrier for borrowers.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Info Modal: Provider Type -->
+<div class="lp-modal-backdrop" id="info-providertype-backdrop">
+  <div class="lp-modal" style="max-width:480px;">
+    <button class="lp-modal-close" data-close="info-providertype-backdrop">&times;</button>
+    <h3 class="lp-modal-title" style="margin-bottom:16px;">Provider type</h3>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0 0 16px 0;">Who actually funds the deal — and how the money reaches the borrower. Filter to the kinds of providers you place with.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#ECFDF5;border:1px solid #A7F3D0;">
+        <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#ECFDF5;color:#059669;border:1px solid #A7F3D0;flex-shrink:0;text-transform:uppercase;margin-top:2px;">DIRECT</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:3px;">Direct lender</div><div style="font-size:12px;color:var(--color-text-secondary);">Funds off its own balance sheet. The name on the term sheet is the party wiring the money — no middleman on the capital.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#EFF6FF;border:1px solid #BFDBFE;">
+        <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;flex-shrink:0;text-transform:uppercase;margin-top:2px;">DIRECT+</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:3px;">Direct + syndication</div><div style="font-size:12px;color:var(--color-text-secondary);">Funds directly on most files, but also taps outside capital or places deals it can't hold itself — so a deal outside its box can still get done.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FAF5FF;border:1px solid #E9D5FF;">
+        <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#FAF5FF;color:#7C3AED;border:1px solid #E9D5FF;flex-shrink:0;text-transform:uppercase;margin-top:2px;">MARKET</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:3px;">Marketplace</div><div style="font-size:12px;color:var(--color-text-secondary);">A platform that routes your deal to a panel of funding partners rather than funding off its own book. One application, several possible funders.</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:8px;background:#FFFBEB;border:1px solid #FDE68A;">
+        <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:#FFFBEB;color:#B45309;border:1px solid #FDE68A;flex-shrink:0;text-transform:uppercase;margin-top:2px;">BROKER</span>
+        <div><div style="font-weight:600;font-size:13px;color:#1F2937;margin-bottom:3px;">Broker / ISO</div><div style="font-size:12px;color:var(--color-text-secondary);">An intermediary (independent sales office) that packages and places deals with funders for a commission. Never funds the deal itself.</div></div>
       </div>
     </div>
   </div>
@@ -4992,7 +5022,7 @@
         "hq_address": null,
         "support_email": null,
         "support_phone": "888-760-1845",
-        "source_url": "https://www.inadvancecapital.com/",
+        "source_url": "https://inadvancecap.com/",
         "source_snippet": "Funder name: In Advance Capital. Call support phone 888-760-1845.",
         "logo_url": "public/assets/lenders/In Advance Lending.png",
         "early_payment_discount": false,
@@ -5959,7 +5989,7 @@
         "hq_address": null,
         "support_email": null,
         "support_phone": null,
-        "source_url": "https://newityld.com/",
+        "source_url": "https://newitymarket.com/",
         "source_snippet": null,
         "logo_url": "public/assets/lenders/Newity.png",
         "early_payment_discount": false,
@@ -8355,7 +8385,7 @@
   const searchInput = document.getElementById('matrix-search');
   const riskButtons = document.querySelectorAll('#risk-group .chip-btn');
   const productButtons = document.querySelectorAll('#product-group .chip-btn');
-  const signalButtons = document.querySelectorAll('#signals-group .chip-btn');
+  const signalButtons = document.querySelectorAll('#signals-group .lp-mf-chip');
   const posButtons = document.querySelectorAll('#pos-group .chip-btn');
   const ficoSlider = document.getElementById('fico-range');
   const ficoVal = document.getElementById('fico-val');
@@ -9076,6 +9106,7 @@
     btn.addEventListener('click', () => {
       btn.classList.toggle('active');
       activeFilters[btn.dataset.signal] = btn.classList.contains('active');
+      syncMoreBtn();
       renderTable();
     });
   });
@@ -9121,7 +9152,7 @@
   const maxfundVal = document.getElementById('maxfund-val');
   const freqChips = document.querySelectorAll('#freq-chips .lp-mf-chip');
   const otherChips = document.querySelectorAll('#other-chips .lp-mf-chip');
-  const ltypeChips = document.querySelectorAll('#lendertype-chips .lp-mf-chip');
+  const ltypeChips = document.querySelectorAll('#lendertype-chips .chip-btn');
   const mfClear = document.getElementById('mf-clear');
 
   const fmtMoney = (v) => v === 0 ? 'Any' : (v >= 1000000 ? `$${(v/1000000).toFixed(v % 1000000 === 0 ? 0 : 1)}M+` : `$${(v/1000).toFixed(0)}k+`);
@@ -9135,7 +9166,10 @@
     if (activeFilters.earlyPayoff) n++;
     if (activeFilters.directOnly) n++;
     if (activeFilters.hasContact) n++;
-    if (activeFilters.lenderTypes.size < 4) n += (4 - activeFilters.lenderTypes.size);
+    // Verification signals now live in the More-filters popover
+    if (activeFilters.softPull) n++;
+    if (activeFilters.bankVerify) n++;
+    if (activeFilters.noCollateral) n++;
     return n;
   };
   const syncMoreBtn = () => {
@@ -9252,14 +9286,16 @@
     activeFilters.directOnly = false;
     activeFilters.hasContact = false;
     activeFilters.industry = '';
-    activeFilters.lenderTypes = new Set(['direct', 'direct_plus', 'marketplace', 'broker']);
+    activeFilters.softPull = false;
+    activeFilters.bankVerify = false;
+    activeFilters.noCollateral = false;
     maxfundSlider.value = 0;
     maxfundVal.textContent = 'Any';
     if (mintermSlider) { mintermSlider.value = 0; mintermVal.textContent = 'Any'; }
     if (industrySelect) industrySelect.value = '';
     freqChips.forEach(c => c.classList.remove('active'));
     otherChips.forEach(c => c.classList.remove('active'));
-    ltypeChips.forEach(c => c.classList.add('active'));
+    signalButtons.forEach(c => c.classList.remove('active'));
     syncMoreBtn();
     renderTable();
   });
@@ -9415,7 +9451,7 @@
       if (backdrop) backdrop.classList.remove('open');
     });
   });
-  document.querySelectorAll('#info-risk-backdrop, #info-product-backdrop, #info-signals-backdrop, #info-position-backdrop').forEach(backdrop => {
+  document.querySelectorAll('#info-risk-backdrop, #info-product-backdrop, #info-signals-backdrop, #info-position-backdrop, #info-providertype-backdrop').forEach(backdrop => {
     backdrop.addEventListener('click', (e) => {
       if (e.target === backdrop) backdrop.classList.remove('open');
     });
