@@ -127,10 +127,10 @@ a { color: inherit; }
 .updated { font-size: 13px; color: var(--text-muted); }
 .controls-left { display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; min-width: 0; }
 /* Ghost hint (LEN-210): barely-there nudge that the table can be filtered.
-   The bracketed term rolls/cycles through the table's filter facets. */
+   The italic term rolls/cycles slowly through the table's filter facets. */
 .ghost-hint { font-size: 13px; font-weight: 600; color: var(--text-muted); opacity: 0.34; letter-spacing: 0.01em; white-space: nowrap; user-select: none; pointer-events: none; }
-.ghost-word { display: inline-block; min-width: 86px; }
-.ghost-word.roll { animation: ghostRoll .5s ease; }
+.ghost-word { display: inline-block; min-width: 92px; font-style: italic; font-weight: 500; }
+.ghost-word.roll { animation: ghostRoll .55s ease; }
 @keyframes ghostRoll { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .ghost-word.roll { animation: none; } }
 
@@ -353,6 +353,26 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 .modal-close { position: sticky; top: 0; float: right; background: var(--bg); border: none; font-size: 22px; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 14px 16px; }
 .modal-close:hover { color: var(--text); }
 
+/* Clickable intel panels → large modal (LEN-210) */
+.panel.clickable { cursor: pointer; transition: border-color .14s ease, box-shadow .14s ease; }
+.panel.clickable:hover { border-color: var(--accent-mid); box-shadow: 0 10px 28px rgba(16,24,39,0.07); }
+.panel.clickable:focus-visible { outline: 2px solid var(--accent-mid); outline-offset: 2px; }
+.panel-expand { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); opacity: 0.7; transition: color .14s ease, opacity .14s ease; }
+.panel-expand svg { width: 12px; height: 12px; }
+.panel.clickable:hover .panel-expand { color: var(--accent-mid); opacity: 1; }
+/* The panel modal — roomy, readable version of a panel's full list */
+.modal.large { max-width: 760px; }
+.pm-sub { font-size: 13px; color: var(--text-muted); line-height: 1.45; margin: 2px 0 4px; }
+.pm-list { display: flex; flex-direction: column; gap: 12px; }
+.pm-item { border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-alt); padding: 14px 16px; }
+.pm-top { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 6px; }
+.pm-chip { font-size: 10px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pm-name { font-size: 15.5px; font-weight: 800; color: var(--text); line-height: 1.25; }
+.pm-meta { font-size: 12.5px; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+.pm-cite { font-size: 12.5px; font-weight: 600; color: var(--accent-mid); margin-bottom: 6px; }
+.pm-desc { font-size: 13.5px; line-height: 1.55; color: var(--text-soft); }
+.pm-links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 10px; }
+
 @media (max-width: 880px) {
   .intel-row { grid-template-columns: 1fr; }
   .map-grid { grid-template-columns: 1fr; }
@@ -393,8 +413,9 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
   <!-- INTEL ROW — two collapsible panels: federal (left) + lender/regulator news (right) (LEN-168) -->
   <section class="intel-row">
 
-    <!-- TOP LEFT — Federal -->
-    <div class="panel panel-federal" id="panelFederal">
+    <!-- TOP LEFT — Federal (click anywhere → large modal with the full list) -->
+    <div class="panel panel-federal clickable" id="panelFederal" role="button" tabindex="0"
+         aria-label="Expand federal rules" onclick="panelClick(event,'federal')" onkeydown="panelKey(event,'federal')">
       <div class="panel-head">
         <span class="panel-eyebrow">
           <svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L21.6 9.3l-4.8 4.68L18 21l-6-3.27L6 21l1.2-7.02L2.4 9.3l6.7-1.04z"/></svg>
@@ -403,6 +424,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
         <span class="panel-title-sm" id="fed-title">No federal APR-disclosure law — states fill the gap</span>
         <span class="panel-meta">
           <span class="panel-count" id="fedCount"></span>
+          <span class="panel-expand">Expand<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></span>
         </span>
       </div>
       <div class="panel-body" id="panelFederalBody">
@@ -414,8 +436,9 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
       </div>
     </div>
 
-    <!-- TOP RIGHT — Regulatory & enforcement news (against financing providers) -->
-    <div class="panel panel-news" id="panelNews">
+    <!-- TOP RIGHT — Regulatory & enforcement news (click anywhere → large modal) -->
+    <div class="panel panel-news clickable" id="panelNews" role="button" tabindex="0"
+         aria-label="Expand regulator news" onclick="panelClick(event,'news')" onkeydown="panelKey(event,'news')">
       <div class="panel-head">
         <span class="panel-eyebrow">
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h13a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3z"/><line x1="7" y1="9" x2="14" y2="9"/><line x1="7" y1="13" x2="14" y2="13"/><line x1="7" y1="17" x2="11" y2="17"/></svg>
@@ -424,6 +447,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
         <span class="panel-title-sm">Regulator actions against financing providers — newest first</span>
         <span class="panel-meta">
           <span class="panel-count" id="enfCount"></span>
+          <span class="panel-expand">Expand<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></span>
         </span>
       </div>
       <div class="panel-body" id="panelNewsBody">
@@ -441,7 +465,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
         <button id="btn-map" class="active" onclick="setView('map')">Map view</button>
         <button id="btn-table" onclick="setView('table')">Table view</button>
       </div>
-      <span class="ghost-hint" aria-hidden="true">Filter by <span class="ghost-word" id="ghostWord">[max penalty]</span></span>
+      <span class="ghost-hint" aria-hidden="true">Table view filters by <em class="ghost-word" id="ghostWord">max penalty</em></span>
     </div>
     <button type="button" class="tour-replay" onclick="startComplianceTour()" aria-label="Take the tour">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
@@ -541,6 +565,19 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
         <h2 id="modalTitle"></h2>
       </div>
       <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- PANEL MODAL (LEN-210): clicking an intel panel expands its full list here -->
+  <div class="modal-scrim" id="panelModal" role="dialog" aria-modal="true" aria-labelledby="pmTitle">
+    <div class="modal large">
+      <button class="modal-close" aria-label="Close" onclick="closePanelModal()">&times;</button>
+      <div class="modal-head">
+        <div class="modal-state" id="pmKicker"></div>
+        <h2 id="pmTitle"></h2>
+        <div class="pm-sub" id="pmSub"></div>
+      </div>
+      <div class="modal-body"><div class="pm-list" id="pmBody"></div></div>
     </div>
   </div>
 
@@ -676,6 +713,67 @@ function closeBillModal(){ document.getElementById('billModal').classList.remove
 document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeBillModal(); });
 document.getElementById('billModal').addEventListener('click', function(e){ if (e.target === this) closeBillModal(); });
 
+/* ---- Panel modal (LEN-210): click an intel panel → roomy full list ---- */
+function panelClick(e, kind){
+  // Let real links navigate and the "Expand → table" jump do its thing.
+  if (e.target.closest('a') || e.target.closest('.fed-seeall')) return;
+  openPanelModal(kind);
+}
+function panelKey(e, kind){
+  if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openPanelModal(kind); }
+}
+function openPanelModal(kind){
+  var kicker, title, sub, body;
+  if (kind === 'news'){
+    var items = ((typeof LEG_ENFORCEMENT !== 'undefined' && LEG_ENFORCEMENT.items) || []).slice()
+      .sort(function(a,b){ return (b.dateISO||'').localeCompare(a.dateISO||''); });
+    kicker = 'In the news';
+    title = 'Regulator & enforcement actions — ' + items.length + ' on record';
+    sub = 'Public actions on the federal/state regulator record, newest first. Private civil suits are tracked separately.';
+    body = items.map(function(it){
+      var c = ENF_CHIP[it.status] || ENF_CHIP.settled;
+      return '<div class="pm-item">'
+        + '<div class="pm-top"><span class="pm-chip enf-status '+c.cls+'">'+c.label+'</span>'
+          + '<span class="pm-name">'+esc(it.matter)+'</span>'
+          + ((it.dateLabel || it.party) ? '<span class="pm-meta">'+esc([it.dateLabel, it.party].filter(Boolean).join(' · '))+'</span>' : '')
+        + '</div>'
+        + (it.outcome ? '<div class="pm-cite">'+esc(it.outcome)+'</div>' : '')
+        + (it.summary ? '<div class="pm-desc">'+esc(it.summary)+'</div>' : '')
+        + '<div class="pm-links">'
+          + (it.url ? '<a class="src-link" href="'+escAttr(it.url)+'" target="_blank" rel="noopener">'+ICON.doc+' Regulator record ↗</a>' : '')
+          + (it.newsUrl ? '<a class="src-link news" href="'+escAttr(it.newsUrl)+'" target="_blank" rel="noopener">'+ICON.news+' '+esc(it.newsTitle || 'Coverage')+' ↗</a>' : '')
+        + '</div>'
+      + '</div>';
+    }).join('');
+  } else {
+    var fitems = (LEG_FEDERAL.items || []).filter(function(it){ return !it.infoOnly; });
+    kicker = 'Federal';
+    title = 'Federal rules — ' + fitems.length;
+    sub = 'No federal APR-disclosure law, but federal marketing and credit rules still bind every lender and broker.';
+    body = fitems.map(function(it){
+      var c = FED_CHIP[it.tableStatus || 'enacted'] || FED_CHIP.enacted;
+      return '<div class="pm-item">'
+        + '<div class="pm-top"><span class="pm-chip fed-status '+c.cls+'">'+c.label+'</span>'
+          + '<span class="pm-name">'+esc(it.name)+(it.acronym ? ' ('+esc(it.acronym)+')' : '')+'</span></div>'
+        + (it.citation ? '<div class="pm-cite">'+esc(it.citation)+'</div>' : '')
+        + (it.desc ? '<div class="pm-desc">'+esc(it.desc)+'</div>' : '')
+        + '<div class="pm-links">'
+          + (it.url ? '<a class="src-link" href="'+escAttr(it.url)+'" target="_blank" rel="noopener">'+ICON.doc+' Read the statute ↗</a>' : '')
+          + (it.newsUrl ? '<a class="src-link news" href="'+escAttr(it.newsUrl)+'" target="_blank" rel="noopener">'+ICON.news+' '+esc(it.newsTitle || 'News coverage')+' ↗</a>' : '')
+        + '</div>'
+      + '</div>';
+    }).join('');
+  }
+  document.getElementById('pmKicker').textContent = kicker;
+  document.getElementById('pmTitle').textContent = title;
+  document.getElementById('pmSub').textContent = sub;
+  document.getElementById('pmBody').innerHTML = body;
+  document.getElementById('panelModal').classList.add('open');
+}
+function closePanelModal(){ document.getElementById('panelModal').classList.remove('open'); }
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closePanelModal(); });
+document.getElementById('panelModal').addEventListener('click', function(e){ if (e.target === this) closePanelModal(); });
+
 /* ---- Federal panel — compact "top stories" strip (LEN-168 #3/#4) ---- */
 var FED_CHIP = {
   'enacted':        { cls: 's-enacted',        label: 'In force' },
@@ -692,12 +790,13 @@ var FED_CHIP = {
   items.forEach(function(it, i){ if (!it.infoOnly && !it.topStory) top.push({ it: it, i: i }); });
   document.getElementById('fedItems').innerHTML = top.map(function(o){
     var it = o.it; var c = FED_CHIP[it.tableStatus || 'enacted'] || FED_CHIP.enacted;
-    return '<button type="button" class="fed-card" onclick="openFedModal('+o.i+')">'
+    // Preview card only — the whole panel is the click target (→ large modal).
+    return '<div class="fed-card">'
       + '<span class="fed-status '+c.cls+'">'+c.label+'</span>'
       + '<span class="fc-name">'+esc(it.name)+(it.acronym?' ('+esc(it.acronym)+')':'')+'</span>'
       + (it.citation ? '<span class="fc-cite">'+esc(it.citation)+'</span>' : '')
       + '<span class="fc-desc">'+esc(it.short || it.desc || '')+'</span>'
-      + '</button>';
+      + '</div>';
   }).join('');
   var cnt = items.filter(function(it){ return !it.infoOnly; }).length;
   var t = document.getElementById('fedSeeAllText'); if (t) t.textContent = 'All ' + cnt + ' federal rules';
@@ -1014,17 +1113,17 @@ document.getElementById('statusFilter').addEventListener('click', function(e){
 document.getElementById('tableSearch').addEventListener('input', function(){ tableState.q = this.value; renderTable(); });
 renderTable();
 
-/* ---- Ghost hint cycler (LEN-210): rolls the bracketed filter facet ---- */
+/* ---- Ghost hint cycler (LEN-210): slowly rolls the italic filter facet ---- */
 (function(){
   var el = document.getElementById('ghostWord'); if (!el) return;
   var words = ['max penalty', 'state', 'legal status']; var i = 0;
   function tick(){
-    el.textContent = '[' + words[i] + ']';
+    el.textContent = words[i];
     el.classList.remove('roll'); void el.offsetWidth; el.classList.add('roll');
     i = (i + 1) % words.length;
   }
   tick();
-  setInterval(tick, 2400);
+  setInterval(tick, 4200);
 })();
 
 function setView(v){

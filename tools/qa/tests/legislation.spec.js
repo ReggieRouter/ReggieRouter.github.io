@@ -59,5 +59,12 @@ test('legislation: federal panel, chips, detail, and table all render', async ({
   await page.locator('#tableSearch').fill('');
   await page.locator('#jurisFilter button[data-juris="all"]').click();
 
+  // Clicking an intel panel expands it into a large modal (LEN-210).
+  await page.locator('#panelFederal').click();
+  await expect(page.locator('#panelModal')).toHaveClass(/open/);
+  expect(await page.locator('#pmBody .pm-item').count()).toBeGreaterThanOrEqual(5);
+  await page.locator('#panelModal .modal-close').click();
+  await expect(page.locator('#panelModal')).not.toHaveClass(/open/);
+
   expect(errors, `Legislation page errors:\n${errors.join('\n')}`).toEqual([]);
 });
