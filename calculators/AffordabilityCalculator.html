@@ -169,8 +169,31 @@ label.field-label {
   letter-spacing: 0.025em;
   margin-bottom: 8px;
 }
-.field-pair { display: grid; grid-template-columns: 1fr 180px; gap: 12px; }
+.field-pair { display: grid; grid-template-columns: 1fr 180px; gap: 12px; align-items: end; }
 @media (max-width: 480px) { .field-pair { grid-template-columns: 1fr; } }
+
+/* Saved-estimate picker (LEN-217) — appears when Cost source = "Saved estimate" */
+.af-saved-picker { margin: -6px 0 18px; }
+.af-saved-picker[hidden] { display: none; }
+.af-saved-list { display: flex; flex-direction: column; gap: 6px; }
+.af-saved-row {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  width: 100%; text-align: left; cursor: pointer;
+  padding: 9px 12px; border: 1px solid var(--lp-border); border-radius: 8px;
+  background: #fff; font-family: inherit; transition: border-color .12s, background .12s;
+}
+.af-saved-row:hover { border-color: var(--lp-green); background: var(--lp-green-soft); }
+.af-saved-row.is-active { border-color: var(--lp-green); background: var(--lp-green-soft); }
+.af-saved-row .sv-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.af-saved-row .sv-label { font-size: 12px; font-weight: 700; color: var(--lp-dark); }
+.af-saved-row .sv-sub { font-size: 10.5px; color: var(--lp-text-muted); }
+.af-saved-row .sv-cost { font-size: 13px; font-weight: 800; color: var(--lp-green); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* Soft (not error-red) empty state */
+.af-saved-empty {
+  padding: 11px 13px; border: 1px dashed var(--lp-border); border-radius: 8px;
+  background: #fafafa; font-size: 12px; line-height: 1.45; color: var(--lp-text-muted);
+}
+.af-saved-empty strong { color: var(--lp-dark); font-weight: 700; }
 
 .input-wrap {
   display: flex;
@@ -223,6 +246,8 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
   color: var(--lp-green); font-size: 12.5px; line-height: 1.5;
   animation: costCalloutIn 0.22s ease;
 }
+/* LEN-217: let the `hidden` attr actually hide it (class display:flex was overriding [hidden]) */
+.cost-callout[hidden] { display: none; }
 .cost-callout strong { font-weight: 700; }
 .cost-callout .ico { flex: 0 0 auto; margin-top: 1px; color: var(--lp-green-mid); }
 .cost-callout-x {
@@ -375,7 +400,17 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 /* ── ROI panel (optional) ─────────────────────────────────── */
 .af-roi { border: 1px solid #bbf7d0; border-radius: 12px; background: var(--lp-green-soft); padding: 18px; margin-bottom: 26px; }
 .af-roi[hidden] { display: none; }
-.af-roi-line { margin-top: 8px; color: var(--lp-green); font-size: 22px; font-weight: 800; line-height: 1.2; }
+.af-roi-line { margin-top: 10px; }
+/* Net-gain rendered as a readable math formula (LEN-217) */
+.af-eq { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; }
+.af-eq-term { display: flex; flex-direction: column; gap: 2px; }
+.af-eq-val { font-size: 17px; font-weight: 700; line-height: 1.1; color: var(--lp-dark); font-variant-numeric: tabular-nums; }
+.af-eq-cap { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--lp-text-muted); }
+.af-eq-op { font-size: 16px; font-weight: 600; color: #94a3b8; padding-bottom: 13px; }
+.af-eq-result .af-eq-val { color: var(--lp-green); font-weight: 800; }
+.af-eq-result .af-eq-cap { color: var(--lp-green); }
+.af-eq-unit { font-size: 11px; font-weight: 700; color: var(--lp-text-muted); margin-left: 1px; }
+.af-eq-sub { margin-top: 9px; font-size: 12px; font-weight: 600; color: var(--lp-text-muted); font-variant-numeric: tabular-nums; }
 .af-roi .note { margin-top: 8px; color: var(--lp-text-muted); font-size: 12px; }
 
 /* ── Disclosures ──────────────────────────────────────────── */
@@ -441,6 +476,7 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 /* ── PDF Details footer module (LEN-160) ──────────────────────
    Mockup: lendpaper-doc-details-footer-module-mockup.svg. Bottom of the input
    column, visually secondary; exactly three optional fields. */
+.lp-deal-context { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--lp-border); }
 .lp-doc-details {
   max-width: 540px; margin: 18px 0 0; padding: 0;
   border: 1px solid #D9E7DF; border-left: 4px solid #1A3C2E; border-radius: 12px; background: #FBFDFC;
@@ -682,6 +718,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
                         <span>Can be pulled from a saved estimate in your <strong>Deal Log</strong>, entered manually, or estimated from the payment.</span>
                         <button type="button" class="cost-callout-x" id="costSourceCalloutX" aria-label="Dismiss">&times;</button>
                     </div>
+                    <div class="af-saved-picker" id="savedPicker" hidden></div>
 
                     <div>
                         <label class="field-label">Term months</label>
@@ -731,6 +768,29 @@ body.is-embedded .lp-main { padding-top: 16px; }
                             <input id="expensesInput" class="input-field" inputmode="decimal" placeholder="Optional">
                         </div>
                     </div>
+                </div>
+
+                <!-- LEN-217: borrower state + doc details at bottom of LEFT input column (matches LEN-183 cross-calc pattern) -->
+                <div class="lp-deal-context no-print">
+                    <div data-lp-compliance-host></div>
+                    <details id="pdfDocDetails" class="lp-doc-details">
+                        <summary>
+                            <span class="lp-dd-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+                            <span class="lp-dd-text">
+                                <span class="lp-dd-kicker">PDF DETAILS</span>
+                                <span class="lp-dd-title">Personalize this estimate</span>
+                                <span class="lp-dd-helper">Prepared by · Company · Prepared for</span>
+                            </span>
+                            <span class="lp-dd-edit">Edit</span>
+                            <span class="lp-dd-caret"></span>
+                        </summary>
+                        <div class="lp-doc-details-grid">
+                            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
+                            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
+                            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Borrower name · use of funds"></label>
+                        </div>
+                        <p class="lp-doc-details-hint">Optional — appears on the saved PDF. Borrower state drives compliance disclosures.</p>
+                    </details>
                 </div>
             </aside>
 
@@ -876,28 +936,6 @@ body.is-embedded .lp-main { padding-top: 16px; }
                     </button>
                 </div>
 
-                <!-- LEN-147: borrower state + doc details at bottom of input column -->
-                <div class="lp-deal-context no-print">
-                    <div data-lp-compliance-host></div>
-                    <details id="pdfDocDetails" class="lp-doc-details">
-                        <summary>
-                            <span class="lp-dd-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
-                            <span class="lp-dd-text">
-                                <span class="lp-dd-kicker">PDF DETAILS</span>
-                                <span class="lp-dd-title">Personalize this estimate</span>
-                                <span class="lp-dd-helper">Prepared by · Company · Prepared for</span>
-                            </span>
-                            <span class="lp-dd-edit">Edit</span>
-                            <span class="lp-dd-caret"></span>
-                        </summary>
-                        <div class="lp-doc-details-grid">
-                            <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
-                            <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
-                            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Borrower name · use of funds"></label>
-                        </div>
-                        <p class="lp-doc-details-hint">Optional — appears on the saved PDF. Borrower state drives compliance disclosures.</p>
-                    </details>
-                </div>
             </section>
         </div>
     </div>
@@ -925,6 +963,7 @@ const els = {
   deposits: document.querySelector("#depositsInput"),
   payback: document.querySelector("#paybackInput"),
   paybackMode: document.querySelector("#paybackModeInput"),
+  savedPicker: document.querySelector("#savedPicker"),
   term: document.querySelector("#termInput"),
   upside: document.querySelector("#upsideInput"),
   timing: document.querySelector("#timingInput"),
@@ -1187,9 +1226,18 @@ function update() {
   if (values.upside > 0) {
     const net = values.upside - values.monthly;
     const annual = net * 12;
-    const timingText = values.timingDays > 0 ? ` · starts in ${Math.round(values.timingDays)} days` : "";
+    const timingSub = values.timingDays > 0 ? ` · upside starts in ${Math.round(values.timingDays)} days` : "";
     const expenseText = values.expenses > 0 ? ` Cushion after expenses and payment: ${formatMoney(values.afterExpenses)}/mo.` : "";
-    els.roiLine.textContent = `${formatMoney(values.upside)} expected upside − ${formatMoney(values.monthly)} payment = ${formatMoney(net)}/mo net · ${formatMoney(annual)}/yr${timingText}`;
+    // Render as a readable math formula rather than one run-on sentence (LEN-217)
+    els.roiLine.innerHTML =
+      '<div class="af-eq">' +
+        '<span class="af-eq-term"><span class="af-eq-val">' + formatMoney(values.upside) + '</span><span class="af-eq-cap">monthly upside</span></span>' +
+        '<span class="af-eq-op">−</span>' +
+        '<span class="af-eq-term"><span class="af-eq-val">' + formatMoney(values.monthly) + '</span><span class="af-eq-cap">payment</span></span>' +
+        '<span class="af-eq-op">=</span>' +
+        '<span class="af-eq-term af-eq-result"><span class="af-eq-val">' + formatMoney(net) + '<span class="af-eq-unit">/mo</span></span><span class="af-eq-cap">net</span></span>' +
+      '</div>' +
+      '<div class="af-eq-sub">' + formatMoney(annual) + ' / yr' + timingSub + '</div>';
     els.roiNote.textContent = `This is a projection, not a guarantee.${expenseText}`;
     els.roiPanel.hidden = false;
   } else {
@@ -1348,11 +1396,87 @@ function summaryText() {
   return out;
 }
 
+/* ── Saved-estimate picker (LEN-217) ──────────────────────────
+   When Cost source = "Saved estimate", surface the broker's saved Deal Log
+   estimates that carry a usable full-term cost; picking one fills the field.
+   If none exist, show a soft explanatory message (not a hard error). Reads the
+   localStorage mirror, which is written on every saveEstimate() regardless of
+   login state. */
+const SAVED_CALC_LABELS = {
+  affordability: "Payment Fit", payment_breakdown: "Amortization", dscr: "DSCR",
+  fundability: "Net & Position", sba_fees: "SBA Fees", deal_read: "Deal Analysis",
+};
+function savedCalcLabel(t) { return SAVED_CALC_LABELS[t] || (t || "Estimate"); }
+function escHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+// Resolve a usable full-term cost from a saved record, or null.
+function savedFullTermCost(rec) {
+  const p = (rec && rec.params) || {};
+  for (const k of ["full_term_cost", "total_payback", "total_of_payments", "total_repayment", "total_cost"]) {
+    const n = Number(p[k]);
+    if (Number.isFinite(n) && n > 0) return Math.round(n);
+  }
+  // Amortization stores funded amount + factor rate (no explicit total) → derive when it's a factor rate.
+  if (rec && rec.calculator_type === "payment_breakdown") {
+    const amt = Number(p.amount), rate = Number(p.rate);
+    if (Number.isFinite(amt) && amt > 0 && Number.isFinite(rate) && rate > 1 && rate < 5) return Math.round(amt * rate);
+  }
+  return null;
+}
+function readSavedEstimates() {
+  let rows = [];
+  try { rows = JSON.parse(localStorage.getItem("lp_quote_log") || "[]"); } catch (e) { rows = []; }
+  return (Array.isArray(rows) ? rows : [])
+    .map(r => ({ rec: r, cost: savedFullTermCost(r) }))
+    .filter(x => x.cost != null)
+    .slice(0, 8);
+}
+function savedDateLabel(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return isNaN(d) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+function renderSavedPicker() {
+  const host = els.savedPicker;
+  if (!host) return;
+  if (els.paybackMode.value !== "quote") { host.hidden = true; host.innerHTML = ""; return; }
+  host.hidden = false;
+  const items = readSavedEstimates();
+  if (!items.length) {
+    host.innerHTML =
+      '<div class="af-saved-empty"><strong>No saved estimates yet.</strong> ' +
+      "Run a deal in any calculator (Amortization, DSCR, …) and hit <strong>Save Estimate as PDF</strong> or <strong>Copy Scenario</strong>. " +
+      "Saved deals land in your Deal Log — then you can pull their full-term cost straight into Payment Fit here.</div>";
+    return;
+  }
+  const current = Math.round(parseMoney(els.payback.value));
+  host.innerHTML = '<div class="af-saved-list">' + items.map((x, i) => {
+    const r = x.rec;
+    const who = r.prepared_for ? escHtml(r.prepared_for) : savedCalcLabel(r.calculator_type);
+    const sub = [savedCalcLabel(r.calculator_type), savedDateLabel(r.created_at)].filter(Boolean).join(" · ");
+    const active = current > 0 && current === x.cost ? " is-active" : "";
+    return '<button type="button" class="af-saved-row' + active + '" data-cost="' + x.cost + '">' +
+             '<span class="sv-meta"><span class="sv-label">' + who + '</span><span class="sv-sub">' + escHtml(sub) + '</span></span>' +
+             '<span class="sv-cost">' + formatMoney(x.cost) + '</span>' +
+           '</button>';
+  }).join("") + '</div>';
+  host.querySelectorAll(".af-saved-row").forEach(btn => {
+    btn.addEventListener("click", () => {
+      els.payback.value = Number(btn.dataset.cost).toLocaleString("en-US");
+      host.querySelectorAll(".af-saved-row").forEach(b => b.classList.toggle("is-active", b === btn));
+      manualScenarioIndex = null;
+      update();
+    });
+  });
+}
+
 /* ── Events ───────────────────────────────────────────────── */
 document.querySelectorAll("#paymentInput, #frequencyInput, #depositsInput, #paybackInput, #paybackModeInput, #termInput, #upsideInput, #timingInput, #timingRiskInput, #expensesInput, #productInput").forEach((input) => {
   input.addEventListener("input", () => { manualScenarioIndex = null; update(); });
   input.addEventListener("change", update);
 });
+els.paybackMode.addEventListener("change", renderSavedPicker);
 
 /* Cost-source explainer: surface the light-green callout when the user touches
    the Cost source field, and let them dismiss it (sticks per browser). */
@@ -1483,6 +1607,7 @@ window.addEventListener('load', () => {
   bindTips();
   applyIntroState();
   update();
+  renderSavedPicker();
   if (window.self !== window.top) document.body.classList.add('is-embedded');
 });
 </script>
