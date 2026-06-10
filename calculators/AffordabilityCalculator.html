@@ -64,6 +64,8 @@
   }
 </script>
 <script type="module" src="../js/quote-log.js"></script>
+<!-- LEN-191: page coach-mark tour engine -->
+<script type="module" src="../js/tour-trigger.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
@@ -730,7 +732,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
                 <div class="af-hero">
                     <div>
                         <div class="af-hero-label">Affordability Verdict</div>
-                        <div class="af-verdict-value pending" id="heroVerdict">Pressure-test the payment</div>
+                        <div class="af-verdict-value pending" id="heroVerdict" data-tour="fit-result">Pressure-test the payment</div>
                         <div class="af-hero-subline" id="heroSubline">Add payment and expected deposits when you're ready.</div>
                     </div>
                     <div class="af-cushion" id="cushionCard">
@@ -1459,5 +1461,6 @@ window.addEventListener('load', () => {
     </div>
 </div>
 
+<button id="lp-tour-nav-link" type="button" onclick="replayTour()" style="display:none; position:fixed; bottom:14px; left:14px; z-index:8000; background:#fff; border:0.5px solid rgba(0,0,0,.14); border-radius:8px; cursor:pointer; font-family:inherit; font-size:12px; color:#2D6A4F; padding:6px 11px; box-shadow:0 2px 8px rgba(17,24,39,.1);">Take a tour</button>
 </body>
 </html>

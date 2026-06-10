@@ -1062,7 +1062,7 @@ select.uw-ctrl{cursor:pointer}
 <main class="sheet">
   <div class="split">
     <section class="col-in" id="inputs"></section>
-    <section class="col-read" id="read"></section>
+    <section class="col-read" id="read" data-tour="deal-verdict"></section>
   </div>
   <section class="band" id="band"></section>
 </main>
@@ -1105,11 +1105,14 @@ select.uw-ctrl{cursor:pointer}
   }
 </script>
 <script type="module" src="../../js/quote-log.js"></script>
+<!-- LEN-191: page coach-mark tour engine -->
+<script type="module" src="../../js/tour-trigger.js"></script>
 
 <script src="data.js"></script>
 <script src="talk.js"></script>
 <script src="deal.js"></script>
 <script src="plan.js"></script>
 <script src="read.js"></script>
+<button id="lp-tour-nav-link" type="button" onclick="replayTour()" style="display:none; position:fixed; bottom:14px; left:14px; z-index:8000; background:#fff; border:0.5px solid rgba(0,0,0,.14); border-radius:8px; cursor:pointer; font-family:inherit; font-size:12px; color:#2D6A4F; padding:6px 11px; box-shadow:0 2px 8px rgba(17,24,39,.1);">Take a tour</button>
 </body>
 </html>

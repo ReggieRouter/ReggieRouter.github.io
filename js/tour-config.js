@@ -115,13 +115,7 @@ export const PAGE_TOURS = {
       {
         id:       'deal-verdict',
         title:    'Read the deal',
-        body:     'One look tells you what they qualify for and where it bends.',
-        position: 'right',
-      },
-      {
-        id:       'deal-talk',
-        title:    'Say it on the call',
-        body:     'Plain-English talk tracks, ready to read straight off the screen.',
+        body:     'One look tells you what they qualify for — and where it bends.',
         position: 'left',
         last:     true,
       },
