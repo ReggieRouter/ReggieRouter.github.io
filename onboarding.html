@@ -296,15 +296,22 @@
       // LEN-105: admin-invited emails skip the approval queue
       const { data: invite } = await supabase.from('invites')
         .select('id, role').eq('email', (session.user.email || '').toLowerCase()).maybeSingle();
+      // LEN-266: trusted-domain allowlist — signups from these company email domains
+      // skip the approval queue (treated like an invite). Add a domain here to let an
+      // entire org in automatically. Matches the email domain exactly (incl. subdomains).
+      const AUTO_APPROVE_DOMAINS = ['yourapprovd.com'];
+      const emailDomain = ((session.user.email || '').toLowerCase().split('@')[1] || '');
+      const domainApproved = AUTO_APPROVE_DOMAINS.some(d => emailDomain === d || emailDomain.endsWith('.' + d));
+      const autoApprove = !!invite || domainApproved;
       const profile = {
         id: session.user.id, email: session.user.email,
         full_name: (document.getElementById('inputFirstName').value.trim() + ' ' + document.getElementById('inputLastName').value.trim()).trim(),
         company: v || null,
-        status: invite ? 'approved' : 'pending', invite_credits: 5, invites_sent: 0
+        status: autoApprove ? 'approved' : 'pending', invite_credits: 5, invites_sent: 0
       };
       // LEN-105: carry the admin-assigned role onto the new profile (onboarding doesn't ask for it)
       if (invite && invite.role) profile.role = invite.role;
-      if (invite) profile.approved_at = new Date().toISOString();
+      if (autoApprove) profile.approved_at = new Date().toISOString();
       // LinkedIn (collected only when no company could be inferred; LEN-243 makes it
       // required for those organic applicants — validated above). `li` computed at top.
       if (li) profile.linkedin_url = li;
@@ -334,7 +341,7 @@
           }
           if (accErr) console.warn('[onboarding] could not stamp invite acceptance:', accErr.message);
         }
-        window.location.href = invite ? '/index.html' : '/pending.html';
+        window.location.href = autoApprove ? '/index.html' : '/pending.html';
       }
     }
     document.getElementById('nextFromName').addEventListener('click', advanceName);
