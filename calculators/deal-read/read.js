@@ -247,7 +247,7 @@ function fundByLabel(v){ const f=FUND_BY.find(x=>x[0]===v); return f?f[1]:''; }
 function fundByUrgent(){ return S.fundBy==='asap'||S.fundBy==='2-4w'; }
 function fieldFundBy(){
   return `<div class="field" data-field="fundby">
-    <label>Funding needed by <span class="req-star" title="Required before export">*</span></label>
+    <label>Funding needed by</label>
     <div class="in-box fundby-box" id="fundByBox" onclick="this.querySelector('select').focus()">
       <span class="in-ico">${I.cal}</span>
       <span class="in-field"><select id="in-fundby" onchange="onFundBy(this.value)">${FUND_BY.map(([v,l])=>`<option value="${v}" ${S.fundBy===v?'selected':''}>${l}</option>`).join('')}</select></span>
@@ -1053,6 +1053,25 @@ function readEmpty(){
       <div class="re-cell"><div class="k">FICO</div><div class="t">→ Rate</div><div class="d">Sets the price and which programs open.</div></div>
       <div class="re-cell"><div class="k">Time in business</div><div class="t">→ Term</div><div class="d">Sets the length and bank eligibility.</div></div>
       <div class="re-cell"><div class="k">Monthly revenue</div><div class="t">→ Amount</div><div class="d">Sizes the offer and the payment cadence.</div></div>
+    </div>
+    <div class="read-ghost" aria-hidden="true">
+      <div class="rg-cap"><span class="rg-pulse"></span> Your live read is standing by — pick an industry to light it up</div>
+      <div class="rg-stage">
+        <div class="rg-hero-num">$&mdash;&mdash;,&mdash;&mdash;&mdash;</div>
+        <div class="rg-hero-sub">Funding range &middot; monthly payment &middot; product stack</div>
+        <div class="rg-levers">
+          <div class="rg-cell"><div class="rg-k">Amount</div><div class="rg-bar s1"></div></div>
+          <div class="rg-cell"><div class="rg-k">Term</div><div class="rg-bar s2"></div></div>
+          <div class="rg-cell"><div class="rg-k">Rate</div><div class="rg-bar s3"></div></div>
+          <div class="rg-cell"><div class="rg-k">Payment</div><div class="rg-bar s4"></div></div>
+        </div>
+        <div class="rg-tt">
+          <div class="rg-tt-lbl">Talk track</div>
+          <div class="rg-line w1"></div>
+          <div class="rg-line w2"></div>
+          <div class="rg-line w3"></div>
+        </div>
+      </div>
     </div>
   </div>`;
 }
