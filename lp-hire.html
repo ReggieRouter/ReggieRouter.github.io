@@ -403,6 +403,16 @@ body { background: var(--color-bg-main); margin: 0; padding: 0; font-family: var
   </div>
 </div>
 
+<!-- LEN-249: signed in, but no LP Hire permission -->
+<div id="no-access" style="display:none;position:fixed;inset:0;background:var(--color-brand-dark);color:#fff;z-index:9999;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px">
+  <div style="max-width:420px">
+    <div style="font-size:38px;margin-bottom:12px">&#128274;</div>
+    <h2 style="margin:0 0 8px;font-size:20px;font-weight:700">No access to LP Hire</h2>
+    <p style="opacity:.8;font-size:14px;line-height:1.55;margin:0 0 22px">Your account (<span id="na-email">your account</span>) isn&rsquo;t granted the <b>LP Hire</b> recruiter feed. Ask Steve to enable it.</p>
+    <button class="pw-btn" id="na-logout" style="max-width:200px;margin:0 auto">Sign out</button>
+  </div>
+</div>
+
 <!-- MAIN APP -->
 <div id="main-app">
   <div class="rp-page">
@@ -787,7 +797,38 @@ async function tryLogin() {
 
 function checkAuth() { if (getToken()) showApp(); }
 
-function showApp() {
+// LEN-249: only is_admin OR profiles.permissions ∋ 'lp_hire' may use the feed.
+// Pre-migration (no permissions column) the select falls back to is_admin only —
+// so the super-admin is never locked out before the SQL runs.
+async function hireAccess() {
+  const token = getToken();
+  if (!token) return { ok: false, email: '' };
+  const hdr = { apikey: SUPABASE_KEY, Authorization: `Bearer ${token}` };
+  try {
+    const ures = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: hdr });
+    if (!ures.ok) return { ok: false, email: '' };
+    const user = await ures.json();
+    const email = user.email || '';
+    let pres = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=is_admin,permissions`, { headers: hdr });
+    if (!pres.ok) pres = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${user.id}&select=is_admin`, { headers: hdr });
+    const rows = pres.ok ? await pres.json() : [];
+    const p = rows[0] || {};
+    const ok = p.is_admin === true || (Array.isArray(p.permissions) && p.permissions.includes('lp_hire'));
+    return { ok, email };
+  } catch (e) { return { ok: false, email: '' }; }
+}
+
+function showNoAccess(email) {
+  document.getElementById('pw-gate').style.display = 'none';
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('na-email').textContent = email || 'your account';
+  document.getElementById('no-access').style.display = 'flex';
+}
+
+async function showApp() {
+  const access = await hireAccess();
+  if (!access.ok) { showNoAccess(access.email); return; }
+  document.getElementById('no-access').style.display = 'none';
   document.getElementById('pw-gate').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
   document.getElementById('fab-btn').style.display = 'inline-flex';
@@ -802,6 +843,7 @@ async function logout() {
 }
 
 document.getElementById('logout-btn').addEventListener('click', logout);
+document.getElementById('na-logout').addEventListener('click', logout);
 document.getElementById('pw-submit').addEventListener('click', tryLogin);
 document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
 document.getElementById('pw-email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('pw-input').focus(); });
