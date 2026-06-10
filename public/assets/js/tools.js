@@ -148,7 +148,7 @@ var TOOLS = [
     id: "sba-rates",
     name: "SBA Fees",
     desc: "Dynamic SBA 7(a) guarantee-fee & rate scenarios.",
-    status: "hidden",
+    status: "live",
     group: "deal-math",
     icon: "flag",
     color: "green",
