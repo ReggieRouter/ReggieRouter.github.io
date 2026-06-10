@@ -3064,7 +3064,18 @@ async function loadMembers() {
   const { data: inv, error: invErr } = await sb.from('invites')
     .select('*')
     .order('created_at', { ascending: false });
-  memInvites = (inv || []).map(i => ({ ...i, accepted_at: i.accepted_at ?? i.used_at ?? null }));
+  // LEN-245: a profile existing for the invitee's email IS proof they signed in.
+  // Derive acceptance from it when the invite row's own stamp is missing — the
+  // onboarding accepted_at/used_at write silently fails on schema drift / RLS, so
+  // signed-in invitees were stuck showing "Awaiting sign-in". Normalizing here flows
+  // through to the count, the status badge, the Resend button, and the CSV export.
+  const profileSignin = new Map(
+    memProfiles.filter(p => p.email).map(p => [p.email.toLowerCase(), p.created_at || null])
+  );
+  memInvites = (inv || []).map(i => ({
+    ...i,
+    accepted_at: i.accepted_at ?? i.used_at ?? (i.email ? profileSignin.get(i.email.toLowerCase()) ?? null : null),
+  }));
   memInvitesError = invErr ? invErr.message : null;
   memRenderStats();
   memRenderTable();
