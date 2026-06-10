@@ -125,6 +125,14 @@ a { color: inherit; }
 .seg button { border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 650; color: var(--text-muted); padding: 8px 18px; border-radius: 999px; cursor: pointer; transition: all .12s ease; }
 .seg button.active { background: var(--accent); color: #fff; }
 .updated { font-size: 13px; color: var(--text-muted); }
+.controls-left { display: inline-flex; align-items: center; gap: 14px; flex-wrap: wrap; min-width: 0; }
+/* Ghost hint (LEN-210): barely-there nudge that the table can be filtered.
+   The bracketed term rolls/cycles through the table's filter facets. */
+.ghost-hint { font-size: 13px; font-weight: 600; color: var(--text-muted); opacity: 0.34; letter-spacing: 0.01em; white-space: nowrap; user-select: none; pointer-events: none; }
+.ghost-word { display: inline-block; min-width: 86px; }
+.ghost-word.roll { animation: ghostRoll .5s ease; }
+@keyframes ghostRoll { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ghost-word.roll { animation: none; } }
 
 /* Map view */
 .map-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 20px; align-items: start; }
@@ -428,9 +436,12 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 
   <!-- View controls -->
   <div class="controls">
-    <div class="seg" role="tablist">
-      <button id="btn-map" class="active" onclick="setView('map')">Map view</button>
-      <button id="btn-table" onclick="setView('table')">Table view</button>
+    <div class="controls-left">
+      <div class="seg" role="tablist">
+        <button id="btn-map" class="active" onclick="setView('map')">Map view</button>
+        <button id="btn-table" onclick="setView('table')">Table view</button>
+      </div>
+      <span class="ghost-hint" aria-hidden="true">Filter by <span class="ghost-word" id="ghostWord">[max penalty]</span></span>
     </div>
     <button type="button" class="tour-replay" onclick="startComplianceTour()" aria-label="Take the tour">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
@@ -1002,6 +1013,19 @@ document.getElementById('statusFilter').addEventListener('click', function(e){
 });
 document.getElementById('tableSearch').addEventListener('input', function(){ tableState.q = this.value; renderTable(); });
 renderTable();
+
+/* ---- Ghost hint cycler (LEN-210): rolls the bracketed filter facet ---- */
+(function(){
+  var el = document.getElementById('ghostWord'); if (!el) return;
+  var words = ['max penalty', 'state', 'legal status']; var i = 0;
+  function tick(){
+    el.textContent = '[' + words[i] + ']';
+    el.classList.remove('roll'); void el.offsetWidth; el.classList.add('roll');
+    i = (i + 1) % words.length;
+  }
+  tick();
+  setInterval(tick, 2400);
+})();
 
 function setView(v){
   var map = v === 'map';
