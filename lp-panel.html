@@ -1020,12 +1020,21 @@ header {
 <div class="modal-overlay" id="perm-modal" style="display:none" onclick="if(event.target===this) closePermModal()">
   <div class="modal-box" style="width:420px">
     <h3>Admin access</h3>
-    <p id="perm-who" style="color:var(--muted);font-size:13px;margin-bottom:14px"></p>
-    <label style="display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);font-weight:600;cursor:pointer">
+    <p id="perm-who" style="color:var(--muted);font-size:13px;margin-bottom:10px"></p>
+    <label class="inv-label" for="perm-name" style="margin-top:0">Name</label>
+    <input type="text" id="perm-name" class="inv-input" placeholder="First Last" style="margin-bottom:12px" />
+    <label style="display:flex;align-items:center;gap:9px;padding:9px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-weight:600;cursor:pointer">
       <input type="checkbox" id="perm-superadmin" onchange="permToggleSuper(this.checked)" />
       Super-admin <span style="font-weight:400;color:var(--muted);font-size:12px">— full access to everything</span>
     </label>
     <div id="perm-scope-list" style="margin-top:8px"></div>
+    <!-- Admin-access invite: send the granted user their sign-in link + what they can reach -->
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div class="inv-label" style="margin-top:0">Send them their access</div>
+      <p class="inv-hint" style="margin:2px 2px 9px">Composes a message with their sign-in link, matching the access checked above. Save first so it sticks.</p>
+      <button class="btn-mem-waitlist" style="padding:7px 12px;font-size:12px" onclick="permCopyInvite()">Copy message</button>
+      <button class="btn-mem-approve" style="padding:7px 12px;font-size:12px" onclick="permEmailInvite()">Email it</button>
+    </div>
     <div class="modal-actions" style="margin-top:18px">
       <button class="btn-cancel" onclick="closePermModal()">Cancel</button>
       <button class="btn-mem-approve" style="padding:8px 16px;font-size:13px" id="perm-save" onclick="savePerms()">Save</button>
@@ -3388,7 +3397,8 @@ function openPermModal(userId) {
   const u = memProfiles.find(p => p.id === userId);
   if (!u) return;
   permEditId = userId;
-  document.getElementById('perm-who').textContent = `${u.full_name || u.email || 'User'} — ${u.email || ''}`;
+  document.getElementById('perm-who').textContent = u.email || '';
+  document.getElementById('perm-name').value = u.full_name || '';
   const isAdmin = u.is_admin === true;
   const perms = Array.isArray(u.permissions) ? u.permissions : [];
   document.getElementById('perm-superadmin').checked = isAdmin;
@@ -3411,7 +3421,8 @@ async function savePerms() {
   const isAdmin = document.getElementById('perm-superadmin').checked;
   const perms = isAdmin ? [] // super-admin implies all; don't double-store scope keys
     : Array.from(document.querySelectorAll('#perm-scope-list .perm-scope:checked')).map(cb => cb.value);
-  const { error } = await sb.from('profiles').update({ is_admin: isAdmin, permissions: perms }).eq('id', permEditId);
+  const name = document.getElementById('perm-name').value.trim();
+  const { error } = await sb.from('profiles').update({ is_admin: isAdmin, permissions: perms, full_name: name || null }).eq('id', permEditId);
   if (error) {
     // permissions column not live yet → guide to the migration
     const msg = /permissions/.test(error.message || '') ? 'Run supabase/permissions_setup.sql first (adds profiles.permissions)' : error.message;
@@ -3420,6 +3431,61 @@ async function savePerms() {
   toast('Permissions updated');
   closePermModal();
   await loadMembers();
+}
+
+// ── Admin-access invite (send the granted user their sign-in link) ──────────
+const PERM_INVITE_SUBJECT = 'Your LendPaper admin access';
+// Read the modal's live state so the message always matches what's checked.
+function permAccessState() {
+  const u = memProfiles.find(p => p.id === permEditId);
+  const isAdmin = document.getElementById('perm-superadmin').checked;
+  const perms = isAdmin ? [] : Array.from(document.querySelectorAll('#perm-scope-list .perm-scope:checked')).map(cb => cb.value);
+  return { email: u?.email || '', name: document.getElementById('perm-name').value.trim(), isAdmin, perms };
+}
+function adminAccessMessage(st) {
+  const first = (st.name || '').trim().split(/\s+/)[0] || 'there';
+  let what, links = [];
+  if (st.isAdmin) {
+    what = 'full super-admin access to the LendPaper back office';
+    links.push('Admin panel: https://lendpaper.com/lp-panel.html');
+    links.push('Recruiter feed: https://lendpaper.com/lp-hire.html');
+  } else {
+    const labels = st.perms.map(k => SCOPE_LABELS[k] || k);
+    what = labels.length ? ('admin access to: ' + labels.join(', ')) : 'admin access';
+    if (st.perms.some(k => PANEL_SCOPES.includes(k))) links.push('Admin panel: https://lendpaper.com/lp-panel.html');
+    if (st.perms.includes('lp_hire')) links.push('Recruiter feed: https://lendpaper.com/lp-hire.html');
+  }
+  if (!links.length) links.push('https://lendpaper.com/login.html');
+  return `Hi ${first},
+
+You've been granted ${what} on LendPaper. Sign in with Google using ${st.email || 'this email'} and you're in:
+
+${links.join('\n')}
+
+— Steve
+LendPaper`;
+}
+async function permCopyInvite() {
+  const st = permAccessState();
+  if (!st.email) { toast('No email on file for this user'); return; }
+  const text = adminAccessMessage(st);
+  // Black rich-text flavor so Gmail/Outlook don't render it in the cursor colour.
+  const html = '<div style="color:#000000;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;white-space:pre-wrap">'
+    + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>') + '</div>';
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html],{type:'text/html'}), 'text/plain': new Blob([text],{type:'text/plain'}) })]);
+    } else { await navigator.clipboard.writeText(text); }
+    toast('Access message copied — ready to paste');
+  } catch (e) {
+    try { await navigator.clipboard.writeText(text); toast('Access message copied'); }
+    catch (e2) { toast('Copy failed: ' + e2.message); }
+  }
+}
+function permEmailInvite() {
+  const st = permAccessState();
+  if (!st.email) { toast('No email on file for this user'); return; }
+  window.location.href = `mailto:${encodeURIComponent(st.email)}?subject=${encodeURIComponent(PERM_INVITE_SUBJECT)}&body=${encodeURIComponent(adminAccessMessage(st))}`;
 }
 
 async function memCredits(userId, val) {
