@@ -99,6 +99,39 @@ var TOOLS = [
     kw: "lender waterfall buy box fico tib revenue product type filter match"
   },
   {
+    id: "ucc-leads",
+    name: "UCC leads",
+    desc: "Fresh UCC-filing leads, matched to your buy box.",
+    status: "inquire",
+    group: "data",
+    icon: "db",
+    color: "green",
+    kw: "ucc leads filings prospecting data list inquire soon"
+  },
+  {
+    id: "marketing-automation",
+    name: "Marketing automation",
+    desc: "Automated outreach and nurture for your pipeline.",
+    status: "inquire",
+    group: "data",
+    icon: "refresh",
+    color: "green",
+    kw: "marketing automation outreach nurture campaigns drip inquire soon"
+  },
+  {
+    id: "deal-log",
+    name: "Deal Log",
+    desc: "Every saved estimate in one place — reopen and keep deals moving.",
+    status: "live",
+    group: "data",
+    icon: "stack",
+    color: "green",
+    slug: "/quote-log",
+    presentation: "external",
+    path: "/quote-log",
+    kw: "deal log estimate log saved deals history quote"
+  },
+  {
     id: "fundability",
     name: "Position & Net",
     desc: "Combined net requirement and stacking risk assessment.",
