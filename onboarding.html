@@ -57,6 +57,11 @@
     .btn-next { width: 100%; padding: 13px; background: var(--brand); color: #fff; border: none; border-radius: 10px; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: background .18s, transform .1s; letter-spacing: -0.01em; }
     .btn-next:hover { background: var(--brand-mid); transform: translateY(-1px); }
     .btn-next:active { transform: none; }
+    .input-wrap { position: relative; margin-bottom: 14px; }
+    .input-prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--muted); opacity: .55; pointer-events: none; font-family: 'Inter', sans-serif; }
+    .input-wrap.has-prefix input { padding-left: 152px; margin-bottom: 0; }
+    .btn-skip { width: 100%; padding: 11px; background: none; color: var(--muted); border: none; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 13px; cursor: pointer; margin-top: 6px; }
+    .btn-skip:hover { color: var(--text); }
     .loading-overlay { display: none; position: absolute; inset: 0; background: rgba(248,250,247,0.95); border-radius: 20px; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 10; }
     .loading-overlay.visible { display: flex; }
     .spinner { width: 28px; height: 28px; border: 2px solid rgba(0,0,0,0.08); border-top-color: var(--brand-mid); border-radius: 50%; animation: spin .7s linear infinite; }
@@ -77,6 +82,7 @@
       <div class="progress">
         <div class="dot active" id="dot-0"></div>
         <div class="dot" id="dot-1"></div>
+        <div class="dot" id="dot-2" style="display:none"></div>
       </div>
       <div id="message" class="msg"></div>
       <div class="steps-viewport">
@@ -93,6 +99,17 @@
             <p class="subtitle">Your company or brokerage name — optional, you can add it later.</p>
             <input type="text" id="inputCompany" placeholder="Acme Capital LLC (optional)" autocomplete="organization" />
             <button class="btn-next" id="nextFromCompany">Let's go →</button>
+          </div>
+          <div class="step" id="step-2">
+            <button class="btn-back" id="backToCompany">← Back</button>
+            <h1>Add your LinkedIn?</h1>
+            <p class="subtitle">Optional — it helps us confirm you're a real broker or lender and speeds up approval. You can always add it later.</p>
+            <div class="input-wrap has-prefix">
+              <span class="input-prefix">linkedin.com/in/</span>
+              <input type="text" id="inputLinkedIn" placeholder="yourname" autocomplete="off" />
+            </div>
+            <button class="btn-next" id="finishFromLinkedIn">Finish →</button>
+            <button class="btn-skip" id="skipLinkedIn">Skip for now</button>
           </div>
         </div>
       </div>
@@ -150,8 +167,16 @@
     const companyGuess = companyFromEmail(session.user.email);
     if (companyGuess) document.getElementById('inputCompany').value = companyGuess;
 
+    // LEN-205: only ask for LinkedIn when the email gives us no company to vet by
+    // (free-mail / unknown domain). Corporate-domain signups skip the step entirely.
+    const needLinkedIn = !companyGuess;
+
     const track = document.getElementById('track');
-    const dots = [0,1].map(i => document.getElementById(`dot-${i}`));
+    const dots = [0,1,2].map(i => document.getElementById(`dot-${i}`));
+    if (needLinkedIn) {
+      document.getElementById('dot-2').style.display = '';
+      document.getElementById('nextFromCompany').textContent = 'Continue →';
+    }
     const msg = document.getElementById('message');
     let currentStep = 0;
     setTimeout(() => document.getElementById('inputName').focus(), 100);
@@ -164,6 +189,7 @@
       msg.className = 'msg';
       if (n === 0) setTimeout(() => document.getElementById('inputName').focus(), 380);
       if (n === 1) setTimeout(() => document.getElementById('inputCompany').focus(), 380);
+      if (n === 2) setTimeout(() => document.getElementById('inputLinkedIn').focus(), 380);
     }
     window.addEventListener('resize', () => {
       const w = track.parentElement.offsetWidth;
@@ -177,6 +203,38 @@
       if (!v) { showErr('Please enter your name.'); return; }
       goToStep(1);
     }
+    // From the company step: go to LinkedIn only when we couldn't infer a company.
+    function advanceCompany() {
+      if (needLinkedIn) goToStep(2);
+      else submitProfile();
+    }
+
+    // Accept a full URL or a bare handle → canonical https://linkedin.com/in/<handle>.
+    function normalizeLinkedIn(raw) {
+      let s = (raw || '').trim();
+      if (!s) return null;
+      s = s.replace(/^@+/, '');
+      if (/linkedin\.com/i.test(s)) {
+        return 'https://' + s.replace(/^https?:\/\//i, '').replace(/^www\./i, '');
+      }
+      s = s.replace(/^\/+|\/+$/g, '').replace(/^in\//i, '');
+      return s ? 'https://linkedin.com/in/' + s : null;
+    }
+
+    // Insert the profile, dropping linkedin_url if the column isn't in the live
+    // schema yet (PGRST204) — a missing optional column must never block signup.
+    async function insertProfileSafe(profile) {
+      const payload = { ...profile };
+      for (let i = 0; i < 2; i++) {
+        const { error } = await supabase.from('profiles').insert(payload);
+        if (!error) return null;
+        const m = error.code === 'PGRST204' && /the '([^']+)' column/.exec(error.message || '');
+        if (m && m[1] === 'linkedin_url' && 'linkedin_url' in payload) { delete payload.linkedin_url; continue; }
+        return error;
+      }
+      return null;
+    }
+
     async function submitProfile() {
       const v = document.getElementById('inputCompany').value.trim();
       document.getElementById('loadingOverlay').classList.add('visible');
@@ -192,7 +250,10 @@
       // LEN-105: carry the admin-assigned role onto the new profile (onboarding doesn't ask for it)
       if (invite && invite.role) profile.role = invite.role;
       if (invite) profile.approved_at = new Date().toISOString();
-      const { error } = await supabase.from('profiles').insert(profile);
+      // LEN-205: optional LinkedIn (only collected when no company could be inferred).
+      const li = normalizeLinkedIn(document.getElementById('inputLinkedIn').value);
+      if (li) profile.linkedin_url = li;
+      const error = await insertProfileSafe(profile);
       if (error) {
         document.getElementById('loadingOverlay').classList.remove('visible');
         showErr(error.message);
@@ -200,7 +261,7 @@
         // LEN-175: the invite Role is the onboarding JTBD persona. Seed it so the home
         // dashboard + tour are tailored from first login (index.html reads lp_persona;
         // it validates the key against PERSONA_TOOLS, so legacy/unknown values no-op).
-        const PERSONA_KEYS = ['dealmath','placement','diligence','sba','compliance'];
+        const PERSONA_KEYS = ['dealmath','placement','diligence','sba','compliance','sales'];
         if (invite && PERSONA_KEYS.includes(invite.role)) {
           try { localStorage.setItem('lp_persona', invite.role); } catch (e) { /* storage off — skip */ }
         }
@@ -209,10 +270,14 @@
       }
     }
     document.getElementById('nextFromName').addEventListener('click', advanceName);
-    document.getElementById('nextFromCompany').addEventListener('click', submitProfile);
+    document.getElementById('nextFromCompany').addEventListener('click', advanceCompany);
     document.getElementById('backToName').addEventListener('click', () => goToStep(0));
+    document.getElementById('backToCompany').addEventListener('click', () => goToStep(1));
+    document.getElementById('finishFromLinkedIn').addEventListener('click', submitProfile);
+    document.getElementById('skipLinkedIn').addEventListener('click', () => { document.getElementById('inputLinkedIn').value = ''; submitProfile(); });
     document.getElementById('inputName').addEventListener('keydown', e => { if (e.key === 'Enter') advanceName(); });
-    document.getElementById('inputCompany').addEventListener('keydown', e => { if (e.key === 'Enter') submitProfile(); });
+    document.getElementById('inputCompany').addEventListener('keydown', e => { if (e.key === 'Enter') advanceCompany(); });
+    document.getElementById('inputLinkedIn').addEventListener('keydown', e => { if (e.key === 'Enter') submitProfile(); });
     function showErr(text) { msg.textContent = text; msg.className = 'msg error'; }
   </script>
 </body>

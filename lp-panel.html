@@ -538,6 +538,7 @@ header {
 .mem-pill.placement { background: #DBEAFE; color: #1D4ED8; }
 .mem-pill.dealmath { background: #DCFCE7; color: #15803D; }
 .mem-pill.diligence { background: #EDE9FE; color: #6D28D9; }
+.mem-pill.sales { background: #FFEDD5; color: #C2410C; }
 .mem-pill.sba { background: var(--amber-light); color: var(--amber); }
 .mem-pill.compliance { background: #E0F2FE; color: #0369A1; }
 .mem-badge { display: inline-block; border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; }
@@ -950,6 +951,7 @@ header {
            login and the onboarding "what do you do most" step is pre-filled. -->
       <select id="inv-role" class="inv-input">
         <option value="">What do they do most? (optional)</option>
+        <option value="sales">Selling &amp; originating financing (AE, loan officer, SDR, rep)</option>
         <option value="placement">Placing deals with lenders (broker / ISO)</option>
         <option value="dealmath">Structuring &amp; pricing deals</option>
         <option value="diligence">Underwriting &amp; due diligence</option>
@@ -2969,6 +2971,7 @@ async function renderMembersPanel() {
         <input type="text" class="mem-search" id="mem-search" placeholder="Search name, company, email…" oninput="memRenderTable()" />
         <select class="mem-select" id="mem-role" onchange="memRenderTable()">
           <option value="">All roles</option>
+          <option value="sales">Sales</option>
           <option value="placement">Placement</option>
           <option value="dealmath">Deal structuring</option>
           <option value="diligence">Underwriting</option>
@@ -3061,6 +3064,7 @@ function memRolePill(role) {
   // LEN-175: role now carries the onboarding JTBD persona key. Legacy invites
   // may still hold the old entity-type values (broker/iso/lender) — keep them mapped.
   const map = {
+    sales:      ['sales',      'Sales'],
     placement:  ['placement',  'Placement'],
     dealmath:   ['dealmath',   'Deal structuring'],
     diligence:  ['diligence',  'Underwriting'],
@@ -3317,11 +3321,26 @@ function inviteOpenMail() {
 
 async function inviteCopyMsg() {
   if (!invCurrent) return;
+  const text = inviteMessage(invCurrent.name);
+  // Put an explicit-black rich-text flavor on the clipboard alongside plain text,
+  // so pasting into Gmail/Outlook renders black (a plain-text paste otherwise
+  // inherits the cursor's colour and can come out white).
+  const html = '<div style="color:#000000;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;white-space:pre-wrap">'
+    + text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')
+    + '</div>';
   try {
-    await navigator.clipboard.writeText(inviteMessage(invCurrent.name));
-    toast('Message copied');
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html':  new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([text], { type: 'text/plain' })
+      })]);
+    } else {
+      await navigator.clipboard.writeText(text);
+    }
+    toast('Message copied — black text, ready to paste');
   } catch (e) {
-    toast('Copy failed: ' + e.message);
+    try { await navigator.clipboard.writeText(text); toast('Message copied'); }
+    catch (e2) { toast('Copy failed: ' + e2.message); }
   }
 }
 
