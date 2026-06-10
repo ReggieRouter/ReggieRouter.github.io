@@ -125,6 +125,31 @@
     const { data: existing } = await supabase.from('profiles').select('id').eq('id', session.user.id).single();
     if (existing) { window.location.replace('/auth-callback.html'); throw new Error('profile exists — redirecting'); }
 
+    // Soft-suggest the company from the user's email domain — fully editable, optional.
+    const LP_FREE_EMAIL_DOMAINS = new Set([
+      'gmail.com','googlemail.com','outlook.com','hotmail.com','live.com','msn.com',
+      'yahoo.com','yahoo.co.uk','ymail.com','aol.com','icloud.com','me.com','mac.com',
+      'proton.me','protonmail.com','pm.me','gmx.com','gmx.net','zoho.com','mail.com',
+      'yandex.com','fastmail.com','hey.com','comcast.net','verizon.net','att.net','sbcglobal.net'
+    ]);
+    function companyFromEmail(email) {
+      const m = /@([^@\s]+)$/.exec((email || '').trim().toLowerCase());
+      if (!m) return '';
+      const domain = m[1].replace(/\.$/, '');
+      if (LP_FREE_EMAIL_DOMAINS.has(domain)) return '';
+      const parts = domain.split('.').filter(Boolean);
+      if (parts.length < 2) return '';
+      const SLD = new Set(['co','com','net','org','gov','edu','ac']);
+      const orgLabel = (parts.length >= 3 && SLD.has(parts[parts.length - 2]))
+        ? parts[parts.length - 3]
+        : parts[parts.length - 2];
+      if (!orgLabel) return '';
+      return orgLabel.replace(/[-_]+/g, ' ').split(' ').filter(Boolean)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    }
+    const companyGuess = companyFromEmail(session.user.email);
+    if (companyGuess) document.getElementById('inputCompany').value = companyGuess;
+
     const track = document.getElementById('track');
     const dots = [0,1].map(i => document.getElementById(`dot-${i}`));
     const msg = document.getElementById('message');

@@ -938,7 +938,7 @@ header {
       <label class="inv-label" for="inv-name">Name</label>
       <input type="text" id="inv-name" class="inv-input" placeholder="First Last (optional)" />
       <label class="inv-label" for="inv-email">Email</label>
-      <input type="email" id="inv-email" class="inv-input" placeholder="name@company.com" />
+      <input type="email" id="inv-email" class="inv-input" placeholder="name@company.com" oninput="invSuggestCompany()" />
       <label class="inv-label" for="inv-company">Company</label>
       <input type="text" id="inv-company" class="inv-input" placeholder="Company (optional)" />
       <label class="inv-label" for="inv-role">Role</label>
@@ -3127,8 +3127,52 @@ function memRenderInvitedTable(wrap) {
   </table>`;
 }
 
+// Generic free-mail providers — these carry no company signal.
+const LP_FREE_EMAIL_DOMAINS = new Set([
+  'gmail.com','googlemail.com','outlook.com','hotmail.com','live.com','msn.com',
+  'yahoo.com','yahoo.co.uk','ymail.com','aol.com','icloud.com','me.com','mac.com',
+  'proton.me','protonmail.com','pm.me','gmx.com','gmx.net','zoho.com','mail.com',
+  'yandex.com','fastmail.com','hey.com','comcast.net','verizon.net','att.net','sbcglobal.net'
+]);
+
+// Best-effort company guess from an email's domain — purely local, no lookup.
+// Free-mail domains return '' (no signal). e.g. john@acme-capital.com → "Acme Capital".
+function companyFromEmail(email) {
+  const m = /@([^@\s]+)$/.exec((email || '').trim().toLowerCase());
+  if (!m) return '';
+  const domain = m[1].replace(/\.$/, '');
+  if (LP_FREE_EMAIL_DOMAINS.has(domain)) return '';
+  const parts = domain.split('.').filter(Boolean);
+  if (parts.length < 2) return '';
+  // For second-level TLDs (co.uk, com.au, co.nz...), the org label sits one further left.
+  const SLD = new Set(['co','com','net','org','gov','edu','ac']);
+  const orgLabel = (parts.length >= 3 && SLD.has(parts[parts.length - 2]))
+    ? parts[parts.length - 3]
+    : parts[parts.length - 2];
+  if (!orgLabel) return '';
+  return orgLabel
+    .replace(/[-_]+/g, ' ')
+    .split(' ').filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+// Suggest the company from the invitee's email — a soft pre-fill the admin can edit.
+// Only touch the field while it's empty or still holds our last suggestion; never
+// clobber something typed by hand.
+let invCompanySuggestion = '';
+function invSuggestCompany() {
+  const el = document.getElementById('inv-company');
+  const cur = el.value.trim();
+  if (cur && cur !== invCompanySuggestion) return;
+  const guess = companyFromEmail(document.getElementById('inv-email').value);
+  el.value = guess;
+  invCompanySuggestion = guess;
+}
+
 function openInviteModal() {
   invCurrent = null;
+  invCompanySuggestion = '';
   document.getElementById('inv-name').value = '';
   document.getElementById('inv-email').value = '';
   document.getElementById('inv-company').value = '';
