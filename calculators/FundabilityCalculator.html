@@ -375,40 +375,57 @@
         .lp-cta-primary:hover { background:#2D6A4F; }
         .lp-cta-secondary { background:transparent; color:#1A3C2E; border:1px solid #1A3C2E; }
         .lp-cta-secondary:hover { background:#F0FDF4; }
-        /* LEN-11 — optional Document details panel (screen only; never printed) */
+        /* LEN-160 — left-column PDF Details footer module (screen only; never printed).
+           Mockup: lendpaper-doc-details-footer-module-mockup.svg. Bottom of the input
+           column, visually secondary; exactly three optional fields. */
         .lp-doc-details {
-            max-width: 980px; margin: 0 auto 14px; padding: 0 4px;
-            border: 1px solid #E5E7EB; border-radius: 10px; background: #fff;
+            max-width: 540px; margin: 18px 0 0; padding: 0;
+            border: 1px solid #D9E7DF; border-left: 4px solid #1A3C2E; border-radius: 12px;
+            background: #FBFDFC;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         .lp-doc-details > summary {
-            list-style: none; cursor: pointer; padding: 12px 14px;
-            font-size: 12px; font-weight: 800; color: #111827; letter-spacing: 0.01em;
+            list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px;
         }
         .lp-doc-details > summary::-webkit-details-marker { display: none; }
-        .lp-doc-details > summary::before { content: "+ "; color: #1A3C2E; font-weight: 900; }
-        .lp-doc-details[open] > summary::before { content: "– "; }
-        .lp-doc-details > summary span { color: #6B7280; font-weight: 500; }
+        .lp-dd-icon {
+            flex: 0 0 auto; width: 32px; height: 32px; border-radius: 8px;
+            background: #F0FDF4; border: 1px solid #BBF7D0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .lp-dd-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .lp-dd-kicker { font-size: 11px; font-weight: 800; color: #64748B; letter-spacing: 0.12em; }
+        .lp-dd-title { font-size: 14px; font-weight: 800; color: #111827; }
+        .lp-dd-helper { font-size: 12px; font-weight: 500; color: #64748B; }
+        .lp-doc-details[open] .lp-dd-helper { display: none; }
+        .lp-dd-edit {
+            flex: 0 0 auto; font-size: 12px; font-weight: 800; color: #1A3C2E;
+            border: 1px solid #D9E7DF; border-radius: 8px; padding: 6px 12px; background: #fff;
+        }
+        .lp-doc-details > summary:hover .lp-dd-edit { border-color: #1A3C2E; }
+        .lp-dd-caret { flex: 0 0 auto; width: 16px; text-align: center; font-size: 20px; font-weight: 800; color: #64748B; line-height: 1; }
+        .lp-doc-details:not([open]) .lp-dd-caret::after { content: "+"; }
+        .lp-doc-details[open] .lp-dd-caret::after { content: "\2013"; }
         .lp-doc-details-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px;
-            padding: 4px 14px 16px;
+            display: grid; grid-template-columns: 1fr; gap: 12px;
+            padding: 2px 16px 8px;
         }
         .lp-doc-details-grid label {
             display: flex; flex-direction: column; gap: 4px;
             font-size: 10px; font-weight: 800; color: #64748B; text-transform: uppercase; letter-spacing: 0.04em;
         }
         .lp-doc-details-grid input {
-            padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 7px;
+            padding: 9px 11px; border: 1px solid #D1D5DB; border-radius: 8px;
             font-size: 13px; font-weight: 500; color: #111827; text-transform: none; letter-spacing: 0;
             font-family: inherit; background: #fff;
         }
         .lp-doc-details-grid input:focus { outline: none; border-color: #1A3C2E; }
-        .lp-doc-details-hint { margin: 0; padding: 0 14px 14px; font-size: 10.5px; color: #94A3B8; }
-        @media (max-width: 640px) { .lp-doc-details-grid { grid-template-columns: 1fr; } }
+        .lp-doc-details-hint { margin: 0; padding: 0 16px 14px; font-size: 10.5px; color: #94A3B8; }
         /* LEN-147 — deal-context overrides (replaces .lp-context + uppercase title band) */
         #deal-context [data-lp-compliance-host] { margin: 0 !important; }
         #deal-context [data-lp-compliance-host] > div { align-items: flex-start !important; }
-        #deal-context .lp-doc-details { max-width: 100%; margin: 0; }
+        #deal-context .lp-doc-details { max-width: 100%; margin: 16px 0 0; }
         /* LEN-11 — broker/deal context block injected into the captured body at print time */
         .lp-doc-context { display: none; }
         body.pdf-export-mode .lp-doc-context {
@@ -678,15 +695,22 @@
                     <div data-lp-compliance-host></div>
                     <!-- LEN-11 — optional document details that personalize the exported PDF. All fields optional. -->
                     <details id="pdfDocDetails" class="lp-doc-details">
-                        <summary>Document details <span>— optional, appears on the PDF</span></summary>
+                        <summary>
+                            <span class="lp-dd-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+                            <span class="lp-dd-text">
+                                <span class="lp-dd-kicker">PDF DETAILS</span>
+                                <span class="lp-dd-title">Prepared for the saved estimate</span>
+                                <span class="lp-dd-helper">Prepared by · Company · Prepared for</span>
+                            </span>
+                            <span class="lp-dd-edit">Edit</span>
+                            <span class="lp-dd-caret"></span>
+                        </summary>
                         <div class="lp-doc-details-grid">
                             <label>Prepared by<input id="pdfPreparedBy" type="text" autocomplete="off" placeholder="Your name"></label>
                             <label>Company<input id="pdfPreparedByCompany" type="text" autocomplete="off" placeholder="Your company"></label>
-                            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Merchant / borrower name"></label>
-                            <label>Deal name<input id="pdfDealName" type="text" autocomplete="off" placeholder="e.g. Q3 Working Capital"></label>
-                            <label>Lender / program<input id="pdfLender" type="text" autocomplete="off" placeholder="e.g. Northline Capital"></label>
+                            <label>Prepared for<input id="pdfPreparedFor" type="text" autocomplete="off" placeholder="Borrower name · use of funds"></label>
                         </div>
-                        <p class="lp-doc-details-hint">These appear at the top of the saved PDF. Leave blank to omit. Borrower state is set above and drives state-specific compliance disclosures.</p>
+                        <p class="lp-doc-details-hint">Optional — appears on the saved PDF. Borrower state is set above and drives state-specific compliance disclosures.</p>
                     </details>
                 </div>
             </div>
@@ -900,23 +924,17 @@
         const name = v('pdfPreparedBy'), company = v('pdfPreparedByCompany');
         return {
             preparedBy: [name, company].filter(Boolean).join(' · '),
-            preparedFor: v('pdfPreparedFor'),
-            dealName: v('pdfDealName'),
-            lender: v('pdfLender')
+            preparedFor: v('pdfPreparedFor')
         };
     }
     // LEN-11 — inject the broker/deal context into the captured body. The print header is
     // overwritten by generatePDF → initPrintLayout, so this block must live in the body.
     function mountDocContext(element) {
         const c = pdfDocContext();
-        if (!c.preparedBy && !c.preparedFor && !c.dealName && !c.lender) return null;
+        if (!c.preparedBy && !c.preparedFor) return null;
         const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
         const rows = [];
         if (c.preparedFor) rows.push(`<div class="dc-for">Prepared for ${esc(c.preparedFor)}</div>`);
-        const meta = [];
-        if (c.dealName) meta.push(esc(c.dealName));
-        if (c.lender) meta.push(esc(c.lender));
-        if (meta.length) rows.push(`<div class="dc-meta">${meta.join(' · ')}</div>`);
         if (c.preparedBy) rows.push(`<div class="dc-by">Prepared by ${esc(c.preparedBy)}</div>`);
         if (!rows.length) return null;
         const node = document.createElement('div');
@@ -1367,7 +1385,7 @@
         bindTips();
         PDF_HELPER.initDismissibles();
         rewireFundHowto();
-        PDF_HELPER.persistFields('fund', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor','pdfDealName','pdfLender']);
+        PDF_HELPER.persistFields('fund', ['pdfPreparedBy','pdfPreparedByCompany','pdfPreparedFor']);
         // LEN-156 — Position is the default tab; pull the shared funding + deal-context nodes
         // (authored in the Net panel) into the Position column on load so they're visible.
         mountFunding('risk');

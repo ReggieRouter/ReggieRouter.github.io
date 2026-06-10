@@ -105,6 +105,77 @@ Never allow a blank or default-state document to be downloaded.
 
 ---
 
+## 3A. Optional Document Metadata — PDF Details footer module (LEN-160)
+
+Every calculator carries one optional metadata module (`#pdfDocDetails`,
+`.lp-doc-details`) that personalizes the saved PDF. It is the **single source of
+truth** for the PDF's prepared-header fields. It is screen-only chrome (`no-print`)
+and **must never change PDF math, validation, watermarking, compliance, or
+Estimate Log behavior.**
+
+### UI contract (the footer module)
+
+- Lives at the **bottom of the input column**, visually secondary to the financing
+  inputs — **not** a full-width floating bar above the inputs. (Multi-card calcs —
+  Amortization, SBA — render the single module below the cards, left-aligned.)
+- Collapsed state (mockup `lendpaper-doc-details-footer-module-mockup.svg`): a small
+  document icon, the kicker `PDF DETAILS`, the title `Prepared for the saved estimate`,
+  the helper line `Prepared by · Company · Prepared for`, and an `Edit` + `+`/`–`
+  affordance. It is a `<details>`/`<summary>` disclosure.
+- Mint guidance / how-to boxes use a real **30×30 close target** with reserved right
+  padding so text never runs under it (injected by `PDF_HELPER.initDismissibles`;
+  Amortization's per-card intro box matches the same size).
+
+### The three optional fields — exactly these, nothing else
+
+| Field | id | Meaning | Blank behavior |
+|---|---|---|---|
+| Prepared by | `pdfPreparedBy` | Person preparing the estimate | Omit the prepared-by line if blank |
+| Company | `pdfPreparedByCompany` | Preparer / company name | Combined into the prepared-by line (`Prepared by Jane · Northline Capital`) |
+| Prepared for | `pdfPreparedFor` | Borrower / merchant — may include use of funds | Omit the prepared-for line if blank |
+
+Rules:
+
+- All three are optional; export is never gated on them.
+- `Prepared for` may carry borrower name **plus** use of funds on one line.
+- **Never print an empty metadata shell** such as `Prepared for —` or `Prepared by —`.
+- Do not reintroduce `Deal name` / `Lender / program` fields — they were removed in
+  LEN-160; the PDF no longer renders a deal-name subtitle or a lender/program cell.
+
+---
+
+## 3B. Client-facing framing — HARD RULES (LEN-160)
+
+Estimate PDFs are handed to the borrower. They must read as **neutral fact**, not as
+internal sales coaching. These are non-negotiable:
+
+1. **Never use a broker-coaching label as a header — and never as the first header.**
+   The on-screen talk-track header **"What you tell the borrower"** (and any 2nd-person
+   sell-to-the-borrower framing) is **screen-only**. In the PDF it must be hidden
+   (`.no-print` / hidden in `pdf-export-mode`) or replaced with a neutral label such as
+   **"Summary"**. The talk-track *content* may stay; the coaching *header* may not.
+
+2. **No acknowledgement / signature block on an estimate PDF.** Estimate calculators
+   (Amortization, DSCR, Fundability, SBA Fees, Payment Fit) produce *estimates, not
+   executed agreements* — never print a "Borrower / Representative / Date" signature or
+   "Acknowledgement & Signatures" section. (Signed-artifact flows such as Deal Analysis
+   are a separate, intentional document path and are out of scope for this rule.)
+
+3. **Internal qualification analysis stays on screen.** Broker-only reads — e.g.
+   "Qualification Read", Daily Pressure, WOW coverage, breakeven hurdles — must not
+   print on the client PDF. Only neutral facts (figures, terms) and required
+   disclosures belong there.
+
+4. **A cautionary verdict is honest, not alarming.** When a deal is stretching, lead
+   with a balanced top-line (e.g. *"Stretching, but possible. Make sure you're
+   comfortable."*) rather than a bare red verdict word.
+
+5. **No collapsed/`expand ▸` artifacts in the PDF.** Any on-screen `<details>` that
+   belongs in the PDF (e.g. Required Disclosures) must be force-rendered open with its
+   expand affordance hidden — never print a dangling header with no content.
+
+---
+
 ## 4. Print Stylesheet (Standard — All Calculators)
 
 All calculators share this base. Drop into a `print.css` or global `@media print` block.
