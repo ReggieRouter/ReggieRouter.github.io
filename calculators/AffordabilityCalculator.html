@@ -214,6 +214,25 @@ select.input-field { -webkit-appearance: none; appearance: none; cursor: pointer
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .helper { margin-top: 8px; color: var(--lp-text-muted); font-size: 12px; line-height: 1.45; }
 
+/* Cost-source explainer — light-green dismissible callout (surfaced on interaction) */
+.cost-callout {
+  position: relative; display: flex; align-items: flex-start; gap: 9px;
+  margin: -2px 0 18px; padding: 11px 34px 11px 13px;
+  background: var(--lp-green-soft); border: 1px solid #BBE6CD;
+  border-left: 3px solid var(--lp-green-mid); border-radius: 8px;
+  color: var(--lp-green); font-size: 12.5px; line-height: 1.5;
+  animation: costCalloutIn 0.22s ease;
+}
+.cost-callout strong { font-weight: 700; }
+.cost-callout .ico { flex: 0 0 auto; margin-top: 1px; color: var(--lp-green-mid); }
+.cost-callout-x {
+  position: absolute; top: 6px; right: 7px; border: none; background: transparent;
+  cursor: pointer; color: var(--lp-green-mid); font-size: 18px; line-height: 1;
+  padding: 2px 5px; border-radius: 6px; transition: background 0.15s;
+}
+.cost-callout-x:hover { background: rgba(26,60,46,0.08); }
+@keyframes costCalloutIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
 /* Use-of-funds cycler */
 .cycler { display: flex; gap: 8px; align-items: stretch; }
 .cycler .input-wrap { flex: 1; }
@@ -651,14 +670,18 @@ body.is-embedded .lp-main { padding-top: 16px; }
                             <div class="input-wrap subdued">
                                 <select id="paybackModeInput" class="input-field">
                                     <option value="deal" selected>From deal</option>
-                                    <option value="entered">Entered manually</option>
-                                    <option value="estimate">Estimate from payment</option>
-                                    <option value="quote">From a saved estimate</option>
+                                    <option value="entered">Manual entry</option>
+                                    <option value="estimate">From payment</option>
+                                    <option value="quote">Saved estimate</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-                    <div class="helper" style="margin:-8px 0 18px;">Can be pulled from a saved estimate in your <strong style="font-weight:700;color:var(--lp-text-muted);">Deal Log</strong>, entered manually, or estimated from the payment.</div>
+                    <div id="costSourceCallout" class="cost-callout" hidden>
+                        <svg class="ico" width="15" height="15" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg>
+                        <span>Can be pulled from a saved estimate in your <strong>Deal Log</strong>, entered manually, or estimated from the payment.</span>
+                        <button type="button" class="cost-callout-x" id="costSourceCalloutX" aria-label="Dismiss">&times;</button>
+                    </div>
 
                     <div>
                         <label class="field-label">Term months</label>
@@ -1330,6 +1353,26 @@ document.querySelectorAll("#paymentInput, #frequencyInput, #depositsInput, #payb
   input.addEventListener("input", () => { manualScenarioIndex = null; update(); });
   input.addEventListener("change", update);
 });
+
+/* Cost-source explainer: surface the light-green callout when the user touches
+   the Cost source field, and let them dismiss it (sticks per browser). */
+(() => {
+  const sel = document.getElementById("paybackModeInput");
+  const callout = document.getElementById("costSourceCallout");
+  const x = document.getElementById("costSourceCalloutX");
+  if (!sel || !callout) return;
+  const DISMISS_KEY = "lp_affordability_cost_callout_dismissed";
+  const reveal = () => {
+    if (localStorage.getItem(DISMISS_KEY) === "1") return;
+    callout.hidden = false;
+  };
+  sel.addEventListener("focus", reveal);
+  sel.addEventListener("change", reveal);
+  x?.addEventListener("click", () => {
+    callout.hidden = true;
+    try { localStorage.setItem(DISMISS_KEY, "1"); } catch (e) {}
+  });
+})();
 
 document.querySelectorAll(".tab").forEach((button) => {
   button.addEventListener("click", () => {
