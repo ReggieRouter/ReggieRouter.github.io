@@ -62,9 +62,9 @@ var TOOLS = [
     id: "registry", 
     name: "Secretary of State Search", 
     desc: "Search public business records and UCC filings.",
-    status: "live", 
-    group: "data", 
-    icon: "search", 
+    status: "live",
+    group: "risk",
+    icon: "search",
     color: "green",
     slug: "https://www.registryroute.com/",
     presentation: "external",
@@ -131,13 +131,23 @@ var TOOLS = [
     name: "Compliance Desk",
     desc: "State + federal commercial financing disclosure law, mapped. Know where disclosure rules bite.",
     status: "live",
-    group: "data",
+    group: "risk",
     icon: "flag",
     color: "green",
     slug: "/compliance",
     presentation: "page",
     path: "/legislation.html",
     kw: "legislation law regulation disclosure commercial financing state federal cfpb 1071 cfdl map tracker compliance bill statute"
+  },
+  {
+    id: "uw-suite",
+    name: "Underwriting suite",
+    desc: "Tighten underwriting and identity checks before you fund. Tell us what you need.",
+    status: "inquire",
+    group: "risk",
+    icon: "stack",
+    color: "green",
+    kw: "underwriting uw identity verification authentication fraud risk diligence inquire suite"
   },
   /*
   {

@@ -253,6 +253,20 @@ input { font-family: inherit; }
   text-align: center;
 }
 .nav-item.active .nav-count { background: rgba(16, 185, 129, 0.15); color: var(--accent-hover); }
+/* LEN-170: sidebar "soon" inquire items (UCC leads, marketing automation) */
+.nav-item-soon { opacity: 0.62; }
+.nav-item-soon:hover { opacity: 1; }
+.nav-soon {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: var(--bg-alt);
+  border-radius: 99px;
+  padding: 2px 7px;
+}
 
 .sidebar-footer {
   margin-top: auto;
@@ -1215,6 +1229,14 @@ input { font-family: inherit; }
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
           Data &amp; leads<span class="nav-count" id="count-data">0</span>
         </button>
+        <button class="nav-item nav-item-soon" onclick="openFeatureRequest('ucc-leads','UCC leads')" title="Coming soon — tap to express interest">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          UCC leads<span class="nav-soon">Soon</span>
+        </button>
+        <button class="nav-item nav-item-soon" onclick="openFeatureRequest('marketing-automation','Marketing automation')" title="Coming soon — tap to express interest">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/></svg>
+          Marketing automation<span class="nav-soon">Soon</span>
+        </button>
       </div>
       <div class="nav-divider"></div>
       <div class="nav-section">
@@ -1600,13 +1622,13 @@ const randomTagline = taglines[Math.floor(Math.random() * taglines.length)];
 
 /* ---- Render ---- */
 function cardHTML(t, i) {
-  var dis = t.status === 'soon';
+  var dis = t.status === 'soon' || t.status === 'inquire';
   var tag = dis ? 'div' : 'a';
   var href = dis ? '' : ' href="'+t.slug+'"';
   var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
   var cls = 'card' + (dis ? ' is-disabled' : '') + (t.id === 'amo' ? ' card-amo-glisten' : '');
-  var pillCls = t.status==='live' ? 'pill-live' : t.status==='new' ? 'pill-new' : t.status==='soon' ? 'pill-soon' : '';
-  var pillTxt = t.status==='live' ? 'Live' : t.status==='new' ? 'New' : t.status==='soon' ? 'Soon' : '';
+  var pillCls = t.status==='live' ? 'pill-live' : t.status==='new' ? 'pill-new' : (t.status==='soon'||t.status==='inquire') ? 'pill-soon' : '';
+  var pillTxt = t.status==='live' ? 'Live' : t.status==='new' ? 'New' : t.status==='soon' ? 'Soon' : t.status==='inquire' ? 'Inquire' : '';
   
   var onclick = dis ? ' onclick="openFeatureRequest(\''+t.id+'\',\''+t.name+'\')"' : ' onclick="handleToolClick(event, \''+t.id+'\')"';
 
@@ -1625,7 +1647,7 @@ function cardHTML(t, i) {
 
 function handleToolClick(e, id) {
   var t = TOOLS.find(function(x){ return x.id === id; });
-  if (!t || t.status === 'soon') return;
+  if (!t || t.status === 'soon' || t.status === 'inquire') return;
   if (t.presentation === 'external') return; // Let default link behavior happen
 
   e.preventDefault();
@@ -1897,7 +1919,6 @@ function featuredCardHTML(t, i, isPrimary) {
 function renderHome() {
   var featured = featuredIds.map(function(id){ return TOOLS.find(function(x){ return x.id === id; }); }).filter(Boolean);
   var liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1; });
-  var soon = TOOLS.filter(function(t){ return t.status === 'soon'; });
 
   var html = '<div class="featured-grid">';
   featured.forEach(function(t, i){ html += featuredCardHTML(t, i, i === 0); });
@@ -1909,11 +1930,8 @@ function renderHome() {
     html += '</div>';
   }
 
-  if (soon.length) {
-    html += '<div class="home-section-label">Coming Soon</div><div class="soon-grid">';
-    soon.forEach(function(t, i){ html += cardHTML(t, i); });
-    html += '</div>';
-  }
+  // LEN-170: no dedicated "Coming Soon" section on the home page — soon/inquire
+  // tiles live within their category panels; clicking one opens the inquire modal.
 
   document.getElementById('homeTools').innerHTML = html;
 
@@ -2493,8 +2511,15 @@ overlay.addEventListener('click', closeMobile);
 /* ---- Modal System Functions ---- */
 function openFeatureRequest(id, name) {
   document.getElementById('frm-name').textContent = name;
+  // LEN-170: inquire features send a tailored interest note instead of the generic ask.
+  var customMsgs = {
+    'uw-suite': 'I’d be interested in learning how you can improve my underwriting process with LendPaper tooling.',
+    'ucc-leads': 'I’d be interested in LendPaper’s UCC leads when they’re available.',
+    'marketing-automation': 'I’d be interested in LendPaper’s marketing automation when it’s available.'
+  };
+  var msg = customMsgs[id] || ('I’d love to see the ' + name + ' tool added to LendPaper.');
   var subject = encodeURIComponent('Feature request: ' + name);
-  var body = encodeURIComponent('Hi LendPaper,\n\nI’d love to see the ' + name + ' tool added to LendPaper.\n\nFeel free to loop me in when it ships.\n\n— ');
+  var body = encodeURIComponent('Hi LendPaper,\n\n' + msg + '\n\nFeel free to loop me in when it ships.\n\n— ');
   document.getElementById('frm-email-btn').href = 'mailto:hello@lendpaper.com?subject=' + subject + '&body=' + body;
   document.getElementById('frm-overlay').classList.add('open');
 }
