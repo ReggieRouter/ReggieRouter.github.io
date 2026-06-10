@@ -8674,8 +8674,8 @@
         </td>
         <td><div style="display:flex; flex-wrap:wrap; gap:4px; max-width:180px;">${productsHtml}</div></td>
         <td>${riskCellHTML(risk)}</td>
-        <td class="num-col">${lender.fico === 0 ? '<span class="lp-tbd">—</span>' : lender.fico}</td>
-        <td class="num-col">${lender.tib === 0 ? '<span class="lp-tbd">—</span>' : lender.tib}</td>
+        <td class="num-col">${!lender.fico ? '<span class="lp-tbd">—</span>' : lender.fico}</td>
+        <td class="num-col">${!lender.tib ? '<span class="lp-tbd">—</span>' : lender.tib}</td>
         <td class="num-col">${formatCurrency(lender.rev)}</td>
         <td class="num-col">${stackingHtml}</td>
       `;
