@@ -3072,10 +3072,21 @@ async function loadMembers() {
   const profileSignin = new Map(
     memProfiles.filter(p => p.email).map(p => [p.email.toLowerCase(), p.created_at || null])
   );
-  memInvites = (inv || []).map(i => ({
-    ...i,
-    accepted_at: i.accepted_at ?? i.used_at ?? (i.email ? profileSignin.get(i.email.toLowerCase()) ?? null : null),
-  }));
+  // LEN-248: detect an invitee who signed in under a DIFFERENT email than the one they
+  // were invited at (e.g. Google defaulted to a personal Gmail). Match by normalized
+  // full name → first matching profile whose email isn't the invite email.
+  const norm = s => (s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const profileByName = new Map();
+  memProfiles.forEach(p => { const k = norm(p.full_name); if (k && !profileByName.has(k)) profileByName.set(k, p); });
+  memInvites = (inv || []).map(i => {
+    const accepted_at = i.accepted_at ?? i.used_at ?? (i.email ? profileSignin.get(i.email.toLowerCase()) ?? null : null);
+    let signedInAs = null;
+    if (!accepted_at) {
+      const p = profileByName.get(norm(i.full_name));
+      if (p && p.email && p.email.toLowerCase() !== (i.email || '').toLowerCase()) signedInAs = p.email;
+    }
+    return { ...i, accepted_at, signedInAs };
+  });
   memInvitesError = invErr ? invErr.message : null;
   memRenderStats();
   memRenderTable();
@@ -3261,9 +3272,13 @@ function memRenderInvitedTable(wrap) {
       <td style="color:var(--muted)">${esc(i.company || '—')}</td>
       <td>${i.role ? memRolePill(i.role) : '<span style="color:var(--muted)">—</span>'}</td>
       <td style="color:var(--muted)">${fmt(i.created_at)}</td>
-      <td>${i.accepted_at ? `<span class="mem-badge approved">Accepted ${fmt(i.accepted_at)}</span>` : '<span class="mem-badge invited">Awaiting sign-in</span>'}</td>
+      <td>${i.accepted_at
+        ? `<span class="mem-badge approved">Accepted ${fmt(i.accepted_at)}</span>`
+        : i.signedInAs
+          ? `<span class="mem-badge invited" title="A profile with this person's name signed in under a different email than they were invited at">Signed in as <strong>${esc(i.signedInAs)}</strong></span>`
+          : '<span class="mem-badge invited">Awaiting sign-in</span>'}</td>
       <td style="white-space:nowrap">
-        ${i.accepted_at ? '' : `<button class="btn-mem-approve" onclick="inviteResend('${i.id}')">Resend</button> `}
+        ${(i.accepted_at || i.signedInAs) ? '' : `<button class="btn-mem-approve" onclick="inviteResend('${i.id}')">Resend</button> `}
         <button class="btn-mem-waitlist" onclick="inviteRevoke('${i.id}', this)">Revoke</button>
       </td>
     </tr>`).join('')}</tbody>
