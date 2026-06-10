@@ -12,6 +12,39 @@ let currentSteps = [];
 let currentIndex = 0;
 let onDoneCb     = null;
 let activeClickHandler = null;
+let scrollLocked = false;
+
+// ── Scroll freeze ────────────────────────────────────────────────────────────
+// While a step is open the page must hold still — otherwise the user scrolls and
+// the fixed spotlight/callout drift off the target. We block USER scroll (wheel,
+// touch, scroll keys) but leave programmatic scrollIntoView free so the engine
+// can still center each step's target. (Body overflow:hidden would block that.)
+
+const SCROLL_KEYS = new Set([32, 33, 34, 35, 36, 38, 40]); // space, pgup/dn, end, home, ↑, ↓
+
+function blockScrollEvent(e) { e.preventDefault(); }
+
+function blockScrollKeys(e) {
+  // Let keys through when the user is focused inside the callout (buttons, etc.).
+  if (calloutEl && calloutEl.contains(document.activeElement)) return;
+  if (SCROLL_KEYS.has(e.keyCode)) e.preventDefault();
+}
+
+function lockScroll() {
+  if (scrollLocked) return;
+  scrollLocked = true;
+  window.addEventListener('wheel',     blockScrollEvent, { passive: false });
+  window.addEventListener('touchmove', blockScrollEvent, { passive: false });
+  window.addEventListener('keydown',   blockScrollKeys,  false);
+}
+
+function unlockScroll() {
+  if (!scrollLocked) return;
+  scrollLocked = false;
+  window.removeEventListener('wheel',     blockScrollEvent, { passive: false });
+  window.removeEventListener('touchmove', blockScrollEvent, { passive: false });
+  window.removeEventListener('keydown',   blockScrollKeys,  false);
+}
 
 // ── DOM setup ──────────────────────────────────────────────────────────────
 
@@ -45,19 +78,20 @@ function ensureDOM() {
   calloutEl = document.createElement('div');
   calloutEl.id = 'lp-tour-callout';
   calloutEl.innerHTML = `
-    <div style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;
-                color:#888;margin-bottom:4px" id="lp-tc-step"></div>
-    <div style="font-size:13px;font-weight:500;margin-bottom:6px;
-                color:#111" id="lp-tc-title"></div>
-    <div style="font-size:12px;line-height:1.65;margin-bottom:14px;
-                color:#555" id="lp-tc-body"></div>
+    <div style="font-size:10px;font-weight:600;letter-spacing:.06em;
+                text-transform:uppercase;color:#9aa0a6;margin-bottom:5px"
+         id="lp-tc-step"></div>
+    <div style="font-size:14px;font-weight:700;letter-spacing:-0.01em;
+                margin-bottom:5px;color:#111" id="lp-tc-title"></div>
+    <div style="font-size:12.5px;font-weight:500;line-height:1.5;
+                margin-bottom:13px;color:#3c4043" id="lp-tc-body"></div>
     <div style="display:flex;align-items:center;gap:6px">
       <div style="display:flex;gap:3px;flex:1" id="lp-tc-dots"></div>
       <button id="lp-tc-skip"
-        style="font-size:11px;background:none;border:none;cursor:pointer;
-               padding:3px 6px;color:#aaa">Skip</button>
+        style="font-size:11px;font-weight:500;background:none;border:none;
+               cursor:pointer;padding:3px 6px;color:#9aa0a6">Skip</button>
       <button id="lp-tc-next"
-        style="font-size:12px;font-weight:500;background:#1D9E75;color:#fff;
+        style="font-size:12px;font-weight:600;background:#1D9E75;color:#fff;
                border:none;border-radius:7px;padding:7px 14px;cursor:pointer">
         Next &#8594;
       </button>
@@ -68,10 +102,12 @@ function ensureDOM() {
     background:    '#fff',
     border:        '0.5px solid rgba(0,0,0,0.12)',
     borderRadius:  '12px',
-    padding:       '16px 18px',
-    width:         '252px',
+    padding:       '14px 15px',
+    width:         '248px',
     zIndex:        CALLOUT_Z,
-    boxShadow:     '0 4px 20px rgba(0,0,0,0.12)',
+    boxShadow:     '0 6px 22px rgba(0,0,0,0.16)',
+    fontFamily:    "'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
+    WebkitFontSmoothing: 'auto',
   });
 
   document.body.append(overlayEl, spotEl, calloutEl);
@@ -193,6 +229,7 @@ function advance() {
 }
 
 function endTour(reason) {
+  unlockScroll();
   overlayEl.style.display = 'none';
   spotEl.style.display    = 'none';
   calloutEl.style.display = 'none';
@@ -217,6 +254,7 @@ export function startTour(steps, onDone) {
   currentSteps = steps;
   currentIndex = 0;
   onDoneCb     = onDone || null;
+  lockScroll();
   renderStep(0);
 }
 
