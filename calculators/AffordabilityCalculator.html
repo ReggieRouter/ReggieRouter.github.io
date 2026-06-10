@@ -743,8 +743,8 @@ body.is-embedded .lp-main { padding-top: 16px; }
                     </div>
                     <div class="field-pair" style="margin-bottom:14px;">
                         <div>
-                            <label class="field-label">Days until upside kicks in
-                                <span class="tooltip-icon" data-tip="Lag between funding and when this capital starts producing the return above — e.g. inventory has to sell, a hire has to ramp. Ask the borrower: &quot;Once the funds land, how long before they start bringing in extra revenue?&quot;"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
+                            <label class="field-label">Time to return
+                                <span class="tooltip-icon" data-tip="Lag between funding and when this capital starts producing the return above — e.g. inventory has to sell, a hire has to ramp. Ask the borrower: <strong>&quot;Once the funds land, how long before they start bringing in extra revenue?&quot;</strong>"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-1px"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="4.75" r="0.75" fill="currentColor"/></svg></span>
                             </label>
                             <div class="input-wrap">
                                 <input id="timingInput" class="input-field" inputmode="numeric" placeholder="14">
@@ -1265,7 +1265,7 @@ function bindTips() {
   document.querySelectorAll('.tooltip-icon').forEach(el => {
     if (el.dataset.bound) return;
     el.dataset.bound = "1";
-    el.addEventListener('mouseenter', e => { tt.textContent = el.dataset.tip; tt.classList.add('show'); });
+    el.addEventListener('mouseenter', e => { tt.innerHTML = el.dataset.tip; tt.classList.add('show'); });
     el.addEventListener('mousemove', e => {
       const m = 12; let x = e.clientX + m, y = e.clientY + m;
       if (x + tt.offsetWidth > window.innerWidth) x = e.clientX - tt.offsetWidth - m;
