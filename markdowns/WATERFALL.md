@@ -108,6 +108,35 @@ assuming corruption.
 
 ---
 
+## §4 — Logos getting stripped, and the live-file ↔ Supabase divergence  ⚠️ (LEN-214)
+
+**Logos.** Each lender row carries `logo_url`. The live file's curated rows point at
+`public/assets/lenders/<file>.png`. But `publish.py` regenerates `logo_url` from Supabase
+`lender_logo_url`, which scrapers re-clobber to **remote URLs or null** — so a publish
+silently **strips local logos**. Curated local logos are now pinned in `publish.py`'s
+`LOGO_OVERRIDES` (keyed by `lender_data.id`, always win over Supabase). **To add a local
+logo permanently:** drop the file in `public/assets/lenders/`, set the row's `logo_url` in
+`waterfall.html`, AND add `{id: 'public/assets/lenders/<file>'}` to `LOGO_OVERRIDES` —
+otherwise the next publish wipes it.
+
+**Newtek hard rule.** Newtek is FOUR rows in Supabase (ids 234 `NewtekOne`, 374 `NewTek`,
+196/197 `Newtek (SBA/Term)`). Canonical = keep **NewTek** name on id 234's data, drop
+374/196/197. Enforced in `publish.py` (`NEWTEK_CANONICAL_*` / `NEWTEK_DROP_IDS`) and in the
+live file (single id-234 row). Never let a re-scrape re-split it.
+
+**⚠️ THE BIG ONE — `publish.py` is currently UNSAFE to run.** The live `waterfall.html` is
+hand-curated (LEN-198 dedup → 132 rows, LEN-194 brand-name fixes, Wall→Wall Street, new
+logos). **Supabase was NOT cleaned** — it still has ~160 rows with duplicates and polluted
+`display_name`s (id 2 → "Forward Financing", id 5 → "Fora Financial", id 192 → "Ameris
+Bank Equipment Finance", id 9 → "Spartan Capital Group" …). A publish today would
+REGRESS the site: re-add dup rows, re-apply wrong brand names, un-rename Wall Street.
+**This divergence is the root cause of the recurring "my logos / fields disappeared" reports.**
+Before running a real `publish.py`: reconcile Supabase to the curated state first
+(LEN-194 `display_name`s, LEN-198 dedup, Wall Street rename). Logos + Newtek are already
+pre-pinned via the override maps, but they don't make the rest of a publish safe.
+
+---
+
 ## Pre-ship gate for ANY waterfall data change
 
 1. `grep -oE '[^\\]</script' <data-region>` returns **0**  (§1)
