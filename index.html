@@ -1085,10 +1085,7 @@ input { font-family: inherit; }
 /* Viewed-tool relax (LEN-51): untried calculators stay vivid; explored ones
    settle back (muted name + softened icon) so the unopened ones quietly draw the
    eye. Re-lights on hover. No data = nothing relaxed = identical to before. */
-.card.is-viewed .card-icon { opacity: 0.5; transition: opacity var(--transition); }
-.card.is-viewed .card-name { color: var(--text-muted); }
-.card.is-viewed:hover .card-icon { opacity: 1; }
-.card.is-viewed:hover .card-name { color: var(--text); }
+/* Viewed-tool graying REMOVED per Steve — never dim or mute explored calculators. */
 
 @media (max-width: 900px) {
   .featured-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1586,7 +1583,7 @@ input { font-family: inherit; }
 </div>
 
 <!-- External Data -->
-<script src="public/assets/js/tools.js?v=2026.06.08.0001"></script>
+<script src="public/assets/js/tools.js?v=2026.06.10.0001"></script>
 <!-- Auth state for topbar control (hard-gate login, LEN-68). config.js sets SUPABASE_* globals the auth module reads. -->
 <script src="js/config.js"></script>
 <script type="module">
@@ -2019,6 +2016,9 @@ function resolveFeaturedIds() {
 
   // pins -> usage -> persona -> global default; dedup, live-only, cap at the row size.
   var ids = [];
+  // Steve: always bias the Amortization calc to LEAD the featured row — it's the
+  // strongest tool, so present it first regardless of usage/persona/pins.
+  if (liveIds.indexOf('amo') !== -1) ids.push('amo');
   pins.concat(used, persona, defaultFeaturedIds).forEach(function(id){
     if (ids.length < FEATURED_MAX && ids.indexOf(id) === -1 && liveIds.indexOf(id) !== -1) ids.push(id);
   });
@@ -2029,9 +2029,16 @@ function resolveFeaturedIds() {
 // before the user has actually used anything.
 function primaryFeaturedLabel(firstId) {
   if (isPinned(firstId)) return 'Pinned';
+  var usage = getToolUsage();
   var liveIds = liveToolIds();
-  var hasUsage = Object.keys(getToolUsage()).some(function(id){ return liveIds.indexOf(id) !== -1; });
-  if (hasUsage) return 'Most used';
+  var usedIds = Object.keys(usage).filter(function(id){ return liveIds.indexOf(id) !== -1; });
+  // Amortization is always biased to lead — only call it "Most used" when it
+  // genuinely is; otherwise an honest evergreen kicker.
+  if (firstId === 'amo') {
+    var top = usedIds.slice().sort(function(a, b){ return (usage[b].count || 0) - (usage[a].count || 0); })[0];
+    return (top === 'amo') ? 'Most used' : 'Start here';
+  }
+  if (usedIds.length) return 'Most used';
   if (getPersona()) return 'Suggested';
   return 'Most used';   // no data, no persona -> preserves the pre-personalization label
 }
