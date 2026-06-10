@@ -10,7 +10,15 @@ const base = require('@playwright/test');
 
 const test = base.test.extend({
   page: async ({ page }, use) => {
-    await page.addInitScript(() => { window.__LP_QA_BYPASS__ = true; });
+    await page.addInitScript(() => {
+      window.__LP_QA_BYPASS__ = true;
+      // First-run spotlight tours render a full-viewport overlay that intercepts
+      // the first click (click-anywhere-to-dismiss, e.g. Compliance Desk .spot-block,
+      // LEN-168) — which flakes interaction tests under parallel load. Mark them
+      // "seen" so the harness exercises the page itself, not the coachmark. Same
+      // category as the auth bypass above; add keys here as new tours land. (LEN-213)
+      try { localStorage.setItem('lp_cd_tour_v2', '1'); } catch (e) {}
+    });
     await use(page);
   },
 });
