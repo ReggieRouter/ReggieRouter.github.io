@@ -114,8 +114,6 @@
 <title>LendPaper — Calculators &amp; Tools for SMB Funders, Brokers &amp; ISOs</title>
 <meta name="description" content="Fast, free calculators and tools for MCA, LOC, SBA, and alternative financing professionals. Built for funding desks that don't have time to waste.">
 <link rel="canonical" href="https://lendpaper.com/">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@125,700&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
 
 <!-- Open Graph / Facebook -->
@@ -777,12 +775,12 @@ input { font-family: inherit; }
 /* ==================== Services ==================== */
 
 .svc-header { margin-bottom: 24px; }
-.svc-page-title { font-family: 'Anybody', var(--font); font-stretch: 125%; font-size: 20px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); margin-bottom: 6px; }
+.svc-page-title { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; color: var(--text); margin-bottom: 6px; }
 .svc-page-sub { font-size: 13px; color: var(--text-muted); max-width: 520px; line-height: 1.5; }
 
 .svc-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -802,8 +800,16 @@ input { font-family: inherit; }
 .svc-card-icon.green { background: var(--accent-soft); color: var(--accent-hover); }
 .svc-card-icon.amber { background: var(--warning-soft); color: #B45309; }
 .svc-card-icon.blue  { background: var(--info-soft); color: #1D4ED8; }
+.svc-card-icon.red   { background: rgba(239, 68, 68, 0.10); color: #DC2626; }
 .svc-card-title { font-size: 13.5px; font-weight: 700; color: var(--text); margin-bottom: 6px; letter-spacing: -0.01em; }
 .svc-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+
+.svc-cred-head { margin-bottom: 10px; }
+.svc-cred-eyebrow {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--text-faint); margin-bottom: 5px;
+}
+.svc-cred-intro { font-size: 13px; color: var(--text-muted); line-height: 1.5; max-width: 520px; }
 
 .svc-cred-bar {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -1418,6 +1424,13 @@ input { font-family: inherit; }
 
         <div class="svc-cards">
           <div class="svc-card">
+            <div class="svc-card-icon red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg>
+            </div>
+            <h3 class="svc-card-title">Compliance &amp; legal defense</h3>
+            <p class="svc-card-desc">Disclosure law is moving faster than most desks can track, and a single non-compliant document is now an existential threat — fines, voided contracts, and lawsuits that can shut a lender down. We build compliance into every estimate and keep your desk ahead of state-by-state legislation, so your paper protects you instead of exposing you.</p>
+          </div>
+          <div class="svc-card">
             <div class="svc-card-icon green">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
             </div>
@@ -1438,6 +1451,11 @@ input { font-family: inherit; }
             <h3 class="svc-card-title">Enablement training</h3>
             <p class="svc-card-desc">Loan officer and ISO training built on M.Ed methodology. From someone who ran revenue enablement at NerdWallet. Not a deck — a system. Includes call scripts, objection handling frameworks, and deal-stage messaging — built for your specific loan products.</p>
           </div>
+        </div>
+
+        <div class="svc-cred-head">
+          <p class="svc-cred-eyebrow">About the founder</p>
+          <p class="svc-cred-intro">A bit of background on who you'd be working with — a decade spent building and scaling B2B lending products, with the track record to match.</p>
         </div>
 
         <div class="svc-cred-bar">
@@ -1470,8 +1488,8 @@ input { font-family: inherit; }
 
         <div class="svc-cta-block">
           <h3 class="svc-cta-heading">Tell me what's broken.</h3>
-          <p class="svc-cta-copy">Your desk has a workflow problem I haven't built a fix for yet. Describe it. I'll tell you if I can solve it — and what it would cost.</p>
-          <a href="mailto:hello@lendpaper.com?subject=Here%27s%20what%27s%20broken%20on%20my%20desk&body=Hi%20Steve%2C%0A%0AHere%27s%20the%20problem%20I%27m%20running%20into%3A%0A%0A" class="svc-cta-btn">
+          <p class="svc-cta-copy">Your desk has a workflow problem I haven't built a fix for yet. Describe it. I'll tell you if I can solve it.</p>
+          <a href="mailto:steve@lendpaper.com?subject=Here%27s%20what%27s%20broken%20on%20my%20desk&body=Hi%20Steve%2C%0A%0AHere%27s%20the%20problem%20I%27m%20running%20into%3A%0A%0A" class="svc-cta-btn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             Email Steve
           </a>
