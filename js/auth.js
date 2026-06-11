@@ -110,6 +110,9 @@ async function logUsage(tool, event = 'view') {
 
 async function signOut() {
   await supabase.auth.signOut();
+  // Clear the cached greeting name so a shared machine never greets the next
+  // visitor with the previous user's name (LEN-285).
+  try { localStorage.removeItem('lp_first_name'); } catch (e) {}
   navTop('/index.html');
 }
 

@@ -1336,8 +1336,8 @@ html.pre-landing #suggest-panel { display: none !important; }
   </header>
   <main class="lp-land-hero">
     <div class="lp-land-eyebrow">Free tools · No account needed</div>
-    <h1 class="lp-land-h1">The professional toolkit for <em>commercial lending.</em></h1>
-    <p class="lp-land-sub">Amortization breakdowns, deal analysis, DSCR, and the lender waterfall — built for brokers and lenders who close deals.</p>
+    <h1 class="lp-land-h1">You're not just closing deals.<br><em>You're opening doors.</em></h1>
+    <p class="lp-land-sub">LendPaper is the commercial lending desk in one place — calculators, lender intelligence, and deal tools that help brokers and ISOs close faster. Built by someone who worked the desk.</p>
     <div class="lp-land-cta">
       <a class="lp-land-btn primary" href="/?p=tools/deal-read">Explore the tools →</a>
       <a class="lp-land-btn ghost" href="/login.html">Sign in</a>
@@ -1453,7 +1453,7 @@ html.pre-landing #suggest-panel { display: none !important; }
       <div class="topbar-auth" id="topbarAuth">
         <a class="btn-login" id="loginBtn" href="/login.html">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          Log in
+          Sign in
         </a>
         <div class="auth-account" id="authAccount">
           <span class="auth-avatar" id="authAvatar"></span>
@@ -1772,9 +1772,16 @@ html.pre-landing #suggest-panel { display: none !important; }
     let session = null;
     try { session = await getSession(); } catch (e) { session = null; }
     if (!session) {
-      // Logged out → minimalist brand landing on the bare home view (tool deep-links still route).
+      // Logged out: drop any cached first name so the greeting never addresses an
+      // anonymous visitor (or the next person on a shared machine) by a previous
+      // user's name — open access means logged-out visitors DO see the dashboard
+      // when they arrive on a tool route (LEN-285).
+      window.LP_FIRST_NAME = null;
+      try { localStorage.removeItem('lp_first_name'); } catch (e) {}
+      if (window.refreshGreetingName) window.refreshGreetingName();
+      // Minimalist brand landing on the bare home view (tool deep-links still route).
       if (!_isToolRoute()) _showLanding();
-      return; // leave "Log in" button visible
+      return; // leave "Sign in" button visible
     }
     _hideLanding(); // Logged in → reconcile to the dashboard (covers a stale sync hint).
     // Logged in: swap to the account control.

@@ -616,10 +616,15 @@ saveEstimate({
 - **Freemium:** Free shows the last 10 (display cap only — all rows are retained
   in the DB for Pro eligibility). Pro: full history, deal naming, shareable links,
   CSV export.
-- **Soft-gated (LEN-127):** `/quote-log` never hard-redirects. Logged-out users
-  see their `localStorage` quotes + a "Sign in to sync" banner; signed-in free
-  users hitting the 10 cap see the "Upgrade to Pro" note. Use `getProfile()`,
-  not `requireApprovedUser()`, on this page.
+- **Hard-gated (LEN-285, supersedes the LEN-127 soft gate):** `/quote-log` is the
+  ONLY page that requires sign-in. It calls
+  `requireApprovedUser('/login.html?reason=savelog')`; everything else on the
+  site is open to anonymous visitors. Do not re-add auth gates to calculators.
+- **Save gate (LEN-285):** `saveEstimate()` dispatches a `lp:estimate-saved`
+  CustomEvent; `js/save-gate.js` (included on every calculator) listens and, for
+  anonymous users, offers sign-in (banner → modal) and re-saves the deal after
+  OAuth via the `post-login-action`/`post-login-data` sessionStorage intent —
+  consumed (read + removed) on the TOOL page, never in auth-callback.
 - Schema + RLS migration: `supabase/estimates.sql`.
 
 ---
