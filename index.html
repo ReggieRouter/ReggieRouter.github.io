@@ -1909,6 +1909,18 @@ var rotationPool = [
   "Know your product. Know your borrower."
 ];
 
+// LEN-304: rotation pool shown ONLY to logged-out visitors (anonymous tool
+// desk). One line is picked per load when no higher-priority trigger matches,
+// then pinned per session so it doesn't flip on the updateGreeting tick. Kept
+// separate from the logged-in rotationPool so the two voices never cross.
+var anonRotationPool = [
+  "See the deal the way the lender will.",
+  "Run the math before you pitch.",
+  "Read the deal before it reads you.",
+  "Know the numbers cold.",
+  "Your next deal needs a number."
+];
+
 var phraseBank = [
   "Close faster. Underwrite smarter.",
   "The deal you need is one conversation away.",
@@ -1995,17 +2007,23 @@ function getLocalDateString(dateObj) {
   return yyyy + "-" + mm + "-" + dd;
 }
 
-function getRotationMessage() {
-  var stored = sessionStorage.getItem('lp_rotation_message');
-  if (stored && rotationPool.indexOf(stored) !== -1) {
+// pool/storeKey default to the logged-in rotation; the logged-out path passes
+// anonRotationPool + its own session key so the two pinned picks never collide.
+function getRotationMessage(pool, storeKey) {
+  pool = pool || rotationPool;
+  storeKey = storeKey || 'lp_rotation_message';
+  var stored = sessionStorage.getItem(storeKey);
+  if (stored && pool.indexOf(stored) !== -1) {
     return stored;
   }
-  var randomMsg = rotationPool[Math.floor(Math.random() * rotationPool.length)];
-  sessionStorage.setItem('lp_rotation_message', randomMsg);
+  var randomMsg = pool[Math.floor(Math.random() * pool.length)];
+  sessionStorage.setItem(storeKey, randomMsg);
   return randomMsg;
 }
 
-function getContextualGreeting() {
+// `anon` (logged-out) only swaps the rotation-pool fallback; every dated/calendar
+// trigger above it is shared, so the hierarchy is never duplicated.
+function getContextualGreeting(anon) {
   var now = new Date();
   var year = now.getFullYear();
   var month = now.getMonth();   // 0 = Jan, 11 = Dec
@@ -2058,7 +2076,9 @@ function getContextualGreeting() {
   }
 
   if (useRotation) {
-    return getRotationMessage();
+    return anon
+      ? getRotationMessage(anonRotationPool, 'lp_anon_rotation_message')
+      : getRotationMessage();
   }
 
   // 5. Time of Day Fallbacks
@@ -2091,10 +2111,17 @@ function updateGreeting() {
   var gs = document.getElementById('greetingSubtitle');
   if (!gt) return;
 
-  // Anonymous tool desk (LEN-287): one static line, zero personalization.
+  // Anonymous tool desk (LEN-304): contextual greeting from the shared store,
+  // zero personalization (no name lookups in this path). One line per load via
+  // the same top-down hierarchy, with a fixed "No account needed." subline that
+  // never rotates and isn't pulled from any pool. Gated entirely on lpIsAnon()
+  // at render time, so the logged-in banner below is untouched.
   if (lpIsAnon()) {
-    gt.textContent = 'Pick a tool and start. No account needed.';
-    if (gs) gs.style.display = 'none';
+    gt.textContent = getContextualGreeting(true);
+    if (gs) {
+      gs.textContent = 'No account needed.';
+      gs.style.display = 'block';
+    }
     return;
   }
 
