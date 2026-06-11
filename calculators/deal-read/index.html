@@ -1160,6 +1160,7 @@ select.uw-ctrl{cursor:pointer}
      (mirror of LEGAL.md Part II) so it auto-updates as new laws take effect. Must
      load before the deal-read scripts (data/talk/deal/plan/read) that read it. -->
 <script src="../../public/assets/js/compliance-rules.js"></script>
+<script src="../../js/completion-cue.js"></script>
 <script type="importmap">{ "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }</script>
 <!-- Open access (LEN-285): tools render for every visitor — no auth redirect. getProfile() resolves null when logged out. Never add a bare top-level return (ES-module parse error). -->
 <script type="module">
@@ -1186,6 +1187,20 @@ select.uw-ctrl{cursor:pointer}
   var s=['data.js','talk.js','deal.js','plan.js','read.js'];
   for(var i=0;i<s.length;i++){ document.write('<scr'+'ipt src="'+s[i]+q+'"><\/scr'+'ipt>'); }
 })();
+</script>
+<script>
+// LEN-288 — completion cue: flash the talk track + Save PDF once industry, funding-by,
+// and borrower state are all set. Industry is picked by click, hence the click event.
+window.LPCompletionCue && LPCompletionCue.init({
+  slug: 'deal_read',
+  takeaway: '.tt',
+  noteAnchor: '#read', // .tt is rebuilt on every renderRead(); anchor the note to the stable host
+  cta: function(){ return document.querySelector('#read .btn-primary'); },
+  events: ['input','change','click'],
+  isComplete: function(){
+    try { return !!(S.selected && S.fundBy && S.stateConfirmed); } catch(e){ return false; }
+  }
+});
 </script>
 <button id="lp-tour-nav-link" type="button" onclick="replayTour()" style="display:none; position:fixed; bottom:14px; left:14px; z-index:8000; background:#fff; border:0.5px solid rgba(0,0,0,.14); border-radius:8px; cursor:pointer; font-family:inherit; font-size:12px; color:#2D6A4F; padding:6px 11px; box-shadow:0 2px 8px rgba(17,24,39,.1);">Take a tour</button>
 </body>

@@ -56,7 +56,7 @@
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
 <link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
 <!-- Local shared scripts versioned off the iframe ?v= stamp so a CURRENT_VERSION bump refetches them (LEN-222). -->
-<script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}var q=v?('?v='+encodeURIComponent(v)):'';['../public/assets/js/calculator-app.js','../public/assets/js/pdf-helper.js','../public/assets/js/compliance-rules.js','../public/assets/js/compliance.js','../js/config.js'].forEach(function(s){document.write('<scr'+'ipt src="'+s+q+'"><\/scr'+'ipt>');});})();</script>
+<script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}var q=v?('?v='+encodeURIComponent(v)):'';['../public/assets/js/calculator-app.js','../public/assets/js/pdf-helper.js','../public/assets/js/compliance-rules.js','../public/assets/js/compliance.js','../js/config.js','../js/completion-cue.js'].forEach(function(s){document.write('<scr'+'ipt src="'+s+q+'"><\/scr'+'ipt>');});})();</script>
 <script type="importmap">
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
 </script>
@@ -254,6 +254,29 @@
 .sum-fail { background: var(--fail-bg); border-color: transparent; }
 .sum-text { font-size: 13px; color: var(--lp-dark); line-height: 1.6; flex: 1; }
 .sum-text strong { font-weight: 800; }
+
+/* -- Takeaway block (LEN-288 — matches SBA Fees) -- */
+.takeaway {
+    background: #fff;
+    border: 1px solid var(--lp-border);
+    border-left: 5px solid var(--lp-green);
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.6;
+    margin-top: 10px;
+}
+.tk-eyebrow {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #64748b;
+    margin-bottom: 8px;
+}
 
 /* -- Tooltips (LendPaper Style) -- */
 .tooltip-icon {
@@ -846,6 +869,10 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                     <div id="sopBaseline" style="margin-top:20px;"></div>
                     <div id="threshRef"></div>
                     <div id="summaries" style="margin-top:16px"></div>
+                    <div class="takeaway" id="dscrTakeaway">
+                        <span class="tk-eyebrow">What you tell the borrower</span>
+                        <span id="takeaway-content-dscr">Enter EBIDA and a scenario amount to see results.</span>
+                    </div>
                 </div>
             </div>
 
@@ -1317,7 +1344,33 @@ function renderSummaries(){
     h += '<div class="sum-card '+(pass?'sum-pass':'sum-fail')+'"><div class="sum-text"><strong>'+sc.name+':</strong> '+ (S.mode==='both'?'BDSCR '+db.toFixed(2)+' & GDSCR '+dg.toFixed(2) : (S.mode==='gdscr'?'GDSCR '+dg.toFixed(2):'BDSCR '+db.toFixed(2))) + (pass?' - Likely to approve.':' - Below thresholds.') + '</div></div>';
   });
   document.getElementById('summaries').innerHTML = h;
+  renderTakeaway(cd);
   document.getElementById('sopBaseline').innerHTML = '<div style="font-size:11px; color:var(--lp-text-muted); background:var(--gray-50); padding:12px; border-radius:10px; border:1px solid var(--lp-border); display:flex; justify-content:space-between; align-items:center; gap:12px;"><span><strong>SBA SOP Baseline Reference:</strong> BDSCR min 1.15x per SBA SOP 50 10 7 (Standard 7(a) loans). GDSCR min 1.00x when global cash flow analysis is required (typically for loans &gt; $350k or where business cash flow alone is insufficient).</span><button class="lender-ctx-btn" onclick="openLenderCtx()" style="white-space:nowrap;">Lender thresholds →</button></div>';
+}
+
+// LEN-288 — borrower-facing takeaway (first scenario; mirrors copyDscr's math)
+function renderTakeaway(cd){
+  var tk = document.getElementById('takeaway-content-dscr');
+  if (!tk) return;
+  var sc0 = S.scenarios[0];
+  var hasEbida = Object.values(S.ebida).some(function(v){ return v > 0; });
+  if (!sc0 || !(sc0.amount > 0) || !hasEbida) {
+    tk.textContent = 'Enter EBIDA and a scenario amount to see results.';
+    return;
+  }
+  var mp0 = calcPmt(sc0.amount, sc0.rate, sc0.term);
+  var db0 = (mp0*12+cd.bObl)>0 ? cd.ebida/(mp0*12+cd.bObl) : 0;
+  var dg0 = (mp0*12+cd.gObl)>0 ? cd.global/(mp0*12+cd.gObl) : 0;
+  var head = '"You\'re looking at <strong>' + fmt(mp0) + '/month</strong> on ' + fmt(sc0.amount) + ' over ' + sc0.term + ' years — ';
+  if (S.mode === 'both') {
+    var passBoth = db0 >= 1.15 && dg0 >= 1.0;
+    tk.innerHTML = head + 'business coverage <strong>' + db0.toFixed(2) + 'x</strong> (min 1.15x), global <strong>' + dg0.toFixed(2) + 'x</strong> (min 1.00x).' + (passBoth ? ' That clears both bars."' : ' Let\'s adjust the amount or term to clear the bar."');
+  } else {
+    var r = S.mode === 'gdscr' ? dg0 : db0;
+    var min = S.mode === 'gdscr' ? 1.00 : 1.15;
+    var scope = S.mode === 'gdscr' ? 'global cash flow' : 'the business\'s cash flow';
+    tk.innerHTML = head + scope + ' covers that payment <strong>' + r.toFixed(2) + 'x</strong>' + (r >= min ? ', clear of the ' + min.toFixed(2) + 'x lenders look for."' : ', short of the ' + min.toFixed(2) + 'x lenders look for. Let\'s adjust the amount or term."');
+  }
 }
 
 function renderLenderModal() {
@@ -1755,5 +1808,20 @@ window.addEventListener('load', () => {
     </div>
 </div>
 
+<script>
+// LEN-288 — completion cue: flash takeaway + Save PDF the first time every required input is valid
+window.LPCompletionCue && LPCompletionCue.init({
+    slug: 'dscr',
+    takeaway: '#dscrTakeaway',
+    cta: '#pdfBtn',
+    isComplete: function () {
+        // mirrors runPDF()'s render gate: hasEbida && hasScenarioAmount
+        try {
+            return Object.values(S.ebida).some(function (v) { return v > 0; }) &&
+                   S.scenarios.some(function (s) { return s.amount > 0; });
+        } catch (e) { return false; }
+    }
+});
+</script>
 </body>
 </html>

@@ -49,7 +49,7 @@
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css?v=2026.05.25.1000">
     <link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
     <!-- Local shared scripts versioned off the iframe ?v= stamp so a CURRENT_VERSION bump refetches them (LEN-222; replaces stale hardcoded ?v= stamps). -->
-    <script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}var q=v?('?v='+encodeURIComponent(v)):'';['../public/assets/js/calculator-app.js','../public/assets/js/pdf-helper.js','../public/assets/js/compliance-rules.js','../public/assets/js/compliance.js'].forEach(function(s){document.write('<scr'+'ipt src="'+s+q+'"><\/scr'+'ipt>');});})();</script>
+    <script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}var q=v?('?v='+encodeURIComponent(v)):'';['../public/assets/js/calculator-app.js','../public/assets/js/pdf-helper.js','../public/assets/js/compliance-rules.js','../public/assets/js/compliance.js','../js/completion-cue.js'].forEach(function(s){document.write('<scr'+'ipt src="'+s+q+'"><\/scr'+'ipt>');});})();</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Typography & Core Variables */
@@ -3710,6 +3710,19 @@ function shareWithTeam() {
   const body = encodeURIComponent("I've been using LendPaper for deal analysis — the amortization calculator alone is worth it. It's free to use: https://lendpaper.com");
   window.open('mailto:?subject=' + subject + '&body=' + body);
 }
+</script>
+<script>
+// LEN-288 — completion cue: flash takeaway + Save PDF the first time every required input is valid
+window.LPCompletionCue && LPCompletionCue.init({
+  slug: 'payment_breakdown',
+  takeaway: '.takeaway',
+  cta: '.lp-cta-primary',
+  isComplete: function () {
+    // mirrors the calcCard() guard: if(!amt || !factor || !term) return;
+    var n = function (s) { var el = document.querySelector(s); return el ? parseFloat(String(el.value).replace(/[^0-9.\-]/g, '')) : NaN; };
+    return n('input[id^="amt-"]') > 0 && n('input[id^="factor-"]') > 0 && n('input[id^="term-"]') > 0;
+  }
+});
 </script>
 <button id="lp-tour-nav-link" type="button" onclick="replayTour()" style="display:none; position:fixed; bottom:14px; left:14px; z-index:8000; background:#fff; border:0.5px solid rgba(0,0,0,.14); border-radius:8px; cursor:pointer; font-family:inherit; font-size:12px; color:#2D6A4F; padding:6px 11px; box-shadow:0 2px 8px rgba(17,24,39,.1);">Take a tour</button>
 </body>

@@ -49,7 +49,7 @@
     <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
     <link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
     <!-- Local shared scripts versioned off the iframe ?v= stamp so a CURRENT_VERSION bump refetches them (LEN-222). -->
-    <script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}var q=v?('?v='+encodeURIComponent(v)):'';['../public/assets/js/calculator-app.js','../public/assets/js/pdf-helper.js','../public/assets/js/compliance-rules.js','../public/assets/js/compliance.js','../js/config.js'].forEach(function(s){document.write('<scr'+'ipt src="'+s+q+'"><\/scr'+'ipt>');});})();</script>
+    <script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}var q=v?('?v='+encodeURIComponent(v)):'';['../public/assets/js/calculator-app.js','../public/assets/js/pdf-helper.js','../public/assets/js/compliance-rules.js','../public/assets/js/compliance.js','../js/config.js','../js/completion-cue.js'].forEach(function(s){document.write('<scr'+'ipt src="'+s+q+'"><\/scr'+'ipt>');});})();</script>
     <script type="importmap">
       { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
     </script>
@@ -1456,5 +1456,19 @@
     </div>
 </div>
 
+<script>
+// LEN-288 — completion cue: flash takeaway + Save PDF the first time every required input is valid
+window.LPCompletionCue && LPCompletionCue.init({
+    slug: 'fundability',
+    takeaway: '#net_takeaway, #risk_takeaway',  // first visible (active tab) wins
+    cta: '.lp-cta-primary',
+    isComplete: function () {
+        // mirrors runNetCalc()'s guard and the PDF render gate per tab
+        var n = function (id) { var el = document.getElementById(id); return el ? parseFloat(String(el.value).replace(/[^0-9.\-]/g, '')) : NaN; };
+        var amt = n('funding_amt');
+        return (amt > 0 && n('monthly_rev') > 0) || (amt > 0 && n('net_pct') > 0);
+    }
+});
+</script>
 </body>
 </html>
