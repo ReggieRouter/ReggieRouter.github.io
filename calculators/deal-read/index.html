@@ -1170,12 +1170,13 @@ select.uw-ctrl{cursor:pointer}
 <script type="importmap">{ "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }</script>
 <!-- Open access (LEN-285): tools render for every visitor — no auth redirect. getProfile() resolves null when logged out. Never add a bare top-level return (ES-module parse error). -->
 <script type="module">
-  import { getProfile, logUsage } from '../../js/auth.js';
+  import { getProfile } from '../../js/auth.js';
+  import { logEvent } from '../../js/analytics.js';
   const profile = await getProfile();
   if (profile) {
     window.lpProfile = profile;
-    logUsage('deal-read', 'view');
   }
+  logEvent('deal-read', 'view'); // anonymous + signed-in (LEN-285)
 </script>
 <script type="module" src="../../js/quote-log.js"></script>
 <!-- LEN-191: page coach-mark tour engine -->

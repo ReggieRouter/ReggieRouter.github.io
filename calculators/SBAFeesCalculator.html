@@ -56,12 +56,13 @@
 </script>
 <!-- Open access (LEN-285): tools render for every visitor — no auth redirect. getProfile() resolves null when logged out. Never add a bare top-level return (ES-module parse error). -->
 <script type="module">
-  import { getProfile, logUsage } from '../js/auth.js';
+  import { getProfile } from '../js/auth.js';
+  import { logEvent } from '../js/analytics.js';
   const profile = await getProfile();
   if (profile) {
     window.lpProfile = profile;
-    logUsage('sba-fees', 'view');
   }
+  logEvent('sba-fees', 'view'); // anonymous + signed-in (LEN-285)
 </script>
 <script type="module" src="../js/quote-log.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>

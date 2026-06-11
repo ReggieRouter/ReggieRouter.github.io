@@ -2166,12 +2166,13 @@
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
 </script>
 <script type="module">
-  import { getProfile, logUsage } from './js/auth.js';
+  import { getProfile } from './js/auth.js';
+  import { logEvent } from './js/analytics.js';
   const profile = await getProfile();
   if (profile) {
     window.lpProfile = profile; // invite toast reads invite_credits / invites_sent (LEN-75)
-    logUsage('waterfall', 'view');
   }
+  logEvent('waterfall', 'view'); // anonymous + signed-in (LEN-285)
 </script>
 </head>
 <body>

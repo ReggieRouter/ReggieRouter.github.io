@@ -388,12 +388,13 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 <script type="importmap">{ "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }</script>
 <!-- Open access (LEN-285): tools render for every visitor — no auth redirect. getProfile() resolves null when logged out. Never add a bare top-level return (ES-module parse error). -->
 <script type="module">
-  import { getProfile, logUsage } from './js/auth.js';
+  import { getProfile } from './js/auth.js';
+  import { logEvent } from './js/analytics.js';
   const profile = await getProfile();
   if (profile) {
     window.lpProfile = profile;
-    logUsage('legislation', 'view');
   }
+  logEvent('legislation', 'view'); // anonymous + signed-in (LEN-285)
 </script>
 
 <nav class="topnav">
