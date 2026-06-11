@@ -399,6 +399,9 @@ input { font-family: inherit; }
 /* LEN-298: Deal math is a fixed 2×3 grid so all six cards stay visible without
    horizontal scroll. Collapses to 2 cols, then 1, on narrower viewports. */
 #dealMathCards .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* LEN-298: give the category-tab cards a little more height than the compact
+   home-dashboard cards. Scoped to the Deal math / Risk & UW views only. */
+#dealMathCards .card, #riskCards .card { padding: 22px 16px; }
 
 .card {
   display: flex; align-items: center; gap: 14px;
