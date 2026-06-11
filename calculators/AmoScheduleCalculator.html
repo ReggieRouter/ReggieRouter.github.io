@@ -1401,12 +1401,11 @@
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
 </script>
 <script type="module">
-  // Hard auth gate (LEN-68, re-applied for launch). requireApprovedUser()
-  // redirects logged-out/unapproved users to /login.html and returns null —
-  // the gate is enforced inside that call. Guard the bookkeeping with
+  // Open access (LEN-285): tools render for every visitor — no auth redirect.
+  // getProfile() resolves null when logged out; guard the bookkeeping with
   // `if (profile)`; never add a bare top-level `return` (ES-module parse error).
-  import { requireApprovedUser, logUsage } from '../js/auth.js';
-  const profile = await requireApprovedUser();
+  import { getProfile, logUsage } from '../js/auth.js';
+  const profile = await getProfile();
   if (profile) {
     window.lpProfile = profile; // invite toast reads invite_credits / invites_sent (LEN-75)
     logUsage('amortization', 'view');

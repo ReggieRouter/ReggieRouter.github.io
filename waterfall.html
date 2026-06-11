@@ -2166,8 +2166,8 @@
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
 </script>
 <script type="module">
-  import { requireApprovedUser, logUsage } from './js/auth.js';
-  const profile = await requireApprovedUser();
+  import { getProfile, logUsage } from './js/auth.js';
+  const profile = await getProfile();
   if (profile) {
     window.lpProfile = profile; // invite toast reads invite_credits / invites_sent (LEN-75)
     logUsage('waterfall', 'view');
