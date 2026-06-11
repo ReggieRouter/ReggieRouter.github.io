@@ -96,9 +96,11 @@ async function saveEstimate(opts = {}) {
   logEvent(record.calculator_type, 'calculator_run', { doc_id: record.doc_id, pdf_generated: record.pdf_generated });
 
   // Persist to Supabase when signed in and the table exists
+  let signedIn = false;
   try {
     const session = await getSession();
     if (session) {
+      signedIn = true;
       const { error } = await supabase.from('estimates').insert({
         doc_id: record.doc_id,
         user_id: session.user.id,
@@ -113,6 +115,12 @@ async function saveEstimate(opts = {}) {
   } catch (e) {
     console.warn('[QuoteLog] save error (local mirror kept):', e);
   }
+
+  // Announce the save so the save gate (LEN-285) can offer sign-in to
+  // anonymous users. Fire-and-forget; never blocks the calculator.
+  try {
+    window.dispatchEvent(new CustomEvent('lp:estimate-saved', { detail: { record, signedIn } }));
+  } catch (e) {}
   return record;
 }
 
