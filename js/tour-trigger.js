@@ -12,10 +12,15 @@
 import { startTour }                              from './tour.js';
 import { TOUR_VERSION, PAGE_TOURS, SAMPLE_DEAL } from './tour-config.js';
 
+// ── KILL SWITCH (Steve, 6/11 — first-visit review): ALL tour modes are OFF.
+// The coach mark was firing on a visitor's first calculator load and colliding
+// with other UI (invite toast). Flip to false to re-enable; engine untouched.
+const TOURS_DISABLED = true;
+
 // LEN-191 (handoff §0): mark the tour engine as wired on this page so the nudge
 // engine defers to a pending tour. Restraint for an impatient audience —
 // ONE coach mark globally, tracked by this flag.
-window.__LP_TOURS_ENABLED__ = true;
+window.__LP_TOURS_ENABLED__ = !TOURS_DISABLED;
 const SEEN_ANY_KEY = TOUR_VERSION + '_seen_any';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -92,6 +97,7 @@ function wirePdfPulse() {
 
 // init(force): force=true bypasses all suppression gates (manual "Take a tour").
 function init(force) {
+  if (TOURS_DISABLED) return; // kills the coach mark, the PDF pulse, and replay
   const page = currentPage();
   const config = PAGE_TOURS[page];
   if (!config) return;

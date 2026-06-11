@@ -273,15 +273,22 @@
 
     (async () => {
       const state = await render();
+      // ALL tour modes OFF (Steve, 6/11) — no auto-launch, button hidden.
+      // To re-enable: unhide #tourBtn and restore the auto-start below.
+      const TOURS_DISABLED = true;
       const startTour = () => runTour(buildTourSteps(state), {
         onDone: () => { try { localStorage.setItem(TOUR_SEEN_KEY, '1'); } catch (e) {} },
       });
       const tourBtn = document.getElementById('tourBtn');
-      if (tourBtn) tourBtn.addEventListener('click', startTour);
-
-      let seen = false;
-      try { seen = localStorage.getItem(TOUR_SEEN_KEY) === '1'; } catch (e) {}
-      if (!seen) setTimeout(startTour, 450); // let the table paint first
+      if (tourBtn) {
+        if (TOURS_DISABLED) tourBtn.style.display = 'none';
+        else tourBtn.addEventListener('click', startTour);
+      }
+      if (!TOURS_DISABLED) {
+        let seen = false;
+        try { seen = localStorage.getItem(TOUR_SEEN_KEY) === '1'; } catch (e) {}
+        if (!seen) setTimeout(startTour, 450); // let the table paint first
+      }
     })();
   </script>
 </body>

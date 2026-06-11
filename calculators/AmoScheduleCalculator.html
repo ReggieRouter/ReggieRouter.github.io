@@ -3641,8 +3641,7 @@ ${id === 1 ? `
 </div>
 <script>
 (function () {
-  // Live invite count once the auth gate (LEN-68) sets window.lpProfile;
-  // returns null until then and we fall back to the default allocation of 5.
+  // Live invite count once window.lpProfile resolves (signed-in users only).
   function invitesLeft() {
     const p = window.lpProfile;
     if (p && (p.invite_credits != null || p.invites_sent != null)) {
@@ -3651,6 +3650,16 @@ ${id === 1 ? `
     return null;
   }
 
+  // Per-Steve (6/11): never on a first visit — visits 2–4 only, and never again
+  // once the user acts on it. Counted per browser, bumped once per page load.
+  const VISIT_KEY = 'lp_amo_visits';
+  const DONE_KEY = 'lp_invite_toast_done';
+  let visitCount = 0;
+  try {
+    visitCount = (parseInt(localStorage.getItem(VISIT_KEY) || '0', 10) || 0) + 1;
+    localStorage.setItem(VISIT_KEY, String(visitCount));
+  } catch (e) {}
+
   let toastTimer = null;
 
   window.showInviteToast = function () {
@@ -3658,6 +3667,11 @@ ${id === 1 ? `
     const msgEl = document.getElementById('inviteToastMsg');
     const ctaEl = document.getElementById('inviteToastCtaLabel');
     if (!toast || !msgEl || !ctaEl) return;
+
+    // Open access (LEN-285): anonymous visitors have no invites — signed-in only.
+    if (!window.lpProfile) return;
+    if (visitCount < 2 || visitCount > 4) return; // never the 1st visit, stop nagging after the 4th
+    try { if (localStorage.getItem(DONE_KEY)) return; } catch (e) {}
 
     const n = invitesLeft();
     if (n === 0) return; // out of credits — nothing to ask for
@@ -3685,6 +3699,7 @@ ${id === 1 ? `
   document.getElementById('inviteToastCta').addEventListener('click', () => {
     document.getElementById('inviteToast').classList.remove('visible');
     clearTimeout(toastTimer);
+    try { localStorage.setItem(DONE_KEY, '1'); } catch (e) {} // acted on — never nag again
     shareWithTeam();
   });
 })();

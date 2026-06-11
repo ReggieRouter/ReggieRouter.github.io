@@ -1247,8 +1247,15 @@ function setView(v){
   window.addEventListener('scroll', reposition, { passive: true });
   document.addEventListener('keydown', function(e){ if (active && e.key === 'Escape') end(); });
 
-  // Auto-launch once per browser on first visit
-  if (!seen()){ setTimeout(start, 700); }
+  // ALL tour modes OFF (Steve, 6/11): no auto-launch, replay button hidden.
+  // To re-enable, restore the seen() auto-launch and unhide .tour-replay.
+  var TOURS_DISABLED = true;
+  if (TOURS_DISABLED) {
+    var replayBtn = document.querySelector('.tour-replay');
+    if (replayBtn) replayBtn.style.display = 'none';
+  } else if (!seen()) {
+    setTimeout(start, 700);
+  }
 })();
 
 /* ---- The map (adapted from the registry-route US map; brand-green choropleth) ---- */
