@@ -172,10 +172,10 @@
       .select('id, full_name, company, role').eq('email', (session.user.email || '').toLowerCase()).maybeSingle();
     const invited = !!inviteRow;
 
-    // LEN-205/LEN-232: only ask for LinkedIn when we can't vet the person any other way —
-    // i.e. no corporate domain to infer a company from AND no admin invite. Corporate-domain
-    // OR invited signups skip the step entirely.
-    const needLinkedIn = !companyGuess && !invited;
+    // LEN-285 open access: every signup is auto-approved, so the LinkedIn vetting
+    // step (LEN-205/232/243 — only ever a signal for the approval queue) is retired.
+    // Step-2 markup stays dormant in case a vetting flow ever returns.
+    const needLinkedIn = false;
 
     // LEN-242: an invited user already gave us their name + company on the invite, and
     // Google OAuth hands us their name too. Don't make them re-type what we already know —
@@ -257,12 +257,14 @@
       return s ? 'https://linkedin.com/in/' + s : null;
     }
 
-    // Insert the profile, dropping linkedin_url if the column isn't in the live
-    // schema yet (PGRST204) — a missing optional column must never block signup.
+    // Upsert the profile (onConflict id — a back-button double submit must not
+    // create a duplicate row or error out; LEN-285), dropping linkedin_url if the
+    // column isn't in the live schema yet (PGRST204) — a missing optional column
+    // must never block signup.
     async function insertProfileSafe(profile) {
       const payload = { ...profile };
       for (let i = 0; i < 3; i++) {
-        const { error } = await supabase.from('profiles').insert(payload);
+        const { error } = await supabase.from('profiles').upsert(payload, { onConflict: 'id' });
         if (!error) return null;
         const m = error.code === 'PGRST204' && /the '([^']+)' column/.exec(error.message || '');
         if (m && m[1] === 'linkedin_url' && 'linkedin_url' in payload) { delete payload.linkedin_url; continue; }
@@ -281,17 +283,14 @@
       return null;
     }
 
+    let submitting = false; // double-submit guard (LEN-285) — upsert is the DB-side net
     async function submitProfile() {
+      if (submitting) return;
+      submitting = true;
+      const submitBtns = [document.getElementById('nextFromCompany'), document.getElementById('finishFromLinkedIn')];
+      submitBtns.forEach(b => { if (b) { b.disabled = true; b.textContent = 'Setting up…'; } });
       const v = document.getElementById('inputCompany').value.trim();
       const li = normalizeLinkedIn(document.getElementById('inputLinkedIn').value);
-      // LEN-243: organic applicants (no corporate domain, no invite) must provide LinkedIn —
-      // it's our only vetting signal for them. Block before any DB work. Invited / corporate
-      // users never reach this branch (needLinkedIn is false, the step is hidden).
-      if (needLinkedIn && !li) {
-        if (currentStep !== 2) goToStep(2);
-        showErr('Please add your LinkedIn to finish.');
-        return;
-      }
       document.getElementById('loadingOverlay').classList.add('visible');
       // LEN-105: admin-invited emails skip the approval queue
       const { data: invite } = await supabase.from('invites')
@@ -302,22 +301,27 @@
       const AUTO_APPROVE_DOMAINS = ['yourapprovd.com'];
       const emailDomain = ((session.user.email || '').toLowerCase().split('@')[1] || '');
       const domainApproved = AUTO_APPROVE_DOMAINS.some(d => emailDomain === d || emailDomain.endsWith('.' + d));
-      const autoApprove = !!invite || domainApproved;
+      // LEN-285 open access: EVERY signup is approved instantly — the invite /
+      // trusted-domain checks above now only feed role + persona seeding.
       const profile = {
         id: session.user.id, email: session.user.email,
         full_name: (document.getElementById('inputFirstName').value.trim() + ' ' + document.getElementById('inputLastName').value.trim()).trim(),
         company: v || null,
-        status: autoApprove ? 'approved' : 'pending', invite_credits: 5, invites_sent: 0
+        status: 'approved', invite_credits: 5, invites_sent: 0,
+        approved_at: new Date().toISOString()
       };
       // LEN-105: carry the admin-assigned role onto the new profile (onboarding doesn't ask for it)
       if (invite && invite.role) profile.role = invite.role;
-      if (autoApprove) profile.approved_at = new Date().toISOString();
       // LinkedIn (collected only when no company could be inferred; LEN-243 makes it
       // required for those organic applicants — validated above). `li` computed at top.
       if (li) profile.linkedin_url = li;
       const error = await insertProfileSafe(profile);
       if (error) {
         document.getElementById('loadingOverlay').classList.remove('visible');
+        submitting = false;
+        submitBtns.forEach(b => { if (b) b.disabled = false; });
+        document.getElementById('nextFromCompany').textContent = 'Let\'s go →';
+        document.getElementById('finishFromLinkedIn').textContent = 'Finish →';
         showErr(error.message);
       } else {
         // LEN-175: the invite Role is the onboarding JTBD persona. Seed it so the home
@@ -341,7 +345,12 @@
           }
           if (accErr) console.warn('[onboarding] could not stamp invite acceptance:', accErr.message);
         }
-        window.location.href = autoApprove ? '/index.html' : '/pending.html';
+        // LEN-285: no pending screen, ever. If the user came from a save-gate /
+        // gated page, return them there (consume the key before redirecting).
+        const returnTo = sessionStorage.getItem('auth-return-to')
+          || sessionStorage.getItem('redirectAfterLogin');
+        try { sessionStorage.removeItem('auth-return-to'); sessionStorage.removeItem('redirectAfterLogin'); } catch (e) {}
+        window.location.href = returnTo || '/index.html';
       }
     }
     document.getElementById('nextFromName').addEventListener('click', advanceName);
