@@ -12,15 +12,21 @@
 ---
 
 ## Deployment
-- Repo: `github.com:ReggieRouter/lendpaper.git` (Netlify auto-deploys on push to `main`)
-- Working directory: `~/Desktop/LendPaper`
+- Repo: `github.com:ReggieRouter/lendpaper.git` — production lendpaper.com is **GitHub Pages built from `origin/main`** (netlify.toml is inert). Bump `index.html` CURRENT_VERSION + `<meta name="version">` on every deploy (LEN-222).
+- Work in per-session worktrees under `~/lp-worktrees/` (the old Desktop/Documents two-copy sync is retired — those clones are legacy; never blind-copy from them).
 
-## Two-copy sync rule (every edit)
-Files exist in BOTH `~/Documents/GitHub/lendpaper/` (the repo) and `~/Desktop/LendPaper/`. After any edit, sync the other copy **by applying the diff — never blind-copy whole files**:
-```bash
-git diff HEAD~1 HEAD | patch -p1 -d ~/Desktop/LendPaper
-```
-The copies are NOT byte-identical: Desktop copies may carry extra auth-gate/share-prompt blocks (e.g. `calculators/AmoScheduleCalculator.html`). A blind `cp` destroys those blocks.
+## Open Access & Auth (LEN-285) — read before touching auth, gates, login, or tracking
+
+The site is **open access**: every tool/calculator renders for anonymous visitors. Sign-in exists ONLY to save deals. These are standing rules — a new feature that violates one is a regression, whatever its ticket says:
+
+1. **Never add `requireApprovedUser()` (or any login redirect) to a tool page.** Tool pages use `getProfile()` from `js/auth.js` (null for visitors, never redirects) and call `logEvent('<tool>','view')` from `js/analytics.js`. The ONLY hard-gated page is `/quote-log` (`requireApprovedUser('/login.html?reason=savelog')`).
+2. **`js/auth.js` Supabase client config is load-bearing.** Keep the DEFAULT storageKey (`sb-arpquyoucdsdmbetgftj-auth-token`) — renaming logs out every user and breaks the LEN-153 landing's `sb-*` localStorage anti-flash scan. Keep `autoRefreshToken: !inIframe` (LEN-244): two clients refreshing the same token rotate it out from under each other → the "log in every visit" bug. Never set it unconditionally `true`, and never add a second `createClient` to a page that already loads `auth.js`.
+3. **Profile statuses:** every signup is auto-approved (onboarding upserts `status:'approved'`); `denied` is the only blocked status (→ `denied.html`). `pending.html` / `waitlist.html` / `early-access.html` are retired (in `scratch/retired-auth-pages/`) — never link or route to them, never reintroduce an approval queue.
+4. **No magic links / email OTP anywhere** (Outlook Safe Links prefetch burns the one-time token). Login = Google + Microsoft OAuth only; this includes the auth-callback recovery card.
+5. **Save gate:** `saveEstimate()` (js/quote-log.js) dispatches `lp:estimate-saved`; `js/save-gate.js` handles the anonymous sign-in offer and the post-login re-save (`post-login-action`/`post-login-data` consumed on the TOOL page — never clear them in auth-callback; only `auth-return-to` is consumed there, BEFORE the redirect). New calculators must include `quote-log.js`, `save-gate.js`, and `analytics.js`.
+6. **Analytics:** `usage_events` columns are `tool` / `event` / `session_id` / `metadata` / `user_id` (NOT tool_name/event_type). Tool keys are frozen (LEN-143). Anonymous inserts depend on the `anon_insert_usage_events` RLS policy (run 2026-06-11). Never put `params`/PII in metadata. `logEvent` must never throw.
+7. **No "coming soon" / roadmap teasers** — no soon/inquire tiles, badges, or unbuilt-feature toggles anywhere public (LEN-285 swept them; competitors can see every page now).
+8. **Greeting/name UI must be session-gated:** the cached `lp_first_name` is cleared on sign-out and on any logged-out load — never greet an anonymous visitor by a cached name.
 
 ## Every new HTML page must include
 

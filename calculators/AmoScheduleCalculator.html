@@ -1401,19 +1401,21 @@
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
 </script>
 <script type="module">
-  // Hard auth gate (LEN-68, re-applied for launch). requireApprovedUser()
-  // redirects logged-out/unapproved users to /login.html and returns null —
-  // the gate is enforced inside that call. Guard the bookkeeping with
+  // Open access (LEN-285): tools render for every visitor — no auth redirect.
+  // getProfile() resolves null when logged out; guard the bookkeeping with
   // `if (profile)`; never add a bare top-level `return` (ES-module parse error).
-  import { requireApprovedUser, logUsage } from '../js/auth.js';
-  const profile = await requireApprovedUser();
+  import { getProfile } from '../js/auth.js';
+  import { logEvent } from '../js/analytics.js';
+  const profile = await getProfile();
   if (profile) {
     window.lpProfile = profile; // invite toast reads invite_credits / invites_sent (LEN-75)
-    logUsage('amortization', 'view');
   }
+  logEvent('amortization', 'view'); // anonymous + signed-in (LEN-285)
 </script>
 <!-- Quote Log: exposes window.saveEstimate / window.LPQuoteLog (LEN-123) -->
 <script type="module" src="../js/quote-log.js"></script>
+<!-- Save gate (LEN-285): offers sign-in when an anonymous user saves a deal -->
+<script type="module" src="../js/save-gate.js"></script>
 <!-- LEN-191: page coach-mark tour engine (one-and-done, dismissible) -->
 <script type="module" src="../js/tour-trigger.js"></script>
 </head>
@@ -3639,8 +3641,7 @@ ${id === 1 ? `
 </div>
 <script>
 (function () {
-  // Live invite count once the auth gate (LEN-68) sets window.lpProfile;
-  // returns null until then and we fall back to the default allocation of 5.
+  // Live invite count once window.lpProfile resolves (signed-in users only).
   function invitesLeft() {
     const p = window.lpProfile;
     if (p && (p.invite_credits != null || p.invites_sent != null)) {
@@ -3649,6 +3650,16 @@ ${id === 1 ? `
     return null;
   }
 
+  // Per-Steve (6/11): never on a first visit — visits 2–4 only, and never again
+  // once the user acts on it. Counted per browser, bumped once per page load.
+  const VISIT_KEY = 'lp_amo_visits';
+  const DONE_KEY = 'lp_invite_toast_done';
+  let visitCount = 0;
+  try {
+    visitCount = (parseInt(localStorage.getItem(VISIT_KEY) || '0', 10) || 0) + 1;
+    localStorage.setItem(VISIT_KEY, String(visitCount));
+  } catch (e) {}
+
   let toastTimer = null;
 
   window.showInviteToast = function () {
@@ -3656,6 +3667,11 @@ ${id === 1 ? `
     const msgEl = document.getElementById('inviteToastMsg');
     const ctaEl = document.getElementById('inviteToastCtaLabel');
     if (!toast || !msgEl || !ctaEl) return;
+
+    // Open access (LEN-285): anonymous visitors have no invites — signed-in only.
+    if (!window.lpProfile) return;
+    if (visitCount < 2 || visitCount > 4) return; // never the 1st visit, stop nagging after the 4th
+    try { if (localStorage.getItem(DONE_KEY)) return; } catch (e) {}
 
     const n = invitesLeft();
     if (n === 0) return; // out of credits — nothing to ask for
@@ -3683,6 +3699,7 @@ ${id === 1 ? `
   document.getElementById('inviteToastCta').addEventListener('click', () => {
     document.getElementById('inviteToast').classList.remove('visible');
     clearTimeout(toastTimer);
+    try { localStorage.setItem(DONE_KEY, '1'); } catch (e) {} // acted on — never nag again
     shareWithTeam();
   });
 })();
@@ -3690,7 +3707,7 @@ ${id === 1 ? `
 <script>
 function shareWithTeam() {
   const subject = encodeURIComponent('Check out LendPaper');
-  const body = encodeURIComponent("I've been using LendPaper for deal analysis — the amortization calculator alone is worth it. Request access here: https://lendpaper.com/early-access.html");
+  const body = encodeURIComponent("I've been using LendPaper for deal analysis — the amortization calculator alone is worth it. It's free to use: https://lendpaper.com");
   window.open('mailto:?subject=' + subject + '&body=' + body);
 }
 </script>

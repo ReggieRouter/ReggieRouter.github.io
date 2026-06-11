@@ -22,9 +22,9 @@
 <meta charset="UTF-8">
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2026.06.10.0003">
+<meta name="version" content="2026.06.11.0001">
 <script type="text/javascript">
-  window.CURRENT_VERSION = "2026.06.10.0003";
+  window.CURRENT_VERSION = "2026.06.11.0001";
 
   // Force active cleanup of legacy service workers
   if ('serviceWorker' in navigator) {
@@ -114,6 +114,27 @@
 <title>LendPaper — Calculators &amp; Tools for SMB Funders, Brokers &amp; ISOs</title>
 <meta name="description" content="Fast, free calculators and tools for MCA, LOC, SBA, and alternative financing professionals. Built for funding desks that don't have time to waste.">
 <link rel="canonical" href="https://lendpaper.com/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@125,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Pre-paint auth decision (sync) to avoid a personalized/anonymous flash. -->
+<script>
+(function(){
+  try {
+    var hasSession = false;
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1 && localStorage.getItem(k)) { hasSession = true; break; }
+    }
+    // LEN-287 (per Steve 6/11): logged-out visitors land DIRECTLY on the
+    // anonymous tool desk — the LEN-153 marketing landing no longer takes over
+    // bare "/". It's parked behind an explicit /?landing for review.
+    var wantLanding = new URLSearchParams(location.search).has('landing');
+    if (!hasSession && wantLanding) document.documentElement.classList.add('pre-landing');
+    if (!hasSession) document.documentElement.classList.add('lp-anon');
+  } catch(e){}
+})();
+</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
 
 <!-- Open Graph / Facebook -->
@@ -251,21 +272,6 @@ input { font-family: inherit; }
   text-align: center;
 }
 .nav-item.active .nav-count { background: rgba(16, 185, 129, 0.15); color: var(--accent-hover); }
-/* LEN-170: sidebar "soon" inquire items (UCC leads, marketing automation) */
-.nav-item-soon { opacity: 0.62; }
-.nav-item-soon:hover { opacity: 1; }
-.nav-soon {
-  margin-left: auto;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  background: var(--bg-alt);
-  border-radius: 99px;
-  padding: 2px 7px;
-}
-
 .sidebar-footer {
   margin-top: auto;
   padding: 16px 20px;
@@ -425,7 +431,6 @@ input { font-family: inherit; }
   text-transform: uppercase; padding: 3px 8px; border-radius: 99px; white-space: nowrap;
 }
 .pill-live { background: var(--accent-soft); color: var(--accent-hover); }
-.pill-soon { background: var(--bg-alt); color: var(--text-faint); border: 1px solid var(--border); }
 .pill-new  { background: var(--warning-soft); color: #92400E; }
 .pill-paid { background: #FFFBEB; color: #92400E; border: 1px solid #FCD34D; }
 
@@ -1056,9 +1061,6 @@ input { font-family: inherit; }
 /* ==================== Live tools grid (2-col) ==================== */
 .live-tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 28px; }
 
-/* ==================== Coming soon grid (3-col) ==================== */
-.soon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-
 /* ==================== Resume chip (LEN-51: pick up where you left off) ==================== */
 .resume-chip {
   display: inline-flex; align-items: center; gap: 7px;
@@ -1095,10 +1097,9 @@ input { font-family: inherit; }
 
 @media (max-width: 900px) {
   .featured-grid { grid-template-columns: repeat(2, 1fr); }
-  .soon-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
-  .featured-grid, .live-tools-grid, .soon-grid { grid-template-columns: 1fr; }
+  .featured-grid, .live-tools-grid { grid-template-columns: 1fr; }
 }
 /* ==================== Category Pills & Highlights ==================== */
 .category-pills {
@@ -1159,44 +1160,9 @@ input { font-family: inherit; }
   background: rgba(212, 160, 23, 0.03) !important;
 }
 
-/* ==================== Suggest Widget ==================== */
-#suggest-btn {
-  position: fixed; bottom: 24px; right: 24px; z-index: 500;
-  display: flex; align-items: center; gap: 7px;
-  padding: 9px 16px 9px 12px;
-  background: var(--accent); color: #fff;
-  border: none; border-radius: 999px; cursor: pointer;
-  font-family: var(--font); font-size: 13px; font-weight: 600;
-  box-shadow: 0 4px 14px rgba(26,60,46,0.35);
-  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-  user-select: none;
-}
-#suggest-btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(26,60,46,0.4); }
-#suggest-btn svg { flex-shrink: 0; }
-
-#suggest-panel {
-  position: fixed; bottom: 72px; right: 24px; z-index: 499;
-  width: 320px; background: var(--bg); border: 1.5px solid var(--border);
-  border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.12);
-  padding: 20px; display: none; flex-direction: column; gap: 14px;
-  animation: suggestIn 220ms cubic-bezier(0.16,1,0.3,1) both;
-}
-#suggest-panel.open { display: flex; }
-@keyframes suggestIn {
-  from { opacity: 0; transform: translateY(10px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.suggest-header {
-  display: flex; justify-content: space-between; align-items: flex-start;
-}
-.suggest-header h3 { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; }
-.suggest-close {
-  background: none; border: none; cursor: pointer; padding: 0; margin: -2px -2px 0 0;
-  color: var(--text-faint); font-size: 18px; line-height: 1;
-  transition: color var(--transition);
-}
-.suggest-close:hover { color: var(--text); }
-.suggest-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+/* ==================== Suggest-style form fields ====================
+   The floating Suggest FAB was removed (LEN-287, waterfall keeps its own
+   lp-fab) — these field styles remain for the glossary propose-a-term form. */
 .suggest-field { display: flex; flex-direction: column; gap: 5px; }
 .suggest-field label { font-size: 11.5px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.02em; }
 .suggest-field textarea,
@@ -1213,25 +1179,139 @@ input { font-family: inherit; }
 .suggest-field select:focus { border-color: var(--accent); }
 .suggest-field textarea::placeholder,
 .suggest-field input::placeholder { color: var(--text-faint); }
-#suggest-submit {
-  width: 100%; padding: 9px; background: var(--accent); color: #fff;
-  border: none; border-radius: var(--radius-sm); font-family: var(--font);
-  font-size: 13px; font-weight: 600; cursor: pointer;
-  transition: background var(--transition); margin-top: 2px;
+</style>
+<!-- Landing styles in their own sheet: the main sheet above has a pre-existing unclosed @media that auto-closes at the sheet boundary and would otherwise swallow these rules (LEN-153). -->
+<style id="lp-landing-css">
+/* ============================================================
+   Logged-out brand landing (LEN-153) — minimalist front door.
+   Shown only to logged-out visitors on the bare home view.
+   ============================================================ */
+#landing { display: none; }
+html.pre-landing .shell { display: none !important; }
+html.pre-landing #landing { display: flex; }
+#landing {
+  position: fixed; inset: 0; z-index: 60;
+  flex-direction: column;
+  background: #F8FAF7; color: #111827;
+  overflow: hidden;
+  font-family: var(--font);
 }
-#suggest-submit:hover:not(:disabled) { background: var(--accent-hover); }
-#suggest-submit:disabled { opacity: 0.6; cursor: default; }
-#suggest-success {
-  display: none; flex-direction: column; gap: 6px; text-align: center;
-  padding: 10px 0;
+#landing::before {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(26,60,46,0.032) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(26,60,46,0.032) 1px, transparent 1px);
+  background-size: 52px 52px;
 }
-#suggest-success p { font-size: 13.5px; font-weight: 700; color: var(--text); }
-#suggest-success span { font-size: 12px; color: var(--text-muted); }
-#suggest-error { display: none; font-size: 12px; color: var(--danger); margin-top: -6px; }
+#landing .glow {
+  position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+  width: 620px; height: 340px; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse, rgba(52,168,120,0.10) 0%, transparent 68%);
+}
+#waveBg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.lp-land-top {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 32px;
+}
+.lp-land-top img { height: 26px; display: block; }
+.lp-land-login {
+  font-size: 13px; font-weight: 600; color: var(--accent);
+  text-decoration: none; padding: 8px 16px; border-radius: 999px;
+  border: 1px solid rgba(26,60,46,0.18); transition: background var(--transition), border-color var(--transition);
+}
+.lp-land-login:hover { background: rgba(26,60,46,0.05); border-color: rgba(26,60,46,0.32); }
+.lp-land-hero {
+  position: relative; z-index: 2; flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 24px 24px 64px;
+}
+.lp-land-eyebrow {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 22px;
+}
+.lp-land-h1 {
+  font-family: 'Figtree', var(--font); font-weight: 700;
+  font-size: clamp(33px, 5.4vw, 56px); line-height: 1.05; letter-spacing: -0.025em;
+  color: #0F231A; max-width: 16ch; margin: 0 0 20px;
+}
+.lp-land-h1 em { font-style: normal; color: var(--accent); }
+.lp-land-sub {
+  font-size: clamp(15px, 1.7vw, 18px); line-height: 1.6; color: #3D5445;
+  max-width: 540px; margin: 0 0 34px;
+}
+.lp-land-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 52px; }
+.lp-land-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 14px; font-weight: 600; text-decoration: none;
+  padding: 13px 26px; border-radius: 999px; transition: transform var(--transition), background var(--transition), border-color var(--transition);
+}
+.lp-land-btn.primary { background: var(--accent); color: #fff; }
+.lp-land-btn.primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.lp-land-btn.ghost { color: var(--accent); border: 1px solid rgba(26,60,46,0.20); }
+.lp-land-btn.ghost:hover { background: rgba(26,60,46,0.05); border-color: rgba(26,60,46,0.34); }
+.lp-land-quote {
+  margin: 0; max-width: 440px;
+  background: #fff; border: 1px solid rgba(0,0,0,0.07); border-radius: 16px;
+  padding: 24px 26px; box-shadow: 0 4px 28px rgba(15,35,26,0.05);
+}
+.lp-land-quote blockquote {
+  margin: 0 0 14px; font-size: 15.5px; line-height: 1.55; color: #1F2A24; font-weight: 500;
+}
+.lp-land-quote figcaption { font-size: 12.5px; color: var(--text-muted); }
+.lp-land-quote figcaption strong { display: block; color: #0F231A; font-weight: 700; margin-bottom: 1px; }
+.lp-land-foot {
+  position: relative; z-index: 2; text-align: center;
+  padding: 18px; font-size: 12px; color: var(--text-faint);
+}
+.lp-land-foot a { color: var(--text-muted); text-decoration: none; }
+.lp-land-foot a:hover { color: var(--accent); }
+@media (max-width: 560px) {
+  .lp-land-top { padding: 18px 20px; }
+  .lp-land-hero { padding: 16px 20px 48px; }
+  .lp-land-cta { width: 100%; }
+  .lp-land-btn { flex: 1; justify-content: center; }
+}
+</style>
+<style id="lp-anon-css">
+/* Anonymous tool desk (LEN-287) — additions only; the logged-in dashboard is untouched. */
+.home-divider { height: 1px; background: var(--border); margin: 26px 0 18px; }
+.featured-card-cta {
+  align-self: flex-start; margin: 2px 0 10px;
+  background: none; border: 1px solid rgba(26,60,46,0.22); border-radius: 999px;
+  padding: 6px 13px; font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: var(--accent); cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+.featured-card-cta:hover { background: var(--accent-soft); border-color: rgba(26,60,46,0.4); }
 </style>
 </head>
 <body>
 <h1 class="seo-heading" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">LendPaper - Commercial Lending Calculators & Broker Tools</h1>
+
+<!-- Logged-out brand landing (LEN-153). Visibility controlled by html.pre-landing. -->
+<div id="landing" aria-hidden="true">
+  <canvas id="waveBg"></canvas>
+  <div class="glow"></div>
+  <header class="lp-land-top">
+    <a href="/" aria-label="LendPaper home"><img src="/public/assets/brand/logo-lockup-light.svg" alt="LendPaper"></a>
+    <a class="lp-land-login" href="/login.html">Sign in</a>
+  </header>
+  <main class="lp-land-hero">
+    <div class="lp-land-eyebrow">Free tools · No account needed</div>
+    <h1 class="lp-land-h1">Lending math your clients can <em>actually read.</em></h1>
+    <p class="lp-land-sub">Calculators, lender intelligence, and deal tools for brokers and ISOs who close — built by someone who worked the desk.</p>
+    <div class="lp-land-cta">
+      <a class="lp-land-btn primary" href="/?p=tools/deal-read">Explore the tools →</a>
+      <a class="lp-land-btn ghost" href="/login.html">Sign in</a>
+    </div>
+    <figure class="lp-land-quote">
+      <blockquote>"The amortization calc alone saves me 20 minutes a deal."</blockquote>
+      <figcaption><strong>Justin Friedman</strong>PEAC</figcaption>
+    </figure>
+  </main>
+  <footer class="lp-land-foot">© 2026 LendPaper · <a href="mailto:hello@lendpaper.com">hello@lendpaper.com</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></footer>
+</div>
+
 <div class="shell">
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -1335,7 +1415,7 @@ input { font-family: inherit; }
       <div class="topbar-auth" id="topbarAuth">
         <a class="btn-login" id="loginBtn" href="/login.html">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          Log in
+          Sign in
         </a>
         <div class="auth-account" id="authAccount">
           <span class="auth-avatar" id="authAvatar"></span>
@@ -1535,47 +1615,6 @@ input { font-family: inherit; }
   </div>
 </div>
 
-<!-- Suggest Widget -->
-<button id="suggest-btn" aria-label="Suggest a tool">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-  Suggest
-</button>
-<div id="suggest-panel" role="dialog" aria-label="Suggest a tool">
-  <div class="suggest-header">
-    <div>
-      <h3>What should we build next?</h3>
-      <p class="suggest-sub">Early feedback shapes what ships.</p>
-    </div>
-    <button class="suggest-close" id="suggest-close" aria-label="Close">×</button>
-  </div>
-  <form id="suggest-form" style="display:flex;flex-direction:column;gap:12px;">
-    <div class="suggest-field">
-      <label for="suggest-idea">Your idea</label>
-      <textarea id="suggest-idea" name="idea" placeholder="Describe it in your own words…" required></textarea>
-    </div>
-    <div class="suggest-field">
-      <label for="suggest-role">Your role</label>
-      <select id="suggest-role" name="role">
-        <option value="">Select your role</option>
-        <option value="Broker">Broker</option>
-        <option value="Loan Officer">Loan Officer</option>
-        <option value="Lender">Lender</option>
-        <option value="Other">Other</option>
-      </select>
-    </div>
-    <div class="suggest-field">
-      <label for="suggest-email">Your email <span style="font-weight:400;color:var(--text-faint)">(I'll reply personally)</span></label>
-      <input id="suggest-email" name="email" type="email" placeholder="you@example.com">
-    </div>
-    <span id="suggest-error">Something went wrong — try again.</span>
-    <button type="submit" id="suggest-submit">Send it →</button>
-  </form>
-  <div id="suggest-success">
-    <p>Got it.</p>
-    <span>I read every one of these.</span>
-  </div>
-</div>
-
 <!-- Modal Structure -->
 <div id="lp-modal-overlay" onclick="closeModal()">
     <div id="lp-modal-container" onclick="event.stopPropagation()">
@@ -1607,6 +1646,39 @@ input { font-family: inherit; }
 <script src="js/config.js"></script>
 <script type="module">
   import { getSession, getProfile, signOut } from './js/auth.js';
+
+  // ── Logged-out brand landing (LEN-153, parked behind /?landing per LEN-287) ──
+  const _html = document.documentElement;
+  let _waveStarted = false;
+  function _startWave() {
+    if (_waveStarted) return; _waveStarted = true;
+    const cv = document.getElementById('waveBg'); if (!cv) return;
+    const ctx = cv.getContext('2d'); let f = 0, raf;
+    function rsz(){ cv.width = window.innerWidth; cv.height = window.innerHeight; } rsz();
+    window.addEventListener('resize', rsz);
+    // Calm wave band hugging the bottom edge (lifted from login.html, favicon-flavored).
+    const WS = [{yF:.88,amp:.020,freq:.0075,spd:.16,a:.05},{yF:.93,amp:.016,freq:.011,spd:-.12,a:.04},{yF:.975,amp:.012,freq:.006,spd:.10,a:.03}];
+    function draw(){
+      const W = cv.width, H = cv.height; ctx.clearRect(0,0,W,H); const t = f*.018;
+      WS.forEach(w => { ctx.beginPath(); ctx.strokeStyle = `rgba(26,60,46,${w.a})`; ctx.lineWidth = .9;
+        for (let x=0;x<=W;x+=3){ const y = w.yF*H + Math.sin(x*w.freq + t*w.spd)*w.amp*H; x===0?ctx.moveTo(x,y):ctx.lineTo(x,y); } ctx.stroke(); });
+      f++; raf = requestAnimationFrame(draw);
+    }
+    draw();
+    document.addEventListener('visibilitychange', () => { if (document.hidden) cancelAnimationFrame(raf); else { f = 0; draw(); } });
+  }
+  function _showLanding() {
+    _html.classList.add('pre-landing');
+    const el = document.getElementById('landing'); if (el) el.setAttribute('aria-hidden', 'false');
+    _startWave();
+  }
+  function _hideLanding() {
+    _html.classList.remove('pre-landing');
+    const el = document.getElementById('landing'); if (el) el.setAttribute('aria-hidden', 'true');
+  }
+  // Sync pre-paint hint already decided initial state; if it chose landing, animate now.
+  if (_html.classList.contains('pre-landing')) { _showLanding(); }
+
   (async function initTopbarAuth() {
     const loginBtn = document.getElementById('loginBtn');
     const account  = document.getElementById('authAccount');
@@ -1616,7 +1688,31 @@ input { font-family: inherit; }
     if (!loginBtn) return;
     let session = null;
     try { session = await getSession(); } catch (e) { session = null; }
-    if (!session) return; // logged out → leave "Log in" button visible
+    if (!session) {
+      // Logged out: drop any cached first name so the greeting never addresses an
+      // anonymous visitor (or the next person on a shared machine) by a previous
+      // user's name — open access means logged-out visitors DO see the dashboard
+      // when they arrive on a tool route (LEN-285).
+      window.LP_FIRST_NAME = null;
+      try { localStorage.removeItem('lp_first_name'); } catch (e) {}
+      // Anonymous tool desk (LEN-287) — reconcile in case the sync hint was stale.
+      if (!_html.classList.contains('lp-anon')) {
+        _html.classList.add('lp-anon');
+        if (window.rerenderHomeAuth) window.rerenderHomeAuth();
+      } else if (window.refreshGreetingName) {
+        window.refreshGreetingName();
+      }
+      // LEN-287 (per Steve 6/11): no landing takeover — logged-out visitors stay
+      // on the anonymous tool desk. The LEN-153 landing only shows when asked
+      // for explicitly via /?landing (kept for review; delete or route later).
+      if (new URLSearchParams(location.search).has('landing')) _showLanding();
+      return; // leave "Sign in" button visible
+    }
+    _hideLanding(); // Logged in → reconcile to the dashboard (covers a stale sync hint).
+    if (_html.classList.contains('lp-anon')) {
+      _html.classList.remove('lp-anon');
+      if (window.rerenderHomeAuth) window.rerenderHomeAuth();
+    }
     // Logged in: swap to the account control.
     let label = session.user && session.user.email ? session.user.email : 'Account';
     let realName = null; // a human name, never the email
@@ -1682,33 +1778,28 @@ const randomTagline = taglines[Math.floor(Math.random() * taglines.length)];
 
 /* ---- Render ---- */
 function cardHTML(t, i) {
-  var dis = t.status === 'soon' || t.status === 'inquire';
-  var tag = dis ? 'div' : 'a';
-  var href = dis ? '' : ' href="'+t.slug+'"';
+  // LEN-285: roadmap teaser tiles (soon/inquire) removed — every tile is a live tool.
   var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
-  var cls = 'card' + (dis ? ' is-disabled' : '') + (t.id === 'amo' ? ' card-amo-glisten' : '')
-          + (!dis && isViewed(t.id) ? ' is-viewed' : '');
-  var pillCls = t.status==='live' ? 'pill-live' : t.status==='new' ? 'pill-new' : (t.status==='soon'||t.status==='inquire') ? 'pill-soon' : '';
-  var pillTxt = t.status==='live' ? 'Live' : t.status==='new' ? 'New' : t.status==='soon' ? 'Soon' : t.status==='inquire' ? 'Inquire' : '';
-  
-  var onclick = dis ? ' onclick="openFeatureRequest(\''+t.id+'\',\''+t.name+'\')"' : ' onclick="handleToolClick(event, \''+t.id+'\')"';
+  var cls = 'card' + (t.id === 'amo' ? ' card-amo-glisten' : '') + (isViewed(t.id) ? ' is-viewed' : '');
+  var pillCls = t.status==='new' ? 'pill-new' : 'pill-live';
+  var pillTxt = t.status==='new' ? 'New' : 'Live';
 
   var metaHTML = '<span class="pill '+pillCls+'">'+pillTxt+'</span>';
   if (t.isPaid) {
     metaHTML += '<span class="pill pill-paid" style="margin-left: 4px;">Paid</span>';
   }
 
-  return '<'+tag+href+target+' class="'+cls+'" '+onclick+' data-id="'+t.id+'" data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
+  return '<a href="'+t.slug+'"'+target+' class="'+cls+'" onclick="handleToolClick(event, \''+t.id+'\')" data-id="'+t.id+'" data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
     +'<div class="card-icon '+t.color+'">'+ICO[t.icon]+'</div>'
     +'<div class="card-body"><div class="card-name">'+t.name+'</div><div class="card-desc">'+t.desc+'</div></div>'
     +'<div class="card-meta">'+metaHTML
-    +(dis?'':'<span class="card-arrow">'+ICO.arrow+'</span>')
-    +'</div></'+tag+'>';
+    +'<span class="card-arrow">'+ICO.arrow+'</span>'
+    +'</div></a>';
 }
 
 function handleToolClick(e, id) {
   var t = TOOLS.find(function(x){ return x.id === id; });
-  if (!t || t.status === 'soon' || t.status === 'inquire') return;
+  if (!t) return;
   if (t.presentation === 'external') { recordToolUsage(id); return; } // count the visit, then let the link open
 
   e.preventDefault();
@@ -1977,10 +2068,34 @@ function getContextualGreeting() {
   return "Working late.";
 }
 
+// LEN-287: anonymous tool desk — true when no session. Class is set synchronously
+// by the head pre-paint hint and reconciled by initTopbarAuth once auth resolves.
+function lpIsAnon() { return document.documentElement.classList.contains('lp-anon'); }
+// Called by initTopbarAuth when the resolved auth state disagrees with the hint.
+window.rerenderHomeAuth = function () {
+  try { updateGreeting(); renderHome(); } catch (e) {}
+};
+
+// "Try a sample deal" (LEN-287): flag consumed by deal-read's boot() — it seeds a
+// realistic input set so a first-time visitor sees real output in one click.
+window.openSampleDeal = function (e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  try { sessionStorage.setItem('lp_deal_read_sample', '1'); } catch (err) {}
+  var t = TOOLS.find(function (x) { return x.id === 'deal-read'; });
+  if (t) openTool(t, true); else window.location.href = '/tools/deal-read';
+};
+
 function updateGreeting() {
   var gt = document.getElementById('greetingText');
   var gs = document.getElementById('greetingSubtitle');
   if (!gt) return;
+
+  // Anonymous tool desk (LEN-287): one static line, zero personalization.
+  if (lpIsAnon()) {
+    gt.textContent = 'Pick a tool and start. No account needed.';
+    if (gs) gs.style.display = 'none';
+    return;
+  }
 
   // Personalized hook (LEN-164) — only when we know the first name and this
   // session was picked for it; otherwise fall through to the contextual greeting.
@@ -2155,10 +2270,15 @@ function featuredCardHTML(t, i, isPrimary, primaryLabel) {
   var label = isPrimary ? (primaryLabel || 'Most used') : (featuredLabels[t.id] || '');
   var iconCls = t.color === 'green' ? 'green' : '';
   var delayStyle = isPrimary ? '' : ' style="animation-delay:'+(i*80)+'ms"';
+  // Anonymous desk (LEN-287): Deal Analysis carries a one-click sample-deal CTA.
+  var sampleCta = (lpIsAnon() && t.id === 'deal-read')
+    ? '<button type="button" class="featured-card-cta" onclick="openSampleDeal(event)">Try a sample deal →</button>'
+    : '';
   return '<a'+href+target+' class="'+cls+'"'+onclick+delayStyle+'>'
     +'<div class="featured-card-icon '+iconCls+'">'+ICO[t.icon]+'</div>'
     +'<div class="featured-card-name">'+t.name+'</div>'
     +'<div class="featured-card-desc">'+t.desc+'</div>'
+    +sampleCta
     +'<div class="featured-card-foot">'
     +(label ? '<span class="featured-card-label">'+label+' →</span>' : '<span></span>')
     +'<span class="featured-card-arrow">'+ICO.arrow+'</span>'
@@ -2189,7 +2309,10 @@ function customizePanelHTML() {
 }
 
 function renderHome() {
-  var featuredIds = resolveFeaturedIds();
+  // Anonymous tool desk (LEN-287): same page, personalization layer off — fixed
+  // top trio, no Resume chip, no "Your tools"/Customize, no "More Tools" label.
+  var anon = lpIsAnon();
+  var featuredIds = anon ? ['amo', 'deal-read', 'dscr'] : resolveFeaturedIds();
   var featured = featuredIds.map(function(id){ return TOOLS.find(function(x){ return x.id === id; }); }).filter(Boolean);
   var isRef = function(t){ return REFERENCE_IDS.indexOf(t.id) !== -1; };
   // Tools kept off the home dashboard (Deal Log has its own sidebar home; SBA Fees
@@ -2201,7 +2324,7 @@ function renderHome() {
 
   // "Resume where you left off" — only after the user has opened a (still-live) tool.
   var lastId = '';
-  try { lastId = localStorage.getItem(LP_LAST_TOOL_KEY) || ''; } catch (e) {}
+  try { lastId = anon ? '' : (localStorage.getItem(LP_LAST_TOOL_KEY) || ''); } catch (e) {}
   var lastTool = lastId ? TOOLS.find(function(x){ return x.id === lastId && x.status === 'live'; }) : null;
   if (lastTool) {
     html += '<button type="button" class="resume-chip" onclick="handleToolClick(event, \''+lastTool.id+'\')">'
@@ -2209,19 +2332,21 @@ function renderHome() {
           + ' <span class="resume-chip-arrow">&rarr;</span></button>';
   }
 
-  html += '<div class="featured-head">'
-        + '<span class="featured-head-label">Your tools</span>'
-        + '<button type="button" class="customize-btn" onclick="toggleCustomize()">'
-        + (customizeOpen ? 'Done' : 'Customize') + '</button></div>';
-  if (customizeOpen) html += customizePanelHTML();
+  if (!anon) {
+    html += '<div class="featured-head">'
+          + '<span class="featured-head-label">Your tools</span>'
+          + '<button type="button" class="customize-btn" onclick="toggleCustomize()">'
+          + (customizeOpen ? 'Done' : 'Customize') + '</button></div>';
+    if (customizeOpen) html += customizePanelHTML();
+  }
 
-  var pLabel = primaryFeaturedLabel(featuredIds[0]);
+  var pLabel = anon ? 'Start here' : primaryFeaturedLabel(featuredIds[0]);
   html += '<div class="featured-grid">';
   featured.forEach(function(t, i){ html += featuredCardHTML(t, i, i === 0, pLabel); });
   html += '</div>';
 
   if (liveRest.length) {
-    html += '<div class="home-section-label">More Tools</div><div class="live-tools-grid">';
+    html += (anon ? '<div class="home-divider"></div>' : '<div class="home-section-label">More Tools</div>') + '<div class="live-tools-grid">';
     liveRest.forEach(function(t, i){ html += cardHTML(t, i); });
     html += '</div>';
   }
@@ -2232,8 +2357,7 @@ function renderHome() {
     html += '</div>';
   }
 
-  // LEN-170: no dedicated "Coming Soon" section on the home page — soon/inquire
-  // tiles live within their category panels; clicking one opens the inquire modal.
+  // LEN-285: roadmap teaser tiles removed entirely — the grid only ever shows live tools.
 
   document.getElementById('homeTools').innerHTML = html;
 
@@ -2988,70 +3112,6 @@ document.addEventListener('keydown', (e) => {
   }
   
   setInterval(drawFavicon, 50); // ~20 FPS for perfect lightweight motion
-})();
-
-/* ---- Suggest Widget ---- */
-(function() {
-  var FORMSPREE_ID = 'YOUR_FORMSPREE_ID'; // Replace with ID from formspree.io
-
-  var btn   = document.getElementById('suggest-btn');
-  var panel = document.getElementById('suggest-panel');
-  var form  = document.getElementById('suggest-form');
-  var successEl = document.getElementById('suggest-success');
-  var errorEl   = document.getElementById('suggest-error');
-  var submitBtn = document.getElementById('suggest-submit');
-
-  btn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    panel.classList.toggle('open');
-  });
-
-  document.addEventListener('click', function(e) {
-    if (panel.classList.contains('open') && !panel.contains(e.target) && e.target !== btn) {
-      panel.classList.remove('open');
-    }
-  });
-
-  document.getElementById('suggest-close').addEventListener('click', function() {
-    panel.classList.remove('open');
-  });
-
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    errorEl.style.display = 'none';
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending…';
-
-    var data = new FormData(form);
-    fetch('https://formspree.io/f/' + FORMSPREE_ID, {
-      method: 'POST',
-      body: data,
-      headers: { 'Accept': 'application/json' }
-    }).then(function(res) {
-      if (res.ok) {
-        form.style.display = 'none';
-        successEl.style.display = 'flex';
-        setTimeout(function() {
-          panel.classList.remove('open');
-          setTimeout(function() {
-            form.reset();
-            form.style.display = 'flex';
-            successEl.style.display = 'none';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Send it →';
-          }, 400);
-        }, 2800);
-      } else {
-        errorEl.style.display = 'block';
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Send it →';
-      }
-    }).catch(function() {
-      errorEl.style.display = 'block';
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Send it →';
-    });
-  });
 })();
 
 renderHome();

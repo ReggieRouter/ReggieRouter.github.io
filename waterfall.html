@@ -2166,12 +2166,13 @@
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
 </script>
 <script type="module">
-  import { requireApprovedUser, logUsage } from './js/auth.js';
-  const profile = await requireApprovedUser();
+  import { getProfile } from './js/auth.js';
+  import { logEvent } from './js/analytics.js';
+  const profile = await getProfile();
   if (profile) {
     window.lpProfile = profile; // invite toast reads invite_credits / invites_sent (LEN-75)
-    logUsage('waterfall', 'view');
   }
+  logEvent('waterfall', 'view'); // anonymous + signed-in (LEN-285)
 </script>
 </head>
 <body>
@@ -10054,7 +10055,7 @@
 <script>
 function shareWithTeam() {
   const subject = encodeURIComponent('Check out LendPaper');
-  const body = encodeURIComponent("I've been using LendPaper for deal analysis — the lender waterfall alone is worth it. Request access here: https://lendpaper.com/early-access.html");
+  const body = encodeURIComponent("I've been using LendPaper for deal analysis — the lender waterfall alone is worth it. It's free to use: https://lendpaper.com");
   window.open('mailto:?subject=' + subject + '&body=' + body);
 }
 </script>

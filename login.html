@@ -93,31 +93,6 @@
     .btn-ms { background: #2F2F2F; }
     .btn-ms:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.18); }
 
-    /* ── DIVIDER ── */
-    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
-    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .divider span { font-size: 11px; letter-spacing: .06em; color: var(--muted); white-space: nowrap; font-weight: 500; }
-
-    /* ── MAGIC LINK ── */
-    .email-row { display: flex; gap: 8px; }
-    .email-row input {
-      flex: 1; padding: 11px 13px;
-      background: var(--bg); border: 1px solid var(--border-mid); border-radius: 9px;
-      color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
-      outline: none; transition: border-color .18s, box-shadow .18s; min-width: 0;
-    }
-    .email-row input:focus { border-color: var(--brand-light); box-shadow: 0 0 0 3px rgba(52,168,120,0.1); }
-    .email-row input::placeholder { color: var(--muted); opacity: .65; }
-    .btn-magic {
-      padding: 11px 16px; background: var(--bg); border: 1px solid var(--border-mid);
-      border-radius: 9px; color: var(--text); font-family: 'Inter', sans-serif;
-      font-weight: 500; font-size: 13.5px; cursor: pointer; white-space: nowrap;
-      flex-shrink: 0; transition: background .18s, border-color .18s;
-    }
-    .btn-magic:hover { background: #EFF1EE; border-color: rgba(0,0,0,0.18); }
-    .btn-magic:disabled { opacity: .5; cursor: not-allowed; }
-    .email-hint { font-size: 11.5px; color: var(--muted); margin-top: 7px; line-height: 1.5; }
-
     /* ── FORGOT EMAIL ── */
     .forgot-note {
       margin-top: 10px; font-size: 11.5px; color: var(--muted);
@@ -144,17 +119,28 @@
         <div class="logo-word">lend<span>paper</span>.</div>
       </div>
 
-      <h1>Let's get you in.</h1>
-      <p class="sub">Early access members only.</p>
+      <h1 id="loginHeadline">Sign in to LendPaper</h1>
+      <p class="sub" id="loginSub">Your saved deals and Quote Log live here.</p>
+      <script>
+        // Save-gate context (LEN-285): /login.html?reason=save|savelog swaps the copy.
+        (function () {
+          try {
+            var reason = new URLSearchParams(window.location.search).get('reason');
+            if (reason === 'save' || reason === 'savelog') {
+              document.getElementById('loginHeadline').textContent = 'Sign in to save this deal';
+              document.getElementById('loginSub').textContent = 'Your Quote Log keeps every quote you generate. Free — takes 10 seconds.';
+            }
+          } catch (e) {}
+        })();
+      </script>
 
       <div id="msg" class="msg"></div>
 
       <div id="webviewWarn" class="webview-warn">
         <strong>You're in an in-app browser</strong>
-        Google and Microsoft sign-in are blocked here (they only work in a full browser). Open this page in Safari or Chrome — or just use the email sign-in link below, which works anywhere.
+        Google and Microsoft sign-in are blocked here (they only work in a full browser). Copy the link and open this page in Safari or Chrome to sign in.
         <div class="ww-actions">
           <button type="button" id="wwCopy">Copy link</button>
-          <button type="button" id="wwEmail">Use email link instead</button>
         </div>
       </div>
 
@@ -180,21 +166,10 @@
         </button>
       </div>
 
-      <div class="divider"><span>OR EMAIL ME A SIGN-IN LINK</span></div>
-
-      <div class="email-row">
-        <input type="email" id="emailInput" placeholder="you@company.com" autocomplete="email" />
-        <button class="btn-magic" id="magicBtn">Send link</button>
-      </div>
-      <p class="email-hint">One-click sign-in sent to your inbox — no password needed.</p>
-      <p class="forgot-note">
-        Can't access this email?
+      <p class="forgot-note" style="margin-top:18px">
+        Trouble signing in?
         <a href="mailto:hello@lendpaper.com?subject=Sign-in%20help">hello@lendpaper.com</a>
       </p>
-
-      <div class="card-footer">
-        <a href="/early-access.html">Request early access →</a>
-      </div>
 
     </div>
   </div>
@@ -221,22 +196,6 @@
     const { data:{ session } } = await supabase.auth.getSession();
     if (session) window.location.href = '/auth-callback.html';
     const REDIR = window.location.origin + '/auth-callback.html';
-    const EMAIL_KEY = 'lp_login_email';  // stash so auth-callback can attribute a failed click (LEN-259)
-
-    // Record a failed sign-in so admins can see who bounced and why. Best-effort.
-    async function logLoginFailure(stage, code, description, email) {
-      try {
-        await supabase.from('login_failures').insert({
-          email: (email || '').trim() || null,
-          stage,
-          error_code: code ? String(code).slice(0, 120) : null,
-          error_description: description ? String(description).slice(0, 500) : null,
-          user_agent: (navigator.userAgent || '').slice(0, 500),
-          url: window.location.origin + '/login.html',
-          meta: {}
-        });
-      } catch (_) { /* table may not exist yet / offline — non-fatal */ }
-    }
 
     // ── In-app browser detection ──────────────────────────────────────────
     // Google refuses OAuth inside embedded webviews (LinkedIn/Facebook/Instagram/
@@ -262,10 +221,6 @@
       document.getElementById('webviewWarn').classList.add('show');
       googleBtn.classList.add('is-blocked');
       msBtn.classList.add('is-blocked');
-      document.getElementById('wwEmail').addEventListener('click', () => {
-        const el = document.getElementById('emailInput');
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus();
-      });
       document.getElementById('wwCopy').addEventListener('click', async () => {
         const btn = document.getElementById('wwCopy');
         const url = window.location.origin + '/login.html';
@@ -288,7 +243,7 @@
       if (inApp) {
         document.getElementById('webviewWarn').classList.add('show');
         document.getElementById('webviewWarn').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        showMsg('Google sign-in is blocked in in-app browsers. Open in Safari/Chrome, or use the email link below.', 'error');
+        showMsg('Google sign-in is blocked in in-app browsers. Copy the link and open it in Safari or Chrome.', 'error');
         return;
       }
       googleBtn.disabled = true; googleBtn.textContent = 'Opening Google...'; clearMsg();
@@ -303,7 +258,7 @@
       if (inApp) {
         document.getElementById('webviewWarn').classList.add('show');
         document.getElementById('webviewWarn').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        showMsg('Microsoft sign-in is blocked in in-app browsers. Open in Safari/Chrome, or use the email link below.', 'error');
+        showMsg('Microsoft sign-in is blocked in in-app browsers. Copy the link and open it in Safari or Chrome.', 'error');
         return;
       }
       msBtn.disabled = true; msBtn.textContent = 'Opening Microsoft...'; clearMsg();
@@ -311,69 +266,10 @@
       if (error) { msBtn.disabled = false; msBtn.textContent = 'Continue with Microsoft'; showMsg(error.message, 'error'); }
     });
 
-    // Magic link — with a per-email cooldown so repeat clicks can't drain the
-    // project's shared email quota (the "email rate limit exceeded" error). LEN-253.
-    const magicBtn = document.getElementById('magicBtn');
-    const emailInput = document.getElementById('emailInput');
-    const COOLDOWN_MS = 60000;                          // matches Supabase's per-email floor
-    const cdKey = e => 'lp_magic_cd_' + e.trim().toLowerCase();
-    let sending = false, cdTimer = null;
-
-    const cooldownLeft = email => Math.max(0, (+(localStorage.getItem(cdKey(email)) || 0)) - Date.now());
-
-    // Holds the button down with a visible "Resend in Ns" countdown until the
-    // cooldown clears (used after a rate-limit error, so the user waits it out).
-    function runCountdown(email) {
-      clearInterval(cdTimer);
-      const tick = () => {
-        const left = cooldownLeft(email);
-        if (left <= 0) {
-          clearInterval(cdTimer); cdTimer = null;
-          if (!emailInput.disabled) { magicBtn.disabled = false; magicBtn.textContent = 'Send link'; }
-          return;
-        }
-        magicBtn.disabled = true;
-        magicBtn.textContent = 'Resend in ' + Math.ceil(left / 1000) + 's';
-      };
-      tick();
-      cdTimer = setInterval(tick, 1000);
-    }
-
-    async function sendMagic() {
-      if (sending) return;                               // in-flight guard
-      const email = emailInput.value.trim();
-      if (!email || !email.includes('@')) { showMsg('Enter a valid email address.', 'error'); return; }
-      if (cooldownLeft(email) > 0) {                     // cooldown guard — don't burn the quota
-        showMsg('Hang tight — a sign-in link is already on its way to this address. Wait for the countdown, or use “Continue with Google” above.', 'error');
-        runCountdown(email);
-        return;
-      }
-      sending = true; magicBtn.disabled = true; magicBtn.textContent = 'Sending...'; clearMsg();
-      try { localStorage.setItem(EMAIL_KEY, email); } catch (_) {}  // so a failed click is attributable
-      const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: REDIR } });
-      sending = false;
-      if (error) {
-        const rateLimited = error.status === 429
-          || /rate limit/i.test(error.message || '')
-          || /over_email_send_rate_limit/i.test(error.code || '');
-        logLoginFailure('send', error.code || error.status || 'send_failed', error.message, email);
-        if (rateLimited) {
-          localStorage.setItem(cdKey(email), Date.now() + COOLDOWN_MS);
-          showMsg('Demand is higher than anticipated. Your link is queued. Try again soon.', 'error');
-          runCountdown(email);
-        } else {
-          magicBtn.disabled = false; magicBtn.textContent = 'Send link';
-          showMsg(error.message, 'error');
-        }
-      } else {
-        emailInput.disabled = true;
-        localStorage.setItem(cdKey(email), Date.now() + COOLDOWN_MS);  // block a refresh-then-resend
-        magicBtn.textContent = 'Sent ✓';
-        showMsg('Check your inbox — expires in 10 minutes.', 'ok');
-      }
-    }
-    magicBtn.addEventListener('click', sendMagic);
-    emailInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMagic(); });
+    // Magic link / email OTP removed entirely (LEN-285): Outlook Safe Links
+    // prefetches one-time URLs and burns the token before the user can click,
+    // so the email path produced more "invalid link" errors than sign-ins.
+    // Google + Microsoft OAuth cover both user bases.
   </script>
 </body>
 </html>

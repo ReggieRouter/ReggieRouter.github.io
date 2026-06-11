@@ -53,16 +53,19 @@
     <script type="importmap">
       { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
     </script>
-    <!-- Hard auth gate (LEN-68, re-applied for launch): requireApprovedUser() redirects logged-out/unapproved users to /login.html. Never add a bare top-level return (ES-module parse error). -->
+    <!-- Open access (LEN-285): tools render for every visitor — no auth redirect. getProfile() resolves null when logged out. Never add a bare top-level return (ES-module parse error). -->
     <script type="module">
-      import { requireApprovedUser, logUsage } from '../js/auth.js';
-      const profile = await requireApprovedUser();
+      import { getProfile } from '../js/auth.js';
+  import { logEvent } from '../js/analytics.js';
+      const profile = await getProfile();
       if (profile) {
         window.lpProfile = profile;
-        logUsage('fundability', 'view');
       }
+      logEvent('fundability', 'view'); // anonymous + signed-in (LEN-285)
     </script>
     <script type="module" src="../js/quote-log.js"></script>
+<!-- Save gate (LEN-285): offers sign-in when an anonymous user saves a deal -->
+<script type="module" src="../js/save-gate.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>

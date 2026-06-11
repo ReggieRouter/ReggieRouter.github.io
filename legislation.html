@@ -386,14 +386,15 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
 <!-- Shared LendPaper libraries: config (Supabase) + hard auth gate -->
 <script src="js/config.js"></script>
 <script type="importmap">{ "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }</script>
-<!-- Hard auth gate (LEN-68, re-applied for launch): requireApprovedUser() redirects logged-out/unapproved users to /login.html. Never add a bare top-level return (ES-module parse error). -->
+<!-- Open access (LEN-285): tools render for every visitor — no auth redirect. getProfile() resolves null when logged out. Never add a bare top-level return (ES-module parse error). -->
 <script type="module">
-  import { requireApprovedUser, logUsage } from './js/auth.js';
-  const profile = await requireApprovedUser();
+  import { getProfile } from './js/auth.js';
+  import { logEvent } from './js/analytics.js';
+  const profile = await getProfile();
   if (profile) {
     window.lpProfile = profile;
-    logUsage('legislation', 'view');
   }
+  logEvent('legislation', 'view'); // anonymous + signed-in (LEN-285)
 </script>
 
 <nav class="topnav">
@@ -1246,8 +1247,15 @@ function setView(v){
   window.addEventListener('scroll', reposition, { passive: true });
   document.addEventListener('keydown', function(e){ if (active && e.key === 'Escape') end(); });
 
-  // Auto-launch once per browser on first visit
-  if (!seen()){ setTimeout(start, 700); }
+  // ALL tour modes OFF (Steve, 6/11): no auto-launch, replay button hidden.
+  // To re-enable, restore the seen() auto-launch and unhide .tour-replay.
+  var TOURS_DISABLED = true;
+  if (TOURS_DISABLED) {
+    var replayBtn = document.querySelector('.tour-replay');
+    if (replayBtn) replayBtn.style.display = 'none';
+  } else if (!seen()) {
+    setTimeout(start, 700);
+  }
 })();
 
 /* ---- The map (adapted from the registry-route US map; brand-green choropleth) ---- */

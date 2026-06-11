@@ -35,30 +35,9 @@
     .card .why { font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:22px; }
     .card .why strong { color:var(--text); font-weight:600; }
 
-    .recover-label { font-size:12px; font-weight:600; color:var(--text); margin-bottom:8px; }
-    .email-row { display:flex; gap:8px; }
-    .email-row input {
-      flex:1; min-width:0; padding:11px 13px; background:var(--bg);
-      border:1px solid var(--border-mid); border-radius:9px; color:var(--text);
-      font-family:'Inter',sans-serif; font-size:14px; outline:none;
-      transition:border-color .18s, box-shadow .18s;
-    }
-    .email-row input:focus { border-color:var(--brand-light); box-shadow:0 0 0 3px rgba(52,168,120,0.1); }
-    .btn-primary {
-      padding:11px 16px; background:var(--brand); color:#fff; border:none; border-radius:9px;
-      font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px; cursor:pointer;
-      white-space:nowrap; flex-shrink:0; transition:opacity .18s, box-shadow .18s;
-    }
-    .btn-primary:hover { opacity:.9; box-shadow:0 6px 20px rgba(26,60,46,0.18); }
-    .btn-primary:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
-
     .feedback { font-size:12.5px; line-height:1.5; margin-top:10px; display:none; }
     .feedback.ok    { color:var(--ok-txt); display:block; }
     .feedback.error { color:var(--err-txt); display:block; }
-
-    .divider { display:flex; align-items:center; gap:12px; margin:18px 0; }
-    .divider::before, .divider::after { content:''; flex:1; height:1px; background:var(--border); }
-    .divider span { font-size:11px; letter-spacing:.06em; color:var(--muted); white-space:nowrap; font-weight:500; }
 
     .btn-google {
       display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
@@ -87,17 +66,8 @@
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 8v4m0 4h.01M10.3 3.86l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3.14l-8-14a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Sign-in didn't go through
     </span>
-    <h1 id="recover-title">That sign-in link didn't work</h1>
+    <h1 id="recover-title">That sign-in didn't work</h1>
     <p class="why" id="recover-why"></p>
-
-    <div class="recover-label">Get a fresh link — sent straight to your inbox</div>
-    <div class="email-row">
-      <input type="email" id="recoverEmail" placeholder="you@company.com" autocomplete="email" />
-      <button class="btn-primary" id="recoverBtn">Send link</button>
-    </div>
-    <p class="feedback" id="recoverFeedback"></p>
-
-    <div class="divider"><span>OR</span></div>
 
     <button class="btn-google" id="recoverGoogle">
       <svg viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
@@ -108,6 +78,8 @@
       <svg viewBox="0 0 18 18"><path d="M0 0h8.55v8.55H0z" fill="#F25022"/><path d="M9.45 0H18v8.55H9.45z" fill="#7FBA00"/><path d="M0 9.45h8.55V18H0z" fill="#00A4EF"/><path d="M9.45 9.45H18V18H9.45z" fill="#FFB900"/></svg>
       Continue with Microsoft
     </button>
+
+    <p class="feedback" id="recoverFeedback"></p>
 
     <div class="help">
       Still stuck? Email <a href="mailto:hello@lendpaper.com?subject=Sign-in%20help">hello@lendpaper.com</a> and we'll get you in.
@@ -152,34 +124,33 @@
     }
 
     // ── Friendly copy per failure cause ──
+    // (Magic links were removed in LEN-285 — these branches now only catch stale
+    // links from emails sent before the change, and steer everyone to OAuth.)
     function friendly(code, description) {
       const blob = ((code || '') + ' ' + (description || '')).toLowerCase();
-      // Expired/consumed magic link (incl. the email-scanner prefetch case). Check
-      // the link-specific words first so a generic access_denied that's really an
-      // OAuth block doesn't get mislabeled as "link expired".
       if (/expired|otp|magic|invalid|used|link/.test(blob)) {
         return {
           title: 'That sign-in link was already used or expired',
-          why: 'Sign-in links are <strong>one-time</strong> and only last a few minutes. Often an email security scanner opens the link before you do and uses it up — that’s usually what happened here. Grab a fresh one below and you’re in.'
+          why: 'Email sign-in links were <strong>one-time</strong> and have been retired. Sign in with Google or Microsoft below — it takes one click.'
         };
       }
       if (/rate|429|too many/.test(blob)) {
         return {
           title: 'Too many sign-in attempts',
-          why: 'You’ve requested a few links in a short window. Wait about a minute, then send a fresh one below.'
+          why: 'You’ve tried a few times in a short window. Wait about a minute, then sign in with Google or Microsoft below.'
         };
       }
       // Google / Microsoft / OAuth provider denied or couldn't authorize (e.g. a
-      // Workspace or Entra admin policy, or the account isn't on the access list yet).
+      // Workspace or Entra admin policy).
       if (/access_denied|denied|forbidden|admin_policy|provider|oauth|google|azure|microsoft|consent|unauthorized/.test(blob)) {
         return {
           title: 'We couldn’t authorize that account',
-          why: 'Your Google or Microsoft sign-in didn’t go through — your work account’s admin may restrict third-party apps, or this account isn’t on the access list yet. Try the <strong>email sign-in link</strong> below (works with any address), or retry below.'
+          why: 'Your Google or Microsoft sign-in didn’t go through — your work account’s admin may restrict third-party apps. Retry below, or try your other account; if it keeps failing, email us and we’ll get you in.'
         };
       }
       return {
         title: 'We couldn’t finish signing you in',
-        why: 'Something interrupted the sign-in. The quickest fix is a fresh link — send one below, or retry with Google or Microsoft.'
+        why: 'Something interrupted the sign-in. Retry with Google or Microsoft below.'
       };
     }
 
@@ -190,41 +161,17 @@
       document.getElementById('recover-title').textContent = f.title;
       document.getElementById('recover-why').innerHTML = f.why;
       if (code) document.getElementById('recover-code').textContent = 'Reference: ' + code;
-      // Pre-fill the email we stashed at login so recovery is one tap.
-      try {
-        const stashed = (localStorage.getItem(EMAIL_KEY) || '').trim();
-        if (stashed) document.getElementById('recoverEmail').value = stashed;
-      } catch (_) {}
       document.getElementById('recover').classList.add('show');
       wireRecovery();
     }
 
+    // Recovery = retry OAuth. The email-link sender was removed with the magic
+    // link (LEN-285) — resending a one-time link just feeds the same Safe-Links
+    // prefetch failure that stranded the user here in the first place.
     let wired = false;
     function wireRecovery() {
       if (wired) return; wired = true;
-      const emailEl = document.getElementById('recoverEmail');
-      const btn = document.getElementById('recoverBtn');
       const fb = document.getElementById('recoverFeedback');
-      let sending = false;
-
-      async function send() {
-        if (sending) return;
-        const email = emailEl.value.trim();
-        if (!email || !email.includes('@')) { fb.className = 'feedback error'; fb.textContent = 'Enter a valid email address.'; return; }
-        sending = true; btn.disabled = true; btn.textContent = 'Sending…'; fb.className = 'feedback';
-        try { localStorage.setItem(EMAIL_KEY, email); } catch (_) {}
-        const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: REDIR } });
-        sending = false;
-        if (error) {
-          btn.disabled = false; btn.textContent = 'Send link';
-          fb.className = 'feedback error'; fb.textContent = error.message || 'Could not send the link. Try again.';
-        } else {
-          btn.textContent = 'Sent ✓'; emailEl.disabled = true;
-          fb.className = 'feedback ok'; fb.textContent = 'Fresh link on its way — check your inbox (expires in a few minutes). Open it on this device.';
-        }
-      }
-      btn.addEventListener('click', send);
-      emailEl.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
 
       document.getElementById('recoverGoogle').addEventListener('click', async () => {
         const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: REDIR } });
@@ -269,28 +216,33 @@
         } else if (hasToken) {
           showRecovery('token_no_session', 'token_not_stored', 'Token arrived but the session could not be stored.');
         } else {
-          showRecovery('no_credentials', 'no_credentials', 'Arrived without credentials — the sign-in redirect dropped them (no code or access_token in URL).');
+          // Direct visit (bookmark / back button) with no OAuth flow in progress —
+          // nothing to recover from, just go home. LEN-285.
+          window.location.href = '/index.html';
         }
       } else {
-        // Success — clear the stash and route by profile status.
+        // Success — clear the stash and route. Open access (LEN-285): everyone gets
+        // in except denied accounts (kept so bad actors can be banned). pending /
+        // waitlist / any legacy status are treated as approved — no queue routing.
         try { localStorage.removeItem(EMAIL_KEY); } catch (_) {}
         const { data: profile } = await supabase.from('profiles').select('id, status, is_admin').eq('id', session.user.id).single();
         if (!profile) {
           window.location.href = '/onboarding.html';
-        } else if (profile.is_admin) {
-          window.location.href = '/lp-panel.html'; // admin page folded into lp-panel Members tab (LEN-84)
-        } else if (profile.status === 'pending') {
-          window.location.href = '/pending.html';
-        } else if (profile.status === 'waitlist') {
-          window.location.href = '/waitlist.html';
         } else if (profile.status === 'denied') {
-          window.location.href = '/waitlist.html'; // denied → waitlist page, soft landing
-        } else if (profile.status === 'approved') {
-          const next = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
-          sessionStorage.removeItem('redirectAfterLogin');
-          window.location.href = next;
+          window.location.href = '/denied.html';
         } else {
-          window.location.href = '/pending.html';
+          // A pending save intent ('post-login-action' / 'post-login-data') is left
+          // in sessionStorage on purpose — the tool page consumes AND clears it on
+          // load (js/save-gate.js), which is what prevents duplicate saves.
+          // Read + REMOVE the return target before redirecting — a stale key here
+          // is the classic Quote Log redirect loop. An explicit return target wins
+          // even for admins (they were mid-task on a tool); the admin default is
+          // lp-panel (folded into Members tab, LEN-84).
+          const returnTo = sessionStorage.getItem('auth-return-to')
+            || sessionStorage.getItem('redirectAfterLogin');
+          sessionStorage.removeItem('auth-return-to');
+          sessionStorage.removeItem('redirectAfterLogin');
+          window.location.href = returnTo || (profile.is_admin ? '/lp-panel.html' : '/index.html');
         }
       }
     }

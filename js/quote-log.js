@@ -12,6 +12,7 @@
 //   await saveEstimate({ calculator_type, params, pdf_generated, prepared_for });
 
 import { supabase, getSession } from './auth.js';
+import { logEvent } from './analytics.js';
 
 const LS_KEY = 'lp_quote_log';
 const RESTORE_KEY = 'lp_restore_estimate';
@@ -89,10 +90,17 @@ async function saveEstimate(opts = {}) {
   // Always mirror locally (offline / logged-out / pre-migration safety net)
   pushLocal(record);
 
+  // Anonymous-friendly usage event (LEN-285) — PDF gen + Copy Scenario are the
+  // deliberate "run" moments every calculator funnels through. No params in
+  // metadata (they can carry PII like prepared_for).
+  logEvent(record.calculator_type, 'calculator_run', { doc_id: record.doc_id, pdf_generated: record.pdf_generated });
+
   // Persist to Supabase when signed in and the table exists
+  let signedIn = false;
   try {
     const session = await getSession();
     if (session) {
+      signedIn = true;
       const { error } = await supabase.from('estimates').insert({
         doc_id: record.doc_id,
         user_id: session.user.id,
@@ -107,6 +115,12 @@ async function saveEstimate(opts = {}) {
   } catch (e) {
     console.warn('[QuoteLog] save error (local mirror kept):', e);
   }
+
+  // Announce the save so the save gate (LEN-285) can offer sign-in to
+  // anonymous users. Fire-and-forget; never blocks the calculator.
+  try {
+    window.dispatchEvent(new CustomEvent('lp:estimate-saved', { detail: { record, signedIn } }));
+  } catch (e) {}
   return record;
 }
 

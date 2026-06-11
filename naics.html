@@ -337,6 +337,12 @@ mark{background:#FEF08A;color:#854D0E;padding:0 2px;border-radius:2px}
   .card-accordions{flex-direction:column}
 }
 </style>
+<!-- Anonymous usage tracking (LEN-285) -->
+<script src="/js/config.js"></script>
+<script type="module">
+  import { logEvent } from '/js/analytics.js';
+  logEvent('naics', 'view');
+</script>
 </head>
 <body>
 
