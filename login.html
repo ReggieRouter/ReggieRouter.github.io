@@ -93,31 +93,6 @@
     .btn-ms { background: #2F2F2F; }
     .btn-ms:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.18); }
 
-    /* ── DIVIDER ── */
-    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
-    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .divider span { font-size: 11px; letter-spacing: .06em; color: var(--muted); white-space: nowrap; font-weight: 500; }
-
-    /* ── MAGIC LINK ── */
-    .email-row { display: flex; gap: 8px; }
-    .email-row input {
-      flex: 1; padding: 11px 13px;
-      background: var(--bg); border: 1px solid var(--border-mid); border-radius: 9px;
-      color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px;
-      outline: none; transition: border-color .18s, box-shadow .18s; min-width: 0;
-    }
-    .email-row input:focus { border-color: var(--brand-light); box-shadow: 0 0 0 3px rgba(52,168,120,0.1); }
-    .email-row input::placeholder { color: var(--muted); opacity: .65; }
-    .btn-magic {
-      padding: 11px 16px; background: var(--bg); border: 1px solid var(--border-mid);
-      border-radius: 9px; color: var(--text); font-family: 'Inter', sans-serif;
-      font-weight: 500; font-size: 13.5px; cursor: pointer; white-space: nowrap;
-      flex-shrink: 0; transition: background .18s, border-color .18s;
-    }
-    .btn-magic:hover { background: #EFF1EE; border-color: rgba(0,0,0,0.18); }
-    .btn-magic:disabled { opacity: .5; cursor: not-allowed; }
-    .email-hint { font-size: 11.5px; color: var(--muted); margin-top: 7px; line-height: 1.5; }
-
     /* ── FORGOT EMAIL ── */
     .forgot-note {
       margin-top: 10px; font-size: 11.5px; color: var(--muted);
