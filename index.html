@@ -1650,6 +1650,18 @@ html.pre-landing #landing { display: flex; }
 <script src="js/config.js"></script>
 <script type="module">
   import { getSession, getProfile, signOut } from './js/auth.js';
+  import { logEvent } from './js/analytics.js';
+
+  // ── Adoption-funnel view events (LEN-177) ──────────────────────────────────
+  // Calculators/tools log their own 'view' from inside their page (iframe or
+  // standalone), so the SPA only logs the dashboard itself. By the time this
+  // module evaluates, the initial handleRouting() has already run, so
+  // window.currentView reflects the landing route — a deep link straight into a
+  // tool/glossary must NOT also count as a home open. The glossary view is
+  // logged from switchView(); if that ran before analytics loaded it queues the
+  // event in window._lpPendingView, flushed here.
+  if (!window.currentView || window.currentView === 'home') logEvent('home', 'view');
+  if (window._lpPendingView) { logEvent(window._lpPendingView, 'view'); window._lpPendingView = null; }
 
   // ── Logged-out brand landing (LEN-153, parked behind /?landing per LEN-287) ──
   const _html = document.documentElement;
@@ -2859,6 +2871,15 @@ function switchView(v) {
   document.getElementById('content').scrollTop = 0;
   closeMobile();
   if (v === 'home') refreshViewedRelax();
+
+  // LEN-177: count glossary opens for the Adoption funnel (once per page load).
+  // analytics.js is a module and may not have evaluated yet on the initial
+  // route — queue the event for the auth module to flush in that case.
+  if (v === 'glossary' && !window._lpGlossaryViewLogged) {
+    window._lpGlossaryViewLogged = true;
+    if (window.lpAnalytics) window.lpAnalytics.logEvent('glossary', 'view');
+    else window._lpPendingView = 'glossary';
+  }
 
   const searchWrap = document.querySelector('.search-wrap');
   if (searchWrap) {
