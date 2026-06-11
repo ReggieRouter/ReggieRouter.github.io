@@ -474,6 +474,8 @@ header {
 .ado-goal-badge.atrisk  { background: var(--red-light); color: var(--red); }
 .ado-goalform { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 .ado-goalform select, .ado-goalform input { padding: 7px 9px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; background: var(--white); color: var(--text); }
+.ado-edit-btn { font-size: 12px; font-weight: 600; color: var(--green); background: var(--green-light); border: 1px solid var(--border); border-radius: 6px; padding: 4px 11px; cursor: pointer; white-space: nowrap; }
+.ado-edit-btn:hover { background: var(--white); border-color: var(--green-mid); }
 .stale-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .stale-table th { text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--muted); padding: 0 10px 8px; border-bottom: 1px solid var(--border); }
 .stale-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
@@ -1053,6 +1055,27 @@ header {
     <div class="modal-actions" style="margin-top:18px">
       <button class="btn-cancel" onclick="closePermModal()">Cancel</button>
       <button class="btn-mem-approve" style="padding:8px 16px;font-size:13px" id="perm-save" onclick="savePerms()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEN-286: edit member name/company, exclude from metrics, merge duplicate accounts -->
+<div class="modal-overlay" id="ado-user-modal" style="display:none" onclick="if(event.target===this) adoCloseUser()">
+  <div class="modal-box" style="width:470px;max-height:88vh;overflow-y:auto">
+    <h3>Edit member</h3>
+    <p id="ado-um-who" style="color:var(--muted);font-size:13px;margin-bottom:14px"></p>
+    <label class="inv-label" for="ado-um-name" style="margin-top:0">Name</label>
+    <input type="text" id="ado-um-name" class="inv-input" placeholder="First Last" style="margin-bottom:12px" />
+    <label class="inv-label" for="ado-um-company">Company</label>
+    <input type="text" id="ado-um-company" class="inv-input" placeholder="Company" style="margin-bottom:4px" />
+    <label style="display:flex;align-items:flex-start;gap:9px;padding:12px 0;margin-top:8px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer">
+      <input type="checkbox" id="ado-um-exclude" style="margin-top:2px" />
+      <span><strong style="font-weight:600">Exclude from metrics</strong><br><span style="color:var(--muted);font-size:12px">Hide this person and all their activity from every adoption count — for test / internal logins.</span></span>
+    </label>
+    <div id="ado-um-merge"></div>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn-cancel" onclick="adoCloseUser()">Cancel</button>
+      <button class="btn-mem-approve" style="padding:8px 16px;font-size:13px" id="ado-um-save" onclick="adoSaveUser()">Save</button>
     </div>
   </div>
 </div>
@@ -3871,6 +3894,13 @@ let adoProfiles = [], adoEvents = [], adoEstimates = [], adoGoals = [];
 let adoPeople = [], adoCompanies = [], adoFunnel = null, adoAnon = null, adoTools = [];
 let adoTab = 'people', adoWindow = 30, adoCompanyFilter = null;
 let adoLoadError = null, adoGoalsMissing = false;
+// LEN-286 admin tools: edit / exclude / merge members.
+let adoAllProfiles = [], adoHidden = [], adoShowHidden = false, adoUserId = null, adoColsMissing = false;
+
+// Window can be a number of days or the string 'today' (since local midnight).
+function adoWinStartMs() { if (adoWindow === 'today') { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); } return Date.now() - Number(adoWindow) * 864e5; }
+function adoWinShort() { return adoWindow === 'today' ? 'today' : adoWindow + 'd'; }
+function adoWinPhrase() { return adoWindow === 'today' ? 'today' : 'last ' + adoWindow + 'd'; }
 
 function adoV(id) { const e = document.getElementById(id); return e ? e.value : ''; }
 function adoCompanyKey(c) { const t = (c || '').trim(); return t ? t.toLowerCase() : '__none__'; }
@@ -3897,6 +3927,7 @@ async function renderAdoptionPanel() {
       <div><h1>Adoption</h1><p>Engagement &amp; adoption by person, company, and tool — live from Supabase · admin activity excluded</p></div>
       <div style="display:flex;gap:10px;align-items:center">
         <select id="ado-window" class="mem-select" onchange="adoSetWindow(this.value)">
+          <option value="today">Today</option>
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
           <option value="90">Last 90 days</option>
@@ -3930,6 +3961,7 @@ async function renderAdoptionPanel() {
           <option value="dormant">Dormant (30d+)</option>
         </select>
         <span id="ado-cofilter" style="display:none;font-size:12px;color:var(--muted)"></span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);cursor:pointer;margin-left:auto"><input type="checkbox" id="ado-showhidden" onchange="adoToggleShowHidden(this.checked)" /> Show excluded / merged</label>
       </div>
       <div id="ado-table-wrap" style="color:var(--muted);font-size:13px">Loading…</div>
     </div>`;
@@ -3942,8 +3974,16 @@ async function renderAdoptionPanel() {
 
 async function loadAdoption() {
   const histStart = new Date(Date.now() - ADO_HISTORY_DAYS * 864e5).toISOString();
-  const [profRes, evRes, estRes, goalRes] = await Promise.all([
-    sb.from('profiles').select('id, email, full_name, company, role, status, created_at, last_seen, invite_credits, invites_sent, is_admin'),
+  // exclude_from_metrics / merged_into are added by supabase/adoption_admin_tools.sql.
+  // Degrade gracefully (and flag a hint) if that migration hasn't run yet.
+  const BASE_COLS = 'id, email, full_name, company, role, status, created_at, last_seen, invite_credits, invites_sent, is_admin';
+  adoColsMissing = false;
+  let profRes = await sb.from('profiles').select(BASE_COLS + ', exclude_from_metrics, merged_into');
+  if (profRes.error && /exclude_from_metrics|merged_into/.test(profRes.error.message || '')) {
+    adoColsMissing = true;
+    profRes = await sb.from('profiles').select(BASE_COLS);
+  }
+  const [evRes, estRes, goalRes] = await Promise.all([
     sb.from('usage_events').select('user_id, session_id, tool, event, created_at, metadata').gte('created_at', histStart),
     sb.from('estimates').select('user_id, created_at').gte('created_at', histStart),
     sb.from('adoption_goals').select('*').eq('active', true).order('created_at', { ascending: true }),
@@ -3956,12 +3996,34 @@ async function loadAdoption() {
     return;
   }
   const allProfiles = profRes.data || [];
+  adoAllProfiles = allProfiles;
+  const byId = {}; allProfiles.forEach(p => byId[p.id] = p);
+  // Follow a merge chain to the surviving (canonical) profile; guard cycles.
+  const canon = id => { let c = id, seen = new Set(); while (byId[c] && byId[c].merged_into && byId[c].merged_into !== c && !seen.has(c)) { seen.add(c); c = byId[c].merged_into; } return c; };
   const adminIds = new Set(allProfiles.filter(p => p.is_admin).map(p => p.id));
-  adoProfiles = allProfiles.filter(p => !p.is_admin);
+  const excludedIds = new Set(allProfiles.filter(p => p.exclude_from_metrics).map(p => p.id));
+  // An id is dropped from every metric if it (or its canonical) is admin or excluded.
+  const dropId = id => adminIds.has(id) || excludedIds.has(id) || adminIds.has(canon(id)) || excludedIds.has(canon(id));
+  // Countable members: canonical only (no admins, no excluded, no merged-away dupes).
+  adoProfiles = allProfiles.filter(p => !p.is_admin && !p.exclude_from_metrics && canon(p.id) === p.id);
+  // Fold the alt emails of merged dupes onto their canonical, for display.
+  const altEmails = {};
+  allProfiles.forEach(p => { if (p.merged_into) { const c = canon(p.id); if (c !== p.id) (altEmails[c] = altEmails[c] || []).push(p.email); } });
+  adoProfiles.forEach(p => { p._alts = altEmails[p.id] || []; });
+  // Hidden roster (excluded + merged-away) so the admin can review / undo them.
+  adoHidden = allProfiles.filter(p => !p.is_admin && (p.exclude_from_metrics || (p.merged_into && canon(p.id) !== p.id)))
+    .map(p => ({ p, kind: p.exclude_from_metrics ? 'excluded' : 'merged', into: p.merged_into ? (byId[canon(p.id)] || {}) : null }))
+    .sort((a, b) => (a.p.full_name || a.p.email || '').localeCompare(b.p.full_name || b.p.email || ''));
   if (evRes.error || estRes.error) adoLoadError = (evRes.error || estRes.error).message;
-  // Internal testing must never inflate adoption: drop admins' own activity.
-  adoEvents = (evRes.data || []).filter(e => !e.user_id || !adminIds.has(e.user_id));
-  adoEstimates = (estRes.data || []).filter(e => !adminIds.has(e.user_id));
+  // Drop admin/excluded activity; remap merged-away activity onto the canonical id.
+  const remap = e => {
+    if (!e.user_id) return e;            // anonymous — keep as-is
+    if (dropId(e.user_id)) return null;
+    const c = canon(e.user_id);
+    return c === e.user_id ? e : { ...e, user_id: c };
+  };
+  adoEvents = (evRes.data || []).map(remap).filter(Boolean);
+  adoEstimates = (estRes.data || []).map(remap).filter(Boolean);
   if (goalRes.error) { adoGoalsMissing = true; adoGoals = []; } else { adoGoals = goalRes.data || []; }
   adoCompute();
   adoRenderFunnel();
@@ -3972,7 +4034,7 @@ async function loadAdoption() {
 function adoCompute() {
   const now = Date.now();
   const actT = now - ADO_ACTIVE_DAYS * 864e5, riskT = now - ADO_RISK_DAYS * 864e5;
-  const winStart = now - adoWindow * 864e5;
+  const winStart = adoWinStartMs();
   const inWin = e => Date.parse(e.created_at) >= winStart;
   const evByUser = {}, estByUser = {}, anonEvents = [];
   for (const e of adoEvents) {
@@ -4083,7 +4145,7 @@ function adoCompute() {
 }
 
 function adoSetWindow(v) {
-  adoWindow = parseInt(v, 10) || 30;
+  adoWindow = v === 'today' ? 'today' : (parseInt(v, 10) || 30);
   adoCompute();
   adoRenderFunnel();
   adoRenderTabsCounts();
@@ -4135,7 +4197,7 @@ function adoRenderFunnel() {
       <div class="dash-card good"><div class="dash-card-num">${f.power}</div><div class="dash-card-label">Power users</div></div>
     </div>
     <p style="font-size:12px;color:var(--muted);margin-top:10px">${f.total} members · <strong style="color:var(--text)">${f.pctEngaged}%</strong> engaged · <strong style="color:var(--text)">${f.pctAdopted}%</strong> adopted</p>
-    <div class="dash-section-title" style="margin-top:20px">Open access · last ${adoWindow}d ${adoInfo('Anonymous traffic (no account — most visitors since open access, LEN-285). Sessions are distinct per-browser ids from <code>usage_events</code>. Tool opens = page views of a tool; downloads = PDFs generated. Signups = new member profiles created in the window; conversion = signups ÷ anonymous sessions.', 300)}</div>
+    <div class="dash-section-title" style="margin-top:20px">Open access · ${adoWinPhrase()} ${adoInfo('Anonymous traffic (no account — most visitors since open access, LEN-285). Sessions are distinct per-browser ids from <code>usage_events</code>. Tool opens = page views of a tool; downloads = PDFs generated. Signups = new member profiles created in the window; conversion = signups ÷ anonymous sessions.', 300)}</div>
     <div class="dash-cards">
       <div class="dash-card"><div class="dash-card-num">${a.sessions}</div><div class="dash-card-label">Anonymous sessions</div></div>
       <div class="dash-card"><div class="dash-card-num">${a.opens}</div><div class="dash-card-label">Anon tool opens</div></div>
@@ -4188,11 +4250,13 @@ function adoRenderPeople() {
     } else chip.style.display = 'none';
   }
 
-  if (!rows.length) { wrap.innerHTML = '<p style="color:var(--muted);font-size:13px">No members match.</p>'; return; }
-  wrap.innerHTML = `<table class="mem-table">
-    <thead><tr><th>User</th><th>Company</th><th>Stage ${adoInfo(ADO_STAGE_TIP, 340)}</th><th>Recency</th><th>Tools ${adoInfo(`Distinct tools used in the selected window (${adoWindow}d). Tool opens, runs, and PDF downloads per tool are on the Tools tab.`, 250)}</th><th>Estimates ${adoInfo(`Deals saved to the Deal Log in the selected window (${adoWindow}d). Only signed-in saves create estimates — anonymous PDF/copy runs appear on the Tools tab instead.`, 270)}</th><th>Invites</th><th>Last active</th></tr></thead>
-    <tbody>${rows.map(r => `<tr>
-      <td><div class="mem-user"><span class="mem-avatar">${esc(memInitials(r.p.full_name))}</span><div><div class="mem-name">${esc(r.p.full_name || '—')}</div><div class="mem-email">${esc(r.p.email || '')}</div></div></div></td>
+  const hint = adoColsMissing
+    ? `<p style="color:var(--amber);font-size:12px;margin-bottom:10px">Editing names &amp; companies works now. To <strong>exclude</strong> or <strong>merge</strong> accounts, run <code>supabase/adoption_admin_tools.sql</code> once (adds two columns to <code>profiles</code>).</p>`
+    : '';
+  if (!rows.length && !(adoShowHidden && adoHidden.length)) { wrap.innerHTML = hint + '<p style="color:var(--muted);font-size:13px">No members match.</p>'; return; }
+  const altLine = p => (p._alts && p._alts.length) ? `<div class="mem-email" style="color:var(--green-mid)" title="merged accounts">+ ${p._alts.map(esc).join(', ')}</div>` : '';
+  const bodyRow = r => `<tr>
+      <td><div class="mem-user"><span class="mem-avatar">${esc(memInitials(r.p.full_name))}</span><div><div class="mem-name">${esc(r.p.full_name || '—')}</div><div class="mem-email">${esc(r.p.email || '')}</div>${altLine(r.p)}</div></div></td>
       <td style="color:var(--muted)">${esc(adoCompanyLabel(r.p.company))}</td>
       <td>${adoStagePill(r.stage)}</td>
       <td><span class="ado-rec ${r.rec}">${adoRecLabel(r.rec)}</span></td>
@@ -4200,7 +4264,87 @@ function adoRenderPeople() {
       <td>${r.estWin}</td>
       <td style="color:var(--muted)">${r.p.invites_sent || 0}/${r.p.invite_credits ?? 5}</td>
       <td style="color:var(--muted)">${adoLastActive(r.lastActivity)}</td>
-    </tr>`).join('')}</tbody></table>`;
+      <td><button class="ado-edit-btn" onclick="adoOpenUser('${r.p.id}')">Edit</button></td>
+    </tr>`;
+  const hiddenRow = h => `<tr style="opacity:.5">
+      <td><div class="mem-user"><span class="mem-avatar">${esc(memInitials(h.p.full_name))}</span><div><div class="mem-name">${esc(h.p.full_name || '—')}</div><div class="mem-email">${esc(h.p.email || '')}</div></div></div></td>
+      <td colspan="7" style="color:var(--muted);font-size:12px;font-style:italic">${h.kind === 'excluded' ? 'Excluded from metrics' : 'Merged into ' + esc((h.into && (h.into.full_name || h.into.email)) || '—')}</td>
+      <td><button class="ado-edit-btn" onclick="adoOpenUser('${h.p.id}')">Manage</button></td>
+    </tr>`;
+  wrap.innerHTML = hint + `<table class="mem-table">
+    <thead><tr><th>User</th><th>Company</th><th>Stage ${adoInfo(ADO_STAGE_TIP, 340)}</th><th>Recency</th><th>Tools ${adoInfo(`Distinct tools used in the selected window (${adoWinShort()}). Tool opens, runs, and PDF downloads per tool are on the Tools tab.`, 250)}</th><th>Estimates ${adoInfo(`Deals saved to the Deal Log in the selected window (${adoWinShort()}). Only signed-in saves create estimates — anonymous PDF/copy runs appear on the Tools tab instead.`, 270)}</th><th>Invites</th><th>Last active</th><th>Manage</th></tr></thead>
+    <tbody>${rows.map(bodyRow).join('')}${(adoShowHidden ? adoHidden.map(hiddenRow).join('') : '')}</tbody></table>`;
+}
+
+function adoToggleShowHidden(on) { adoShowHidden = !!on; adoRenderPeople(); }
+
+// ── Edit / exclude / merge a member (LEN-286 admin tools) ────────────────────
+function adoFindProfile(id) { return adoAllProfiles.find(p => p.id === id); }
+function adoCanonId(id) { const byId = {}; adoAllProfiles.forEach(x => byId[x.id] = x); let c = id, s = new Set(); while (byId[c] && byId[c].merged_into && byId[c].merged_into !== c && !s.has(c)) { s.add(c); c = byId[c].merged_into; } return c; }
+
+function adoOpenUser(id) {
+  const p = adoFindProfile(id); if (!p) return;
+  adoUserId = id;
+  document.getElementById('ado-um-who').textContent = p.email || id;
+  document.getElementById('ado-um-name').value = p.full_name || '';
+  document.getElementById('ado-um-company').value = p.company || '';
+  const exc = document.getElementById('ado-um-exclude');
+  exc.checked = !!p.exclude_from_metrics; exc.disabled = adoColsMissing;
+  adoRenderMergeSection(p);
+  document.getElementById('ado-user-modal').style.display = 'flex';
+}
+function adoCloseUser() { document.getElementById('ado-user-modal').style.display = 'none'; adoUserId = null; }
+
+function adoRenderMergeSection(p) {
+  const box = document.getElementById('ado-um-merge');
+  if (adoColsMissing) {
+    box.innerHTML = `<div style="padding-top:14px;border-top:1px solid var(--border);color:var(--amber);font-size:12px">Run <code>supabase/adoption_admin_tools.sql</code> once to enable excluding &amp; merging.</div>`;
+    return;
+  }
+  const merged = adoAllProfiles.filter(x => x.merged_into && x.id !== p.id && adoCanonId(x.id) === p.id);
+  let html = `<div style="padding-top:14px;border-top:1px solid var(--border)"><div class="inv-label" style="margin-top:0">Combine duplicate accounts</div><p class="inv-hint" style="margin:2px 2px 10px">Same person signed in with another email? Merge the duplicate <em>into</em> this profile — their visits &amp; saved deals roll up here and the duplicate stops counting on its own.</p>`;
+  if (merged.length) {
+    html += `<div style="margin-bottom:10px">${merged.map(m => `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;font-size:13px"><span>${esc(m.full_name || m.email || m.id)} <span style="color:var(--muted);font-size:12px">${esc(m.email || '')}</span></span><button class="ado-edit-btn" onclick="adoUnmerge('${m.id}')">Unmerge</button></div>`).join('')}</div>`;
+  }
+  if (p.merged_into) {
+    const into = adoFindProfile(adoCanonId(p.id)) || {};
+    html += `<p style="font-size:12px;color:var(--muted)">This profile is merged into <strong>${esc(into.full_name || into.email || '—')}</strong>. <a href="#" onclick="adoUnmerge('${p.id}');return false" style="color:var(--green-mid)">Unmerge</a></p>`;
+  } else {
+    const cand = adoAllProfiles.filter(x => !x.is_admin && x.id !== p.id && adoCanonId(x.id) === x.id && !x.exclude_from_metrics)
+      .sort((a, b) => (a.full_name || a.email || '').localeCompare(b.full_name || b.email || ''));
+    html += `<div style="display:flex;gap:8px"><select id="ado-um-mergepick" class="inv-input" style="flex:1;margin:0"><option value="">Select an account to merge in…</option>${cand.map(c => `<option value="${c.id}">${esc(c.full_name || c.email || c.id)} — ${esc(c.email || '')}</option>`).join('')}</select><button class="btn-mem-waitlist" style="padding:7px 12px;font-size:12px;white-space:nowrap" onclick="adoMergeInto()">Merge in</button></div>`;
+  }
+  box.innerHTML = html + `</div>`;
+}
+
+async function adoSaveUser() {
+  if (!adoUserId) return;
+  const btn = document.getElementById('ado-um-save'); btn.disabled = true; btn.textContent = 'Saving…';
+  const name = document.getElementById('ado-um-name').value.trim();
+  const company = document.getElementById('ado-um-company').value.trim();
+  const upd = { full_name: name || null, company: company || null };
+  if (!adoColsMissing) upd.exclude_from_metrics = document.getElementById('ado-um-exclude').checked;
+  const { error } = await sb.from('profiles').update(upd).eq('id', adoUserId);
+  btn.disabled = false; btn.textContent = 'Save';
+  if (error) { toast('Save failed: ' + error.message); return; }
+  toast('Member updated'); adoCloseUser(); await loadAdoption();
+}
+
+async function adoMergeInto() {
+  const sec = adoV('ado-um-mergepick'); if (!sec) { toast('Pick an account to merge in'); return; }
+  const secP = adoFindProfile(sec), priP = adoFindProfile(adoUserId);
+  if (!confirm(`Merge "${secP ? (secP.full_name || secP.email) : 'that account'}" INTO "${priP ? (priP.full_name || priP.email) : 'this profile'}"?\n\nTheir visits and saved deals roll up here; they stop counting separately. Reversible.`)) return;
+  const { error } = await sb.from('profiles').update({ merged_into: adoUserId }).eq('id', sec);
+  if (error) { toast('Merge failed: ' + error.message); return; }
+  toast('Accounts merged'); const keep = adoUserId; await loadAdoption();
+  if (keep && adoFindProfile(keep)) adoOpenUser(keep);
+}
+
+async function adoUnmerge(id) {
+  const { error } = await sb.from('profiles').update({ merged_into: null }).eq('id', id);
+  if (error) { toast('Unmerge failed: ' + error.message); return; }
+  toast('Unmerged'); const keep = adoUserId; await loadAdoption();
+  if (keep && adoFindProfile(keep)) adoOpenUser(keep); else adoCloseUser();
 }
 
 function adoRenderCompanies() {
@@ -4226,8 +4370,8 @@ function adoRenderCompanies() {
 function adoRenderTools() {
   const wrap = document.getElementById('ado-table-wrap');
   if (!wrap) return;
-  if (!adoTools.length) { wrap.innerHTML = `<p style="color:var(--muted);font-size:13px">No tool activity in the last ${adoWindow} days.</p>`; return; }
-  wrap.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Per-tool usage in the selected window (${adoWindow}d), anonymous + signed-in, admin activity excluded. Opens = page views · Runs = PDF generated or scenario copied · Downloads = runs that produced a PDF.</p>
+  if (!adoTools.length) { wrap.innerHTML = `<p style="color:var(--muted);font-size:13px">No tool activity ${adoWindow === 'today' ? 'today' : 'in the last ' + adoWindow + ' days'}.</p>`; return; }
+  wrap.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Per-tool usage in the selected window (${adoWinShort()}), anonymous + signed-in, admin activity excluded. Opens = page views · Runs = PDF generated or scenario copied · Downloads = runs that produced a PDF.</p>
   <table class="mem-table">
     <thead><tr><th>Tool</th><th>Opens</th><th>Runs</th><th>PDF downloads</th><th>Anon sessions</th><th>Signed-in users</th><th>Top company</th></tr></thead>
     <tbody>${adoTools.map(t => `<tr>
@@ -4356,11 +4500,11 @@ function adoExportCSV() {
   const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   let headers, body, name;
   if (adoTab === 'tools') {
-    headers = ['Tool', `Opens (${adoWindow}d)`, 'Runs', 'PDF downloads', 'Anon sessions', 'Signed-in users', 'Top company'];
+    headers = ['Tool', `Opens (${adoWinShort()})`, 'Runs', 'PDF downloads', 'Anon sessions', 'Signed-in users', 'Top company'];
     body = adoTools.map(t => [cell(t.label), t.opens, t.runs, t.downloads, t.anonSessions, t.users, cell(t.topCompany)].join(','));
     name = 'lendpaper-tool-usage.csv';
   } else {
-    headers = ['Name', 'Email', 'Company', 'Stage', 'Recency', `Tools (${adoWindow}d)`, `Estimates (${adoWindow}d)`, 'Invites sent', 'Invite credits', 'Last active (days)'];
+    headers = ['Name', 'Email', 'Company', 'Stage', 'Recency', `Tools (${adoWinShort()})`, `Estimates (${adoWinShort()})`, 'Invites sent', 'Invite credits', 'Last active (days)'];
     body = adoPeople.map(r => [
       cell(r.p.full_name), cell(r.p.email), cell(adoCompanyLabel(r.p.company)), cell(r.stage), cell(r.rec),
       r.toolsWin, r.estWin, r.p.invites_sent || 0, r.p.invite_credits ?? 5,
