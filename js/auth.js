@@ -10,9 +10,13 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 // just don't run their own refresh loop. A calculator opened as its OWN top-level page
 // (deep link / bookmark) is window.top, so it keeps autoRefresh and works standalone.
 const inIframe = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+// NOTE (LEN-285): keep the DEFAULT storageKey (sb-<ref>-auth-token). Renaming it
+// would log out every existing user and break the sb-* localStorage scan the
+// LEN-153 landing uses to pick its pre-paint state.
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
+    storage: window.localStorage,
     autoRefreshToken: !inIframe,
     detectSessionInUrl: !inIframe,
   },
@@ -52,7 +56,9 @@ function currentTopPath() {
   return window.location.pathname;
 }
 
-// Call at top of any gated page. Redirects if not logged in or not approved.
+// Call at top of any gated page (Quote Log is the only one left — LEN-285 opened
+// the tools). Redirects if not logged in; denied accounts are the only status
+// still blocked. pending/waitlist statuses are treated as approved (open access).
 async function requireApprovedUser(redirectTo = '/login.html') {
   // Test-only bypass: the QA harness (LEN-129) sets this window flag via
   // addInitScript so gated pages render headless. Never set in production —
@@ -66,13 +72,8 @@ async function requireApprovedUser(redirectTo = '/login.html') {
     navTop(redirectTo);
     return null;
   }
-  if (profile.status === 'pending') {
-    navTop('/pending.html');
-    return null;
-  }
-  if (profile.status === 'denied' || profile.status === 'waitlist') {
-    // denied.html is intentionally unrouted — both land on the waitlist soft landing
-    navTop('/waitlist.html');
+  if (profile.status === 'denied') {
+    navTop('/denied.html');
     return null;
   }
   // Update last_seen
@@ -82,6 +83,19 @@ async function requireApprovedUser(redirectTo = '/login.html') {
     .eq('id', profile.id);
   return profile;
 }
+
+// Open-access companion to requireApprovedUser: resolves the logged-in user (or
+// the full profile via getProfile) WITHOUT ever redirecting or throwing. Tool
+// pages call this to decorate the UI for signed-in users; visitors get null.
+async function getOptionalUser() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.user || null;
+  } catch (e) {
+    return null; // never block or throw — open pages must always render
+  }
+}
+if (typeof window !== 'undefined') window._lpGetOptionalUser = getOptionalUser;
 
 // Log a tool usage event
 async function logUsage(tool, event = 'view') {
@@ -99,4 +113,4 @@ async function signOut() {
   navTop('/index.html');
 }
 
-export { supabase, getSession, getProfile, requireApprovedUser, logUsage, signOut };
+export { supabase, getSession, getProfile, requireApprovedUser, getOptionalUser, logUsage, signOut };
