@@ -1975,9 +1975,25 @@ document.addEventListener('click',e=>{ const r=document.getElementById('indRes')
   if(r&&r.classList.contains('open')&&!e.target.closest('.field')&&!S.indEditing){ /* keep */ }
 });
 
+// "Try a sample deal" (LEN-287): the anonymous home desk sets this flag so a
+// first-time visitor sees real output in one click. Consume-then-clear so a
+// refresh doesn't re-seed over the user's own edits.
+function seedSampleDeal(){
+  let flag=null;
+  try{ flag=sessionStorage.getItem('lp_deal_read_sample'); }catch(e){ return; }
+  if(flag!=='1') return;
+  try{ sessionStorage.removeItem('lp_deal_read_sample'); }catch(e){}
+  S.selected='811111'; S.q='';                       // General Automotive Repair
+  S.fico=680; S.tib=36; S.tibUnit='mo'; S.rev=85000; S.reqAmt=150000;
+  S.state='IL'; S.stateConfirmed=true; S.fundBy='2-4w';
+  S.prep={by:'',company:'',forr:'Funded-by-Friday Auto Group'};
+  save();
+}
+
 // ── boot ──────────────────────────────────────────────────────
 function boot(){
   load();
+  seedSampleDeal();
   if(S.selected && !NAICS_DB.find(n=>n.c===S.selected)) S.selected=null;
   document.body.dataset.mode=S.mode;
   document.querySelectorAll('#modeseg button').forEach(b=>b.classList.toggle('on',b.dataset.mode===S.mode));

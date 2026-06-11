@@ -129,6 +129,11 @@
       if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1 && localStorage.getItem(k)) { hasSession = true; break; }
     }
     if (!hasSession && !onToolRoute) document.documentElement.classList.add('pre-landing');
+    // LEN-287: logged-out visitors who DO reach the app shell (tool routes, or
+    // navigating Home from a tool) get the anonymous tool desk — same page,
+    // personalization chrome stripped. Sync hint avoids a personalized flash;
+    // initTopbarAuth reconciles once the real session resolves.
+    if (!hasSession) document.documentElement.classList.add('lp-anon');
   } catch(e){}
 })();
 </script>
@@ -1157,44 +1162,9 @@ input { font-family: inherit; }
   background: rgba(212, 160, 23, 0.03) !important;
 }
 
-/* ==================== Suggest Widget ==================== */
-#suggest-btn {
-  position: fixed; bottom: 24px; right: 24px; z-index: 500;
-  display: flex; align-items: center; gap: 7px;
-  padding: 9px 16px 9px 12px;
-  background: var(--accent); color: #fff;
-  border: none; border-radius: 999px; cursor: pointer;
-  font-family: var(--font); font-size: 13px; font-weight: 600;
-  box-shadow: 0 4px 14px rgba(26,60,46,0.35);
-  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
-  user-select: none;
-}
-#suggest-btn:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(26,60,46,0.4); }
-#suggest-btn svg { flex-shrink: 0; }
-
-#suggest-panel {
-  position: fixed; bottom: 72px; right: 24px; z-index: 499;
-  width: 320px; background: var(--bg); border: 1.5px solid var(--border);
-  border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.12);
-  padding: 20px; display: none; flex-direction: column; gap: 14px;
-  animation: suggestIn 220ms cubic-bezier(0.16,1,0.3,1) both;
-}
-#suggest-panel.open { display: flex; }
-@keyframes suggestIn {
-  from { opacity: 0; transform: translateY(10px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.suggest-header {
-  display: flex; justify-content: space-between; align-items: flex-start;
-}
-.suggest-header h3 { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; }
-.suggest-close {
-  background: none; border: none; cursor: pointer; padding: 0; margin: -2px -2px 0 0;
-  color: var(--text-faint); font-size: 18px; line-height: 1;
-  transition: color var(--transition);
-}
-.suggest-close:hover { color: var(--text); }
-.suggest-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+/* ==================== Suggest-style form fields ====================
+   The floating Suggest FAB was removed (LEN-287, waterfall keeps its own
+   lp-fab) — these field styles remain for the glossary propose-a-term form. */
 .suggest-field { display: flex; flex-direction: column; gap: 5px; }
 .suggest-field label { font-size: 11.5px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.02em; }
 .suggest-field textarea,
@@ -1211,21 +1181,6 @@ input { font-family: inherit; }
 .suggest-field select:focus { border-color: var(--accent); }
 .suggest-field textarea::placeholder,
 .suggest-field input::placeholder { color: var(--text-faint); }
-#suggest-submit {
-  width: 100%; padding: 9px; background: var(--accent); color: #fff;
-  border: none; border-radius: var(--radius-sm); font-family: var(--font);
-  font-size: 13px; font-weight: 600; cursor: pointer;
-  transition: background var(--transition); margin-top: 2px;
-}
-#suggest-submit:hover:not(:disabled) { background: var(--accent-hover); }
-#suggest-submit:disabled { opacity: 0.6; cursor: default; }
-#suggest-success {
-  display: none; flex-direction: column; gap: 6px; text-align: center;
-  padding: 10px 0;
-}
-#suggest-success p { font-size: 13.5px; font-weight: 700; color: var(--text); }
-#suggest-success span { font-size: 12px; color: var(--text-muted); }
-#suggest-error { display: none; font-size: 12px; color: var(--danger); margin-top: -6px; }
 </style>
 <!-- Landing styles in their own sheet: the main sheet above has a pre-existing unclosed @media that auto-closes at the sheet boundary and would otherwise swallow these rules (LEN-153). -->
 <style id="lp-landing-css">
@@ -1236,9 +1191,6 @@ input { font-family: inherit; }
 #landing { display: none; }
 html.pre-landing .shell { display: none !important; }
 html.pre-landing #landing { display: flex; }
-/* Hide app-only fixed widgets (Suggest FAB + panel) on the logged-out landing. */
-html.pre-landing #suggest-btn,
-html.pre-landing #suggest-panel { display: none !important; }
 #landing {
   position: fixed; inset: 0; z-index: 60;
   flex-direction: column;
@@ -1321,6 +1273,18 @@ html.pre-landing #suggest-panel { display: none !important; }
   .lp-land-cta { width: 100%; }
   .lp-land-btn { flex: 1; justify-content: center; }
 }
+</style>
+<style id="lp-anon-css">
+/* Anonymous tool desk (LEN-287) — additions only; the logged-in dashboard is untouched. */
+.home-divider { height: 1px; background: var(--border); margin: 26px 0 18px; }
+.featured-card-cta {
+  align-self: flex-start; margin: 2px 0 10px;
+  background: none; border: 1px solid rgba(26,60,46,0.22); border-radius: 999px;
+  padding: 6px 13px; font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: var(--accent); cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+.featured-card-cta:hover { background: var(--accent-soft); border-color: rgba(26,60,46,0.4); }
 </style>
 </head>
 <body>
@@ -1653,47 +1617,6 @@ html.pre-landing #suggest-panel { display: none !important; }
   </div>
 </div>
 
-<!-- Suggest Widget -->
-<button id="suggest-btn" aria-label="Suggest a tool">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-  Suggest
-</button>
-<div id="suggest-panel" role="dialog" aria-label="Suggest a tool">
-  <div class="suggest-header">
-    <div>
-      <h3>What should we build next?</h3>
-      <p class="suggest-sub">Early feedback shapes what ships.</p>
-    </div>
-    <button class="suggest-close" id="suggest-close" aria-label="Close">×</button>
-  </div>
-  <form id="suggest-form" style="display:flex;flex-direction:column;gap:12px;">
-    <div class="suggest-field">
-      <label for="suggest-idea">Your idea</label>
-      <textarea id="suggest-idea" name="idea" placeholder="Describe it in your own words…" required></textarea>
-    </div>
-    <div class="suggest-field">
-      <label for="suggest-role">Your role</label>
-      <select id="suggest-role" name="role">
-        <option value="">Select your role</option>
-        <option value="Broker">Broker</option>
-        <option value="Loan Officer">Loan Officer</option>
-        <option value="Lender">Lender</option>
-        <option value="Other">Other</option>
-      </select>
-    </div>
-    <div class="suggest-field">
-      <label for="suggest-email">Your email <span style="font-weight:400;color:var(--text-faint)">(I'll reply personally)</span></label>
-      <input id="suggest-email" name="email" type="email" placeholder="you@example.com">
-    </div>
-    <span id="suggest-error">Something went wrong — try again.</span>
-    <button type="submit" id="suggest-submit">Send it →</button>
-  </form>
-  <div id="suggest-success">
-    <p>Got it.</p>
-    <span>I read every one of these.</span>
-  </div>
-</div>
-
 <!-- Modal Structure -->
 <div id="lp-modal-overlay" onclick="closeModal()">
     <div id="lp-modal-container" onclick="event.stopPropagation()">
@@ -1778,12 +1701,22 @@ html.pre-landing #suggest-panel { display: none !important; }
       // when they arrive on a tool route (LEN-285).
       window.LP_FIRST_NAME = null;
       try { localStorage.removeItem('lp_first_name'); } catch (e) {}
-      if (window.refreshGreetingName) window.refreshGreetingName();
+      // Anonymous tool desk (LEN-287) — reconcile in case the sync hint was stale.
+      if (!_html.classList.contains('lp-anon')) {
+        _html.classList.add('lp-anon');
+        if (window.rerenderHomeAuth) window.rerenderHomeAuth();
+      } else if (window.refreshGreetingName) {
+        window.refreshGreetingName();
+      }
       // Minimalist brand landing on the bare home view (tool deep-links still route).
       if (!_isToolRoute()) _showLanding();
       return; // leave "Sign in" button visible
     }
     _hideLanding(); // Logged in → reconcile to the dashboard (covers a stale sync hint).
+    if (_html.classList.contains('lp-anon')) {
+      _html.classList.remove('lp-anon');
+      if (window.rerenderHomeAuth) window.rerenderHomeAuth();
+    }
     // Logged in: swap to the account control.
     let label = session.user && session.user.email ? session.user.email : 'Account';
     let realName = null; // a human name, never the email
@@ -2139,10 +2072,34 @@ function getContextualGreeting() {
   return "Working late.";
 }
 
+// LEN-287: anonymous tool desk — true when no session. Class is set synchronously
+// by the head pre-paint hint and reconciled by initTopbarAuth once auth resolves.
+function lpIsAnon() { return document.documentElement.classList.contains('lp-anon'); }
+// Called by initTopbarAuth when the resolved auth state disagrees with the hint.
+window.rerenderHomeAuth = function () {
+  try { updateGreeting(); renderHome(); } catch (e) {}
+};
+
+// "Try a sample deal" (LEN-287): flag consumed by deal-read's boot() — it seeds a
+// realistic input set so a first-time visitor sees real output in one click.
+window.openSampleDeal = function (e) {
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  try { sessionStorage.setItem('lp_deal_read_sample', '1'); } catch (err) {}
+  var t = TOOLS.find(function (x) { return x.id === 'deal-read'; });
+  if (t) openTool(t, true); else window.location.href = '/tools/deal-read';
+};
+
 function updateGreeting() {
   var gt = document.getElementById('greetingText');
   var gs = document.getElementById('greetingSubtitle');
   if (!gt) return;
+
+  // Anonymous tool desk (LEN-287): one static line, zero personalization.
+  if (lpIsAnon()) {
+    gt.textContent = 'Pick a tool and start. No account needed.';
+    if (gs) gs.style.display = 'none';
+    return;
+  }
 
   // Personalized hook (LEN-164) — only when we know the first name and this
   // session was picked for it; otherwise fall through to the contextual greeting.
@@ -2317,10 +2274,15 @@ function featuredCardHTML(t, i, isPrimary, primaryLabel) {
   var label = isPrimary ? (primaryLabel || 'Most used') : (featuredLabels[t.id] || '');
   var iconCls = t.color === 'green' ? 'green' : '';
   var delayStyle = isPrimary ? '' : ' style="animation-delay:'+(i*80)+'ms"';
+  // Anonymous desk (LEN-287): Deal Analysis carries a one-click sample-deal CTA.
+  var sampleCta = (lpIsAnon() && t.id === 'deal-read')
+    ? '<button type="button" class="featured-card-cta" onclick="openSampleDeal(event)">Try a sample deal →</button>'
+    : '';
   return '<a'+href+target+' class="'+cls+'"'+onclick+delayStyle+'>'
     +'<div class="featured-card-icon '+iconCls+'">'+ICO[t.icon]+'</div>'
     +'<div class="featured-card-name">'+t.name+'</div>'
     +'<div class="featured-card-desc">'+t.desc+'</div>'
+    +sampleCta
     +'<div class="featured-card-foot">'
     +(label ? '<span class="featured-card-label">'+label+' →</span>' : '<span></span>')
     +'<span class="featured-card-arrow">'+ICO.arrow+'</span>'
@@ -2351,7 +2313,10 @@ function customizePanelHTML() {
 }
 
 function renderHome() {
-  var featuredIds = resolveFeaturedIds();
+  // Anonymous tool desk (LEN-287): same page, personalization layer off — fixed
+  // top trio, no Resume chip, no "Your tools"/Customize, no "More Tools" label.
+  var anon = lpIsAnon();
+  var featuredIds = anon ? ['amo', 'deal-read', 'dscr'] : resolveFeaturedIds();
   var featured = featuredIds.map(function(id){ return TOOLS.find(function(x){ return x.id === id; }); }).filter(Boolean);
   var isRef = function(t){ return REFERENCE_IDS.indexOf(t.id) !== -1; };
   // Tools kept off the home dashboard (Deal Log has its own sidebar home; SBA Fees
@@ -2363,7 +2328,7 @@ function renderHome() {
 
   // "Resume where you left off" — only after the user has opened a (still-live) tool.
   var lastId = '';
-  try { lastId = localStorage.getItem(LP_LAST_TOOL_KEY) || ''; } catch (e) {}
+  try { lastId = anon ? '' : (localStorage.getItem(LP_LAST_TOOL_KEY) || ''); } catch (e) {}
   var lastTool = lastId ? TOOLS.find(function(x){ return x.id === lastId && x.status === 'live'; }) : null;
   if (lastTool) {
     html += '<button type="button" class="resume-chip" onclick="handleToolClick(event, \''+lastTool.id+'\')">'
@@ -2371,19 +2336,21 @@ function renderHome() {
           + ' <span class="resume-chip-arrow">&rarr;</span></button>';
   }
 
-  html += '<div class="featured-head">'
-        + '<span class="featured-head-label">Your tools</span>'
-        + '<button type="button" class="customize-btn" onclick="toggleCustomize()">'
-        + (customizeOpen ? 'Done' : 'Customize') + '</button></div>';
-  if (customizeOpen) html += customizePanelHTML();
+  if (!anon) {
+    html += '<div class="featured-head">'
+          + '<span class="featured-head-label">Your tools</span>'
+          + '<button type="button" class="customize-btn" onclick="toggleCustomize()">'
+          + (customizeOpen ? 'Done' : 'Customize') + '</button></div>';
+    if (customizeOpen) html += customizePanelHTML();
+  }
 
-  var pLabel = primaryFeaturedLabel(featuredIds[0]);
+  var pLabel = anon ? 'Start here' : primaryFeaturedLabel(featuredIds[0]);
   html += '<div class="featured-grid">';
   featured.forEach(function(t, i){ html += featuredCardHTML(t, i, i === 0, pLabel); });
   html += '</div>';
 
   if (liveRest.length) {
-    html += '<div class="home-section-label">More Tools</div><div class="live-tools-grid">';
+    html += (anon ? '<div class="home-divider"></div>' : '<div class="home-section-label">More Tools</div>') + '<div class="live-tools-grid">';
     liveRest.forEach(function(t, i){ html += cardHTML(t, i); });
     html += '</div>';
   }
@@ -3149,70 +3116,6 @@ document.addEventListener('keydown', (e) => {
   }
   
   setInterval(drawFavicon, 50); // ~20 FPS for perfect lightweight motion
-})();
-
-/* ---- Suggest Widget ---- */
-(function() {
-  var FORMSPREE_ID = 'YOUR_FORMSPREE_ID'; // Replace with ID from formspree.io
-
-  var btn   = document.getElementById('suggest-btn');
-  var panel = document.getElementById('suggest-panel');
-  var form  = document.getElementById('suggest-form');
-  var successEl = document.getElementById('suggest-success');
-  var errorEl   = document.getElementById('suggest-error');
-  var submitBtn = document.getElementById('suggest-submit');
-
-  btn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    panel.classList.toggle('open');
-  });
-
-  document.addEventListener('click', function(e) {
-    if (panel.classList.contains('open') && !panel.contains(e.target) && e.target !== btn) {
-      panel.classList.remove('open');
-    }
-  });
-
-  document.getElementById('suggest-close').addEventListener('click', function() {
-    panel.classList.remove('open');
-  });
-
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    errorEl.style.display = 'none';
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending…';
-
-    var data = new FormData(form);
-    fetch('https://formspree.io/f/' + FORMSPREE_ID, {
-      method: 'POST',
-      body: data,
-      headers: { 'Accept': 'application/json' }
-    }).then(function(res) {
-      if (res.ok) {
-        form.style.display = 'none';
-        successEl.style.display = 'flex';
-        setTimeout(function() {
-          panel.classList.remove('open');
-          setTimeout(function() {
-            form.reset();
-            form.style.display = 'flex';
-            successEl.style.display = 'none';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Send it →';
-          }, 400);
-        }, 2800);
-      } else {
-        errorEl.style.display = 'block';
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Send it →';
-      }
-    }).catch(function() {
-      errorEl.style.display = 'block';
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Send it →';
-    });
-  });
 })();
 
 renderHome();
