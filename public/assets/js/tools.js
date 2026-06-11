@@ -1,16 +1,21 @@
 /**
  * LendPaper Tool Registry
  * Single source of truth for all calculators and tools.
+ *
+ * Array order is render order within each category (see renderCat). Deal math is
+ * laid out as a 2×3 grid, so its six entries are ordered row-major (LEN-298):
+ *   Row 1: Amortization · Deal Analysis · Payment Fit
+ *   Row 2: Position & Net · DSCR · SBA Fees
  */
 
 var TOOLS = [
-  { 
-    id: "amo", 
+  {
+    id: "amo",
     name: "Amortization",
     desc: "Full payment schedule with pre-pay & buyout scenarios.",
-    status: "live", 
-    group: "deal-math", 
-    icon: "chart", 
+    status: "live",
+    group: "deal-math",
+    icon: "chart",
     color: "green",
     slug: "/tools/payment-breakdown",
     presentation: "page",
@@ -43,14 +48,53 @@ var TOOLS = [
     path: "/calculators/AffordabilityCalculator.html",
     kw: "payment fit affordability roi break even payment load deposits cash cushion qualify borrower upside net"
   },
+  {
+    id: "fundability",
+    name: "Position & Net",
+    desc: "Combined net requirement and stacking risk assessment.",
+    status: "live",
+    group: "deal-math",
+    icon: "stack",
+    color: "green",
+    slug: "/tools/fundability",
+    presentation: "page",
+    path: "/calculators/FundabilityCalculator.html",
+    kw: "net funding wire origination fundability stacking risk positions"
+  },
+  {
+    id: "dscr",
+    name: "DSCR",
+    desc: "Debt service coverage ratio and payment-to-revenue benchmarking.",
+    status: "live",
+    group: "deal-math",
+    icon: "refresh",
+    color: "green",
+    slug: "/tools/dscr",
+    presentation: "page",
+    path: "/calculators/DSCRCalculator.html",
+    kw: "coverage dscr ratio revenue bank statement underwriting"
+  },
+  {
+    id: "sba-rates",
+    name: "SBA Fees",
+    desc: "Dynamic SBA 7(a) guarantee-fee & rate scenarios.",
+    status: "live",
+    group: "deal-math",
+    icon: "flag",
+    color: "green",
+    slug: "/tools/sba-fees",
+    presentation: "page",
+    path: "/calculators/SBAFeesCalculator.html",
+    kw: "sba fees rates scenario builder 7a guarantee packaging search closing"
+  },
   /*
   {
     id: "verifier",
-    name: "Business Verifier", 
+    name: "Business Verifier",
     desc: "Verify business entity details, residential status, and D&B credentials.",
-    status: "live", 
-    group: "risk", 
-    icon: "search", 
+    status: "live",
+    group: "risk",
+    icon: "search",
     color: "green",
     slug: "/tools/verifier",
     presentation: "page",
@@ -58,9 +102,9 @@ var TOOLS = [
     kw: "business entity verification address check dnb registry underwriting"
   },
   */
-  { 
-    id: "registry", 
-    name: "Secretary of State Search", 
+  {
+    id: "registry",
+    name: "Secretary of State Search",
     desc: "Search public business records and UCC filings.",
     status: "live",
     group: "risk",
@@ -72,18 +116,20 @@ var TOOLS = [
     target: "_blank",
     kw: "ucc lookup search public records registry route"
   },
+  // NAICS Search retired as a standalone tool — NAICS lookup now lives inside
+  // Deal Analysis (search any industry or 6-digit code, with restricted-industry flags).
   {
-    id: "dscr",
-    name: "DSCR",
-    desc: "Debt service coverage ratio and payment-to-revenue benchmarking.",
+    id: "legislation",
+    name: "Compliance Desk",
+    desc: "State + federal commercial financing disclosure law, mapped. Know where disclosure rules bite.",
     status: "live",
     group: "risk",
-    icon: "refresh",
+    icon: "flag",
     color: "green",
-    slug: "/tools/dscr",
+    slug: "/compliance",
     presentation: "page",
-    path: "/calculators/DSCRCalculator.html",
-    kw: "coverage dscr ratio revenue bank statement underwriting"
+    path: "/legislation.html",
+    kw: "legislation law regulation disclosure commercial financing state federal cfpb 1071 cfdl map tracker compliance bill statute"
   },
   {
     id: "waterfall",
@@ -110,47 +156,6 @@ var TOOLS = [
     presentation: "external",
     path: "/quote-log",
     kw: "deal log estimate log saved deals history quote"
-  },
-  {
-    id: "fundability",
-    name: "Position & Net",
-    desc: "Combined net requirement and stacking risk assessment.",
-    status: "live",
-    group: "deal-math",
-    icon: "stack",
-    color: "green",
-    slug: "/tools/fundability",
-    presentation: "page",
-    path: "/calculators/FundabilityCalculator.html",
-    kw: "net funding wire origination fundability stacking risk positions"
-  },
-  {
-    id: "sba-rates",
-    name: "SBA Fees",
-    desc: "Dynamic SBA 7(a) guarantee-fee & rate scenarios.",
-    status: "live",
-    group: "deal-math",
-    icon: "flag",
-    color: "green",
-    slug: "/tools/sba-fees",
-    presentation: "page",
-    path: "/calculators/SBAFeesCalculator.html",
-    kw: "sba fees rates scenario builder 7a guarantee packaging search closing"
-  },
-  // NAICS Search retired as a standalone tool — NAICS lookup now lives inside
-  // Deal Analysis (search any industry or 6-digit code, with restricted-industry flags).
-  {
-    id: "legislation",
-    name: "Compliance Desk",
-    desc: "State + federal commercial financing disclosure law, mapped. Know where disclosure rules bite.",
-    status: "live",
-    group: "risk",
-    icon: "flag",
-    color: "green",
-    slug: "/compliance",
-    presentation: "page",
-    path: "/legislation.html",
-    kw: "legislation law regulation disclosure commercial financing state federal cfpb 1071 cfdl map tracker compliance bill statute"
   },
 ];
 

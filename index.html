@@ -22,9 +22,9 @@
 <meta charset="UTF-8">
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2026.06.11.0003">
+<meta name="version" content="2026.06.11.0004">
 <script type="text/javascript">
-  window.CURRENT_VERSION = "2026.06.11.0003";
+  window.CURRENT_VERSION = "2026.06.11.0004";
 
   // Force active cleanup of legacy service workers
   if ('serviceWorker' in navigator) {
@@ -396,6 +396,9 @@ input { font-family: inherit; }
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 10px;
 }
+/* LEN-298: Deal math is a fixed 2×3 grid so all six cards stay visible without
+   horizontal scroll. Collapses to 2 cols, then 1, on narrower viewports. */
+#dealMathCards .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 .card {
   display: flex; align-items: center; gap: 14px;
@@ -882,6 +885,7 @@ input { font-family: inherit; }
   .g-item { grid-template-columns: 1fr; }
   .g-term { border-right: none; border-bottom: 1px solid var(--border); padding: 10px 16px 4px; }
   .g-def { padding: 4px 16px 12px; }
+  #dealMathCards .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 768px) {
@@ -896,6 +900,7 @@ input { font-family: inherit; }
   .content { padding: 20px 16px 48px; }
   .topbar { padding: 0 16px; }
   .cards { grid-template-columns: 1fr; }
+  #dealMathCards .cards { grid-template-columns: 1fr; }
   .glossary-controls { gap: 2px; }
   .letter-btn { width: 24px; height: 28px; font-size: 11px; }
 }
@@ -1637,7 +1642,7 @@ html.pre-landing #landing { display: flex; }
 </div>
 
 <!-- External Data -->
-<script src="public/assets/js/tools.js?v=2026.06.10.0001"></script>
+<script src="public/assets/js/tools.js?v=2026.06.11.0004"></script>
 <!-- Auth state for topbar control (hard-gate login, LEN-68). config.js sets SUPABASE_* globals the auth module reads. -->
 <script src="js/config.js"></script>
 <script type="module">
@@ -1777,13 +1782,10 @@ function cardHTML(t, i) {
   // LEN-285: roadmap teaser tiles (soon/inquire) removed — every tile is a live tool.
   var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
   var cls = 'card' + (t.id === 'amo' ? ' card-amo-glisten' : '') + (isViewed(t.id) ? ' is-viewed' : '');
-  var pillCls = t.status==='new' ? 'pill-new' : 'pill-live';
-  var pillTxt = t.status==='new' ? 'New' : 'Live';
 
-  var metaHTML = '<span class="pill '+pillCls+'">'+pillTxt+'</span>';
-  if (t.isPaid) {
-    metaHTML += '<span class="pill pill-paid" style="margin-left: 4px;">Paid</span>';
-  }
+  // LEN-298: LIVE/New status badge removed sitewide — all tools are live, so it
+  // carried no signal. Paid tools still flag (none today, logic kept for later).
+  var metaHTML = t.isPaid ? '<span class="pill pill-paid">Paid</span>' : '';
 
   return '<a href="'+t.slug+'"'+target+' class="'+cls+'" onclick="handleToolClick(event, \''+t.id+'\')" data-id="'+t.id+'" data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
     +'<div class="card-icon '+t.color+'">'+ICO[t.icon]+'</div>'
