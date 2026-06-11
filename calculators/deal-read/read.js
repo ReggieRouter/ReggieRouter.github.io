@@ -658,15 +658,7 @@ function fileReadHTML(d){
   }
   return `<div class="file-read"><div class="fr-eyebrow eyebrow">The file at a glance</div><div class="fr-rows">${rows.join('')}</div>${thin}</div>`;
 }
-// Underwriter mode is not built yet — clicking the toggle shows a "coming soon"
-// note and never switches mode (LEN-155, Steve).
-function underwriterSoon(btn){
-  let pop=document.getElementById('uwSoonPop');
-  if(!pop){ pop=document.createElement('div'); pop.id='uwSoonPop'; pop.className='soon-pop'; pop.textContent='Coming soon'; document.body.appendChild(pop); }
-  try{ const r=btn.getBoundingClientRect(); pop.style.top=(r.bottom+9)+'px'; pop.style.left=(r.left+r.width/2)+'px'; }catch(e){}
-  pop.classList.add('show');
-  clearTimeout(window._soonT); window._soonT=setTimeout(()=>{ pop.classList.remove('show'); },1700);
-}
+// Underwriter mode toggle removed (LEN-285) — it was an unbuilt-feature teaser.
 function openUWSource(key){
   const f=UW_FIELDS.find(x=>x.key===key); if(!f) return;
   S.modal='uwsrc';

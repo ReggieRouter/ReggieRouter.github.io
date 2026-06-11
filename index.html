@@ -269,21 +269,6 @@ input { font-family: inherit; }
   text-align: center;
 }
 .nav-item.active .nav-count { background: rgba(16, 185, 129, 0.15); color: var(--accent-hover); }
-/* LEN-170: sidebar "soon" inquire items (UCC leads, marketing automation) */
-.nav-item-soon { opacity: 0.62; }
-.nav-item-soon:hover { opacity: 1; }
-.nav-soon {
-  margin-left: auto;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  background: var(--bg-alt);
-  border-radius: 99px;
-  padding: 2px 7px;
-}
-
 .sidebar-footer {
   margin-top: auto;
   padding: 16px 20px;
@@ -443,7 +428,6 @@ input { font-family: inherit; }
   text-transform: uppercase; padding: 3px 8px; border-radius: 99px; white-space: nowrap;
 }
 .pill-live { background: var(--accent-soft); color: var(--accent-hover); }
-.pill-soon { background: var(--bg-alt); color: var(--text-faint); border: 1px solid var(--border); }
 .pill-new  { background: var(--warning-soft); color: #92400E; }
 .pill-paid { background: #FFFBEB; color: #92400E; border: 1px solid #FCD34D; }
 
@@ -1074,9 +1058,6 @@ input { font-family: inherit; }
 /* ==================== Live tools grid (2-col) ==================== */
 .live-tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 28px; }
 
-/* ==================== Coming soon grid (3-col) ==================== */
-.soon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-
 /* ==================== Resume chip (LEN-51: pick up where you left off) ==================== */
 .resume-chip {
   display: inline-flex; align-items: center; gap: 7px;
@@ -1113,10 +1094,9 @@ input { font-family: inherit; }
 
 @media (max-width: 900px) {
   .featured-grid { grid-template-columns: repeat(2, 1fr); }
-  .soon-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
-  .featured-grid, .live-tools-grid, .soon-grid { grid-template-columns: 1fr; }
+  .featured-grid, .live-tools-grid { grid-template-columns: 1fr; }
 }
 /* ==================== Category Pills & Highlights ==================== */
 .category-pills {
@@ -1862,33 +1842,28 @@ const randomTagline = taglines[Math.floor(Math.random() * taglines.length)];
 
 /* ---- Render ---- */
 function cardHTML(t, i) {
-  var dis = t.status === 'soon' || t.status === 'inquire';
-  var tag = dis ? 'div' : 'a';
-  var href = dis ? '' : ' href="'+t.slug+'"';
+  // LEN-285: roadmap teaser tiles (soon/inquire) removed — every tile is a live tool.
   var target = t.target ? ' target="'+t.target+'" rel="noopener"' : '';
-  var cls = 'card' + (dis ? ' is-disabled' : '') + (t.id === 'amo' ? ' card-amo-glisten' : '')
-          + (!dis && isViewed(t.id) ? ' is-viewed' : '');
-  var pillCls = t.status==='live' ? 'pill-live' : t.status==='new' ? 'pill-new' : (t.status==='soon'||t.status==='inquire') ? 'pill-soon' : '';
-  var pillTxt = t.status==='live' ? 'Live' : t.status==='new' ? 'New' : t.status==='soon' ? 'Soon' : t.status==='inquire' ? 'Inquire' : '';
-  
-  var onclick = dis ? ' onclick="openFeatureRequest(\''+t.id+'\',\''+t.name+'\')"' : ' onclick="handleToolClick(event, \''+t.id+'\')"';
+  var cls = 'card' + (t.id === 'amo' ? ' card-amo-glisten' : '') + (isViewed(t.id) ? ' is-viewed' : '');
+  var pillCls = t.status==='new' ? 'pill-new' : 'pill-live';
+  var pillTxt = t.status==='new' ? 'New' : 'Live';
 
   var metaHTML = '<span class="pill '+pillCls+'">'+pillTxt+'</span>';
   if (t.isPaid) {
     metaHTML += '<span class="pill pill-paid" style="margin-left: 4px;">Paid</span>';
   }
 
-  return '<'+tag+href+target+' class="'+cls+'" '+onclick+' data-id="'+t.id+'" data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
+  return '<a href="'+t.slug+'"'+target+' class="'+cls+'" onclick="handleToolClick(event, \''+t.id+'\')" data-id="'+t.id+'" data-kw="'+t.kw+' '+t.name.toLowerCase()+'" style="animation-delay:'+(i*40)+'ms">'
     +'<div class="card-icon '+t.color+'">'+ICO[t.icon]+'</div>'
     +'<div class="card-body"><div class="card-name">'+t.name+'</div><div class="card-desc">'+t.desc+'</div></div>'
     +'<div class="card-meta">'+metaHTML
-    +(dis?'':'<span class="card-arrow">'+ICO.arrow+'</span>')
-    +'</div></'+tag+'>';
+    +'<span class="card-arrow">'+ICO.arrow+'</span>'
+    +'</div></a>';
 }
 
 function handleToolClick(e, id) {
   var t = TOOLS.find(function(x){ return x.id === id; });
-  if (!t || t.status === 'soon' || t.status === 'inquire') return;
+  if (!t) return;
   if (t.presentation === 'external') { recordToolUsage(id); return; } // count the visit, then let the link open
 
   e.preventDefault();
@@ -2412,8 +2387,7 @@ function renderHome() {
     html += '</div>';
   }
 
-  // LEN-170: no dedicated "Coming Soon" section on the home page — soon/inquire
-  // tiles live within their category panels; clicking one opens the inquire modal.
+  // LEN-285: roadmap teaser tiles removed entirely — the grid only ever shows live tools.
 
   document.getElementById('homeTools').innerHTML = html;
 

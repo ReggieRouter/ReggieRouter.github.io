@@ -1089,11 +1089,6 @@ select.uw-ctrl{cursor:pointer}
 .intro-x{position:absolute;top:8px;right:9px;background:none;border:none;color:rgba(255,255,255,.7);font-size:17px;cursor:pointer;line-height:1;padding:2px 6px;border-radius:5px}
 .intro-x:hover{background:rgba(255,255,255,.16);color:#fff}
 
-/* ════════ "Coming soon" tooltip (Underwriter mode) ════════ */
-.soon-pop{position:fixed;transform:translateX(-50%) translateY(-4px);background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:6px 11px;border-radius:7px;z-index:200;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;white-space:nowrap}
-.soon-pop.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.soon-pop::after{content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-bottom-color:var(--ink)}
-
 /* ════════ Short-Term Financing (LEN-162) ════════ */
 .kn-sub{font-size:10.5px;font-weight:600;color:var(--muted);margin:-3px 0 8px}
 .stf-split{font-size:12.5px;line-height:1.55;color:var(--ink-2)}
@@ -1120,12 +1115,10 @@ select.uw-ctrl{cursor:pointer}
     <div class="tt-main">Deal Analysis</div>
     <div class="tt-sub">Four-Factor Underwriting Engine</div>
   </div>
-  <div class="top-right">
-    <div class="modeseg" id="modeseg">
-      <button data-mode="broker" class="on" onclick="setMode('broker')"><span class="dot"></span>Sales rep</button>
-      <button data-mode="underwriter" onclick="underwriterSoon(this)"><span class="dot"></span>Underwriter</button>
-    </div>
-  </div>
+  <!-- Mode segment removed (LEN-285): Underwriter was an unbuilt-feature teaser; the
+       calc runs in its one shipped mode (body[data-mode=broker]). Empty spacer keeps
+       the 1fr/auto/1fr header grid balanced so the title stays centered. -->
+  <div class="top-right" aria-hidden="true"></div>
 </header>
 
 <main class="sheet">
