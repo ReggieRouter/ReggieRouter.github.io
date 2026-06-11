@@ -269,28 +269,33 @@
         } else if (hasToken) {
           showRecovery('token_no_session', 'token_not_stored', 'Token arrived but the session could not be stored.');
         } else {
-          showRecovery('no_credentials', 'no_credentials', 'Arrived without credentials — the sign-in redirect dropped them (no code or access_token in URL).');
+          // Direct visit (bookmark / back button) with no OAuth flow in progress —
+          // nothing to recover from, just go home. LEN-285.
+          window.location.href = '/index.html';
         }
       } else {
-        // Success — clear the stash and route by profile status.
+        // Success — clear the stash and route. Open access (LEN-285): everyone gets
+        // in except denied accounts (kept so bad actors can be banned). pending /
+        // waitlist / any legacy status are treated as approved — no queue routing.
         try { localStorage.removeItem(EMAIL_KEY); } catch (_) {}
         const { data: profile } = await supabase.from('profiles').select('id, status, is_admin').eq('id', session.user.id).single();
         if (!profile) {
           window.location.href = '/onboarding.html';
-        } else if (profile.is_admin) {
-          window.location.href = '/lp-panel.html'; // admin page folded into lp-panel Members tab (LEN-84)
-        } else if (profile.status === 'pending') {
-          window.location.href = '/pending.html';
-        } else if (profile.status === 'waitlist') {
-          window.location.href = '/waitlist.html';
         } else if (profile.status === 'denied') {
-          window.location.href = '/waitlist.html'; // denied → waitlist page, soft landing
-        } else if (profile.status === 'approved') {
-          const next = sessionStorage.getItem('redirectAfterLogin') || '/index.html';
-          sessionStorage.removeItem('redirectAfterLogin');
-          window.location.href = next;
+          window.location.href = '/denied.html';
         } else {
-          window.location.href = '/pending.html';
+          // A pending save intent ('post-login-action' / 'post-login-data') is left
+          // in sessionStorage on purpose — the tool page consumes AND clears it on
+          // load (js/save-gate.js), which is what prevents duplicate saves.
+          // Read + REMOVE the return target before redirecting — a stale key here
+          // is the classic Quote Log redirect loop. An explicit return target wins
+          // even for admins (they were mid-task on a tool); the admin default is
+          // lp-panel (folded into Members tab, LEN-84).
+          const returnTo = sessionStorage.getItem('auth-return-to')
+            || sessionStorage.getItem('redirectAfterLogin');
+          sessionStorage.removeItem('auth-return-to');
+          sessionStorage.removeItem('redirectAfterLogin');
+          window.location.href = returnTo || (profile.is_admin ? '/lp-panel.html' : '/index.html');
         }
       }
     }
