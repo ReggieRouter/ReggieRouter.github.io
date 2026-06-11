@@ -111,6 +111,8 @@ async function saveEstimate(opts = {}) {
         prepared_for: record.prepared_for,
       });
       if (error) console.warn('[QuoteLog] DB insert skipped (local mirror kept):', error.message);
+      // Adoption-funnel signal (LEN-286): a deal actually persisted to the log.
+      if (!error) logEvent(record.calculator_type, 'deal_saved', { doc_id: record.doc_id });
     }
   } catch (e) {
     console.warn('[QuoteLog] save error (local mirror kept):', e);

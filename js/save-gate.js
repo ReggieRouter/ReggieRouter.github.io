@@ -17,6 +17,7 @@
 
 import { supabase, getOptionalUser } from './auth.js';
 import { saveEstimate } from './quote-log.js';
+import { logEvent } from './analytics.js';
 
 const ACTION_KEY = 'post-login-action';
 const DATA_KEY = 'post-login-data';
@@ -145,6 +146,8 @@ function offerSignIn(record) {
   try { if (sessionStorage.getItem(DISMISS_KEY) === '1') return; } catch (e) {}
   if (bannerShownThisLoad) return;
   bannerShownThisLoad = true;
+  // Adoption-funnel signal (LEN-286): anonymous user hit the save gate.
+  logEvent(record.calculator_type || 'unknown', 'save_gate_shown', { doc_id: record.doc_id });
   mountCss();
   const el = document.createElement('div');
   el.className = 'lp-sg-toast';

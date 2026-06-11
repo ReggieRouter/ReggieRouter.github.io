@@ -145,23 +145,42 @@ Cross-tool log of every estimate. Full spec: `markdowns/CALCULATORS.md §15`.
 - Display terminology standards (Buyout amount / Finance charge / Funded / etc.):
   `CALCULATORS.md §14`. Canonical product term "Deal Log": `BRANDING.md §1`.
 
-## Adoption & Goals (LEN-57)
+## Adoption & Goals (LEN-57 · LEN-286)
 
 Admin **Adoption** tab in `lp-panel.html` (header nav, between Members and
 Recruiter). Tracks engagement vs adoption — **distinct lifecycle stages**, each
-with its own signal — by person and by company, with admin-set goals.
+with its own signal — by person, company, and tool, with admin-set goals.
 
-- **Lifecycle (highest reached wins):** Invited (account only) → Engaged
-  (logged in / opened a tool: `last_seen` or any `usage_events`) → Adopted
-  (recurring estimates: estimates in 2+ distinct ISO weeks **or** ≥3 in 30d) →
-  Power user (Adopted + ≥2 distinct tools + a recent estimate). A recency
-  overlay (active ≤7d / at-risk ≤30d / dormant) runs alongside the stage.
-  Thresholds are JS constants (`ADO_ACTIVE_DAYS` etc.) at the top of the
-  Adoption block — tune there.
+- **Lifecycle (highest reached wins, LEN-286 definitions):** Invited (account
+  only) → Engaged (logged in / opened a tool: `last_seen` or any
+  `usage_events`) → Adopted (**saved ≥1 deal** to the Deal Log, 90-day
+  lookback) → Power user (Adopted + **5+ saved deals or 3+ sessions in 7d**).
+  A recency overlay (active ≤7d / at-risk ≤30d / dormant) runs alongside the
+  stage. Thresholds are JS constants (`ADO_ACTIVE_DAYS` etc.) at the top of
+  the Adoption block — tune there. The funnel title's circle-i tooltip is the
+  user-facing definition — keep it in sync with the constants.
+- **Open access (LEN-286):** anonymous traffic surfaces as aggregate "Open
+  access" cards (sessions / opens / PDF downloads / signups+conversion), a
+  conversion-flow strip (anon session → ran a tool → save gate → signed up →
+  deal saved), and a **Tools tab** (per-tool opens / runs / PDF downloads /
+  anon sessions / signed-in users / top company). Anonymous visitors can never
+  be people-rows (no identity). **Admin accounts' own activity is excluded
+  from every count** (internal testing must not inflate adoption).
+  `calculator_run`/`deal_saved` events key by `estimates.calculator_type`
+  (`payment_breakdown`, `deal_read`, `sba_fees`…) while `view` events use the
+  frozen LEN-143 slugs (`amortization`, `deal-read`…) — `ADO_TOOL_CANON` in
+  lp-panel.html maps run-keys → view-slugs; extend BOTH `ADO_TOOL_CANON` and
+  `ADO_TOOL_LABELS` when adding a calculator.
+- **Funnel events (LEN-286, logged from 2026-06-11):** `save_gate_shown`
+  (js/save-gate.js, anonymous save offer) and `deal_saved` (js/quote-log.js,
+  successful `estimates` insert). Both are invisible to users — never gate UX
+  on them.
 - **Data:** computed **client-side** from first-party Supabase — `profiles`
-  (incl. `last_seen`, `company`), `usage_events`, `estimates`. One 90-day pull
-  of activity; the 7/30/90d window filters in JS (UTC math against
-  `timestamptz`). Goals persist in `adoption_goals` (scope person/company/global).
+  (incl. `last_seen`, `company`), `usage_events` (incl. `session_id`,
+  `metadata.pdf_generated`), `estimates`. One 90-day pull of activity; the
+  7/30/90d window filters in JS (UTC math against `timestamptz`). Stages are
+  window-independent; the window picker filters activity counts only. Goals
+  persist in `adoption_goals` (scope person/company/global).
 - **DB setup (run once, Supabase SQL editor):** `supabase/adoption_setup.sql` —
   creates `adoption_goals` + RLS, **and adds admin-SELECT policies to
   `usage_events` and `estimates`** (otherwise the admin's RLS returns 0 rows and

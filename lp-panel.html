@@ -447,6 +447,21 @@ header {
 .ado-rec.active { color: var(--green-mid); }
 .ado-rec.risk   { color: var(--amber); }
 .ado-rec.dormant{ color: var(--muted); }
+.ado-info { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 5px; vertical-align: -3px; position: relative; cursor: help; color: var(--muted); }
+.ado-info svg { width: 14px; height: 14px; display: block; }
+.ado-info:hover { color: var(--text); }
+.ado-tip { display: none; position: absolute; left: 50%; transform: translateX(-50%); top: calc(100% + 8px); z-index: 300; width: 320px;
+  background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 13px 15px; box-shadow: 0 8px 28px rgba(15,35,26,0.14);
+  font-size: 12px; font-weight: 400; line-height: 1.55; color: var(--text); text-transform: none; letter-spacing: 0; text-align: left; white-space: normal; }
+.ado-tip strong { font-weight: 700; }
+.ado-tip .ado-tip-row { margin-bottom: 6px; }
+.ado-tip .ado-tip-row:last-child { margin-bottom: 0; }
+.ado-info:hover .ado-tip, .ado-info:focus .ado-tip { display: block; }
+.ado-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 14px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); font-size: 12px; color: var(--muted); }
+.ado-flow .ado-flow-step { display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 86px; }
+.ado-flow .ado-flow-num { font-size: 17px; font-weight: 700; color: var(--text); }
+.ado-flow .ado-flow-arrow { color: var(--border); font-size: 15px; }
+.ado-flow .ado-flow-pct { font-size: 10.5px; color: var(--green-mid); font-weight: 600; }
 .ado-goal { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; background: var(--white); }
 .ado-goal-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
 .ado-goal-label { font-weight: 600; font-size: 14px; }
@@ -3821,14 +3836,28 @@ function memExportCSV() {
   URL.revokeObjectURL(a.href);
 }
 
-// ── Adoption Panel (LEN-57) ───────────────────────────────
+// ── Adoption Panel (LEN-57 · LEN-286) ────────────────────
 // Engagement vs adoption are distinct lifecycle stages, each with its own
 // signal: Invited (account only) → Engaged (logged in / opened a tool) →
-// Adopted (recurring estimates) → Power user (recurring + multi-tool). A
-// recency overlay (active/at-risk/dormant) runs alongside the stage. All
-// metrics are computed client-side from first-party Supabase data.
-const ADO_ACTIVE_DAYS = 7, ADO_RISK_DAYS = 30, ADO_ADOPT_30D_MIN = 3, ADO_POWER_TOOLS_MIN = 2;
+// Adopted (saved ≥1 deal to the Deal Log) → Power user (Adopted + 5 saved
+// deals or 3+ sessions in 7d). A recency overlay (active/at-risk/dormant)
+// runs alongside the stage. Open access (LEN-285) means most traffic is
+// anonymous — anon sessions surface as aggregate cards, the conversion flow,
+// and the Tools tab (they can't be people-rows: no identity). Admin accounts'
+// own activity is excluded everywhere so internal testing never inflates
+// adoption. All metrics are computed client-side from first-party Supabase.
+const ADO_ACTIVE_DAYS = 7, ADO_RISK_DAYS = 30, ADO_POWER_ESTS_MIN = 5, ADO_POWER_SESS_7D = 3;
 const ADO_HISTORY_DAYS = 90;            // raw activity pulled once, windows filtered in JS
+// calculator_run / deal_saved events key by estimates.calculator_type; views key
+// by the frozen LEN-143 tool slugs. Canonicalize to the view slug for per-tool rollups.
+const ADO_TOOL_CANON = { payment_breakdown: 'amortization', deal_read: 'deal-read', sba_fees: 'sba-fees' };
+const ADO_TOOL_LABELS = {
+  amortization: 'Amortization', dscr: 'DSCR', 'deal-read': 'Deal Analysis',
+  fundability: 'Net & Position', affordability: 'Payment Fit', 'sba-fees': 'SBA Fees',
+  legislation: 'Compliance Desk', waterfall: 'Lender Waterfall', naics: 'NAICS', game: 'Deal Desk Quiz',
+};
+function adoToolKey(t) { return ADO_TOOL_CANON[t] || t || 'unknown'; }
+function adoToolLabel(t) { return ADO_TOOL_LABELS[t] || t; }
 const ADO_METRICS = {
   estimates_count: { label: 'Estimates created', unit: '' },
   pct_engaged:     { label: '% members engaged', unit: '%' },
@@ -3839,7 +3868,7 @@ const ADO_METRICS = {
   distinct_tools:  { label: 'Distinct tools used', unit: '' },
 };
 let adoProfiles = [], adoEvents = [], adoEstimates = [], adoGoals = [];
-let adoPeople = [], adoCompanies = [], adoFunnel = null;
+let adoPeople = [], adoCompanies = [], adoFunnel = null, adoAnon = null, adoTools = [];
 let adoTab = 'people', adoWindow = 30, adoCompanyFilter = null;
 let adoLoadError = null, adoGoalsMissing = false;
 
@@ -3848,21 +3877,24 @@ function adoCompanyKey(c) { const t = (c || '').trim(); return t ? t.toLowerCase
 function adoCompanyLabel(c) { const t = (c || '').trim(); return t || '— No company —'; }
 function adoPersonName(id) { const p = adoProfiles.find(x => x.id === id); return p ? (p.full_name || p.email || id) : id; }
 
-// ISO-week key (UTC) so "estimates in 2+ distinct weeks" is timezone-stable.
-function adoIsoWeek(iso) {
-  const d = new Date(iso);
-  d.setUTCHours(0, 0, 0, 0);
-  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-  const yStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  const wk = Math.ceil((((d - yStart) / 864e5) + 1) / 7);
-  return d.getUTCFullYear() + '-W' + wk;
+// Hoverable circle-i definition tooltip (keyboard-focusable).
+function adoInfo(html, w) {
+  return `<span class="ado-info" tabindex="0"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><rect x="7.3" y="7" width="1.4" height="4.2" rx="0.7" fill="currentColor"/><circle cx="8" cy="4.9" r="0.95" fill="currentColor"/></svg><span class="ado-tip"${w ? ` style="width:${w}px"` : ''}>${html}</span></span>`;
 }
+const ADO_STAGE_TIP = `
+  <div class="ado-tip-row"><strong>Adoption</strong> = the lifecycle stage a member has reached (highest wins):</div>
+  <div class="ado-tip-row"><strong>Invited</strong> — has an account, no activity yet.</div>
+  <div class="ado-tip-row"><strong>Engaged</strong> — signed in or opened any tool.</div>
+  <div class="ado-tip-row"><strong>Adopted</strong> — saved at least 1 deal to the Deal Log (90-day lookback).</div>
+  <div class="ado-tip-row"><strong>Power user</strong> — Adopted, plus ${ADO_POWER_ESTS_MIN}+ saved deals or ${ADO_POWER_SESS_7D}+ sessions in the last 7 days.</div>
+  <div class="ado-tip-row">Recency runs alongside the stage: Active ≤7d · At-risk ≤30d · Dormant 30d+.</div>
+  <div class="ado-tip-row" style="color:var(--muted)">Stages are window-independent; the window picker filters activity counts (tools, estimates, anonymous traffic). Admin accounts are excluded everywhere. Anonymous visitors have no identity, so they appear only in the Open access cards and the Tools tab.</div>`;
 
 async function renderAdoptionPanel() {
   const view = document.getElementById('adoption-view');
   view.innerHTML = `
     <div class="dash-header">
-      <div><h1>Adoption</h1><p>Engagement &amp; adoption by person and company — live from Supabase</p></div>
+      <div><h1>Adoption</h1><p>Engagement &amp; adoption by person, company, and tool — live from Supabase · admin activity excluded</p></div>
       <div style="display:flex;gap:10px;align-items:center">
         <select id="ado-window" class="mem-select" onchange="adoSetWindow(this.value)">
           <option value="7">Last 7 days</option>
@@ -3879,6 +3911,7 @@ async function renderAdoptionPanel() {
       <div class="tabs" style="margin-bottom:14px">
         <button class="tab active" id="ado-tabbtn-people" onclick="adoShowTab('people')">People <span class="tab-count" id="ado-count-people" style="display:none"></span></button>
         <button class="tab" id="ado-tabbtn-companies" onclick="adoShowTab('companies')">Companies <span class="tab-count" id="ado-count-companies" style="display:none"></span></button>
+        <button class="tab" id="ado-tabbtn-tools" onclick="adoShowTab('tools')">Tools <span class="tab-count" id="ado-count-tools" style="display:none"></span></button>
         <button class="tab" id="ado-tabbtn-goals" onclick="adoShowTab('goals')">Goals <span class="tab-count" id="ado-count-goals" style="display:none"></span></button>
       </div>
       <div class="mem-toolbar" id="ado-people-toolbar">
@@ -3911,7 +3944,7 @@ async function loadAdoption() {
   const histStart = new Date(Date.now() - ADO_HISTORY_DAYS * 864e5).toISOString();
   const [profRes, evRes, estRes, goalRes] = await Promise.all([
     sb.from('profiles').select('id, email, full_name, company, role, status, created_at, last_seen, invite_credits, invites_sent, is_admin'),
-    sb.from('usage_events').select('user_id, tool, event, created_at').gte('created_at', histStart),
+    sb.from('usage_events').select('user_id, session_id, tool, event, created_at, metadata').gte('created_at', histStart),
     sb.from('estimates').select('user_id, created_at').gte('created_at', histStart),
     sb.from('adoption_goals').select('*').eq('active', true).order('created_at', { ascending: true }),
   ]);
@@ -3922,10 +3955,13 @@ async function loadAdoption() {
     if (el) el.innerHTML = `<span style="color:var(--red)">Error loading profiles: ${esc(profRes.error.message)}</span>`;
     return;
   }
-  adoProfiles = (profRes.data || []).filter(p => !p.is_admin);
+  const allProfiles = profRes.data || [];
+  const adminIds = new Set(allProfiles.filter(p => p.is_admin).map(p => p.id));
+  adoProfiles = allProfiles.filter(p => !p.is_admin);
   if (evRes.error || estRes.error) adoLoadError = (evRes.error || estRes.error).message;
-  adoEvents = evRes.data || [];
-  adoEstimates = estRes.data || [];
+  // Internal testing must never inflate adoption: drop admins' own activity.
+  adoEvents = (evRes.data || []).filter(e => !e.user_id || !adminIds.has(e.user_id));
+  adoEstimates = (estRes.data || []).filter(e => !adminIds.has(e.user_id));
   if (goalRes.error) { adoGoalsMissing = true; adoGoals = []; } else { adoGoals = goalRes.data || []; }
   adoCompute();
   adoRenderFunnel();
@@ -3935,10 +3971,14 @@ async function loadAdoption() {
 
 function adoCompute() {
   const now = Date.now();
-  const d30 = now - 30 * 864e5, actT = now - ADO_ACTIVE_DAYS * 864e5, riskT = now - ADO_RISK_DAYS * 864e5;
+  const actT = now - ADO_ACTIVE_DAYS * 864e5, riskT = now - ADO_RISK_DAYS * 864e5;
   const winStart = now - adoWindow * 864e5;
-  const evByUser = {}, estByUser = {};
-  for (const e of adoEvents) (evByUser[e.user_id] = evByUser[e.user_id] || []).push(e);
+  const inWin = e => Date.parse(e.created_at) >= winStart;
+  const evByUser = {}, estByUser = {}, anonEvents = [];
+  for (const e of adoEvents) {
+    if (!e.user_id) { anonEvents.push(e); continue; }
+    (evByUser[e.user_id] = evByUser[e.user_id] || []).push(e);
+  }
   for (const e of adoEstimates) (estByUser[e.user_id] = estByUser[e.user_id] || []).push(e);
 
   adoPeople = adoProfiles.map(p => {
@@ -3947,18 +3987,19 @@ function adoCompute() {
     const lastEv = evs.reduce((m, e) => Math.max(m, Date.parse(e.created_at)), 0);
     const lastEst = ests.reduce((m, e) => Math.max(m, Date.parse(e.created_at)), 0);
     const lastActivity = Math.max(lastSeen, lastEv, lastEst);
-    const distinctTools = new Set(evs.map(e => e.tool)).size;
-    const est30 = ests.filter(e => Date.parse(e.created_at) >= d30).length;
-    const weeks = new Set(ests.map(e => adoIsoWeek(e.created_at))).size;
-    const estWin = ests.filter(e => Date.parse(e.created_at) >= winStart).length;
-    const usageWin = evs.filter(e => Date.parse(e.created_at) >= winStart).length;
-    const adopted = (weeks >= 2) || (est30 >= ADO_ADOPT_30D_MIN);
+    const toolsWin = new Set(evs.filter(inWin).map(e => adoToolKey(e.tool))).size;
+    const estWin = ests.filter(inWin).length;
+    // Sessions in the last 7d: distinct session_id; legacy logUsage rows have
+    // no session_id, so fall back to a per-day bucket.
+    const sess7 = new Set(evs.filter(e => Date.parse(e.created_at) >= actT)
+      .map(e => e.session_id || String(e.created_at).slice(0, 10))).size;
     const engaged = (lastSeen > 0) || evs.length > 0 || ests.length > 0;
-    const power = adopted && distinctTools >= ADO_POWER_TOOLS_MIN && lastEst >= actT;
+    const adopted = ests.length >= 1;        // LEN-286: ≥1 deal saved to the Deal Log
+    const power = adopted && (ests.length >= ADO_POWER_ESTS_MIN || sess7 >= ADO_POWER_SESS_7D);
     const stage = power ? 'power' : adopted ? 'adopted' : engaged ? 'engaged' : 'invited';
     let rec = 'dormant';
     if (lastActivity >= actT) rec = 'active'; else if (lastActivity >= riskT) rec = 'risk';
-    return { p, stage, rec, distinctTools, est30, weeks, estWin, usageWin, lastActivity };
+    return { p, stage, rec, toolsWin, estWin, sess7, lastActivity };
   });
 
   const total = adoPeople.length;
@@ -3981,7 +4022,7 @@ function adoCompute() {
   adoCompanies = Object.values(byCo).map(c => {
     const ids = new Set(c.members.map(m => m.p.id));
     const tools = new Set();
-    for (const e of adoEvents) if (ids.has(e.user_id)) tools.add(e.tool);
+    for (const e of adoEvents) if (ids.has(e.user_id)) tools.add(adoToolKey(e.tool));
     const memberCount = c.members.length;
     const engagedCount = c.members.filter(m => m.stage !== 'invited').length;
     const adoptedCount = c.members.filter(m => m.stage === 'adopted' || m.stage === 'power').length;
@@ -3993,6 +4034,52 @@ function adoCompute() {
       pctAdopted: memberCount ? Math.round(adoptedCount / memberCount * 100) : 0,
     };
   }).sort((a, b) => b.memberCount - a.memberCount || b.adoptedCount - a.adoptedCount);
+
+  // ── Open access (LEN-286): anonymous aggregates + conversion flow, windowed ──
+  const isDl = e => !!(e.metadata && e.metadata.pdf_generated);
+  const anonWin = anonEvents.filter(inWin);
+  const sessOf = e => e.session_id || 'unknown';
+  const anonSessions = new Set(anonWin.map(sessOf)).size;
+  const ranSessions = new Set(anonWin.filter(e => e.event === 'calculator_run').map(sessOf)).size;
+  const gateSessions = new Set(anonWin.filter(e => e.event === 'save_gate_shown').map(sessOf)).size;
+  const signups = adoProfiles.filter(p => p.created_at && Date.parse(p.created_at) >= winStart).length;
+  const dealsSaved = adoEstimates.filter(inWin).length;
+  adoAnon = {
+    sessions: anonSessions,
+    opens: anonWin.filter(e => e.event === 'view').length,
+    runs: anonWin.filter(e => e.event === 'calculator_run').length,
+    downloads: anonWin.filter(isDl).length,
+    ranSessions, gateSessions, signups, dealsSaved,
+    conv: anonSessions ? Math.round(signups / anonSessions * 100) : 0,
+  };
+
+  // ── Per-tool rollup (LEN-286), windowed — opens / runs / downloads / who ──
+  const byTool = {};
+  for (const e of adoEvents) {
+    if (!inWin(e)) continue;
+    const k = adoToolKey(e.tool);
+    const t = byTool[k] = byTool[k] || { key: k, opens: 0, runs: 0, downloads: 0, anonSess: new Set(), users: new Set(), userEvs: {} };
+    if (e.event === 'view') t.opens++;
+    else if (e.event === 'calculator_run') t.runs++;
+    if (isDl(e)) t.downloads++;
+    if (e.user_id) { t.users.add(e.user_id); t.userEvs[e.user_id] = (t.userEvs[e.user_id] || 0) + 1; }
+    else t.anonSess.add(sessOf(e));
+  }
+  const profById = {};
+  for (const p of adoProfiles) profById[p.id] = p;
+  adoTools = Object.values(byTool).map(t => {
+    const coCount = {};
+    for (const uid of Object.keys(t.userEvs)) {
+      const co = ((profById[uid] || {}).company || '').trim();
+      if (co) coCount[co] = (coCount[co] || 0) + t.userEvs[uid];
+    }
+    const top = Object.entries(coCount).sort((a, b) => b[1] - a[1])[0];
+    return {
+      key: t.key, label: adoToolLabel(t.key), opens: t.opens, runs: t.runs,
+      downloads: t.downloads, anonSessions: t.anonSess.size, users: t.users.size,
+      topCompany: top ? top[0] : '—', total: t.opens + t.runs,
+    };
+  }).sort((a, b) => b.total - a.total);
 }
 
 function adoSetWindow(v) {
@@ -4005,7 +4092,7 @@ function adoSetWindow(v) {
 
 function adoShowTab(name) {
   adoTab = name;
-  ['people', 'companies', 'goals'].forEach(t => {
+  ['people', 'companies', 'tools', 'goals'].forEach(t => {
     const b = document.getElementById('ado-tabbtn-' + t);
     if (b) b.className = 'tab' + (t === name ? ' active' : '');
   });
@@ -4017,6 +4104,7 @@ function adoShowTab(name) {
 function adoRenderTab() {
   if (adoTab === 'people') adoRenderPeople();
   else if (adoTab === 'companies') adoRenderCompanies();
+  else if (adoTab === 'tools') adoRenderTools();
   else adoRenderGoals();
 }
 
@@ -4024,6 +4112,7 @@ function adoRenderTabsCounts() {
   const set = (id, n) => { const e = document.getElementById(id); if (!e) return; e.textContent = n; e.style.display = n > 0 ? 'inline-flex' : 'none'; };
   set('ado-count-people', adoPeople.length);
   set('ado-count-companies', adoCompanies.length);
+  set('ado-count-tools', adoTools.length);
   set('ado-count-goals', adoGoals.length);
 }
 
@@ -4034,15 +4123,34 @@ function adoRenderFunnel() {
   const err = adoLoadError
     ? `<p style="color:var(--red);font-size:13px;margin-bottom:12px">Couldn’t read activity (${esc(adoLoadError)}). Run <code>supabase/adoption_setup.sql</code> to grant admin read access — counts stay 0 until then.</p>`
     : '';
+  const a = adoAnon || { sessions: 0, opens: 0, runs: 0, downloads: 0, ranSessions: 0, gateSessions: 0, signups: 0, dealsSaved: 0, conv: 0 };
+  const flowStep = (num, label) => `<div class="ado-flow-step"><span class="ado-flow-num">${num}</span><span>${label}</span></div>`;
+  const arrow = '<span class="ado-flow-arrow">→</span>';
   el.innerHTML = `${err}
-    <div class="dash-section-title">Adoption funnel · ${adoWindow}d</div>
+    <div class="dash-section-title">Adoption funnel ${adoInfo(ADO_STAGE_TIP, 340)}</div>
     <div class="dash-cards">
       <div class="dash-card"><div class="dash-card-num">${f.invited}</div><div class="dash-card-label">Invited</div></div>
       <div class="dash-card"><div class="dash-card-num">${f.engaged}</div><div class="dash-card-label">Engaged</div></div>
       <div class="dash-card good"><div class="dash-card-num">${f.adopted}</div><div class="dash-card-label">Adopted</div></div>
       <div class="dash-card good"><div class="dash-card-num">${f.power}</div><div class="dash-card-label">Power users</div></div>
     </div>
-    <p style="font-size:12px;color:var(--muted);margin-top:10px">${f.total} members · <strong style="color:var(--text)">${f.pctEngaged}%</strong> engaged · <strong style="color:var(--text)">${f.pctAdopted}%</strong> adopted</p>`;
+    <p style="font-size:12px;color:var(--muted);margin-top:10px">${f.total} members · <strong style="color:var(--text)">${f.pctEngaged}%</strong> engaged · <strong style="color:var(--text)">${f.pctAdopted}%</strong> adopted</p>
+    <div class="dash-section-title" style="margin-top:20px">Open access · last ${adoWindow}d ${adoInfo('Anonymous traffic (no account — most visitors since open access, LEN-285). Sessions are distinct per-browser ids from <code>usage_events</code>. Tool opens = page views of a tool; downloads = PDFs generated. Signups = new member profiles created in the window; conversion = signups ÷ anonymous sessions.', 300)}</div>
+    <div class="dash-cards">
+      <div class="dash-card"><div class="dash-card-num">${a.sessions}</div><div class="dash-card-label">Anonymous sessions</div></div>
+      <div class="dash-card"><div class="dash-card-num">${a.opens}</div><div class="dash-card-label">Anon tool opens</div></div>
+      <div class="dash-card"><div class="dash-card-num">${a.downloads}</div><div class="dash-card-label">Anon PDF downloads</div></div>
+      <div class="dash-card good"><div class="dash-card-num">${a.signups}</div><div class="dash-card-label">Signups · ${a.conv}% of sessions</div></div>
+    </div>
+    <div class="ado-flow">
+      ${flowStep(a.sessions, 'Anonymous session')}${arrow}
+      ${flowStep(a.ranSessions, 'Ran a tool')}${arrow}
+      ${flowStep(a.gateSessions, 'Save gate shown')}${arrow}
+      ${flowStep(a.signups, 'Signed up')}${arrow}
+      ${flowStep(a.dealsSaved, 'Deals saved')}
+      <span style="flex:1"></span>
+      <span style="font-size:10.5px">"Ran a tool" / "Save gate" count anonymous sessions; save-gate events start 6/11</span>
+    </div>`;
 }
 
 function adoStagePill(stage) {
@@ -4082,13 +4190,13 @@ function adoRenderPeople() {
 
   if (!rows.length) { wrap.innerHTML = '<p style="color:var(--muted);font-size:13px">No members match.</p>'; return; }
   wrap.innerHTML = `<table class="mem-table">
-    <thead><tr><th>User</th><th>Company</th><th>Stage</th><th>Recency</th><th>Tools</th><th>Estimates</th><th>Invites</th><th>Last active</th></tr></thead>
+    <thead><tr><th>User</th><th>Company</th><th>Stage ${adoInfo(ADO_STAGE_TIP, 340)}</th><th>Recency</th><th>Tools ${adoInfo(`Distinct tools used in the selected window (${adoWindow}d). Tool opens, runs, and PDF downloads per tool are on the Tools tab.`, 250)}</th><th>Estimates ${adoInfo(`Deals saved to the Deal Log in the selected window (${adoWindow}d). Only signed-in saves create estimates — anonymous PDF/copy runs appear on the Tools tab instead.`, 270)}</th><th>Invites</th><th>Last active</th></tr></thead>
     <tbody>${rows.map(r => `<tr>
       <td><div class="mem-user"><span class="mem-avatar">${esc(memInitials(r.p.full_name))}</span><div><div class="mem-name">${esc(r.p.full_name || '—')}</div><div class="mem-email">${esc(r.p.email || '')}</div></div></div></td>
       <td style="color:var(--muted)">${esc(adoCompanyLabel(r.p.company))}</td>
       <td>${adoStagePill(r.stage)}</td>
       <td><span class="ado-rec ${r.rec}">${adoRecLabel(r.rec)}</span></td>
-      <td>${r.distinctTools}</td>
+      <td>${r.toolsWin}</td>
       <td>${r.estWin}</td>
       <td style="color:var(--muted)">${r.p.invites_sent || 0}/${r.p.invite_credits ?? 5}</td>
       <td style="color:var(--muted)">${adoLastActive(r.lastActivity)}</td>
@@ -4115,6 +4223,24 @@ function adoRenderCompanies() {
     }).join('')}</tbody></table>`;
 }
 
+function adoRenderTools() {
+  const wrap = document.getElementById('ado-table-wrap');
+  if (!wrap) return;
+  if (!adoTools.length) { wrap.innerHTML = `<p style="color:var(--muted);font-size:13px">No tool activity in the last ${adoWindow} days.</p>`; return; }
+  wrap.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Per-tool usage in the selected window (${adoWindow}d), anonymous + signed-in, admin activity excluded. Opens = page views · Runs = PDF generated or scenario copied · Downloads = runs that produced a PDF.</p>
+  <table class="mem-table">
+    <thead><tr><th>Tool</th><th>Opens</th><th>Runs</th><th>PDF downloads</th><th>Anon sessions</th><th>Signed-in users</th><th>Top company</th></tr></thead>
+    <tbody>${adoTools.map(t => `<tr>
+      <td style="font-weight:600">${esc(t.label)}</td>
+      <td>${t.opens}</td>
+      <td>${t.runs}</td>
+      <td>${t.downloads}</td>
+      <td>${t.anonSessions}</td>
+      <td>${t.users}</td>
+      <td style="color:var(--muted)">${esc(t.topCompany)}</td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
 function adoGoalCurrent(g) {
   const now = Date.now();
   const wStart = now - (g.window_days || 30) * 864e5;
@@ -4126,7 +4252,7 @@ function adoGoalCurrent(g) {
   const mc = members.length;
   switch (g.metric) {
     case 'estimates_count': return adoEstimates.filter(e => ids.has(e.user_id) && Date.parse(e.created_at) >= wStart).length;
-    case 'distinct_tools': { const t = new Set(); for (const e of adoEvents) if (ids.has(e.user_id) && Date.parse(e.created_at) >= wStart) t.add(e.tool); return t.size; }
+    case 'distinct_tools': { const t = new Set(); for (const e of adoEvents) if (ids.has(e.user_id) && Date.parse(e.created_at) >= wStart) t.add(adoToolKey(e.tool)); return t.size; }
     case 'engaged_members': return members.filter(m => m.stage !== 'invited').length;
     case 'adopted_members': return members.filter(m => m.stage === 'adopted' || m.stage === 'power').length;
     case 'power_members': return members.filter(m => m.stage === 'power').length;
@@ -4227,17 +4353,25 @@ async function adoDeleteGoal(id) {
 }
 
 function adoExportCSV() {
-  const headers = ['Name', 'Email', 'Company', 'Stage', 'Recency', 'Distinct tools', `Estimates (${adoWindow}d)`, 'Invites sent', 'Invite credits', 'Last active (days)'];
   const cell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const lines = [headers.join(','), ...adoPeople.map(r => [
-    cell(r.p.full_name), cell(r.p.email), cell(adoCompanyLabel(r.p.company)), cell(r.stage), cell(r.rec),
-    r.distinctTools, r.estWin, r.p.invites_sent || 0, r.p.invite_credits ?? 5,
-    r.lastActivity ? Math.floor((Date.now() - r.lastActivity) / 864e5) : '',
-  ].join(','))];
-  const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  let headers, body, name;
+  if (adoTab === 'tools') {
+    headers = ['Tool', `Opens (${adoWindow}d)`, 'Runs', 'PDF downloads', 'Anon sessions', 'Signed-in users', 'Top company'];
+    body = adoTools.map(t => [cell(t.label), t.opens, t.runs, t.downloads, t.anonSessions, t.users, cell(t.topCompany)].join(','));
+    name = 'lendpaper-tool-usage.csv';
+  } else {
+    headers = ['Name', 'Email', 'Company', 'Stage', 'Recency', `Tools (${adoWindow}d)`, `Estimates (${adoWindow}d)`, 'Invites sent', 'Invite credits', 'Last active (days)'];
+    body = adoPeople.map(r => [
+      cell(r.p.full_name), cell(r.p.email), cell(adoCompanyLabel(r.p.company)), cell(r.stage), cell(r.rec),
+      r.toolsWin, r.estWin, r.p.invites_sent || 0, r.p.invite_credits ?? 5,
+      r.lastActivity ? Math.floor((Date.now() - r.lastActivity) / 864e5) : '',
+    ].join(','));
+    name = 'lendpaper-adoption.csv';
+  }
+  const blob = new Blob([[headers.join(','), ...body].join('\n')], { type: 'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'lendpaper-adoption.csv';
+  a.download = name;
   a.click();
   URL.revokeObjectURL(a.href);
 }
