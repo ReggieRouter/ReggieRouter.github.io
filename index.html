@@ -117,22 +117,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@125,700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- Logged-out landing: pre-paint decision (sync) to avoid a dashboard/landing flash. LEN-153. -->
+<!-- Pre-paint auth decision (sync) to avoid a personalized/anonymous flash. -->
 <script>
 (function(){
   try {
-    var p = new URLSearchParams(location.search).get('p');
-    var onToolRoute = (p && /tools|compliance|quote-log/.test(p)) || /^\/(tools|compliance|quote-log)\//.test(location.pathname);
     var hasSession = false;
     for (var i = 0; i < localStorage.length; i++) {
       var k = localStorage.key(i);
       if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1 && localStorage.getItem(k)) { hasSession = true; break; }
     }
-    if (!hasSession && !onToolRoute) document.documentElement.classList.add('pre-landing');
-    // LEN-287: logged-out visitors who DO reach the app shell (tool routes, or
-    // navigating Home from a tool) get the anonymous tool desk — same page,
-    // personalization chrome stripped. Sync hint avoids a personalized flash;
-    // initTopbarAuth reconciles once the real session resolves.
+    // LEN-287 (per Steve 6/11): logged-out visitors land DIRECTLY on the
+    // anonymous tool desk — the LEN-153 marketing landing no longer takes over
+    // bare "/". It's parked behind an explicit /?landing for review.
+    var wantLanding = new URLSearchParams(location.search).has('landing');
+    if (!hasSession && wantLanding) document.documentElement.classList.add('pre-landing');
     if (!hasSession) document.documentElement.classList.add('lp-anon');
   } catch(e){}
 })();
@@ -1300,8 +1298,8 @@ html.pre-landing #landing { display: flex; }
   </header>
   <main class="lp-land-hero">
     <div class="lp-land-eyebrow">Free tools · No account needed</div>
-    <h1 class="lp-land-h1">You're not just closing deals.<br><em>You're opening doors.</em></h1>
-    <p class="lp-land-sub">LendPaper is the commercial lending desk in one place — calculators, lender intelligence, and deal tools that help brokers and ISOs close faster. Built by someone who worked the desk.</p>
+    <h1 class="lp-land-h1">Lending math your clients can <em>actually read.</em></h1>
+    <p class="lp-land-sub">Calculators, lender intelligence, and deal tools for brokers and ISOs who close — built by someone who worked the desk.</p>
     <div class="lp-land-cta">
       <a class="lp-land-btn primary" href="/?p=tools/deal-read">Explore the tools →</a>
       <a class="lp-land-btn ghost" href="/login.html">Sign in</a>
@@ -1649,12 +1647,8 @@ html.pre-landing #landing { display: flex; }
 <script type="module">
   import { getSession, getProfile, signOut } from './js/auth.js';
 
-  // ── Logged-out brand landing (LEN-153) ──────────────────────────────
+  // ── Logged-out brand landing (LEN-153, parked behind /?landing per LEN-287) ──
   const _html = document.documentElement;
-  function _isToolRoute() {
-    const p = new URLSearchParams(location.search).get('p');
-    return (p && /tools|compliance|quote-log/.test(p)) || /^\/(tools|compliance|quote-log)\//.test(location.pathname);
-  }
   let _waveStarted = false;
   function _startWave() {
     if (_waveStarted) return; _waveStarted = true;
@@ -1708,8 +1702,10 @@ html.pre-landing #landing { display: flex; }
       } else if (window.refreshGreetingName) {
         window.refreshGreetingName();
       }
-      // Minimalist brand landing on the bare home view (tool deep-links still route).
-      if (!_isToolRoute()) _showLanding();
+      // LEN-287 (per Steve 6/11): no landing takeover — logged-out visitors stay
+      // on the anonymous tool desk. The LEN-153 landing only shows when asked
+      // for explicitly via /?landing (kept for review; delete or route later).
+      if (new URLSearchParams(location.search).has('landing')) _showLanding();
       return; // leave "Sign in" button visible
     }
     _hideLanding(); // Logged in → reconcile to the dashboard (covers a stale sync hint).
