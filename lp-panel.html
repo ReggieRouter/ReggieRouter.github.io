@@ -3389,9 +3389,9 @@ async function memWaitlist(userId, btn) {
   await loadMembers();
 }
 
-// LEN-232: hard "no" — revoke access. Whitelist gating (js/auth.js) blocks any
-// non-approved status; 'denied' routes to waitlist.html (soft landing, doesn't tip off
-// a declined competitor). Reversible: Approve re-grants access.
+// LEN-232: hard "no" — revoke access. Open access (LEN-285): 'denied' is the only
+// blocked status; js/auth.js + auth-callback route it to denied.html. Reversible:
+// Approve re-grants access.
 async function memDecline(userId, btn) {
   const u = memProfiles.find(p => p.id === userId);
   if (!confirm(`Decline ${u ? (u.full_name || u.email) : 'this user'}? They'll lose access to the app. You can re-approve them later.`)) return;
