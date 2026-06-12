@@ -22,9 +22,9 @@
 <meta charset="UTF-8">
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2026.06.11.0004">
+<meta name="version" content="2026.06.11.0006">
 <script type="text/javascript">
-  window.CURRENT_VERSION = "2026.06.11.0004";
+  window.CURRENT_VERSION = "2026.06.11.0006";
 
   // Force active cleanup of legacy service workers
   if ('serviceWorker' in navigator) {
@@ -115,7 +115,6 @@
 <meta name="description" content="Fast, free calculators and tools for MCA, LOC, SBA, and alternative financing professionals. Built for funding desks that don't have time to waste.">
 <link rel="canonical" href="https://lendpaper.com/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@125,700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <!-- Pre-paint auth decision (sync) to avoid a personalized/anonymous flash. -->
 <script>
@@ -1645,7 +1644,7 @@ html.pre-landing #landing { display: flex; }
 </div>
 
 <!-- External Data -->
-<script src="public/assets/js/tools.js?v=2026.06.11.0004"></script>
+<script src="public/assets/js/tools.js?v=2026.06.11.0005"></script>
 <!-- Auth state for topbar control (hard-gate login, LEN-68). config.js sets SUPABASE_* globals the auth module reads. -->
 <script src="js/config.js"></script>
 <script type="module">
@@ -1909,6 +1908,18 @@ var rotationPool = [
   "Know your product. Know your borrower."
 ];
 
+// LEN-304: rotation pool shown ONLY to logged-out visitors (anonymous tool
+// desk). One line is picked per load when no higher-priority trigger matches,
+// then pinned per session so it doesn't flip on the updateGreeting tick. Kept
+// separate from the logged-in rotationPool so the two voices never cross.
+var anonRotationPool = [
+  "See the deal the way the lender will.",
+  "Run the math before you pitch.",
+  "Read the deal before it reads you.",
+  "Know the numbers cold.",
+  "Your next deal needs a number."
+];
+
 var phraseBank = [
   "Close faster. Underwrite smarter.",
   "The deal you need is one conversation away.",
@@ -1995,17 +2006,23 @@ function getLocalDateString(dateObj) {
   return yyyy + "-" + mm + "-" + dd;
 }
 
-function getRotationMessage() {
-  var stored = sessionStorage.getItem('lp_rotation_message');
-  if (stored && rotationPool.indexOf(stored) !== -1) {
+// pool/storeKey default to the logged-in rotation; the logged-out path passes
+// anonRotationPool + its own session key so the two pinned picks never collide.
+function getRotationMessage(pool, storeKey) {
+  pool = pool || rotationPool;
+  storeKey = storeKey || 'lp_rotation_message';
+  var stored = sessionStorage.getItem(storeKey);
+  if (stored && pool.indexOf(stored) !== -1) {
     return stored;
   }
-  var randomMsg = rotationPool[Math.floor(Math.random() * rotationPool.length)];
-  sessionStorage.setItem('lp_rotation_message', randomMsg);
+  var randomMsg = pool[Math.floor(Math.random() * pool.length)];
+  sessionStorage.setItem(storeKey, randomMsg);
   return randomMsg;
 }
 
-function getContextualGreeting() {
+// `anon` (logged-out) only swaps the rotation-pool fallback; every dated/calendar
+// trigger above it is shared, so the hierarchy is never duplicated.
+function getContextualGreeting(anon) {
   var now = new Date();
   var year = now.getFullYear();
   var month = now.getMonth();   // 0 = Jan, 11 = Dec
@@ -2058,7 +2075,9 @@ function getContextualGreeting() {
   }
 
   if (useRotation) {
-    return getRotationMessage();
+    return anon
+      ? getRotationMessage(anonRotationPool, 'lp_anon_rotation_message')
+      : getRotationMessage();
   }
 
   // 5. Time of Day Fallbacks
@@ -2077,24 +2096,22 @@ window.rerenderHomeAuth = function () {
   try { updateGreeting(); renderHome(); } catch (e) {}
 };
 
-// "Try a sample deal" (LEN-287): flag consumed by deal-read's boot() — it seeds a
-// realistic input set so a first-time visitor sees real output in one click.
-window.openSampleDeal = function (e) {
-  if (e) { e.preventDefault(); e.stopPropagation(); }
-  try { sessionStorage.setItem('lp_deal_read_sample', '1'); } catch (err) {}
-  var t = TOOLS.find(function (x) { return x.id === 'deal-read'; });
-  if (t) openTool(t, true); else window.location.href = '/tools/deal-read';
-};
-
 function updateGreeting() {
   var gt = document.getElementById('greetingText');
   var gs = document.getElementById('greetingSubtitle');
   if (!gt) return;
 
-  // Anonymous tool desk (LEN-287): one static line, zero personalization.
+  // Anonymous tool desk (LEN-304): contextual greeting from the shared store,
+  // zero personalization (no name lookups in this path). One line per load via
+  // the same top-down hierarchy, with a fixed "No account needed." subline that
+  // never rotates and isn't pulled from any pool. Gated entirely on lpIsAnon()
+  // at render time, so the logged-in banner below is untouched.
   if (lpIsAnon()) {
-    gt.textContent = 'Pick a tool and start. No account needed.';
-    if (gs) gs.style.display = 'none';
+    gt.textContent = getContextualGreeting(true);
+    if (gs) {
+      gs.textContent = 'No account needed.';
+      gs.style.display = 'block';
+    }
     return;
   }
 
@@ -2271,15 +2288,10 @@ function featuredCardHTML(t, i, isPrimary, primaryLabel) {
   var label = isPrimary ? (primaryLabel || 'Most used') : (featuredLabels[t.id] || '');
   var iconCls = t.color === 'green' ? 'green' : '';
   var delayStyle = isPrimary ? '' : ' style="animation-delay:'+(i*80)+'ms"';
-  // Anonymous desk (LEN-287): Deal Analysis carries a one-click sample-deal CTA.
-  var sampleCta = (lpIsAnon() && t.id === 'deal-read')
-    ? '<button type="button" class="featured-card-cta" onclick="openSampleDeal(event)">Try a sample deal →</button>'
-    : '';
   return '<a'+href+target+' class="'+cls+'"'+onclick+delayStyle+'>'
     +'<div class="featured-card-icon '+iconCls+'">'+ICO[t.icon]+'</div>'
     +'<div class="featured-card-name">'+t.name+'</div>'
     +'<div class="featured-card-desc">'+t.desc+'</div>'
-    +sampleCta
     +'<div class="featured-card-foot">'
     +(label ? '<span class="featured-card-label">'+label+' →</span>' : '<span></span>')
     +'<span class="featured-card-arrow">'+ICO.arrow+'</span>'
@@ -2313,13 +2325,27 @@ function renderHome() {
   // Anonymous tool desk (LEN-287): same page, personalization layer off — fixed
   // top trio, no Resume chip, no "Your tools"/Customize, no "More Tools" label.
   var anon = lpIsAnon();
-  var featuredIds = anon ? ['amo', 'deal-read', 'dscr'] : resolveFeaturedIds();
+  // Anon desk top trio is fixed (LEN-304): Amortization, Payment Fit, Lender Waterfall.
+  var featuredIds = anon ? ['amo', 'affordability', 'waterfall'] : resolveFeaturedIds();
   var featured = featuredIds.map(function(id){ return TOOLS.find(function(x){ return x.id === id; }); }).filter(Boolean);
   var isRef = function(t){ return REFERENCE_IDS.indexOf(t.id) !== -1; };
   // Tools kept off the home dashboard (Deal Log has its own sidebar home; SBA Fees
   // is too basic to surface here) — see HOME_HIDE. They still live on their category page.
-  var liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && HOME_HIDE.indexOf(t.id) === -1 && !isRef(t); });
-  var reference = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && isRef(t); });
+  var liveRest, reference;
+  if (anon) {
+    // One flat grid for anonymous visitors (LEN-304): lead with Deal Analysis +
+    // Secretary of State Search, then the rest in TOOLS order. Compliance Desk is
+    // folded in here — no separate Reference section for the logged-out home.
+    var ANON_REST_LEAD = ['deal-read', 'registry'];
+    var anonPool = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && HOME_HIDE.indexOf(t.id) === -1; });
+    var anonLead = ANON_REST_LEAD.map(function(id){ return anonPool.find(function(t){ return t.id === id; }); }).filter(Boolean);
+    var anonTail = anonPool.filter(function(t){ return ANON_REST_LEAD.indexOf(t.id) === -1; });
+    liveRest = anonLead.concat(anonTail);
+    reference = [];
+  } else {
+    liveRest = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && HOME_HIDE.indexOf(t.id) === -1 && !isRef(t); });
+    reference = TOOLS.filter(function(t){ return t.status === 'live' && featuredIds.indexOf(t.id) === -1 && isRef(t); });
+  }
 
   var html = '';
 
