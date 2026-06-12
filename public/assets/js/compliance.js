@@ -171,11 +171,33 @@
       document.head.appendChild(s);
     },
 
-    // ── Host UI: compact borrower-state selector + conditional note ──────
+    // Canonical Borrower-state field styling (LEN-317). Mirrors the Deal
+    // Analysis `.lp-state-field` (uppercase 10.5px label + 15px/600 select in a
+    // 44px box) so every calculator's state field is visually identical.
+    // Self-contained + scoped so it renders the same regardless of host-page CSS.
+    _ensureHostCSS: function () {
+      if (document.getElementById('lp-compliance-host-css')) return;
+      var s = document.createElement('style');
+      s.id = 'lp-compliance-host-css';
+      s.textContent =
+        "[data-lp-compliance-host] .lp-cmp-field{margin-bottom:16px;max-width:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}"
+        + "[data-lp-compliance-host] .lp-cmp-lbl{display:block;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#8b918b;margin-bottom:7px}"
+        + "[data-lp-compliance-host] .lp-cmp-lbl .lp-cmp-i{display:inline-flex;vertical-align:-2px;color:#aab0aa;cursor:help;margin:0 1px}"
+        + "[data-lp-compliance-host] .lp-cmp-lbl .lp-cmp-i:hover{color:#2D6A4F}"
+        + "[data-lp-compliance-host] .lp-cmp-lbl .lp-cmp-note{font-weight:700;color:#aab0aa}"
+        + "[data-lp-compliance-host] .lp-cmp-box{position:relative;display:flex;align-items:center;background:#fff;border:1.5px solid #e7e8e2;border-radius:10px;height:44px;padding:0 12px;transition:border-color .15s}"
+        + "[data-lp-compliance-host] .lp-cmp-box:focus-within{border-color:#2D6A4F}"
+        + "[data-lp-compliance-host] .lp-cmp-box select{flex:1;min-width:0;border:none;outline:none;background:none;font-family:inherit;font-size:15px;font-weight:600;color:#191e1b;cursor:pointer;appearance:none;-webkit-appearance:none}"
+        + "[data-lp-compliance-host] .lp-cmp-box .lp-cmp-chev{position:absolute;right:11px;color:#8b918b;pointer-events:none;display:flex}";
+      document.head.appendChild(s);
+    },
+
+    // ── Host UI: canonical borrower-state field + conditional note ───────
     // Pages opt in with <div data-lp-compliance-host></div>. Silent when the
     // selected state has nothing to say.
     _renderHost: function (host) {
       if (!this.isEnabled()) { host.innerHTML = ''; return; }
+      this._ensureHostCSS();
       var self = this;
       var current = this.getState();
       var opts = '<option value="">Borrower state…</option>' + Object.keys(US_STATES).sort().map(function (c) {
@@ -193,12 +215,16 @@
         }
       }
 
+      // circle-i info + chevron-down, matching the Deal Analysis field
+      var infoSvg = '<span class="lp-cmp-i" tabindex="0" role="img" aria-label="Why state matters" title="Some states require an APR disclosure on commercial financing offers. Set the borrower state and any required disclosure is flagged automatically.">'
+        + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>';
+      var chevSvg = '<span class="lp-cmp-chev"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>';
+
       host.innerHTML =
-        '<div style="display:flex;flex-direction:column;align-items:flex-end;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
-        + '<label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#6B7280;">'
-        + 'Borrower state'
-        + '<select data-lp-state-select style="font-size:12px;color:#374151;border:1px solid #E5E7EB;border-radius:6px;padding:3px 6px;background:#fff;max-width:160px;">' + opts + '</select>'
-        + '</label>' + noteHTML + '</div>';
+        '<div class="lp-cmp-field">'
+        + '<label class="lp-cmp-lbl">Borrower state ' + infoSvg + ' <span class="lp-cmp-note">for compliance</span></label>'
+        + '<div class="lp-cmp-box"><select data-lp-state-select aria-label="Borrower state">' + opts + '</select>' + chevSvg + '</div>'
+        + '</div>' + noteHTML;
 
       var sel = host.querySelector('[data-lp-state-select]');
       if (sel) sel.addEventListener('change', function () { self.setState(this.value); });

@@ -22,7 +22,9 @@ const PROD_NARR = {
 function pn(label){ return PROD_NARR[label] || {short:label.toLowerCase(), rank:3, credit:true, why:'capital structured around your situation'}; }
 function capFirst(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 function ttEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function ttRender(s){ return ttEsc(s).replace(/⟦/g,'<span class="hi">').replace(/⟧/g,'</span>'); }
+// Bold the umbrella product term wherever it surfaces in a talk track (LEN-317).
+// Display-only: the raw string is untouched, so copied text (ttPlain) stays clean.
+function ttRender(s){ return ttEsc(s).replace(/⟦/g,'<span class="hi">').replace(/⟧/g,'</span>').replace(/short-term financing/gi, m=>'<b>'+m+'</b>'); }
 function ttPlain(s){ return String(s).replace(/[⟦⟧]/g,''); }
 
 // ── Payment cadence by lead-product family ───────────────────

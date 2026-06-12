@@ -130,6 +130,26 @@ Fields should be persisted to localStorage via `PDF_HELPER.persistFields(scopeKe
 Call it on DOMContentLoaded with `['borrowerState','pdfPreparedBy','pdfPreparedByCompany',
 'pdfPreparedFor','pdfDealName','pdfLender']` (include whatever IDs exist in that calc).
 
+#### Borrower-state FIELD STYLE — canonical (LEN-317)
+The Borrower-state field is a **full-width block field**, never a tiny inline
+right-aligned selector. Deal Analysis (`calculators/deal-read/` `.lp-state-field`)
+is the reference; **every calculator's state field must match this font + size**:
+
+- **Label:** block, `font-size:10.5px`, `font-weight:700`, `letter-spacing:.07em`,
+  `text-transform:uppercase`, muted color (`#8b918b`), `margin-bottom:7px`. Text is
+  `Borrower state` + a circle-`i` info icon + a lighter-weight `for compliance` note.
+- **Control:** select sits in a 44px-tall box (`1.5px` border `#e7e8e2`,
+  `border-radius:10px`), with the **value at `font-size:15px`, `font-weight:600`,
+  ink color (`#191e1b`)** and a right-aligned chevron. One green border on focus
+  (`#2D6A4F`) — **no double box-shadow ring** (BRANDING.md §2 single-outline rule).
+
+This styling is rendered for free by the shared engine: `LPCompliance._renderHost`
+(`public/assets/js/compliance.js`) injects the scoped `lp-compliance-host-css` and
+the canonical markup, so any calc using `<div data-lp-compliance-host>` is already
+compliant. Calculators that render a **bespoke** state field (e.g. Amortization's
+per-card paired field) must still hit the **15px / 600 / ink** value size — a 12–13px
+or lighter-weight state value is a design bug.
+
 ### Tooltip icon
 Lowercase `i` only. No circles, question marks, or other shapes.
 `title` attribute for simple hover text; component for richer content.
