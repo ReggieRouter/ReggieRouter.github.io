@@ -60,6 +60,9 @@
   }
   logEvent('affordability', 'view'); // anonymous + signed-in (LEN-285)
 </script>
+<!-- Tenant white-label branding (LEN-306) - inert without a tenant session -->
+<link rel="stylesheet" href="../public/assets/css/white-label.css">
+<script type="module" src="../js/branding.js"></script>
 <script type="module" src="../js/quote-log.js"></script>
 <!-- Save gate (LEN-285): offers sign-in when an anonymous user saves a deal -->
 <script type="module" src="../js/save-gate.js"></script>
@@ -68,7 +71,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
-  --lp-green: #1A3C2E;
+  --lp-green: var(--tenant-primary, #1A3C2E);
   --lp-green-mid: #2D6A4F;
   --lp-green-light: #f0fdf4;
   --lp-green-soft: #ecfdf3;
@@ -637,7 +640,7 @@ body.is-embedded .lp-main { padding-top: 16px; }
 
 <div class="lp-main">
     <div class="print-header-content">
-        <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
+        <img data-tenant-logo src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
         <h1>Payment Fit</h1>
     </div>
 
@@ -976,6 +979,8 @@ body.is-embedded .lp-main { padding-top: 16px; }
         <div class="print-watermark">
             Powered by LendPaper | hello@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.
         </div>
+        <!-- Tenant contact line on printed/PDF docs (LEN-306) -->
+        <div data-tenant-doc-footer hidden></div>
     </div>
 </div>
 

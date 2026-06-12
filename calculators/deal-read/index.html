@@ -21,7 +21,7 @@
    LendPaper · Deal Analysis — clean white / green calculator system
    ════════════════════════════════════════════════════════════ */
 :root{
-  --green:#1A3C2E; --green-dk:#0f2a1f; --green-wash:#eef5ef; --green-line:#cde3d2;
+  --green:var(--tenant-primary, #1A3C2E); --green-dk:#0f2a1f; --green-wash:#eef5ef; --green-line:#cde3d2;
   --ink:#191e1b; --ink-2:#454b47; --muted:#8b918b; --faint:#aab0aa;
   --line:#e7e8e2; --line-2:#eff0ea; --bg:#fff; --bg-2:#f7f8f5;
 
@@ -1171,6 +1171,9 @@ select.uw-ctrl{cursor:pointer}
   }
   logEvent('deal-read', 'view'); // anonymous + signed-in (LEN-285)
 </script>
+<!-- Tenant white-label branding (LEN-306) - inert without a tenant session -->
+<link rel="stylesheet" href="../../public/assets/css/white-label.css">
+<script type="module" src="../../js/branding.js"></script>
 <script type="module" src="../../js/quote-log.js"></script>
 <!-- Save gate (LEN-285): offers sign-in when an anonymous user saves a deal -->
 <script type="module" src="../../js/save-gate.js"></script>

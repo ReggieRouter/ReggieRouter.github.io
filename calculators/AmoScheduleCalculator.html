@@ -56,7 +56,7 @@
         :root {
             --brand-primary: #111827;
             --brand-secondary: #6B7280;
-            --brand-accent: #1A3C2E;
+            --brand-accent: var(--tenant-primary, #1A3C2E);
             --brand-accent-hover: #065F46;
             --brand-tint: #F0FDF4;
             --brand-border: #E5E7EB;
@@ -380,7 +380,7 @@
         body.pdf-export-mode .pdf-document {
             display: block !important;
             --ink: #101827; --muted: #65758b; --soft: #f7faf9; --line: #dbe4e8;
-            --green: #1A3C2E; --green-mid: #17613f; --green-soft: #effaf3;
+            --green: var(--tenant-primary, #1A3C2E); --green-mid: #17613f; --green-soft: #effaf3;
             --amber-bg: #fffdf4; --amber-line: #f3d675; --amber-ink: #7c4a03;
             --mint-line: #b7efcc; --mint-bg: #fbfffc;
             color: var(--ink);
@@ -1413,6 +1413,9 @@
   logEvent('amortization', 'view'); // anonymous + signed-in (LEN-285)
 </script>
 <!-- Quote Log: exposes window.saveEstimate / window.LPQuoteLog (LEN-123) -->
+<!-- Tenant white-label branding (LEN-306) - inert without a tenant session -->
+<link rel="stylesheet" href="../public/assets/css/white-label.css">
+<script type="module" src="../js/branding.js"></script>
 <script type="module" src="../js/quote-log.js"></script>
 <!-- Save gate (LEN-285): offers sign-in when an anonymous user saves a deal -->
 <script type="module" src="../js/save-gate.js"></script>
@@ -1424,7 +1427,7 @@
     <!-- Main Workspace -->
     <main class="w-full relative">
         <div class="print-header-content">
-            <img src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
+            <img data-tenant-logo src="../public/assets/brand/logo-lockup-light.svg" alt="LendPaper Logo">
             <h1>Amortization Report</h1>
         </div>
 
@@ -1444,6 +1447,12 @@
         <!-- PDF Details module (#pdfDocDetails) relocated into the primary card's
              left input column (LEN-183) — see the card template below. -->
 
+        <!-- Doc Combine (LEN-308): client-side pdf-lib merge of lender contracts +
+             the amortization schedule. Renders itself; documents never leave the device. -->
+        <div id="doc-combine" class="no-print" style="margin:24px auto 0; max-width:1000px;"></div>
+        <!-- Share quote link (LEN-310, paid): renders only for tenants with features.share_links -->
+        <div id="quote-share" class="no-print" style="margin:16px auto 0; max-width:560px;"></div>
+
         <!-- Redesigned borrower-facing document (LEN-124). Built from calculator state at
              Save time by buildPdfDocument(); hidden on screen, revealed only in pdf-export-mode. -->
         <div id="pdf-document" class="pdf-document" aria-hidden="true"></div>
@@ -1455,6 +1464,8 @@
         <div class="print-watermark">
             Powered by LendPaper | hello@lendpaper.com | lendpaper.com — Ask about whitelabeling and custom tools.
         </div>
+        <!-- Tenant contact line on printed/PDF docs (LEN-306) -->
+        <div data-tenant-doc-footer hidden></div>
     </main>
 
     <!-- Global Layout Toast -->
@@ -3550,7 +3561,63 @@ ${id === 1 ? `
                 console.log('%c origination fee field online. you\'re doing better than you think.', 'color:#1D9E75; font-style:italic;');
             }
         };
+
+        // ── White-label hooks (LEN-308 / LEN-310) ────────────────────────────────
+        // First card (in DOM order) with a completed calculation = the deal being shared.
+        function _lpPrimaryCalc() {
+            const cards = document.querySelectorAll('[id^="cardContainer-"]');
+            for (const card of cards) {
+                const cid = card.id.replace('cardContainer-', '');
+                const c = lastCalc[cid];
+                if (c && c.schedule && c.schedule.length) return c;
+            }
+            return null;
+        }
+        function _lpTermLabel(c) {
+            const unit = c.termUnit === 'wks' ? 'wk' : c.termUnit === 'days' ? 'day' : 'mo';
+            return c.term + ' ' + unit + (c.term === 1 ? '' : 's');
+        }
+
+        // Doc Combine (LEN-308): branded amortization PDF from live calc state.
+        // pdf-lib output (not window.print) because print output can't be merged.
+        window.LP_getAmortizationPdfBytes = async () => {
+            const c = _lpPrimaryCalc();
+            if (!c) throw new Error('Run a calculation first.');
+            const meta = fmtUsd0.format(c.amt) + ' funded · ' + _lpTermLabel(c) +
+                ' · ' + c.pmtLabel.toLowerCase() + ' ' + fmtUsd.format(c.pmt) +
+                (c.startDateStr ? ' · starts ' + c.startDateStr : '');
+            const rows = c.schedule.map(r => ({
+                n: r.period,
+                payment: fmtUsd.format(r.pmt),
+                principal: fmtUsd.format(r.principal),
+                interest: fmtUsd.format(r.interest),
+                balance: fmtUsd.format(r.balance)
+            }));
+            return window.LP_DocCombine.buildAmortizationPdf(meta, rows);
+        };
+
+        // Quote share (LEN-310): payload snapshot for the hosted branded quote link.
+        window.LP_getQuotePayload = () => {
+            const c = _lpPrimaryCalc();
+            if (!c) throw new Error('Run a calculation first.');
+            return {
+                title: 'Payment Breakdown',
+                meta: fmtUsd0.format(c.amt) + ' · ' + _lpTermLabel(c),
+                lines: [
+                    { label: 'Funded',           value: fmtUsd0.format(c.amt) },
+                    { label: 'Total payback',    value: fmtUsd.format(c.payback) },
+                    { label: c.pmtLabel,         value: fmtUsd.format(c.pmt) },
+                    { label: 'Factor',           value: c.factor.toFixed(2) + '×' },
+                    { label: 'Est. maturity',    value: c.maturityDate || '—' }
+                ]
+            };
+        };
     </script>
+    <!-- pdf-lib + Doc Combine module (LEN-308) — UI renders into #doc-combine above -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
+    <script src="../js/doc-combine.js" defer></script>
+    <!-- Share quote link (LEN-310, paid) — renders into #quote-share, after branding.js resolves -->
+    <script type="module" src="../js/quote-share.js"></script>
 
     <!-- Print-only footer rendered by the browser's native print engine on every page -->
     <div class="lp-print-footer">

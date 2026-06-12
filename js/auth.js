@@ -113,6 +113,8 @@ async function signOut() {
   // Clear the cached greeting name so a shared machine never greets the next
   // visitor with the previous user's name (LEN-285).
   try { localStorage.removeItem('lp_first_name'); } catch (e) {}
+  // Clear cached tenant branding so the next user isn't mis-branded (LEN-306).
+  try { sessionStorage.removeItem('lp_tenant_v1'); } catch (e) {}
   navTop('/index.html');
 }
 
