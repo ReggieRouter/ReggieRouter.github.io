@@ -22,9 +22,9 @@
 <meta charset="UTF-8">
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2026.06.12.0002">
+<meta name="version" content="2026.06.12.0003">
 <script type="text/javascript">
-  window.CURRENT_VERSION = "2026.06.12.0002";
+  window.CURRENT_VERSION = "2026.06.12.0003";
 
   // Force active cleanup of legacy service workers
   if ('serviceWorker' in navigator) {
@@ -116,6 +116,8 @@
 <link rel="canonical" href="https://lendpaper.com/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Tenant white-label chrome (LEN-306) — inert without a tenant session -->
+<link rel="stylesheet" href="/public/assets/css/white-label.css">
 <!-- Pre-paint auth decision (sync) to avoid a personalized/anonymous flash. -->
 <script>
 (function(){
@@ -1326,13 +1328,14 @@ html.pre-landing #landing { display: flex; }
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
+      <svg data-tenant-hide width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1A3C2E" stroke-width="2.5" stroke-linecap="square" stroke-linejoin="miter">
         <path d="M4 4v16h11l5-5V4H4z"/>
         <path d="M15 20v-5h5" stroke-linecap="butt"/>
         <path d="M9 9v6"/>
         <path d="M9 15h4"/>
       </svg>
-      <div><span class="logo-lend">lend</span><span class="logo-paper">paper</span><span class="logo-dot">.</span></div>
+      <div data-tenant-hide><span class="logo-lend">lend</span><span class="logo-paper">paper</span><span class="logo-dot">.</span></div>
+      <img data-tenant-logo alt="" hidden>
     </div>
 
     <nav>
@@ -1423,6 +1426,7 @@ html.pre-landing #landing { display: flex; }
         <div class="auth-account" id="authAccount">
           <span class="auth-avatar" id="authAvatar"></span>
           <span class="auth-name" id="authName"></span>
+          <a data-tenant-profile-link href="/company-profile.html" hidden>Company profile</a>
           <button class="btn-signout" id="signoutBtn" type="button">Sign out</button>
         </div>
       </div>
@@ -1435,6 +1439,7 @@ html.pre-landing #landing { display: flex; }
         <div class="home-greeting">
           <div class="greeting-text" id="greetingText"></div>
           <div class="greeting-sub" id="greetingSubtitle"></div>
+          <div data-tenant-contact hidden></div>
         </div>
         <div id="homeTools"></div>
       </div>
@@ -1647,6 +1652,8 @@ html.pre-landing #landing { display: flex; }
 <script src="public/assets/js/tools.js?v=2026.06.11.0005"></script>
 <!-- Auth state for topbar control (hard-gate login, LEN-68). config.js sets SUPABASE_* globals the auth module reads. -->
 <script src="js/config.js"></script>
+<!-- Tenant branding loader (LEN-306) — no-op for anonymous/non-tenant users -->
+<script type="module" src="/js/branding.js"></script>
 <script type="module">
   import { getSession, getProfile, signOut } from './js/auth.js';
   import { logEvent } from './js/analytics.js';

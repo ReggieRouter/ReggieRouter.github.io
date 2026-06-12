@@ -691,6 +691,7 @@ header {
       <button class="btn-ghost" id="nav-dashboard" onclick="showMainView('dashboard')">Dashboard</button>
       <button class="btn-ghost" id="nav-members" onclick="showMainView('members')">Members</button>
       <button class="btn-ghost" id="nav-adoption" onclick="showMainView('adoption')">Adoption</button>
+      <button class="btn-ghost" id="nav-whitelabel" onclick="showMainView('whitelabel')">White Label</button>
       <button class="btn-ghost" id="nav-recruiter" onclick="showMainView('recruiter')">Recruiter</button>
       <button class="btn-ghost" id="nav-registry" onclick="showMainView('registry')">Registry</button>
       <button class="btn-ghost" id="compliance-nav-btn" onclick="showMainView('compliance')">Compliance</button>
@@ -730,6 +731,7 @@ header {
       <div id="dashboard-view" style="display:none"></div>
       <div id="members-view" style="display:none"></div>
       <div id="adoption-view" style="display:none"></div>
+      <div id="whitelabel-view" style="display:none"></div>
       <div id="recruiter-view" style="display:none"></div>
       <div id="registry-view" style="display:none"></div>
       <div id="compliance-view" style="display:none"></div>
@@ -1148,6 +1150,7 @@ const ADMIN_SCOPES = [
   { key: 'registry',   label: 'Lender Registry / Data Health', panel: true },
   { key: 'compliance', label: 'Compliance',          panel: true  },
   { key: 'adoption',   label: 'Adoption',            panel: true  },
+  { key: 'whitelabel', label: 'White Label',         panel: true  },
   { key: 'staging',    label: 'Staging',             panel: true  },
 ];
 const PANEL_SCOPES = ADMIN_SCOPES.filter(s => s.panel).map(s => s.key);
@@ -1170,6 +1173,7 @@ function applyPermissions(profile) {
   // Header nav — show only granted scopes (super-admin sees all).
   const navMap = {
     'nav-dashboard': 'dashboard', 'nav-members': 'members', 'nav-adoption': 'adoption',
+    'nav-whitelabel': 'whitelabel',
     'nav-registry': 'registry', 'compliance-nav-btn': 'compliance', 'nav-staging': 'staging',
     'nav-overrides': 'registry',
   };
@@ -1367,6 +1371,7 @@ function showMainView(view) {
   document.getElementById('lender-detail').style.display = view==='detail' ? 'block' : 'none';
   document.getElementById('members-view').style.display = view==='members' ? 'block' : 'none';
   document.getElementById('adoption-view').style.display = view==='adoption' ? 'block' : 'none';
+  document.getElementById('whitelabel-view').style.display = view==='whitelabel' ? 'block' : 'none';
   document.getElementById('recruiter-view').style.display = view==='recruiter' ? 'block' : 'none';
   document.getElementById('registry-view').style.display = view==='registry' ? 'block' : 'none';
   document.getElementById('compliance-view').style.display = view==='compliance' ? 'block' : 'none';
@@ -1374,6 +1379,7 @@ function showMainView(view) {
   if (view === 'dashboard') renderDashboard();
   if (view === 'members') renderMembersPanel();
   if (view === 'adoption') renderAdoptionPanel();
+  if (view === 'whitelabel') renderWhiteLabelPanel();
   if (view === 'recruiter') renderRecruiterPanel();
   if (view === 'registry') renderRegistryPanel();
   if (view === 'compliance') renderCompliancePanel();
@@ -3127,6 +3133,79 @@ let memInvites = [];
 let memInvitesError = null;
 let memTab = 'pending';
 let memRealtimeStarted = false;
+
+// ── White Label (LEN-330) ────────────────────────────────
+// Lists tenants and opens a fully-branded preview of their instance.
+// Preview = the tenant row handed to branding.js via URL fragment; it never
+// touches the admin's profile, and quote-log.js skips Deal Log writes while
+// the preview flag is set (preview PDFs leave no trace).
+let wlTenants = [];
+
+async function renderWhiteLabelPanel() {
+  const view = document.getElementById('whitelabel-view');
+  view.innerHTML = `
+    <div class="dash-header">
+      <div><h1>White Label</h1><p>Tenant brands — preview any tenant's instance, including their PDF output</p></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn-ghost" onclick="renderWhiteLabelPanel()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="dash-section" id="wl-table-wrap" style="color:var(--muted);font-size:13px">Loading…</div>
+    <div class="dash-section" style="font-size:12px;color:var(--muted)">
+      Preview opens in a new tab and applies the brand to that tab only (your profile is untouched).
+      PDFs generated inside a preview are not recorded to the Deal Log. Use the Exit control in the
+      preview tab — or just close it — to leave preview mode.
+    </div>`;
+
+  const wrap = document.getElementById('wl-table-wrap');
+  const { data: tenants, error } = await sb.from('tenants')
+    .select('id, slug, company_name, logo_url, primary_color, contact_name, contact_email, contact_phone, active, features')
+    .order('company_name');
+  if (error) { wrap.innerHTML = `<span style="color:#b3261e">Could not load tenants: ${esc(error.message)} — has the "admin read tenants" policy been run?</span>`; return; }
+  wlTenants = tenants || [];
+  if (!wlTenants.length) { wrap.innerHTML = 'No tenants yet — seed one via supabase/tenants.sql.'; return; }
+
+  // Linked-user counts (profiles RLS already grants the admin full read for Members)
+  const { data: links } = await sb.from('profiles').select('tenant_id').not('tenant_id', 'is', null);
+  const counts = {};
+  (links || []).forEach(r => { counts[r.tenant_id] = (counts[r.tenant_id] || 0) + 1; });
+
+  wrap.innerHTML = `
+    <table class="mem-table">
+      <thead><tr>
+        <th>Logo</th><th>Tenant</th><th>Contact</th><th>Brand color</th><th>Share links</th><th>Users</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${wlTenants.map((t, i) => `
+          <tr>
+            <td>${t.logo_url ? `<img src="${esc(t.logo_url)}" alt="" style="max-height:24px;max-width:90px;display:block">` : '<span style="color:var(--muted)">—</span>'}</td>
+            <td><strong>${esc(t.company_name)}</strong><br><span style="font-size:11px;color:var(--muted)">${esc(t.slug)}</span></td>
+            <td style="font-size:12px">${esc(t.contact_name || '—')}${t.contact_email ? `<br>${esc(t.contact_email)}` : ''}${t.contact_phone ? `<br>${esc(t.contact_phone)}` : ''}</td>
+            <td><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${esc(t.primary_color || '#1A3C2E')};vertical-align:-2px;margin-right:6px"></span>${esc(t.primary_color || '—')}</td>
+            <td>${t.features && t.features.share_links === true ? 'enabled' : 'off'}</td>
+            <td>${counts[t.id] || 0}</td>
+            <td>${t.active ? 'active' : 'inactive'}</td>
+            <td><button class="btn-mem-approve" style="padding:6px 12px;font-size:12px" onclick="wlPreviewTenant(${i})">Preview instance</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function wlPreviewTenant(i) {
+  const t = wlTenants[i];
+  if (!t) return;
+  // Same shape branding.js caches from a real tenant session, plus the preview
+  // marker that suppresses Deal Log writes and shows the exit pill.
+  const payload = {
+    slug: t.slug, company_name: t.company_name, logo_url: t.logo_url,
+    primary_color: t.primary_color, contact_name: t.contact_name,
+    contact_email: t.contact_email, contact_phone: t.contact_phone,
+    active: true, features: t.features || {}, _preview: true,
+  };
+  // Unicode-safe base64 for the fragment handoff (fragments never hit the server)
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  window.open('/#lp-tenant-preview=' + encodeURIComponent(b64), '_blank');
+}
 
 async function renderMembersPanel() {
   const view = document.getElementById('members-view');

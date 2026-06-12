@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Company Profile · LendPaper</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='32' height='32'%3E%3Crect width='24' height='24' rx='5' fill='%2314532D'/%3E%3Cpath d='M4 4v16h11l5-5V4H4z' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M15 20v-5h5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 9v6' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3Cpath d='M9 15h4' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='square' stroke-linejoin='miter'/%3E%3C/svg%3E">
+<meta property="og:title" content="Company Profile — LendPaper" />
+<meta property="og:description" content="Manage your white-label branding and contact identity. Questions? Email hello@lendpaper.com" />
+<meta property="og:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+<meta property="og:url" content="https://lendpaper.com/company-profile.html" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://lendpaper.com/public/assets/brand/og-image.png" />
+<!--
+  ============================================================
+  LendPaper White Labeling — company-profile.html (LEN-309)
+
+  Self-serve admin profile page for white-label tenants.
+  Evan (Brightwell Funding) edits: company name, contact name,
+  email, phone, brand color, and uploads his logo. Changes apply
+  site-wide on next page load (branding.js cache is cleared on save).
+  Non-tenant users see a locked state.
+  ============================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/public/assets/css/white-label.css">
+<script src="/js/config.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #F3F4F6;
+    color: #111827;
+  }
+  .tp-wrap { max-width: 640px; margin: 0 auto; padding: 24px 16px 64px; }
+  .tp-back {
+    display: inline-block;
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--tenant-primary);
+    text-decoration: none;
+  }
+  .tp-back:hover { text-decoration: underline; }
+  .tp-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .tp-header h1 { font-family: 'Figtree', 'Inter', sans-serif; font-weight: 700; font-size: 1.3rem; margin: 0; }
+  .tp-sub { margin: 0 0 24px; font-size: 0.85rem; color: #6B7280; }
+
+  .tp-card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .tp-card h2 { font-family: 'Figtree', 'Inter', sans-serif; font-weight: 700; font-size: 0.95rem; margin: 0 0 14px; }
+
+  .tp-field { margin-bottom: 14px; }
+  .tp-field label { display: block; font-size: 0.78rem; font-weight: 600; color: #444; margin-bottom: 4px; }
+  .tp-field input[type="text"],
+  .tp-field input[type="email"],
+  .tp-field input[type="tel"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+  }
+  /* Single green border on focus — no double ring (BRANDING.md §2) */
+  .tp-field input:focus { outline: 2px solid var(--tenant-primary); outline-offset: -1px; border-color: transparent; }
+  .tp-hint { font-size: 0.74rem; color: #888; margin-top: 4px; }
+
+  /* Logo uploader */
+  .tp-logo-row { display: flex; align-items: center; gap: 16px; }
+  .tp-logo-preview {
+    width: 96px; height: 96px;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    background: #fafafa;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    flex: none;
+  }
+  .tp-logo-preview img { max-width: 100%; max-height: 100%; }
+  .tp-logo-preview span { font-size: 0.72rem; color: #999; padding: 8px; text-align: center; }
+  .tp-upload-btn {
+    padding: 10px 16px;
+    border: 1.5px solid var(--tenant-primary);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--tenant-primary);
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+  }
+
+  /* Color picker */
+  .tp-color-row { display: flex; align-items: center; gap: 12px; }
+  .tp-color-row input[type="color"] {
+    width: 52px; height: 40px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 2px;
+    background: #fff;
+    cursor: pointer;
+  }
+  .tp-color-hex { font-size: 0.88rem; color: #555; font-variant-numeric: tabular-nums; }
+
+  .tp-save {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background: var(--tenant-primary);
+    color: #fff;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .tp-save:disabled { opacity: 0.5; cursor: not-allowed; }
+  .tp-status { margin-top: 10px; font-size: 0.85rem; text-align: center; min-height: 1.2em; }
+  .tp-status.ok { color: #1b7a3d; }
+  .tp-status.err { color: #b3261e; }
+
+  .tp-locked {
+    text-align: center;
+    padding: 48px 16px;
+    color: #6B7280;
+    font-size: 0.9rem;
+  }
+  .tp-locked a { color: var(--tenant-primary); }
+</style>
+</head>
+<body>
+<div class="tp-wrap">
+  <a class="tp-back" href="/">&larr; Back to tools</a>
+  <div class="tp-header">
+    <h1>Company profile</h1>
+  </div>
+  <p class="tp-sub">This is how your brand appears across your tools and on every document you send.</p>
+
+  <div id="tp-locked" class="tp-locked" hidden>
+    Sign in with a white-label account to manage a company profile.<br><br>
+    <a href="/login.html">Sign in</a>
+  </div>
+
+  <div id="tp-form" hidden>
+    <div class="tp-card">
+      <h2>Logo</h2>
+      <div class="tp-logo-row">
+        <div class="tp-logo-preview" id="tp-logo-preview"><span>No logo yet</span></div>
+        <div>
+          <button type="button" class="tp-upload-btn" id="tp-upload-btn">Upload logo</button>
+          <input type="file" id="tp-logo-input" accept="image/png,image/svg+xml,image/jpeg,image/webp" hidden>
+          <p class="tp-hint">PNG with transparent background or SVG works best (PNG / JPG / SVG / WebP — not HEIC). Max 2&nbsp;MB.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tp-card">
+      <h2>Company</h2>
+      <div class="tp-field">
+        <label for="tp-company">Company name</label>
+        <input type="text" id="tp-company" autocomplete="organization">
+      </div>
+      <div class="tp-field">
+        <label for="tp-color">Brand color</label>
+        <div class="tp-color-row">
+          <input type="color" id="tp-color" value="#1A3C2E">
+          <span class="tp-color-hex" id="tp-color-hex">#1A3C2E</span>
+        </div>
+        <p class="tp-hint">Used for buttons, accents, and document headers.</p>
+      </div>
+    </div>
+
+    <div class="tp-card">
+      <h2>Contact — shown on your homepage and every PDF</h2>
+      <div class="tp-field">
+        <label for="tp-name">Your name</label>
+        <input type="text" id="tp-name" autocomplete="name">
+      </div>
+      <div class="tp-field">
+        <label for="tp-email">Email</label>
+        <input type="email" id="tp-email" autocomplete="email">
+      </div>
+      <div class="tp-field">
+        <label for="tp-phone">Phone</label>
+        <input type="tel" id="tp-phone" autocomplete="tel">
+      </div>
+    </div>
+
+    <button type="button" class="tp-save" id="tp-save">Save changes</button>
+    <p class="tp-status" id="tp-status"></p>
+  </div>
+</div>
+
+<script type="module">
+import { supabase as sb } from '/js/auth.js';
+
+const MAX_LOGO_BYTES = 2 * 1024 * 1024;
+let tenantId = null;
+let logoFile = null;
+
+const $ = (id) => document.getElementById(id);
+
+async function load() {
+  const { data: { session } = {} } = await sb.auth.getSession();
+  if (!session) return lock();
+
+  const { data: profile } = await sb
+    .from('profiles').select('tenant_id').eq('id', session.user.id).maybeSingle();
+  if (!profile || !profile.tenant_id) return lock();
+  tenantId = profile.tenant_id;
+
+  const { data: t, error } = await sb
+    .from('tenants')
+    .select('company_name, logo_url, primary_color, contact_name, contact_email, contact_phone')
+    .eq('id', tenantId).maybeSingle();
+  if (error || !t) return lock();
+
+  $('tp-company').value = t.company_name || '';
+  $('tp-name').value = t.contact_name || '';
+  $('tp-email').value = t.contact_email || '';
+  $('tp-phone').value = t.contact_phone || '';
+  if (t.primary_color) {
+    $('tp-color').value = t.primary_color;
+    $('tp-color-hex').textContent = t.primary_color.toUpperCase();
+    document.documentElement.style.setProperty('--tenant-primary', t.primary_color);
+  }
+  if (t.logo_url) setPreview(t.logo_url);
+
+  $('tp-form').hidden = false;
+}
+
+function lock() {
+  $('tp-locked').hidden = false;
+}
+
+function setPreview(src) {
+  $('tp-logo-preview').innerHTML = '';
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = 'Logo preview';
+  $('tp-logo-preview').appendChild(img);
+}
+
+function status(msg, cls) {
+  const el = $('tp-status');
+  el.textContent = msg;
+  el.className = 'tp-status ' + (cls || '');
+}
+
+// Logo selection
+$('tp-upload-btn').addEventListener('click', () => $('tp-logo-input').click());
+$('tp-logo-input').addEventListener('change', (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (f.size > MAX_LOGO_BYTES) {
+    status('Logo is over 2 MB — export a smaller version.', 'err');
+    return;
+  }
+  logoFile = f;
+  setPreview(URL.createObjectURL(f));
+  status('Logo ready — save changes to apply.', 'ok');
+});
+
+// Color live preview
+$('tp-color').addEventListener('input', (e) => {
+  $('tp-color-hex').textContent = e.target.value.toUpperCase();
+  document.documentElement.style.setProperty('--tenant-primary', e.target.value);
+});
+
+// Save
+$('tp-save').addEventListener('click', async () => {
+  const btn = $('tp-save');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  status('');
+  try {
+    const update = {
+      company_name: $('tp-company').value.trim(),
+      contact_name: $('tp-name').value.trim(),
+      contact_email: $('tp-email').value.trim(),
+      contact_phone: $('tp-phone').value.trim(),
+      primary_color: $('tp-color').value
+    };
+
+    if (!update.company_name) throw new Error('Company name is required.');
+
+    // 1. Upload logo if a new one was chosen
+    if (logoFile) {
+      const ext = (logoFile.name.split('.').pop() || 'png').toLowerCase();
+      const path = tenantId + '/logo.' + ext;
+      const { error: upErr } = await sb.storage
+        .from('tenant-assets')
+        .upload(path, logoFile, { upsert: true, contentType: logoFile.type });
+      if (upErr) throw new Error('Logo upload failed: ' + upErr.message);
+      const { data: pub } = sb.storage.from('tenant-assets').getPublicUrl(path);
+      // Cache-bust so the new logo shows immediately site-wide
+      update.logo_url = pub.publicUrl + '?v=' + Date.now();
+    }
+
+    // 2. Save tenant row
+    const { error: tErr } = await sb.from('tenants').update(update).eq('id', tenantId);
+    if (tErr) throw new Error(tErr.message);
+
+    // 3. Clear branding cache so every page picks up changes
+    try { sessionStorage.removeItem('lp_tenant_v1'); } catch (_) {}
+
+    logoFile = null;
+    status('Saved. Your branding updates everywhere on next page load.', 'ok');
+  } catch (e) {
+    status(e.message || 'Could not save changes.', 'err');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Save changes';
+});
+
+load();
+</script>
+</body>
+</html>

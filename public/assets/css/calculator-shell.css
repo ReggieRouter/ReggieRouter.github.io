@@ -4,7 +4,7 @@
  */
 
 :root {
-  --lp-green: #1A3C2E;
+  --lp-green: var(--tenant-primary, #1A3C2E);
   --lp-green-dark: #0f4022;
   --lp-green-soft: rgba(26, 60, 46, 0.08);
   --lp-dark: #111827;
