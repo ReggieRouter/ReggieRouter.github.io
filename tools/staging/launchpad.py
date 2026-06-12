@@ -209,6 +209,11 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         pass
 
 
+def esc(s):
+    return (str(s).replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace('"', "&quot;"))
+
+
 def index_html(rows, retired=()):
     payload = [{k: r[k] for k in ("name", "branch", "ticket", "port", "changed", "missing",
                                   "htmls", "tips", "status", "tags", "checks",
