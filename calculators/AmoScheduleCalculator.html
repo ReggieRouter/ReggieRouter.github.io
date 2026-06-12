@@ -2442,9 +2442,8 @@
                                 </div>
                             </div>
 
-                            <!-- Start Date + Borrower State paired (LEN-183): two "context" fields
-                                 (when it begins / where the borrower is). Held side by side and
-                                 top-aligned at all widths; Borrower State drives the compliance engine. -->
+                            <!-- Start Date (LEN-183 context field). Borrower State moved out of this
+                                 pair to the foot of the input column (LEN-226 cross-calc convention). -->
                             <div class="lp-pair-row">
                                 <div>
                                     <label>Start Date</label>
@@ -2452,26 +2451,33 @@
                                         <input type="date" id="start-${id}" value="${today}" class="lp-input font-bold" onchange="calcCard(${id})">
                                     </div>
                                 </div>
-                                <div>
-                                    <label class="lp-pair-optlabel">Borrower State
-                                        <span class="tooltip no-print">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                                            <span class="tooltiptext">Will check for state-specific disclosure requirements (CA, NY, VA, UT, and others)</span>
-                                        </span>
-                                        <span class="lp-optnote">— optional</span>
-                                    </label>
-                                    <div class="lp-input-group lp-input-light pr-2">
-                                        <select id="state-${id}" class="w-full py-2 px-3 outline-none text-[#191e1b] text-[15px] font-semibold bg-transparent appearance-none cursor-pointer" onchange="setBorrowerState(${id}, this.value)">
-                                            <option value="">Select state…</option>
-                                            ${LP_STATE_OPTIONS}
-                                        </select>
-                                    </div>
-                                </div>
                             </div>
-                            <!-- Compliance disclosure note, anchored under the paired row (LEN-126) -->
-                            <div id="stateNote-${id}" class="lp-state-note no-print"></div>
                         </div>
 ${id === 1 ? `
+                        <!-- LEN-226: Borrower State + PDF Details grouped at the foot of the LEFT
+                             input column — cross-calc convention (LEN-183/217). One global instance
+                             (primary card only): scenarios share one borrower, and setBorrowerState
+                             already syncs LPCompliance globally. Field markup/styling is the
+                             LEN-317 canonical 15px/600 field — do not restyle. -->
+                        <div class="lp-pair-row no-print">
+                            <div>
+                                <label class="lp-pair-optlabel">Borrower State
+                                    <span class="tooltip no-print">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                        <span class="tooltiptext">Will check for state-specific disclosure requirements (CA, NY, VA, UT, and others)</span>
+                                    </span>
+                                    <span class="lp-optnote">— optional</span>
+                                </label>
+                                <div class="lp-input-group lp-input-light pr-2">
+                                    <select id="state-${id}" class="w-full py-2 px-3 outline-none text-[#191e1b] text-[15px] font-semibold bg-transparent appearance-none cursor-pointer" onchange="setBorrowerState(${id}, this.value)">
+                                        <option value="">Select state…</option>
+                                        ${LP_STATE_OPTIONS}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Compliance disclosure note, anchored under the state field (LEN-126) -->
+                        <div id="stateNote-${id}" class="lp-state-note no-print"></div>
                         <!-- PDF Details (LEN-160 / LEN-183): relocated to the foot of the input
                              column (was stranded below the schedule table). One global instance —
                              primary card only — since the metadata is a single set per saved PDF. -->
