@@ -129,6 +129,9 @@
             if (reason === 'save' || reason === 'savelog') {
               document.getElementById('loginHeadline').textContent = 'Sign in to save this deal';
               document.getElementById('loginSub').textContent = 'Your Quote Log keeps every quote you generate. Free — takes 10 seconds.';
+            } else if (reason === 'game') {
+              document.getElementById('loginHeadline').textContent = 'Sign in to play';
+              document.getElementById('loginSub').textContent = 'The leaderboard needs to know who to crown. Free — takes 10 seconds, then straight to the game.';
             }
           } catch (e) {}
         })();

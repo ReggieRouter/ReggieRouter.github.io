@@ -77,6 +77,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .race-modal-icon{font-size:34px;margin-bottom:8px;}
 .race-later{display:block;width:100%;background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;margin-top:12px;cursor:pointer;}
 .race-later:hover{color:var(--text);}
+#auth-veil{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--muted);}
 /* Leaderboard mode card */
 .mode-lb{text-align:left;padding:18px 22px;grid-column:span 2;}
 .lb-tease-txt{font-size:11px;color:var(--muted);font-style:italic;margin-top:5px;line-height:1.5;}
@@ -257,6 +258,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </style>
 </head>
 <body>
+<div id="auth-veil">🔐 Checking your credentials…</div>
 <div class="wrap">
   <div class="logo">LendPaper <span>/ Deal Desk</span></div>
 
@@ -275,7 +277,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="modal-box">
       <div class="race-modal-icon">⚡</div>
       <div class="modal-title">Race Mode</div>
-      <div class="modal-sub">20 seconds on the clock, every question. No time to talk yourself out of the right answer.<br><br>That's the point — forcing fast recognition is how terms stop being trivia and start being reflexes. If you know it, you know it <em>now</em>.</div>
+      <div class="modal-sub">20 seconds on the clock — and speed pays. A correct answer is 100 pts, plus up to <strong>+100 more</strong> the faster you lock it in. Untimed tops out at 700. On the clock? <strong>1,400.</strong><br><br>That's the point — forcing fast recognition is how terms stop being trivia and start being reflexes. If you know it, you know it <em>now</em>.</div>
       <button class="btn" style="width:100%" onclick="confirmRace()">Put me on the clock ⚡</button>
       <button class="race-later" onclick="dismissRace()">Maybe later</button>
     </div>
@@ -289,7 +291,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div id="streak-bar" class="streak-bar hidden">🔥 <span id="streak-count">3</span>-day streak</div>
     <p class="first-timer-nudge">First time? Start with Quick Play.</p>
     <div class="race-row">
-      <div class="race-txt">⚡ Race Mode <span>20-second shot clock on glossary quizzes</span></div>
+      <div class="race-txt">⚡ Race Mode <span>20-second shot clock — faster answers score more</span></div>
       <button class="race-switch" id="race-switch" role="switch" aria-checked="false" aria-label="Race Mode" onclick="toggleRace()"><span class="race-knob"></span></button>
     </div>
     <div class="mode-cards">
@@ -1108,7 +1110,10 @@ function pick(idx){
   const btns=document.querySelectorAll('.choice'), isOk=G._choices[idx].correct;
   btns.forEach((b,i)=>{b.disabled=true;if(G._choices[i].correct)b.classList.add('correct');else if(i===idx&&!isOk)b.classList.add('wrong');});
   const fb=document.getElementById('fb');
-  if(isOk){G.correct++;G.streak++;G.score+=100;G.bestStreak=Math.max(G.bestStreak,G.streak);fb.textContent='✓ Correct! +100 pts';fb.className='fb ok';markDot('dots',G.idx,'c');const sk=document.getElementById('streak');sk.textContent=G.streak>=2?(STREAKS[Math.min(G.streak,STREAKS.length-1)]||`⚡ ${G.streak} in a row!`):'';}
+  if(isOk){
+    let pts=100,bonusTxt='';
+    if(G.race){const secs=(Date.now()-G.t0)/1000;const bonus=Math.max(0,Math.min(100,Math.round((20-secs)*5)));if(bonus>0){pts+=bonus;bonusTxt=` · +${bonus} speed ⚡`;}}
+    G.correct++;G.streak++;G.score+=pts;G.bestStreak=Math.max(G.bestStreak,G.streak);fb.textContent=`✓ Correct! +${pts} pts${bonusTxt}`;fb.className='fb ok';markDot('dots',G.idx,'c');const sk=document.getElementById('streak');sk.textContent=G.streak>=2?(STREAKS[Math.min(G.streak,STREAKS.length-1)]||`⚡ ${G.streak} in a row!`):'';}
   else{G.streak=0;fb.textContent='✗ Not quite — correct answer highlighted above';fb.className='fb bad';markDot('dots',G.idx,'w');}
   document.getElementById('score-pill').textContent=`${G.score} pts`;
   setTimeout(nextQ,1200);
@@ -1131,7 +1136,7 @@ function endGlossary(){
   _lastRace=G.race;
   const rank=GL_RANKS.find(r=>G.correct>=r.min);
   const avg=G.speeds.length?(G.speeds.reduce((a,b)=>a+b,0)/G.speeds.length).toFixed(1)+'s':'—';
-  _lastEndScore=G.score; _lastEndTotal=700;
+  _lastEndScore=G.score; _lastEndTotal=G.race?1400:700;
   maybeShowNameModal({
     game:'glossary', score:G.score, total:7, correct:G.correct, rank:rank.title,
     title:G.correct>=6?'Deal cleared. 🎉':G.correct>=4?'Not bad, not bad.':'Back to the glossary with you.',
@@ -1353,6 +1358,21 @@ document.addEventListener('keydown',e=>{
     if((e.key==='Enter'||e.key===' ')&&OG.answered){nextObj();}
   }
 });
+</script>
+<script type="module">
+  // Login gate (LEN-335) — deliberate carve-out from the LEN-285 open-access
+  // rule: /game requires sign-in so plays are attributable. Do not remove.
+  import { requireApprovedUser } from '/js/auth.js';
+  import { logEvent } from '/js/analytics.js';
+  const profile = await requireApprovedUser('/login.html?reason=game');
+  if(!profile) throw new Error('not signed in — redirecting to login');
+  // Tie leaderboard identity to the account: derive "First L." once, skip the name modal
+  if(!localStorage.getItem('lp_name') && profile.full_name){
+    const parts=profile.full_name.trim().split(/\s+/);
+    setPlayerName(parts.length>1?`${parts[0]} ${parts[parts.length-1][0]}.`:parts[0]);
+  }
+  document.getElementById('auth-veil').remove();
+  logEvent('game','view');
 </script>
 </body>
 </html>
