@@ -393,6 +393,15 @@ header {
 .lp-bool-no  { color: var(--muted); }
 .lp-pending-inline { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
 .lp-pending-note { font-size: 11px; color: var(--amber); font-weight: 600; }
+.conf-badge { display: inline-block; border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.3px; vertical-align: middle; margin-left: 4px; }
+.conf-badge.verified { background: #DCFCE7; color: #166534; }
+.conf-badge.single { background: var(--amber-light); color: var(--amber); }
+.conf-badge.estimate { background: #DBEAFE; color: #1D4ED8; }
+.conf-sources { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; width: 100%; }
+.conf-source-link { font-size: 10px; color: var(--muted); text-decoration: none; border: 1px solid var(--border); border-radius: 3px; padding: 0 5px; white-space: nowrap; }
+.conf-source-link:hover { color: var(--green-mid); border-color: var(--green-mid); }
+.conf-source-t1 { border-color: #86EFAC; color: #166534; }
+.conf-source-t3 { border-color: #93C5FD; color: #1D4ED8; }
 .btn-inline-approve { background: var(--green-light); color: var(--green); border: 1px solid #86EFAC; border-radius: 5px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
 .btn-inline-reject  { background: var(--red-light); color: var(--red); border: 1px solid #FECACA; border-radius: 5px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
 .btn-field-edit { background: none; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 11px; color: var(--muted); padding: 1px 5px; margin-left: 4px; vertical-align: middle; }
@@ -1257,7 +1266,7 @@ async function loadLenders() {
   // Get all pending changes (full records for dashboard list)
   const { data: counts } = await sb
     .from('pending_changes')
-    .select('id, lender_id, field_name, old_value, new_value, created_at')
+    .select('id, lender_id, field_name, old_value, new_value, created_at, confidence, sources, search_queries')
     .eq('status', 'pending')
     .order('created_at', { ascending: false });
 
@@ -2175,13 +2184,16 @@ function renderLivePreview() {
       // formatters return HTML — don't esc() their output; plain formatValue() returns text — do esc() it
       const oldFmt = formatter ? formatter(tryParse(p.old_value)) : esc(formatValue(p.old_value));
       const newFmt = formatter ? formatter(tryParse(p.new_value)) : esc(formatValue(p.new_value));
+      const confBadge = confBadgeHtml(p.confidence);
+      const sourcesHtml = sourceLinksHtml(p.sources);
       return `<span class="lp-old"><span class="diff-was">was</span>${oldFmt}</span><span class="lp-new"><span class="diff-now">→</span>${newFmt}</span>
               <div class="lp-pending-inline">
-                <span class="lp-pending-note">Scraped change</span>
+                <span class="lp-pending-note">Scraped change${confBadge}</span>
                 <button class="btn-inline-approve" onclick="approveChange('${p.id}','${field}',${JSON.stringify(p.new_value)})">Keep New</button>
                 <button class="btn-inline-reject" onclick="rejectChange('${p.id}','${field}',${JSON.stringify(p.old_value)})">Revert</button>
                 ${editBtn}
-              </div>`;
+              </div>
+              ${sourcesHtml}`;
     }
     return `${currentFmt || '<span style="color:var(--muted)">—</span>'}${lockIcon}${editBtn}`;
   }
@@ -2238,10 +2250,10 @@ function renderLivePreview() {
       const appArgs = JSON.stringify(p.new_value).replace(/"/g,'&quot;');
       const rejArgs = JSON.stringify(p.old_value).replace(/"/g,'&quot;');
       return chips + `<div class="lp-pending-inline" style="width:100%;margin-top:8px">
-        <span class="lp-pending-note">Scraped change</span>
+        <span class="lp-pending-note">Scraped change${confBadgeHtml(p.confidence)}</span>
         <button class="btn-inline-approve" onclick="approveChange('${p.id}','${field}',${JSON.stringify(p.new_value)})">Keep New</button>
         <button class="btn-inline-reject" onclick="rejectChange('${p.id}','${field}',${JSON.stringify(p.old_value)})">Revert</button>
-      </div>`;
+      </div>${sourceLinksHtml(p.sources)}`;
     }
     return cur.map(x => `<span class="lp-chip">${esc(x)}</span>`).join('') || '<span style="color:var(--muted);font-size:13px">—</span>';
   }
@@ -2694,6 +2706,24 @@ function toggleFAQ() {
 }
 
 // ── Helpers ───────────────────────────────────────────────
+function confBadgeHtml(confidence) {
+  if (!confidence) return '';
+  const cls = confidence === 'VERIFIED' ? 'verified' : confidence === 'SINGLE_SOURCE' ? 'single' : 'estimate';
+  const label = confidence === 'VERIFIED' ? '✓ VERIFIED' : confidence === 'SINGLE_SOURCE' ? 'SINGLE SOURCE' : confidence;
+  return `<span class="conf-badge ${cls}">${label}</span>`;
+}
+
+function sourceLinksHtml(sources) {
+  if (!sources || !Array.isArray(sources) || !sources.length) return '';
+  const links = sources.map(s => {
+    const tier  = s.tier || 'T2';
+    const lbl   = s.label || (s.url || '').replace(/https?:\/\/(www\.)?/, '').split('/')[0];
+    const cls   = tier === 'T1' ? 'conf-source-t1' : tier === 'T3' ? 'conf-source-t3' : '';
+    return `<a class="conf-source-link ${cls}" href="${esc(s.url||'#')}" target="_blank" title="${esc(s.url||'')}">${esc(tier)}: ${esc(lbl)}</a>`;
+  }).join('');
+  return `<div class="conf-sources">${links}</div>`;
+}
+
 function tryParse(v) {
   if (v === null || v === undefined) return null;
   try { return JSON.parse(v); } catch { return v; }
@@ -2926,15 +2956,25 @@ function renderDashboard() {
       const checked = selectedChangeIds.has(c.id);
       const noteTxt = getChangeNote(c.lender_id, c.field_name);
       const hasNote = !!noteTxt;
+      const srcLinks = (() => {
+        const ss = c.sources;
+        if (Array.isArray(ss) && ss.length) {
+          return ss.map(s => {
+            const tier = s.tier || 'T2';
+            const lbl  = s.label || (s.url || '').replace(/https?:\/\/(www\.)?/,'').split('/')[0];
+            const cls  = tier === 'T1' ? 'conf-source-t1' : tier === 'T3' ? 'conf-source-t3' : '';
+            return `<a class="conf-source-link ${cls}" href="${esc(s.url||'#')}" target="_blank" title="${esc(s.url||'')}">${esc(tier)}: ${esc(lbl)}</a>`;
+          }).join(' ');
+        }
+        return srcUrl ? `<a href="${esc(srcUrl)}" target="_blank" style="color:var(--green);font-size:12px;text-decoration:none">↗ Source</a>` : '<span style="color:var(--muted);font-size:12px">—</span>';
+      })();
       return `<tr class="${susp ? 'suspicious-row' : ''}${checked ? ' row-selected' : ''}" id="prow-${c.id}">
         <td style="width:28px"><input type="checkbox" class="pchk" data-cid="${c.id}" ${checked ? 'checked' : ''} onchange="toggleChangeSelect('${c.id}', this)" /></td>
         <td style="cursor:pointer;color:var(--green);font-weight:500;white-space:nowrap" onclick="selectLender(${c.lender_id})">${lenderName}</td>
-        <td><span class="field-label">${esc(fieldLabel)}</span>${susp ? '<span class="suspicious-badge">⚠ ZERO/BLANK</span>' : ''}</td>
+        <td><span class="field-label">${esc(fieldLabel)}</span>${confBadgeHtml(c.confidence)}${susp ? '<span class="suspicious-badge">⚠ ZERO/BLANK</span>' : ''}</td>
         <td><span class="val-old">${oldFmt || '—'}</span></td>
         <td id="pnow-${c.id}">${pendingNowControl(c)}</td>
-        <td style="white-space:nowrap">
-          ${srcUrl ? `<a href="${esc(srcUrl)}" target="_blank" style="color:var(--green);font-size:12px;text-decoration:none" title="${esc(srcUrl)}">↗ Source</a>` : '<span style="color:var(--muted);font-size:12px">—</span>'}
-        </td>
+        <td style="white-space:nowrap">${srcLinks}</td>
         <td style="font-size:11px;color:var(--muted);white-space:nowrap">${dateStr}</td>
         <td id="pact-${c.id}">
           <div class="action-btns">
