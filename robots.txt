@@ -1,10 +1,2 @@
 User-agent: *
-Allow: /
-
-# Internal tools — not for indexing
-Disallow: /lp-panel
-Disallow: /lp-panel.html
-Disallow: /lp-hire
-Disallow: /lp-hire.html
-
-Sitemap: https://lendpaper.com/sitemap.xml
+Disallow: /

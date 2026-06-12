@@ -47,6 +47,9 @@ async function getCurrentUserId() {
 
 async function logEvent(tool, event, metadata = {}) {
   try {
+    // STAGING GUARD: only the production hostname writes usage_events —
+    // staging/preview instances must never pollute the adoption funnel.
+    if (!/(^|\.)lendpaper\.com$/.test(location.hostname)) return;
     const userId = await getCurrentUserId();
     const { error } = await supabase.from('usage_events').insert({
       session_id: getSessionId(),
