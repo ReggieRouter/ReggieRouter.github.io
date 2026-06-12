@@ -17,11 +17,20 @@ The `main` mirror worktree is intentionally skipped (it's what's already live).
 Re-scans on every index load, so new worktrees show up without a restart.
 
 Review state (LEN-313) persists in ~/lp-worktrees/.launchpad-state.json, keyed by
-worktree dir name: {"status": pending|approved|needs-work, "tags": [...], "updated": iso}.
-POST /api/state {"name", "status"?, "tags"?} merges + saves atomically.
+worktree dir name: {"status": pending|approved|needs-work, "tags": [...],
+"checks": {"<tip-id>": true}, "updated": iso}.
+POST /api/state {"name", "status"?, "tags"?, "checks"?} merges + saves atomically
+("checks" merges per key; a false value deletes that key).
+
+v2.1 (LEN-315): per-card goal + request date read from ~/lp-worktrees/.launchpad-intents.json
+(read-only manifest owned elsewhere; keyed by ticket id OR worktree dir name; falls back
+to the last commit subject), staleness meta line + amber warning band, hard block for
+worktrees whose merge-base predates DESIGN_EPOCH (the 6/11 open-access flag-day), and
+always-visible what-to-check checkboxes that persist in the state file.
 """
 import datetime
 import functools
+import hashlib
 import http.server
 import json
 import os
@@ -33,7 +42,9 @@ import threading
 BASE_PORT = int(os.environ.get("LP_STAGING_PORT", "8780"))
 WORKTREE_ROOT = os.path.expanduser("~/lp-worktrees")
 STATE_PATH = os.path.join(WORKTREE_ROOT, ".launchpad-state.json")
+INTENTS_PATH = os.path.join(WORKTREE_ROOT, ".launchpad-intents.json")
 VALID_STATUS = {"pending", "approved", "needs-work"}
+DESIGN_EPOCH = "5bcb6c9d8fab3053b18d54061ce179c6570bb9da"  # open-access merge 6/11 — bump on each design flag-day.
 # `git worktree list` must run from inside the repo; the script always lives in a worktree.
 REPO_ANCHOR = os.path.dirname(os.path.abspath(__file__))
 
@@ -57,7 +68,8 @@ def ok(args, cwd=None):
 
 
 def discover():
-    """Return [{path, branch, ticket, changed}] for every worktree except the main mirror."""
+    """Return [{path, branch, ticket, changed, subject, last, base, behind, epoch_ok}]
+    for every worktree except the main mirror."""
     out = sh(["git", "worktree", "list", "--porcelain"], cwd=REPO_ANCHOR)
     items, cur = [], {}
     for line in out.splitlines():
@@ -89,7 +101,16 @@ def discover():
                           *(l[3:] for l in dirty.splitlines() if len(l) > 3)})
         m = re.search(r"len-(\d+)", branch, re.I)
         ticket = f"LEN-{m.group(1)}" if m else ""
-        result.append({"path": path, "branch": branch, "ticket": ticket, "changed": changed})
+        # staleness vs origin/main (LEN-315) — rev-list uses --count, no commit list materialized
+        mb = sh(["git", "merge-base", "HEAD", "origin/main"], cwd=path)
+        behind = sh(["git", "rev-list", "--count", "HEAD..origin/main"], cwd=path)
+        result.append({"path": path, "branch": branch, "ticket": ticket, "changed": changed,
+                       "subject": sh(["git", "log", "-1", "--format=%s", "HEAD"], cwd=path),
+                       "last": sh(["git", "log", "-1", "--format=%cs", "HEAD"], cwd=path),
+                       "base": sh(["git", "log", "-1", "--format=%cs", mb], cwd=path) if mb else "",
+                       "behind": int(behind) if behind.isdigit() else 0,
+                       "epoch_ok": bool(mb) and ok(["git", "merge-base", "--is-ancestor",
+                                                    DESIGN_EPOCH, mb], cwd=path)})
     result.sort(key=lambda r: r["path"])
     return result
 
@@ -141,6 +162,16 @@ def load_state():
         return {}
 
 
+def load_intents():
+    """Goal manifest (LEN-315) — owned by a separate process; read-only here."""
+    try:
+        with open(INTENTS_PATH) as f:
+            d = json.load(f)
+        return d if isinstance(d, dict) else {}
+    except Exception:
+        return {}
+
+
 def save_state(state):
     tmp = STATE_PATH + ".tmp"
     with open(tmp, "w") as f:
@@ -176,9 +207,12 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
 
 def index_html(rows):
     payload = [{k: r[k] for k in ("name", "branch", "ticket", "port", "changed",
-                                  "htmls", "tips", "status", "tags")} for r in rows]
+                                  "htmls", "tips", "status", "tags", "checks",
+                                  "goal", "requested", "goal_src",
+                                  "last", "base", "behind", "epoch_ok")} for r in rows]
     data = json.dumps(payload).replace("</", "<\\/")
-    return TEMPLATE.replace("{{DATA}}", data).replace("{{N}}", str(len(rows)))
+    n = sum(1 for r in rows if r["epoch_ok"])  # blocked rows don't count as in flight
+    return TEMPLATE.replace("{{DATA}}", data).replace("{{N}}", str(n))
 
 
 class LaunchpadHandler(http.server.BaseHTTPRequestHandler):
@@ -196,14 +230,24 @@ class LaunchpadHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         rows = discover()
         state = load_state()
+        intents = load_intents()
         for r in rows:
             r["port"] = ensure_server(r["path"])
             r["name"] = os.path.basename(r["path"])
             st = state.get(r["name"], {})
             r["status"] = st.get("status", "pending")
             r["tags"] = st.get("tags", []) if isinstance(st.get("tags"), list) else []
+            r["checks"] = st.get("checks", {}) if isinstance(st.get("checks"), dict) else {}
+            it = intents.get(r["ticket"]) or intents.get(r["name"]) or {}
+            it = it if isinstance(it, dict) else {}
+            r["goal"] = str(it.get("goal") or "").strip()
+            r["requested"] = str(it.get("requested") or "").strip()
+            r["goal_src"] = "manifest" if r["goal"] else "commit"
+            if not r["goal"]:
+                r["goal"], r["requested"] = r["subject"], ""
             r["htmls"] = [c for c in r["changed"] if c.endswith(".html")]
-            r["tips"] = tips_for(r["changed"])
+            r["tips"] = [{"id": hashlib.sha1(t.encode()).hexdigest()[:8], "text": t}
+                         for t in tips_for(r["changed"])]
         html = index_html(rows).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -225,6 +269,8 @@ class LaunchpadHandler(http.server.BaseHTTPRequestHandler):
             self._json(400, {"error": "bad status"}); return
         if "tags" in body and not isinstance(body["tags"], list):
             self._json(400, {"error": "bad tags"}); return
+        if "checks" in body and not isinstance(body["checks"], dict):
+            self._json(400, {"error": "bad checks"}); return
         with _state_lock:
             state = load_state()
             entry = state.get(name) if isinstance(state.get(name), dict) else None
@@ -233,6 +279,14 @@ class LaunchpadHandler(http.server.BaseHTTPRequestHandler):
                 entry["status"] = body["status"]
             if "tags" in body:
                 entry["tags"] = sorted({str(t) for t in body["tags"]})[:8]
+            if "checks" in body:
+                checks = entry.get("checks") if isinstance(entry.get("checks"), dict) else {}
+                for k, v in body["checks"].items():  # merge: truthy sets, falsy deletes
+                    if v:
+                        checks[str(k)] = True
+                    else:
+                        checks.pop(str(k), None)
+                entry["checks"] = checks
             entry["updated"] = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
             state[name] = entry
             save_state(state)
@@ -279,11 +333,19 @@ header{background:var(--brand);color:#fff;padding:20px 28px}header h1{margin:0;f
 .card.needswork .kicker,.card.needswork .slim-kicker{color:var(--amber)}
 .slim-kicker{font-size:11px;font-weight:700;letter-spacing:.06em}
 .wt{font-size:15px;font-weight:600;margin:9px 0 3px}
+.goal{margin:2px 0 8px}
+.goal-k{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--mid)}
+.goal-t{font-size:13.5px;margin-top:2px}
+.goal-src{color:var(--muted);font-size:12px;font-weight:400}
 .changed{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
-.tips{margin-top:9px;font-size:12.5px}
-.tips summary{cursor:pointer;color:var(--mid);font-weight:600;font-size:12px}
-.tips ul{margin:6px 0 2px;padding-left:20px;color:#3a443e}
-.tips li{margin:2px 0}
+.meta{font-size:11.5px;color:var(--muted);margin-top:5px}
+.warnband{background:#FFFBEB;color:#B45309;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 11px;margin:0 0 10px}
+.blockband{background:#FEF2F2;color:#991B1B;font-size:12.5px;font-weight:700;border-radius:8px;padding:7px 11px;margin:0 0 10px}
+.checks{margin-top:11px}
+.checks-k{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--mid)}
+.check{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;color:#3a443e;margin-top:5px;cursor:pointer}
+.check input{margin:1px 0 0;accent-color:var(--brand)}
+.nudge{font-size:12px;color:var(--mid);font-weight:600;align-self:center}
 .links{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
 .linkgroup{display:inline-flex}
 .links a{font-size:13px;text-decoration:none;color:var(--brand);background:#fff;border:1px solid var(--brand);border-radius:7px 0 0 7px;padding:6px 11px;font-weight:600}
@@ -312,6 +374,15 @@ header{background:var(--brand);color:#fff;padding:20px 28px}header h1{margin:0;f
 .confetti i{position:absolute;top:6px;width:6px;height:10px;animation:cfall .8s ease-out forwards}
 @keyframes cfall{from{transform:translateY(0) rotate(0deg);opacity:1}to{transform:translateY(96px) rotate(230deg);opacity:0}}
 .empty{color:var(--muted);font-size:14px;padding:14px 0}
+#blocked{margin-top:36px;border-left:3px solid #991B1B;padding-left:15px}
+.blocked-title{font-size:13px;font-weight:700;color:#991B1B;margin-bottom:10px}
+.brow{background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 13px;margin-bottom:8px}
+.brow-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px}
+.brow-goal{color:#3a443e;font-size:12px}
+.brow-meta{color:var(--muted);font-size:11.5px}
+.bshow{margin-left:auto;font-size:11.5px;color:#991B1B;background:#fff;border:1px solid #991B1B;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:600}
+.bshow:hover{background:#991B1B;color:#fff}
+.brow .card{margin:10px 0 0}
 .refresh{font-size:12px;color:var(--muted);margin-top:18px}
 .keys{font-size:12px;color:var(--muted);margin-top:8px}
 .keys b{font-weight:600;color:#3a443e;font-family:ui-monospace,Menlo,monospace}
@@ -323,17 +394,27 @@ header{background:var(--brand);color:#fff;padding:20px 28px}header h1{margin:0;f
 <div class="filters" id="filters"></div>
 <div class="clearcard" id="clear" hidden><b>Queue clear.</b><span>Every worktree reviewed. Nothing waiting on you.</span></div>
 <div id="cards"></div>
+<div id="blocked" hidden><div class="blocked-title">Out of date — predates the 6/11 open-access design</div><div id="brows"></div></div>
 <div class="refresh">Auto-discovered on load — new worktrees appear, merged/removed ones drop off. Reload to refresh.</div>
 <div class="keys"><b>j</b>/<b>k</b> move · <b>a</b> approve · <b>w</b> needs work · <b>p</b> preview first page</div>
 </div>
 <script>
 "use strict";
 const ROWS = {{DATA}};
+const ACTIVE = ROWS.filter(r=>r.epoch_ok);     // the review queue
+const BLOCKED = ROWS.filter(r=>!r.epoch_ok);   // predate DESIGN_EPOCH — bottom section only
+const TODAY = new Date();
 const TAGS = ["pending","finished","priority","monetize"];
 const FILTERS = [["all","All"],["priority","Priority"],["pending","Pending"],
-  ["finished","Finished"],["monetize","Monetize"],["needswork","Needs work"]];
+  ["finished","Finished"],["monetize","Monetize"],["needswork","Needs work"],
+  ["outdated","Out of date"]];
 let filter = "all";
 ROWS.forEach((r,i)=>{ r._i = i; r._pv = {}; });
+function isStale(r){
+  if(!r.epoch_ok) return false;
+  const age = r.base ? (TODAY - new Date(r.base)) / 864e5 : 0;
+  return r.behind >= 10 || age > 3;
+}
 
 function el(tag, cls, text){
   const e = document.createElement(tag);
@@ -370,6 +451,11 @@ function setStatus(r, s){
 function toggleTag(r, t){
   r.tags = r.tags.includes(t) ? r.tags.filter(x=>x!==t) : r.tags.concat(t);
   post(r, {tags: r.tags});
+  updateAll();
+}
+function setCheck(r, id, on){
+  if(on) r.checks[id] = true; else delete r.checks[id];
+  post(r, {checks: {[id]: on}});
   updateAll();
 }
 function togglePreview(r, p, pi){
@@ -415,6 +501,13 @@ function buildCard(r){
               el("span","slim-kicker",""));
   slim.addEventListener("click", ()=>card.classList.toggle("peek"));
   const full = el("div","full");
+  if(!r.epoch_ok){
+    full.append(el("div","blockband",
+      "OUT OF DATE — built on the pre-open-access design. Rebase before any rollout."));
+  }else if(isStale(r)){
+    full.append(el("div","warnband", "Based on main from " + r.base + " — " + r.behind +
+      " commits behind. Verify against the live site before approving."));
+  }
   const top = el("div","top");
   if(r.ticket){
     const a = el("a","ticket", r.ticket);
@@ -424,14 +517,29 @@ function buildCard(r){
   }
   top.append(el("span","branch", r.branch), el("span","port", ":" + r.port), el("span","kicker",""));
   full.append(top, el("div","wt", r.name));
+  const goal = el("div","goal");
+  goal.append(el("div","goal-k","SHOULD ACCOMPLISH"));
+  const gt = el("div","goal-t", r.goal || "(no goal recorded)");
+  if(r.goal_src === "commit") gt.append(el("span","goal-src"," (from last commit)"));
+  else if(r.requested) gt.append(el("span","goal-src"," · requested " + r.requested));
+  goal.append(gt);
+  full.append(goal);
   const ch = r.changed.slice(0,8).join(", ") + (r.changed.length > 8 ? " …" : "");
   full.append(el("div","changed", ch || "no diff vs main"));
-  const det = el("details","tips");
-  det.append(el("summary", null, "What to check"));
-  const ul = el("ul");
-  r.tips.forEach(t=>ul.append(el("li", null, t)));
-  det.append(ul);
-  full.append(det);
+  full.append(el("div","meta", "last commit " + r.last + " · branched from main of " + r.base +
+    (r.behind ? " · " + r.behind + " behind main" : " · current with main")));
+  const checks = el("div","checks");
+  checks.append(el("div","checks-k","WHAT TO CHECK"));
+  r.tips.forEach(t=>{
+    const lab = el("label","check");
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = !!r.checks[t.id];
+    cb.addEventListener("change", ()=>setCheck(r, t.id, cb.checked));
+    lab.append(cb, el("span", null, t.text));
+    checks.append(lab);
+  });
+  full.append(checks);
   const links = el("div","links");
   pagesOf(r).forEach((p, pi)=>{
     const g = el("span","linkgroup");
@@ -453,6 +561,9 @@ function buildCard(r){
     chips.append(c);
   });
   const btns = el("div","btns");
+  const nudge = el("span","nudge","All checks done.");
+  nudge.hidden = true;
+  btns.append(nudge);
   const ap = el("button","btn approve","Approve");
   ap.addEventListener("click", ()=>setStatus(r,"approved"));
   const nw = el("button","btn needsw","Needs work");
@@ -467,6 +578,7 @@ function buildCard(r){
 
 function updateCard(r){
   const c = r._card;
+  if(!c) return;  // blocked card not yet expanded via Show anyway
   c.classList.toggle("approved", r.status === "approved");
   c.classList.toggle("needswork", r.status === "needs-work");
   c.classList.toggle("finished", r.tags.includes("finished"));
@@ -476,28 +588,33 @@ function updateCard(r){
   c.querySelector(".kicker").textContent = k;
   c.querySelector(".slim-kicker").textContent = k || "FINISHED";
   c.querySelectorAll(".chip").forEach(ch=>ch.classList.toggle("on", r.tags.includes(ch.dataset.tag)));
+  const done = r.tips.length > 0 && r.tips.every(t=>r.checks[t.id]);
+  c.querySelector(".nudge").hidden = !(done && r.status === "pending");
+  if(!r.epoch_ok) return;  // blocked cards live in their own section — no filters/ordering
   c.style.order = group(r) * 1000 + r._i;
-  c.style.display = matches(r, filter) ? "" : "none";
+  c.style.display = (filter !== "outdated" && matches(r, filter)) ? "" : "none";
 }
 
 function updateAll(){
   ROWS.forEach(updateCard);
   FILTERS.forEach(([f, label])=>{
-    const n = ROWS.filter(r=>matches(r, f)).length;
+    const n = f === "outdated" ? BLOCKED.length : ACTIVE.filter(r=>matches(r, f)).length;
     const b = document.querySelector('[data-f="' + f + '"]');
     b.textContent = label + " (" + n + ")";
     b.classList.toggle("on", filter === f);
   });
-  const reviewed = ROWS.filter(r=>r.status === "approved" || r.tags.includes("finished")).length;
-  document.getElementById("progfill").style.width = ROWS.length ? (100 * reviewed / ROWS.length) + "%" : "0";
-  document.getElementById("proglabel").textContent = reviewed + " of " + ROWS.length + " reviewed";
-  const pendingLeft = ROWS.filter(r=>r.status === "pending" && !r.tags.includes("finished")).length;
-  document.getElementById("clear").hidden = !(ROWS.length && pendingLeft === 0);
+  const reviewed = ACTIVE.filter(r=>r.status === "approved" || r.tags.includes("finished")).length;
+  document.getElementById("progfill").style.width = ACTIVE.length ? (100 * reviewed / ACTIVE.length) + "%" : "0";
+  document.getElementById("proglabel").textContent = reviewed + " of " + ACTIVE.length + " reviewed";
+  const pendingLeft = ACTIVE.filter(r=>r.status === "pending" && !r.tags.includes("finished")).length;
+  document.getElementById("clear").hidden = filter === "outdated" || !(ACTIVE.length && pendingLeft === 0);
+  document.getElementById("blocked").hidden = !BLOCKED.length;
 }
 
 function visibleSorted(){
-  return ROWS.filter(r=>matches(r, filter))
-             .sort((a,b)=>(group(a)*1000 + a._i) - (group(b)*1000 + b._i));
+  if(filter === "outdated") return [];
+  return ACTIVE.filter(r=>matches(r, filter))
+               .sort((a,b)=>(group(a)*1000 + a._i) - (group(b)*1000 + b._i));
 }
 document.addEventListener("keydown", e=>{
   if(e.metaKey || e.ctrlKey || e.altKey) return;
@@ -530,9 +647,35 @@ FILTERS.forEach(([f])=>{
   b.addEventListener("click", ()=>{ filter = f; updateAll(); });
   fbar.append(b);
 });
+function buildBlockedRow(r){
+  const row = el("div","brow");
+  const line = el("div","brow-line");
+  line.append(el("span","slim-branch", r.branch));
+  if(r.ticket){
+    const a = el("a","ticket", r.ticket);
+    a.href = "https://linear.app/lendpaper/issue/" + r.ticket;
+    a.target = "_blank"; a.rel = "noopener";
+    line.append(a);
+  }
+  line.append(el("span","brow-goal", r.goal),
+              el("span","brow-meta", "last commit " + r.last + " · base " + (r.base || "?") +
+                " · " + r.behind + " behind"));
+  const b = el("button","bshow","Show anyway");
+  b.addEventListener("click", ()=>{
+    if(!r._card){ row.append(buildCard(r)); updateCard(r); }
+    else r._card.hidden = !r._card.hidden;
+    b.textContent = r._card.hidden ? "Show anyway" : "Hide";
+  });
+  line.append(b);
+  row.append(line);
+  return row;
+}
+
 const wrap = document.getElementById("cards");
-if(ROWS.length) ROWS.forEach(r=>wrap.append(buildCard(r)));
+if(ACTIVE.length) ACTIVE.forEach(r=>wrap.append(buildCard(r)));
 else wrap.append(el("div","empty","No in-flight worktrees found under ~/lp-worktrees/."));
+const brows = document.getElementById("brows");
+BLOCKED.forEach(r=>brows.append(buildBlockedRow(r)));
 updateAll();
 </script>
 </body></html>"""
