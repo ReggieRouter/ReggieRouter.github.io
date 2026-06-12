@@ -43,7 +43,7 @@ BASE_PORT = int(os.environ.get("LP_STAGING_PORT", "8780"))
 WORKTREE_ROOT = os.path.expanduser("~/lp-worktrees")
 STATE_PATH = os.path.join(WORKTREE_ROOT, ".launchpad-state.json")
 INTENTS_PATH = os.path.join(WORKTREE_ROOT, ".launchpad-intents.json")
-VALID_STATUS = {"pending", "approved", "needs-work"}
+VALID_STATUS = {"pending", "approved", "needs-work", "rejected"}
 DESIGN_EPOCH = "5bcb6c9d8fab3053b18d54061ce179c6570bb9da"  # open-access merge 6/11 — bump on each design flag-day.
 # `git worktree list` must run from inside the repo; the script always lives in a worktree.
 REPO_ANCHOR = os.path.dirname(os.path.abspath(__file__))
@@ -209,14 +209,18 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
         pass
 
 
-def index_html(rows):
+def index_html(rows, retired=()):
     payload = [{k: r[k] for k in ("name", "branch", "ticket", "port", "changed", "missing",
                                   "htmls", "tips", "status", "tags", "checks",
                                   "goal", "requested", "goal_src",
                                   "last", "base", "behind", "epoch_ok")} for r in rows]
     data = json.dumps(payload).replace("</", "<\\/")
     n = sum(1 for r in rows if r["epoch_ok"])  # blocked rows don't count as in flight
-    return TEMPLATE.replace("{{DATA}}", data).replace("{{N}}", str(n))
+    ret = (f"{len(retired)} retired request{'s' if len(retired) != 1 else ''} hidden "
+           f"(superseded / canceled / already shipped): {esc(', '.join(sorted(retired)))}. "
+           f"Restore via .launchpad-state.json." if retired else "")
+    return (TEMPLATE.replace("{{DATA}}", data).replace("{{N}}", str(n))
+                    .replace("{{RETIRED}}", ret))
 
 
 class LaunchpadHandler(http.server.BaseHTTPRequestHandler):
@@ -252,7 +256,11 @@ class LaunchpadHandler(http.server.BaseHTTPRequestHandler):
             r["htmls"] = [c for c in r["changed"] if c.endswith(".html")]
             r["tips"] = [{"id": hashlib.sha1(t.encode()).hexdigest()[:8], "text": t}
                          for t in tips_for(r["changed"])]
-        html = index_html(rows).encode("utf-8")
+        # retired = dead requests (superseded/canceled/shipped) — hidden entirely (LEN-321)
+        retired = [r["name"] for r in rows
+                   if isinstance(state.get(r["name"]), dict) and state[r["name"]].get("retired")]
+        rows = [r for r in rows if r["name"] not in retired]
+        html = index_html(rows, retired).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(html)))
@@ -275,6 +283,8 @@ class LaunchpadHandler(http.server.BaseHTTPRequestHandler):
             self._json(400, {"error": "bad tags"}); return
         if "checks" in body and not isinstance(body["checks"], dict):
             self._json(400, {"error": "bad checks"}); return
+        if "retired" in body and not isinstance(body["retired"], bool):
+            self._json(400, {"error": "bad retired"}); return
         with _state_lock:
             state = load_state()
             entry = state.get(name) if isinstance(state.get(name), dict) else None
@@ -283,6 +293,11 @@ class LaunchpadHandler(http.server.BaseHTTPRequestHandler):
                 entry["status"] = body["status"]
             if "tags" in body:
                 entry["tags"] = sorted({str(t) for t in body["tags"]})[:8]
+            if "retired" in body:
+                if body["retired"]:
+                    entry["retired"] = True
+                else:
+                    entry.pop("retired", None)
             if "checks" in body:
                 checks = entry.get("checks") if isinstance(entry.get("checks"), dict) else {}
                 for k, v in body["checks"].items():  # merge: truthy sets, falsy deletes
@@ -318,6 +333,7 @@ header{background:var(--brand);color:#fff;padding:20px 28px}header h1{margin:0;f
 .card:focus{outline:2px solid var(--brand);outline-offset:2px;box-shadow:none}
 .card.approved{border-left-color:var(--brand)}
 .card.needswork{border-left-color:var(--amber)}
+.card.rejected{border-left-color:#991B1B;opacity:.55}
 .card.finished{opacity:.55;padding:8px 17px}
 .card.finished.peek{opacity:.85;padding:14px 17px}
 .card.finished .full{display:none}
@@ -335,6 +351,8 @@ header{background:var(--brand);color:#fff;padding:20px 28px}header h1{margin:0;f
 .kicker{font-size:11px;font-weight:700;letter-spacing:.06em;margin-left:auto}
 .card.approved .kicker,.card.approved .slim-kicker{color:var(--brand)}
 .card.needswork .kicker,.card.needswork .slim-kicker{color:var(--amber)}
+.card.rejected .kicker,.card.rejected .slim-kicker{color:#991B1B}
+.btn.reject{color:#991B1B;border-color:#991B1B}
 .slim-kicker{font-size:11px;font-weight:700;letter-spacing:.06em}
 .wt{font-size:15px;font-weight:600;margin:9px 0 3px}
 .goal{margin:2px 0 8px}
@@ -402,8 +420,9 @@ header{background:var(--brand);color:#fff;padding:20px 28px}header h1{margin:0;f
 <div class="clearcard" id="clear" hidden><b>Queue clear.</b><span>Every worktree reviewed. Nothing waiting on you.</span></div>
 <div id="cards"></div>
 <div id="blocked" hidden><div class="blocked-title">Out of date — predates the 6/11 open-access design</div><div id="brows"></div></div>
+<div class="refresh">{{RETIRED}}</div>
 <div class="refresh">Auto-discovered on load — new worktrees appear, merged/removed ones drop off. Reload to refresh.</div>
-<div class="keys"><b>j</b>/<b>k</b> move · <b>a</b> approve · <b>w</b> needs work · <b>p</b> preview first page</div>
+<div class="keys"><b>j</b>/<b>k</b> move · <b>a</b> approve · <b>w</b> needs work · <b>x</b> reject · <b>p</b> preview first page</div>
 </div>
 <script>
 "use strict";
@@ -414,7 +433,7 @@ const TODAY = new Date();
 const TAGS = ["pending","finished","priority","monetize"];
 const FILTERS = [["all","All"],["priority","Priority"],["pending","Pending"],
   ["finished","Finished"],["monetize","Monetize"],["needswork","Needs work"],
-  ["outdated","Out of date"]];
+  ["rejected","Rejected"],["outdated","Out of date"]];
 let filter = "all";
 ROWS.forEach((r,i)=>{ r._i = i; r._pv = {}; });
 function isStale(r){
@@ -433,9 +452,11 @@ function matches(r, f){
   if(f === "all") return true;
   if(f === "pending") return r.status === "pending" && !r.tags.includes("finished");
   if(f === "needswork") return r.status === "needs-work";
+  if(f === "rejected") return r.status === "rejected";
   return r.tags.includes(f);
 }
 function group(r){
+  if(r.status === "rejected") return 4;
   if(r.tags.includes("finished")) return 3;
   if(r.status === "needs-work") return 2;
   if(r.tags.includes("priority")) return 0;
@@ -579,11 +600,13 @@ function buildCard(r){
   const nudge = el("span","nudge","All checks done.");
   nudge.hidden = true;
   btns.append(nudge);
+  const rj = el("button","btn reject","Reject");
+  rj.addEventListener("click", ()=>setStatus(r,"rejected"));
   const ap = el("button","btn approve","Approve");
   ap.addEventListener("click", ()=>setStatus(r,"approved"));
   const nw = el("button","btn needsw","Needs work");
   nw.addEventListener("click", ()=>setStatus(r,"needs-work"));
-  btns.append(ap, nw);
+  btns.append(ap, nw, rj);
   act.append(chips, btns);
   full.append(act);
   card.append(slim, full);
@@ -596,10 +619,12 @@ function updateCard(r){
   if(!c) return;  // blocked card not yet expanded via Show anyway
   c.classList.toggle("approved", r.status === "approved");
   c.classList.toggle("needswork", r.status === "needs-work");
+  c.classList.toggle("rejected", r.status === "rejected");
   c.classList.toggle("finished", r.tags.includes("finished"));
   if(!r.tags.includes("finished")) c.classList.remove("peek");
   const k = r.status === "approved" ? "APPROVED — READY TO MERGE"
-          : r.status === "needs-work" ? "NEEDS WORK" : "";
+          : r.status === "needs-work" ? "NEEDS WORK"
+          : r.status === "rejected" ? "REJECTED" : "";
   c.querySelector(".kicker").textContent = k;
   c.querySelector(".slim-kicker").textContent = k || "FINISHED";
   c.querySelectorAll(".chip").forEach(ch=>ch.classList.toggle("on", r.tags.includes(ch.dataset.tag)));
@@ -618,7 +643,8 @@ function updateAll(){
     b.textContent = label + " (" + n + ")";
     b.classList.toggle("on", filter === f);
   });
-  const reviewed = ACTIVE.filter(r=>r.status === "approved" || r.tags.includes("finished")).length;
+  const reviewed = ACTIVE.filter(r=>r.status === "approved" || r.status === "rejected"
+                                  || r.tags.includes("finished")).length;
   document.getElementById("progfill").style.width = ACTIVE.length ? (100 * reviewed / ACTIVE.length) + "%" : "0";
   document.getElementById("proglabel").textContent = reviewed + " of " + ACTIVE.length + " reviewed";
   const pendingLeft = ACTIVE.filter(r=>r.status === "pending" && !r.tags.includes("finished")).length;
@@ -645,11 +671,12 @@ document.addEventListener("keydown", e=>{
     vis[i]._card.focus();
     vis[i]._card.scrollIntoView({block:"nearest"});
     e.preventDefault();
-  }else if(e.key === "a" || e.key === "w" || e.key === "p"){
+  }else if(e.key === "a" || e.key === "w" || e.key === "x" || e.key === "p"){
     const r = vis.find(r=>r._card === cur);
     if(!r) return;
     if(e.key === "a") setStatus(r, "approved");
     else if(e.key === "w") setStatus(r, "needs-work");
+    else if(e.key === "x") setStatus(r, "rejected");
     else togglePreview(r, pagesOf(r)[0], 0);
     e.preventDefault();
   }
