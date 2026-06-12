@@ -67,3 +67,24 @@ async function logEvent(tool, event, metadata = {}) {
 window.lpAnalytics = { logEvent, getSessionId };
 
 export { logEvent, getSessionId };
+
+// INTERNAL-BUILD STAMP (staging-only commit): renders ONLY off-production —
+// hostname-gated, so if this ever ships to lendpaper.com it renders nothing.
+// Deliberately innocuous wording (reads as a version watermark) as a second
+// layer; the brand-green left edge + "s-" prefix are the internal tell.
+if (/github\.io$/.test(location.hostname)) {
+  const mountBuildStamp = () => {
+    if (document.getElementById('lp-build-stamp')) return;
+    const el = document.createElement('div');
+    el.id = 'lp-build-stamp';
+    el.textContent = 'build s-0612 \u00b7 ref';
+    el.style.cssText = 'position:fixed;bottom:8px;left:10px;z-index:99999;' +
+      'font:600 10.5px/1 ui-monospace,Menlo,monospace;color:#6b746f;' +
+      'background:rgba(255,255,255,.85);border:1px solid #e3e7e4;' +
+      'border-left:3px solid #1A3C2E;border-radius:6px;padding:4px 8px;' +
+      'pointer-events:none;opacity:.85';
+    document.body.appendChild(el);
+  };
+  if (document.body) mountBuildStamp();
+  else window.addEventListener('DOMContentLoaded', mountBuildStamp);
+}
