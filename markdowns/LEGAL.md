@@ -609,6 +609,8 @@ it on the next monthly run.
 | tx-hb700 | TX HB 700 (2025) — Fin. Code Ch. 398 bill history | TX | https://capitol.texas.gov/BillLookup/History.aspx?LegSess=89R&Bill=HB700 |
 | tx-occc | Texas OCCC — sales-based financing registration/rules | TX | https://occc.texas.gov/ |
 | la-act198 | LA Act 198 (2025) / HB 470 — R.S. 9:3137.10 | LA | https://www.legis.la.gov/legis/BillInfo.aspx?i=248484 |
+| cloudfund-dockets | CloudFund LLC — federal docket watch (CourtListener search feed; litigation per Steve 6/9, LEN-201) | Company watch | https://www.courtlistener.com/feed/search/?q=cloudfund&type=r |
+| cloudfund-site | CloudFund LLC — company site (closed lender, permanently scrape-blocklisted; watch for legal/wind-down notices) | Company watch | https://cloudfund.com/ |
 <!-- SOURCE-REGISTRY:END -->
 
 **Monitoring log:** <!-- SCRAPER-LAST-RUN -->never (first automated run pending)<!-- /SCRAPER-LAST-RUN -->
@@ -636,5 +638,6 @@ text. A human (Steve + counsel) promotes bulletin items into §8–§13.
 | 2026-05-22 | Initial legal copy established | Founder / LendPaper |
 | 2026-06-07 | Part II added: regulatory compliance engine sections (§7–§16), state matrix, source registry, canonical compliance disclaimer (LEN-88) | Claude / LendPaper |
 | 2026-06-07 | Primary-source verification pass: TX HB 700 = LAW (eff. 9/1/2025, OCCC registration); LA = LAW (2024 law + Act 198, eff. 8/1/2025, no threshold); MD SB 881 DIED 4/13/2026 (watch 2027); CAN-SPAM $53,088 confirmed for 2026 (OMB M-26-11). Penalty exposure ranges added per regulation (§8–§13 + glossary) | Claude / LendPaper |
+| 2026-06-12 | §15: CloudFund litigation/compliance watch added (cloudfund-dockets CourtListener feed + cloudfund-site) — closed lender, removed from waterfall and permanently scrape-blocklisted in the engine; bulletin surfaces new docket/site activity (LEN-201) | Claude / LendPaper |
 
 *Update this log whenever disclaimer copy, legal positions, or entity status change.*
