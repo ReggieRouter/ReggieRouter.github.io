@@ -104,11 +104,15 @@ def discover():
         # staleness vs origin/main (LEN-315) — rev-list uses --count, no commit list materialized
         mb = sh(["git", "merge-base", "HEAD", "origin/main"], cwd=path)
         behind = sh(["git", "rev-list", "--count", "HEAD..origin/main"], cwd=path)
+        n_behind = int(behind) if behind.isdigit() else 0
+        # what the branch's preview is missing (so a stale-base artifact is self-explanatory)
+        missing = sh(["git", "log", "--format=%s", "--max-count=6", "HEAD..origin/main"],
+                     cwd=path).splitlines() if n_behind else []
         result.append({"path": path, "branch": branch, "ticket": ticket, "changed": changed,
                        "subject": sh(["git", "log", "-1", "--format=%s", "HEAD"], cwd=path),
                        "last": sh(["git", "log", "-1", "--format=%cs", "HEAD"], cwd=path),
                        "base": sh(["git", "log", "-1", "--format=%cs", mb], cwd=path) if mb else "",
-                       "behind": int(behind) if behind.isdigit() else 0,
+                       "behind": n_behind, "missing": missing,
                        "epoch_ok": bool(mb) and ok(["git", "merge-base", "--is-ancestor",
                                                     DESIGN_EPOCH, mb], cwd=path)})
     result.sort(key=lambda r: r["path"])
@@ -206,7 +210,7 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def index_html(rows):
-    payload = [{k: r[k] for k in ("name", "branch", "ticket", "port", "changed",
+    payload = [{k: r[k] for k in ("name", "branch", "ticket", "port", "changed", "missing",
                                   "htmls", "tips", "status", "tags", "checks",
                                   "goal", "requested", "goal_src",
                                   "last", "base", "behind", "epoch_ok")} for r in rows]
@@ -339,6 +343,9 @@ header{background:var(--brand);color:#fff;padding:20px 28px}header h1{margin:0;f
 .goal-src{color:var(--muted);font-size:12px;font-weight:400}
 .changed{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
 .meta{font-size:11.5px;color:var(--muted);margin-top:5px}
+.newer{margin-top:7px;padding:7px 10px;background:#F8FAF9;border:1px solid var(--border);border-radius:7px}
+.newer-k{font-size:10.5px;font-weight:700;letter-spacing:.04em;color:#B45309;margin-bottom:3px}
+.newer-i{font-size:11.5px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;line-height:1.5}
 .warnband{background:#FFFBEB;color:#B45309;font-size:12.5px;font-weight:600;border-radius:8px;padding:7px 11px;margin:0 0 10px}
 .blockband{background:#FEF2F2;color:#991B1B;font-size:12.5px;font-weight:700;border-radius:8px;padding:7px 11px;margin:0 0 10px}
 .checks{margin-top:11px}
@@ -528,6 +535,14 @@ function buildCard(r){
   full.append(el("div","changed", ch || "no diff vs main"));
   full.append(el("div","meta", "last commit " + r.last + " · branched from main of " + r.base +
     (r.behind ? " · " + r.behind + " behind main" : " · current with main")));
+  if(r.behind && r.missing && r.missing.length){
+    const nw = el("div","newer");
+    nw.append(el("div","newer-k","PREVIEW MAY LAG MAIN — newer on main since this branched:"));
+    r.missing.forEach(s=> nw.append(el("div","newer-i","· " + s)));
+    if(r.behind > r.missing.length)
+      nw.append(el("div","newer-i","· … and " + (r.behind - r.missing.length) + " more"));
+    full.append(nw);
+  }
   const checks = el("div","checks");
   checks.append(el("div","checks-k","WHAT TO CHECK"));
   r.tips.forEach(t=>{
