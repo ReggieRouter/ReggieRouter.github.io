@@ -879,19 +879,9 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                 </div>
             </div>
 
-            <!-- LEN-11 — standard action-button stack -->
-            <div class="action-buttons no-print">
-                <button class="lp-cta-primary" id="pdfBtn" onclick="runPDF()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                    Save Estimate as PDF
-                </button>
-                <button class="lp-cta-secondary" onclick="copyDscr()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    Copy Scenario
-                </button>
-            </div>
-
-            <!-- LEN-147: borrower state + doc details at bottom of input column -->
+            <!-- LEN-147/LEN-226: borrower state + doc details at the foot of the input flow,
+                 ABOVE the action stack — cross-calc convention (LEN-183/217): the personalize
+                 block always precedes the Save-PDF CTA in document order. -->
             <div class="lp-deal-context no-print">
                 <div data-lp-compliance-host></div>
                 <details id="pdfDocDetails" class="lp-doc-details">
@@ -912,6 +902,18 @@ body.pdf-export-mode .print-watermark { display: none !important; }
                     </div>
                     <p class="lp-doc-details-hint">Optional — appears on the saved PDF. Borrower state drives compliance disclosures.</p>
                 </details>
+            </div>
+
+            <!-- LEN-11 — standard action-button stack -->
+            <div class="action-buttons no-print">
+                <button class="lp-cta-primary" id="pdfBtn" onclick="runPDF()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    Save Estimate as PDF
+                </button>
+                <button class="lp-cta-secondary" onclick="copyDscr()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy Scenario
+                </button>
             </div>
         </div>
 
