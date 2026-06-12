@@ -9085,7 +9085,8 @@
     earlyPayoff: false,
     directOnly: false,    // hide pure broker/marketplace aggregators
     hasContact: false,    // has support_phone OR support_email
-    lenderTypes: new Set(['direct', 'direct_plus', 'marketplace', 'broker']) // all visible by default
+    lenderTypes: new Set(['direct', 'direct_plus', 'marketplace', 'broker']), // all visible by default
+    origBucket: '',   // origination volume bucket filter (lt5m / 5-20m / 20-50m / gt50m)
   };
 
   let sortColumn = 'name'; // default: alphabetical A→Z
@@ -9254,6 +9255,17 @@
       if (activeFilters.lenderTypes.size < 4) {
         const lt = l.lender_type || 'direct';
         if (!activeFilters.lenderTypes.has(lt)) return false;
+      }
+
+      // Origination volume bucket filter
+      if (activeFilters.origBucket) {
+        const est = l.originations_est;
+        if (!est || !est.monthly_usd_low) return false;
+        const mid = (est.monthly_usd_low + (est.monthly_usd_high || est.monthly_usd_low)) / 2;
+        if (activeFilters.origBucket === 'lt5m'  && mid >= 5000000)                return false;
+        if (activeFilters.origBucket === '5-20m'  && (mid < 5000000  || mid >= 20000000)) return false;
+        if (activeFilters.origBucket === '20-50m' && (mid < 20000000 || mid >= 50000000)) return false;
+        if (activeFilters.origBucket === 'gt50m'  && mid < 50000000)               return false;
       }
 
       return true;
@@ -9886,6 +9898,7 @@
   const maxfundVal = document.getElementById('maxfund-val');
   const freqChips = document.querySelectorAll('#freq-chips .lp-mf-chip');
   const otherChips = document.querySelectorAll('#other-chips .lp-mf-chip');
+  const origChips = document.querySelectorAll('#orig-chips .lp-mf-chip');
   const ltypeChips = document.querySelectorAll('#lendertype-chips .chip-btn');
   const mfClear = document.getElementById('mf-clear');
 
