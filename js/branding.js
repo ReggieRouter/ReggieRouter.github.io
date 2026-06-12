@@ -53,13 +53,26 @@ try {
 } catch (_) {}
 
 async function fetchTenant() {
-  try {
-    const cached = sessionStorage.getItem(CACHE_KEY);
-    if (cached) return JSON.parse(cached); // may be null (cached "no tenant")
-  } catch (_) {}
+  let raw = null;
+  try { raw = sessionStorage.getItem(CACHE_KEY); } catch (_) {}
+  let cached;
+  try { cached = raw ? JSON.parse(raw) : undefined; } catch (_) { cached = undefined; }
 
+  // Admin preview entries (LEN-330) are deliberately session-independent —
+  // they carry the visible pill + the no-trace guards.
+  if (cached && cached._preview) return cached;
+
+  // Anonymous visitors are NEVER branded: a session is required before any
+  // cached tenant is honored. A cache with no session is stale (expired login)
+  // or hand-poisoned — wipe it so the stock LendPaper brand always wins.
   const { data: { session } = {} } = await supabase.auth.getSession();
-  if (!session) return cacheAndReturn(null);
+  if (!session) {
+    if (raw) { try { sessionStorage.removeItem(CACHE_KEY); } catch (_) {} }
+    return null;
+  }
+
+  // Session-validated cache hit (a tenant row, or null for "no tenant").
+  if (cached !== undefined) return cached;
 
   const { data: profile, error: pErr } = await supabase
     .from('profiles')
