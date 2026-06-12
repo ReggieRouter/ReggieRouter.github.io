@@ -697,3 +697,48 @@ All calculator modals share one shell so they look identical:
   fill). Selectable options use **pills** (`.lp-pill`); multi-select accents go
   green → blue → purple in that order.
 - Modals never carry computed-output color rules from §4 onto their own chrome.
+
+---
+
+## 18. Completion Cue (cross-tool, LEN-288)
+
+When every required input on a calculator first becomes valid in a visit, draw
+the user's eye to the outputs. Shared engine: `js/completion-cue.js` — **every
+calculator (and every new calculator) must include it and call
+`LPCompletionCue.init(...)`**; never reimplement per-calc.
+
+Behavior (per calculator, escalating):
+- **Completions 1–2:** one calm flash on the takeaway / "What You Tell the
+  Borrower" box, then the Save PDF CTA ~300ms behind it. Sequential, never
+  simultaneous. Flash = a single green ring (`rgba(26,60,46,…)`) — one clean
+  outline, never border + ring (BRANDING.md §2).
+- **Completion 3+:** no flash. A small dismissible plain-text note (kicker
+  style, NO dot badges) near the takeaway nudges talk-track generation. Once
+  dismissed — or once the user engages with the takeaway/PDF — it never
+  returns.
+- Fires **once per page visit** on the first user-event-driven completion;
+  never on bare page load or programmatic restore; inert under
+  `body.pdf-export-mode`; respects `prefers-reduced-motion` (note path still
+  works).
+
+Contract:
+
+```javascript
+LPCompletionCue.init({
+  slug: 'sba_fees',            // FROZEN calculator_type slug (§6a — do not invent)
+  takeaway: '.takeaway',       // selector or fn → element (first visible wins)
+  cta: '.lp-cta-primary',      // selector or fn → element
+  isComplete: function(){...}, // mirror the calc's own required-field gate
+  noteAnchor: '#read',         // optional — stable parent if takeaway re-renders
+  events: ['input','change'],  // optional — add 'click' for click-driven inputs
+});
+```
+
+State: localStorage `lp_cue_<slug>_count` / `lp_cue_<slug>_done` — per
+calculator, anonymous-safe. `isComplete` must mirror the calculator's existing
+validation (e.g. Deal Analysis requires industry + "Funding needed by" +
+borrower state), not duplicate its own notion of "required".
+
+Shipped 6/11 in all 6 calculators; DSCR's takeaway panel (`#dscrTakeaway`,
+"What you tell the borrower") was added as part of this — DSCR talk-track copy
+renders via `renderTakeaway()` from `renderSummaries()`.

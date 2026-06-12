@@ -83,7 +83,8 @@ Write these exactly; do not coin synonyms.
   focus ring on top of the border** (the border + double-ring look reads as busy
   / AI-generated). Canonical reference: the Amortization calc's
   `.lp-input-group:focus-within { border-color: var(--brand-accent); }`.
-  Applies to every calculator and surface. (LEN-151, 2026-06-09.)
+  Applies to every calculator and surface. (Standard set LEN-151 2026-06-09; sweep
+  completed LEN-171 2026-06-11 — all six calculators compliant.)
 - Inline unit swaps (e.g. daily/weekly/monthly, `%`/`$`, `mos`/`wks`) live as a
   subtle trailing button inside the field — muted `#94A3B8` label + `⇄` glyph,
   `1px` left divider, greens on hover. Mirrors the Amortization `% ⇄` control.
