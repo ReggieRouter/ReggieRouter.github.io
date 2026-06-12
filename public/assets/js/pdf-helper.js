@@ -485,7 +485,31 @@ window.PDF_HELPER = {
         // No-op for Payment Breakdown, which renders its own calm-native notice.
         this.mountEstimateNotice(element);
 
-        window.addEventListener('afterprint', () => self._handlePdfSaveSuccess(), { once: true });
+        // Remove print-mode classes, injected page style, and fingerprint once the
+        // dialog clears. Runs from `afterprint` (fires the moment the dialog closes)
+        // so the 800px pdf-export-mode layout never lingers on screen; the 1500ms
+        // timer below is only a fallback for browsers that don't fire afterprint.
+        var _cleanedUp = false;
+        var _cleanupPrintMode = function() {
+            if (_cleanedUp) return;
+            _cleanedUp = true;
+            document.documentElement.classList.remove('pdf-export-mode');
+            document.body.classList.remove('pdf-export-mode');
+            document.body.classList.remove('multi-scenario');
+            var ps = document.getElementById('lp-quote-page-style');
+            if (ps) ps.parentNode.removeChild(ps);
+            var fp = document.getElementById('lp-doc-fingerprint');
+            if (fp) fp.parentNode.removeChild(fp);
+            var cb = document.getElementById('lp-compliance-print-block');
+            if (cb) cb.parentNode.removeChild(cb);
+            var en = document.getElementById('lp-estimate-notice');
+            if (en) en.parentNode.removeChild(en);
+        };
+
+        window.addEventListener('afterprint', () => {
+            self._handlePdfSaveSuccess();
+            _cleanupPrintMode();
+        }, { once: true });
 
         try {
             window.print();
@@ -496,20 +520,7 @@ window.PDF_HELPER = {
             // Restore document title
             document.title = origDocTitle;
 
-            // Remove print-mode classes, injected page style, and fingerprint after dialog clears
-            setTimeout(() => {
-                document.documentElement.classList.remove('pdf-export-mode');
-                document.body.classList.remove('pdf-export-mode');
-                document.body.classList.remove('multi-scenario');
-                var ps = document.getElementById('lp-quote-page-style');
-                if (ps) ps.parentNode.removeChild(ps);
-                var fp = document.getElementById('lp-doc-fingerprint');
-                if (fp) fp.parentNode.removeChild(fp);
-                var cb = document.getElementById('lp-compliance-print-block');
-                if (cb) cb.parentNode.removeChild(cb);
-                var en = document.getElementById('lp-estimate-notice');
-                if (en) en.parentNode.removeChild(en);
-            }, 1500);
+            setTimeout(_cleanupPrintMode, 1500);
 
             if (btn) {
                 btn.innerHTML = origText;
