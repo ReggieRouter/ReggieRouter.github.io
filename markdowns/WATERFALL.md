@@ -1,11 +1,37 @@
-# WATERFALL.md — Lender Waterfall: blank-table failure modes & prevention
+# WATERFALL.md — Lender Waterfall: THE canonical reference
 
-The Lender Waterfall (`waterfall.html`) ships its lender data **hardcoded** as a JS
-array (`const lenderData = [ ... ]`) inside an inline `<script>` block. There is **no
-runtime fetch** — if the script block breaks, the table renders **zero lenders** and
-the rest of the file dumps onto the page as raw text. This has happened repeatedly.
-This doc lists every known cause and the guardrails. **Read before editing waterfall
-data or the publish pipeline.**
+**Read this file before ANY waterfall work** — data edits, publish runs, logo fixes,
+identity corrections. It is the single source of truth for how the waterfall ships
+(§0), every known blank-table failure mode (§1–§3), logo/identity rules (§4), and the
+Supabase↔live reconcile + publish freeze (§5).
+
+---
+
+## §0 — Canonical facts (the one-screen version)
+
+- **Data is HARDCODED.** `waterfall.html` ships its lender data as a JS array
+  (`const lenderData = [ ... ]`) inside an inline `<script>`. There is **no runtime
+  fetch** — if the script block breaks, the table renders zero lenders and the rest
+  of the file dumps as raw text. Hand-fixes to the array are safe until the next
+  publish regenerates it.
+- **Hosting:** production lendpaper.com is **GitHub Pages built from `origin/main`**
+  (netlify.toml is inert). Pushing to main IS the deploy.
+- **Publish pipeline:** `~/lendpaper-engine/publish.py` (separate repo) regenerates
+  the array from Supabase `lender_data` (**approved rows only**), through a reserved
+  worktree `~/lp-worktrees/.publish`, and pushes to origin/main. It escapes
+  `</script>`/U+2028, strips `source_snippet`, applies merge/drop/override rules, and
+  compile-verifies before writing.
+- **Worktree rule:** never edit waterfall.html in a shared/stale checkout. Build
+  fixes in `~/lp-worktrees/main` off fresh `origin/main`, push `origin HEAD:main`.
+- **`DISPLAY_NAME_OVERRIDES` exists in TWO places** — `waterfall.html` (runtime) and
+  `publish.py` (publish time). They must stay in sync; they are permanent (never
+  strip/revert — see CLAUDE.md).
+- **Reconcile tool:** `~/lendpaper-engine/reverse_sync_len215.py` (LEN-215) simulates
+  a publish and diffs it against the live curated file — identity diffs (names,
+  logos, row membership) are the publish-safety signal. Run it dry before lifting any
+  freeze or trusting a publish.
+- **Pre-ship gate for any hand-edit to the array:** the §1 grep must return 0, the
+  inline script must compile, and the page must render the expected row count.
 
 ---
 
@@ -124,16 +150,55 @@ otherwise the next publish wipes it.
 374/196/197. Enforced in `publish.py` (`NEWTEK_CANONICAL_*` / `NEWTEK_DROP_IDS`) and in the
 live file (single id-234 row). Never let a re-scrape re-split it.
 
-**⚠️ THE BIG ONE — `publish.py` is currently UNSAFE to run.** The live `waterfall.html` is
-hand-curated (LEN-198 dedup → 132 rows, LEN-194 brand-name fixes, Wall→Wall Street, new
-logos). **Supabase was NOT cleaned** — it still has ~160 rows with duplicates and polluted
-`display_name`s (id 2 → "Forward Financing", id 5 → "Fora Financial", id 192 → "Ameris
-Bank Equipment Finance", id 9 → "Spartan Capital Group" …). A publish today would
-REGRESS the site: re-add dup rows, re-apply wrong brand names, un-rename Wall Street.
-**This divergence is the root cause of the recurring "my logos / fields disappeared" reports.**
-Before running a real `publish.py`: reconcile Supabase to the curated state first
-(LEN-194 `display_name`s, LEN-198 dedup, Wall Street rename). Logos + Newtek are already
-pre-pinned via the override maps, but they don't make the rest of a publish safe.
+---
+
+## §5 — The publish freeze & Supabase↔live reconcile (LEN-215 / LEN-194)
+
+**History.** The live file accumulated hand-curated fixes (LEN-198 dedup → 132 rows,
+LEN-194/257 identity corrections, logo pins) that Supabase never received. Every
+`publish.py` run regressed them — that divergence was the root cause of all the
+recurring "my logos / fields disappeared" reports. Publishing was FROZEN 6/10:
+`publish.py` hard-aborts a real publish unless `--force-unsafe` (or
+`LP_PUBLISH_UNFREEZE=1`); `--dry-run` always works.
+
+**Layer 1 — identity reconcile: DONE 6/12.** `reverse_sync_len215.py` (engine repo)
+simulates a publish (same merge/dedup/override pipeline) and diffs it against the live
+array. As of 6/12 a simulated publish emits **exactly the live 132 companies with
+matching names and logos** — the dup rows still physically in Supabase (~160 approved)
+are absorbed at publish time by `MERGE_GROUPS`/`DROP_IDS`/`dedup_by_name`, and the last
+polluted `display_name` (id 9 "Spartan Capital Group") was patched back to David Allen
+Capital. **Do NOT disapprove the dup rows in Supabase**: merge groups UNION
+`product_types` across their cluster — disapproving members would shrink the canonical
+row's products and re-diverge the publish.
+
+Field-level (non-identity) diffs between Supabase and the live file are EXPECTED and
+flow forward on publish — they're review-queue-approved scrape improvements that are
+*newer* than the live file. `reverse_sync_len215.py` deliberately never syncs them
+backwards.
+
+**Layer 2 — wrong-company data under brand names (LEN-194).** Six rows wear a brand
+name over another company's scraped data (id 7 PEAC↔Flex One, 8 CFG↔Lee Bank,
+2 Forward Financing↔NewCo, 5 Fora↔Uplyft, 6 Expansion Capital Group↔Same Day,
+4 Mulligan↔Onramp). Steve's call: rows keep the BRAND → fix identity columns
+(`lender_name`, `source_url`, `application_submission_url`, wrong contacts → NULL)
+via `len194_brand_identity_fix.sql`, then re-scrape each under its true identity with
+`verify_fields_v1.py --lender-ids 2,4,5,6,7,8` and approve the queued corrections in
+lp-panel → Data Health. Until that lands, those rows' underwriting numbers are the
+wrong company's — on the live site AND in Supabase equally, so a publish no longer
+*regresses* anything; it just doesn't fix them either.
+
+Two masked leftovers (harmless but dirty): id 159 (`SOS Capital` data, display
+"altbanq") and id 192 (`Balboa Capital` data, display "Ameris Bank Equipment
+Finance") are both deduped away at publish time by name against the real rows
+(240 altbanq / 215 Ameris). Restoring their true display names would make them
+re-appear as new waterfall rows — that's a membership decision for Steve, not a
+cleanup to do in passing.
+
+**Lifting the freeze.** Only after: (1) `reverse_sync_len215.py` dry-run reports zero
+identity patches, and (2) `publish.py --dry-run` diff vs origin/main shows only
+intended field improvements. Then remove the freeze block in `publish.py` (or run
+`--force-unsafe` for a one-off) — and remember a real publish pushes to main, which
+needs Steve's approval.
 
 ---
 
