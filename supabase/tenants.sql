@@ -87,7 +87,7 @@ values (
   'Evan Paez',
   null,                             -- Evan fills via profile page (or set here)
   null,                             -- Evan fills via profile page (or set here)
-  '#1A3C2E',                        -- placeholder; set from logo via profile page
+  '#0A2150',                        -- Brightwell wordmark navy (pulled from logo); editable via profile page
   null                              -- set via profile page logo upload
 )
 on conflict (slug) do nothing;
