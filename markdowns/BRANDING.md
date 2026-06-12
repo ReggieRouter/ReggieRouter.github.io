@@ -117,6 +117,31 @@ Fallback for PDFs: `Arial, Helvetica, sans-serif`
   with no space. Commas and decimal points always included.
 - Percentages display as `XX.X%` — always one decimal place for consistency.
 
+### Retired — never resurrect (set 2026-06-11, LEN-312)
+These shipped at some point and were deliberately removed. Reintroducing any of
+them is a regression, whatever the source branch says:
+
+- **'Anybody' display font** (Google Fonts `Anybody:wdth,wght@125,700`) — the old
+  home-greeting font. Deleted from index.html; never re-add the `<link>` or any
+  `font-family: 'Anybody'` rule. Headings are **Figtree 700**; the home greeting
+  uses the system stack.
+- **Pre-LEN-143 tool display names** — "Payment Breakdown", "Deal Read",
+  "Fundability" (as display copy), "SBA Scenario Builder". Canonical names live in
+  CALCULATORS.md §6a (Amortization / Deal Analysis / Net & Position / SBA Fees /
+  Payment Fit). URL slugs and analytics keys stay frozen — only display strings
+  were renamed.
+- **"Coming soon" / roadmap teasers** — SOON pills, "Notify me" cards, unbuilt-tool
+  tiles (NAICS Search, ROI Analysis, UW analysis, Compliance teaser). Swept by
+  LEN-285; nothing unbuilt is ever shown publicly.
+- **The old home layout** — pre-open-access tile grid with a COMING SOON section.
+  Canonical logged-out home = LEN-304 (featured trio + flat grid, no Reference
+  section).
+
+If you SEE any of these in a browser, you are almost certainly previewing a stale
+checkout, not a regression: preview only through the staging launchpad
+(`python3 tools/staging/launchpad.py` → :8780), which excludes legacy clones and
+merged-stale worktrees (LEN-312). Verify against `origin/main` before "fixing".
+
 ---
 
 ## 4. Generated Document Layout

@@ -66,6 +66,7 @@ Do this for every new tool added to `tools.js` with `presentation: "page"`.
 - **Logo naming convention:** Assets ending in `-dark.svg` contain white/light text — place on dark backgrounds only. Assets ending in `-light.svg` contain dark text — place on light backgrounds only. Always verify contrast before finalizing.
 - **NEVER use the word "Lendio"** or any Lendio-branded assets in any content, code, or metadata. LendPaper is the exclusive project identity.
 - **Never append "Inc.", "LLC.", or any corporate suffix** to LendPaper until incorporation is confirmed. See `LEGAL.md`.
+- **Retired design elements** ('Anybody' font, pre-LEN-143 tile names, coming-soon teasers, the old home layout) must never be reintroduced — full list in `BRANDING.md §3 → Retired`. If you see them in a browser you're previewing a stale checkout: use the staging launchpad (:8780) and verify against `origin/main` before "fixing" anything.
 
 ---
 
@@ -203,6 +204,7 @@ Full PDF spec, html2canvas config, print stylesheet, anti-fraud watermark rules,
 
 ## Supabase & Infrastructure
 
+- **Run SQL/DDL from the CLI (LEN-311):** `cd ~/lendpaper-engine && ./venv/bin/python run_sql.py <file.sql>` (or `-c "select 1;"`) — hits the Supabase Management API with `SUPABASE_PAT` from `.env`. The service key CANNOT run DDL; this can. Flow for any schema change: write `supabase/<name>.sql` → `run_sql.py` it → verify with a follow-up SELECT. No more SQL-editor paste.
 - **Supabase URL:** `https://arpquyoucdsdmbetgftj.supabase.co`
 - **Tables:** `lender_data`, `state_registries`, `pending_changes`, `scrape_runs`, `estimates` (Deal Log — see below)
 - **Admin panel:** `lp-panel.html` — manages pending changes, scrape diffs, lender data
