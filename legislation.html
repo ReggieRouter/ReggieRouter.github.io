@@ -590,7 +590,7 @@ table.leg tbody tr:hover { background: var(--bg-alt); }
   </div>
 
   <div class="disclaimer">
-    <strong>Seed data — verify before relying on it.</strong> This beta is preloaded with a representative set of commercial-financing disclosure laws and bills for demonstration. Citations, effective dates, and scope thresholds are approximate and must be confirmed against the official statute and current legislative status before use. Not legal advice. Source registry to be wired to <code>markdowns/LEGAL.md</code> Part II.
+    <strong>Not legal advice.</strong> Confirm citations, effective dates, and scope thresholds against the official statute and current legislative status before use.
   </div>
 </div>
 
@@ -698,7 +698,7 @@ function fillBillModal(stateLabel, b, statusKey){
     + '</div>';
   document.getElementById('modalBody').innerHTML = rows
     + '<div class="modal-foot">' + links
-    + '<div class="modal-disclaimer">Seed data — verify against the official statute and current legislative status before relying on it. Not legal advice.</div></div>';
+    + '<div class="modal-disclaimer">Verify against the official statute and current legislative status before relying on it. Not legal advice.</div></div>';
   document.getElementById('billModal').classList.add('open');
 }
 function openBillModal(abbr, idx){
@@ -802,7 +802,7 @@ var FED_CHIP = {
   var cnt = items.filter(function(it){ return !it.infoOnly; }).length;
   var t = document.getElementById('fedSeeAllText'); if (t) t.textContent = 'All ' + cnt + ' federal rules';
   var fc = document.getElementById('fedCount'); if (fc) fc.textContent = cnt + ' rules';
-  document.getElementById('updatedLabel').textContent = 'Seed data · last reviewed ' + LEG_META.updated;
+  document.getElementById('updatedLabel').textContent = 'Last reviewed ' + LEG_META.updated;
 })();
 /* "All federal rules →" — jump to the table, filtered to federal */
 function fedSeeAll(){
@@ -861,7 +861,7 @@ function stateCopy(nameE, status){
     case 'enacted':        return nameE + ' has a commercial-financing disclosure law that is enacted and in effect. The map gives the fast answer; the table below carries the exact statutes, penalty details, and scope.';
     case 'effective-soon': return nameE + '’s disclosure law is enacted and takes effect soon. The table below carries the exact statute, effective date, penalty details, and scope.';
     case 'pending':        return nameE + ' has introduced or pending disclosure activity — not yet in force. The table below tracks the bill, its status, and likely scope.';
-    default:               return 'No specific commercial-financing disclosure law is on file for ' + nameE + ' in this seed dataset. Federal marketing and credit rules still apply — see the table below.';
+    default:               return 'No specific commercial-financing disclosure law is on file for ' + nameE + '. Federal marketing and credit rules still apply — see the table below.';
   }
 }
 function activityHTML(){
