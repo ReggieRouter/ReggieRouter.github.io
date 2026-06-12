@@ -1061,6 +1061,27 @@ header {
   </div>
 </div>
 
+<!-- LEN-58: manual email send — compose + Send via the send-email Edge Function (Resend) -->
+<div class="modal-overlay" id="email-modal" style="display:none" onclick="if(event.target===this) closeEmailModal()">
+  <div class="modal-box" style="width:560px;max-height:88vh;overflow-y:auto">
+    <h3>Send an email</h3>
+    <p style="margin-bottom:6px">Sends as <strong>Steve at LendPaper &lt;hello@lendpaper.com&gt;</strong> via Resend. Plain text, one recipient, one touch.</p>
+    <label class="inv-label" for="em-to" style="margin-top:0">To</label>
+    <input type="email" id="em-to" class="inv-input" readonly style="background:var(--bg);color:var(--muted)" />
+    <label class="inv-label" for="em-template">Template</label>
+    <select id="em-template" class="inv-input" onchange="emApplyTemplate()"></select>
+    <label class="inv-label" for="em-subject">Subject</label>
+    <input type="text" id="em-subject" class="inv-input" maxlength="200" placeholder="Subject" />
+    <label class="inv-label" for="em-body">Body</label>
+    <textarea id="em-body" class="inv-input" rows="12" maxlength="10000" placeholder="Plain-text body" style="resize:vertical;font-family:inherit;line-height:1.55"></textarea>
+    <p class="inv-hint" id="em-notice" style="display:none;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;border-radius:7px;padding:9px 11px;margin-top:10px"></p>
+    <div class="modal-actions" style="margin-top:18px">
+      <button class="btn-cancel" onclick="closeEmailModal()">Cancel</button>
+      <button class="btn-mem-approve" style="padding:8px 16px;font-size:13px" id="em-send" onclick="emSend()">Send</button>
+    </div>
+  </div>
+</div>
+
 <!-- LEN-286: edit member name/company, exclude from metrics, merge duplicate accounts -->
 <div class="modal-overlay" id="ado-user-modal" style="display:none" onclick="if(event.target===this) adoCloseUser()">
   <div class="modal-box" style="width:470px;max-height:88vh;overflow-y:auto">
@@ -3481,6 +3502,7 @@ function memRenderTable() {
         ${u.status !== 'approved' ? `<button class="btn-mem-approve" onclick="memApprove('${u.id}', this)">Approve</button>` : ''}
         ${memTab !== 'waitlist' && u.status !== 'waitlist' ? ` <button class="btn-mem-waitlist" onclick="memWaitlist('${u.id}', this)">Waitlist</button>` : ''}
         ${u.status !== 'denied' ? ` <button class="btn-mem-decline" onclick="memDecline('${u.id}', this)">Decline</button>` : ''}
+        <button class="btn-ghost" style="font-size:11px;padding:3px 9px" onclick="openEmailModal('${u.id}')" title="Email this member (LEN-58)">Email</button>
         <button class="btn-ghost" style="font-size:11px;padding:3px 9px" onclick="openPermModal('${u.id}')" title="Grant admin permissions">${memAccessLabel(u)}</button>
       </td>
     </tr>`).join('')}</tbody>
@@ -3787,6 +3809,158 @@ function openInviteModal() {
 }
 
 function closeInviteModal() { document.getElementById('invite-modal').style.display = 'none'; }
+
+// ── LEN-58: manual email send (Resend via the send-email Edge Function) ─────
+// Templates are the LEN-59 approved copy verbatim; {first} is substituted from
+// the member's name when a template is applied. Plain text only (v1).
+// The mailto invite flow above (LEN-105) is untouched — this is a separate,
+// server-sent path for messaging existing members.
+const EMAIL_TEMPLATES = {
+  reengage_no_deal: {
+    label: 'Re-engagement — never saved a deal (7+ days)',
+    subject: 'Did LendPaper not click?',
+    body: `Hey {first},
+
+You signed up for LendPaper a little while back but haven't saved a deal yet. No pressure — everything works without even signing in. The account just keeps your numbers in one place.
+
+Next time you've got a file in front of you, run it through Deal Analysis or the Lender Waterfall and hit save. Then it's sitting in your Deal Log when the borrower calls back.
+
+If something didn't click, reply and tell me what. I read every one.
+
+— Steve
+LendPaper · hello@lendpaper.com`
+  },
+  reengage_quiet: {
+    label: 'Re-engagement — was active, went quiet (14+ days)',
+    subject: 'A few things shipped since your last deal',
+    body: `Hey {first},
+
+Haven't seen you run a deal in a couple of weeks — usually that means slammed or between files. Either way, fair.
+
+Since you were last in:
+
+- Deal Analysis now scores deal readiness and flags product fit before you pitch.
+- Objection talk tracks — what to say when the borrower balks at the payment.
+- The Compliance Desk tracks state disclosure laws, sortable by state and penalty.
+
+All free, all open — and your saved deals are right where you left them in the Deal Log.
+
+If LendPaper stopped fitting your workflow, reply and tell me why. That's the most useful email I get.
+
+— Steve`
+  },
+  invite_nudge: {
+    label: 'Invite nudge — invited, never signed in',
+    subject: 'Your LendPaper invite (still good)',
+    body: `Hey {first},
+
+I sent over a LendPaper invite a few days back — wanted to make sure it didn't get buried.
+
+Nothing to set up. The tools are open at lendpaper.com — amortization, deal analysis, payment fit, lender waterfall, SBA fees, DSCR. Free right now.
+
+Signing in (Google, same email I invited) just adds the Deal Log: every deal you run gets saved and is ready when the borrower calls back.
+
+Run one real file through it. If it doesn't save you time, ignore me.
+
+— Steve
+LendPaper`
+  },
+  personal_invite: {
+    label: 'Personal invite — warm intro from Steve',
+    subject: 'The deal tools I mentioned',
+    body: `{first} — good talking with you. The tools I mentioned are at lendpaper.com — free, nothing to sign up for; sign in only if you want your deals saved. Run your next file through it and tell me what's missing.
+
+— Steve`
+  },
+  digest: {
+    label: '"New stuff this week" digest skeleton',
+    subject: 'New on LendPaper: [headline feature]',
+    body: `Hey {first},
+
+Quick rundown of what shipped this week:
+
+- [Feature 1] — [one line: what it does for a deal]
+- [Feature 2] — [one line]
+- [Feature 3 — optional; cut if thin]
+
+Worth a look next time you've got a file open: [link to the most relevant tool].
+
+Your saved deals are where you left them: https://lendpaper.com/quote-log
+
+Reply if something's broken or missing — half this list got built that way.
+
+— Steve
+LendPaper`
+  }
+};
+
+let emTo = '', emFirst = 'there';
+function openEmailModal(userId) {
+  const u = memProfiles.find(p => p.id === userId);
+  if (!u || !u.email) { toast('No email on file for this member'); return; }
+  emTo = u.email;
+  emFirst = (u.full_name || '').trim().split(/\s+/)[0] || 'there';
+  document.getElementById('em-to').value = emTo;
+  document.getElementById('em-template').innerHTML =
+    '<option value="">Custom — write your own</option>' +
+    Object.entries(EMAIL_TEMPLATES).map(([k, t]) => `<option value="${k}">${esc(t.label)}</option>`).join('');
+  document.getElementById('em-subject').value = '';
+  document.getElementById('em-body').value = '';
+  document.getElementById('em-notice').style.display = 'none';
+  const btn = document.getElementById('em-send');
+  btn.disabled = false; btn.textContent = 'Send';
+  document.getElementById('email-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('em-template').focus(), 50);
+}
+function closeEmailModal() { document.getElementById('email-modal').style.display = 'none'; }
+
+function emApplyTemplate() {
+  const t = EMAIL_TEMPLATES[document.getElementById('em-template').value];
+  if (!t) return; // Custom — leave whatever's typed alone
+  document.getElementById('em-subject').value = t.subject;
+  document.getElementById('em-body').value = t.body.split('{first}').join(emFirst);
+}
+
+// Inline fallback when the Edge Function can't send (Resend not connected yet,
+// or the function isn't deployed) — the modal stays useful via mailto.
+function emShowFallback(msg) {
+  const subject = document.getElementById('em-subject').value.trim();
+  const body = document.getElementById('em-body').value;
+  const n = document.getElementById('em-notice');
+  n.innerHTML = `${esc(msg)} <a href="mailto:${encodeURIComponent(emTo)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}" style="color:var(--green-mid);font-weight:600">Open in Mail instead</a>`;
+  n.style.display = '';
+}
+
+async function emSend() {
+  const subject = document.getElementById('em-subject').value.trim();
+  const text = document.getElementById('em-body').value;
+  if (!subject) { toast('Subject is required'); return; }
+  if (!text.trim()) { toast('Body is required'); return; }
+  const btn = document.getElementById('em-send');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  document.getElementById('em-notice').style.display = 'none';
+  let errPayload = null;
+  try {
+    const { error } = await sb.functions.invoke('send-email', { body: { to: emTo, subject, text } });
+    if (error) {
+      try { errPayload = await error.context.json(); } catch (_) { /* non-JSON or network error */ }
+      throw error;
+    }
+    toast('Sent to ' + emTo);
+    closeEmailModal();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Send';
+    if (errPayload && errPayload.error === 'not_configured') {
+      emShowFallback("Resend isn't connected yet — see LEN-58.");
+    } else if (errPayload && errPayload.error === 'forbidden') {
+      toast('Send refused: your profile is not an admin');
+    } else if (errPayload) {
+      emShowFallback('Send failed (' + (errPayload.error || 'error') + (errPayload.status ? ' ' + errPayload.status : '') + ').');
+    } else {
+      emShowFallback("Couldn't reach the send-email function (not deployed yet?) — see LEN-58.");
+    }
+  }
+}
 
 // LEN-207: founder email signature helper
 function openSignatureModal() { document.getElementById('signature-modal').style.display = 'flex'; }
