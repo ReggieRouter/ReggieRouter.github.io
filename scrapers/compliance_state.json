@@ -1,1 +1,112 @@
-{}
+{
+  "ftc-tsr": {
+    "hash": "dab1dec23a5364bf9da9d3395c25fad26a58ab661426da48a0a109dabb0122c5",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "ftc-canspam": {
+    "hash": "29e5aceedcb66e1dac9b28511c6d1325db378f0923f076087c21a3a54fcc79c8",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "ftc-safeguards": {
+    "hash": "bf6089ef86f097ec8280e178bf61da444b81163b4ef76501d8f904afe8669a96",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "cfpb-newsroom": {
+    "hash": "d2ec674ce6b8c22c237c86d9c19a68702321242cb73c6dfc8580522e58712954",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "cfpb-1071": {
+    "hash": "dfa783a5ecc8cfcaa7f20834f1c48ca88b728b03dc12578fad8cd47767b17392",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "ecfr-regb": {
+    "hash": "fc128f65ca713c60b0362b2c1b2deb9e6e84343ad4b67088eb779e92b53381fc",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "ny-dfs-600": {
+    "hash": "429d48d783de7fa99c6bc6818a7623961bc49d678f224d6699059af5e73fa5d7",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "ny-ag": {
+    "hash": "eacbf51f2fbd2bc8b1fddf9026784e2e789856d0e6772c21eefd30b5ada966fd",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "ca-dfpi": {
+    "hash": "e36b16d740aeabbe10080207acf5fe1a8aa033ae3c1c9b5a358458f602073995",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "ca-sb666": {
+    "hash": "9492a14d14c8b3ece4ee9060f45b7ba64c67469f0a57a286cb0ae104fcd37c7f",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "ca-ccpa": {
+    "hash": "da1b0fda19e6d45aaf5258018783cc0b50cf7107a39b6748694de732dbfaeed0",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "md-sb881": {
+    "hash": "41d08a7624d9508640fabbf2b2b59a82cf9589551e8b0b355fadbb5d8e944210",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "md-ofr": {
+    "hash": "5bdcb4986720f56cee599ba4b9787a79a5a38655976fffab6be08b1a34590906",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "de-usury": {
+    "hash": "a4f2991d8d0294ce9183bc8e601579418fb19a3487461ef7e86a8ec0f9744be0",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "de-ag": {
+    "hash": "a7c028d0ccc27b34a2d4f97e42cdfb21ee1ad6f9f7189a238b65a7d7a4021134",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "ut-dfi": {
+    "hash": "dd626e4b2b15dd77ea5c196bcfc83fd6d0ebd5664a1cfaccd296705f396c0088",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "va-sbf": {
+    "hash": "f0e9f07718f633243beabe642e4e72293c2a48d1a881513c71e2255550ad3b9b",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "tx-hb700": {
+    "hash": "fdad7fd43fc7e5a2249334ec7be8d832c1919d5f2d5194d0813ab50016fb4a8c",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "tx-occc": {
+    "hash": "071e1ad37b5d5f5bf1c64c1c4d70b94612ad0c7206efb250f768c64713c88e2d",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "la-act198": {
+    "hash": "1204080cbe45ef96c0cf58620faa9a47b821a887c7792029474ed061d431cce7",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "cloudfund-dockets": {
+    "hash": "61cfe3f81e20be3efcd5cecc8c3a79da152e85a3e0e577e217541b0a87c86901",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  },
+  "cloudfund-site": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lastChecked": "2026-06-12",
+    "lastChanged": null
+  }
+}

@@ -613,7 +613,7 @@ it on the next monthly run.
 | cloudfund-site | CloudFund LLC — company site (closed lender, permanently scrape-blocklisted; watch for legal/wind-down notices) | Company watch | https://cloudfund.com/ |
 <!-- SOURCE-REGISTRY:END -->
 
-**Monitoring log:** <!-- SCRAPER-LAST-RUN -->never (first automated run pending)<!-- /SCRAPER-LAST-RUN -->
+**Monitoring log:** <!-- SCRAPER-LAST-RUN -->last automated check 2026-06-12; 0 change(s) detected; 3 fetch error(s)<!-- /SCRAPER-LAST-RUN -->
 
 Detected changes are written to `public/assets/data/compliance-bulletin.json`
 and surface on the lp-panel Compliance dashboard — not into this file's legal
