@@ -397,8 +397,11 @@
         body.pdf-export-mode .pdf-document * { box-sizing: border-box; }
 
         /* Topline header — brand kicker / Prepared For box / preparer meta */
+        /* display needs !important: the blanket print rules `header { display:none !important }`
+           (print chrome cleanup) would otherwise swallow this <header class="topline"> too —
+           the calm doc's brand kicker / Prepared For box never reached the printed PDF. */
         body.pdf-export-mode .pdf-document .topline {
-            display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: flex-start;
+            display: grid !important; grid-template-columns: 1fr 1.15fr 1fr; align-items: flex-start;
             gap: 28px; padding-bottom: 15px; margin-bottom: 13px; border-bottom: 1px solid var(--line);
         }
         body.pdf-export-mode .pdf-document .brand {
@@ -406,6 +409,10 @@
         }
         body.pdf-export-mode .pdf-document .brand span {
             display: block; margin-top: 3px; color: var(--muted); font-size: 9px; font-weight: 800; letter-spacing: 0.16em;
+        }
+        /* White-label tenant kicker (LEN-306): tenant logo above the doc title */
+        body.pdf-export-mode .pdf-document .brand img {
+            display: block; max-height: 24px; max-width: 140px; margin-bottom: 5px;
         }
         body.pdf-export-mode .pdf-document .company-box {
             padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); text-align: center;
@@ -1834,17 +1841,31 @@
             const companyName = preparedForName
                 ? `<div class="company-name">${preparedForName}</div>`
                 : `<div class="company-name is-empty">Borrower not specified</div>`;
-            // Prepared-by falls back to "financing provider" rather than implying LendPaper is the lender.
-            const preparedByLine = ctx.preparedBy ? `Prepared by ${pdfEscape(ctx.preparedBy)}` : 'Prepared by financing provider';
+            // White-label tenant (LEN-306): the calm doc is the whole Amo PDF (the
+            // .print-header-content path is hidden in pdf-export-mode), so tenant
+            // identity renders here — logo + company in the kicker, contact in the meta.
+            const tenant = window.LP_TENANT || null;
+            const brandKicker = tenant
+                ? `<div class="brand">${tenant.logo_url ? `<img src="${pdfEscape(tenant.logo_url)}" alt="">` : ''}${pdfEscape(tenant.company_name)} <span>Payment Breakdown</span></div>`
+                : `<div class="brand">Payment Breakdown <span>Scenario Modeling Engine</span></div>`;
+            // Prepared-by falls back to the tenant contact, then "financing provider"
+            // rather than implying LendPaper is the lender.
+            const tenantContact = tenant
+                ? [tenant.contact_name, tenant.contact_email, tenant.contact_phone].filter(Boolean).map(pdfEscape).join(' · ')
+                : '';
+            const preparedByLine = ctx.preparedBy ? `Prepared by ${pdfEscape(ctx.preparedBy)}`
+                : (tenant && tenant.contact_name) ? `Prepared by ${pdfEscape(tenant.contact_name)}`
+                : 'Prepared by financing provider';
             const topline = `
                 <header class="topline">
-                    <div class="brand">Payment Breakdown <span>Scenario Modeling Engine</span></div>
+                    ${brandKicker}
                     <div class="company-box">
                         <div class="label">Prepared For</div>
                         ${companyName}
                     </div>
                     <div class="meta">
                         ${preparedByLine}
+                        ${tenantContact ? `${tenantContact}<br>` : ''}
                         ${docNo ? `<strong>${pdfEscape(docNo)}</strong>` : ''}
                         Using LendPaper technology${docDate ? ` · ${pdfEscape(docDate)}` : ''}
                     </div>
@@ -1862,11 +1883,17 @@
 
             // Footer rendered once at the document end. Per-page legal micro-copy + page numbers
             // come from the @page margin boxes; PDF_HELPER adds the watermark + forensic fingerprint.
+            // Tenant contact identity leads the footer (LEN-307 acceptance); the LendPaper
+            // software-provider legal line is never suppressed (LEGAL.md §3).
+            const footerTenantLine = tenant
+                ? `<div><strong>${pdfEscape(tenant.company_name)}</strong>${tenantContact ? ' · ' + tenantContact : ''}</div>`
+                : '';
             const footerPrepared = ctx.preparedBy
                 ? `Prepared by ${pdfEscape(ctx.preparedBy)} using LendPaper technology. `
                 : 'Prepared using LendPaper technology. ';
             const footer = `
                 <footer class="pdf-footer">
+                    ${footerTenantLine}
                     <div>${footerPrepared}LendPaper is a software provider only, not a lender, broker, financial advisor, or law firm. This document is informational and not an official offer of credit. Terms, origination fees, payoff amounts, and disclosures are subject to lender review and applicable law. lendpaper.com/legal/estimates</div>
                     <div class="pdf-footer-line">${docNo ? pdfEscape(docNo) + '<br>' : ''}ESTIMATE ONLY</div>
                 </footer>`;
