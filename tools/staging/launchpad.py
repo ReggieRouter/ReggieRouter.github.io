@@ -40,6 +40,13 @@ def sh(args, cwd=None):
         return ""
 
 
+def ok(args, cwd=None):
+    try:
+        return subprocess.run(args, cwd=cwd, capture_output=True, timeout=15).returncode == 0
+    except Exception:
+        return False
+
+
 def discover():
     """Return [{path, branch, ticket, changed}] for every worktree except the main mirror."""
     out = sh(["git", "worktree", "list", "--porcelain"], cwd=REPO_ANCHOR)
@@ -62,8 +69,13 @@ def discover():
             continue
         if branch == "main" or os.path.basename(path) == "main":
             continue  # the live mirror — skip
+        if not (path + os.sep).startswith(WORKTREE_ROOT + os.sep):
+            continue  # legacy clones / nested agent worktrees — retired designs must never preview (LEN-312)
         committed = sh(["git", "diff", "--name-only", "origin/main...HEAD"], cwd=path)
         dirty = sh(["git", "status", "--porcelain"], cwd=path)
+        dirty_tracked = [l for l in dirty.splitlines() if not l.startswith("??")]
+        if not dirty_tracked and ok(["git", "merge-base", "--is-ancestor", "HEAD", "origin/main"], cwd=path):
+            continue  # fully merged + clean — already live, nothing in flight (LEN-312)
         changed = sorted({*(committed.splitlines()),
                           *(l[3:] for l in dirty.splitlines() if len(l) > 3)})
         m = re.search(r"len-(\d+)", branch, re.I)
