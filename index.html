@@ -22,9 +22,9 @@
 <meta charset="UTF-8">
 <base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2026.06.12.0005">
+<meta name="version" content="2026.06.12.0006">
 <script type="text/javascript">
-  window.CURRENT_VERSION = "2026.06.12.0005";
+  window.CURRENT_VERSION = "2026.06.12.0006";
 
   // Force active cleanup of legacy service workers
   if ('serviceWorker' in navigator) {
@@ -1939,6 +1939,17 @@ var anonRotationPool = [
   "Your next deal needs a number."
 ];
 
+// LEN-336: logged-out subline pool — replaces LEN-304's pinned "No account
+// needed." line. One pick per session (same getRotationMessage pinning as the
+// pools above). Every line must keep the open-access promise AND stay honest
+// about the one real gate: saving deals → Deal Log sign-in.
+var anonSublinePool = [
+  "Everything's open — sign in only to save your deals.",
+  "Free to use. Sign in only to save your work.",
+  "Every tool is open. An account just keeps your deals.",
+  "Open to everyone — nothing to sign up for."
+];
+
 var phraseBank = [
   "Close faster. Underwrite smarter.",
   "The deal you need is one conversation away.",
@@ -2122,13 +2133,14 @@ function updateGreeting() {
 
   // Anonymous tool desk (LEN-304): contextual greeting from the shared store,
   // zero personalization (no name lookups in this path). One line per load via
-  // the same top-down hierarchy, with a fixed "No account needed." subline that
-  // never rotates and isn't pulled from any pool. Gated entirely on lpIsAnon()
-  // at render time, so the logged-in banner below is untouched.
+  // the same top-down hierarchy. Subline rotates through anonSublinePool
+  // (LEN-336), pinned per session so it doesn't flip on the updateGreeting
+  // tick. Gated entirely on lpIsAnon() at render time, so the logged-in
+  // banner below is untouched.
   if (lpIsAnon()) {
     gt.textContent = getContextualGreeting(true);
     if (gs) {
-      gs.textContent = 'No account needed.';
+      gs.textContent = getRotationMessage(anonSublinePool, 'lp_anon_subline_message');
       gs.style.display = 'block';
     }
     return;
