@@ -76,6 +76,16 @@ function pushLocal(record) {
 // ── Save ──────────────────────────────────────────────────────────────────────
 // Fire on PDF generation and on "Copy Scenario". Never throws — logging an
 // estimate must never block the calculator's primary action.
+// Admin tenant preview (LEN-330): while lp-panel's "Preview instance" tab is
+// active (branding cache carries _preview), estimates must leave no trace —
+// no Supabase row, no localStorage mirror, no usage events, no save gate.
+function inTenantPreview() {
+  try {
+    const t = JSON.parse(sessionStorage.getItem('lp_tenant_v1') || 'null');
+    return !!(t && t._preview);
+  } catch (e) { return false; }
+}
+
 async function saveEstimate(opts = {}) {
   const record = {
     doc_id: opts.doc_id || genDocId(),
@@ -86,6 +96,11 @@ async function saveEstimate(opts = {}) {
     prepared_by: opts.prepared_by || (opts.params && opts.params.prepared_by) || null,
     prepared_for: opts.prepared_for || null,
   };
+
+  if (inTenantPreview()) {
+    console.info('[QuoteLog] tenant preview — estimate not recorded (LEN-330)');
+    return Object.assign({ preview: true }, record);
+  }
 
   // Always mirror locally (offline / logged-out / pre-migration safety net)
   pushLocal(record);

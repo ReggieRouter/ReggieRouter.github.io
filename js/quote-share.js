@@ -39,6 +39,11 @@ async function createQuoteLink() {
   if (typeof window.LP_getQuotePayload !== 'function') {
     throw new Error('Quote data source not wired on this page.');
   }
+  // Admin tenant preview (LEN-330): never create real, tracked quote rows
+  // from a preview session.
+  if (window.LP_TENANT && window.LP_TENANT._preview) {
+    throw new Error('Preview mode — quote links are disabled here.');
+  }
   const { data: { session } = {} } = await sb.auth.getSession();
   if (!session) throw new Error('Sign in to share quotes.');
 

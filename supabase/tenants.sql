@@ -174,3 +174,17 @@ create policy "owner read views" on public.quote_views
     quote_id in (select id from public.quotes where created_by = auth.uid())
   );
 
+
+-- ============================================================
+-- 8. Admin tenant preview (LEN-330)
+--    lp-panel's White Label tab lists every tenant; the base policy
+--    only exposes the user's OWN tenant row. Same is_admin predicate
+--    as the adoption_setup.sql admin policies.
+-- ============================================================
+drop policy if exists "admin read tenants" on public.tenants;
+create policy "admin read tenants" on public.tenants
+  for select
+  to authenticated
+  using (
+    exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin = true)
+  );

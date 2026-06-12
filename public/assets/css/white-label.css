@@ -175,9 +175,37 @@
 .qs-status.ok { color: #1b7a3d; }
 .qs-status.err { color: #b3261e; }
 
-/* Doc Combine and quote share never belong in the printed document */
+/* ---------- Admin tenant preview pill (LEN-330) ---------- */
+.tenant-preview-pill {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 9999;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #111827;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+.tenant-preview-pill button {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: none;
+  color: #fff;
+  font: inherit;
+  padding: 3px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.tenant-preview-pill button:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* Doc Combine, quote share, and the preview pill never belong in the printed document */
 @media print {
-  .dc-card, .qs-btn, .qs-status { display: none !important; }
+  .dc-card, .qs-btn, .qs-status, .tenant-preview-pill { display: none !important; }
 }
 
 @media (max-width: 480px) {

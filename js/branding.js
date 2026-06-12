@@ -26,6 +26,22 @@ import { supabase } from './auth.js';
 const CACHE_KEY = 'lp_tenant_v1';
 const PENDING_CLASS = 'branding-pending';
 
+// Admin tenant preview (LEN-330): lp-panel opens "/#lp-tenant-preview=<b64 row>".
+// Seed the session cache from the fragment (marked _preview) and clean the URL —
+// the whole tab (incl. calculator iframes, which share tab sessionStorage) then
+// renders as that tenant without touching any profile. Cosmetic only: RLS still
+// governs every actual data access.
+try {
+  const m = /[#&]lp-tenant-preview=([^&]+)/.exec(location.hash || '');
+  if (m && window.self === window.top) {
+    const t = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
+    if (t && t.company_name) {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(Object.assign({}, t, { _preview: true })));
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+  }
+} catch (_) {}
+
 // Avoid flash-of-LendPaper for tenant users who branded last session.
 // Anonymous and non-tenant users never have the cache, so they never
 // see the pending state (zero-regression requirement, LEN-306).
@@ -143,7 +159,28 @@ function apply(tenant) {
   window.LP_TENANT = tenant;
   document.dispatchEvent(new CustomEvent('lp:tenant-ready', { detail: tenant }));
 
+  // 8. Admin preview pill (LEN-330) — top window only, never inside the tool iframe
+  if (tenant._preview && window.self === window.top) renderPreviewPill(tenant);
+
   root.classList.remove(PENDING_CLASS);
+}
+
+function renderPreviewPill(tenant) {
+  if (document.getElementById('lp-tenant-preview-pill')) return;
+  const pill = document.createElement('div');
+  pill.id = 'lp-tenant-preview-pill';
+  pill.className = 'tenant-preview-pill';
+  const label = document.createElement('span');
+  label.textContent = 'Previewing ' + tenant.company_name + ' — admin only';
+  const exit = document.createElement('button');
+  exit.type = 'button';
+  exit.textContent = 'Exit preview';
+  exit.addEventListener('click', () => {
+    try { sessionStorage.removeItem(CACHE_KEY); } catch (_) {}
+    location.reload();
+  });
+  pill.append(label, exit);
+  document.body.appendChild(pill);
 }
 
 function init() {
