@@ -8859,6 +8859,19 @@
         "detailed_restrictions": []
     }
 ];
+  // Safety net: surface JS crashes as a visible banner rather than a blank table.
+  // Any unhandled ReferenceError / TypeError during init renders here instead of silently failing.
+  window.addEventListener('error', (ev) => {
+    const tbody = document.getElementById('lender-table-body');
+    if (!tbody) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="8" style="padding:2rem;text-align:center;color:#b91c1c;font-weight:600;">
+      Waterfall failed to load — JS error: ${ev.message} (${ev.filename?.split('/').pop()}:${ev.lineno}).
+      Hard-refresh to retry. If this persists, report to your admin.
+    </td>`;
+    tbody.appendChild(tr);
+  });
+
   // LENDER_TYPE_OVERRIDES — hard-coded lender_type corrections.
   // Add an entry here when a lender's type has been manually verified and must not be changed by future data imports.
   // Keys are the lender name exactly as it appears in the data. Values are the raw string before normalization.
