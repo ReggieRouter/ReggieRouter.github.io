@@ -83,6 +83,12 @@
     footer { background: var(--surface); border-top: 1px solid var(--border); padding: 24px; text-align: center; font-size: 12px; color: var(--muted); }
     footer a { color: var(--green); text-decoration: none; }
   </style>
+<!-- Anonymous usage tracking (LEN-285 / LEN-177) -->
+<script src="/js/config.js"></script>
+<script type="module">
+  import { logEvent } from '/js/analytics.js';
+  logEvent('underwriting-guide', 'view');
+</script>
 </head>
 <body>
 
