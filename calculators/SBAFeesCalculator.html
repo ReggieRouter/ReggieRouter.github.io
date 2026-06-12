@@ -50,7 +50,7 @@
 <link rel="stylesheet" href="../public/assets/css/calculator-shell.css">
 <link rel="stylesheet" href="../public/assets/css/pdf-calm.css">
 <!-- Local shared scripts versioned off the iframe ?v= stamp so a CURRENT_VERSION bump refetches them (LEN-222). -->
-<script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}var q=v?('?v='+encodeURIComponent(v)):'';['../public/assets/js/calculator-app.js','../public/assets/js/pdf-helper.js','../public/assets/js/compliance-rules.js','../public/assets/js/compliance.js','../js/config.js'].forEach(function(s){document.write('<scr'+'ipt src="'+s+q+'"><\/scr'+'ipt>');});})();</script>
+<script>(function(){var v='';try{v=new URLSearchParams(location.search).get('v')||'';}catch(e){}var q=v?('?v='+encodeURIComponent(v)):'';['../public/assets/js/calculator-app.js','../public/assets/js/pdf-helper.js','../public/assets/js/compliance-rules.js','../public/assets/js/compliance.js','../js/config.js','../js/completion-cue.js'].forEach(function(s){document.write('<scr'+'ipt src="'+s+q+'"><\/scr'+'ipt>');});})();</script>
 <script type="importmap">
   { "imports": { "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" } }
 </script>
@@ -1112,5 +1112,18 @@ window.onload = () => {
     </div>
 </div>
 
+<script>
+// LEN-288 — completion cue: flash takeaway + Save PDF the first time every required input is valid
+window.LPCompletionCue && LPCompletionCue.init({
+    slug: 'sba_fees',
+    takeaway: '.takeaway',
+    cta: '.lp-cta-primary',
+    isComplete: function () {
+        // mirrors the calculate() gate: if (loanAmt > 0) — term/rate fall back to defaults
+        var el = document.querySelector('input[id^="loanAmount-"]');
+        return !!el && parseFloat(String(el.value).replace(/[^0-9.\-]/g, '')) > 0;
+    }
+});
+</script>
 </body>
 </html>
