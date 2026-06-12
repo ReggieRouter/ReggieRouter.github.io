@@ -1,6 +1,9 @@
 /* ════════════════════════════════════════════════════════════
    LendPaper · js/bank-autofill.js — BankProfile → calculator fields
    LEN-342 (P1 of markdowns/BANK_DATA.md). Requires js/bank-import.js.
+   LEN-343 (P2): optional Plaid Link path inside the same drop-zone UI —
+   signed-in users can connect a bank (sandbox); the stateless Edge
+   Functions return the same BankProfile shape into the same apply path.
 
    Loaded ONLY behind the ?bankimport=1 query flag — with the flag absent
    neither this file nor bank-import.js is fetched and the page is
@@ -44,7 +47,14 @@
     '.lp-bankdrop-note{margin-top:8px;font-size:11.5px;line-height:1.5;color:#4b554f}',
     '.lp-bankdrop-legal{margin-top:7px;font-size:10.5px;line-height:1.5;color:#6b746e}',
     '.lp-bankdrop-err{margin-top:10px;font-size:12px;color:#9a3d3b;background:#fbf1f0;border:1px solid #ecd2d0;border-radius:10px;padding:9px 12px}',
-    '.lp-bank-kicker{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:lowercase;color:#2D6A4F;margin-left:7px;white-space:nowrap}'
+    '.lp-bank-kicker{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:lowercase;color:#2D6A4F;margin-left:7px;white-space:nowrap}',
+    /* LEN-343 — Plaid connect link (single-outline focus rule: one outline, never a box-shadow ring) */
+    '.lp-bankdrop-plaidrow{margin-top:7px;text-align:center}',
+    '.lp-bankdrop-plaid{background:none;border:0;padding:0;cursor:pointer;font-family:inherit;font-size:11.5px;font-weight:600;color:#2D6A4F;text-decoration:underline}',
+    '.lp-bankdrop-plaid:hover{color:#1A3C2E}',
+    '.lp-bankdrop-plaid:focus-visible{outline:1.5px solid #2D6A4F;outline-offset:2px}',
+    '.lp-bankdrop-plaid[disabled]{opacity:.55;cursor:default;text-decoration:none}',
+    '.lp-bankdrop-signin{font-size:11px;color:#6b746e}'
   ].join('\n');
 
   function injectStyles() {
@@ -67,6 +77,62 @@
   function removeKicker(key) {
     document.querySelectorAll('.lp-bank-kicker[data-bank-kicker="' + key + '"]')
       .forEach(function (k) { k.remove(); });
+  }
+
+  /* ── Plaid Link path (LEN-343 — P2, sandbox) ─────────────────
+     Lives behind the SAME ?bankimport=1 flag: this module isn't even
+     fetched without it, so flag-off pages carry zero Plaid code. The Edge
+     Functions are stateless (see supabase/functions/plaid-exchange) — the
+     browser receives only the derived BankProfile, exactly like a
+     statement drop; no tokens or raw transactions ever reach this code. */
+  var PLAID_CDN = 'https://cdn.plaid.com/link/v2/stable/link-initialize.js';
+
+  function lpSession() {
+    /* js/auth.js keeps supabase-js's DEFAULT storageKey (sb-<ref>-auth-token,
+       load-bearing per LEN-285) — reading it directly keeps this file a classic
+       script with no imports, and the key name yields the functions host. */
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        var m = k && k.match(/^sb-([a-z0-9]+)-auth-token$/);
+        if (!m) continue;
+        var s = JSON.parse(localStorage.getItem(k));
+        if (s && s.access_token) {
+          return { token: s.access_token, fnBase: 'https://' + m[1] + '.supabase.co/functions/v1' };
+        }
+      }
+    } catch (e) { /* no session */ }
+    return null;
+  }
+
+  function callFn(sess, name, body) {
+    return fetch(sess.fnBase + '/' + name, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sess.token },
+      body: JSON.stringify(body || {})
+    }).then(function (resp) {
+      return resp.json().catch(function () { return {}; }).then(function (data) {
+        if (!resp.ok) {
+          var msg = data && data.error === 'not_configured'
+            ? 'Bank connection isn’t configured yet — drop a statement file instead.'
+            : resp.status === 401 ? 'Your session expired — sign in again to connect a bank.'
+            : 'Bank connection failed (' + ((data && data.error) || resp.status) + '). Try a statement file instead.';
+          throw new Error(msg);
+        }
+        return data;
+      });
+    });
+  }
+
+  function loadPlaidJs() {
+    return new Promise(function (resolve, reject) {
+      if (window.Plaid) return resolve();
+      var s = document.createElement('script');
+      s.src = PLAID_CDN;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Couldn’t load Plaid Link — check your connection and try again.')); };
+      document.head.appendChild(s);
+    });
   }
 
   /* ── drop zone ───────────────────────────────────────────── */
@@ -115,6 +181,51 @@
       handleFile(fileInput.files[0]);
       fileInput.value = '';
     });
+
+    /* ── LEN-343: Plaid connect link, same flag, same apply path. Rendered as
+       a sibling row right under the zone (not nested in the role=button zone,
+       which would break keyboard semantics). Signed-out users see a plain
+       "sign in" line — the Edge Functions require a Supabase JWT. ── */
+    function plaidErr(msg) {
+      result.hidden = false;
+      result.innerHTML = '<div class="lp-bankdrop-err">' +
+        String(msg && msg.message || msg).replace(/[<>&]/g, '') + '</div>';
+    }
+    var plaidRow = document.createElement('div');
+    plaidRow.className = 'lp-bankdrop-plaidrow';
+    if (lpSession()) {
+      plaidRow.innerHTML = '<button type="button" class="lp-bankdrop-plaid">or connect your bank (sandbox)</button>';
+      var pBtn = plaidRow.querySelector('button');
+      pBtn.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        if (pBtn.disabled) return;
+        var sess = lpSession(); // re-read: the token may have refreshed since mount
+        if (!sess) { plaidErr('Sign in to connect a bank.'); return; }
+        var idle = pBtn.textContent;
+        var busy = function (label) { pBtn.disabled = !!label; pBtn.textContent = label || idle; };
+        busy('connecting…');
+        loadPlaidJs().then(function () {
+          return callFn(sess, 'plaid-create-link-token');
+        }).then(function (data) {
+          window.Plaid.create({
+            token: data.link_token,
+            onSuccess: function (publicToken) {
+              busy('pulling transactions…');
+              callFn(sess, 'plaid-exchange', { public_token: publicToken }).then(function (out) {
+                busy(null);
+                if (out && out.bankProfile) onProfile(out.bankProfile, result);
+                else plaidErr('The bank connection returned no profile — try a statement file instead.');
+              }).catch(function (err) { busy(null); plaidErr(err); });
+            },
+            onExit: function () { busy(null); }
+          }).open();
+        }).catch(function (err) { busy(null); plaidErr(err); });
+      });
+    } else {
+      plaidRow.innerHTML = '<span class="lp-bankdrop-signin">sign in to connect a bank</span>';
+    }
+    wrap.insertBefore(plaidRow, result);
+
     return wrap;
   }
 
