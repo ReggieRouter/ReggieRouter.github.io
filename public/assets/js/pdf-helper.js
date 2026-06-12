@@ -47,6 +47,10 @@ window.PDF_HELPER = {
     },
     
     initPrintLayout: function(title, quoteId) {
+        // Remember args so the white-label layer can re-render this header once
+        // the tenant resolves (branding.js is async; see listener at file end).
+        this._lastPrintArgs = [title, quoteId];
+
         // Set dynamic favicon for artifact mode
         let link = document.querySelector("link[rel~='icon']");
         if (!link) {
@@ -56,15 +60,32 @@ window.PDF_HELPER = {
         }
         link.type = 'image/svg+xml';
         link.href = '../public/assets/brand/favicon-artifact.svg';
-        
+
         // Find header
         const headerEl = document.querySelector('.print-header-content');
         if (!headerEl) return;
-        
+
         const tier = this.getTier();
+        const tenant = window.LP_TENANT || null;
         let headerHTML = "";
-        
-        if (tier === 'free') {
+
+        if (tenant) {
+            // White-label tenant (LEN-306): tenant logo + name on the left,
+            // "Powered by LendPaper" attribution on the right (BRANDING.md §5).
+            const escT = (s) => String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            headerHTML = `
+                <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 0 10px 0 !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
+                    <div class="print-header-left" style="display: flex !important; align-items: center !important; gap: 8px !important;">
+                        ${tenant.logo_url ? `<img src="${escT(tenant.logo_url)}" alt="" style="max-height: 28px !important; max-width: 150px !important;">` : ''}
+                        <span style="font-size: 15px !important; font-weight: 800 !important; color: #111827 !important; letter-spacing: -0.02em !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">${escT(tenant.company_name)}</span>
+                    </div>
+                    <div class="print-header-right" style="text-align: right !important; color: #9CA3AF !important;">
+                        <span style="font-size: 7.5px !important; font-weight: 700 !important; letter-spacing: 0.05em !important; text-transform: uppercase !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;">Powered by LendPaper</span>
+                    </div>
+                </div>
+            `;
+        } else if (tier === 'free') {
             headerHTML = `
                 <div class="print-header-cols" style="display: flex !important; justify-content: space-between !important; align-items: flex-end !important; width: 100% !important; border-bottom: 0.5pt solid #E5E7EB !important; padding: 0 0 10px 0 !important; margin-bottom: 16px !important; box-sizing: border-box !important;">
                     <div class="print-header-left"></div>
@@ -1067,3 +1088,13 @@ window.PDF_HELPER = {
     }
   }
 })();
+
+// White-label (LEN-306): the print header is rendered before branding.js
+// resolves the tenant, so re-render it once the tenant is known. branding.js
+// always dispatches lp:tenant-ready (with null detail for non-tenants — the
+// re-render is then a no-op refresh of the default tier header).
+document.addEventListener('lp:tenant-ready', function () {
+    if (window.PDF_HELPER && PDF_HELPER._lastPrintArgs) {
+        PDF_HELPER.initPrintLayout.apply(PDF_HELPER, PDF_HELPER._lastPrintArgs);
+    }
+});
