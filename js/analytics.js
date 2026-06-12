@@ -87,4 +87,6 @@ if (/github\.io$/.test(location.hostname)) {
   };
   if (document.body) mountBuildStamp();
   else window.addEventListener('DOMContentLoaded', mountBuildStamp);
+  // per-tile update flags (home page) — staging-only module, fails silent
+  import('./staging-updates.js').catch(() => {});
 }
