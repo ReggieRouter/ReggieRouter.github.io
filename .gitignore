@@ -10,3 +10,4 @@ workspace/
 client_secret*.json
 *.zip
 archive/
+__pycache__/

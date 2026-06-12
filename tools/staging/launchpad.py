@@ -728,9 +728,31 @@ updateAll();
 </body></html>"""
 
 
+def auto_retire_loop():
+    """Sweep out-of-date cards every 4h while the server runs (LEN-323).
+
+    Lives here as well as in the launchd job because launchd is TCC-blocked from
+    ~/Documents (the primary repo's .git) unless python3 gets Full Disk Access;
+    this thread inherits the launching terminal's grant, so staging is always
+    swept whenever it's actually being served. Subprocess (not import) so the
+    sweep can never take the server down with it.
+    """
+    import sys
+    import time
+    script = os.path.join(REPO_ANCHOR, "retire_stale.py")
+    while True:
+        time.sleep(10)  # let the HTTP server come up so the sweep can use /api/state
+        try:
+            subprocess.run([sys.executable, script], capture_output=True, timeout=600)
+        except Exception:
+            pass
+        time.sleep(4 * 3600)
+
+
 def main():
     print(f"LendPaper staging launchpad → http://localhost:{BASE_PORT}/")
     print("Discovering worktrees under ~/lp-worktrees/ … (Ctrl-C to stop)")
+    threading.Thread(target=auto_retire_loop, daemon=True).start()
     httpd = socketserver.ThreadingTCPServer(("", BASE_PORT), LaunchpadHandler)
     httpd.daemon_threads = True
     try:
