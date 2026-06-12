@@ -92,9 +92,10 @@ To add lenders: update the `NEW_LENDERS` list in `ingest_rest.py` with `{"name":
   **never hardcode it** (LEGAL.md §14).
 - New calculators/surfaces: include `compliance-rules.js` + `compliance.js`
   after `pdf-helper.js` and add `<div data-lp-compliance-host>`.
-- Monthly scraper: `scrapers/compliance_scraper.py` via
+- Daily scraper: `scrapers/compliance_scraper.py` via
   `.github/workflows/compliance-watch.yml` — monitors the LEGAL.md §15 source
-  registry; bulletin renders in lp-panel → Compliance.
+  registry; bulletin renders in lp-panel → Compliance. LLM-free (urllib +
+  SHA256 hash diff), so daily cadence costs no tokens (LEN-93).
 - Admin master toggle (lp-panel → Compliance) is **per-browser** for testing;
   live users always have the layer ON.
 

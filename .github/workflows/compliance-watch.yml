@@ -1,5 +1,5 @@
 # LendPaper Compliance Watch (LEN-93)
-# Fully automated monthly regulatory scrape — no manual trigger required.
+# Fully automated daily regulatory scrape — no manual trigger required.
 # Monitors the Source Registry in markdowns/LEGAL.md §15, updates the
 # compliance bulletin JSON (surfaces on the lp-panel Compliance dashboard
 # with a notification dot), and commits the results. Pushing to main
@@ -9,8 +9,9 @@ name: Compliance Watch
 
 on:
   schedule:
-    # 09:17 UTC on the 3rd of every month (off-peak minute to dodge cron congestion)
-    - cron: '17 9 3 * *'
+    # 09:17 UTC daily (off-peak minute to dodge cron congestion). Scrape is
+    # LLM-free (urllib + SHA256 hash diff), so daily cadence costs no tokens.
+    - cron: '17 9 * * *'
   workflow_dispatch: {}   # optional manual run for testing — the schedule never depends on it
 
 permissions:
@@ -38,6 +39,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No regulatory changes detected this month."
           else
-            git commit -m "Compliance watch: monthly regulatory scrape $(date -u +%Y-%m-%d) (LEN-93)"
+            git commit -m "Compliance watch: daily regulatory scrape $(date -u +%Y-%m-%d) (LEN-93)"
             git push
           fi
