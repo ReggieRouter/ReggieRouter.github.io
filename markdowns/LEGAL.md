@@ -331,6 +331,42 @@ rate, term length, payment frequency, and timing of funding**:
 
 Sources: [FTC Act §5 (UDAP)](https://www.ftc.gov/legal-library/browse/statutes/federal-trade-commission-act) · NY AG: [ag.ny.gov](https://ag.ny.gov/) · CA AG: [oag.ca.gov](https://oag.ca.gov/)
 
+### 9.3 MCA / RBF, business credit & credit-utilization framing — house rule backed by FTC Act §5 (LEN-317)
+
+**PERMANENT compliance note.** Reps and product copy frequently want to position
+short-term financing (MCA / RBF) as a credit play. The accurate framing:
+
+- **MCAs / RBFs usually do NOT build business credit.** An MCA/RBF is a purchase
+  of future receivables, not a loan, and the funder typically does **not** report
+  the account to the commercial credit bureaus. **Never claim, imply, or hint
+  that taking an MCA/RBF will build, establish, or improve business or personal
+  credit** — that is a misrepresentation (FTC Act §5; state UDAP) and, because
+  credit-repair-style promises are involved, carries added exposure.
+- **What IS fair to say (carefully):** an MCA/RBF can let a business **pay down
+  or avoid leaning on high-interest credit cards**, which can **lower its credit
+  utilization**. Lower utilization is one input some scoring models weigh, so in
+  a **high-utilization** situation this can be a legitimate, useful benefit to
+  surface — *for the borrower's own cash-flow and card-balance management.*
+- **Tread carefully — required guardrails on that framing:**
+  - Frame it as **the borrower's choice to use proceeds to reduce card balances**,
+    not as a feature of the product. The MCA/RBF itself does nothing to credit.
+  - **No causal credit-score promise.** Never say it "will raise your score,"
+    "fixes your credit," or "is a credit-building tool." Utilization is one of
+    many factors; outcomes depend on the borrower's full profile and the bureaus.
+    Use conditional language ("can help reduce reliance on cards," "*may* help
+    utilization") — never guarantees.
+  - **Never present this as credit repair or credit counseling** (separately
+    regulated — CROA / state credit-services-organization laws).
+  - Cost honesty still governs (§9.2): swapping card debt for an MCA/RBF can be
+    **more** expensive; don't imply a cost saving that isn't there.
+
+> One-liner for talk tracks: *"An MCA/RBF won't build your business credit — but
+> if card balances are high, you can use it to pay those down and lower your
+> utilization. It's a cash-flow move, not a credit-building product, and it's no
+> guarantee your score changes."*
+
+Sources: [FTC Act §5 (UDAP)](https://www.ftc.gov/legal-library/browse/statutes/federal-trade-commission-act) · [Credit Repair Organizations Act (CROA), 15 U.S.C. §1679](https://www.ftc.gov/legal-library/browse/statutes/credit-repair-organizations-act)
+
 ---
 
 ## 10. Disclosure Requirements

@@ -700,6 +700,8 @@ function renderRead(){
 
   ttBind(d);
   refreshFundingRange();
+  // The intro callout no longer lingers — it slides away on its own (LEN-317).
+  if(introNew){ setTimeout(()=>{ const p=document.querySelector('#read .intro-pop'); if(p && S._introState==='show'){ p.classList.add('intro-out'); setTimeout(dismissIntro,440); } }, 8500); }
 }
 function qchip(lever, label, val){
   const sm = String(val).length>12 ? ' sm':'';
@@ -1052,7 +1054,8 @@ function prodKeynote(d){
   const rows=list.map((p)=>{
     const label=p[0]; const q=productQualify(label,d); const v=verdict3(q); const display=prodDisplay(label);
     const sub=prodSubline(label);
-    return `<button class="kn-item" onclick="openLever('product')">
+    const oi=(d.prods||[]).indexOf(p); // original index — each row opens ITS OWN product (LEN-317)
+    return `<button class="kn-item" onclick="openProd(${oi})">
       <span class="kn-item-main">
         <span class="kn-item-name">${ttEsc(display)}</span>
         ${sub?`<span class="kn-item-sub">${sub}</span>`:''}
@@ -1079,6 +1082,12 @@ function stfStructureHTML(){
       <div class="stf-h">Short-Term Loan <span class="stf-tag">BLA</span></div>
       <div class="stf-b">A <b>Business Loan Agreement</b> with a <b>personal guarantee</b> — fixed daily/weekly payments and a fixed term. Higher bar, often <b>625–640+ FICO</b> (lenders like OnDeck, Credibly).</div>
     </div>
+    <div class="stf-ex">
+      <div class="stf-ex-h">Same $50,000 — two different deals</div>
+      <div class="stf-ex-row"><span class="stf-ex-k">Revenue-Based Financing</span><span class="stf-ex-v">The funder buys ~$65,000 of future sales and collects <b>~10% of daily deposits</b>. Slow week, smaller pull — repayment <b>flexes with revenue</b>. No personal guarantee; it does <b>not</b> build business credit.</span></div>
+      <div class="stf-ex-row"><span class="stf-ex-k">Short-Term Loan</span><span class="stf-ex-v">A $50,000 loan repaid in <b>fixed</b> daily/weekly amounts over a set term, backed by a <b>personal guarantee</b>. Predictable, but the payment doesn't bend if sales dip — and a missed payment is a default.</span></div>
+      <div class="stf-ex-note">Same headline number, different risk and obligation. The structure — not the price — is what the borrower is actually signing.</div>
+    </div>
     <div class="stf-rule">${I.info}<span>Client-facing, always call the MCA structure <b>“Revenue-Based Financing”</b> — never “MCA.” A short-term loan on a BLA is <b>never</b> “RBF.”</span></div>
   </div>`;
 }
@@ -1089,6 +1098,16 @@ function renderProdTile(d){
   const pq=document.getElementById('prodQ'); if(pq) pq.innerHTML=`<span class="pq-dot" style="background:${q.dotColor}"></span>${q.word}`;
 }
 function cycleProd(dir){ const d=currentDeal(); const n=(d.prods||[]).length; if(n<2) return; S.prodIdx=((S.prodIdx||0)+dir+n)%n; save(); renderRead(); }
+// Eligible-products row click (LEN-317): select THAT product, re-render so the
+// whole read reflects it, then open its lever. For Short-Term Financing, jump
+// straight to the RBF-vs-short-term-loan explainer.
+function openProd(i){
+  const d=currentDeal(); const list=d.prods||[]; if(!list.length) return;
+  S.prodIdx=Math.max(0,Math.min(i|0,list.length-1)); save();
+  const fam=prodFamily(list[S.prodIdx][0]);
+  renderRead();
+  openLever('product', (fam==='mca'||fam==='rbf')?'structure':undefined);
+}
 function applyDeltas(lv){
   if(S.tweaks.deltas!=='on'){ _prevProxy = lv?{amount:lv.amountProxy,termProxy:lv.termProxy,rateProxy:lv.rateProxy}:{}; return; }
   document.querySelectorAll('.lever-cell').forEach(cell=>{
@@ -1513,8 +1532,11 @@ function buildProductTrack(label, d){
   const q=productQualify(label,d); const cadence=payFreqFor(fam).toLowerCase();
   const useDep=(fam==='equip'||fam==='factor')&&(q.rung==='likely'||q.rung==='possible');
   const fit=useDep ? 'an option that depends on how you’ll use the funds' : ({likely:'a strong fit for you right now',possible:'a realistic option worth running',unlikely:'a stretch on today’s file',vunlikely:'unlikely on today’s file',buildup:'something to build toward, not today'}[q.rung]||'an option');
-  const talk=`${capFirst(p.short)} is ${fit} — ${p.why}. Repayment runs ${cadence}: ${payFreqWhy(fam)}.${q.caution?` Worth knowing: ${q.caution}.`:''}`;
-  const text=`${capFirst(p.short)} — ${p.why}. Repaid ${cadence}.${q.caution?` Note: ${q.caution}.`:''}`;
+  // Lead with the umbrella surface term for MCA/RBF so it reads "Short-Term
+  // Financing" (bolded by ttRender) and matches the eligible-products label (LEN-317).
+  const lead=(fam==='mca'||fam==='rbf')?'Short-Term Financing':capFirst(p.short);
+  const talk=`${lead} is ${fit} — ${p.why}. Repayment runs ${cadence}: ${payFreqWhy(fam)}.${q.caution?` Worth knowing: ${q.caution}.`:''}`;
+  const text=`${lead} — ${p.why}. Repaid ${cadence}.${q.caution?` Note: ${q.caution}.`:''}`;
   return {label:display, talk, text, email:text};
 }
 // Forward-planning nudges → cross-link the right calculator from the live signals.
@@ -1541,6 +1563,92 @@ function buildNextSteps(d){
   const plain=nudges.map(n=>'• '+n.txt.replace(/<[^>]+>/g,'').replace(/&amp;/g,'&')).join('\n');
   return {html, plain};
 }
+// ── Objection-aware talk tracks (LEN-317) ────────────────────
+// When the rep captured what the borrower expected, turn each expectation→read
+// GAP into a borrower-facing script that bridges "what you wanted" → "what the
+// file actually delivers." These especially cover the recurring asks: a richer
+// product (LOC / SBA / longer-term loan), a bigger amount, a longer term, or a
+// monthly payment.
+function objectionScript(g){
+  const exp=g.exp, act=g.act, lev=g.lever;
+  if(lev==='Product') return {
+    talk:`You mentioned you were hoping for ⟦${exp}⟧ — let me be straight with you. On today's file, ⟦${act}⟧ is the path that actually funds, and funds fast. ${exp} typically calls for a stronger or longer file; if that's the goal, this is exactly how we build toward it. I'd rather get capital working for you now than chase a yes that isn't there yet.`,
+    text:`On ${exp}: today's file funds fastest as ${act}. We build toward ${exp} as the business grows — ${act} gets you moving now.`,
+    email:`You'd asked about ${exp}. Straight read: ${act} is what funds cleanly on today's file, so that's where I'd start. As the business builds history, ${exp} comes into reach — any later option depends on performance and underwriting at the time. The plan is to get capital working now and graduate from there.`
+  };
+  if(lev==='Amount'){
+    if(g.status==='under') return {
+      talk:`Good news on the amount — you mentioned ⟦${exp}⟧, and the file actually supports ⟦${act}⟧. There's room to do more if you want it; we'll size it to what your cash flow comfortably carries.`,
+      text:`On the amount: you said ${exp}, and the file supports ${act} — room to do more if you want it.`,
+      email:`On amount: you'd mentioned ${exp}. The file actually supports ${act}, so there's room to go higher if it's useful — sized to what the cash flow carries.`
+    };
+    return {
+      talk:`You were looking for ⟦${exp}⟧. What this file supports right now is ⟦${act}⟧ — and I'd be doing you a disservice quoting a number the cash flow can't carry. Two honest ways forward: stage it in rounds, or strengthen the file — more revenue history, more time — to lift the ceiling. The goal is a payment that grows the business, not one that strangles it.`,
+      text:`On the amount: you asked ${exp}; the file supports ${act} today. We can stage it or build revenue to lift the ceiling — but I won't quote past what cash flow carries.`,
+      email:`On amount: you'd asked for ${exp}. Today's file supports ${act}; I won't quote past what the deposits can carry. Two paths — stage the capital in rounds, or build revenue/time to raise the ceiling. Either way the payment has to leave you a profit.`
+    };
+  }
+  if(lev==='Term') return {
+    talk:`You were picturing ⟦${exp}⟧. This product runs ⟦${act}⟧ — term length tracks time in business, and longer, bank-style terms generally open up once there's more history on the books. Think of this as the on-ramp, not the ceiling: clean payments here are exactly what graduates you to a longer, cheaper term down the road.`,
+    text:`On term: you expected ${exp}; this product runs ${act}. Longer terms open with more time in business — this is the on-ramp to them.`,
+    email:`On term: you'd expected ${exp}. This product runs ${act} — term tracks time in business, and longer/cheaper bank terms open as history builds. This is step one toward them, not the ceiling.`
+  };
+  if(lev==='Payment'){
+    if(/month/i.test(exp)) return {
+      talk:`You were expecting ⟦${exp}⟧ payments. This product remits ⟦${act}⟧ instead — a small slice out of your deposits, so it scales with how the business actually performs rather than landing as one big bill. A fixed monthly payment comes with a term loan or SBA, which need a stronger file. For getting capital working now, this cadence is usually the friendlier one.`,
+      text:`On payment: you pictured ${exp}; this remits ${act} — a small slice of deposits that scales with sales. Fixed monthly comes with a term loan/SBA (stronger file).`,
+      email:`On payment cadence: you'd pictured ${exp}. This product remits ${act} — a small slice of deposits that flexes with sales instead of one fixed bill. Monthly payments come with a term loan or SBA, which need a stronger file; for funding now, this cadence is the friendlier one.`
+    };
+    return {
+      talk:`You expected ⟦${exp}⟧ remittance — good news, this one's a fixed ⟦${act}⟧ payment instead. That's usually the win here: one predictable bill you can plan the month around.`,
+      text:`On payment: you expected ${exp}; this is a fixed ${act} payment — usually a plus, one predictable bill.`,
+      email:`On payment: you'd expected ${exp}. This product is a fixed ${act} payment instead — usually a win: one predictable bill to budget around.`
+    };
+  }
+  const plain=String(g.why||'').replace(/<[^>]+>/g,'');
+  return {talk:plain, text:plain, email:plain};
+}
+function buildObjectionTracks(d, c){
+  if(!anyExpectation()) return [];
+  const lv=leversForProduct(d, selProdLabel(d));
+  const atr=lv?lv.atr:(d.leadProduct?computeATR(d):null);
+  const gaps=expectationGaps(d,atr).filter(g=>g.status!=='match');
+  return gaps.map(g=>{
+    const s=objectionScript(g);
+    const kicker=(g.lever==='Amount'&&g.status==='under')?`Upside · ${g.lever}`:`Objection · ${g.lever}`;
+    return {label:kicker, kind:'objection', talk:s.talk, text:s.text, email:s.email, discl:c.discl};
+  });
+}
+// Shown as the LAST talk-track page when the rep hasn't told us what the borrower
+// expected — the tracks sharpen the moment they do. One tap opens the input.
+function expectPromptItem(c){
+  const html=`<div class="tt-expectask">
+    <div class="tt-ea-h">${I.qmark} What was the borrower hoping for?</div>
+    <div class="tt-ea-b">Tell me what they walked in wanting — a product, an amount, a term, or monthly payments — and I'll write the exact lines that bridge what they <b>expected</b> to what the file actually <b>delivers</b>.</div>
+    <div class="tt-ea-chips">
+      <button class="tt-ea-chip" onclick="askExpect('reqProduct')">A specific product</button>
+      <button class="tt-ea-chip" onclick="askExpect('reqAmt')">A dollar amount</button>
+      <button class="tt-ea-chip" onclick="askExpect('expTerm')">A longer term</button>
+      <button class="tt-ea-chip" onclick="askExpect('expPayFreq')">Monthly payments</button>
+    </div>
+  </div>`;
+  return {label:'What did they expect?', kind:'expectprompt', html, talk:'Tip: capture what the borrower expected to unlock the objection-handling tracks.', text:'', email:'', discl:c.discl};
+}
+// Opens "What does the borrower expect?" (left column — not re-rendered by
+// renderRead, so toggle its DOM directly like toggleExp does), scrolls to it,
+// and focuses the relevant field so the rep can answer in one tap.
+function askExpect(field){
+  S.expOpen=true; save();
+  const panel=document.getElementById('expPanel');
+  if(panel) panel.classList.add('open');
+  const tog=document.querySelector('.exp-toggle');
+  if(tog){ const plus=tog.querySelector('.et-plus'); if(plus) plus.textContent='–'; const ch=tog.querySelector('.fac-chev'); if(ch) ch.style.transform='rotate(180deg)'; }
+  requestAnimationFrame(()=>{
+    if(panel){ try{ panel.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){ try{ panel.scrollIntoView(); }catch(_){} } }
+    const map={reqProduct:'exp-prod',reqAmt:'exp-amt',expTerm:'exp-term',expPayFreq:'exp-pay'};
+    const id=map[field]; if(id){ const el=document.getElementById(id); if(el){ try{ el.focus({preventScroll:true}); }catch(e){ try{ el.focus(); }catch(_){} } } }
+  });
+}
 function buildTalkItems(d){
   const e=NAICS_DB.find(n=>n.c===d.code);
   const c=buildCombinedTracks(d.code,d.tier,d.prods,e?e.d:'');
@@ -1552,11 +1660,15 @@ function buildTalkItems(d){
     const pt=buildProductTrack(label,d);
     items.push({label:pt.label, talk:pt.talk, text:pt.text, email:pt.email, discl:c.discl});
   });
+  // Objection-handling pages auto-appear once the rep captures an expectation (LEN-317).
+  if(anyExpectation()) buildObjectionTracks(d,c).forEach(o=>items.push(o));
   const ns=buildNextSteps(d);
   if(ns) items.push({label:'Next steps', kind:'nextsteps', html:ns.html, talk:ns.plain, text:ns.plain, email:ns.plain, discl:c.discl});
+  // No expectation captured yet → close with an easy prompt to add one.
+  if(!anyExpectation()) items.push(expectPromptItem(c));
   return items;
 }
-function ttPane(it, tab){ if(it.kind==='nextsteps') return it.html; const raw=tab==='talk'?it.talk:tab==='text'?it.text:it.email; return tab==='talk'?'“'+ttRender(raw)+'”':ttRender(raw); }
+function ttPane(it, tab){ if(it.kind==='nextsteps'||it.kind==='expectprompt') return it.html; const raw=tab==='talk'?it.talk:tab==='text'?it.text:it.email; return tab==='talk'?'“'+ttRender(raw)+'”':ttRender(raw); }
 // Re-shows on first use and after ~30 idle days — same staleness signal as the intro.
 function ttHintEligible(){
   try{ const ts=parseInt(localStorage.getItem('lp_dr_tt_hint')||'0',10); if(ts && (Date.now()-ts)<30*86400000) return false; }catch(e){}

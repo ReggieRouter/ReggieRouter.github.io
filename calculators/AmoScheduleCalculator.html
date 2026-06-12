@@ -1286,7 +1286,8 @@
         .lp-optnote { font-weight:400; letter-spacing:0; text-transform:none; color:#9CA3AF; margin-left:4px; }
         /* Lighter styling for optional inputs */
         .lp-input-light { border-color:#EEF2EF !important; background:#FAFCFA !important; }
-        .lp-input-light select { font-size:13px; color:#374151; }
+        /* Borrower-state value size matched to the canonical field (LEN-317): 15px/600 ink. */
+        .lp-input-light select { font-size:15px; font-weight:600; color:#191e1b; }
         /* The compliance host renders its own duplicate state selector — hide that
            label/select; keep its disclosure note (the borrower-state field below
            drives it via LPCompliance.setState). */
@@ -2422,7 +2423,7 @@
                                         <span class="lp-optnote">— optional</span>
                                     </label>
                                     <div class="lp-input-group lp-input-light pr-2">
-                                        <select id="state-${id}" class="w-full py-2 px-3 outline-none text-[#374151] text-[13px] bg-transparent appearance-none cursor-pointer" onchange="setBorrowerState(${id}, this.value)">
+                                        <select id="state-${id}" class="w-full py-2 px-3 outline-none text-[#191e1b] text-[15px] font-semibold bg-transparent appearance-none cursor-pointer" onchange="setBorrowerState(${id}, this.value)">
                                             <option value="">Select state…</option>
                                             ${LP_STATE_OPTIONS}
                                         </select>
