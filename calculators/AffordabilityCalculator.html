@@ -1677,6 +1677,28 @@ window.LPCompletionCue && LPCompletionCue.init({
     }
 });
 </script>
+<script>
+// LEN-342 — bank-statement autofill (P1, markdowns/BANK_DATA.md). INERT BY DEFAULT:
+// only the ?bankimport=1 query flag loads the parsers and renders the drop zone.
+// Without the flag this block returns immediately — zero UI / behavior change.
+(function () {
+    try { if (new URLSearchParams(location.search).get('bankimport') !== '1') return; } catch (e) { return; }
+    var v = ''; try { v = new URLSearchParams(location.search).get('v') || ''; } catch (e) {}
+    var q = v ? ('?v=' + encodeURIComponent(v)) : '';
+    function loadScript(src, cb) {
+        var s = document.createElement('script');
+        s.src = src + q; s.onload = cb;
+        document.body.appendChild(s);
+    }
+    loadScript('../js/bank-import.js', function () {
+        loadScript('../js/bank-autofill.js', function () {
+            var start = function () { window.LPBankAutofill && LPBankAutofill.init({ calc: 'payment-fit' }); };
+            if (document.readyState === 'complete') start();
+            else window.addEventListener('load', start);
+        });
+    });
+})();
+</script>
 <button id="lp-tour-nav-link" type="button" onclick="replayTour()" style="display:none; position:fixed; bottom:14px; left:14px; z-index:8000; background:#fff; border:0.5px solid rgba(0,0,0,.14); border-radius:8px; cursor:pointer; font-family:inherit; font-size:12px; color:#2D6A4F; padding:6px 11px; box-shadow:0 2px 8px rgba(17,24,39,.1);">Take a tour</button>
 </body>
 </html>
