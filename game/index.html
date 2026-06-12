@@ -65,6 +65,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .streak-bar.hidden{display:none;}
 /* First-timer nudge */
 .first-timer-nudge{font-size:12px;color:var(--muted);margin-bottom:16px;font-weight:500;}
+
+/* Race mode */
+.race-row{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:14px;text-align:left;}
+.race-txt{font-size:13px;font-weight:700;}
+.race-txt span{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px;}
+.race-switch{position:relative;width:44px;height:24px;border-radius:99px;border:none;background:var(--border);cursor:pointer;transition:background .2s;flex-shrink:0;padding:0;}
+.race-switch .race-knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s;}
+.race-switch.on{background:var(--green);}
+.race-switch.on .race-knob{left:23px;}
+.race-modal-icon{font-size:34px;margin-bottom:8px;}
+.race-later{display:block;width:100%;background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;margin-top:12px;cursor:pointer;}
+.race-later:hover{color:var(--text);}
 /* Leaderboard mode card */
 .mode-lb{text-align:left;padding:18px 22px;grid-column:span 2;}
 .lb-tease-txt{font-size:11px;color:var(--muted);font-style:italic;margin-top:5px;line-height:1.5;}
@@ -97,6 +109,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .2s;}
 .dot.cur{background:var(--green);}.dot.c{background:var(--ok);}.dot.w{background:var(--bad);}.dot.t{background:var(--warn);}
 .timer-wrap{height:5px;background:var(--border);border-radius:99px;margin-bottom:24px;overflow:hidden;}
+.timer-wrap.hidden{display:none;}
 .timer-bar{height:100%;background:var(--green);border-radius:99px;transition:width 1s linear,background .3s;}
 .timer-bar.urgent{background:var(--bad);}
 .q-type-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border:1.5px solid var(--border);padding:4px 10px;border-radius:6px;margin-bottom:14px;}
@@ -257,6 +270,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
 
+  <!-- RACE MODE MODAL -->
+  <div class="modal-backdrop hidden" id="race-modal">
+    <div class="modal-box">
+      <div class="race-modal-icon">⚡</div>
+      <div class="modal-title">Race Mode</div>
+      <div class="modal-sub">20 seconds on the clock, every question. No time to talk yourself out of the right answer.<br><br>That's the point — forcing fast recognition is how terms stop being trivia and start being reflexes. If you know it, you know it <em>now</em>.</div>
+      <button class="btn" style="width:100%" onclick="confirmRace()">Put me on the clock ⚡</button>
+      <button class="race-later" onclick="dismissRace()">Maybe later</button>
+    </div>
+  </div>
+
   <!-- START -->
   <div id="s-start" class="screen active">
     <div class="start-eyebrow">LendPaper Academy</div>
@@ -264,6 +288,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <p class="start-sub">Glossary quiz, objection handling, and a live leaderboard. Pick your mode.</p>
     <div id="streak-bar" class="streak-bar hidden">🔥 <span id="streak-count">3</span>-day streak</div>
     <p class="first-timer-nudge">First time? Start with Quick Play.</p>
+    <div class="race-row">
+      <div class="race-txt">⚡ Race Mode <span>20-second shot clock on glossary quizzes</span></div>
+      <button class="race-switch" id="race-switch" role="switch" aria-checked="false" aria-label="Race Mode" onclick="toggleRace()"><span class="race-knob"></span></button>
+    </div>
     <div class="mode-cards">
       <div class="mode-card mode-quick accent-card" onclick="startGame('all','all')">
         <div class="mc-left">
@@ -362,7 +390,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="score-pill" id="score-pill">0 pts</div>
     </div>
     <div class="progress-dots" id="dots"></div>
-    <div class="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+    <div class="timer-wrap" id="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
     <div class="q-body visible" id="q-body">
       <div class="q-type-badge" id="q-type-badge">DEFINE THE TERM</div>
       <div class="cat-context" id="cat-context"></div>
@@ -952,12 +980,33 @@ function shuffle(a){return seededShuffle(a,mkRng(Math.random()*1e9|0));}
 
 // ── Challenge params from URL ──
 const _QS=new URLSearchParams(location.search);
-const CHALLENGE=_QS.has('s')?{seed:parseInt(_QS.get('s')),name:decodeURIComponent(_QS.get('cn')||'Someone'),target:parseInt(_QS.get('ct')||0),total:parseInt(_QS.get('tt')||21),mode:_QS.get('m')||'r1'}:null;
+const CHALLENGE=_QS.has('s')?{seed:parseInt(_QS.get('s')),name:decodeURIComponent(_QS.get('cn')||'Someone'),target:parseInt(_QS.get('ct')||0),total:parseInt(_QS.get('tt')||21),mode:_QS.get('m')||'r1',race:_QS.get('r')==='1'}:null;
+
+// ─── RACE MODE (optional 20s shot clock, glossary only) ───
+const RACE_KEY='lp_game_race';
+let raceMode=localStorage.getItem(RACE_KEY)==='1';
+let _lastRace=false;
+function setRaceUI(){
+  const sw=document.getElementById('race-switch');
+  if(sw){sw.classList.toggle('on',raceMode);sw.setAttribute('aria-checked',raceMode?'true':'false');}
+}
+function toggleRace(){
+  if(raceMode){raceMode=false;localStorage.setItem(RACE_KEY,'0');setRaceUI();return;}
+  document.getElementById('race-modal').classList.remove('hidden');
+}
+function confirmRace(){
+  raceMode=true;localStorage.setItem(RACE_KEY,'1');setRaceUI();
+  document.getElementById('race-modal').classList.add('hidden');
+}
+function dismissRace(){
+  document.getElementById('race-modal').classList.add('hidden');
+}
 
 let _currentSeed=0;
 function genSeed(){return Math.floor(Math.random()*999999)+1;}
 function buildChallengeUrl(mode,seed,name,score,total){
   const p=new URLSearchParams({m:mode,s:seed,cn:encodeURIComponent(name),ct:score,tt:total});
+  if(mode==='g') p.set('r',_lastRace?'1':'0');
   return `${GAME_URL}?${p}`;
 }
 function copyChallengeLink(mode){
@@ -981,7 +1030,8 @@ function startGame(cat,diff,seed){
   const rng=mkRng(s);
   const n=Math.min(7,pool.length);
   const questions=seededShuffle(pool,rng).slice(0,n);
-  G={questions,total:n,idx:0,score:0,correct:0,streak:0,bestStreak:0,speeds:[],answered:false,interval:null,timeLeft:20,t0:null};
+  G={questions,total:n,idx:0,score:0,correct:0,streak:0,bestStreak:0,speeds:[],answered:false,interval:null,timeLeft:20,t0:null,
+     race:(seed&&CHALLENGE&&CHALLENGE.mode==='g')?CHALLENGE.race:raceMode};
   // Challenge banner
   const banner=document.getElementById('g-challenge-banner');
   const txt=document.getElementById('g-challenge-txt');
@@ -1040,7 +1090,11 @@ function renderQ(t,type){
   });
 }
 function startTimer(){
-  clearInterval(G.interval); G.timeLeft=20;
+  clearInterval(G.interval);
+  const wrap=document.getElementById('timer-wrap');
+  if(!G.race){wrap.classList.add('hidden');return;}
+  wrap.classList.remove('hidden');
+  G.timeLeft=20;
   const bar=document.getElementById('timer-bar'); bar.style.width='100%'; bar.className='timer-bar';
   G.interval=setInterval(()=>{
     G.timeLeft--; bar.style.width=(G.timeLeft/20*100)+'%';
@@ -1074,6 +1128,7 @@ function nextQ(){
 }
 function endGlossary(){
   clearInterval(G.interval);
+  _lastRace=G.race;
   const rank=GL_RANKS.find(r=>G.correct>=r.min);
   const avg=G.speeds.length?(G.speeds.reduce((a,b)=>a+b,0)/G.speeds.length).toFixed(1)+'s':'—';
   _lastEndScore=G.score; _lastEndTotal=700;
@@ -1283,6 +1338,7 @@ function updateLBTease(){
   if(el&&top)el.textContent=players+' reps on the board · '+top.name+' leads Glossary';
 }
 initStreak();
+setRaceUI();
 updateLBTease();
 
 document.addEventListener('keydown',e=>{
